@@ -1,0 +1,5 @@
+SubDir TOP app ;
+
+OutputPath app : image ;
+LinkLibraries app : slib-a slib-b ;
+Application app : main.c ;

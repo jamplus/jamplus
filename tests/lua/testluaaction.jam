@@ -1,0 +1,17 @@
+actions lua RunLuaScript
+{
+	require 'iox'; iox.Sleep($(SLEEP)); print([[$(TEXT)]])
+}
+
+rule DoLua TARGET : SOURCES : SLEEP : TEXT
+{
+	Depends all : $(TARGET) ;
+	Always $(TARGET) ;
+	SLEEP on $(TARGET) = $(SLEEP) ;
+	TEXT on $(TARGET) = $(TEXT) ;
+	RunLuaScript $(TARGET) : $(SOURCES) ;
+}
+
+DoLua MyTarget.out : xUnit.h : 5000 : hello ;
+DoLua MyTarget.out2 : xUnit2.h : 2500 : hi ;
+DoLua MyTarget.out3 : xUnit3.h : 1000 : together ;

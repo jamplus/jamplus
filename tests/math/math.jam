@@ -1,0 +1,6 @@
+Echo 10 + 2 \= [ Math 10 + 2 ] ;
+Echo 10 - 2 \= [ Math 10 - 2 ] ;
+Echo 10 * 2 \= [ Math 10 * 2 ] ;
+Echo 10 / 2 \= [ Math 10 / 2 ] ;
+Echo 10 % 3 \= [ Math 10 % 3 ] ;
+Exit 10 ^ 2 \= [ Math 10 ^ 2 ] ;

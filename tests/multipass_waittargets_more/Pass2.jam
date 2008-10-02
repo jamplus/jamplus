@@ -1,0 +1,12 @@
+Echo Pass 2 ;
+
+actions WriteFile
+{
+	^^($(1)|$(CONTENTS)) ;
+}
+
+CONTENTS on originalfile.txt = "originalfile.txt written..." ;
+#Always originalfile.txt ;
+WriteFile originalfile.txt ;
+
+QueueJamfile Pass3.jam ;

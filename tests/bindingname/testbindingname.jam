@@ -1,0 +1,12 @@
+actions EchoIt
+{
+	echo $(1)
+}
+
+Depends all : all/that/stuff ;
+NotFile all ;
+EchoIt all/that/stuff ;
+LOCATE on all/that/stuff = s:/ ;
+BINDING on all/that/stuff = somethingelse.txt ;
+
+

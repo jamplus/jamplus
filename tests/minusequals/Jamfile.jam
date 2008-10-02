@@ -1,0 +1,4 @@
+textToFilter = ab ad be cd be f0 12 ;
+Echo $(textToFilter) ;
+textToFilter -= ad be ;
+Echo $(textToFilter) ;

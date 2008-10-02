@@ -1,0 +1,15 @@
+IncludeModule CopyFile ;
+
+rule CopyDirectory PARENTS : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING
+{
+	SOURCE_PATH = $(SOURCE_PATH:R=) ;
+	DESTINATION_PATH = $(DESTINATION_PATH:R=) ;
+
+	local files = @($(SOURCE_PATH)/$(SEARCH_STRING:E=*):W) ;
+	local file ;
+	for file in $(files)
+	{
+		local justFile = [ Match $(SOURCE_PATH)/(.+) : $(file) ] ;
+		CopyFile $(PARENTS) : $(justFile:R=$(DESTINATION_PATH)) : $(file) ;
+	}
+}

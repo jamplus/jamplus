@@ -1,0 +1,4 @@
+SubDir TOP ;
+
+Application helloworld : main.c ;
+

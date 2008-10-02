@@ -1,0 +1,10 @@
+SubDir TOP ;
+
+SRCS =
+		auidemo.cpp
+;
+
+IncludeModule wxWidgets ;
+UseWxWidgets SimpleWx : base core adv aui html : linklibs ;
+
+Application SimpleWx : $(SRCS) : windows ;

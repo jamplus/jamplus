@@ -1,0 +1,3 @@
+SubDir TOP lib-c ;
+
+Library lib-c : add.c add.h ;

@@ -1,0 +1,41 @@
+DEPCACHE.standard = .depcache ;
+DEPCACHE = standard ;
+FILECACHE.generic.PATH = cache ;
+FILECACHE.generic.GENERATE = 1 ;
+FILECACHE.generic.USE = 1 ;
+
+LuaFile md5png.lua ;
+LuaFile md5file.lua ;
+LuaFile md5zip.lua ;
+
+rule ConvertImage SOURCE
+{
+	local source = [ FGristFiles $(SOURCE) ] ;
+	local target = $(source:S=.image) ;
+	MakeLocate $(target) : $(LOCATE_TARGET) ;
+	Clean clean : $(target) ;
+	UseFileCache $(target) ;
+
+	Depends all : $(target) : $(source) ;
+	ConvertImageHelper $(target) : $(source) ;
+}
+
+actions ConvertImageHelper
+{
+	copy $(2) $(1)
+}
+
+ConvertImage file1.png ;
+UseMD5Callback file1.png : md5png ;
+
+ConvertImage file2.png ;
+UseMD5Callback file2.png : md5file ;
+
+ConvertImage file3.png ;
+# Use default MD5 callback.
+
+ConvertImage file4.zip ;
+UseMD5Callback file4.zip : md5zip ;
+
+ConvertImage file5.zip ;
+# Use default MD5 callback.

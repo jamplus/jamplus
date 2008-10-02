@@ -1,0 +1,400 @@
+This file details the differences between this copy of Jam and the stock
+upstream version as distributed by Perforce.
+
+* Conventions Used for Jam Patches
+
+    All changes we've made to Jam C source are surrounded by an
+    #ifdef.  The #ifdefs are constructed such that it is possible to
+    remove each feature independent of the other.  This greatly eases
+    maintenance costs, since the next time an upstream version of jam
+    is merged in it'll be very easy to see why each change was made.
+    It also makes it easy to assess how big a tweak to jam each change
+    actually is.
+
+    The naming convention for the #defines is:
+
+	OPT_BUILTIN_..._EXT -- a new builtin rule
+	OPT_IMPROVE_..._EXT -- a new general improvement, but no real
+				change in functionaltiy
+	OPT_FIX_..._EXT -- a bug fix to Jam (suitable for including in
+			    the upstream Jam).
+	OPT_..._EXT -- anything that doesn't fall neatly in the above.
+	
+    All changes made to Jamfiles or Jamrules are surrounded by obvious
+    comments of the form:
+
+    ### LOCAL CHANGE
+    #
+    stuff
+    #
+    ### LOCAL CHANGE
+
+* The builtin Jambase is slightly changed.
+
+    The builtin Jambase has a few tweaks to make it nicer under NT.
+
+    It sets the MSVCNT var from MSVCDIR if MSVCDIR is set.  MSVCDIR is
+    the variable Visual C++ 6.0's version of vcvars32.bat sets, while
+    MSVCNT seems to be a Visual C++ 5.0 thing.  This change has been
+    sent upstream.
+
+    If MSVCNT is still unset, it uses W32_GETREG and W32_SHORTNAME to
+    grab the installation location of Visual C++, and sets MSVCNT
+    appropriately.  This is merely a matter of convenience for people.
+
+    It doesn't complain if it can't find a compiler under NT.
+
+    It doesn't announce that it is using Visual C++.
+
+    In all other ways (variables set, rules and actions defined) the
+    built in Jambase is identical to stock Jam.
+
+* New Builtin Rules
+
+** PWD
+
+    A new rule PWD returns the current working directory.  Used like
+    so:
+
+	pwd = [ PWD ];
+
+    This, together with some Jam logic, can be used to generate a
+    fully qualified path name.  Currently it is only used to fully
+    qualify the tools/bin directry before changing the PATH.
+
+    This option is controlled by the OPT_BUILTIN_PWD_EXT #define.
+
+** W32_GETREG
+
+    Available only under WinNT (Win2k as well).  Gets a value from the
+    registry, like so:
+
+	value = [ W32_GETREG list ] ;
+
+    This is primarily so Jam can find the location of the Visual C++
+    installation from the registry, which makes it a bit easier to get
+    a build environment up and running.  Otherwise, they would have to
+    set the MSVCDIR environment variable, either at Visual C++ install
+    time or by running the vcvars32.bat file that comes with Visual
+    C++.
+
+    This option is controlled by the OPT_BUILTIN_W32_GETREG_EXT
+    #define.
+
+** W32_SHORTNAME
+
+    Available only under WinNT (Win2k as well).  Takes a string
+    holding a file name and returns its short name.  E.g. "Program
+    Files" -> "PROGRA~1" etc.  Used like so:
+
+	short = [ W32_SHORTNAME longname ] ;
+
+    This is primarily useful for shortening the long path name
+    supplied by W32_GETREG, which often contains things like "Program
+    Files" in it, etc., which confuses Jam later on.
+
+    This option is controlled by the OPT_BUILTIN_W32_SHORTNAME_EXT
+    #define.
+
+* New Features
+
+** Header Caching
+
+    This code is taken from //guest/craig_mcpheeters/jam/src/ on the
+    Perforce public depot.  Many thanks to Craig McPheeters for making his
+    code available.  It is delimited by the OPT_HEADER_CACHE_EXT #define
+    within the code.
+
+    Jam has a facility to scan source files for other files they might
+    include.  This code implements a cache of these scans, so the entire
+    source tree need not be scanned each time jam is run.  This brings the
+    following benefits:
+
+	- If a file would otherwise be scanned multiple times in a
+	  single jam run (because the same file is represented by
+	  multiple targets, perhaps each with a different grist), it
+	  will now be scanned only once.  In this way, things are
+	  faster even if the cache file is not present when Jam is
+	  run.
+
+	- If a cache entry is present in the cache file when Jam
+	  starts, and the file has not changed since the last time it
+	  was scanned, Jam will not bother to re-scan it.  This
+	  markedly increaces Jam startup times for large projects.
+
+    This code has improvements over Craig McPheeters' original
+    version.  I've described all of these changes to Craig and he
+    intends to incorporate them back into his version.  The changes
+    are:
+
+	- The actual name of the cache file is controlled by the
+	  HCACHEFILE Jam variable.  If HCACHEFILE is left unset (the
+	  default), reading and writing of a cache file is not
+	  performed.  The cache is always used internally regardless
+	  of HCACHEFILE, which helps when HDRGRIST causes the same
+	  file to be scanned multiple times.
+
+	  Setting LOCATE and SEARCH on the the HCACHEFILE works as
+	  well, so you can place anywhere on disk you like or even
+	  search for it in several directories.  You may also set it
+	  in your environment to share it amongst all your projects.
+
+	- The .jamdeps file is in a new format that allows binary data
+	  to be in any of the fields, in particular the file names.
+	  The original code would break if a file name contained the
+	  '@' or '\n' characters.  The format is also versioned,
+	  allowing upgrades to automatically ignore old .jamdeps
+	  files.  The format remains human readable.  In addition,
+	  care has been taken to not add the entry into the header
+	  cache until the entire record has been successfully read from
+	  the file.
+
+	- The cache stores the value of HDRPATTERN with each cache
+	  entry, and it is compared along with the file's date to
+	  determine if there is a cache hit.  If the HDRPATTERN does
+	  not match, it is treated as a cache miss.  This allows
+	  HDRPATTERN to change without worrying about stale cache
+	  entries.  It also allows the same file to be scanned
+	  multiple times with different HDRPATTERN values.
+
+	- Each cache entry is given an "age" which is the maximum
+	  number of times a given header cache entry can go unused
+	  before it is purged from the cache.  This helps clean up old
+	  entries in the .jamdeps file when files move around or are
+	  removed from your project.
+
+	  You control the maximum age with the HCACHEMAXAGE variable.
+	  If set to 0, no cache aging is performed.  Otherwise it is
+	  the number of times a jam must be run before an unused cache
+	  entry is purged.  The default for HCACHEMAXAGE if left unset
+	  is 100.
+
+	- Jambase itself is changed.
+
+	  SubDir now always sets HDRGRIST to $(SOURCE_GRIST) so header
+	  scanning can deal with multiple header files of the same
+	  name in different directories.  With the header cache, this
+	  does no longer incurs a performance penalty -- a given file
+	  will still only be scanned once.
+
+	  The FGristSourceFiles rule is now just an alias for
+	  FGristFiles.  Header files do not necessarily have global
+	  visibility, and the header cache eliminates any performance
+	  penalty this might otherwise incur.
+
+    Because of all these improvements, the following claims can be
+    made about this header cache implementation that can not be made
+    about Craig McPheeters' original version.
+
+	- The semantics of a Jam run will never be different because of
+	  the header cache (the HDRPATTERN check ensures this).
+
+	- It will never be necessary to delete .jamdeps to fix obscure
+	  jam problems or purge old entries.
+
+** Improved ...patience...
+
+    This changes the ...patience... lines to be printed out after the
+    first 100 and every subsequent 1000 files have been header scanned.
+    Previously, ...patience... was printed out for every 1000 targets.
+
+    This change both reduces the number of ...patience... lines printed,
+    and makes them more accurately reflect the work being done.
+
+    This change is enabled with the OPT_IMPROVED_PATIENCE_EXT #define.
+
+** Improved progress indication
+
+    This changes the ...on target N... message to instead include the
+    percentage complet and an estimated time to completion.
+
+    This change is enabled with the OPT_IMPROVED_PROGRESS_EXT #define.
+
+** Improved debug level help
+
+    This change is delimited by the OPT_IMPROVE_DEBUG_LEVEL_HELP_EXT
+    #define within the code.
+
+    The -h option to jam now prints out what each of the debug levels do.
+
+** Print Total Time
+
+    This change is delimited by the OPT_PRINT_TOTAL_TIME_EXT #define
+    within the code.
+
+    If the total time jam runs is greater than 10 seconds, the time is
+    printed when jam exits.  This helps people back up claims that the
+    build is too slow and they need a faster machine.  ;-)
+
+** Improved HdrRule treatment
+
+    A new 3rd argument to HdrRule is the bound name of the 1st
+    argument to HdrRule.  This allows HdrRule to extend the search
+    path for headers to include all directories headers have been
+    found in so far.
+
+    E.g. if a source file does "#include <foo/bar/baz.h>" and the
+    baz.h header is found in $(TOP)/include, this change allows
+    HdrRule to add $(TOP)/include/foo/bar to the HDRSEARCH path.  This
+    way, if baz.h does #include "goo.h", any goo.h in
+    $(TOP)/include/foo/bar will be found.
+
+    The default Jambase makes use of this new argument to extend
+    HDRSEARCH on the header files.
+
+    This feature is enabled with the OPT_HDRRULE_BOUNDNAME_ARG_EXT
+    #define.
+
+** Improved "compile" debug output.
+
+    With level 5 jam debugging, a jam rule execution trace is
+    printed.  This extends that debugging output to include:
+
+	- when a new rule is defined (with a special note when the new
+	  rule re-defines a pre-existing rule).
+
+	- when a new actions is defined (with a special note when the
+	  new actions re-defines a pre-existing actions).
+
+	- when an included Jamfile ends.
+	
+    This makes it possible to write scripts that process Jam debugging
+    output that look for potential errors, such as re-defining a rule
+    or action that is part of Jambase.
+
+    This feature is enabled with OPT_IMPROVE_DEBUG_COMPILE_EXT.
+
+** "IFUSED" targets
+
+    Because the Windows NT shell (cmd.exe) sucks, it is often best to
+    break up complex operations into many actions.  Examples include
+    creating various response files and linker definition files for
+    the link step of a compile.
+
+    The problem with this is that these files may not always be
+    rebuilt when necessary.  It is difficult to construct a
+    straightforward chain of actions that guarantees that all the
+    response files that need to get built whenever the final link
+    makes use of them.
+
+    Stock Jam provides two main ways to accomplish this:
+
+	- Mark the response files TEMPORARY and remove them with
+	  RmTemps after the link.  This is problematic since removing
+	  them just adds mystery to the final link process for the
+	  typical engineer.  People often want to look at the files to
+	  see exactly how the link occurs.
+
+	- Perform the final link with several actions that take a list
+	  of the final image and all the response files in $(<).  Each
+	  action would build one of the elements in $(<).  This is an
+	  obtuse hack that is difficult to explain and maintain.
+
+    The solution presented here is a new built in rule IFUSED.  When
+    called like this:
+
+	IFUSED target ;
+
+    "target" is marked "ifused".
+
+    When Jam decides that a given target is to be built, it now checks
+    all direct dependents to see if they are marked ifused.  If they
+    are, the ifused dependents are also marked for rebuilding, and
+    their direct dependents are similarly considered, and so on.
+
+    This affords the benefits of marking targets TEMPORARY (that they
+    will be rebuilt whenever the targets they depend on are rebuilt)
+    without the negatives (that they get deleted after the build).
+
+    BUGS:
+
+    There is a bug in this implementation that I do not believe will
+    lead to practical problems.  Consider the following set of
+    dependencies.
+
+	d -> b*	    (d depends on b*)
+	c -> b*
+	b* -> a
+
+    Consider b* to be marked "ifused".  The current implementation
+    will correctly rebuild b whenever either d or c is rebuilt.
+    However, it does not guarantee that BOTH d and c get built
+    whenever b* is updated.  If b* is updated only because it is
+    ifused, some of its dependents may not be updated.  For example,
+    if c is updated and b* is marked for updated because it is
+    ifused, then d may not be updated.  If d is marked for update
+    and b* is marked for updated because it is ifused, c may not be
+    marked for update.  I call this a bug since it shouldn't be
+    necessary to run Jam twice to satisfy all dependencies.
+
+    A simple way to work around this is to mark b* with NOTFILE.  This
+    will cause b*'s time stamp to no longer be considered.  This is
+    arguably a reasonable thing to do, since these files are rarely
+    edited by hand and whenever they are used they are rebuilt.
+    Another workaround is to mark the final linked image with LEAF,
+    which will usually has a similar effect of removing b*'s time
+    stamp from consideration.  Another workaround is to avoid having a
+    IFUSED file with more than one dependent target (this is usually
+    the case anyway, which is the major reason I don't consider this
+    problem serious).
+
+** Rule names are expanded
+
+    With OPT_EXPAND_RULE_NAMES_EXT #defined, jam will expand rule
+    names just like variables.  E.g., this will print "foo"
+
+	rule print-foo
+	{
+	    Echo "foo" ;
+	}
+	variable = "print" ;
+	$(variable)-foo ;
+
+** Environment variable to set number of jobs
+
+    For multi-processor systems, the -j<x> command line option can
+    provide significant build time savings.  With
+    OPT_IMPROVE_JOBS_SETTING_EXT #defined, jam will read from the
+    environment variable JAM_JOBS the default number of jobs to
+    spawn.
+
+* Operational Changes
+
+** Versioning
+
+    We add a PATCHED_VERSION variable that indicates the local version
+    of custom jam is in use.
+
+    The variable is a list.  PATCHED_VERSION[1] is the major version,
+    PATCHED_VERSION[2] is the minor version.
+
+    As you might expect, major version increments indicate
+    non-backwards compatible changes (elimination of builtin rules or
+    other features, changing features in an incompatible way, etc.).
+    Minor version increments indicate the addition of backwards
+    compatible features and bug fixes.
+
+    It is expected that a project's Jamrules will check the
+    PATCHED_VERSION variable and check for a major version mismatch,
+    and ensure the minor version is not too low.
+
+    This option is enabled with the OPT_PATCHED_VERSION_VAR_EXT
+    #define.
+
+** Maximum Command Length for NT
+
+    Jam ships with a maximum command line length of 996 for Windows
+    NT.  Windows NT 4.0 and greater can handle command line lengths of
+    at least 10240 characters long (perhaps longer, no tests have been
+    done).
+
+    This change increaces the maximum command line length to 10240 for
+    Windows 4.0 and greater.
+
+    Caveat: the default Windows 4.0 command shell can only handle
+    commands up to 1-2k bytes long for many of its own internal
+    commands, such as del and echo.  So this feature has spurred the
+    implementation of jamshell.c, a simple shell that lives in
+    tools/jamshell.
+
+* Bug Fixes

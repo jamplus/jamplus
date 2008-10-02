@@ -1,0 +1,8 @@
+.gitconfig
+*.ncb
+*.suo
+*.user
+*.wwdb
+Debug/*
+Release/*
+LuaPlus

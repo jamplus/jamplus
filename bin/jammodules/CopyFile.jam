@@ -1,0 +1,17 @@
+rule CopyFile PARENTS : TARGET : SOURCE
+{
+	Depends $(PARENTS) : $(TARGET) : $(SOURCE) ;
+	SearchSource $(SOURCE) : $(SEARCH_SOURCE) ;
+	MakeLocate $(TARGET) : $(TARGET:D) ;
+	BINDING on $(TARGET) = $(TARGET:BS) ;
+	CopyFile1 $(TARGET) : $(SOURCE) ;
+	Clean clean:$(PARENTS) : $(TARGET) ;
+}
+
+
+actions CopyFile1
+{
+	$(CP) "$(2:\\)" "$(1:\\)"
+}
+
+

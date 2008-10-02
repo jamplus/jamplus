@@ -1,0 +1,24 @@
+FILECACHE.generic.PATH = cache ;
+FILECACHE.generic.GENERATE = 1 ;
+FILECACHE.generic.USE = 1 ;
+DEPCACHE.standard = .depcache ;
+DEPCACHE = standard ;
+
+rule ConvertImage SOURCE
+{
+	local target = $(SOURCE:S=.image) ;
+	MakeLocate $(target) : $(LOCATE_TARGET) ;
+	Clean clean : $(target) ;
+	UseFileCache $(target) ;
+
+	Depends all : $(target) : $(SOURCE) ;
+	ConvertImageHelper $(target) : $(SOURCE) ;
+}
+
+actions ConvertImageHelper
+{
+	copy $(2) $(1)
+}
+
+ConvertImage file1.tga ;
+ConvertImage file2.tga ;

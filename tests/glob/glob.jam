@@ -1,0 +1,9 @@
+Echo All - [ Glob ../../bin : * ] ;
+Echo Dirs Only - [ Glob ../../bin : */ ] ;
+Echo Files Only - [ Glob ../../bin : *[^/] ] ;
+
+Echo ----------------------- No prepend ;
+Echo All - [ Glob ../../bin : * : 0 ] ;
+Echo Dirs Only - [ Glob ../../bin : */ : 0 ] ;
+Echo Files Only - [ Glob ../../bin : *[^/] : 0 ] ;
+

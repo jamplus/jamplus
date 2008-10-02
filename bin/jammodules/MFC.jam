@@ -1,0 +1,9 @@
+rule UseMFC TARGETS : OPTIONS
+{
+	if shared in $(OPTIONS)
+	{
+		Defines $(TARGETS) : _AFXDLL ;
+	}
+
+	IncludeDirectories $(TARGETS) : $(MSVCNT)/atlmfc/include ;
+}

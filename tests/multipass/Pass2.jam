@@ -1,0 +1,13 @@
+Echo Pass 2 ;
+
+actions WriteFile
+{
+	^^($(1)|$(CONTENTS)) ;
+}
+
+Depends all : Pass3.jam ;
+CONTENTS on Pass3.jam = "Echo Pass 3 written ;" ;
+Always Pass3.jam ;
+WriteFile Pass3.jam ;
+
+QueueJamfile Pass3.jam ;

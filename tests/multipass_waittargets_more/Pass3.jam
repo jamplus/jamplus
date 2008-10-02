@@ -1,0 +1,3 @@
+Echo Pass 3 ;
+
+Clean clean : originalfile.txt ;

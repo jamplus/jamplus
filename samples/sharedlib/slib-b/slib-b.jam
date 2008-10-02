@@ -1,0 +1,4 @@
+SubDir TOP slib-b ;
+
+LinkLibraries slib-b : lib-c ;
+Library slib-b : slib-b.c : shared ;

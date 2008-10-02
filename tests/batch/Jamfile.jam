@@ -1,0 +1,8 @@
+actions maxtargets 3 piecemeal BatchIt
+{
+	echo $(2)
+}
+
+local deps = hello hi more less somewhere over the rainbow ;
+Depends all : $(deps) ;
+BatchIt $(deps) : $(deps) ;

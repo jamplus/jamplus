@@ -1,0 +1,10 @@
+SubDir TOP ;
+
+Application helloworld : main.c ;
+
+Project Data : data.dat ;
+Project Utility : file.txt ;
+
+Workspace helloworld : Data ;
+
+Workspace helloworld-all : helloworld Data Utility ;

@@ -1,0 +1,295 @@
+local platformName = $(PLATFORM) ;
+if $(PLATFORM) = * 	{ platformName = [all] ; }
+local configName = $(CONFIG) ;
+if $(CONFIG) = * 	{ configName = [all] ; }
+TargetInfoFile = TargetInfo.$(platformName).$(configName).lua ;
+
+MakeLocate $(TargetInfoFile) : $(TARGETINFO_LOCATE) ;
+
+rule CreatePrecompiledHeader NAME : HEADER
+{
+}
+
+
+rule UsePrecompiledHeader NAME : HEADER : FILES
+{
+}
+
+
+EMPTY = "" ;
+
+rule LinkLibraries
+{
+	if $(PLATFORM) = *  &&  $(CONFIG) = *
+	{
+		local projectsString = "	'$(>)',$(NEWLINE)" ;
+		Contents += "Projects['$(<)'].Libraries = concat(Projects['$(<)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
+		Contents += "$(projectsString:J=$(EMPTY))})$(NEWLINE)" ;
+	}
+}
+
+
+rule Lump
+{
+}
+
+
+rule DumpSources prefix : SOURCES
+{
+	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
+	Contents += "$(prefix).Sources = {$(NEWLINE)" ;
+	for source in $(SOURCES:R=$(subdir))
+	{
+		if ! $(source:S) in $(SUFOBJ) $(SUFRES)
+		{
+			Contents += "	[[$(source)]],$(NEWLINE)" ;
+		}
+	}
+	Contents += "}$(NEWLINE)" ;
+}
+
+
+rule ProjectGroup TARGET : FOLDERNAME : PROJECTS
+{
+	PROJECTGROUP.$(FOLDERNAME) on $(TARGET) += $(PROJECTS) ;
+	if ! $(FOLDERNAME) in [ on $(TARGET) Var PROJECTGROUPS ]
+	{
+		PROJECTGROUPS on $(TARGET) += $(FOLDERNAME) ;
+	}
+}
+
+
+rule DumpProjectGroups prefix : TARGET
+{
+	Contents += "$(prefix).ProjectGroups = {$(NEWLINE)" ;
+
+	local folderName ;
+	for folderName in [ on $(TARGET) Var PROJECTGROUPS ]
+	{
+		Contents += "$(TAB)[ [[$(folderName)]] ] = {$(NEWLINE)" ;
+		local project ;
+		for project in [ on $(TARGET) Var PROJECTGROUP.$(folderName) ]
+		{
+			Contents += "$(TAB)$(TAB)[[$(project)]],$(NEWLINE)" ;
+		}
+		Contents += "$(TAB)},$(NEWLINE)" ;
+	}
+	Contents += "}$(NEWLINE)" ;
+}
+
+
+rule SourceGroup TARGET : FOLDERNAME : SOURCES
+{
+	SOURCEGROUP.$(FOLDERNAME) on $(TARGET) += $(SOURCES) ;
+	if ! $(FOLDERNAME) in [ on $(TARGET) Var SOURCEGROUPS ]
+	{
+		SOURCEGROUPS on $(TARGET) += $(FOLDERNAME) ;
+	}
+}
+
+
+rule DumpSourceGroups prefix : TARGET
+{
+	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
+	Contents += "$(prefix).SourceGroups = {$(NEWLINE)" ;
+
+	local folderName ;
+	for folderName in [ on $(TARGET) Var SOURCEGROUPS ]
+	{
+		Contents += "$(TAB)[ [[$(folderName)]] ] = {$(NEWLINE)" ;
+		local source ;
+		for source in [ on $(TARGET) Var SOURCEGROUP.$(folderName) ]
+		{
+			Contents += "$(TAB)$(TAB)[[$(source:R=$(subdir))]],$(NEWLINE)" ;
+		}
+		Contents += "$(TAB)},$(NEWLINE)" ;
+	}
+	Contents += "}$(NEWLINE)" ;
+}
+
+
+rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
+{
+	# Write initial Project information.
+	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
+	local project = "Projects['$(TARGETS[0])']" ;
+	Contents += "$(NEWLINE)$(NEWLINE)--------------------------------------------------------------------$(NEWLINE)" ;
+
+	if $(PLATFORM) = *
+	{
+		Contents += "$(project).Name = '$(TARGETS[0])'$(NEWLINE)" ;
+		Contents += "$(project).Path = '$(subdir)'$(NEWLINE)" ;
+		Contents += "$(project).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'$(NEWLINE)" ;
+		Contents += "$(project).Jamfile = [[$(CURRENT_JAMFILE)]]$(NEWLINE)" ;
+	}
+
+	if ! ( lib in $(OPTIONS) )
+	{
+		local ext = SUFEXE ;
+		if shared in $(OPTIONS)
+		{
+			ext = SUFSHAREDLIB ;
+		}
+
+		local outputName = [ _retrieveOutputName $(TARGETS) : $(ext) : $(CONFIG) : $(PLATFORM) ] ;
+		Contents += "$(project).OutputNames['$(PLATFORM)']['$(CONFIG)'] = [[$(outputName)]]$(NEWLINE)" ;
+
+		local outputPath = [ _retrieveOutputPath $(TARGETS) : $(CONFIG) : $(PLATFORM) ] ;
+		Contents += "$(project).OutputPaths['$(PLATFORM)']['$(CONFIG)'] = [[$(outputPath[1])/]]$(NEWLINE)" ;
+	}
+
+	local defines =
+			[ _retrieveVar DEFINES : * : $(CONFIG) : $(PLATFORM) ]
+			[ _retrieveVar DEFINES : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+			[ _retrieveVar DEFINES : $(_obj) : $(CONFIG) : $(PLATFORM) ]
+	;
+	local definesString = "'$(defines)'," ;
+	definesString ?= "" ;
+	Contents += "$(project).Defines['$(PLATFORM)']['$(CONFIG)'] = { $(definesString:J= ) }$(NEWLINE)" ;
+
+	local hdrs =
+			$(SEARCH_SOURCE)
+			[ _retrieveVar HDRS : $(_obj) : $(CONFIG) : $(PLATFORM) ]
+			[ _retrieveVar HDRS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+			[ _retrieveVar HDRS : * : $(CONFIG) : $(PLATFORM) ]
+			$(SUBDIRHDRS)
+			$(STDHDRS)
+	;
+	local hdrsString = "[[$(hdrs)]]," ;
+	hdrsString ?= "" ;
+	Contents += "$(project).IncludePaths['$(PLATFORM)']['$(CONFIG)'] = { $(hdrsString:J= ) }$(NEWLINE)" ;
+
+	if $(PLATFORM) = *  &&  $(CONFIG) = *
+	{
+		DumpSources $(project) : $(SOURCES) ;
+		DumpSourceGroups $(project) : $(TARGETS) ;
+	}
+
+	if $(IS_APPLICATION)
+	{
+		DumpProjectGroups $(project) : $(TARGETS) ;
+	}
+
+	Depends all : $(TARGETS) ;
+	Depends $(TARGETS) : $(TargetInfoFile) ;
+}
+
+
+rule Application TARGETS : SOURCES
+{
+	Workspace $(TARGETS[0]) : $(TARGETS[0]) : all ;
+
+	DumpProjectInfo $(TARGETS) : $(SOURCES) : app ;
+}
+
+
+rule Library TARGETS : SOURCES : OPTIONS
+{
+	if shared in $(OPTIONS)
+	{
+		DumpProjectInfo $(TARGETS) : $(SOURCES) : shared ;
+	}
+	else
+	{
+		DumpProjectInfo $(TARGETS) : $(SOURCES) : lib ;
+	}
+}
+
+
+rule Project PROJECT_NAME : SOURCES
+{
+	DumpProjectInfo $(PROJECT_NAME) : $(SOURCES) ;
+}
+
+
+rule Workspace SOLUTION_NAME : TARGETS : OPTIONS
+{
+	Depends all : $(TARGETS) ;
+	Depends $(TARGETS) : $(TargetInfoFile) ;
+
+	if $(PLATFORM) != *
+	{
+		return ;
+	}
+
+	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
+	local solutionInfo = "Workspaces['$(SOLUTION_NAME)']" ;
+
+	if ! [ on $(SOLUTION_NAME) Var first ]  ||  ( all in $(OPTIONS) )
+	{
+		Contents += "$(solutionInfo).Name = '$(SOLUTION_NAME)'
+$(solutionInfo).Path = '$(subdir)'
+$(solutionInfo).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'
+" ;
+		DumpProjectGroups $(solutionInfo) : $(TARGETS) ;
+
+		first on $(SOLUTION_NAME) = false ;
+	}
+
+	local projectLines = "$(TAB)'$(TARGETS)',$(NEWLINE)" ;
+	Contents += "$(solutionInfo).Projects = concat($(solutionInfo).Projects, $(NEWLINE){$(NEWLINE)$(projectLines)})$(NEWLINE)" ;
+}
+
+
+rule WriteTargetInfoFile FILENAME
+{
+	Always $(FILENAME) ;
+	WriteTargetInfoFileHelper $(FILENAME) ;
+}
+
+
+actions WriteTargetInfoFileHelper
+{
+	^^($(1)|$(Contents:J=))
+}
+
+
+Contents = "-- This file is generated.  Do not modify.$(NEWLINE)$(NEWLINE)" ;
+
+if $(PLATFORM) = *
+{
+	Contents += "local function concat(l, r)
+	local out = {}
+	if l then
+		for _, v in ipairs(l) do
+			table.insert(out, v)
+		end
+	end
+	for _, v in ipairs(r) do
+		table.insert(out, v)
+	end
+	return out
+end
+
+local autoWriteMetaTable = { active = true }
+AutoWriteMetaTable = autoWriteMetaTable
+
+function autoWriteMetaTable.__index(table, key)
+	local t = rawget(table, key)
+	if autoWriteMetaTable.active and not t then
+		t = {}
+		setmetatable(t, autoWriteMetaTable)
+		rawset(table, key, t)
+	end
+	return t
+end
+
+function autoWriteMetaTable.__newindex(table, key, value)
+	local t = rawget(table, key)
+	if not t then
+		rawset(table, key, value)
+		t = rawget(table, key)
+	end
+	return t
+end
+
+Projects = setmetatable({}, autoWriteMetaTable)
+Workspaces = setmetatable({}, autoWriteMetaTable)
+
+" ;
+}
+
+JAMFILE = Jamfile.jam ;
+include $(JAMFILE) ;
+
+WriteTargetInfoFile $(TargetInfoFile) ;

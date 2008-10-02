@@ -1,0 +1,4 @@
+SubDir TOP project1 ;
+
+LinkLibraries project1 : common ;
+Application project1 : project1.cpp ;

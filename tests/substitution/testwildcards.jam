@@ -1,0 +1,8 @@
+Echo @(**.jam@-Release/@-o*:W) ;
+
+FILES = file1.c file2.c file3.c file1.o file2.o file3.o file1.s file2.s file3.s ;
+Echo $(FILES:I=\\.c$:I=\\.o:X="^file1") ;
+C_FILES = $(FILES:I=\\.c$) ;
+Echo $(C_FILES) ;
+
+Echo $(FILES:I=\\.c$:I=\\.o) ;

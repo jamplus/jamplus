@@ -1,0 +1,3 @@
+IncludeModule CopyDirectory ;
+
+CopyDirectory all : destination : source : **@-ignore/ ;

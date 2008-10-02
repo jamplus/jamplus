@@ -1,0 +1,9 @@
+SubDir TOP ;
+
+ALL_LOCATE_TARGET = image ;
+
+SubInclude TOP app ;
+SubInclude TOP lib-c ;
+SubInclude TOP slib-a ;
+#SubInclude TOP slib-a-d ;
+SubInclude TOP slib-b ;

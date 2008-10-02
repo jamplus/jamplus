@@ -1,0 +1,29 @@
+SubDir TOP ;
+
+SRCS =
+		ChildFrm.cpp
+		ChildFrm.h
+		MainFrm.cpp
+		MainFrm.h
+		Resource.h
+		SimpleMFC.cpp
+		SimpleMFC.h
+		SimpleMFC.rc
+		SimpleMFCDoc.cpp
+		SimpleMFCDoc.h
+		SimpleMFCView.cpp
+		SimpleMFCView.h
+		stdafx.cpp
+		stdafx.h
+;
+
+IncludeModule MFC ;
+UseMFC SimpleMFC : shared ;
+
+Lump SimpleMFC : SRCS : SimpleMFCLump : stdafx : stdafx.h : cpp ;
+
+SRCS += [ ResourceCompiler SimpleMFC : SimpleMFC.rc ] ;
+
+PrecompiledHeader stdafx.cpp stdafx.h : $(SRCS) ;
+
+Application SimpleMFC : $(SRCS) : windows ;

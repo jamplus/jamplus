@@ -1,0 +1,19 @@
+Echo Pass 1 ;
+
+actions Copy
+{
+	copy $(2) $(1)
+}
+
+actions piecemeal together existing Clean
+{
+	del "$(>:\\)"
+}
+
+NotFile all ;
+Depends all : copiedfile.txt ;
+Depends copiedfile.txt : originalfile.txt ;
+Clean clean : copiedfile.txt ;
+
+QueueJamfile Pass2.jam ;
+
