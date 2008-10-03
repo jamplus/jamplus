@@ -4,5 +4,7 @@ actions maxtargets 3 piecemeal BatchIt
 }
 
 local deps = hello hi more less somewhere over the rainbow ;
-Depends all : $(deps) ;
-BatchIt $(deps) : $(deps) ;
+Depends all : $(deps).out ;
+Depends $(deps).out : $(deps) ;
+NotFile $(deps) ;
+BatchIt $(deps).out : $(deps) ;
