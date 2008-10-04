@@ -1,0 +1,18 @@
+ALL_LOCATE_TARGET = temp ;
+
+FILE = somefile.txt ;
+Echo No LOCATE - $(FILE:T) ;
+
+LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+Echo With LOCATE - $(FILE:T) ;
+
+actions DoSomething
+{
+	echo $(FILE:T) > $(1)
+}
+
+Depends all : $(FILE) ;
+MakeLocate $(FILE) : $(ALL_LOCATE_TARGET) ;
+Always $(FILE) ;
+Clean clean : $(FILE) ;
+DoSomething $(FILE) ;

@@ -39,6 +39,12 @@
 # include "regexp.h"
 # include "fileglob.h"
 
+#ifdef OPT_EXPAND_BINDING_EXT
+# include "parse.h"
+# include "rules.h"
+# include "search.h"
+#endif
+
 typedef struct {
 	PATHNAME	f;		/* :GDBSMR -- pieces */
 	char		parent;		/* :P -- go to parent directory */
@@ -58,7 +64,10 @@ typedef struct {
 	char		wildcard;
 #endif
 #ifdef OPT_EXPAND_LITERALS_EXT
-	char		expand;
+	char		expandliteral;
+#endif
+#ifdef OPT_EXPAND_BINDING_EXT
+	char		expandbinding;
 #endif
 
 } VAR_EDITS ;
@@ -328,7 +337,7 @@ var_expand(
 		    evalue = value = list_new( L0, edits.empty.ptr, 0 );
 
 #ifdef OPT_EXPAND_LITERALS_EXT
-		if ( colon && edits.expand ) {
+		if ( colon && edits.expandliteral ) {
 		    LOL lol;
 		    LIST *newvalue = var_expand( L0, value->string, value->string + strlen( value->string ), &lol, 0 );
 		    if ( origvalue ) {
@@ -346,6 +355,7 @@ var_expand(
 		    LIST *rem;
 		    size_t save_buffer_pos;
 		    size_t end_buffer_pos;
+		    const char *valuestring;
 
 		    /* Handle end subscript (length actually) */
 
@@ -355,10 +365,23 @@ var_expand(
 		    /* Apply : mods, if present */
 
 		    save_buffer_pos = buffer_pos( &buff );
+
+		    valuestring = value->string;
+
+#ifdef OPT_EXPAND_BINDING_EXT
+		    if( colon && edits.expandbinding ) {
+			time_t time;
+			TARGET *t = bindtarget( valuestring );
+			pushsettings( t->settings );
+			valuestring = search( t->name, &time );
+			popsettings( t->settings );			
+		    }
+#endif
+
 		    if( colon && edits.filemods ) {
-			var_edit_file( value->string, &buff, &edits );
+			var_edit_file( valuestring, &buff, &edits );
 		    } else {
-			buffer_addstring( &buff, value->string, strlen( value->string ) + 1 );
+			buffer_addstring( &buff, valuestring, strlen( valuestring ) + 1 );
 		    }
 		    buffer_setpos( &buff, save_buffer_pos );
 
@@ -589,7 +612,10 @@ var_edit_parse(
 	    case 'W': edits->wildcard = 1; continue;
 #endif
 #ifdef OPT_EXPAND_LITERALS_EXT
-	    case 'A': edits->expand = 1; continue;
+	    case 'A': edits->expandliteral = 1; continue;
+#endif
+#ifdef OPT_EXPAND_BINDING_EXT
+	    case 'T': edits->expandbinding = 1; continue;
 #endif
 	    default: return; /* should complain, but so what... */
 	    }
