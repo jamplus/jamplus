@@ -294,6 +294,23 @@ rule FindVisualStudio VERSION
 }
 
 
+rule FindMinGW
+{
+	local PATHS =
+		c:/mingw
+		d:/mingw
+	;
+
+	local gcc = [ Glob $(PATHS)/bin : gcc.exe ] ;
+	if ! $(gcc)
+	{
+		return ;
+	}
+
+	MINGW_ROOT = [ Match (.+)/bin : $(gcc[1]) ] ;
+}
+
+
 rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 {
 	THE_COMPILER ?= $(COMPILER) ;
@@ -310,8 +327,6 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 		RM		?= del /f/q ;
 		RMDIR	?= rmdir /s/q ;
 		SLASH	?= / ;
-		SUFLIB	?= .lib ;
-		SUFOBJ	?= .obj ;
 		SUFEXE	?= .exe ;
 		SUFSHAREDLIB ?= .dll ;
 		SUFRES	?= .res ;
@@ -336,9 +351,16 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 				}
 			}
 		}
+		else
+		{
+			COMPILER = $(THE_COMPILER) ;
+		}
 
 		if $(COMPILER) in vc5 vc6 vs2003 vs2005 vs2008
 		{
+			SUFLIB	?= .lib ;
+			SUFOBJ	?= .obj ;
+
 			MSVCNT = ;
 			switch $(COMPILER)
 			{
@@ -384,6 +406,20 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			UNDEFFLAG	?= "/u _" ;
 
 			NOARUPDATE = true ;
+		}
+		else if $(COMPILER) = mingw
+		{
+			FindMinGW ;
+
+			SUFLIB	?= .a ;
+			SUFOBJ	?= .o ;
+
+			DEFINES.*.* on * += MINGW ;
+
+			CC			?= "$(MINGW_ROOT)/bin/gcc" ;
+			C++			?= "$(MINGW_ROOT)/bin/g++" ;
+			RANLIB		?= "$(MINGW_ROOT)/bin/ranlib" ;
+			SUFEXE		?= .exe ;
 		}
 		else
 		{
@@ -1033,7 +1069,7 @@ rule FDirName
 	return $(_s) ;
 }
 
-if $(NT)
+if $(MSVCNT)
 {
 	rule FDefines { return /D$(<) ; }
 	rule FIncludes { return /I"\"$(<)\"" ; }
@@ -1451,6 +1487,11 @@ rule MultiCppCompile TARGET : SOURCES
 			MFLAGS on $(_src) = $(_flags) ;
 			UseCommandLine $(_obj) : [ on $(_src) Var MFLAGS ] ;
 		}
+		else if $(COMPILER) = mingw
+		{
+			_flags += $(_postmflags) ;
+			MFLAGS on $(_src) = $(_flags) "-c -o \"$(_obj:T)\"" ;
+		}
 
 		newsrcs += $(_src) ;
 	}
@@ -1513,6 +1554,14 @@ if $(MSVCNT)
 	{
 	PATH=%PATH%;$(MSVCNT_PATH)
 	"$(AR)" /nologo /out:$(<) @@($(>:\\))
+	}
+}
+
+if $(COMPILER) = mingw
+{
+	actions updated response batched_C++
+	{
+		$(CC) -c $(MFLAGS) $(>)
 	}
 }
 

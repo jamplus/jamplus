@@ -26,7 +26,8 @@ Compilers =
 	{ 'vs2005', 'Visual Studio 2005' },
 	{ 'vs2003', 'Visual Studio 2003' },
 	{ 'vs2002', 'Visual Studio 2002' },
-	{ 'vc6', 'Visual C++ 6' },
+	{ 'vc6',	'Visual C++ 6' },
+	{ 'mingw',	'MinGW' },
 }
 
 local buildWorkspaceName = '!BuildWorkspace'
@@ -111,7 +112,7 @@ end
 function ProcessCommandLine()
 	local options = Options {
 		Option {{"gen"}, "Set a project generator", "Req", 'GENERATOR'},
---		Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
+		Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
 		Option {{"postfix"}, "Extra text for the IDE project name"},
 		Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
 	}
@@ -139,8 +140,8 @@ function ProcessCommandLine()
 		end
 		genOptions = Options(genOptions)
 
-		print(getopt.usageInfo("\nAvailable generators:", genOptions))
---[[ I didn't finish moving this patch in.  I'll do it after release.
+		print(getopt.usageInfo("\nAvailable workspace generators:", genOptions))
+
 		local compilerOptions = {}
 		for compilerInfo in ivalues(Compilers) do
 			compilerOptions[#compilerOptions + 1] =
@@ -149,7 +150,7 @@ function ProcessCommandLine()
 		compilerOptions = Options(compilerOptions)
 
 		print(getopt.usageInfo("\nAvailable compilers:", compilerOptions))
-]]
+
 		os.exit(-1)
 	end
 end
@@ -930,7 +931,6 @@ Exporters =
 		Options =
 		{
 			vs2003 = true,
-			compiler = 'vs2003',
 		}
 	},
 
@@ -944,7 +944,6 @@ Exporters =
 		Options =
 		{
 			vs2005 = true,
-			compiler = 'vs2005',
 		}
 	},
 
@@ -958,7 +957,6 @@ Exporters =
 		Options =
 		{
 			vs2008 = true,
-			compiler = 'vs2008',
 		}
 	},
 
@@ -1098,6 +1096,7 @@ end
 
 function BuildProject()
 	local exporter = Exporters[opts.gen]
+	exporter.Options.compiler = opts.compiler or opts.gen
 
 	iox.PathCreate(destinationRootPath)
 
@@ -1181,7 +1180,7 @@ include $(jamPath)Jambase.jam ;
 
 	-- Write UpdateWorkspace.bat.
 	local contents = '@"' .. scriptPath .. 'JamToWorkspace.bat" --gen=' ..
-			exporter.Options.compiler .. ' '
+			opts.gen .. ' --compiler=' .. exporter.Options.compiler .. ' '
 	contents = contents .. '"--config=' .. destinationRootPath .. '\\UpdateWorkspace.config" '
 	contents = contents .. '"' .. sourceJamfilePath .. '"\n'
 	io.writeall(destinationRootPath .. 'UpdateWorkspace.bat', contents)
