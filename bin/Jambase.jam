@@ -547,7 +547,11 @@ rule MkDir
 
 	# Don't create . or any directory already created.
 
-	if $(<:G=) != $(DOT) && ! $($(<)-mkdir)
+	if $(<:G=) = $(DOT)
+	{
+		NotFile $(<) ;
+	}
+	else if ! $($(<)-mkdir)
 	{
 	    # Cheesy gate to prevent multiple invocations on same dir
 	    # Arrange for jam dirs
