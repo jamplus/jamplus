@@ -1,3 +1,6 @@
+if ! $(TARGETINFO_LOCATE)
+{
+
 rule CopyFile PARENTS : TARGET : SOURCE
 {
 	Depends $(PARENTS) : $(TARGET) : $(SOURCE) ;
@@ -14,4 +17,12 @@ actions CopyFile1
 	$(CP) "$(2:\\)" "$(1:\\)"
 }
 
+}
+else
+{
 
+rule CopyFile
+{
+}
+
+}

@@ -1,5 +1,8 @@
 IncludeModule CopyFile ;
 
+if ! $(TARGETINFO_LOCATE)
+{
+
 rule CopyDirectory PARENTS : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING
 {
 	SOURCE_PATH = $(SOURCE_PATH:R=) ;
@@ -12,4 +15,14 @@ rule CopyDirectory PARENTS : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING
 		local justFile = [ Match $(SOURCE_PATH)/(.+) : $(file) ] ;
 		CopyFile $(PARENTS) : $(justFile:R=$(DESTINATION_PATH)) : $(file) ;
 	}
+}
+
+}
+else
+{
+
+rule CopyDirectory
+{
+}
+
 }
