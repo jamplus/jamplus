@@ -882,24 +882,33 @@ rule SubInclude
 	# We use SubDir to get there, in case the included Jamfile
 	# either doesn't have its own SubDir (naughty) or is a subtree
 	# with its own TOP.
-
 	if ! $($(<[1]))
 	{
 	    Exit SubInclude $(<[1]) without prior SubDir $(<[1]) ;
 	}
 
+	local jamfile ;
+	if $(>)
+	{
+		jamfile = $(>:S=.jam) ;
+	}
+	else
+	{
+		jamfile = $(JAMFILE) ;
+	}
+
+	local include_marker = included_$(<:J=_)_$(jamfile) ;
+	if $($(include_marker))
+	{
+		return ;
+	}
+	$(include_marker) = true ;
+
 	local saveTokens = $(ALL_SUBDIR_TOKENS) ;
 	local saveCurrentJamfile = $(CURRENT_JAMFILE) ;
 	SubDir $(<) ;
 
-	if $(>)
-	{
-		CURRENT_JAMFILE = $(>:D=$(SUBDIR):S=.jam) ;
-	}
-	else
-	{
-		CURRENT_JAMFILE = $(JAMFILE:D=$(SUBDIR)) ;
-	}
+	CURRENT_JAMFILE = $(jamfile:D=$(SUBDIR)) ;
 	include $(CURRENT_JAMFILE) ;
 
 	if $(saveTokens)
