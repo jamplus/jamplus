@@ -174,14 +174,14 @@ cmd_string(
 {
     const char  *in   = rule->actions;
 
-    while (*in  &&  buffer_pos(buff) < outsize) {
+    while (*in  &&  (int)buffer_pos(buff) < outsize) {
 	int 	dollar = 0;
 	size_t	lastword;
 
 	/* Copy white space */
 
 	while (isspace(*in)) {
-	    if (buffer_pos(buff) >= outsize)
+	    if ((int)buffer_pos(buff) >= outsize)
 		return -1;
 	    buffer_addchar(buff, *in++);
 	}
@@ -192,7 +192,7 @@ cmd_string(
 	 * for response file indicators. */
 
 	while (*in && !isspace(*in)) {
-	    if (buffer_pos(buff) >= outsize)
+	    if ((int)buffer_pos(buff) >= outsize)
 		return -1;
 
 	    if (in[0] == '$' && in[1] == '(') {
@@ -215,7 +215,7 @@ cmd_string(
 		}
 
 		tlen = strlen(r->file->name);
-		if (buffer_pos(buff) + tlen >= outsize)
+		if ((int)buffer_pos(buff) + tlen >= outsize)
 		    return -1;
 		buffer_addstring(buff, r->file->name, tlen);
 
@@ -358,7 +358,7 @@ cmd_string(
 	    {
 		int so = strlen(l->string);
 
-		if (buffer_pos(buff) + so >= outsize)
+		if ((int)buffer_pos(buff) + so >= outsize)
 		    return -1;
 		buffer_addstring(buff, l->string, so);
 
@@ -373,7 +373,7 @@ cmd_string(
 	}
     }
 
-    if (buffer_pos(buff) >= outsize)
+    if ((int)buffer_pos(buff) >= outsize)
 	return -1;
     buffer_addchar(buff, 0);
     return buffer_pos(buff);
