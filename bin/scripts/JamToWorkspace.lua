@@ -1220,7 +1220,12 @@ ProcessCommandLine()
 
 -- Turn the source code root into an absolute path based on the current working directory.
 sourceJamfilePath = iox.PathMakeAbsolute(nonOpts[1]):gsub('\\', '/')
-sourceRootPath, sourceJamfile = sourceJamfilePath:match('(.+/)(.+)')
+sourceRootPath, sourceJamfile = sourceJamfilePath:match('(.+/)(.*)')
+if not sourceRootPath or not sourceJamfile then
+	sourceRootPath = sourceJamfilePath
+	sourceJamfile = 'Jamfile.jam'
+	sourceJamfilePath = sourceRootPath .. '/' .. sourceJamfile
+end
 
 Config.SubIncludes =
 {
