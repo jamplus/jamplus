@@ -823,10 +823,10 @@ compile_setexec(
 	rule->actions = copystr( parse->string1 );
 	rule->bindlist = bindlist;
 	rule->flags = parse->num;
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 	rule->maxline = parse->num2;
 	rule->maxtargets = parse->num3;
-#endif
+/* commented out so jamgram.y can compile #endif */
 
 	return L0;
 }

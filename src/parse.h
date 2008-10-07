@@ -25,10 +25,10 @@ struct _PARSE {
 	const char	*string;
 	const char	*string1;
 	int		num;
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 	int		num2;
 	int		num3;
-#endif
+/* commented out so jamgram.y can compile #endif */
 	int		refs;
 } ;
 
@@ -44,7 +44,7 @@ PARSE * parse_make(
 	const char	*string1,
 	int		num );
 
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 PARSE * parse_make3( 
 	LIST 		*(*func)( PARSE *p, LOL *args, int *jmp ),
 	PARSE		*left,
@@ -55,7 +55,7 @@ PARSE * parse_make3(
 	int		num,
 	int		num2,
 	int		num3 );
-#endif
+/* commented out so jamgram.y can compile #endif */
 
 void 	parse_refer( PARSE *p );
 void 	parse_free( PARSE *p );

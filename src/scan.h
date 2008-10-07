@@ -37,10 +37,10 @@ typedef struct _YYSTYPE {
 	PARSE		*parse;
 	LIST		*list;
 	int		number;
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 	int		number2;
 	int		number3;
-#endif
+/* commented out so jamgram.y can compile #endif */
 } YYSTYPE;
 
 extern YYSTYPE yylval;

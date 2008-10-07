@@ -1183,11 +1183,11 @@ make1cmds( ACTIONS *a0 )
 
 	    start = 0;
 	    chunk = length = list_length( ns );
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 	    maxline = rule->maxline;
-#else
+/* commented so jamgram.y can compile #else
 	    maxline = rule->flags / RULE_MAXLINE;
-#endif
+#endif */
 #ifdef OPT_PIECEMEAL_PUNT_EXT
 	    maxline = maxline && maxline < CMDBUF ? maxline : CMDBUF;
 #else
@@ -1197,7 +1197,7 @@ make1cmds( ACTIONS *a0 )
 	    do
 	    {
 		/* Build cmd: cmd_new consumes its lists. */
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 		int thischunk = rule->maxtargets != 0 ? min(chunk, rule->maxtargets) : chunk;
 
 		CMD *cmd = cmd_new( rule,
@@ -1205,13 +1205,13 @@ make1cmds( ACTIONS *a0 )
 			list_sublist( ns, start, thischunk ),
 			list_copy( L0, shell ),
 			maxline );
-#else
+/* commented so jamgram.y can compile #else
 		CMD *cmd = cmd_new( rule, 
 			list_copy( L0, nt ), 
 			list_sublist( ns, start, chunk ),
 			list_copy( L0, shell ),
 			maxline );
-#endif
+#endif */
 
 		if( cmd )
 		{
@@ -1220,11 +1220,11 @@ make1cmds( ACTIONS *a0 )
 		    if( !cmds ) cmds = cmd;
 		    else cmds->tail->next = cmd;
 		    cmds->tail = cmd;
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 		    start += thischunk;
-#else
+/* commented out so jamgram.y can compile #else
 		    start += chunk;
-#endif
+#endif */
 		}
 		else if( ( rule->flags & RULE_PIECEMEAL ) && chunk > 1 )
 		{

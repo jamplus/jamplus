@@ -59,21 +59,21 @@ struct _rule {
 # define	RULE_QUIETLY	0x08	/* don't mention it unless verbose */
 # define	RULE_PIECEMEAL	0x10	/* split exec so each $(>) is small */
 # define	RULE_EXISTING	0x20	/* $(>) is pre-exisitng sources only */
-#ifdef OPT_RESPONSE_FILES
+/* commented out so jamgram.y can compile #ifdef OPT_RESPONSE_FILES */
 # define	RULE_RESPONSE	0x40	/* enable response file syntax */
-#endif
+/* commented out so jamgram.y can compile #endif */
 # define	RULE_MAXLINE	0x80	/* cmd specific maxline (last) */
-/*commented out for the parser -- #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT*/
+/* commented out for the parser -- #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT */
 # define	RULE_LUA	0x100	/* this action is lua script */
 /*#endif*/
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 # define	RULE_MAXTARGETS	0x200	/* cmd specific maxtargets */
-#endif
+/* commented out so jamgram.y can compile #endif */
 
 	int		maxline;
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 	int		maxtargets;
-#endif
+/* commented out so jamgram.y can compile #endif */
 
 } ;
 

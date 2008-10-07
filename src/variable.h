@@ -26,7 +26,7 @@ void 	var_done();
 # define VAR_SET	0	/* override previous value */
 # define VAR_APPEND	1	/* append to previous value */
 # define VAR_DEFAULT	2	/* set only if no previous value */
-#ifdef OPT_MINUS_EQUALS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_MINUS_EQUALS_EXT */
 # define VAR_REMOVE	3	/* filter an old value */
-#endif
+/* commented out so jamgram.y can compile #endif */
 

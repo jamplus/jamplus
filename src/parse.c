@@ -100,15 +100,15 @@ parse_make(
 	p->string = string;
 	p->string1 = string1;
 	p->num = num;
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 	p->num2 = p->num3 = 0;
-#endif
+/* commented out so jamgram.y can compile #endif */
 	p->refs = 1;
 
 	return p;
 }
 
-#ifdef OPT_ACTION_MAXTARGETS_EXT
+/* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 
 PARSE *
 parse_make3( 
@@ -147,7 +147,7 @@ parse_make3(
 	return p;
 }
 
-#endif
+/* commented out so jamgram.y can compile #endif */
 
 void
 parse_refer( PARSE *p )
