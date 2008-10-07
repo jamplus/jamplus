@@ -31,6 +31,8 @@
  *	cmd_next() - walk the CMD chain
  */
 
+#include "buffer.h"
+
 #ifdef OPT_RESPONSE_FILES
 #include "tmpfile.h"
 
@@ -61,11 +63,7 @@ struct _cmd
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 	char *luastring;
 #endif
-#ifdef OPT_PIECEMEAL_PUNT_EXT
-	char	buf[ CMDBUF ];	/* actual commands */
-#else
-    	char	buf[ MAXLINE ];	/* actual commands */
-#endif
+	BUFFER	commandbuff;	/* actual commands */
 } ;
 
 CMD *cmd_new(

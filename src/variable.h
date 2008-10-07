@@ -13,7 +13,7 @@
 typedef struct _buffer BUFFER;
 
 void 	var_defines( const char **e );
-int	var_string( const char *in, BUFFER *buff, LOL *lol, char separator );
+int	var_string( const char *in, BUFFER *buff, int outsize, LOL *lol, char separator );
 LIST * 	var_get( const char *symbol );
 void 	var_set( const char *symbol, LIST *value, int flag );
 LIST * 	var_swap( const char *symbol, LIST *value );

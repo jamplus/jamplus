@@ -145,12 +145,14 @@ int
 var_string(
 	const char *in,
 	BUFFER	*buff,
+	int	outsize,
 	LOL	*lol,
 	char    separator)
 {
-	size_t	out0 = buffer_pos( buff );
+	if ( outsize == 0 )
+	    outsize = INT_MAX;
 
-	while( *in )
+	while( *in  &&  (int)buffer_pos(buff) < outsize )
 	{
 	    size_t	lastword;
 	    int		dollar = 0;
@@ -159,6 +161,8 @@ var_string(
 
 	    while( isspace( *in ) )
 	    {
+		if ( (int)buffer_pos(buff) >= outsize)
+		    return -1;
 		buffer_addchar( buff, *in++ );
 	    }
 
@@ -168,6 +172,9 @@ var_string(
 
 	    while( *in && !isspace( *in ) )
 	    {
+		if ( (int)buffer_pos(buff) >= outsize)
+		    return -1;
+
 		if( in[0] == '$' && in[1] == '(' )
 		    dollar++;
 
@@ -187,6 +194,9 @@ var_string(
 		{
 		    int so = strlen( l->string );
 
+		    if ( (int)buffer_pos(buff) + so >= outsize)
+			return -1;
+
 		    buffer_addstring( buff, l->string, so );
 
 		    /* Separate with space */
@@ -199,9 +209,12 @@ var_string(
 	    }
 	}
 
+	if ( (int)buffer_pos(buff) >= outsize)
+	    return -1;
+
 	buffer_addchar( buff, 0 );
 
-	return buffer_pos( buff ) - out0;
+	return buffer_pos( buff );
 }
 
 /*

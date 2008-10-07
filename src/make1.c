@@ -514,7 +514,7 @@ make1c( TARGET *t )
 	    }
 
 	    if( DEBUG_EXEC )
-		printf( "%s\n", cmd->buf );
+		printf( "%s\n", buffer_ptr( &cmd->commandbuff ) );
 #endif /* !OPT_SERIAL_OUTPUT_EXT */
 #ifdef OPT_RESPONSE_FILES
 	    if (DEBUG_EXEC)
@@ -524,7 +524,7 @@ make1c( TARGET *t )
 #endif
 
 	    if( globs.cmdout )
-		fprintf( globs.cmdout, "%s", cmd->buf );
+		fprintf( globs.cmdout, "%s", buffer_ptr(&cmd->commandbuff) );
 
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 	    if ( cmd->rule->flags & RULE_LUA )
@@ -544,7 +544,7 @@ make1c( TARGET *t )
 	    else
 	    {
 		fflush( stdout );
-		execcmd( cmd->buf, make1d, t, cmd->shell );
+		execcmd( buffer_ptr(&cmd->commandbuff), make1d, t, cmd->shell );
 	    }
 	}
 	else
@@ -676,7 +676,7 @@ make1d(
 	    /* Print command text on failure */
 
 	    if( !DEBUG_EXEC )
-		printf( "%s\n", cmd->buf );
+		printf( "%s\n", buffer_ptr( &cmd->commandbuff ) );
 #ifdef OPT_RESPONSE_FILES
 	    if (!DEBUG_EXEC)
 	    {
@@ -719,7 +719,7 @@ make1d(
 
 	if( DEBUG_EXEC || (status == EXEC_CMD_FAIL && DEBUG_MAKE) )
 	{
-	    printf( "%s\n", cmd->buf );
+	    printf( "%s\n", buffer_ptr(&cmd->commandbuff) );
 #ifdef OPT_RESPONSE_FILES
 	    printResponseFiles(cmd);
 #endif

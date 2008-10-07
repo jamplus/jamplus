@@ -550,7 +550,7 @@ evaluate_rule(
 
 	buffer_init( &buff );
 
-	if( (i = var_string( rulename, &buff, args, ' ' )) < 0 )
+	if( (i = var_string( rulename, &buff, 0, args, ' ' )) < 0 )
 	{
 	    printf( "Failed to expand rule %s -- expansion too long\n", rulename );
 	    exit( EXITBAD );

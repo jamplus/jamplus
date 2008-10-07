@@ -198,7 +198,7 @@ headers1(
 		lol_init( &args );
 		lol_add( &args, list_new( L0, file, 0 ) );
 		buffer_init( &buff );
-		if ( var_string( hdrpipe->string, &buff, &args, ' ') < 0 )  {
+		if ( var_string( hdrpipe->string, &buff, 0, &args, ' ') < 0 )  {
 		    printf( "Cannot expand HDRPIPE '%s' !\n", hdrpipe->string );
 		    exit( EXITBAD );
 		}

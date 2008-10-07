@@ -65,7 +65,7 @@ cmd_new(
 	lol_add( &cmd->args, targets );
 	lol_add( &cmd->args, sources );
 
-	memset( cmd->buf, 0, sizeof( cmd->buf ) );
+	buffer_init( &cmd->commandbuff );
 
 	/* Bail if the result won't fit in maxline */
 	/* We don't free targets/sources/shell if bailing. */
@@ -91,7 +91,7 @@ cmd_new(
 #endif
 	if (buffer_pos(&buff) < (size_t)maxline)
 	{
-	    memcpy(cmd->buf, buffer_ptr(&buff), buffer_pos(&buff));
+	    buffer_addstring( &cmd->commandbuff, buffer_ptr( &buff ), buffer_pos( &buff ) );
 	    buffer_free(&buff);
 	}
 	else
@@ -100,7 +100,7 @@ cmd_new(
 			&cmd->response_files ) < 0 )
 #endif /* OPT_MULTIPASS_EXT */
 #else
-	if( var_string( rule->actions, cmd->buf, maxline, &cmd->args ) < 0 )
+	if( var_string( rule->actions, &cmd->commandbuff, maxline, &cmd->args, ' ' ) < 0 )
 #endif
 	{
 	    cmd_free( cmd );
@@ -109,7 +109,7 @@ cmd_new(
 #ifdef OPT_PIECEMEAL_PUNT_EXT
         /* if the command was too long and we can possibly make it
            shorter, try.  Otherwise hope for the best. */
-        if ( strlen(cmd->buf) > MAXLINE && rule->flags & RULE_PIECEMEAL )
+        if ( strlen( buffer_ptr( &cmd->commandbuff ) ) > MAXLINE && rule->flags & RULE_PIECEMEAL )
         {
             cmd_free( cmd );
             return 0;
@@ -139,6 +139,7 @@ cmd_free( CMD *cmd )
 	    free( t );
 	}
 #endif
+	buffer_free( &cmd->commandbuff );
 	free( (char *)cmd );
 }
 
@@ -243,7 +244,7 @@ cmd_string(
 		    buffer_init( &subbuff );
 
 		    while (0 > (expandedSize = var_string(
-				     in + 2, &subbuff, lol, ' '))) {
+				     in + 2, &subbuff, 0, lol, ' '))) {
 			    printf("jam: out of memory");
 			    exit(EXITBAD);
 			}
@@ -291,7 +292,7 @@ cmd_string(
 		    buffer_init( &subbuff );
 
 		    while (0 > (expandedSize = var_string(
-				     in + 3, &subbuff, lol, ' '))) {
+				     in + 3, &subbuff, 0, lol, ' '))) {
 			    printf("jam: out of memory");
 			    exit(EXITBAD);
 			}
@@ -326,7 +327,7 @@ cmd_string(
 			buffer_init( &subbuff );
 
 			while (0 > (expandedSize = var_string(
-					 in, &subbuff, lol, ' '))) {
+					 in, &subbuff, 0, lol, ' '))) {
 				printf("jam: out of memory");
 				exit(EXITBAD);
 			    }
