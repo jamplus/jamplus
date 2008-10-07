@@ -1,0 +1,24 @@
+/*! \page index JamPlus
+
+<h2>Introduction</h2>
+JamPlus is a generic code and data build system built on the code base of the original Perforce version of Jam.
+
+JamPlus adds new features to Jam and integrates a number of patches from the Jamming mailing list and the Perforce Public Depot.
+
+A sampling of the new features in the JamPlus distribution follows:
+
+- <b>Multiple Passes:</b> The ability to run multiple internal passes, collecting unknown dependencies, and executing them in a future pass.
+- <b>Network Cache:</b> Any to-be-built target can be retrieved from one or more shared network caches of prebuilt targets.
+- <b>Command-line Dependencies:</b> When the 'command line' of a target (not necessarily the real command line) changes, the target is rebuilt.
+- <b>Powerful New Variable Expansion:</b> Convert between slash types, expand literal text, include or exclude list components, recursive file globs, and more.
+- <b>Dependency (Header) Cache:</b> When dependency information is scanned, it is cached for the next build, offering a huge performance boost.
+- <b>Batch Compilation:</b> JamPlus is able to batch files to tools that support it, such as the Visual C++ compiler.
+- <b>Workspace/Project Generator:</b> JamPlus can output project files for the Visual Studio IDE.
+
+<h2>Contents</h2>
+
+<ul>
+<li>\ref commands shows the list of rules available in the default <tt>Jambase.jam</tt>.
+</ul>
+*/
+

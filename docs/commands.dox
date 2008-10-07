@@ -1,0 +1,82 @@
+/*! \page commands Jambase Rules
+
+\section cmd_intro Introduction
+
+If [square] brackets are used the argument is optional.
+
+Here is an alphabetically sorted list of all commands with references to their
+documentation:
+\secreflist
+\refitem rule_Application Application
+\refitem rule_Library Library
+\endsecreflist
+
+The following is a list of rules available in <tt>bin/Jambase.jam</tt>.
+
+<hr>
+\section rule_Application rule Application TARGET : SOURCES : OPTIONS
+\addindex rule_Application
+
+Compiles \c SOURCES and links them into \c TARGETS.
+
+\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.
+\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> to link into the application.  Object and compiled Windows resource files may also be passed with this list.
+\param OPTIONS The following options are available.  All options are optional.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c windows - Forces a GUI application.  On Windows, the application must have a \c WinMain function.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
+  <li>\c console (default) - Builds a console application.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    Application helloworld : helloworld.cpp ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_Library rule Library TARGET : SOURCES : OPTIONS
+\addindex rule_Application
+
+Compiles \c SOURCES and archives them into a library called \c TARGET.
+
+\param TARGET The targets to archive \c SOURCES into.  The target name is given without extension; a platform specific extension will be generated.
+\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> to link into the application.  Object and compiled Windows resource files may also be passed with this list.
+\param OPTIONS (optional) The following options are available.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c shared - Instead of building a static library (the default), a shared library (DLL) is built.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\htmlonly <blockquote> \endhtmlonly
+If \c shared is specified for \c OPTIONS, the following additional options are available:
+
+<ul>
+  <li>\c windows - Forces a GUI application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
+  <li>\c console (default) - Builds a console application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    # Build a static library called mystaticlibrary from the sources
+    # file1.c and file2.cpp.
+    Library mystaticlibrary : file1.c file2.cpp ;
+
+    # Build a shared library called mystaticlibrary from the sources
+    # file3.c and file4.cpp.
+    Library mysharedlibrary : file3.c file4.cpp : shared ;
+\endcode
+
+<hr>
+
+
+*/
+
