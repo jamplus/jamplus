@@ -197,9 +197,6 @@ JAMBASEDATE = 2008.10.08 ;
 
 CONFIG ?= debug ;
 
-DEFINES.*.debug on * += _DEBUG DEBUG ;
-DEFINES.*.release on * += NDEBUG ;
-
 VALID_CONFIGS = debug release ;
 VALID_PLATFORMS = win32 ;
 
@@ -391,6 +388,8 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			C++FLAGS.win32.debug on *	?= [ on * Var CCFLAGS.win32.debug ] ;
 			C++FLAGS.win32.release on *	?= [ on * Var CCFLAGS.win32.release ] ;
 
+			DEFINES.*.debug on * += _DEBUG DEBUG ;
+			DEFINES.*.release on * += NDEBUG ;
 			LINKDIRECTORIES.*.*	+= "$(DXSDK_DIR)/Lib/x86" $(MSSDK_LINKDIRECTORIES) ;
 			LINKFLAGS.win32.debug on * = /INCREMENTAL /DEBUG /MACHINE:X86 ;
 			LINKFLAGS.win32.release on * = /INCREMENTAL:NO /DEBUG /MACHINE:X86 /OPT:REF /OPT:ICF ;
@@ -415,6 +414,8 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			SUFOBJ	?= .o ;
 
 			DEFINES.*.* on * += MINGW ;
+			DEFINES.*.debug on * += _DEBUG DEBUG ;
+			DEFINES.*.release on * += NDEBUG ;
 
 			CC			?= "$(MINGW_ROOT)/bin/gcc" ;
 			C++			?= "$(MINGW_ROOT)/bin/g++" ;
