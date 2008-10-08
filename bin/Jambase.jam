@@ -1711,16 +1711,30 @@ rule _retrieveOutputName TARGET : SUFFIX_NAME : THE_CONFIG : THE_PLATFORM
 			OUTPUTNAME.$(THE_PLATFORM).$(THE_CONFIG)
 			OUTPUTNAME.*.$(THE_CONFIG)
 			OUTPUTNAME.$(THE_PLATFORM).*
-			OUTPUTNAME.*.* ] ;
-	target ?= $(TARGET).$(THE_CONFIG) ;
+			OUTPUTNAME.*.*
+			: $(TARGET) ] ;
+
+	local presuffix = [ on $(TARGET) SearchVar
+			OUTPUTPRESUFFIX.$(THE_PLATFORM).$(THE_CONFIG)
+			OUTPUTPRESUFFIX.*.$(THE_CONFIG)
+			OUTPUTPRESUFFIX.$(THE_PLATFORM).*
+			OUTPUTPRESUFFIX.*.* ] ;
+	presuffix ?= .$(THE_CONFIG) ;
+	if $(presuffix) = *off*
+	{
+		presuffix = ;
+	}
 
 	local suffix = [ on $(TARGET) SearchVar
+			OUTPUTSUFFIX.$(THE_PLATFORM).$(THE_CONFIG)
+			OUTPUTSUFFIX.*.$(THE_CONFIG)
+			OUTPUTSUFFIX.$(THE_PLATFORM).*
+			OUTPUTSUFFIX.*.*
 			$(SUFFIX_NAME).$(THE_PLATFORM)
-			$(SUFFIX_NAME).* ] ;
-	suffix ?= $($(SUFFIX_NAME).$(THE_PLATFORM)) ;
-	suffix ?= $($(SUFFIX_NAME)) ;
+			$(SUFFIX_NAME).*
+			$(SUFFIX_NAME) ] ;
 
-	return $(target)$(suffix) ;
+	return $(target)$(presuffix:E=)$(suffix) ;
 }
 
 
@@ -2203,6 +2217,26 @@ rule OutputName TARGETS : NAME : THE_CONFIG : THE_PLATFORM
 rule OutputPath TARGETS : OUTPUTPATH : THE_CONFIG : THE_PLATFORM
 {
 	LOCATE.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGETS) = $(OUTPUTPATH) ;
+}
+
+
+rule OutputPreSuffix TARGETS : PRESUFFIX : THE_CONFIG : THE_PLATFORM
+{
+	OUTPUTPRESUFFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGETS) = $(PRESUFFIX:E=*off*) ;
+}
+
+
+rule OutputPreSuffixClear TARGETS : PRESUFFIX : THE_CONFIG : THE_PLATFORM
+{
+	OUTPUTPRESUFFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGETS) = ;
+}
+
+
+rule OutputSuffix TARGETS : SUFFIX : THE_CONFIG : THE_PLATFORM
+{
+	local NO_DOT_SUFFIX = [ Match \\.?(.+) : $(SUFFIX) ] ;
+	SUFFIX = .$(NO_DOT_SUFFIX) ;
+	OUTPUTSUFFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGETS) = $(SUFFIX) ;
 }
 
 

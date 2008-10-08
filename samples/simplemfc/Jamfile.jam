@@ -26,4 +26,7 @@ SRCS += [ ResourceCompiler SimpleMFC : SimpleMFC.rc ] ;
 
 PrecompiledHeader stdafx.cpp stdafx.h : $(SRCS) ;
 
+OutputPreSuffix SimpleMFC : .debug : debug ;
+OutputPreSuffix SimpleMFC : : release ;
+
 Application SimpleMFC : $(SRCS) : windows ;
