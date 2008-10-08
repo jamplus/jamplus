@@ -190,7 +190,7 @@ NEWLINE = "
 
 # for perforce use -- jambase version
 
-JAMBASEDATE = 2002.05.09 ;
+JAMBASEDATE = 2008.10.08 ;
 
 # Initialize variables
 #
