@@ -1276,11 +1276,11 @@ if $(NT) && $(MSVCNT)
 	actions response Link bind NEEDLIBS
 	{
 	PATH=%PATH%;$(MSVCNT_PATH)
-	"$(LINK:\\)" /nologo $(LINKFLAGS) /out:$(<) $(UNDEFS) @@($(>) $(NEEDLIBS) "$(LINKLIBS)")
+	"$(LINK:\\)" /nologo $(LINKFLAGS) /out:$(<[1]) $(UNDEFS) @@($(>) $(NEEDLIBS) "$(LINKLIBS)")
 	if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
 	if "%ERRORLEVEL%" == "1090650113" echo 1 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
 	"$(RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
-	"$(LINK:\\)" /nologo $(LINKFLAGS) /out:$(<) $(UNDEFS) @@($(>) $(NEEDLIBS) "$(LINKLIBS)")
+	"$(LINK:\\)" /nologo $(LINKFLAGS) /out:$(<[1]) $(UNDEFS) @@($(>) $(NEEDLIBS) "$(LINKLIBS)")
 	}
 }
 
@@ -1782,7 +1782,7 @@ rule _writeManifest TARGET : _t
 
 rule _linkManifest _t
 {
-	MANIFEST on $(_t) = "$(LOCATE_TARGET)/$(_t)" ;
+	MANIFEST on $(_t) = "$(LOCATE_TARGET)/$(_t[1])" ;
 }
 
 
@@ -1974,7 +1974,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 
 	Depends exe : $(TARGET) ;
-	Depends $(TARGET) : $(_t) ;
+	Depends $(TARGET) : $(_linkTargets) ;
 	NotFile $(TARGET) ;
 	Depends $(_t) : $(_s) ;
 	Needs $(_tlib) : $(_s) ;
@@ -2023,10 +2023,10 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	    Depends $(zap) : $(<) ;
 
-		_linkManifest $(_t) ;
+		_linkManifest $(_linkTargets) ;
 	}
 
-	Link $(_t) : $(_s) ;
+	Link $(_linkTargets) : $(_s) ;
 }
 
 
