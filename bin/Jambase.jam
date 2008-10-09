@@ -809,6 +809,8 @@ rule SubDir
 	    } else {
 			NoCare $(JAMRULES:R=$($(_top)):G=$(_top)) ;
 			include $(JAMRULES:R=$($(_top)):G=$(_top)) ;
+			NoCare @($(_top).jamrules:R=$($(_top)):G=$(_top)) ;
+			include @($(_top).jamrules:R=$($(_top)):G=$(_top)) ;
 	    }
 	}
 
