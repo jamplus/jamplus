@@ -254,8 +254,8 @@ rule FindVisualStudio VERSION
 				MSVCNT_PATH = $(MSVCNT)/../Common7/IDE ;
 				VS2005 = 1 ;
 				MSSDK = $(MSVCNT) ;
-				MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
-				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" "$(MSVCNT)/atlmfc/lib" ;
+				MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" @("$(MSSDK)/../SDK/v2.0/include":R=) ;
+				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" "$(MSVCNT)/atlmfc/lib" @("$(MSSDK)/../SDK/v2.0/Lib":R=) ;
 				return vs2005 ;
 			}
 
