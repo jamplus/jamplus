@@ -1195,6 +1195,10 @@ include $(jamPath)Jambase.jam ;
 		local index = 1
 		while index <= #workspace.Projects do
 			local project = Projects[workspace.Projects[index]]
+			if not project then
+				print('* Project [' .. workspace.Projects[index] .. '] is in workspace [' .. workspace.Name .. '] but not defined.')
+				error()
+			end
 			if not project.CollectedForWorkspace then
 				project.CollectedForWorkspace = true
 				for projectName in ivalues(project.Libraries) do
