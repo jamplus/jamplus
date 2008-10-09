@@ -165,11 +165,6 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 		DumpSourceGroups $(project) : $(TARGETS) ;
 	}
 
-	if $(IS_APPLICATION)
-	{
-		DumpProjectGroups $(project) : $(TARGETS) ;
-	}
-
 	Depends all : $(TARGETS) ;
 	Depends $(TARGETS) : $(TargetInfoFile) ;
 }
