@@ -202,12 +202,12 @@ VALID_PLATFORMS ?= win32 ;
 
 PLATFORM ?= win32 ;
 
-if ! $(CONFIG) in $(VALID_CONFIGS)
+if ! $(CONFIG) in * $(VALID_CONFIGS)
 {
 	Exit * jam: CONFIG must be one of the following: $(VALID_CONFIGS:J=$(SPACE)) ;
 }
 
-if ! $(PLATFORM) in $(VALID_PLATFORMS)
+if ! $(PLATFORM) in * $(VALID_PLATFORMS)
 {
 	Exit * jam: PLATFORM must be one of the following: $(VALID_PLATFORMS:J=$(SPACE)) ;
 }
