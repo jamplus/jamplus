@@ -314,7 +314,7 @@ function VisualStudioProjectMetaTable:Write(outputPath, commandLines)
 
 		if project and project.Name then
 			if project.Defines then
-				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';')
+				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
 			end
 			if project.IncludePaths then
 				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
