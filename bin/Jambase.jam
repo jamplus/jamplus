@@ -577,8 +577,8 @@ rule MakeLocate
 	if $(>)
 	{
 	    LOCATE on $(<) = $(>) ;
-	    Depends $(<) : $(>[1]:G=dir) ;
-	    MkDir $(>[1]:G=dir) ;
+	    Depends $(<) : $(>[1]:G=!dir!) ;
+	    MkDir $(>[1]:G=!dir!) ;
 	}
 }
 
