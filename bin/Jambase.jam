@@ -829,10 +829,15 @@ rule SubDir
 	# directory should not hold object files, LOCATE_TARGET can
 	# subsequently be redefined.
 
+	local target = /$(>) ;
+
 	SEARCH_SOURCE = $(SUBDIR) ;
 	LOCATE_SOURCE = [ FDirName $(ALL_LOCATE_TARGET) $(SUBDIR_DOWN) ] ;
+	LOCATE_SOURCE = $(LOCATE_SOURCE)$(target:E=) ;
 	LOCATE_TARGET = [ FDirName $(ALL_LOCATE_TARGET) $(SUBDIR_DOWN) ] ;
+	LOCATE_TARGET = $(LOCATE_TARGET)$(target:E=) ;
 	SOURCE_GRIST = [ FGrist $(ALL_SUBDIR_TOKENS) ] ;
+	SOURCE_GRIST = $(SOURCE_GRIST)$(target:E=) ;
 	## LOCAL CHANGE -- OPT_HEADER_CACHE_EXT.  With the header
 	# cache, we can grist all files found during a header scan
 	# without incurring a performance penalty.
