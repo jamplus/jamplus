@@ -1339,6 +1339,9 @@ rule GroupByVar1
 _OutputAsTree = 0 ;
 rule MultiCppCompile TARGET : SOURCES
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+
 	# Set this if you want object files to be put in subdirs matching dir hierarchy of source files.
 	# Otherwise, all object files are put in one flat directory per project.
 #	local _OutputAsTree = 0 ;
@@ -1394,13 +1397,13 @@ rule MultiCppCompile TARGET : SOURCES
 	# for each file
 	local _src ;
 	local newsrcs ;
-	local sources = [ FGristFiles $(SOURCES:I=\\.cpp$:I=\\.c$:I=\\.cxx$:I=\\$(SUFOBJ)$:I=\\$(SUFRES)) ] ;
-#	local sources = [ FGristFiles $(SOURCES) ] ;
+	local sources = $(SOURCES:I=\\.cpp$:I=\\.c$:I=\\.cxx$:I=\\$(SUFOBJ)$:I=\\$(SUFRES):G=$(grist)) ;
+#	local sources = $(SOURCES:G=$(grist)) ;
 
 	# source needs to be scanned for header dependencies
 	HDRRULE on $(sources) = HdrRule ;
 	HDRSCAN on $(sources) = $(HDRPATTERN) ;
-	HDRGRIST on $(sources) = $(HDRGRIST) ;
+	HDRGRIST on $(sources) = $(grist) ;
 
 	MakeLocate $(sources:S=$(SUFOBJ):D=) : $(LOCATE_TARGET) ;
 	SEARCH on $(sources) = $(SEARCH_SOURCE) ;
@@ -1491,7 +1494,7 @@ rule MultiCppCompile TARGET : SOURCES
 					_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
 					_flags += /Yc$(_pch[2]) ;  # h file
 					# mark that it will be created by compilation through srcref
-					_pchFilename = [ FGristFiles $(_pchFilename) ] ;
+					_pchFilename = $(_pchFilename:G=$(grist)) ;
 					MakeLocate $(_pchFilename) : $(LOCATE_TARGET) ;
 					Depends $(_pchFilename) : $(_src) ;
 					Clean clean:$(TARGET) : $(_pchFilename) ;
@@ -1504,7 +1507,7 @@ rule MultiCppCompile TARGET : SOURCES
 					_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
 					_flags += /Yu$(_pch[2]) ;  # h file
 					# mark that compilation will depend on it
-					_pchFilename = [ FGristFiles $(_pchFilename) ] ;
+					_pchFilename = $(_pchFilename:G=$(grist)) ;
 					Includes $(_src) : $(_pchFilename) ;
 				}
 			}
@@ -1547,7 +1550,7 @@ rule MultiCppCompile TARGET : SOURCES
 		if $(MSVCNT) {
 			if $(_pch1[3]) {
 				local _pchFilename = $(_pch1[1]).pch ;
-				_pchFilename = [ FGristFiles $(_pchFilename) ] ;
+				_pchFilename = $(_pchFilename:G=$(grist)) ;
 				Depends $(objects) : $(_pchFilename) ;
 				# add that pch as output
 				objects += $(_pchFilename) ;
@@ -1597,13 +1600,16 @@ if $(COMPILER) = mingw
 ########################################################################
 ########################################################################
 
-rule Lump PARENTS : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER :
+rule Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER :
 		PCH_HEADER_FILENAME : LUMP_EXT : EXTRA_INCLUDE_PATHS
 {
 	if $(LUMP) = 0
 	{
 		return ;
 	}
+
+	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
+	local grist = $(PARENT) ;
 
 	LUMP_EXT ?= cpp ;
 
@@ -1621,7 +1627,7 @@ rule Lump PARENTS : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER :
 	local file ;
 	for file in $($(SOURCES_VARIABLE_NAME))
 	{
-		if [ on [ FGristFiles $(file) ] Var EXCLUDED_FROM_BUILD ] = true {
+		if [ on $(file:G=$(grist)) Var EXCLUDED_FROM_BUILD ] = true {
 			continue ;
 		}
 		if $(file:S) in .c .cpp  &&  $(file) != $(PCH_SOURCE_FILENAME)
@@ -1633,9 +1639,9 @@ rule Lump PARENTS : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER :
 
 	contents = $(contents)$(NEWLINE) ;
 
-	local gristedFileName = [ FGristFiles !$(LUMP_NAME)!.$(LUMP_EXT) ] ;
+	local gristedFileName = @(!$(LUMP_NAME)!.$(LUMP_EXT):G=$(grist)) ;
 	MakeLocate $(gristedFileName) : $(LOCATE_SOURCE) ;
-	Clean clean:$(PARENTS) : $(gristedFileName) ;
+	Clean clean:$(PARENT) : $(gristedFileName) ;
 
 	$(SOURCES_VARIABLE_NAME) = $(PCH_SOURCE_FILENAME) $(gristedFileName) ;
 
@@ -1662,6 +1668,11 @@ actions MakeLump
 
 ########################################################################
 ########################################################################
+
+rule _retrieveActiveTargetName TARGET
+{
+	return $(TARGET:E=$(ACTIVE_PROJECT:E="")) ;
+}
 
 rule _retrieveVar VARIABLE : TARGET : THE_CONFIG : THE_PLATFORM
 {
@@ -1755,7 +1766,9 @@ actions quietly WriteFile
 
 rule _writeManifest TARGET : _t
 {
-	local tempEmbeddedManifest = [ FGristFiles $(_t).embed.manifest ] ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	local tempEmbeddedManifest = @($(_t).embed.manifest:G=$(grist)) ;
 	MakeLocate $(tempEmbeddedManifest) : $(LOCATE_TARGET) ;
 	CONTENTS on $(tempEmbeddedManifest) =
 "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
@@ -1765,19 +1778,19 @@ rule _writeManifest TARGET : _t
 	WriteFile $(tempEmbeddedManifest) ;
 	Clean clean:$(TARGET) : $(tempEmbeddedManifest) ;
 
-	local tempEmbeddedRc = [ FGristFiles $(_t).embed.rc ] ;
+	local tempEmbeddedRc = @($(_t).embed.rc:G=$(grist)) ;
 	Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
 	MakeLocate $(tempEmbeddedRc) : $(LOCATE_TARGET) ;
 	CONTENTS on $(tempEmbeddedRc) =
-		"1 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ \"$(LOCATE_TARGET)/$(_t).embed.manifest\"" ;
+		"1 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ \"$(LOCATE_TARGET)/$(_t:G=).embed.manifest\"" ;
 	WriteFile $(tempEmbeddedRc) ;
 	Clean clean:$(TARGET) : $(tempEmbeddedRc) ;
 	Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
 
-	local tempEmbeddedRes = [ ResourceCompiler $(TARGET) : $(tempEmbeddedRc) ] ;
+	local tempEmbeddedRes = [ ResourceCompiler $(TARGET) : $(tempEmbeddedRc) : quiet ] ;
 	_s += $(tempEmbeddedRes) ;
 
-	local tempIntermediateManifest = [ FGristFiles $(_t).intermediate.manifest ] ;
+	local tempIntermediateManifest = @($(_t).intermediate.manifest:G=$(grist)) ;
 	MakeLocate $(tempIntermediateManifest) : $(LOCATE_TARGET) ;
 	Clean clean:$(TARGET) : $(tempIntermediateManifest) ;
 
@@ -1787,29 +1800,33 @@ rule _writeManifest TARGET : _t
 
 rule _linkManifest _t
 {
-	MANIFEST on $(_t) = "$(LOCATE_TARGET)/$(_t[1])" ;
+	MANIFEST on $(_t) = "$(LOCATE_TARGET)/$(_t[1]:G=)" ;
 }
 
 
 ########################################################################
 ########################################################################
 
-rule Application TARGETS : SOURCES : OPTIONS
+rule Application TARGET : SOURCES : OPTIONS
 {
-	local objects = [ MultiCppCompile $(TARGETS) : $(SOURCES) ] ;
-	ApplicationFromObjects $(TARGETS) : $(objects) : $(OPTIONS) ;
+	local objects = [ MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
+	ApplicationFromObjects $(TARGET) : $(objects) : $(OPTIONS) ;
+	ACTIVE_PROJECT = "" ;
 }
 
 
 rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 {
-	local _s = [ FGristFiles $(OBJECTS) ] ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	local _s = @($(OBJECTS):G=$(grist)) ;
 	local _t = [ _retrieveOutputName $(TARGET) : SUFEXE ] ;
+	_t = $(_t:G=$(grist)) ;
 
 	if $(COMPILER) in vs2005 vs2008
 	{
 		_writeManifest $(TARGET) : $(_t) ;
-		LinkFlags $(TARGET) : /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t).intermediate.manifest ;
+		LinkFlags $(TARGET) : /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 	}
 
 	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
@@ -1847,6 +1864,7 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 	LINKLIBS on $(_t) =
 		[ _retrieveVar LINKLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
+
 	NEEDLIBS on $(_t) =
 		[ _retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar NEEDLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
@@ -1874,7 +1892,7 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 
 rule Library TARGET : SOURCES : OPTIONS
 {
-	local objects = [ MultiCppCompile $(TARGET) : $(SOURCES) ] ;
+	local objects = [ MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
 	if shared in $(OPTIONS)
 	{
 		SharedLibraryFromObjects $(TARGET) : $(objects) : $(OPTIONS) ;
@@ -1883,13 +1901,16 @@ rule Library TARGET : SOURCES : OPTIONS
 	{
 		LibraryFromObjects $(TARGET) : $(objects) ;
 	}
+	ACTIVE_PROJECT = ;
 }
 
 
 rule LibraryFromObjects TARGET : OBJECTS
 {
-	local _s = [ FGristFiles $(OBJECTS) ] ;
-	local _l = $(TARGET:S=$(SUFLIB)) ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	local _s = $(OBJECTS:G=$(grist)) ;
+	local _l = $(TARGET:S=$(SUFLIB):G=$(TARGET)) ;
 
 	# library depends on its member objects
 
@@ -1962,16 +1983,19 @@ rule LibraryFromObjects TARGET : OBJECTS
 
 rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 {
-	local _s = [ FGristFiles $(OBJECTS) ] ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	local _s = $(OBJECTS:G=$(grist)) ;
 	local _t = [ _retrieveOutputName $(TARGET) : SUFSHAREDLIB ] ;
+	_t = $(_t:G=$(TARGET)) ;
 
 	if $(COMPILER) in vs2005 vs2008
 	{
 		_writeManifest $(TARGET) : $(_t) ;
-		LinkFlags $(TARGET) : /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t).intermediate.manifest ;
+		LinkFlags $(TARGET) : /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 	}
 
-	local _tlib = $(TARGET)$(SUFLIB) ;
+	local _tlib = @($(TARGET)$(SUFLIB):G=$(grist)) ;
 	BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
 
 	local _linkTargets = $(_t) $(_tlib) ;
@@ -2038,18 +2062,22 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 ########################################################################
 ########################################################################
 
-rule CreatePrecompiledHeader NAME : HEADER
+rule CreatePrecompiledHeader TARGET : NAME : HEADER
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
 	HEADER ?= $(NAME:S=.h) ;
-	PCH on [ FGristFiles $(NAME:S=.cpp) ] = $(NAME) $(HEADER) 1 ;
+	PCH on $(NAME:S=.cpp:G=$(grist)) = $(NAME) $(HEADER) 1 ;
 }
 
 
-rule UsePrecompiledHeader NAME : HEADER : FILES
+rule UsePrecompiledHeader TARGET : NAME : HEADER : FILES
 {
-	local cppPchFilename = [ FGristFiles $(NAME:S=.cpp) ] ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	local cppPchFilename = $(NAME:S=.cpp:G=$(grist)) ;
 	local file ;
-	for file in [ FGristFiles $(FILES) ]
+	for file in $(FILES:G=$(grist))
 	{
 		if $(file:S) in .cpp .c  &&  $(file) != $(cppPchFilename)
 		{
@@ -2059,11 +2087,11 @@ rule UsePrecompiledHeader NAME : HEADER : FILES
 }
 
 
-rule PrecompiledHeader NAME : FILES
+rule PrecompiledHeader TARGET : NAME : FILES
 {
 	NAME[2] ?= $(NAME[1]:S=.h) ;
-	CreatePrecompiledHeader $(NAME[1]) : $(NAME[2]) ;
-	UsePrecompiledHeader $(NAME[1]) : $(NAME[2]) : $(FILES) ;
+	CreatePrecompiledHeader $(TARGET) : $(NAME[1]) : $(NAME[2]) ;
+	UsePrecompiledHeader $(TARGET) : $(NAME[1]) : $(NAME[2]) : $(FILES) ;
 }
 
 
@@ -2072,26 +2100,36 @@ rule PrecompiledHeader NAME : FILES
 
 # Originally from http://maillist.perforce.com/pipermail/jamming/2004-July.txt.gz
 # windows resource compiler.
-rule ResourceCompiler PARENTS : SOURCES
+rule ResourceCompiler PARENT : SOURCES : OPTIONS
 {
-	SOURCES = [ FGristFiles $(SOURCES) ] ;
-	local TARGETS = [ FGristFiles $(SOURCES:S=.res) ] ;
+	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
+	local grist = $(PARENT) ;
+
+	SOURCES = $(SOURCES:G=$(grist)) ;
+	local TARGETS = $(SOURCES:S=.res) ;
 
 	SearchSource $(SOURCES) ;
 	MakeLocate $(TARGETS) : $(LOCATE_TARGET) ;
 
 	Depends $(TARGETS) : $(SOURCES) ;
-	Clean clean:$(PARENTS) : $(TARGETS) ;
+	Clean clean:$(PARENT) : $(TARGETS) ;
 
 	HDRS on $(TARGETS) =
 		$(SEARCH_SOURCE)
-		[ _retrieveVar HDRS : $(PARENTS) : $(CONFIG) : $(PLATFORM) ]
+		[ _retrieveVar HDRS : $(PARENT) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar HDRS : * : $(CONFIG) : $(PLATFORM) ]
 		$(SUBDIRHDRS)
 		$(STDHDRS)
 	;
 
-	ResourceCompile $(TARGETS) : $(SOURCES) ;
+	if quiet in $(OPTIONS)
+	{
+		ResourceCompileQuiet $(TARGETS) : $(SOURCES) ;
+	}
+	else
+	{
+		ResourceCompile $(TARGETS) : $(SOURCES) ;
+	}
 
 	return $(TARGETS) ;
 }
@@ -2102,25 +2140,45 @@ actions ResourceCompile
 	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(DEFINES) $(2)
 }
 
+actions quietly ResourceCompileQuiet
+{
+	SET INCLUDE=$(HDRS:\\J=;)
+	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(DEFINES) $(2)
+}
+
 # for settings RCFLAGS
-rule RcFlags
+rule RcFlags TARGET : RESOURCE_NAME : FLAGS
 {
-	RCFLAGS on [ FGristFiles $(1:S=.res) ] += $(2) ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	RCFLAGS on $(RESOURCE_NAME:S=.res:G=$(grist)) += $(FLAGS) ;
 }
 
-rule RcDefines
+rule RcDefines TARGET : RESOURCE_NAME : DEFINES
 {
-	DEFINES on [ FGristFiles $(1:S=.res) ] += $(2) ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	DEFINES on $(RESOURCE_NAME:S=.res:G=$(grist)) += $(DEFINES) ;
 }
 
-rule RcIncludeDirectories
+rule RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
 {
-	HDRS on [ FGristFiles $(1:S=.res) ] += $(2) ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	HDRS on $(RESOURCE_NAME:S=.res:G=$(grist)) += $(HDRS) ;
 }
 
 
 ########################################################################
 ########################################################################
+
+ACTIVE_PROJECT = "" ;
+
+rule ActiveProject PROJECT
+{
+	ACTIVE_PROJECT = $(PROJECT) ;
+}
+
 
 # Global = *
 rule CFlags TARGETS : FLAGS : THE_CONFIG : THE_PLATFORM
@@ -2147,9 +2205,11 @@ rule Defines TARGETS : DEFINES : THE_CONFIG : THE_PLATFORM
 }
 
 
-rule ExcludeFromBuild SOURCES
+rule ExcludeFromBuild TARGET : SOURCES
 {
-	EXCLUDED_FROM_BUILD on [ FGristFiles $(SOURCES) ] = true ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	EXCLUDED_FROM_BUILD on $(SOURCES:G=$(grist)) = true ;
 }
 
 
@@ -2157,7 +2217,7 @@ rule IncludeDirectories TARGETS : INCLUDEPATH : THE_CONFIG : THE_PLATFORM
 {
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGETS) += $(INCLUDEPATH) ;
+	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGETS) += $(INCLUDEPATH:R=$(SUBDIR)) ;
 }
 
 
@@ -2185,7 +2245,14 @@ rule LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 	Depends allclean:$(TARGET) : allclean:$(LIBRARIES) ;
 	NotFile allclean:$(TARGET) ;
 	Always allclean:$(TARGET) ;
-	NEEDLIBS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(LIBRARIES:S=$(SUFLIB)) ;
+
+	local gristLibraries ;
+	local lib ;
+	for lib in $(LIBRARIES)
+	{
+		gristLibraries += $(lib:S=$(SUFLIB):G=$(lib)) ;
+	}
+	NEEDLIBS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(gristLibraries) ;
 }
 
 
@@ -2197,21 +2264,25 @@ rule LinkPrebuiltLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 }
 
 
-rule ObjectDefines TARGETS : DEFINES : THE_CONFIG : THE_PLATFORM
+rule ObjectDefines TARGET : SOURCES : DEFINES : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	local objTargets = [ FGristFiles $(TARGETS:S=$(SUFOBJ)) ] ;
+	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
 	DEFINES.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(DEFINES) ;
 }
 
 
-rule ObjectIncludeDirectories TARGETS : INCLUDEPATH : THE_CONFIG : THE_PLATFORM
+rule ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	local objTargets = [ FGristFiles $(TARGETS:S=$(SUFOBJ)) ] ;
-	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(INCLUDEPATH) ;
+	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
+	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(INCLUDEPATHS) ;
 }
 
 
@@ -2271,9 +2342,9 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES
 }
 
 
-rule UseMD5Callback TARGETS : CALLBACK
+rule UseMD5Callback GRISTED_TARGETS : CALLBACK
 {
-	MD5CALLBACK on [ FGristFiles $(TARGETS) ] = $(CALLBACK) ;
+	MD5CALLBACK on $(GRISTED_TARGETS) = $(CALLBACK) ;
 }
 
 

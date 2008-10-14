@@ -89,6 +89,8 @@ if ! $(wxWidgets_ROOT)
 
 rule UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 {
+	TARGETS = $(TARGETS:E=$(ACTIVE_PROJECT)) ;
+
 	if $(COMPILER) in vc5 vc6 vs2003 vs2005 vs2008
 	{
 		if shared in $(OPTIONS)

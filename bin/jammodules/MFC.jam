@@ -1,5 +1,7 @@
 rule UseMFC TARGETS : OPTIONS
 {
+	TARGETS = $(TARGETS:E=$(ACTIVE_PROJECT)) ;
+
 	if shared in $(OPTIONS)
 	{
 		Defines $(TARGETS) : _AFXDLL ;

@@ -18,15 +18,18 @@ SRCS =
 ;
 
 IncludeModule MFC ;
-UseMFC SimpleMFC : shared ;
 
-Lump SimpleMFC : SRCS : SimpleMFCLump : stdafx : stdafx.h : cpp ;
+ActiveProject SimpleMFC ;
 
-SRCS += [ ResourceCompiler SimpleMFC : SimpleMFC.rc ] ;
+UseMFC : shared ;
 
-PrecompiledHeader stdafx.cpp stdafx.h : $(SRCS) ;
+Lump : SRCS : SimpleMFCLump : stdafx : stdafx.h : cpp ;
 
-OutputPreSuffix SimpleMFC : .debug : debug ;
-OutputPreSuffix SimpleMFC : : release ;
+SRCS += [ ResourceCompiler : SimpleMFC.rc ] ;
 
-Application SimpleMFC : $(SRCS) : windows ;
+PrecompiledHeader : stdafx.cpp stdafx.h : $(SRCS) ;
+
+OutputPostfix : .debug : debug ;
+OutputPostfix : : release ;
+
+Application : $(SRCS) : windows ;
