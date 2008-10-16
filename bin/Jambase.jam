@@ -387,8 +387,6 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 
 			MSVCNT		?= $(MSVCDIR) ;
 
-			DXSDK_DIR = $(DXSDK_DIR:J=$(SPACE)) ;
-
 			MSVCBIN ?= $(MSVCNT)/bin/ ;
 
 			CCFLAGS.win32.debug on * 	= /Od /Gm /EHsc /RTC1 /MDd /W3 /Zi ;
@@ -400,7 +398,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			DEFINES.*.debug on * += _DEBUG DEBUG ;
 			DEFINES.*.release on * += NDEBUG ;
 
-			LINKDIRECTORIES.*.*	on * += "$(DXSDK_DIR)/Lib/x86" $(MSSDK_LINKDIRECTORIES) ;
+			LINKDIRECTORIES.*.*	on * += $(MSSDK_LINKDIRECTORIES) ;
 			LINKFLAGS.win32.debug on * = /INCREMENTAL /DEBUG /MACHINE:X86 ;
 			LINKFLAGS.win32.release on * = /INCREMENTAL:NO /DEBUG /MACHINE:X86 /OPT:REF /OPT:ICF ;
 
@@ -411,7 +409,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			LINK		= "$(MSVCBIN)link" ;
 			MT			= "$(MSSDK)/bin/mt" ;
 			RC			= "$(MSSDK)/bin/RC" ;
-			STDHDRS		?= "$(MSSDK_STDHDRS)" "$(DXSDK_DIR)Include" ;
+			STDHDRS		?= "$(MSSDK_STDHDRS)" ;
 			UNDEFFLAG	?= "/u _" ;
 
 			NOARUPDATE = true ;
