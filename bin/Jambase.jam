@@ -1538,6 +1538,7 @@ rule MultiCppCompile TARGET : SOURCES
 					_flags += /Yc$(_pch[2]) ;  # h file
 					# mark that it will be created by compilation through srcref
 					_pchFilename = $(_pchFilename:G=$(grist)) ;
+					BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
 					MakeLocate $(_pchFilename) : $(LOCATE_TARGET) ;
 					Depends $(_pchFilename) : $(_src) ;
 					Clean clean:$(TARGET) : $(_pchFilename) ;
@@ -2116,7 +2117,8 @@ rule CreatePrecompiledHeader TARGET : NAME : HEADER
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
 	HEADER ?= $(NAME:S=.h) ;
-	PCH on $(NAME:S=.cpp:G=$(grist)) = $(NAME) $(HEADER) 1 ;
+	local cppPchFilename = $(NAME:S=.cpp:G=$(grist)) ;
+	PCH on $(cppPchFilename) = $(NAME) $(HEADER) 1 ;
 }
 
 
