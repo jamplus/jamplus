@@ -559,6 +559,13 @@ rule HdrRule
 
 rule IncludeModule MODULE_NAME
 {
+	local include_marker = included_module_$(MODULE_NAME:J=_) ;
+	if $($(include_marker))
+	{
+		return ;
+	}
+	$(include_marker) = true ;
+
 	include $(JAM_PROCESS_PATH)/jammodules/$(MODULE_NAME).jam ;
 }
 
