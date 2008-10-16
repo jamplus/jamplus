@@ -1380,6 +1380,15 @@ rule MultiCppCompile TARGET : SOURCES
 			$(STDHDRS)
 	;
 
+	local postREFERENCEDIRECTORIES ;
+	if $(MSVCNT)
+	{
+		postREFERENCEDIRECTORIES =
+			[ _retrieveVar REFERENCEDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+			[ _retrieveVar REFERENCEDIRECTORIES : * : $(CONFIG) : $(PLATFORM) ]
+		;
+	}
+
 	local preDEFINES =
 			[ FDefines [ _retrieveVar DEFINES : * : $(CONFIG) : $(PLATFORM) ]
 			[ _retrieveVar DEFINES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
@@ -1476,6 +1485,11 @@ rule MultiCppCompile TARGET : SOURCES
 				$(DEFINES.*.$(CONFIG))
 				$(DEFINES.$(PLATFORM).*)
 				$(DEFINES.*.*) ] ;
+
+		if $(MSVCNT)
+		{
+			_flags += /I\"$(postREFERENCEDIRECTORIES)\" /AI\"$(postREFERENCEDIRECTORIES)\" ;
+		}
 
 		# now that general flags on the file are determined
 

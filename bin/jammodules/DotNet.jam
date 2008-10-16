@@ -1,0 +1,29 @@
+rule UseDotNet TARGETS : OPTIONS
+{
+	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
+
+	local includePaths ;
+	local referencePaths ;
+	local linkPaths ;
+	switch $(COMPILER)
+	{
+		case vs2005 :
+			includePaths = @("$(MSSDK)/../SDK/v2.0/include":R=) ;
+			referencePaths = "$(windir)/Microsoft.NET/Framework/v2.0.50727" ;
+			linkPaths = @("$(MSSDK)/../SDK/v2.0/Lib":R=) ;
+	}
+
+	IncludeDirectories $(TARGETS) : $(includePaths) ;
+	ReferenceDirectories $(TARGETS) : $(referencePaths) ;
+	LinkDirectories $(TARGETS) : $(linkPaths) ;
+}
+
+
+rule ReferenceDirectories TARGETS : DIRECTORIES : THE_CONFIG : THE_PLATFORM
+{
+	THE_CONFIG ?= * ;
+	THE_PLATFORM ?= * ;
+	REFERENCEDIRECTORIES.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGETS) += $(DIRECTORIES:R=$(SUBDIR)) ;
+}
+
+
