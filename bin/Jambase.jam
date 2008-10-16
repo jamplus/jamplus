@@ -1934,6 +1934,8 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 	}
 
 	Link $(_t) : $(_s) ;
+
+	LINK_TARGET on $(TARGET) = $(_t) ;
 }
 
 
@@ -2106,6 +2108,8 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	}
 
 	Link $(_linkTargets) : $(_s) ;
+
+	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
 }
 
 
