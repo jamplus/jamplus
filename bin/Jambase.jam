@@ -249,9 +249,8 @@ rule FindVisualStudio VERSION
 			MSVCNT = [ W32_GETREG $(key) ] ;
 			if $(MSVCNT)
 			{
-				MSVCNT = $(MSVCNT)..\\..\\VC ;
-				MSVCNT = $(MSVCNT:R=$(MSVCNT)) ;
-				MSVCNT_PATH = $(MSVCNT)/../Common7/IDE ;
+				MSVCNT = @($(MSVCNT)..\\..\\VC:R=$(MSVCNT)) ;
+				MSVCNT_PATH = @($(MSVCNT)/../Common7/IDE:R=) ;
 				VS2005 = 1 ;
 				MSSDK = $(MSVCNT) ;
 				MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" @("$(MSSDK)/../SDK/v2.0/include":R=) ;
