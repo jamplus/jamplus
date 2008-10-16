@@ -2047,8 +2047,19 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		LinkFlags $(TARGET) : /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 	}
 
-	local _tlib = @($(TARGET)$(SUFLIB):G=$(grist)) ;
-	BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
+	local hasExportLib = true ;
+	if noexportlib in $(OPTIONS)
+	{
+		hasExportLib = ;
+	}
+
+	local _tlib ;
+	if $(hasExportLib)
+	{
+		_tlib = @($(TARGET)$(SUFLIB):G=$(grist)) ;
+		BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
+		Needs $(_tlib) : $(_s) ;
+	}
 
 	local _linkTargets = $(_t) $(_tlib) ;
 
@@ -2058,7 +2069,6 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	Depends $(TARGET) : $(_linkTargets) ;
 	NotFile $(TARGET) ;
 	Depends $(_t) : $(_s) ;
-	Needs $(_tlib) : $(_s) ;
 	MakeLocate $(_linkTargets) : $(outputPath) ;
 
 	Depends clean : clean:$(TARGET) ;
@@ -2092,7 +2102,10 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		[ _retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar NEEDLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
 	Depends $(_t) : [ on $(_t) Var NEEDLIBS ] ;
-	Needs $(_tlib) : [ on $(_t) Var NEEDLIBS ] ;
+	if $(hasExportLib)
+	{
+		Needs $(_tlib) : [ on $(_t) Var NEEDLIBS ] ;
+	}
 
 	if $(MSVCNT)
 	{
