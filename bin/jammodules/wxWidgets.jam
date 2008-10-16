@@ -55,6 +55,7 @@ if ! $(wxWidgets_ROOT)
 	wxWidgets_BASE_LIBRARIES = net odbc xml ;
 	wxWidgets_PLATFORM_LIBRARIES = adv aui core dbgrid html media qa richtext xrc ;
 	wxWidgets_PLATFORM_PREFIX = msw ;
+	wxWidgets_CONTRIB_LIBRARIES = stc ;
 
 	wxWidgets_LIB_DIR = $(wxWidgets_ROOT)/lib ;
 
@@ -122,6 +123,10 @@ rule UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 				LinkPrebuiltLibraries $(TARGETS) : wx$(component)$(postfix) : $(CONFIG) ;
 			}
 			else if $(component) in $(wxWidgets_PLATFORM_LIBRARIES)
+			{
+				LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
+			}
+			else if $(component) in $(wxWidgets_CONTRIB_LIBRARIES)
 			{
 				LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
 			}
