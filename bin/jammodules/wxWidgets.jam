@@ -89,7 +89,7 @@ if ! $(wxWidgets_ROOT)
 
 rule UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 {
-	TARGETS = $(TARGETS:E=$(ACTIVE_PROJECT)) ;
+	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
 
 	if $(COMPILER) in vc5 vc6 vs2003 vs2005 vs2008
 	{
