@@ -61,6 +61,41 @@ list_append(
 	return l;
 }
 
+#ifdef OPT_MINUS_EQUALS_EXT
+
+/*
+ * list_remove() - remove items from a list
+ */
+
+LIST *
+list_remove( 
+	LIST	*l,
+	LIST	*nl )
+{
+    LIST *newlist = L0;
+    LIST *list;
+    /* Remove values */
+    for ( list = l; list; list = list->next )
+    {
+	LIST *variable;
+	int found = 0;
+	for ( variable = nl; variable; variable = variable->next )
+	{
+	    if ( list->string == variable->string )
+	    {
+		found = 1;
+		break;
+	    }
+	}
+	if ( !found )
+	    newlist = list_new( newlist, list->string, 0 );
+    }
+    
+    return newlist;
+}
+
+#endif
+
 /*
  * list_new() - tack a string onto the end of a list of strings
  */

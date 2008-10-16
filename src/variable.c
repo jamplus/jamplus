@@ -277,28 +277,9 @@ var_set(
 
 #ifdef OPT_MINUS_EQUALS_EXT
 	case VAR_REMOVE:
-	{
-	    LIST *newlist = L0;
-	    LIST *list;
 	    /* Remove values */
-	    for ( list = v->value; list; list = list->next )
-	    {
-		LIST *variable;
-		int found = 0;
-		for ( variable = value; variable; variable = variable->next )
-		{
-		    if ( list->string == variable->string )
-		    {
-			found = 1;
-			break;
-		    }
-		}
-		if ( !found )
-		    newlist = list_new( newlist, list->string, 0 );
-	    }
-	    v->value = newlist;
+	    v->value = list_remove( v->value, value );
 	    break;
-	}
 #endif
 
 	case VAR_DEFAULT:

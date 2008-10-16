@@ -66,6 +66,9 @@ struct _lol {
 } ;
 
 LIST *	list_append( LIST *l, LIST *nl );
+#ifdef OPT_MINUS_EQUALS_EXT
+LIST *	list_remove( LIST *l, LIST *nl );
+#endif
 LIST *	list_copy( LIST *l, LIST  *nl );
 void	list_free( LIST *head );
 LIST *	list_new( LIST *head, const char *string, int copy );

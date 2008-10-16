@@ -345,6 +345,13 @@ addsettings(
 	    v->value = list_append( v->value, value );
 	    break;
 
+#ifdef OPT_MINUS_EQUALS_EXT
+	case VAR_REMOVE:
+	    /* Remove value from existing */
+	    v->value = list_remove( v->value, value );
+	    break;
+#endif
+
 	case VAR_DEFAULT:
 	    /* Toss new, old already set */
 	    list_free( value );
