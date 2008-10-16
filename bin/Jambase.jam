@@ -1589,7 +1589,7 @@ if $(MSVCNT)
 {
 	actions updated response batched_C++
 	{
-		PATH=%PATH%;$(MSVCNT_PATH)
+		PATH=$(MSVCNT_PATH);%PATH%
 		SET INCLUDE=$(STDHDRS:\\J=;)
 		"$(C++:\\)" /nologo @@($(>)) $(MFLAGS)
 	}
