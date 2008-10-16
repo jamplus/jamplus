@@ -1308,7 +1308,7 @@ if $(WIN98)
 # Used to group files from a list by some bound variable.
 # Files with first value of the variable are returned as results, and removed from the input list.
 # NOTE: _filelist and _varname are passed by reference!
-# [ GroupByVar1 _filelist : _varname ]
+# [ GroupByVar1 _filelist : _varname [: maxPerGroup] ]
 rule GroupByVar1
 {
 	# get the actual filelist
@@ -1321,6 +1321,29 @@ rule GroupByVar1
 	local _group1 = ;
 	local _rest = ;
 	local _f ;
+
+	if $(3)
+	{
+		local _count = 0 ;
+		local _done ;
+		for _f in $(_all) {
+			local _var ;
+			on $(_f) _var = $($(2)) ;
+			if ! $(_done) && ( $(_var) in $(_var1) ) && ( $(_var1) in $(_var) )  {
+				_group1 += $(_f) ;
+				_count = [ Math $(_count) + 1 ] ;
+				if $(_count) = $(3)
+				{
+					_done = true ;
+				}
+			} else {
+				_rest += $(_f) ;
+			}
+		}
+		$(1) = $(_rest) ;
+		return $(_group1) ;
+	}
+
 	for _f in $(_all) {
 		local _var ;
 		on $(_f) _var = $($(2)) ;
@@ -1334,16 +1357,23 @@ rule GroupByVar1
 	return $(_group1) ;
 }
 
+
+rule BatchCompileGroupSize TARGET : SIZE
+{
+	BATCH_COMPILE_GROUP_SIZE on $(TARGET) = $(SIZE) ;
+}
+
+
 #---------------------------------------------------------------------
 # OBJECTS = MultiCppCompile $(sources) ;
 #
 #   This rule will compile $(sources), and will return  the result objects.
 #
 #---------------------------------------------------------------------
-_OutputAsTree = 0 ;
 rule MultiCppCompile TARGET : SOURCES
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+
 	local grist = $(TARGET) ;
 
 	# Set this if you want object files to be put in subdirs matching dir hierarchy of source files.
@@ -1544,9 +1574,15 @@ rule MultiCppCompile TARGET : SOURCES
 	# Pass 2: Compile in batches, grouped by flags that were bound in previous pass
 	#
 
+	local batchCompileGroupSize = [ on $(TARGET) Var BATCH_COMPILE_GROUP_SIZE ] ;
+	if ! $(batchCompileGroupSize)
+	{
+		batchCompileGroupSize = [ on * Var BATCH_COMPILE_GROUP_SIZE ] ;
+	}
+
 	# for each batch, grouped by final flags
 	while $(newsrcs) {
-		_sources = [ GroupByVar1 newsrcs : MFLAGS ] ;
+		_sources = [ GroupByVar1 newsrcs : MFLAGS : $(batchCompileGroupSize) ] ;
 
 		# start with empty lists of objects for this batch
 		local objects ;
