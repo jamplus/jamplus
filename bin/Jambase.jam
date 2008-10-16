@@ -1424,9 +1424,6 @@ rule MultiCppCompile TARGET : SOURCES
 			_allobjs += $(_src) ;
 			continue ;
 		}
-#		if ! ( $(ext) in .cpp .cxx .c ) {
-#			continue ;
-#		}
 
 		local _obj = $(_src:S=$(SUFOBJ):D=) ;
 
@@ -1438,8 +1435,6 @@ rule MultiCppCompile TARGET : SOURCES
 		_hdrs += $(postHDRS) ;
 
 		HDRSEARCH on $(_src) = $(_hdrs) ;
-
-#		_hdrs = [ FIncludes $(_hdrs) ] -I. ;
 
 		# Rest
 		Depends $(_obj) : $(_src) ;
