@@ -240,7 +240,7 @@ rule FindVisualStudio VERSION
 				local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
 				MSSDK = [ W32_GETREG $(key) ] ;
 				MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
-				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" "$(MSVCNT)/atlmfc/lib" ;
+				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
 				return vs2008 ;
 			}
 
@@ -253,8 +253,8 @@ rule FindVisualStudio VERSION
 				MSVCNT_PATH = @($(MSVCNT)/../Common7/IDE:R=) ;
 				VS2005 = 1 ;
 				MSSDK = $(MSVCNT) ;
-				MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" @("$(MSSDK)/../SDK/v2.0/include":R=) ;
-				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" "$(MSVCNT)/atlmfc/lib" @("$(MSSDK)/../SDK/v2.0/Lib":R=) ;
+				MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
+				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
 				return vs2005 ;
 			}
 
@@ -269,7 +269,7 @@ rule FindVisualStudio VERSION
 				MSVCNT_PATH = $(MSVCNT)/../Common7/IDE ;
 				MSSDK = $(MSVCNT) ;
 				MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
-				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" "$(MSVCNT)/atlmfc/lib" ;
+				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
 				return vs2003 ;
 			}
 
