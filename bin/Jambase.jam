@@ -1686,7 +1686,7 @@ rule Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER :
 		if [ on $(file:G=$(grist)) Var EXCLUDED_FROM_BUILD ] = true {
 			continue ;
 		}
-		if $(file:S) in .c .cpp  &&  $(file) != $(PCH_SOURCE_FILENAME)
+		if $(file:S) in .c .cpp .cxx  &&  $(file) != $(PCH_SOURCE_FILENAME)
 		{
 			line = "#include \"$(file)\"$(NEWLINE)" ;
 			contents = $(contents)$(line) ;
