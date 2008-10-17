@@ -979,7 +979,7 @@ LIST *filecache_fillvalues(TARGET *t)
 
 	buffer_init(&buff);
 	buffer_addstring(&buff, filecache->string, strlen(filecache->string));
-	buffer_addstring(&buff, ".USE", 4);
+	buffer_addstring(&buff, ".GENERATE", 4);
 	buffer_addchar(&buff, 0);
 	l = var_get( buffer_ptr( &buff ) );
 	if ( l  &&  atoi( l->string ) != 0) {
