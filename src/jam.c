@@ -214,7 +214,7 @@ main( int argc, char **argv, char **arg_environ )
 	argc--, argv++;
 
 #ifdef OPT_SETCWD_SETTING_EXT
-	if( ( n = getoptions( argc, argv, "d:C:j:f:gs:t:ano:qv", optv ) ) < 0 )
+	if( ( n = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qv", optv ) ) < 0 )
 #else
 	if( ( n = getoptions( argc, argv, "d:j:f:gs:t:ano:qv", optv ) ) < 0 )
 #endif
@@ -288,7 +288,7 @@ main( int argc, char **argv, char **arg_environ )
 	/* Pick up interesting options */
 
 #ifdef OPT_DEBUG_MAKE_PRINT_TARGET_NAME
-	if( ( s = getoptval( optv, 't', 0 ) ) )
+	if( ( s = getoptval( optv, 'T', 0 ) ) )
 	    globs.printtarget = !globs.printtarget;
 #endif /* OPT_DEBUG_MAKE_PRINT_TARGET_NAME */
 	if( ( s = getoptval( optv, 'n', 0 ) ) )
