@@ -1,0 +1,964 @@
+/*! \page jam_language Jam Language
+
+\section cmd_intro Introduction
+
+(Note: Much of this documentation is taken verbatim from the jam.html file which ships with the Perforce Jam build.)
+
+\section usage Usage
+
+<pre>
+jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
+    [ -C <i>workdir</i> ]
+    [ -d <i>debug</i> ]
+    [ -f <i>jambase</i> ]
+    [ -j <i>jobs</i> ]
+    [ -o <i>actionsfile</i> ]
+    [ -s <i>var</i>=<i>value</i> ]
+    [ -t <i>target</i> ]
+    [ <i>target</i> ... ]
+</pre>
+
+
+<hr>
+
+\section options Options
+
+If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target;</I> otherwise <b>jam</b> builds the target 'all'.
+
+<b>Jam</b> may be invoked with the following options:
+
+<table width=85% align=center border=1 cellpadding=2>
+  <tr>
+    <td valign=top width=20%><code> -a </code>
+	<td> Build all targets anyway, even if they are up-to-date.
+
+  <tr>
+    <td valign=top><code> -C <i>workdir</i>  </code>
+	<td> Set the \b Jam current working directory to \em workdir.
+
+  <tr>
+    <td valign=top><code> -d <i>c</i>  </code>
+	<td> Turn on display option <i>c</i> and off the default display (summary info and actions):
+
+      <dl>
+	    <dt> a <dd> Show summary info, actions, quiet actions, and the use of temporary targets
+	    <dt> c <dd> Show the names of files that cause rebuilds, i.e. new sources, missing targets, etc.
+	    <dt> d <dd> Display a dependency graph (in <b>jam</b> syntax).
+	    <dt> f <dd> Display fate changes.
+	    <dt> g <dd> Display a detailed hierarchical dependency graph.
+	    <dt> m <dd> Display the dependency analysis, and target/source timestamps and paths
+	    <dt> x <dd> Show shell arguments
+      </dl>
+
+  <tr>
+    <td valign=top><code> -d <i>n</i>  </code>
+    <td> Enable cumulative debugging levels from 1 to <i>n</I>.  Interesting values are:
+
+      <dl>
+	    <dt> 1 <dd> Show actions and summary info (the default)
+	    <dt> 2 <dd> Show text of actions
+	    <dt> 3 <dd> Show progress of make.  Show files when bound
+	    <dt> 4 <dd> Show execcmd()'s work
+	    <dt> 5 <dd> Show rule invocations and variable expansions
+	    <dt> 6 <dd> Show directory/header file/archive scans
+	    <dt> 7 <dd> Show variable settings
+	    <dt> 8 <dd> Show variable fetches and expansions.  Show 'if' calculations.
+	    <dt> 9 <dd> Show variable manipulation, scanner tokens.  Show memory use.
+      </dl>
+
+  <tr>
+    <td valign=top><code> -d +<I>n</i> </code>
+    <td> Enable debugging level <i>n</I>.
+
+  <tr>
+    <td valign=top><code> -d 0 </code>
+    <td> Turn off all debugging levels.  Only errors are emitted.
+
+  <tr>
+	<td valign=top><code> -f <i>jambase</I></code>
+	<td>Read <i>jambase</i> instead of using the built-in Jambase.  Multiple -f flags are permitted.
+
+  <tr>
+    <td valign=top><code> -g </code>
+    <td> Build targets with the newest sources first, rather than in the order of appearance in the Jambase/Jamfiles.
+
+  <tr>
+    <td valign=top><code> -j <i>n</I></code>
+    <td> Run up to <i>n</i> shell commands concurrently (UNIX and NT only).  The default is 1.
+
+  <tr>
+    <td valign=top><code> -n</code>
+    <td> Don't actually execute the updating actions, but do everything else.  This changes the debug level to -dax.
+
+  <tr>
+    <td valign=top><code> -o <i>file</I></code>
+	<td> Write the updating actions to the specified file instead of running them (or outputting them, as on the Mac).
+
+  <tr>
+    <td valign=top><code> -q </code>
+	<td> Quit quickly (as if an interrupt was received) as soon as any target build fails.
+
+  <tr>
+    <td valign=top><code> -s <i>var</I>=<I>value</I></code>
+	<td> Set the variable <i>var</i> to <i>value</I>, overriding both internal variables and variables imported from the environment.
+
+  <tr>
+    <td valign=top><code> -t <i>target</I></code>
+    <td> Rebuild <i>target</i> and everything that depends on it, even if it is up-to-date.
+
+  <tr>
+    <td valign=top><code> -T </code>
+    <td> Toggle printing of the target's bound name (full path).
+
+  <tr>
+    <td valign=top><code> -v</code>
+    <td> Print the version of <b>jam</b> and exit.
+
+</table>
+
+
+<hr>
+\section operation_main Operation
+
+Jam has four phases of operation: start-up, parsing, binding, and updating.
+
+\subsection operation_start-up Start-up Phase
+
+Upon start-up, Jam imports environment variable settings into Jam variables. Environment variables are split at blanks with each word becoming an element in the variable's list of values. Environment variables whose names end in \c PATH are split at \$(SPLITPATH) characters (e.g., <tt>";"</tt> for Windows and <tt>":"</tt> for Unix).
+
+To set a variable's value on the command line, overriding the variable's environment value, use the <tt>-s</tt> option. To see variable assignments made during jam's execution, use the <tt>-d+7</tt> option.
+
+\subsection operation_parsing Parsing Phase
+
+In the parsing phase, \b Jam reads and executes the <tt>Jambase.jam</tt> file.  It finds a <tt>Jambase.jam</tt> file by looking for one in the current working directory and then looking up through 10 parent directories.  If one has not been found by this point, the <tt>Jambase.jam</tt> sitting side-by-side with the \b Jam executable is read in.
+
+The \c Jambase file is written in the \b Jam \ref language_main. The last action of the \c Jambase is to read (via the "include" rule) a user-provided file called &quot;<tt>Jamfile.jam</tt>&quot;.
+
+Collectively, the purpose of the \c Jambase and the \c Jamfile is to name built target and source files, construct the dependency graph among them, and associate build actions with targets. The \c Jambase defines boilerplate rules and variable assignments, and the \c Jamfile uses these to specify the actual relationship among the target and source files. See the \ref jambase_rules document for information.
+
+
+
+
+
+\subsection operation_binding Binding Phase
+
+\subsubsection operation_binding_binding Binding
+
+After parsing, \b Jam recursively descends the dependency graph and binds every file target with a location in the filesystem.
+
+\subsubsection operation_binding_targets Targets
+
+Any string value in \b Jam can represent a target, and it does so if the \ref rule_Depends "Depends" or \ref rule_Includes "Includes" rules make it part of the dependency graph. <i>Build targets</i> are files to be updated. <i>Source targets</i> are the files used in updating build targets. Build targets and source targets are collectively referred to as file targets, and frequently build targets are source targets for other build targets. <i>Pseudotargets</i> are symbols which represent dependencies on other targets, but which are not themselves associated with any real file.
+
+A file target's identifier is generally the file's name, which can be absolutely rooted, relative to the directory of jam's invocation, or simply local (no directory). Most often it is the last case, and the actual file path is bound using the \$(BINDING), \$(SEARCH), and \$(LOCATE) special variables. See \ref language_built_in_variables_binding_search_locate below. A local filename is optionally qualified with "grist," a string value used to assure uniqueness. A file target with an identifier of the form <i>file(member)</i> is a library member (usually an ar(1) archive on UNIX).
+
+The use of \$(BINDING), \$(SEARCH), and \$(LOCATE) allows \b Jam to separate the the location of files from their names, so that Jamfiles can refer to files locally (i.e. relative to the Jamfile's directory), yet still be usable when \b Jam is invoked from a distant directory. The use of grist allows files with the same name to be identified uniquely, so that \b Jam can read a whole directory tree of Jamfiles and not mix up same-named targets.
+
+\subsubsection operation_binding_update_determination Update Determination
+
+After binding each target, \b Jam determines whether the target needs updating, and, if so, marks the target for the updating phase. A target is normally so marked if it is missing, is older than any of its sources, or any of its sources are marked for updating. This behavior can be modified by the application of special built-in rules. See \ref language_built_in_rules_modifying_binding below.
+
+\subsubsection operation_binding_header_file_scanning Header File Scanning
+
+During the binding phase, \b Jam also performs "header" file scanning, where it looks inside source files for the implicit dependencies on other files caused by C's \#include syntax (or whatever is appropriate for other file formats). This is controlled by the special variables \$(HDRSCAN) and \$(HDRRULE). The result of the scan is formed into a rule invocation, with the scanned file as the target and the found included file names as the sources. Note that this is the only case where rules are invoked outside the parsing phase. See \ref language_built_in_variables_hdrscan below.
+
+
+\subsection operation_updating Updating Phase
+
+After binding, \b Jam again recursively descends the dependency graph, this time executing the update actions for each target marked for update during the binding phase. If a target's updating actions fail, then all other targets which depend on that target are skipped.
+
+The <tt>-j</tt> flag instructs jam to build more than one target at a time. If there are multiple actions on a single target, they are run sequentially. The <tt>-g</tt> flag reorders builds so that targets with newest sources are built first. Normally, they are built in the order of appearance in the Jamfiles.
+
+
+<hr>
+\section language_main Language
+
+\subsection language_overview Overview
+
+Jam has a interpreted, procedural language with a few select features to effect program construction. Statements in jam are rule (procedure) definitions, rule invocations, updating action definitions, flow-of-control structures, variable assignments, and sundry language support.
+
+
+
+\subsection language_lexical_features Lexical Features
+
+\b Jam treats its input files as whitespace-separated tokens, with two exceptions: double quotes (") can enclose whitespace to embed it into a token, and everything between the matching curly braces ({}) in the definition of a updating actions is treated as a single string. A backslash (\) can escape a double quote, or any single whitespace character. Both a newline and a tab must be represented physically within quotes. There is no backslash escape for them.
+
+\b Jam requires whitespace (blanks, tabs, or newlines) to surround all tokens, <b>including the colon (:) and semicolon (;) tokens</b>.
+
+\b Jam keywords (as mentioned in this document) are reserved and generally must be quoted with double quotes (") to be used as arbitrary tokens, such as variable or target names.
+
+
+
+\subsection language_datatype Datatype
+
+<b>Jam</b>'s only data type is a one-dimensional list of arbitrary strings. They arise as literal (whitespace-separated) tokens in the Jambase or included files, as the result of variable expansion of those tokens, or as the return value from a rule invocation.
+
+
+
+\subsection language_rules Rules
+
+The basic \b Jam language entity is called a rule. A rule is simply a procedure definition, with a body of \b Jam statements to be run when the rule is invoked. The syntax of rule invocation make it possible to write Jamfiles that look a bit like Makefiles.
+
+Rules take up to 9 arguments (\$(1) through \$(9), each a list) and can have a return value (a single list). A rule's return value can be expanded in a list by enclosing the rule invocation with [ and ].
+
+
+
+\subsection language_updating_actions Updating Actions
+
+A rule may have updating actions associated with it, in which case arguments \$(1) and \$(2) are treated as built targets and sources, respectively. Updating actions are the OS shell commands to execute when updating the built targets of the rule.
+
+When a rule with updating actions is invoked, those actions are added to those associated with its built targets (\$(1)) before the rule's procedure is run. Later, to build the targets in the updating phase, the actions are passed to the OS command shell, with \$(1) and \$(2) replaced by bound versions of the target names. See \ref operation_binding above.
+
+
+
+\subsection language_statements Statements
+
+<tt>Jam</tt>'s language has the following statements:
+
+\htmlonly <blockquote> \endhtmlonly
+
+<tt><i>rulename</i> <i>field1</i> : <i>field2</i> : ... : <i>fieldN</i> ;</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Invoke a rule. A rule is invoked with values in \em field1 through \em fieldN (9 max). They may be referenced in the procedure's \em statements as $(1) through $(<9>N). $(<) and $(>) are synonymous with $(1) and $(2).
+
+\em rulename undergoes \ref language_variable_expansion. If the resulting list is more than one value, each rule is invoked with the same arguments, and the result of the invocation is the concatenation of all the results.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+<tt>actions [ <i>modifiers</i> ] <i>rulename</i> { <i>commands</i> }</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Define a rule's updating actions, replacing any previous definition. The first two arguments may be referenced in the action's \em commands as $(1) and $(2) or $(<) and $(>).
+
+The following action \em modifiers are understood:
+
+<table>
+  <tr>
+    <td><tt>actions bind vars</tt> (deprecated)</td>
+ 	<td>\$(vars) will be replaced with bound values.  The preferred way to expand a bound value in JamPlus is to use the <tt>:T</tt> variable expansion modifier like so: <tt>\$(vars:T)</tt></td>
+  </tr>
+  <tr>
+    <td><tt>actions existing</tt></td>
+ 	<td>\$(>) includes only source targets currently existing.</td>
+  </tr>
+  <tr>
+    <td><tt>actions ignore</tt></td>
+    <td>The return status of the \em commands is ignored.</td>
+  </tr>
+  <tr>
+    <td><tt>actions piecemeal</tt></td>
+    <td>\em commands are repeatedly invoked with a subset of \$(>) small enough to fit in the command buffer on this OS.</td>
+  </tr>
+  <tr>
+    <td><tt>actions quietly</tt></td>
+    <td>The action is not echoed to the standard output.</td>
+  </tr>
+  <tr>
+    <td><tt>actions together</tt></td>
+	<td>The \$(>) from multiple invocations of the same action on the same built target are concatenated together.</td>
+  </tr>
+  <tr>
+    <td><tt>actions updated</tt></td>
+	<td>\$(>) includes only source targets themselves marked for updating.</td>
+  </tr>
+</table>
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+<tt>break</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Breaks out of the closest enclosing \em for or \em while loop.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+<tt>continue</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Jumps to the end of the closest enclosing \em for or \em while loop.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+<tt>for <i>var</i> in <i>list</i> { <i>statements</i> }</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Executes \em statements for each element in \em list, setting the variable \em var to the element value.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+<tt>if <i>cond</i> { <i>statements</i> } [ else <i>statement</i> ] </tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Does the obvious; the else clause is optional. \em cond is built of:
+
+<table BORDER=1>
+  <tr>
+    <td width=25%><code>\em a</code></td>
+    <td> true if any \em a element is a non-zero-length string</td>
+  </tr>
+  <tr>
+    <td><code>\em a = \em b</code></td>
+    <td>list \em a matches list \em b string-for-string</td>
+  </tr>
+  <tr>
+    <td><code>\em a != \em b</code></td>
+    <td>list \em a does not match list \em b</td>
+  </tr>
+  <tr>
+    <td><code>\em a &lt; \em b </code></td>
+    <td><i>a[i]</i> string is less than <i>b[i]</i> string, where \em i is first mismatched element in lists \em a and \em b</td>
+  </tr>
+  <tr>
+    <td><code>\em a &lt;= \em b</code></td>
+    <td> every \em a string is less than or equal to its \em b counterpart</td>
+  </tr>
+  <tr>
+    <td><code>\em a &gt; \em b</code></td>
+    <td><i>a[i]</i> string is greater than <i>b[i]</i> string, where \em i is first mismatched element</td>
+  </tr>
+  <tr>
+    <td><code>\em a &gt;= \em b</code></td>
+    <td>every \em a string is greater than or equal to its \em b counterpart</td>
+  </tr>
+  <tr>
+    <td><code>\em a in \em b</code></td>
+    <td>true if all elements of \em a can be found in \em b, or if \em a has no elements</td>
+  </tr>
+  <tr>
+    <td><code>! \em cond</code></td>
+    <td>condition not true</td>
+  </tr>
+  <tr>
+    <td><code>\em cond && \em cond </code></td>
+    <td>logical and</td>
+  </tr>
+  <tr>
+    <td><code>\em cond || \em cond</code></td>
+    <td>logical or</td>
+  </tr>
+  <tr>
+    <td><code>( \em cond )</code></td>
+    <td> precedence grouping</td>
+</table>
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+<tt>include file ;</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Causes \b Jam to read the named file. The file is bound like a regular target (see \ref operation_binding above) but unlike a regular target, the include file cannot be built. Marking an include file target with the \ref rule_NoCare rule makes it optional: if it is missing, it causes no error.
+
+The include file is inserted into the input stream during the parsing phase. The primary input file and all the included file(s) are treated as a single file; that is, \b Jam infers no scope boundaries from included files.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+<tt>local \em vars [ = \em values ] ;</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Creates new \em vars inside to the enclosing {} block, obscuring any previous values they might have.  The previous values for \em vars are restored when the current block ends.  Any rule called or file included will see the local and not the previous value (this is sometimes called Dynamic Scoping).  The local statement may appear anywhere, even outside of a block (in which case the previous value is restored when the input ends).  The \em vars are initialized to \em values if present, or left uninitialized otherwise.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+<tt>on \em target \em statement ;</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Run \em statement under the influence of <i>target</i>'s target-specific variables.  These variables become local copies during <i>statement</i>'s run, but they may be updated as target-specific variables using the usual &quot;\em variable on \em targets =&quot; syntax.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+<tt>return \em values ;</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Within a rule body, the return statement sets the return value for an invocation of the rule and terminates the rule's execution.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+<tt>rule \em rulename [ : \em vars ] { \em statements }</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Define a rule's procedure, replacing any previous definition.  If \em vars are provided, they are assigned the values of the parameters (\$(1) to \$(9)) when \em statements are executed, as with the \b local statement.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+<tt>
+switch \em value<br>
+{<br>
+case \em pattern1 : \em statements ;<br>
+case \em pattern2 : \em statements ;<br>
+...<br>
+}
+</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+The switch statement executes zero or one of the enclosed <i>statements</i>, depending on which, if any, is the first case whose \em pattern matches \em value.  The \em pattern values are not variable-expanded.  The \em pattern values may include the following wildcards:
+
+<table>
+  <tr>
+    <td><code>?</code></td>
+	<td>match any single character</td>
+  </tr>
+  <tr>
+    <td><code>*</code></td>
+	<td>match zero or more characters</td>
+  </tr>
+  <tr>
+    <td><code>[<i>chars</i>]</code></td>
+	<td>match any single character in \em chars</td>
+  </tr>
+  <tr>
+    <td><code>[^<i>chars</i>]</code></td>
+	<td>match any single character not in <i>chars</i></td>
+  </tr>
+  <tr>
+    <td><code>\\<i>x</i></code></td>
+    <td>match <i>x</i> (escapes the other wildcards)</i></td>
+  </tr>
+</table>
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+<tt>while \em cond { \em statements }</tt>
+
+\htmlonly <blockquote> \endhtmlonly
+
+Repeatedly execute \em statements while \em cond remains true upon entry. (See the description of \em cond expression syntax under if above).
+
+\htmlonly </blockquote> \endhtmlonly
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+
+\subsection language_variables Variables
+
+\b Jam variables are lists of zero or more elements, with each element being a string value.  An undefined variable is indistinguishable from a variable with an empty list, however, a defined variable may have one more elements which are null strings.  All variables are referenced as \$(<i>variable</i>).
+
+Variables are either global or target-specific.  In the latter case, the variable takes on the given value only during the target's binding, header file scanning, and updating; and during the "on <i>target</i> <i>statement</I>" statement.
+
+A variable is defined with:
+
+<table align=center>
+  <tr>
+    <td><code><i>variable</i> = <i>elements</i> ;</code></td>
+	<td>The = operator replaces any previous elements of \em variable with \em elements</td>
+  </tr>
+  <tr>
+    <td><code><i>variable</i> += <i>elements</i> ;</code></td>
+	<td>The += operator adds \em elements to <i>variable</i>'s list of elements</td>
+  </tr>
+  <tr>
+    <td><code><i>variable</i> -= <i>elements</i> ;</code></td>
+	<td>The -= operator removes \em elements from <i>variable</i>'s list of elements</td>
+  </tr>
+  <tr>
+    <td><code><i>variable</i> ?= <i>elements</i> ;</code></td>
+	<td>The ?= operator sets <i>variable</i> only if it was previously unset</td>
+  </tr>
+  <tr>
+    <td><code><i>variable</i> on <i>targets</i> = <i>elements</i> ;</code></td>
+	<td>The = operator replaces any previous elements of \em variable with \em elements directly on \em targets</td>
+  </tr>
+  <tr>
+    <td><code><i>variable</i> on <i>targets</i> += <i>elements</i> ;</code></td>
+	<td>The += operator directly adds \em elements to <i>targets</i>'s <i>variable</i>'s list of elements</td>
+  </tr>
+  <tr>
+    <td><code><i>variable</i> on <i>targets</i> -= <i>elements</i> ;</code></td>
+	<td>The -= operator directly removes \em elements from <i>targets</i>'s <i>variable</i>'s list of elements</td>
+  </tr>
+  <tr>
+    <td><code><i>variable</i> on <i>targets</i> ?= <i>elements</i> ;</code></td>
+	<td>The ?= operator sets <i>variable</i> on <i>targets</i> only if it was previously unset</td>
+  </tr>
+</table>
+
+Variables referenced in updating commands will be replaced with their values; target-specific values take precedence over global values.  Variables passed as arguments (\$(1) and \$(2)) to actions are replaced with their bound values; the "bind" modifier can be used on actions to cause other variables to be replaced with bound values.  See <A HREF="#actionmods">Action Modifiers</A> above.
+
+\b Jam variables are not re-exported to the environment of the shell that executes the updating actions, but the updating actions can reference \b Jam variables with \$(<i>variable</i>).
+
+
+
+
+\subsection language_variable_expansion Variable Expansion
+
+During parsing, \b Jam performs variable expansion on each token that is not a keyword or rule name.  Such tokens with embedded variable references are replaced with zero or more tokens.  Variable references are of the form \$(<i>v</i>) or \$(<i>vm</i>), where \em v is the variable name, and \em m are optional modifiers.
+
+Variable expansion in a rule's actions is similar to variable expansion in statements,  except that the action string is tokenized at whitespace regardless of quoting.
+
+The result of a token after variable expansion is the \em product of the components of the token, where each component is a literal substring or a list substituting a variable reference.  For example:
+
+<table width=75% align=center>
+  <tr>
+    <td><code>
+	    <br>\$(X)      -> a b c
+	    <br>t\$(X)     -> ta tb tc
+	    <br>\$(X)z     -> az bz cz
+	    <br>\$(X)-\$(X) -> a-a a-b a-c b-a b-b b-c c-a c-b c-c
+	</code></td>
+  </tr>
+</table>
+
+The variable name and modifiers can themselves contain a variable reference,  and this partakes of the product as well:
+
+<table width=75% align=center>
+  <tr>
+    <td><code>
+	    <br>\$(X)      -> a b c
+	    <br>\$(Y)      -> 1 2
+	    <br>\$(Z)      -> X Y
+	    <br>\$(\$(Z))   -> a b c 1 2
+
+	</code></td>
+  </tr>
+</table>
+
+Because of this product expansion, if any variable reference in a token is undefined, the result of the expansion is an empty list.  If any variable element is a null string, the result propagates the non-null elements:
+
+<table width=75% align=center>
+  <tr>
+    <td><code>
+	    <br>\$(X)        -> a ""
+	    <br>\$(Y)        -> "" 1
+	    <br>\$(Z)	  ->
+	    <br>*\$(X)\$(Y)*  -> *a* *a1* ** *1*
+	    <br>*\$(X)\$(Z)*  ->
+
+	</code></td>
+  </tr>
+</table>
+
+A variable element's string value can be parsed into grist and filename-related components.  Modifiers to a variable are used to select elements, select components, and replace components.  The modifiers are:
+
+<table width=75% border=1 align=center>
+  <tr>
+    <td><code> [<i>n</i>] </code></td>
+    <td>Select element number <i>n</i> (starting at 1).  If the variable contains fewer than <i>n</i> elements, the result is a zero-element list.</td>
+  </tr>
+  <tr>
+    <td><code> [<i>n</i>-<i>m</i>] </code></td>
+    <td>Select elements number <i>n</i> through <i>m</i>.</td>
+  </tr>
+  <tr>
+    <td><code> [<i>n</i>-] </code></td>
+	<td>Select elements number <i>n</i> through the last.</td>
+  </tr>
+  <tr>
+    <td><code> :B </code></td>
+	<td>Select filename base.</td>
+  </tr>
+  <tr>
+    <td><code> :S </code></td>
+	<td>Select (last) filename suffix.</td>
+  </tr>
+  <tr>
+    <td><code> :M </code></td>
+	<td>Select archive member name.</td>
+  </tr>
+  <tr>
+    <td><code> :D </code></td>
+	<td>Select directory path.</td>
+  </tr>
+  <tr>
+    <td><code> :P </code></td>
+	<td>Select parent directory.</td>
+  </tr>
+  <tr>
+    <td><code> :G </code></td>
+	<td>Select grist.</td>
+  </tr>
+  <tr>
+    <td><code> :U </code></td>
+	<td>Replace lowercase characters with uppercase.</td>
+  </tr>
+  <tr>
+    <td><code> :L </code></td>
+	<td>Replace uppercase characters with lowercase.</td>
+  </tr>
+  <tr>
+    <td><code> :/ </code></td>
+	<td>Convert all backslashes (\\) to forward slashes (/).</td>
+  </tr>
+  <tr>
+    <td><code> :\\\\ </code></td>
+	<td>Convert all forward slashes (/) to backslashes (\\).</td>
+  </tr>
+  <tr>
+    <td><code> :<i>chars</i> </code></td>
+	<td>Select the components listed in <i>chars</i>.</td>
+  </tr>
+  <tr>
+    <td><code> :G=<i>grist</i> </code></td>
+	<td>Replace grist with <i>grist</i>.</td>
+  </tr>
+  <tr>
+    <td><code> :D=<i>path</i> </code></td>
+	<td>Replace directory with <i>path</i>.</td>
+  </tr>
+  <tr>
+    <td><code> :B=<i>base</i> </code></td>
+	<td>Replace the base part of file name with <i>base</i>.</td>
+  </tr>
+  <tr>
+    <td><code> :S=<i>suf</i> </code></td>
+	<td>Replace the suffix of file name with <i>suf</i>.</td>
+  </tr>
+  <tr>
+    <td><code> :M=<i>mem</i> </code></td>
+	<td>Replace the archive member name with <i>mem</i>.</td>
+  </tr>
+  <tr>
+    <td><code> :R=<i>root</i> </code></td>
+	<td>Prepend <i>root</i> to the whole file name,  if not already rooted.</td>
+  </tr>
+  <tr>
+    <td><code> :E=<i>value</i> </code></td>
+	<td>Use <i>value</i> instead if the variable is unset.</td>
+  </tr>
+  <tr>
+    <td><code> :J=<i>joinval</i> </code></td>
+	<td>Concatentate list elements into single element, separated by <i>joinval</i>.</td>
+  </tr>
+</table>
+
+On VMS, \$(var:P) is the parent directory of \$(var:D); on Unix and NT, \$(var:P) and \$(var:D) are the same.
+
+
+
+
+
+\subsection language_built_in_rules Built-in Rules
+
+Jam has twelve built-in rules, all of which are pure procedure rules without updating actions. They are in three groups: the first builds the dependency graph; the second modifies it; and the third are just utility rules.
+
+\subsubsection language_built_in_rules_dependency_building Dependency Building
+
+<table width=75% align=center>
+  <tr>
+    <td><dl>
+	\anchor rule_Depends
+	<dt><code> Depends <i>targets1</i> : <i>targets2</i> ; </code>
+	<dd>Builds a direct dependency: makes each of <i>targets1</i> depend on each of <i>targets2</i>.  Generally, <i>targets1</i> will be rebuilt if <i>targets2</i> are themselves rebuilt are or are newer than <i>targets1</i>.</td>
+
+	\anchor rule_Includes
+    <dt><code>Includes <i>targets1</i> : <i>targets2</i> ;</code></td>
+	<dd>Builds a sibling dependency: makes any target that depends on any of <i>targets1</i> also depend on each of <i>targets2</i>. This reflects the dependencies that arise when one source file includes another:  the object built from the source file depends both on the original and included source file,  but the two sources files don't depend on each other.  For example:
+
+	<code>
+	Depends foo.o : foo.c ;
+	<br>Includes foo.c : foo.h ;
+	</code>
+
+	"foo.o" depends on "foo.c" and "foo.h" in this example.
+
+	</td>
+  </tr>
+</table>
+
+
+
+\subsubsection language_built_in_rules_modifying_binding Modifying Binding
+
+The six rules ALWAYS, LEAVES, NOCARE, NOTFILE, NOUPDATE, and TEMPORARY modify the dependency graph so that <b>jam</b> treats the targets differently during its target binding phase.  See <A HREF="#binding">Binding</A> above.  Normally, <b>jam</b> updates a target if it is missing, if its filesystem modification time is older than any of its dependencies (recursively), or if any of its dependencies are being updated.  This basic behavior can be changed by invoking the following rules:
+
+<table width=75% align=center>
+  <tr>
+    <td><dl>
+
+	<dt><code>
+	ALWAYS <i>targets</i> ;
+	</code>
+
+	<dd> Causes <i>targets</i> to be rebuilt regardless of whether they are up-to-date (they must still be in the dependency graph).  This is used for the clean and uninstall targets, as they have no dependencies and would otherwise appear never to need building.  It is best applied to targets that are also NOTFILE targets, but it can also be used to force a real file to be updated as well.
+
+	<dt><code>
+	LEAVES <i>targets</i> ;
+	</code>
+
+	<dd> Makes each of <i>targets</i> depend only on its leaf sources, and not on any intermediate targets.  This makes it immune to its dependencies being updated, as the "leaf" dependencies are those without their own dependencies and without updating actions. This allows a target to be updated only if original source files change.
+
+	\anchor rule_NoCare
+	<dt><code>
+	NOCARE <i>targets</i> ;
+	</code>
+
+	<dd> Causes <b>jam</b> to ignore <i>targets</i> that neither can be found nor have updating actions to build them.  Normally for such targets <b>jam</b> issues a warning and then skips other targets that depend on these missing targets.  The HdrRule in Jambase uses NOCARE on the header file names found during header file scanning, to let <b>jam</b> know that the included files may not exist.   For example,  if a #include is within an #ifdef, the included file may not actually be around.
+
+	<dt><code>
+	NOTFILE <i>targets</i> ;
+	</code>
+
+	<dd> Marks <i>targets</i> as pseudotargets and not real files. No timestamp is checked, and so the actions on such a target are only executed if the target's dependencies are updated, or if the target is also marked with ALWAYS.  The default <b>jam</b> target "all" is a pseudotarget. In Jambase, NOTFILE is used to define several addition convenient pseudotargets.
+
+	<dt><code>
+	NOUPDATE <i>targets</i> ;
+	</code>
+
+	<dd> Causes the timestamps on <i>targets</i> to be ignored. This has two effects:  first,  once the target has been created it will never be updated; second, manually updating target will not cause other targets to be updated.  In Jambase, for example, this rule is applied to directories by the MkDir rule, because MkDir only cares that the target directory exists, not when it has last been updated.
+
+	<dt><code>
+	TEMPORARY <i>targets</i> ;
+	</code>
+
+	<dd> Marks <i>targets</i> as temporary, allowing them to be removed after other targets that depend upon them have been updated.  If a TEMPORARY target is missing, <b>jam</b> uses the timestamp of the target's parent.  Jambase uses TEMPORARY to mark object files that are archived in a library after they are built, so that they can be deleted after they are archived.
+
+</table>
+
+
+
+
+
+\subsubsection language_built_in_rules_utility_rules Utility Rules
+
+The remaining rules are utility rules.
+
+<table width=75% align=center>
+  <tr>
+    <td><dl>
+
+	<dt><code>
+	Echo <i>args</i> ;
+	</code>
+
+	<dd> Prints out the message <i>args</i> to stdout.
+
+	<dt><code>
+	Exit <i>args</i> ;
+	</code>
+
+	<dd> Blurts out the message <i>args</i> to stdout and then exits with a failure status.
+
+	<dt><code>
+	Glob <i>directories</i> : <i>patterns</i> ;
+	</code>
+
+	<dd> Scans <i>directories</i> for files matching <i>patterns</i>, returning the list of matching files (with directory prepended).  <i>patterns</i> uses the same syntax as in the <b>switch</b> statement.  Only useful within the <tt>[ ]</tt> construct, to change the result into a list.
+
+	<dt><code>
+	Match <i>regexps</i> : <i>list</i> ;
+	</code>
+
+	<dd> Matches the <b>egrep</b>(1) style regular expressions <i>regexps</i> against the strings in <i>list</I>.  The result is the concatenation of matching <tt>()</tt> subexpressions for each string in <i>list</I>, and for each regular expression in <i>regexps</I>.  Only useful within the <tt>[ ]</tt> construct, to change the result into a list.
+
+	</dl>
+
+</table>
+
+
+
+
+\subsection language_built_in_variables Built-in Variables
+
+This section discusses variables that have special meaning to <b>jam</b>.
+
+\subsubsection language_built_in_variables_binding_search_locate BINDING, SEARCH, and LOCATE Variables
+
+These two variables control the binding of file target names to locations in the file system.  Generally, \$(SEARCH) is used to find existing sources while \$(LOCATE) is used to fix the location for built targets.
+
+Rooted (absolute path) file targets are bound as is.  Unrooted file target names are also normally bound as is, and thus relative to the current directory, but the settings of \$(LOCATE) and \$(SEARCH) alter this:
+
+<ul>
+  <li> If \$(LOCATE) is set then the target is bound relative to the first directory in $(LOCATE).  Only the first element is used for binding.
+  <li> If \$(SEARCH) is set then the target is bound to the first directory in \$(SEARCH) where the target file already exists.
+  <li> If the \$(SEARCH) search fails, the target is bound relative to the current directory anyhow.
+</ul>
+
+Both \$(SEARCH) and \$(LOCATE) should be set target-specific and not globally.  If they were set globally,  <b>jam</b> would use the same paths for all file binding, which is not likely to produce sane results.  When writing your own rules,  especially ones not built upon those in Jambase, you may need to set \$(SEARCH) or \$(LOCATE) directly.  Almost all of the rules defined in Jambase set \$(SEARCH) and \$(LOCATE) to sensible values for sources they are looking for and targets they create, respectively.
+
+\subsubsection language_built_in_variables_hdrscan HDRSCAN and HDRRULE Variables
+
+These two variables control header file scanning.  \$(HDRSCAN) is an <b>egrep</b>(1) pattern, with ()'s surrounding the file name, used to find file inclusion statements in source files.  Jambase uses \$(HDRPATTERN) as the pattern for \$(HDRSCAN).  \$(HDRRULE) is the name of a rule to invoke with the results of the scan: the scanned file is the target, the found files are the sources.  \$(HDRRULE) is run under the influence of the scanned file's target-specific variables.
+
+Both \$(HDRSCAN) and \$(HDRRULE) must be set for header file scanning to take place, and they should be set target-specific and not globally.  If they were set globally, all files, including executables and libraries, would be scanned for header file include statements.
+
+The scanning for header file inclusions is not exact, but it is at least dynamic, so there is no need to run something like <b>makedepend</b>(GNU) to create a static dependency file. The scanning mechanism errs on the side of inclusion (i.e., it is more likely to return filenames that are not actually used by the compiler than to miss include files) because it can't tell if \#include lines are inside \#ifdefs or other conditional logic.  In Jambase, HdrRule applies the NOCARE rule to each header file found during scanning so that if the file isn't present yet doesn't cause the compilation to fail, <b>jam</b> won't care.
+
+Also, scanning for regular expressions only works where the included file name is literally in the source file.  It can't handle languages that allow including files using variable names (as the Jam language itself does).
+
+
+
+\subsubsection language_built_in_variables_platform Platform Identifier Variables
+
+A number of Jam built-in variables can be used to identify runtime platform:
+
+<table width=75% align=center>
+  <tr><td>OS<td>OS identifier string
+  <tr><td>OSPLAT<td>Underlying architecture, when applicable
+  <tr><td>MAC<td>true on MAC platform
+  <tr><td>NT<td>true on NT platform
+  <tr><td>OS2<td>true on OS2 platform
+  <tr><td>UNIX<td>true on Unix platforms
+  <tr><td>VMS<td>true on VMS platform
+</table>
+
+
+
+
+\subsubsection language_built_in_variables_jam_version Jam Version Variables
+
+<table width=75% align=center>
+  <tr><td>JAMDATE<td>Time and date at <b>jam</b> start-up.
+  <tr><td>JAMUNAME<td>Ouput of <b>uname</b>(1) command (Unix only)
+  <tr><td>JAMVERSION<td><b>jam</b> version, as reported by jam -v.
+</table>
+
+
+
+\subsubsection language_built_in_variables_jamshell JAMSHELL Variable
+
+When <b>jam</b> executes a rule's action block, it forks and execs a shell, passing the action block as an argument to the shell.   The invocation of the shell can be controlled by \$(JAMSHELL).  The default on Unix is, for example:
+
+<code>JAMSHELL = /bin/sh -c % ;</code>
+
+The % is replaced with the text of the action block.
+
+<b>Jam</b>  does not directly support building in parallel across multiple hosts, since that is heavily dependent on the local environment.   To build in parallel across multiple hosts, you need to write your own shell that provides access to the multiple hosts.  You then reset $(JAMSHELL) to reference it.
+
+Just as <b>jam</b> expands a % to be the text of the rule's action block, it expands a ! to be the multi-process slot number.  The slot number varies between 1 and the number of concurrent jobs permitted by the -j flag given on the command line.  Armed with this, it is possible to write a multiple host shell.  For example:
+
+<table width=75% align=center><tr><td><code>
+
+	<br>#!/bin/sh
+	<br>
+	<br># This sample JAMSHELL uses the SunOS on(1) command to execute a
+	<br># command string with an identical environment on another host.
+	<br>
+	<br># Set JAMSHELL = jamshell ! %
+	<br>#
+	<br># where jamshell is the name of this shell file.
+	<br>#
+	<br># This version handles up to -j6; after that they get executed
+	<br># locally.
+	<br>
+	<br>case $1 in
+	<br>1|4) on winken sh -c "$2";;
+	<br>2|5) on blinken sh -c "$2";;
+	<br>3|6) on nod sh -c "$2";;
+	<br>*)   eval "$2";;
+	<br>esac
+
+</code></table>
+
+
+\section diagnostics Diagnostics
+
+In addition to generic error messages, <b>jam</b> may emit one of the following:
+
+<table width=75% align=center>
+  <tr>
+    <td><dl>
+
+       <dt><code> warning: unknown rule X </code> <dd>
+
+              A rule was invoked that has not been defined with an "actions" or "rule" statement.
+
+       <dt><code> using N temp target(s) </code> <dd>
+
+              Targets marked as being temporary (but nonetheless present) have been found.
+
+       <dt><code> updating N target(s) </code> <dd>
+
+              Targets are out-of-date and will be updated.
+
+       <dt><code> can't find N target(s) </code> <dd>
+
+              Source files can't be found and there are no actions to create them.
+
+       <dt><code> can't make N target(s) </code> <dd>
+
+              Due to sources not being found, other targets cannot be made.
+
+       <dt><code> warning: X depends on itself </code> <dd>
+
+              A target depends on itself either directly or through its sources.
+
+       <dt><code> don't know how to make X </code> <dd>
+
+              A target is not present and no actions have been defined to create it.
+
+       <dt><code> X skipped for lack of Y </code> <dd>
+
+              A source failed to build, and thus a target cannot be built.
+
+       <dt><code> warning: using independent target X </code> <dd>
+
+              A target that is not a dependency of any other target is being referenced with \$(&lt;) or \$(&gt;).
+
+       <dt><code> X removed </code> <dd>
+
+              <b>Jam</b>  removed a  partially built target after being interrupted.
+
+	</dl></table>
+
+
+\section bugs Bugs, Limitations
+
+The -j flag can cause <b>jam</b> to get confused when single actions update more than one target at a time. <b>jam</b> may proceed as if the targets were built even though they are still under construction.
+
+For parallel building to be successful, the dependencies among files must be properly spelled out, as targets tend to get built in a quickest-first ordering.  Also, beware of un-parallelizable commands that drop fixed-named files into the current directory, like <b>yacc</b>(1) does.
+
+With the -j flag, errors from failed commands can get staggeringly mixed up.
+
+A poorly set $(JAMSHELL) is likely to result in silent failure.
+
+
+
+
+
+\section author Author
+
+Jam's author is Christopher Seiwald (<a href="mailto:seiwald@perforce.com">seiwald@perforce.com</A>).  Documentation is provided by <A HREF="http://www.perforce.com">Perforce Software, Inc.</A>
+
+JamPlus's primary author is Joshua Jensen (<a href="mailto:jjensen@workspacewhiz.com">jjensen@workspacewhiz.com</a>).
+
+
+
+*/
+
