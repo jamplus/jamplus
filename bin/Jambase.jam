@@ -1725,9 +1725,9 @@ actions MakeLump
 ########################################################################
 ########################################################################
 
-rule _retrieveActiveTargetName TARGET
+rule _retrieveActiveTargetName TARGETS
 {
-	return $(TARGET:E=$(ACTIVE_PROJECT:E="")) ;
+	return $(TARGETS:E=$(ACTIVE_PROJECT:E="")) ;
 }
 
 rule _retrieveVar VARIABLE : TARGET : THE_CONFIG : THE_PLATFORM
@@ -2258,27 +2258,30 @@ rule ActiveProject PROJECT
 }
 
 
-rule CFlags TARGETS : FLAGS : THE_CONFIG : THE_PLATFORM
+rule CFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	CFLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGETS) += $(FLAGS) ;
+	CFLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
 }
 
 
-rule C++Flags TARGETS : FLAGS : THE_CONFIG : THE_PLATFORM
+rule C++Flags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	C++FLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGETS) += $(FLAGS) ;
+	C++FLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
 }
 
 
-rule Defines TARGETS : DEFINES : THE_CONFIG : THE_PLATFORM
+rule Defines TARGET : DEFINES : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	DEFINES.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGETS) += $(DEFINES) ;
+	DEFINES.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(DEFINES) ;
 }
 
 
@@ -2290,24 +2293,27 @@ rule ExcludeFromBuild TARGET : SOURCES
 }
 
 
-rule IncludeDirectories TARGETS : INCLUDEPATH : THE_CONFIG : THE_PLATFORM
+rule IncludeDirectories TARGET : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGETS) += $(INCLUDEPATH:R=$(SUBDIR)) ;
+	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(INCLUDEPATHS:R=$(SUBDIR)) ;
 }
 
 
-rule LinkDirectories TARGETS : DIRECTORIES : THE_CONFIG : THE_PLATFORM
+rule LinkDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	LINKDIRECTORIES.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGETS) += $(DIRECTORIES) ;
+	LINKDIRECTORIES.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(DIRECTORIES) ;
 }
 
 
 rule LinkFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
 	LINKFLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
@@ -2316,6 +2322,7 @@ rule LinkFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
 
 rule LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
 	Depends $(TARGET) : $(LIBRARIES) ;
@@ -2335,6 +2342,7 @@ rule LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 
 rule LinkPrebuiltLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
 	LINKLIBS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(LIBRARIES:S=$(SUFLIB)) ;
@@ -2385,35 +2393,40 @@ rule ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS : THE_CONFIG : THE
 }
 
 
-rule OutputName TARGETS : NAME : THE_CONFIG : THE_PLATFORM
+rule OutputName TARGET : NAME : THE_CONFIG : THE_PLATFORM
 {
-	OUTPUTNAME.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGETS) = $(NAME) ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	OUTPUTNAME.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) = $(NAME) ;
 }
 
 
-rule OutputPath TARGETS : OUTPUTPATH : THE_CONFIG : THE_PLATFORM
+rule OutputPath TARGET : OUTPUTPATH : THE_CONFIG : THE_PLATFORM
 {
-	LOCATE.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGETS) = $(OUTPUTPATH) ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	LOCATE.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) = $(OUTPUTPATH) ;
 }
 
 
-rule OutputPostfix TARGETS : PRESUFFIX : THE_CONFIG : THE_PLATFORM
+rule OutputPostfix TARGET : POSTFIX : THE_CONFIG : THE_PLATFORM
 {
-	OUTPUTPOSTFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGETS) = $(PRESUFFIX:E=*off*) ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	OUTPUTPOSTFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) = $(POSTFIX:E=*off*) ;
 }
 
 
-rule OutputPostfixClear TARGETS : PRESUFFIX : THE_CONFIG : THE_PLATFORM
+rule OutputPostfixClear TARGET : POSTFIX : THE_CONFIG : THE_PLATFORM
 {
-	OUTPUTPOSTFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGETS) = ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	OUTPUTPOSTFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) = ;
 }
 
 
-rule OutputSuffix TARGETS : SUFFIX : THE_CONFIG : THE_PLATFORM
+rule OutputSuffix TARGET : SUFFIX : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local NO_DOT_SUFFIX = [ Match \\.?(.+) : $(SUFFIX) ] ;
 	SUFFIX = .$(NO_DOT_SUFFIX) ;
-	OUTPUTSUFFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGETS) = $(SUFFIX) ;
+	OUTPUTSUFFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) = $(SUFFIX) ;
 }
 
 

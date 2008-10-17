@@ -1,0 +1,919 @@
+/*! \page jambase_rules Jambase Rules
+
+\section cmd_intro Introduction
+
+If [square] brackets are used the argument is optional.
+
+Here is an alphabetically sorted list of all commands with references to their
+documentation:
+\secreflist
+\refitem rule_ActiveProject ActiveProject
+\refitem rule_Application Application
+\refitem rule_CFlags CFlags
+\refitem rule_CppFlags C++Flags
+\refitem rule_Defines Defines
+\refitem rule_ExcludeFromBuild ExcludeFromBuild
+\refitem rule_FGristDirectories FGristDirectories
+\refitem rule_IncludeDirectories IncludeDirectories
+\refitem rule_IncludeModule IncludeModule
+\refitem rule_Library Library
+\refitem rule_LinkDirectories LinkDirectories
+\refitem rule_LinkLibraries LinkLibraries
+\refitem rule_LinkPrebuiltLibraries LinkPrebuiltLibrariess
+\refitem rule_Lump Lump
+\refitem rule_MakeLocate MakeLocate
+\refitem rule_MkDir MkDir
+\refitem rule_ObjectCFlags ObjectCFlags
+\refitem rule_ObjectCppFlags ObjectC++Flags
+\refitem rule_ObjectDefines ObjectDefines
+\refitem rule_ObjectIncludeDirectories ObjectIncludeDirectories
+\refitem rule_OutputName OutputName
+\refitem rule_OutputPath OutputPath
+\refitem rule_OutputPostfix OutputPostfix
+\refitem rule_OutputSuffix OutputSuffix
+\refitem rule_PrecompiledHeader PrecompiledHeader
+\refitem rule_Project Project
+\refitem rule_ProjectGroup ProjectGroup
+\refitem rule_RcDefines RcDefines
+\refitem rule_RcFlags RcFlags
+\refitem rule_RcIncludeDirectories RcIncludeDirectories
+\refitem rule_ResourceCompiler ResourceCompiler
+\refitem rule_RmTemps RmTemps
+\refitem rule_SearchSource SearchSource
+\refitem rule_SourceGroup SourceGroup
+\refitem rule_SubDir SubDir
+\refitem rule_SubInclude SubInclude
+\refitem rule_Workspace Workspace
+\endsecreflist
+
+The following is a list of rules available in <tt>bin/Jambase.jam</tt>.
+
+<hr>
+\section rule_ActiveProject rule ActiveProject PROJECT
+\addindex rule_ActiveProject
+
+Set the default project target to use when the target isn't specified.  This works with a good number of the Jambase commands.
+
+\param PROJECT The default target name to use for upcoming rules.
+
+
+
+
+
+
+
+<hr>
+\section rule_Application rule Application TARGET : SOURCES : OPTIONS
+\addindex rule_Application
+
+Compiles \c SOURCES and links them into \c TARGET.  Filenames with an <tt>.obj</tt> or <tt>.res</tt> are passed straight through to the linker.  Any file excluded from the build via \ref rule_ExcludeFromBuild is ignored.
+
+\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> to link into the application.  Object and compiled Windows resource files may also be passed with this list.
+\param OPTIONS The following options are available.  All options are optional.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c windows - Forces a GUI application.  On Windows, the application must have a \c WinMain function.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
+  <li>\c console (default) - Builds a console application.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    Application helloworld : helloworld.cpp ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_CFlags rule CFlags TARGET : FLAGS [: THE_CONFIG : THE_PLATFORM]
+\addindex rule_CFlags
+
+For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.
+
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Assign /clr:oldsyntax to all C files in managedapp across all
+    # configurations and platforms.
+    CFlags managedapp : /clr:oldsyntax ;
+
+    # Assign /clr:oldsyntax to all C files in managedapp for the debug
+    # configuration and all platforms.
+    CFlags managedapp : /clr:oldsyntax : debug ;
+
+    # Assign /clr:oldsyntax to all C files in managedapp for the debug
+    # configuration and win32 platform.
+    CFlags managedapp : /clr:oldsyntax : debug : win32 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_CppFlags rule C++Flags TARGET : FLAGS [: THE_CONFIG : THE_PLATFORM]
+\addindex rule_CppFlags
+
+For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.
+
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Assign /clr:oldsyntax to all C++ files in managedapp across all
+    # configurations and platforms.
+    C++Flags managedapp : /clr:oldsyntax ;
+
+    # Assign /clr:oldsyntax to all C++ files in managedapp for the debug
+    # configuration and all platforms.
+    C++Flags managedapp : /clr:oldsyntax : debug ;
+
+    # Assign /clr:oldsyntax to all C++ files in managedapp for the debug
+    # configuration and win32 platform.
+    C++Flags managedapp : /clr:oldsyntax : debug : win32 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_Defines rule Defines TARGET : DEFINES [: THE_CONFIG : THE_PLATFORM]
+\addindex rule_Defines
+
+For the given project \c TARGET, assign the \c DEFINES to the appropriate configuration and platform.
+
+\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param DEFINES The list of defines to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Make #defines available for ABC and DEF=5 in someproject for all
+    # configurations and all platforms.
+    Defines someproject : ABC DEF=5 ;
+
+    # For the win32 platform, add a WIN32 define globally.
+    Defines * : WIN32 : : win32 ;
+
+    # Quote a #define, keeping the quotes for compilation:
+    Defines luacom : LUA5 "LUACOM_DLL=\\\"luacom.dll\\\"" ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_ExcludeFromBuild rule ExcludeFromBuild TARGET : SOURCES
+\addindex rule_ExcludeFromBuild
+
+For the given project \c TARGET, exclude the \c SOURCES from the build.  If using <b>JamToWorkspace</b> for project generation, sources must be excluded and not simply removed from the list.  Otherwise, they don't all show in the generated projects.
+
+\param TARGET The target to exclude the \c SOURCES from.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of defines to exclude.
+
+\code
+    if $(PLATFORM) != xbox
+    {
+        ExcludeFromBuild myproject : $(XBOX_SRCS) ;
+    }
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_FGristDirectories rule FGristDirectories DIRECTORIES
+\addindex rule_FGristDirectories
+
+Given a list of \c DIRECTORIES, a gristed version of each is returned.  Currently, this means the directories are returned in the form: <tt>&lt;!dir!&gt;directory/name</tt>
+
+\param DIRECTORIES The directories to grist.
+\return Returns the gristed version of each directory.
+
+\code
+    Echo [ FGristDirectories $(TEMP)/stuff ] ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_IncludeDirectories rule IncludeDirectories TARGET : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
+\addindex rule_IncludeDirectories
+
+For the given project \c TARGET, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
+
+\param TARGET The target to assign the \c INCLUDEPATHS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param INCLUDEPATHS The list of include paths to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Add $(Code)/Shared to myproject for all configurations and all platforms.
+    IncludeDirectories myproject : $(Code)/Shared ;
+
+    # For the win32 platform, add the MFC include path.
+    IncludeDirectories myproject : "$(MSVCNT)/atlmfc/include" : : win32 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_IncludeModule rule IncludeModule MODULE_NAME
+\addindex rule_IncludeModule
+
+Loads a Jam module from the <tt>bin/jammodules/</tt> directory.  When \c IncludeModule is specified more than once for the same \c MODULE_NAME, the module is only loaded once.
+
+\param MODULE_NAME The name of the module, which is the filename without path and extension.
+
+\code
+    # Make the UseDirectX rule available.
+    IncludeModule DirectX ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_Library rule Library TARGET : SOURCES : OPTIONS
+\addindex rule_Application
+
+Compiles \c SOURCES and archives them into a library called \c TARGET.  Filenames with an <tt>.obj</tt> or <tt>.res</tt> are passed straight through to the linker.  Any file excluded from the build via \ref rule_ExcludeFromBuild is ignored.
+
+\param TARGET The targets to archive \c SOURCES into.  The target name is given without extension; a platform specific extension will be generated.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> to link into the application.  Object and compiled Windows resource files may also be passed with this list.
+\param OPTIONS (optional) The following options are available.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c shared - Instead of building a static library (the default), a shared library (DLL) is built.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\htmlonly <blockquote> \endhtmlonly
+If \c shared is specified for \c OPTIONS, the following additional options are available:
+
+<ul>
+  <li>\c windows - Forces a GUI application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
+  <li>\c console (default) - Builds a console application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    # Build a static library called mystaticlibrary from the sources
+    # file1.c and file2.cpp.
+    Library mystaticlibrary : file1.c file2.cpp ;
+
+    # Build a shared library called mystaticlibrary from the sources
+    # file3.c and file4.cpp.
+    Library mysharedlibrary : file3.c file4.cpp : shared ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_LinkDirectories rule LinkDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
+\addindex rule_LinkDirectories
+
+For the given project \c TARGET, assign the link \c DIRECTORIES to the appropriate configuration and platform.
+
+\param TARGET The target to assign the link \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param DIRECTORIES The list of link directories to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Add c:/some/directory to myproject for all configurations and
+	# all platforms.
+    LinkDirectories myproject : c:/some/directory ;
+
+    # For the win32 platform, add the MFC link directory.
+	LinkDirectories myproject : "$(MSVCNT)/atlmfc/lib" : : win32 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_LinkFlags rule LinkFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+\addindex rule_LinkFlags
+
+For the given project \c TARGET, assign the link \c FLAGS to the appropriate configuration and platform.
+
+\param TARGET The target to assign the link \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of link flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.debug.dll : debug ;
+    LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.dll : release ;
+    LinkFlags ManagedLuaPlus : /KEYFILE:\"$(SEARCH_SOURCE)/ManagedLuaPlus.snk\" ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_LinkLibraries rule LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
+\addindex rule_LinkLibraries
+
+Makes \c TARGET depend on Jam generated \c LIBRARIES and includes them during linking.
+
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param LIBRARIES The list of libraries to apply.  These libraries are those generated from the \ref rule_Library rule.  They do not include prebuilt libraries.  To link prebuilt libraries, use the \ref rule_LinkPrebuiltLibraries rule.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+	LinkLibraries MiniApp : Application LuaPlusStatic Misc ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_LinkPrebuiltLibraries rule LinkPrebuiltLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
+\addindex rule_LinkPrebuiltLibraries
+
+Makes \c TARGET depend on \c LIBRARIES and includes them during linking.
+
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param LIBRARIES The list of libraries to apply.  These libraries are prebuilt libraries, such as kernel32.lib, and are specified without an extension.  For those libraries generated from the \ref rule_Library rule, use the \ref rule_LinkLibraries rule.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    LinkPrebuiltLibraries MiniApp : advapi32 gdi32 ole32 shell32 user32 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_Lump rule Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER : PCH_HEADER_FILENAME : LUMP_EXT : EXTRA_INCLUDE_PATHS
+\addindex rule_Lump
+
+Generates a <tt>.c</tt> or <tt>.cpp</tt> file containing an <tt>\#include</tt> amalgamation of files passed into the rule.
+
+The name of the generated lump file is <tt>\$(LOCATE_SOURCE)/!\$(LUMP_NAME)!.\$(LUMP_EXT)</tt>.  The lump file has the following contents:
+
+<ol>
+<li>If a precompiled header is specified through \c PCH_HEADER and \c PCH_HEADER_FILENAME, a <tt>\#include "$(PCH_HEADER_FILENAME)"</tt> line is added to the lump file.</li>
+<li>For each C-style source specified in \c SOURCES_VARIABLE_NAME that is not excluded from the build via \ref rule_ExcludeFromBuild, a <tt>\#include "filename"</tt> is added to the lump file.</li>
+</ol>
+
+Lumping may be turned off globally by setting the global variable <tt>LUMP</tt> to be <tt>0</tt>.
+
+\param PARENT The parent target to which the lump file belongs.  \c PARENT is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES_VARIABLE_NAME The variable name listing the source files to be added to the lump.  This is not an expanded version through <tt>$(SRCS)</tt> but rather, it is the actual name of the variable, <tt>SRCS</tt>.  On return from the \c Lump rule, \c SOURCES_VARIABLE_NAME will be populated with the gristed name of the lump file.  It will not contain the original file list anymore.
+\param PCH_HEADER (optional) If \c PCH_HEADER is specified, \c PCH_HEADER_FILENAME must also be specified.  \c PCH_HEADER should be the title of the file that is the precompiled header.  That is, if the precompiled header is <tt>StdAfx.cpp</tt>, \c PCH_HEADER must be <tt>StdAfx</tt>.
+\param PCH_HEADER_FILENAME (optional, but required if \c PCH_HEADER is passed in) \c PCH_HEADER_FILENAME is used when building the lump file, as seen above in #1 of the lump file contents.
+\param LUMP_EXT (optional) If a different lump file extension than the default <tt>.cpp</tt> is required, pass it here.  It should not contain the opening period.
+\param EXTRA_INCLUDE_PATHS If additional include paths are needed for this lump file, specify them here.
+
+\code
+    # For the Misc target, use the contents of SRCS to build a lump called
+    # MiscLump.  In addition, this lump should use the precompiled header file
+    # Misc_InternalPch.h.
+    Lump Misc : SRCS : MiscLump : Misc_InternalPch : Misc_InternalPch.h : cpp ;
+
+    # A separate lump in the Misc target is made for PNG_SRCS.  It doesn't have
+    # a precompiled header, but it should be generated as a C file.
+    Lump Misc : PNG_SRCS : PNGLump : : : c ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_MakeLocate rule MakeLocate TARGETS : DIRECTORY
+\addindex rule_MakeLocate
+
+Creates \c DIRECTORY and causes \c TARGETS to be built into the directory.  It does so by setting the special Jam variable \c LOCATE on each of the \c TARGETS and then arranges with \ref rule_MkDir to create the target directory.
+
+\param TARGETS The targets to set the output directory on.
+\param DIRECTORY The output directory to build the targets into.
+
+\code
+    # Set the output location of the given target to be the TEMP directory.
+    MakeLocate junkfile.txt : $(TEMP) ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_MkDir rule MkDir DIRECTORY
+\addindex rule_MkDir
+
+Creates \c DIRECTORY and its parent directories.
+
+If using \c MkDir separately from \ref rule_MakeLocate, it is necessary to set dependencies using the properly gristed directory name obtained through \ref rule_FGristDirectories.
+
+\param DIRECTORY The output directory to create.
+
+\code
+    # Create a directory in the TEMP directory called stuff/.
+    MkDir $(TEMP)/stuff ;
+
+    # Link it into the dependency graph.
+    Depends sometarget : [ FGristDirectories $(TEMP)/stuff ] ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_ObjectCFlags rule ObjectCFlags TARGET : SOURCES : FLAGS [: THE_CONFIG : THE_PLATFORM]
+\addindex rule_ObjectCFlags
+
+For the given \c SOURCES, assign the \c FLAGS to the appropriate configuration and platform.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of sources to assign the \c FLAGS to.
+\param FLAGS The list of flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Assign /clr:oldsyntax to all C files in managedapp across all
+    # configurations and platforms.
+    ObjectCFlags managedapp : somefile.c : /clr:oldsyntax ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_ObjectCppFlags rule ObjectC++Flags TARGET : SOURCES : FLAGS [: THE_CONFIG : THE_PLATFORM]
+\addindex rule_ObjectCppFlags
+
+For the given \c SOURCES, assign the \c FLAGS to the appropriate configuration and platform.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of sources to assign the \c FLAGS to.
+\param FLAGS The list of flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Assign /clr:oldsyntax to all C files in managedapp across all
+    # configurations and platforms.
+    ObjectC++Flags managedapp : somefile.cpp : /clr:oldsyntax ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_ObjectDefines rule ObjectDefines TARGET : SOURCES : DEFINES [: THE_CONFIG : THE_PLATFORM]
+\addindex rule_ObjectDefines
+
+For the given \c SOURCES, assign the \c DEFINES to the appropriate configuration and platform.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of sources to assign the \c DEFINES to.
+\param DEFINES The list of defines to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Make #defines available for ABC and DEF=5 in someproject's justafile.cpp
+	# for all configurations and all platforms.
+    ObjectDefines someproject : justafile.cpp : ABC DEF=5 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_ObjectIncludeDirectories rule ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
+\addindex rule_ObjectIncludeDirectories
+
+For the given \c SOURCES, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of sources to assign the include paths to.
+\param INCLUDEPATHS The list of include paths to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Add $(Code)/Shared to myproject's somefile.cpp for all configurations
+    # and all platforms.
+    ObjectIncludeDirectories myproject : somefile.cpp : $(Code)/Shared ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_OutputName rule OutputName TARGET : NAME : THE_CONFIG : THE_PLATFORM
+\addindex rule_OutputName
+
+By default, the name of a generated executable or library is determined by the name of the \c TARGET.  \c OutputName is used to override the name of the executable or library.
+
+\param TARGET The target to affect the output name change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param NAME The new name of the output target.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Change the name of the LuaPlusShared target to LuaPlus_1100.  When
+    # the shared library is created, the name on disk will be LuaPlus_1100.dll.
+    OutputName LuaPlusShared : LuaPlus_1100 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_OutputPath rule OutputPath TARGET : OUTPUTPATH : THE_CONFIG : THE_PLATFORM
+\addindex rule_OutputPath
+
+By default, the output location of a generated executable or library is at \c LOCATE_TARGET.  \c OutputPath is used to override the output location of the executable or library.
+
+\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param OUTPUTPATH The new output location of the generated target.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Change the name of the LuaPlusShared target to LuaPlus_1100.  When
+	# the shared library is created, the name on disk will be LuaPlus_1100.dll.
+    #
+    # Also change the output location of the generated DLL.
+    OutputName LuaPlusShared : LuaPlus_1100 ;
+    OutputPath LuaPlusShared : "c:/Program Files/LuaPlus" ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_OutputPostfix rule OutputPostfix TARGET : POSTFIX : THE_CONFIG : THE_PLATFORM
+\addindex rule_OutputPostfix
+
+The output postfix is appended to the end of the generated target name.  By default, the output postfix is .\$(CONFIG).  This means the resultant filename is \$(OUTPUTNAME).\$(CONFIG).\$(EXT).
+
+\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param POSTFIX The new output postfix of the generated target.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Change the name of the LuaPlusShared target to LuaPlus_1100.  When
+    # the shared library is created, the name on disk will be LuaPlus_1100.dll.
+    #
+    # Also change the output location of the generated DLL.
+    #
+    # Generate the postfix as follows:
+    #
+    #   * For debug:   LuaPlus_1100.debug.dll
+    #   * For release: LuaPlus_1100.dll
+    OutputName LuaPlusShared : LuaPlus_1100 ;
+    OutputPath LuaPlusShared : "c:/Program Files/LuaPlus" ;
+    OutputPostfix LuaPlusShared : .debug : debug ;
+    OutputPostfix LuaPlusShared : : release ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_OutputSuffix rule OutputSuffix TARGET : SUFFIX : THE_CONFIG : THE_PLATFORM
+\addindex rule_OutputSuffix
+
+The output suffix is the file extension of the generated target.  By default, the output suffix is appropriate for an executable or library.
+
+\param TARGET The target to affect the output suffix change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SUFFIX The new output suffix of the generated target.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # The final name will be SomePlugin.appplugin.
+    OutputSuffix SomePlugin : .appplugin ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_PrecompiledHeader rule PrecompiledHeader TARGET : NAME : FILES
+\addindex rule_PrecompiledHeader
+
+Creates a precompiled header and uses it on the specified \c FILES.
+
+\param TARGET The target to which the precompiled header belongs.  This is needed to properly grist the precompiled header filenames.
+\param NAME This parameter is made up of either one or two filenames.  The first filename is the <tt>.cpp</tt> file used to create the precompiled header.  If it does not contain an extension, <tt>.cpp</tt> is added.  If the second filename is not specified, the default is to use the first filename with its suffix modified to <tt>.h</tt>.  If the second filename is specified, it will represent the header file used for the precompilation.
+\param FILES The list of files to apply the precompiled header to.
+
+\code
+    # For all sources in PCH_SRCS in the Misc project, the precompiled header
+    # will be set to Misc_InternalPch.h.  The precompiled header file is created
+    # from Misc_InternalPch.cpp.
+    PrecompiledHeader Misc : Misc_InternalPch : $(PCH_SRCS) ;
+
+    # The precompiled header stdafx.h is applied to SRCS.  stdafx.cpp is used
+    # to create the precompiled header.
+    PrecompiledHeader SimpleMFC : stdafx.cpp stdafx.h : $(SRCS) ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_Project rule Project PROJECT_NAME : SOURCES
+\addindex rule_Project
+
+When generating a workspace, projects are automatically made of each executable or library processed while reading in the Jamfiles.  When a project isn't an executable or library, such as one containing data files, the \c Project rule can be used to generate a project containing those files.
+
+\param PROJECT_NAME The name of the new project to generate.
+\param SOURCES The list of files representing the contents of the new project.
+
+\code
+    Project Data : $(DATA_FILES) ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_ProjectGroup rule ProjectGroup TARGET : FOLDERNAME : PROJECTS
+\addindex rule_ProjectGroup
+
+For workspaces that support grouping of projects into folders, the \c ProjectGroup rule is used to tell <b>JamToWorkspace</b> which projects go into which folders.
+
+\param TARGET The workspace to which the project folders will be created.
+\param FOLDERNAME The backslash separated folder name to which \c PROJECTS will be inserted into.
+\param PROJECTS The list of projects to put into the folder.
+
+\code
+    ProjectGroup MyApp : "Plugins\\Data Generators" : DataGeneratorA DataGeneratorB ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_RcDefines rule RcDefines TARGET : RESOURCE_NAME : DEFINES
+\addindex rule_RcDefines
+
+To be documented.
+
+
+
+
+
+
+
+<hr>
+\section rule_RcFlags rule RcFlags TARGET : RESOURCE_NAME : FLAGS
+\addindex rule_RcFlags
+
+To be documented.
+
+
+
+
+
+
+
+<hr>
+\section rule_RcIncludeDirectories rule RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
+\addindex rule_RcIncludeDirectories
+
+To be documented.
+
+
+
+
+
+
+
+<hr>
+\section rule_ResourceCompiler rule ResourceCompiler PARENT : SOURCES : OPTIONS
+\addindex rule_ResourceCompiler
+
+Compiles a resource <tt>.rc</tt> file into a <tt>.res</tt> file.
+
+\param PARENT The parent target to which the resource file belongs.  This is needed to properly grist the resource filenames.
+\param SOURCES The <tt>.rc</tt> file to be compiled.
+\param OPTIONS (optional) The following options are available.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c quiet - Typically not user specified.  Used internally by the manifest generation script.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\return Returns the gristed filename of the compiled resource, suitable for passing directly to the \c Application or \c Library rules.
+
+\code
+    # Compile SimpleMFC.rc into SimpleMFC.res.
+    SRCS += [ ResourceCompiler SimpleMFC : SimpleMFC.rc ] ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_RmTemps rule RmTemps TARGETS : SOURCES
+\addindex rule_RmTemps
+
+Marks \c SOURCES as temporary with the \c Temporary rule and deletes \c SOURCES once \c TARGETS are built.  \c RmTemps must be the last rule invoked on \c TARGETS.  Used internally.
+
+
+
+
+
+
+
+<hr>
+\section rule_SearchSource rule SearchSource SOURCES
+\addindex rule_SearchSource
+
+Applies \$(SEARCH_SOURCE) to all \c SOURCES that do not already have a \c SEARCH applied.  Generally, \c SEARCH_SOURCE is applied through rules just as \c Application or \c Library.
+
+\param SOURCES The list of sources to apply \$(SEARCH_SOURCE) to.
+
+\code
+	SearchSource $(SRCS) ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_SourceGroup rule SourceGroup TARGET : FOLDERNAME : SOURCES
+\addindex rule_SourceGroup
+
+For workspace projects that support grouping of files into folders, the \c SourceGroup rule is used to tell <b>JamToWorkspace</b> which files are to be placed into which folders within a project.
+
+\param TARGET The project to which the folders will be created.
+\param FOLDERNAME The backslash separated folder name to which \c SOURCES will be inserted.
+\param SOURCES The list of files to put into the folder.
+
+\code
+	SourceGroup Misc : "zlib" : $(ZLIB_SRCS) ;
+	SourceGroup Misc : "string\\trio" : $(TRIO_SRCS) ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_SubDir rule SubDir TOP d1...dn : SUBNAME
+\addindex rule_SubDir
+
+Sets up housekeeping for the source files located in <tt>$(TOP)/d1/.../dn</tt>:
+
+<ul>
+<li>Reads in rules file associated with \c TOP, if it hasn't already been read.</li>
+<li>Initializes subdirectory specific variables for search paths, output directories, compiler flags, and grist, using <tt>d1...dn</tt> tokens.
+</ul>
+
+\c TOP is the name of a variable; \c d1 thru \c dn are elements of a directory path.
+
+
+
+
+
+
+
+<hr>
+\section rule_SubInclude rule SubInclude VAR d1...dn : FILETITLE
+\addindex rule_SubInclude
+
+Reads the Jamfile in <tt>$(VAR)/d1/.../dn/</tt>.  Assumes a default Jamfile name of <tt>Jamfile.jam</tt>.  If \c FILETITLE is specified, <tt>$(FILETITLE).jam</tt> is read instead of <tt>Jamfile.jam</tt>.
+
+A given Jamfile is only ever read in once, even if multiple \c SubInclude calls are made with the same arguments.
+
+\param VAR A previously specified \c TOP variable created with \ref rule_SubDir.
+\param d1...dn Additional directory components from $(VAR) making up the total path of <tt>$(VAR)/d1/.../dn/</tt>.
+\param FILETITLE (optional) If specified, a Jamfile called <tt>$(FILETITLE).jam</tt> is read instead of the default <tt>Jamfile.jam</tt>.
+
+
+
+
+
+
+<hr>
+\section rule_Workspace rule Workspace SOLUTION_NAME : TARGETS
+\addindex rule_Workspace
+
+Workspaces are automatically generated for any executable processed while reading in the Jamfiles.  To create additional workspaces, such as one that combines all executables into one workspace, the \c Workspace rule is used.
+
+\param SOLUTION_NAME The name of the new solution to generate.
+\param TARGETS The list of targets representing the projects of the new workspace.
+
+\code
+	Workspace Project-all : AppA AppB AppC ;
+\endcode
+
+
+
+
+
+
+<hr>
+*/
+

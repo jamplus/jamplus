@@ -18,7 +18,7 @@ A sampling of the new features in the JamPlus distribution follows:
 <h2>Contents</h2>
 
 <ul>
-<li>\ref commands shows the list of rules available in the default <tt>Jambase.jam</tt>.
+<li>\ref jambase_rules shows the list of rules available in the default <tt>Jambase.jam</tt>.
 </ul>
 */
 
