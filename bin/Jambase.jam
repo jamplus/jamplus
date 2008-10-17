@@ -2163,6 +2163,10 @@ rule UsePrecompiledHeader TARGET : NAME : HEADER : FILES
 
 rule PrecompiledHeader TARGET : NAME : FILES
 {
+	if ! $(NAME[1]:S)
+	{
+		NAME[1] = $(NAME[1]:S=.cpp) ;
+	}
 	NAME[2] ?= $(NAME[1]:S=.h) ;
 	CreatePrecompiledHeader $(TARGET) : $(NAME[1]) : $(NAME[2]) ;
 	UsePrecompiledHeader $(TARGET) : $(NAME[1]) : $(NAME[2]) : $(FILES) ;
