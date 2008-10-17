@@ -567,6 +567,12 @@ rule IncludeModule MODULE_NAME
 }
 
 
+rule FGristDirectories DIRECTORIES
+{
+	return $(DIRECTORIES:G=!dir!) ;
+}
+
+
 rule MakeLocate
 {
 	# MakeLocate targets : directory ;
