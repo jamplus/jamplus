@@ -8,7 +8,7 @@ rule TestMD5
     }
 }
 
-if BUILTIN_MD5 in $(PATCHED_JAM_VERSION)
+#if BUILTIN_MD5 in $(PATCHED_JAM_VERSION)
 {
     # These are part of RFC 1321
     TestMD5 "" : d41d8cd98f00b204e9800998ecf8427e ;
@@ -34,7 +34,7 @@ if BUILTIN_MD5 in $(PATCHED_JAM_VERSION)
 
     EXIT "Done with MD5 test, exiting..." ;
 }
-else
-{
-    ECHO "Skip MD5 test -- BUILTIN_MD5 not in PATCHED_JAM_VERSION." ;
-}
+#else
+#{
+#    ECHO "Skip MD5 test -- BUILTIN_MD5 not in PATCHED_JAM_VERSION." ;
+#}
