@@ -148,7 +148,7 @@ After parsing, \b Jam recursively descends the dependency graph and binds every 
 
 \subsubsection operation_binding_targets Targets
 
-Any string value in \b Jam can represent a target, and it does so if the \ref rule_Depends "Depends" or \ref rule_Includes "Includes" rules make it part of the dependency graph. <i>Build targets</i> are files to be updated. <i>Source targets</i> are the files used in updating build targets. Build targets and source targets are collectively referred to as file targets, and frequently build targets are source targets for other build targets. <i>Pseudotargets</i> are symbols which represent dependencies on other targets, but which are not themselves associated with any real file.
+Any string value in \b Jam can represent a target, and it does so if the \ref rule_Depends "Depends", \ref rule_Includes "Includes", or \ref rule_Needs "Needs" rules make it part of the dependency graph. <i>Build targets</i> are files to be updated. <i>Source targets</i> are the files used in updating build targets. Build targets and source targets are collectively referred to as file targets, and frequently build targets are source targets for other build targets. <i>Pseudotargets</i> are symbols which represent dependencies on other targets, but which are not themselves associated with any real file.
 
 A file target's identifier is generally the file's name, which can be absolutely rooted, relative to the directory of jam's invocation, or simply local (no directory). Most often it is the last case, and the actual file path is bound using the \$(BINDING), \$(SEARCH), and \$(LOCATE) special variables. See \ref language_built_in_variables_binding_search_locate below. A local filename is optionally qualified with "grist," a string value used to assure uniqueness. A file target with an identifier of the form <i>file(member)</i> is a library member (usually an ar(1) archive on UNIX).
 
@@ -422,6 +422,7 @@ Define a rule's procedure, replacing any previous definition.  If \em vars are p
 
 
 
+\anchor statements_switch
 <tt>
 switch \em value<br>
 {<br>
@@ -631,6 +632,26 @@ A variable element's string value can be parsed into grist and filename-related 
 	<td>Convert all forward slashes (/) to backslashes (\\).</td>
   </tr>
   <tr>
+    <td><code> :I=<i>regex</i> </code></td>
+	<td>Include all list items matching <i>regex</i>.  Remove everything else.</td>
+  </tr>
+  <tr>
+    <td><code> :X=<i>regex</i> </code></td>
+	<td>Exclude all list items matching <i>regex</i>.  Keep everything else.</td>
+  </tr>
+  <tr>
+    <td><code> :W=<i>wildcard</i> </code></td>
+	<td>Populate the list with directory contents matching <i>wildcard</i>.</td>
+  </tr>
+  <tr>
+    <td><code> :A </code></td>
+	<td>Expand literal.</td>
+  </tr>
+  <tr>
+    <td><code> :T </code></td>
+	<td>Expand bound name.</td>
+  </tr>
+  <tr>
     <td><code> :<i>chars</i> </code></td>
 	<td>Select the components listed in <i>chars</i>.</td>
   </tr>
@@ -676,19 +697,26 @@ On VMS, \$(var:P) is the parent directory of \$(var:D); on Unix and NT, \$(var:P
 
 \subsection language_built_in_rules Built-in Rules
 
-Jam has twelve built-in rules, all of which are pure procedure rules without updating actions. They are in three groups: the first builds the dependency graph; the second modifies it; and the third are just utility rules.
+\b Jam has a number built-in rules, all of which are pure procedure rules without updating actions. They are in three groups: the first builds the dependency graph; the second modifies it; and the third are just utility rules.
 
 \subsubsection language_built_in_rules_dependency_building Dependency Building
 
+\anchor rule_Depends
+\anchor rule_Includes
+\anchor rule_Needs
 <table width=75% align=center>
   <tr>
     <td><dl>
+	<dt><code>
 	\anchor rule_Depends
-	<dt><code> Depends <i>targets1</i> : <i>targets2</i> ; </code>
-	<dd>Builds a direct dependency: makes each of <i>targets1</i> depend on each of <i>targets2</i>.  Generally, <i>targets1</i> will be rebuilt if <i>targets2</i> are themselves rebuilt are or are newer than <i>targets1</i>.</td>
+	Depends <i>targets1</i> : <i>targets2</i> [ : <i>target3</i> ... <i>targets9</i> ] ; </code>
+	<dd>Builds a direct dependency: makes each of <i>targets1</i> depend on each of <i>targets2</i>.  Generally, <i>targets1</i> will be rebuilt if <i>targets2</i> are themselves rebuilt are or are newer than <i>targets1</i>.
 
+    As a simplification when specifying multi-level dependencies, <i>targets2</i> depend on the optional <i>targets3</i>, and so on.</td>
+
+    <dt><code>
 	\anchor rule_Includes
-    <dt><code>Includes <i>targets1</i> : <i>targets2</i> ;</code></td>
+	Includes <i>targets1</i> : <i>targets2</i> [ : <i>target3</i> ... <i>targets9</i> ] ; </code>
 	<dd>Builds a sibling dependency: makes any target that depends on any of <i>targets1</i> also depend on each of <i>targets2</i>. This reflects the dependencies that arise when one source file includes another:  the object built from the source file depends both on the original and included source file,  but the two sources files don't depend on each other.  For example:
 
 	<code>
@@ -698,6 +726,15 @@ Jam has twelve built-in rules, all of which are pure procedure rules without upd
 
 	"foo.o" depends on "foo.c" and "foo.h" in this example.
 
+    As a simplification when specifying multi-level dependencies, <i>targets2</i> depend on the optional <i>targets3</i>, and so on.
+
+	<dt><code>
+	\anchor rule_Needs
+	Needs <i>targets1</i> : <i>targets2</i> [ : <i>target3</i> ... <i>targets9</i> ] ; </code>
+	<dd>Needs is very similar to \ref rule_Depends.  Like Depends, <i>targets1</i> are dependent on <i>targets2</i> having been built first.  Unlike Depends, if <i>targets2</i> are updated, <i>targets1</i> do not build.
+
+    As a simplification when specifying multi-level dependencies, <i>targets2</i> depend on the optional <i>targets3</i>, and so on.
+
 	</td>
   </tr>
 </table>
@@ -706,48 +743,60 @@ Jam has twelve built-in rules, all of which are pure procedure rules without upd
 
 \subsubsection language_built_in_rules_modifying_binding Modifying Binding
 
-The six rules ALWAYS, LEAVES, NOCARE, NOTFILE, NOUPDATE, and TEMPORARY modify the dependency graph so that <b>jam</b> treats the targets differently during its target binding phase.  See <A HREF="#binding">Binding</A> above.  Normally, <b>jam</b> updates a target if it is missing, if its filesystem modification time is older than any of its dependencies (recursively), or if any of its dependencies are being updated.  This basic behavior can be changed by invoking the following rules:
+The rules \ref rule_Always "Always", \ref rule_Leaves "Leaves", \ref rule_MightNotUpdate "MightNotUpdate", \ref rule_NoCare "NoCare", \ref rule_NotFile "NotFile", \ref rule_NoUpdate "NoUpdate", and \ref rule_Temporary "Temporary" modify the dependency graph so that \b Jam treats the targets differently during its target binding phase.  See \ref operation_binding above.  Normally, \b Jam updates a target if it is missing, if its filesystem modification time is older than any of its dependencies (recursively), or if any of its dependencies are being updated.  This basic behavior can be changed by invoking the following rules:
 
 <table width=75% align=center>
   <tr>
     <td><dl>
 
 	<dt><code>
-	ALWAYS <i>targets</i> ;
+	\anchor rule_Always
+	Always <i>targets</i> ;
 	</code>
 
-	<dd> Causes <i>targets</i> to be rebuilt regardless of whether they are up-to-date (they must still be in the dependency graph).  This is used for the clean and uninstall targets, as they have no dependencies and would otherwise appear never to need building.  It is best applied to targets that are also NOTFILE targets, but it can also be used to force a real file to be updated as well.
+	<dd> Causes <i>targets</i> to be rebuilt regardless of whether they are up-to-date (they must still be in the dependency graph).  This is used for the clean and uninstall targets, as they have no dependencies and would otherwise appear never to need building.  It is best applied to targets that are also NotFile targets, but it can also be used to force a real file to be updated as well.
 
 	<dt><code>
-	LEAVES <i>targets</i> ;
+	\anchor rule_Leaves
+	Leaves <i>targets</i> ;
 	</code>
 
 	<dd> Makes each of <i>targets</i> depend only on its leaf sources, and not on any intermediate targets.  This makes it immune to its dependencies being updated, as the "leaf" dependencies are those without their own dependencies and without updating actions. This allows a target to be updated only if original source files change.
 
+	<dt><code>
+	\anchor rule_MightNotUpdate
+	MightNotUpdate <i>targets</i> ;
+	</code>
+
+	<dd> Some targets may or may not update when their action is executed, such as export libraries for a Windows DLL.  In order for \b Jam to process this behavior appropriately, the <i>targets</i> must be marked so their timestamps will be evaluated at the latest possible time during the \ref operation_updating.
+
+    <dt><code>
 	\anchor rule_NoCare
-	<dt><code>
-	NOCARE <i>targets</i> ;
+	NoCare <i>targets</i> ;
 	</code>
 
-	<dd> Causes <b>jam</b> to ignore <i>targets</i> that neither can be found nor have updating actions to build them.  Normally for such targets <b>jam</b> issues a warning and then skips other targets that depend on these missing targets.  The HdrRule in Jambase uses NOCARE on the header file names found during header file scanning, to let <b>jam</b> know that the included files may not exist.   For example,  if a #include is within an #ifdef, the included file may not actually be around.
+	<dd> Causes \b Jam to ignore <i>targets</i> that neither can be found nor have updating actions to build them.  Normally for such targets \b Jam issues a warning and then skips other targets that depend on these missing targets.  The HdrRule in Jambase uses NoCare on the header file names found during header file scanning, to let \b Jam know that the included files may not exist.   For example,  if a \#include is within an \#ifdef, the included file may not actually be around.
 
 	<dt><code>
-	NOTFILE <i>targets</i> ;
+	\anchor rule_NotFile
+	NotFile <i>targets</i> ;
 	</code>
 
-	<dd> Marks <i>targets</i> as pseudotargets and not real files. No timestamp is checked, and so the actions on such a target are only executed if the target's dependencies are updated, or if the target is also marked with ALWAYS.  The default <b>jam</b> target "all" is a pseudotarget. In Jambase, NOTFILE is used to define several addition convenient pseudotargets.
+	<dd> Marks <i>targets</i> as pseudotargets and not real files. No timestamp is checked, and so the actions on such a target are only executed if the target's dependencies are updated, or if the target is also marked with Always.  The default <b>jam</b> target "all" is a pseudotarget. In Jambase, NotFile is used to define several addition convenient pseudotargets.
 
 	<dt><code>
-	NOUPDATE <i>targets</i> ;
+	\anchor rule_NoUpdate
+	NoUpdate <i>targets</i> ;
 	</code>
 
-	<dd> Causes the timestamps on <i>targets</i> to be ignored. This has two effects:  first,  once the target has been created it will never be updated; second, manually updating target will not cause other targets to be updated.  In Jambase, for example, this rule is applied to directories by the MkDir rule, because MkDir only cares that the target directory exists, not when it has last been updated.
+	<dd> Causes the timestamps on <i>targets</i> to be ignored. This has two effects:  first,  once the target has been created it will never be updated; second, manually updating target will not cause other targets to be updated.  In Jambase, for example, this rule is applied to directories by the MkDir rule, because \ref rule_MkDir only cares that the target directory exists, not when it has last been updated.
 
 	<dt><code>
-	TEMPORARY <i>targets</i> ;
+	\anchor rule_Temporary
+	Temporary <i>targets</i> ;
 	</code>
 
-	<dd> Marks <i>targets</i> as temporary, allowing them to be removed after other targets that depend upon them have been updated.  If a TEMPORARY target is missing, <b>jam</b> uses the timestamp of the target's parent.  Jambase uses TEMPORARY to mark object files that are archived in a library after they are built, so that they can be deleted after they are archived.
+	<dd> Marks <i>targets</i> as temporary, allowing them to be removed after other targets that depend upon them have been updated.  If a Temporary target is missing, \b Jam uses the timestamp of the target's parent.  Jambase uses Temporary to mark object files that are archived in a library after they are built, so that they can be deleted after they are archived.
 
 </table>
 
@@ -764,30 +813,85 @@ The remaining rules are utility rules.
     <td><dl>
 
 	<dt><code>
+	\anchor rule_Echo
 	Echo <i>args</i> ;
 	</code>
 
 	<dd> Prints out the message <i>args</i> to stdout.
 
 	<dt><code>
+	\anchor rule_Exit
 	Exit <i>args</i> ;
 	</code>
 
 	<dd> Blurts out the message <i>args</i> to stdout and then exits with a failure status.
 
 	<dt><code>
-	Glob <i>directories</i> : <i>patterns</i> ;
+	\anchor rule_Glob
+	Glob <i>directories</i> : <i>patterns</i> [ : <i>prepend</i> ] ;
 	</code>
 
-	<dd> Scans <i>directories</i> for files matching <i>patterns</i>, returning the list of matching files (with directory prepended).  <i>patterns</i> uses the same syntax as in the <b>switch</b> statement.  Only useful within the <tt>[ ]</tt> construct, to change the result into a list.
+	<dd> Scans <i>directories</i> for files matching <i>patterns</i>, returning the list of matching files (with directory prepended, unless the optional <i>prepend</i> is set to \c 0 or \c false).  <i>patterns</i> uses the same syntax as in the \ref statements_switch "switch" statement.  Only useful within the <tt>[ ]</tt> construct, to change the result into a list.
+
+	\code
+    # Returns all files and directories.  Directories have a / appended.
+    # Directories . and .. are not returned.
+    Glob bin : * ;
+
+    # Returns just directories.
+    Glob bin : */ ;
+
+    # Returns just files without bin/ prepended.
+    Glob bin : *[^/] : 0;
+	\endcode
+
 
 	<dt><code>
+	\anchor rule_Match
 	Match <i>regexps</i> : <i>list</i> ;
 	</code>
 
 	<dd> Matches the <b>egrep</b>(1) style regular expressions <i>regexps</i> against the strings in <i>list</I>.  The result is the concatenation of matching <tt>()</tt> subexpressions for each string in <i>list</I>, and for each regular expression in <i>regexps</I>.  Only useful within the <tt>[ ]</tt> construct, to change the result into a list.
 
-	</dl>
+
+	<dt><code>
+	\anchor rule_Math
+	Math <i>left</i> <i>operator</i> <i>right</i> ;
+	</code>
+
+	<dd> Calculates the result of the simple math equation.  Only useful within the <tt>[ ]</tt> construct, to change the resultant md5sum into a list.
+
+	** FILL ME IN **
+
+
+	<dt><code>
+	\anchor rule_MD5
+	MD5 <i>list</i> [ : <list2> ... ] ;
+	</code>
+
+	<dd> Calculates the md5sum of all lists and their respective list elements.Each list element is separated with one NUL character, so that <tt>[ MD5 a b ]</tt> is different than <tt>[ MD5 ab ]</tt>.  Each list is separated with two NUL characters so that <tt>[ MD5 a : b ]</tt> is different than <tt>[ MD5 a b ]</tt>.  Only useful within the <tt>[ ]</tt> construct, to change the resultant md5sum into a list.
+
+	\code
+	# Prints d41d8cd98f00b204e9800998ecf8427e.
+    Echo [ MD5 "" ] ;
+
+	# Returns c3fcd3d76192e4007dfb496cca67e13b.
+    Echo [ MD5 "abcdefghijklmnopqrstuvwxyz" ] ;
+	\endcode
+
+
+	<dt><code>
+	\anchor rule_MD5File
+	MD5File <i>filename_list</i> [ : <filename_list2> ... ] ;
+	</code>
+
+	<dd> Calculates the md5sum of all listed files.  Only useful within the <tt>[ ]</tt> construct, to change the resultant md5sum into a list.
+
+	\code
+    Echo [ MD5File "myfile.txt" ] ;
+	\endcode
+
+    </dl>
 
 </table>
 
