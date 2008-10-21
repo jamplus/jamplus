@@ -2059,20 +2059,26 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		hasExportLib = ;
 	}
 
+	local _linkTargets = $(_t) ;
+
 	local _tlib ;
 	if $(hasExportLib)
 	{
-		_tlib = @($(TARGET)$(SUFLIB):G=$(grist)) ;
+		local _tlib = @($(TARGET)$(SUFLIB):G=$(grist)) ;
 		BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
-		Needs $(_tlib) : $(_s) ;
+		Depends $(TARGET) : $(_tlib) ;
+		Depends $(_tlib) : $(_t) ;
+		MightNotUpdate $(_tlib) ;
+		_linkTargets += $(_tlib) ;
 	}
-
-	local _linkTargets = $(_t) $(_tlib) ;
+	else
+	{
+		Depends $(TARGET) : $(_t) ;
+	}
 
 	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 
 	Depends exe : $(TARGET) ;
-	Depends $(TARGET) : $(_linkTargets) ;
 	NotFile $(TARGET) ;
 	Depends $(_t) : $(_s) ;
 	MakeLocate $(_linkTargets) : $(outputPath) ;
@@ -2108,10 +2114,6 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		[ _retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar NEEDLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
 	Depends $(_t) : [ on $(_t) Var NEEDLIBS ] ;
-	if $(hasExportLib)
-	{
-		Needs $(_tlib) : [ on $(_t) Var NEEDLIBS ] ;
-	}
 
 	if $(MSVCNT)
 	{

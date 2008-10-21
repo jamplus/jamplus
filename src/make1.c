@@ -273,6 +273,10 @@ make1b( TARGET *t )
 #ifdef OPT_MULTIPASS_EXT
 	int missing = 0;
 #endif
+#ifdef OPT_BUILTIN_NEEDS_EXT
+	int childmightnotupdate = 0;
+	int childupdated = 0;
+#endif
 
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
 	if (DEBUG_MAKE1) {
@@ -315,6 +319,28 @@ make1b( TARGET *t )
 	    if ( !(t->flags & T_FLAG_INTERNAL) && c->target->asynccnt ) {
 //			printf("warning: Trying to build '%s' before dependent '%s' is done!\n", t->name, c->target->name);
 		}
+#ifdef OPT_BUILTIN_NEEDS_EXT
+	    /* Only test a target's MightNotUpdate flag if the target's build was successful. */
+	    if( c->target->status == EXEC_CMD_OK ) {
+		if ( c->target->flags & T_FLAG_MIGHTNOTUPDATE ) {
+		    time_t timestamp;
+
+		    /* Mark that we've seen a MightNotUpdate flag in this set of children. */
+		    childmightnotupdate = 1;
+
+		    /* Grab the generated target's timestamp. */
+		    if ( file_time( c->target->boundname, &timestamp ) == 0 ) {
+			/* If the child's timestamp is greater that the target's timestamp, then it updated. */
+			if ( timestamp > t->time )
+			    childupdated = 1;
+		    }
+		}
+		/* If it didn't have the MightNotUpdate flag but did update, mark it. */
+		else if ( c->target->fate > T_FATE_STABLE )
+		    childupdated = 1;
+	    }
+#endif
+
 	    if( c->target->status > t->status )
 	{
 	    failed = c->target->name;
@@ -341,6 +367,12 @@ make1b( TARGET *t )
 	}
 #endif
 	}
+
+#ifdef OPT_BUILTIN_NEEDS_EXT
+	/* If we found a MightNotUpdate flag and there was an update, mark the fate as updated. */
+	if ( childmightnotupdate  &&  childupdated  &&  t->fate == T_FATE_STABLE )
+	    t->fate = T_FATE_UPDATE;
+#endif
 
 	/* If actions on deps have failed, bail. */
 	/* Otherwise, execute all actions to make target */

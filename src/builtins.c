@@ -187,6 +187,9 @@ load_builtins()
 #endif
 
 #ifdef OPT_BUILTIN_NEEDS_EXT
+    bindrule( "MightNotUpdate" )->procedure = 
+    	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_MIGHTNOTUPDATE );
+
     bindrule( "Needs" )->procedure =
     bindrule( "NEEDS" )->procedure =
 	parse_make( builtin_depends, P0, P0, P0, C0, C0, 2 );
