@@ -1,0 +1,111 @@
+/*! \page usage Usage
+
+<pre>
+jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
+    [ -C <i>workdir</i> ]
+    [ -d <i>debug</i> ]
+    [ -f <i>jambase</i> ]
+    [ -j <i>jobs</i> ]
+    [ -o <i>actionsfile</i> ]
+    [ -s <i>var</i>=<i>value</i> ]
+    [ -t <i>target</i> ]
+    [ <i>target</i> ... ]
+</pre>
+
+If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target;</I> otherwise <b>jam</b> builds the target 'all'.
+
+<b>Jam</b> may be invoked with the following options:
+
+<table width=85% align=center border=1 cellpadding=2>
+  <tr>
+    <td valign=top width=20%><code> -a </code>
+	<td> Build all targets anyway, even if they are up-to-date.
+
+  <tr>
+    <td valign=top><code> -C <i>workdir</i>  </code>
+	<td> Set the \b Jam current working directory to \em workdir.
+
+  <tr>
+    <td valign=top><code> -d <i>c</i>  </code>
+	<td> Turn on display option <i>c</i> and off the default display (summary info and actions):
+
+      <dl>
+	    <dt> a <dd> Show summary info, actions, quiet actions, and the use of temporary targets
+	    <dt> c <dd> Show the names of files that cause rebuilds, i.e. new sources, missing targets, etc.
+	    <dt> d <dd> Display a dependency graph (in <b>jam</b> syntax).
+	    <dt> f <dd> Display fate changes.
+	    <dt> g <dd> Display a detailed hierarchical dependency graph.
+	    <dt> m <dd> Display the dependency analysis, and target/source timestamps and paths
+	    <dt> x <dd> Show shell arguments
+      </dl>
+
+  <tr>
+    <td valign=top><code> -d <i>n</i>  </code>
+    <td> Enable cumulative debugging levels from 1 to <i>n</I>.  Interesting values are:
+
+      <dl>
+	    <dt> 1 <dd> Show actions and summary info (the default)
+	    <dt> 2 <dd> Show text of actions
+	    <dt> 3 <dd> Show progress of make.  Show files when bound
+	    <dt> 4 <dd> Show execcmd()'s work
+	    <dt> 5 <dd> Show rule invocations and variable expansions
+	    <dt> 6 <dd> Show directory/header file/archive scans
+	    <dt> 7 <dd> Show variable settings
+	    <dt> 8 <dd> Show variable fetches and expansions.  Show 'if' calculations.
+	    <dt> 9 <dd> Show variable manipulation, scanner tokens.  Show memory use.
+      </dl>
+
+  <tr>
+    <td valign=top><code> -d +<I>n</i> </code>
+    <td> Enable debugging level <i>n</I>.
+
+  <tr>
+    <td valign=top><code> -d 0 </code>
+    <td> Turn off all debugging levels.  Only errors are emitted.
+
+  <tr>
+	<td valign=top><code> -f <i>jambase</I></code>
+	<td>Read <i>jambase</i> instead of using the built-in Jambase.  Multiple -f flags are permitted.
+
+  <tr>
+    <td valign=top><code> -g </code>
+    <td> Build targets with the newest sources first, rather than in the order of appearance in the Jambase/Jamfiles.
+
+  <tr>
+    <td valign=top><code> -j <i>n</I></code>
+    <td> Run up to <i>n</i> shell commands concurrently (UNIX and NT only).  The default is 1.
+
+  <tr>
+    <td valign=top><code> -n</code>
+    <td> Don't actually execute the updating actions, but do everything else.  This changes the debug level to -dax.
+
+  <tr>
+    <td valign=top><code> -o <i>file</I></code>
+	<td> Write the updating actions to the specified file instead of running them (or outputting them, as on the Mac).
+
+  <tr>
+    <td valign=top><code> -q </code>
+	<td> Quit quickly (as if an interrupt was received) as soon as any target build fails.
+
+  <tr>
+    <td valign=top><code> -s <i>var</I>=<I>value</I></code>
+	<td> Set the variable <i>var</i> to <i>value</I>, overriding both internal variables and variables imported from the environment.
+
+  <tr>
+    <td valign=top><code> -t <i>target</I></code>
+    <td> Rebuild <i>target</i> and everything that depends on it, even if it is up-to-date.
+
+  <tr>
+    <td valign=top><code> -T </code>
+    <td> Toggle printing of the target's bound name (full path).
+
+  <tr>
+    <td valign=top><code> -v</code>
+    <td> Print the version of <b>jam</b> and exit.
+
+</table>
+
+
+
+
+*/

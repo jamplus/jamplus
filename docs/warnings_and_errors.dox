@@ -1,0 +1,51 @@
+/*! \page warnings_and_errors Warnings and Errors
+
+In addition to generic error messages, <b>jam</b> may emit one of the following:
+
+<table width=75% align=center>
+  <tr>
+    <td><dl>
+
+       <dt><code> warning: unknown rule X </code> <dd>
+
+              A rule was invoked that has not been defined with an "actions" or "rule" statement.
+
+       <dt><code> using N temp target(s) </code> <dd>
+
+              Targets marked as being temporary (but nonetheless present) have been found.
+
+       <dt><code> updating N target(s) </code> <dd>
+
+              Targets are out-of-date and will be updated.
+
+       <dt><code> can't find N target(s) </code> <dd>
+
+              Source files can't be found and there are no actions to create them.
+
+       <dt><code> can't make N target(s) </code> <dd>
+
+              Due to sources not being found, other targets cannot be made.
+
+       <dt><code> warning: X depends on itself </code> <dd>
+
+              A target depends on itself either directly or through its sources.
+
+       <dt><code> don't know how to make X </code> <dd>
+
+              A target is not present and no actions have been defined to create it.
+
+       <dt><code> X skipped for lack of Y </code> <dd>
+
+              A source failed to build, and thus a target cannot be built.
+
+       <dt><code> warning: using independent target X </code> <dd>
+
+              A target that is not a dependency of any other target is being referenced with \$(&lt;) or \$(&gt;).
+
+       <dt><code> X removed </code> <dd>
+
+              <b>Jam</b>  removed a  partially built target after being interrupted.
+
+	</dl></table>
+
+*/

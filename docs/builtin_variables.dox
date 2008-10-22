@@ -1,0 +1,112 @@
+/*! \page builtin_variables Built-in Variables
+
+\section builtin_variables_intro Introduction
+
+This section discusses variables that have special meaning to \b Jam.
+
+\section built_in_variables_binding_binding_search_locate BINDING, SEARCH, and LOCATE Variables
+
+These variables control the binding of file target names to locations in the file system.  Generally, \$(SEARCH) is used to find existing sources while \$(LOCATE) is used to fix the location for built targets.
+
+Rooted (absolute path) file targets are bound as is.  Unrooted file target names are also normally bound as is, and thus relative to the current directory, but the settings of \$(LOCATE) and \$(SEARCH) alter this:
+
+<ul>
+  <li> If \$(LOCATE) is set then the target is bound relative to the first directory in $(LOCATE).  Only the first element is used for binding.
+  <li> If \$(SEARCH) is set then the target is bound to the first directory in \$(SEARCH) where the target file already exists.
+  <li> If the \$(SEARCH) search fails, the target is bound relative to the current directory anyhow.
+</ul>
+
+Both \$(SEARCH) and \$(LOCATE) should be set target-specific and not globally.  If they were set globally,  <b>jam</b> would use the same paths for all file binding, which is not likely to produce sane results.  When writing your own rules,  especially ones not built upon those in Jambase, you may need to set \$(SEARCH) or \$(LOCATE) directly.  Almost all of the rules defined in Jambase set \$(SEARCH) and \$(LOCATE) to sensible values for sources they are looking for and targets they create, respectively.
+
+
+
+
+
+
+
+\section built_in_variables_hdrscan HDRSCAN and HDRRULE Variables
+
+These two variables control header file scanning.  \$(HDRSCAN) is an <b>egrep</b>(1) pattern, with ()'s surrounding the file name, used to find file inclusion statements in source files.  Jambase uses \$(HDRPATTERN) as the pattern for \$(HDRSCAN).  \$(HDRRULE) is the name of a rule to invoke with the results of the scan: the scanned file is the target, the found files are the sources.  \$(HDRRULE) is run under the influence of the scanned file's target-specific variables.
+
+Both \$(HDRSCAN) and \$(HDRRULE) must be set for header file scanning to take place, and they should be set target-specific and not globally.  If they were set globally, all files, including executables and libraries, would be scanned for header file include statements.
+
+The scanning for header file inclusions is not exact, but it is at least dynamic, so there is no need to run something like <b>makedepend</b>(GNU) to create a static dependency file. The scanning mechanism errs on the side of inclusion (i.e., it is more likely to return filenames that are not actually used by the compiler than to miss include files) because it can't tell if \#include lines are inside \#ifdefs or other conditional logic.  In Jambase, HdrRule applies the NOCARE rule to each header file found during scanning so that if the file isn't present yet doesn't cause the compilation to fail, <b>jam</b> won't care.
+
+Also, scanning for regular expressions only works where the included file name is literally in the source file.  It can't handle languages that allow including files using variable names (as the Jam language itself does).
+
+
+
+
+
+
+
+\section built_in_variables_platform Platform Identifier Variables
+
+A number of Jam built-in variables can be used to identify runtime platform:
+
+<table width=75% align=center>
+  <tr><td>OS<td>OS identifier string
+  <tr><td>OSPLAT<td>Underlying architecture, when applicable
+  <tr><td>MAC<td>true on MAC platform
+  <tr><td>NT<td>true on NT platform
+  <tr><td>OS2<td>true on OS2 platform
+  <tr><td>UNIX<td>true on Unix platforms
+  <tr><td>VMS<td>true on VMS platform
+</table>
+
+
+
+
+
+
+
+\section language_built_in_variables_version Jam Version Variables
+
+<table width=75% align=center>
+  <tr><td>JAMDATE<td>Time and date at <b>jam</b> start-up.
+  <tr><td>JAMUNAME<td>Ouput of <b>uname</b>(1) command (Unix only)
+  <tr><td>JAMVERSION<td><b>jam</b> version, as reported by jam -v.
+</table>
+
+
+
+
+
+
+
+\section built_in_variables_jamshell JAMSHELL Variable
+
+When <b>jam</b> executes a rule's action block, it forks and execs a shell, passing the action block as an argument to the shell.   The invocation of the shell can be controlled by \$(JAMSHELL).  The default on Unix is, for example:
+
+<code>JAMSHELL = /bin/sh -c % ;</code>
+
+The % is replaced with the text of the action block.
+
+<b>Jam</b>  does not directly support building in parallel across multiple hosts, since that is heavily dependent on the local environment.   To build in parallel across multiple hosts, you need to write your own shell that provides access to the multiple hosts.  You then reset $(JAMSHELL) to reference it.
+
+Just as <b>jam</b> expands a % to be the text of the rule's action block, it expands a ! to be the multi-process slot number.  The slot number varies between 1 and the number of concurrent jobs permitted by the -j flag given on the command line.  Armed with this, it is possible to write a multiple host shell.  For example:
+
+\code
+    #!/bin/sh
+
+    # This sample JAMSHELL uses the SunOS on(1) command to execute a
+    # command string with an identical environment on another host.
+
+    # Set JAMSHELL = jamshell ! %
+    #
+    # where jamshell is the name of this shell file.
+    #
+    # This version handles up to -j6; after that they get executed
+    # locally.
+
+    case $1 in
+    1|4) on winken sh -c "$2";;
+    2|5) on blinken sh -c "$2";;
+    3|6) on nod sh -c "$2";;
+    *)   eval "$2";;
+    esac
+\endcode
+
+<hr>
+*/
+

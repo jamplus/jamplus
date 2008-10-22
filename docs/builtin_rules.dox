@@ -1,0 +1,285 @@
+/*! \page builtin_rules Built-in Rules
+
+\section builtin_rules_intro Introduction
+
+\b Jam has a number built-in rules, all of which are pure procedure rules without updating actions. They are in three groups: the first builds the dependency graph; the second modifies it; and the third are just utility rules.
+
+<br>
+
+\htmlonly <center> \endhtmlonly
+\section language_built_in_rules_dependency_building Dependency Building
+\htmlonly </center> \endhtmlonly
+
+\secreflist
+\refitem rule_Depends Depends
+\refitem rule_Includes Includes
+\refitem rule_Needs Needs
+\endsecreflist
+
+<hr>
+\section rule_Depends rule Depends targets1 : targets2 [ : target3 ... targets9 ] ;
+\addindex rule_Depends
+
+Builds a direct dependency: makes each of <i>targets1</i> depend on each of <i>targets2</i>.  Generally, <i>targets1</i> will be rebuilt if <i>targets2</i> are themselves rebuilt are or are newer than <i>targets1</i>.
+
+As a simplification when specifying multi-level dependencies, <i>targets2</i> depend on the optional <i>targets3</i>, and so on.</td>
+
+<hr>
+\section rule_Includes rule Includes <i>targets1</i> : <i>targets2</i> [ : <i>target3</i> ... <i>targets9</i> ] ;
+\addindex rule_Includes
+
+Builds a sibling dependency: makes any target that depends on any of <i>targets1</i> also depend on each of <i>targets2</i>. This reflects the dependencies that arise when one source file includes another:  the object built from the source file depends both on the original and included source file,  but the two sources files don't depend on each other.  For example:
+
+\code
+    Depends foo.o : foo.c ;
+    Includes foo.c : foo.h ;
+\endcode
+
+"foo.o" depends on "foo.c" and "foo.h" in this example.
+
+As a simplification when specifying multi-level dependencies, <i>targets2</i> depend on the optional <i>targets3</i>, and so on.
+
+<hr>
+\section rule_Needs rule Needs <i>targets1</i> : <i>targets2</i> [ : <i>target3</i> ... <i>targets9</i> ] ;
+\addindex rule_Depends
+
+Needs is very similar to \ref rule_Depends.  Like Depends, <i>targets1</i> are dependent on <i>targets2</i> having been built first.  Unlike Depends, if <i>targets2</i> are updated, <i>targets1</i> do not build.
+
+As a simplification when specifying multi-level dependencies, <i>targets2</i> depend on the optional <i>targets3</i>, and so on.
+
+
+
+
+<br>
+\htmlonly <center> \endhtmlonly
+\section language_built_in_rules_modifying_binding Modifying Binding
+\htmlonly </center> \endhtmlonly
+
+The rules \ref rule_Always "Always", \ref rule_Leaves "Leaves", \ref rule_MightNotUpdate "MightNotUpdate", \ref rule_NoCare "NoCare", \ref rule_NotFile "NotFile", \ref rule_NoUpdate "NoUpdate", and \ref rule_Temporary "Temporary" modify the dependency graph so that \b Jam treats the targets differently during its target binding phase.  See \ref operation_binding above.  Normally, \b Jam updates a target if it is missing, if its filesystem modification time is older than any of its dependencies (recursively), or if any of its dependencies are being updated.  This basic behavior can be changed by invoking the following rules:
+
+\secreflist
+\refitem rule_Always Always
+\refitem rule_Leaves Leaves
+\refitem rule_MightNotUpdate MightNotUpdate
+\refitem rule_NoCare NoCare
+\refitem rule_NotFile NotFile
+\refitem rule_NoUpdate NoUpdate
+\refitem rule_Temporary Temporary
+\endsecreflist
+
+<hr>
+\section rule_Always rule Always targets ;
+\addindex rule_Always
+
+Causes <i>targets</i> to be rebuilt regardless of whether they are up-to-date (they must still be in the dependency graph).  This is used for the clean and uninstall targets, as they have no dependencies and would otherwise appear never to need building.  It is best applied to targets that are also NotFile targets, but it can also be used to force a real file to be updated as well.
+
+
+
+
+
+
+
+<hr>
+\section rule_Leaves rule Leaves targets ;
+\addindex rule_Leaves
+
+Makes each of <i>targets</i> depend only on its leaf sources, and not on any intermediate targets.  This makes it immune to its dependencies being updated, as the "leaf" dependencies are those without their own dependencies and without updating actions. This allows a target to be updated only if original source files change.
+
+
+
+
+
+
+
+<hr>
+\section rule_MightNotUpdate rule MightNotUpdate targets ;
+\addindex rule_MightNotUpdate
+
+Some targets may or may not update when their action is executed, such as export libraries for a Windows DLL.  In order for \b Jam to process this behavior appropriately, the <i>targets</i> must be marked so their timestamps will be evaluated at the latest possible time during the \ref operation_updating.
+
+
+
+
+
+
+
+<hr>
+\section rule_NoCare rule NoCare targets ;
+\addindex rule_NoCare
+
+Causes \b Jam to ignore <i>targets</i> that neither can be found nor have updating actions to build them.  Normally for such targets \b Jam issues a warning and then skips other targets that depend on these missing targets.  The HdrRule in Jambase uses NoCare on the header file names found during header file scanning, to let \b Jam know that the included files may not exist.   For example,  if a \#include is within an \#ifdef, the included file may not actually be around.
+
+
+
+
+
+
+
+<hr>
+\section rule_NotFile rule NotFile targets ;
+\addindex rule_NotFile
+
+Marks <i>targets</i> as pseudotargets and not real files. No timestamp is checked, and so the actions on such a target are only executed if the target's dependencies are updated, or if the target is also marked with Always.  The default <b>jam</b> target "all" is a pseudotarget. In Jambase, NotFile is used to define several addition convenient pseudotargets.
+
+
+
+
+
+
+
+<hr>
+\section rule_NoUpdate rule NoUpdate targets ;
+\addindex rule_NoUpdate
+
+Causes the timestamps on <i>targets</i> to be ignored. This has two effects:  first,  once the target has been created it will never be updated; second, manually updating target will not cause other targets to be updated.  In Jambase, for example, this rule is applied to directories by the MkDir rule, because \ref rule_MkDir only cares that the target directory exists, not when it has last been updated.
+
+
+
+
+
+
+
+<hr>
+\section rule_Temporary rule Temporary targets ;
+\addindex rule_Temporary
+
+Marks <i>targets</i> as temporary, allowing them to be removed after other targets that depend upon them have been updated.  If a Temporary target is missing, \b Jam uses the timestamp of the target's parent.  Jambase uses Temporary to mark object files that are archived in a library after they are built, so that they can be deleted after they are archived.
+
+
+
+
+
+
+
+
+
+
+
+
+<br>
+\htmlonly <center> \endhtmlonly
+\section language_built_in_rules_utility_rules Utility Rules
+\htmlonly </center> \endhtmlonly
+
+The remaining rules are utility rules.
+
+\secreflist
+\refitem rule_Echo Echo
+\refitem rule_Exit Exit
+\refitem rule_Glob Glob
+\refitem rule_Match Match
+\refitem rule_Math Math
+\refitem rule_MD5 MD5
+\refitem rule_MD5File MD5File
+\endsecreflist
+
+<hr>
+\section rule_Echo rule Echo ARGS ;
+\addindex rule_Echo
+
+Prints out the message \c ARGS to stdout.
+
+
+
+
+
+
+
+<hr>
+\section rule_Exit rule Exit ARGS ;
+\addindex rule_Exit
+
+Blurts out the message \c ARGS to stdout and then exits with a failure status.
+
+
+
+
+
+
+
+<hr>
+\section rule_Glob rule Glob DIRECTORIES : PATTERNS [ : PREPEND ] ;
+\addindex rule_Glob
+
+Scans \c DIRECTORIES for files matching \c PATTERNS, returning the list of matching files (with directory prepended, unless the optional \c PREPEND is set to \c 0 or \c false).  \c PATTERNS uses the same syntax as in the \ref statements_switch "switch" statement.  Only useful within the <tt>[ ]</tt> construct, to change the result into a list.
+
+\code
+    # Returns all files and directories.  Directories have a / appended.
+    # Directories . and .. are not returned.
+    Glob bin : * ;
+
+    # Returns just directories.
+    Glob bin : */ ;
+
+    # Returns just files without bin/ prepended.
+    Glob bin : *[^/] : 0;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_Match rule Match REGEXPS : LIST ;
+\addindex rule_Match
+
+Matches the <b>egrep</b>(1) style regular expressions \c REGEXPS against the strings in \c LIST.  The result is the concatenation of matching <tt>()</tt> subexpressions for each string in \c LIST, and for each regular expression in \c REGEXPS.  Only useful within the <tt>[ ]</tt> construct, to change the result into a list.
+
+
+
+
+
+
+
+<hr>
+\section rule_Math rule Math LEFT OPERATOR RIGHT ;
+\addindex rule_Math
+
+Calculates the result of the simple math equation.  Only useful within the <tt>[ ]</tt> construct, to change the result into a list.
+
+** FILL ME IN **
+
+
+
+
+
+
+
+<hr>
+\section rule_MD5 rule MD5 LIST [ : LIST2 ... ] ;
+\addindex rule_MD5
+
+Calculates the md5sum of all lists and their respective list elements.  Each list element is separated with one NUL character, so that <tt>[ MD5 a b ]</tt> is different than <tt>[ MD5 ab ]</tt>.  Each list is separated with two NUL characters so that <tt>[ MD5 a : b ]</tt> is different than <tt>[ MD5 a b ]</tt>.  Only useful within the <tt>[ ]</tt> construct, to change the resultant md5sum into a list.
+
+\code
+	# Prints d41d8cd98f00b204e9800998ecf8427e.
+    Echo [ MD5 "" ] ;
+
+	# Returns c3fcd3d76192e4007dfb496cca67e13b.
+    Echo [ MD5 "abcdefghijklmnopqrstuvwxyz" ] ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_MD5File rule MD5File FILENAME_LIST [ : FILENAME_LIST2 ... ] ;
+\addindex rule_MD5File
+
+	<dd> Calculates the md5sum of all listed files.  Only useful within the <tt>[ ]</tt> construct, to change the resultant md5sum into a list.
+
+\code
+    Echo [ MD5File "myfile.txt" ] ;
+\endcode
+
+
+
+
+<hr>
+*/
+
