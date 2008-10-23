@@ -1,0 +1,99 @@
+rule TestExpansion LEFT : RIGHT
+{
+	if $(LEFT) = $(RIGHT)
+	{
+		Echo pass: $(LEFT) ;
+	}
+	else
+	{
+		Echo fail: $(LEFT) \!\= $(RIGHT) ;
+	}
+}
+
+
+rule TestWildcard ACTUAL : EXPECTED
+{
+	local _expected ;
+	for _expected in $(EXPECTED)
+	{
+		if ! ( $(_expected) in $(ACTUAL) )
+		{
+			Echo fail: $(ACTUAL) \!\= $(EXPECTED) ;
+			return ;
+		}
+	}
+	Echo pass: $(ACTUAL) ;
+}
+
+
+#------------------------------------------------------------------------------
+TestExpansion $(VAR:E=empty:US=.txt) : EMPTY.TXT ;
+TestExpansion $(VAR:E=empty) : empty ;
+
+#------------------------------------------------------------------------------
+VAR = /home/stuff/file.txt ;
+TestExpansion $(VAR:DB:U) : /HOME/STUFF/FILE ;
+
+#------------------------------------------------------------------------------
+TestWildcard @(../sharedlib/app/*:WBS) : Jamfile.jam main.c ;
+TestWildcard @(@(../sharedlib/app/*:W):BS) : Jamfile.jam main.c ;
+
+TestWildcard @(../sharedlib/app/**:WB=more\\dir\\file:\\) :
+		..\\sharedlib\\app\\more\\dir\\file.jam
+		..\\sharedlib\\app\\more\\dir\\file.c
+;
+
+#------------------------------------------------------------------------------
+top = AppRoot ;
+jamfile = Jamfile.jam ;
+TestExpansion included_$(top:J=_)_$(jamfile) : included_AppRoot_Jamfile.jam ;
+
+#------------------------------------------------------------------------------
+top = AppRoot With Directories ;
+jamfile = SomeFile.jam ;
+TestExpansion included_$(top:J=_)_$(jamfile) : included_AppRoot_With_Directories_SomeFile.jam ;
+
+#------------------------------------------------------------------------------
+list = list of characters to put stuff in between ;
+local var1 = $ ;
+local var2 = (list) ;
+TestExpansion @($(var1)$(var2):A) : $(list) ;
+
+#------------------------------------------------------------------------------
+TestExpansion $(list:J=!) : list!of!characters!to!put!stuff!in!between ;
+
+#------------------------------------------------------------------------------
+FILES = file1.c file2.c file3.c file1.o file2.o file3.o file1.s file2.s file3.s ;
+TestExpansion $(FILES:I=\\.c$:I=\\.o:X="^file1") :
+		file2.c file3.c file2.o file3.o ;
+
+TestExpansion $(FILES:I=\\.c$:I=\\.o:X="^file1":X=\\.c$:I=\\.c$) :
+		file1.c file2.c file3.c file2.o file3.o ;
+
+TestExpansion $(FILES:I=\\.c$:I=\\.o:X="^file1":X=\\.c$) :
+		file2.o file3.o ;
+
+TestExpansion $(FILES:X="^file1":X=\\.o$:I=\\.c$) :
+		file1.c file2.c file3.c ;
+
+#------------------------------------------------------------------------------
+FILE = somefile.txt ;
+TestExpansion $(FILE:T) : somefile.txt ;
+
+LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/somefile.txt ;
+
+BINDING on $(FILE) = newname.txt ;
+TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/newname.txt ;
+
+BINDING on $(FILE) = ;
+SEARCH on $(FILE) = data ;
+LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/somefile.txt ;
+
+LOCATE on $(FILE) = ;
+TestExpansion $(FILE:T) : data/somefile.txt ;
+
+
+
+
