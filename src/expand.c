@@ -45,6 +45,8 @@
 # include "search.h"
 #endif
 
+# include "hash.h"
+
 typedef struct {
 	PATHNAME	f;		/* :GDBSMR -- pieces */
 	char		parent;		/* :P -- go to parent directory */
@@ -78,6 +80,14 @@ static void var_edit_shift( char *out, VAR_EDITS *edits );
 #ifdef OPT_SLASH_MODIFIERS_EXT
 static void var_edit_slash( char *out, VAR_EDITS *edits );
 #endif
+
+struct hash *regexhash;
+
+typedef struct
+{
+    const char *name;
+    regexp *re;
+} regexdata;
 
 # define MAGIC_COLON	'\001'
 # define MAGIC_LEFT	'\002'
@@ -463,49 +473,44 @@ var_expand(
 		    LIST *newl = L0;
 		    LIST *comparel = L0;
 
-		    LIST *inex = edits.includes_excludes;
-		    while ( inex ) {
-			LIST *origl = l;
-			char mod = inex->string[0];
-			regexp *re;
-			inex = list_next( inex );
-			re = regcomp( inex->string );
-			inex = list_next( inex );
+		    LIST *origl = l;
 
-			if ( mod == 'X' ) {
-			    LIST *newnewl = L0;
+		    if ( !regexhash )
+			regexhash = hashinit( sizeof(regexdata), "regex" );
 
-			    for( ; newl; newl = list_next( newl ) ) {
-    				if( !regexec( re, newl->string ) ) {
-				    newnewl = list_new( newnewl, newl->string, 0 );
-				}
+		    for ( ; l; l = list_next( l ) )
+		    {
+			LIST *inex = edits.includes_excludes;
+			int remove = 1;
+
+			while ( inex ) {
+			    char mod = inex->string[0];
+			    regexp *re;
+			    regexdata data, *d = &data;
+			    inex = list_next( inex );
+			    data.name = inex->string;
+			    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
+			    {
+				d->re = regcomp( inex->string );
+				hashenter( regexhash, (HASHDATA **)&d );
 			    }
-			    list_free( newl );
-			    newl = newnewl;
+			    re = d->re;
+			    inex = list_next( inex );
 
-			    for( ; l; l = list_next( l ) ) {
-				if( !regexec( re, l->string ) ) {
-				    comparel = list_new( comparel, l->string, 0 );
-				}
-			    }
-			} else {
-			    for( ; l; l = list_next( l ) ) {
-				if( regexec( re, l->string ) ) {
-				    newl = list_new( newl, l->string, 0 );
-				} else {
-				    comparel = list_new( comparel, l->string, 0 );
-				}
+			    if ( mod == 'X' ) {
+				if( regexec( re, l->string ) )
+				    remove = 1;
+			    } else {
+				if( regexec( re, l->string ) )
+				    remove = 0;
 			    }
 			}
 
-			list_free( origl );
-			l = comparel;
-			comparel = L0;
-
-			free( (char *)re );
+			if ( !remove )
+			    newl = list_new( newl, l->string, 1 );
 		    }
 
-		    list_free( l );
+		    list_free( origl );
 		    l = newl;
 		}
 #endif
@@ -513,6 +518,7 @@ var_expand(
 #ifdef OPT_EXPAND_LITERALS_EXT
 		buffer_free( &buff );
 #endif
+		list_free( edits.includes_excludes );
 	    }
 
 	    /* variables & remainder were gifts from var_expand */
