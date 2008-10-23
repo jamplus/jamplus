@@ -358,10 +358,8 @@ ToolChain $(COMPILER) : $(PLATFORM) : $(CONFIG) ;
 # Base dependencies - first for "bootstrap" kinds of rules
 #
 
-Depends all : shell files lib exe obj ;
-Depends all shell files lib exe obj : first ;
-NotFile all first shell files lib exe obj dirs allclean clean uninstall ;
-Always allclean clean uninstall ;
+NotFile all allclean clean ;
+Always allclean clean ;
 
 #
 # Rules
