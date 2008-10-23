@@ -617,6 +617,7 @@ var_edit_parse(
 #ifdef OPT_EXPAND_BINDING_EXT
 	    case 'T': edits->expandbinding = 1; continue;
 #endif
+	    case MAGIC_COLON: continue;
 	    default: return; /* should complain, but so what... */
 	    }
 
