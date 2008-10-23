@@ -553,7 +553,16 @@ DoRecursion:
 	{
 		// This should refer to a file.
 		struct _finddata_t finfo;
+		bool isDir = false;
+		size_t patternLen = strlen( patternBuf );
+		if ( patternBuf[ patternLen - 1 ] == '/'  ||  patternBuf[ patternLen - 1 ] == '\\' )
+		{
+		    isDir = true;
+		    patternBuf[ patternLen - 1 ] = 0;
+		}
 		intptr_t handle = _findfirst( patternBuf, &finfo );
+		if ( isDir )
+		    patternBuf[ patternLen - 1 ] = '/';
 		if ( handle != -1 )
 			FoundMatch( patternBuf );
 		_findclose( handle );
