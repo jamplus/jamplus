@@ -358,6 +358,30 @@ var_expand(
 		}
 #endif
 
+#ifdef OPT_EXPAND_FILEGLOB_EXT
+		if ( edits.wildcard ) {
+		    LIST *newl = L0;
+		    for( ; value; value = list_next( value ) ) {
+			LIST *foundfiles;
+
+			/* Handle end subscript (length actually) */
+			if( sub2 >= 0 && --sub2 < 0 )
+			    break;
+			
+			foundfiles = fileglob( value->string );
+			newl = list_copy( newl, foundfiles );
+			list_free( foundfiles );
+		    }
+		    if ( origvalue ) {
+			list_free( origvalue );
+			origvalue = 0;
+		    }
+
+		    value = newl;
+		    origvalue = value;
+		}
+#endif
+
 		/* For each variable value */
 
 		for( ; value; value = list_next( value ) )
@@ -452,20 +476,6 @@ var_expand(
 #ifdef OPT_EXPAND_LITERALS_EXT
 		if ( origvalue )
 		    list_free( origvalue );
-#endif
-
-#ifdef OPT_EXPAND_FILEGLOB_EXT
-		if ( edits.wildcard ) {
-		    LIST *newl = L0;
-		    LIST *origl = l;
-		    for( ; l; l = list_next( l ) ) {
-			LIST *foundfiles = fileglob( l->string );
-			newl = list_copy( newl, foundfiles );
-			list_free( foundfiles );
-		    }
-		    list_free( origl );
-		    l = newl;
-		}
 #endif
 
 #ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT
