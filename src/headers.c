@@ -103,6 +103,14 @@ headers( TARGET *t )
 
 #ifdef OPT_HDRPIPE_EXT
 
+extern struct hash *regexhash;
+
+typedef struct
+{
+    const char *name;
+    regexp *re;
+} regexdata;
+
 /* OPT_HDRPIPE_EXT -- http://maillist.perforce.com/pipermail/jamming/2002-June/001717.html */
 
 /*
@@ -137,7 +145,14 @@ static LIST *headers1helper(
 
 	while( rec < MAXINC && hdrscan )
 	{
-	    re[rec++] = regcomp( hdrscan->string );
+	    regexdata data, *d = &data;
+	    data.name = hdrscan->string;
+	    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
+	    {
+		d->re = regcomp( hdrscan->string );
+		hashenter( regexhash, (HASHDATA **)&d );
+	    }
+	    re[rec++] = d->re;
 	    hdrscan = list_next( hdrscan );
 	}
 
@@ -174,9 +189,6 @@ static LIST *headers1helper(
 		    printf( "header found: %s\n", buf2 );
 	    }
 	}
-
-	while( rec )
-	    free( (char *)re[--rec] );
 
 	return result;
 }
