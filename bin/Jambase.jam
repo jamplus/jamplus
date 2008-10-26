@@ -1133,9 +1133,17 @@ rule MultiCppCompile TARGET : SOURCES
 		_postmflags = "/c \"/Fo$(combinedLocateTarget:\\)\\\\\" \"/Fd$(combinedLocateTarget:\\)\\$(_VCPDB).pdb\"" ;
 	}
 
-	local postHDRS =
-			[ _retrieveVar HDRS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar HDRS : * : $(CONFIG) : $(PLATFORM) ]
+	local ALL_TYPES =
+			$(PLATFORM).$(CONFIG)
+			*.$(CONFIG)
+			$(PLATFORM).*
+			*.*
+	;
+
+	local postHDRS ;
+	on $(TARGET) postHDRS += $(HDRS.$(ALL_TYPES)) ;
+	on * postHDRS += $(HDRS.$(ALL_TYPES)) ;
+	postHDRS +=
 			$(SUBDIRHDRS)
 			$(STDHDRS)
 	;
@@ -1143,26 +1151,23 @@ rule MultiCppCompile TARGET : SOURCES
 	local postREFERENCEDIRECTORIES ;
 	if $(MSVCNT)
 	{
-		postREFERENCEDIRECTORIES =
-			[ _retrieveVar REFERENCEDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar REFERENCEDIRECTORIES : * : $(CONFIG) : $(PLATFORM) ]
-		;
+		on $(TARGET) postREFERENCEDIRECTORIES += $(REFERENCEDIRECTORIES.$(ALL_TYPES)) ;
+		on * postREFERENCEDIRECTORIES += $(REFERENCEDIRECTORIES.$(ALL_TYPES)) ;
+		postREFERENCEDIRECTORIES = /I\"$(postREFERENCEDIRECTORIES)\" /AI\"$(postREFERENCEDIRECTORIES)\" ;
 	}
 
-	local preDEFINES =
-			[ FDefines [ _retrieveVar DEFINES : * : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar DEFINES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
-	;
+	local preDEFINES ;
+	on * preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
+	on $(TARGET) preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
+	preDEFINES = [ FDefines $(preDEFINES) ] ;
 
-	local preCCFLAGS =
-			[ _retrieveVar CCFLAGS : * : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar CCFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-	;
+	local preCCFLAGS ;
+	on * preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
+	on $(TARGET) preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
 
-	local preC++FLAGS =
-			[ _retrieveVar C++FLAGS : * : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar C++FLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-	;
+	local preC++FLAGS ;
+	on * preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
+	on $(TARGET) preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
 
 	# start with empty list of all generated objects
 	local _allobjs = ;
@@ -1170,7 +1175,8 @@ rule MultiCppCompile TARGET : SOURCES
 	# for each file
 	local _src ;
 	local newsrcs ;
-	local sources = $(SOURCES:I=\\.cpp$:I=\\.c$:I=\\.cxx$:I=\\$(SUFOBJ)$:I=\\$(SUFRES):G=$(grist)) ;
+	local sources = $(SOURCES:I=\\.cpp$:I=\\.c$:I=\\.cxx$I=\\$(SUFOBJ)$:I=\\$(SUFRES):G=$(grist)) ;
+#	local objSources = $(SOURCES:I=\\$(SUFOBJ)$:I=\\$(SUFRES):G=$(grist)) ;
 #	local sources = $(SOURCES:G=$(grist)) ;
 
 	# source needs to be scanned for header dependencies
@@ -1180,6 +1186,16 @@ rule MultiCppCompile TARGET : SOURCES
 
 	MakeLocate $(sources:S=$(SUFOBJ):D=) : $(LOCATE_TARGET) ;
 	SEARCH on $(sources) = $(SEARCH_SOURCE) ;
+
+#	MakeLocate $(objSources:S=$(SUFOBJ):D=) : $(LOCATE_TARGET) ;
+#	SEARCH on $(objSources) = $(SEARCH_SOURCE) ;
+
+#	for _src in $(_objSources) {
+#		on $(_src) if $(EXCLUDED_FROM_BUILD) = true {
+#			continue ;
+#		}
+#		_allobjs += $(_src) ;
+#	}
 
 	for _src in $(sources) {
 		on $(_src) if $(EXCLUDED_FROM_BUILD) = true {
@@ -1194,10 +1210,7 @@ rule MultiCppCompile TARGET : SOURCES
 		local _obj = $(_src:S=$(SUFOBJ):D=) ;
 
 		local _hdrs = $(SEARCH_SOURCE) ;
-		on $(_obj) _hdrs += $(HDRS.$(PLATFORM).$(CONFIG))
-			$(HDRS.*.$(CONFIG))
-			$(HDRS.$(PLATFORM).*)
-			$(HDRS.*.*) ;
+		on $(_obj) _hdrs += $(HDRS.$(ALL_TYPES)) ;
 		_hdrs += $(postHDRS) ;
 
 		HDRSEARCH on $(_src) = $(_hdrs) ;
@@ -1205,55 +1218,40 @@ rule MultiCppCompile TARGET : SOURCES
 		# Rest
 		Depends $(_obj) : $(_src) ;
 
-		# so we can safely find the union of them all
 		local _flags ;
 		switch $(ext) {
 			case .c :
 				CC on $(_obj) = $(CC) ;
 
 				_flags = $(preCCFLAGS) ;
-				on $(_obj) _flags += $(CCFLAGS.$(PLATFORM).$(CONFIG))
-					$(CCFLAGS.*.$(CONFIG))
-					$(CCFLAGS.$(PLATFORM).*)
-					$(CCFLAGS.*.*) ;
+				on $(_obj) _flags += $(CCFLAGS.$(ALL_TYPES)) ;
 				_flags += $(SUBDIRCCFLAGS) ;
 
 			case .cpp :
 				C++ on $(_obj) = $(C++) ;
 
 				_flags = $(preC++FLAGS) ;
-				on $(_obj) _flags += $(C++FLAGS.$(PLATFORM).$(CONFIG))
-					$(C++FLAGS.*.$(CONFIG))
-					$(C++FLAGS.$(PLATFORM).*)
-					$(C++FLAGS.*.*) ;
+				on $(_obj) _flags += $(C++FLAGS.$(ALL_TYPES)) ;
 				_flags += $(SUBDIRC++FLAGS) ;
 
 			case .cxx :
 				C++ on $(_obj) = $(C++) ;
 
 				_flags = $(preC++FLAGS) ;
-				on $(_obj) _flags += $(C++FLAGS.$(PLATFORM).$(CONFIG))
-					$(C++FLAGS.*.$(CONFIG))
-					$(C++FLAGS.$(PLATFORM).*)
-					$(C++FLAGS.*.*) ;
+				on $(_obj) _flags += $(C++FLAGS.$(ALL_TYPES)) ;
 				_flags += $(SUBDIRC++FLAGS) ;
 		}
 
-		_flags += [ FIncludes $(_hdrs) ] -I. ;
-		_flags += $(preDEFINES) ;
-		on $(_obj) _flags += [ FDefines $(DEFINES.$(PLATFORM).$(CONFIG))
-				$(DEFINES.*.$(CONFIG))
-				$(DEFINES.$(PLATFORM).*)
-				$(DEFINES.*.*) ] ;
+		_flags += [ FIncludes $(_hdrs) . ] ;
 
-		if $(MSVCNT)
-		{
-			_flags += /I\"$(postREFERENCEDIRECTORIES)\" /AI\"$(postREFERENCEDIRECTORIES)\" ;
-		}
+		_flags += $(preDEFINES) ;
+		on $(_obj) _flags += [ FDefines $(DEFINES.$(ALL_TYPES)) ] ;
 
 		# now that general flags on the file are determined
 
 		if $(MSVCNT) {
+			_flags += $(postREFERENCEDIRECTORIES) ;
+
 			# if the source should create pch
 			local _pch ;
 			on $(_src) _pch = $(PCH) ;
@@ -1288,9 +1286,8 @@ rule MultiCppCompile TARGET : SOURCES
 
 			# bind flags, defines and includes to the target
 			_flags += $(_postmflags) ;
-#			MFLAGS on $(_src) = $(_flags) $(_hdrs) $(_defs) $(_postmflags) ;
 			MFLAGS on $(_src) = $(_flags) ;
-			UseCommandLine $(_obj) : [ on $(_src) Var MFLAGS ] ;
+			UseCommandLine $(_obj) : $(_flags) ;
 		}
 		else if $(COMPILER) = mingw
 		{
@@ -1305,10 +1302,11 @@ rule MultiCppCompile TARGET : SOURCES
 	# Pass 2: Compile in batches, grouped by flags that were bound in previous pass
 	#
 
-	local batchCompileGroupSize = [ on $(TARGET) Var BATCH_COMPILE_GROUP_SIZE ] ;
+	local batchCompileGroupSize ;
+	on $(TARGET) batchCompileGroupSize = $(BATCH_COMPILE_GROUP_SIZE) ;
 	if ! $(batchCompileGroupSize)
 	{
-		batchCompileGroupSize = [ on * Var BATCH_COMPILE_GROUP_SIZE ] ;
+		on * batchCompileGroupSize = $(BATCH_COMPILE_GROUP_SIZE) ;
 	}
 
 	# for each batch, grouped by final flags
