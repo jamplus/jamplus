@@ -256,6 +256,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			STDHDRS		?= "$(MSSDK_STDHDRS)" ;
 			UNDEFFLAG	?= "/u _" ;
 
+			NOARSCAN = true ;
 			NOARUPDATE = true ;
 		}
 		else if $(COMPILER) = mingw
