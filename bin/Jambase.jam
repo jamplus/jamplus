@@ -142,13 +142,6 @@ rule FindVisualStudio VERSION
 			    ProductDir ;
 		    MSVCNT = [ W32_GETREG $(key) ] ;
 			return vc6 ;
-
-		case 5.0 :
-		    local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft
-			    DevStudio $(VERSION) Products "Microsoft Visual C++"
-			    ProductDir ;
-		    MSVCNT = [ W32_GETREG $(key) ] ;
-			return vc6 ;
 	}
 }
 
@@ -196,7 +189,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			if ! $(MSVCNT)
 			{
 				MSVCNT_PATH = ;
-				for ver in $(VISUAL_STUDIO_FORCE_VERSION) 9.0 8.0 7.1 7.0 6.0 5.0
+				for ver in $(VISUAL_STUDIO_FORCE_VERSION) 9.0 8.0 7.1 7.0 6.0
 				{
 					COMPILER = [ FindVisualStudio $(ver) ] ;
 					if $(COMPILER)
@@ -215,7 +208,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			COMPILER = $(THE_COMPILER) ;
 		}
 
-		if $(COMPILER) in vc5 vc6 vs2003 vs2005 vs2008
+		if $(COMPILER) in vc6 vs2003 vs2005 vs2008
 		{
 			SUFLIB	?= .lib ;
 			SUFOBJ	?= .obj ;
@@ -223,8 +216,6 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			MSVCNT = ;
 			switch $(COMPILER)
 			{
-				case vc5 :
-					COMPILER = [ FindVisualStudio 5.0 ] ;
 				case vc6 :
 					COMPILER = [ FindVisualStudio 6.0 ] ;
 				case vs2003 :
