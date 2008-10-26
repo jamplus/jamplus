@@ -171,8 +171,11 @@ static LIST *headers1helper(
 		    const char *target = re[i]->startp[1];
 		    char *p = buf2;
 
-		    do *p++ = tolower( *target++ );
-		    while( --l );
+		    if ( l > 0 )
+		    {
+			do *p++ = tolower( *target++ );
+			while( --l );
+		    }
 
 		    *p = 0;
 		}
