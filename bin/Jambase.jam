@@ -15,15 +15,15 @@ rule Var {
 
 # Helper rule used to get value of a variable bound to specific target.
 # [ on <target> Var <var> ]
-rule MultiVar {
-	local key ;
-	local value ;
-	for key in $(1)
-	{
-		value += $($(key)) ;
-	}
-	return $(value) ;
-}
+#rule MultiVar {
+#	local key ;
+#	local value ;
+#	for key in $(1)
+#	{
+#		value += $($(key)) ;
+#	}
+#	return $(value) ;
+#}
 
 # Helper rule used to get value of a variable bound to specific target.
 # [ on <target> Var <var> ]
@@ -42,8 +42,6 @@ SPACE = " " ;
 TAB = "	" ;
 NEWLINE = "
 " ;
-
-# for perforce use -- jambase version
 
 JAMBASEDATE = 2008.10.08 ;
 
@@ -309,28 +307,18 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 	CRELIB		?= ;
 	DOT			?= . ;
 	DOTDOT		?= .. ;
-	EXEMODE		?= 711 ;
-	FILEMODE	?= 644 ;
 	HDRS		?= ;
-	INSTALLGRIST	?= installed ;
 	JAMFILE		?= Jamfile.jam ;
 	JAMRULES	?= Jamrules.jam ;
-	LEX			?= ;
 	LIBDIR		?= /usr/local/lib ;
 	LINK		?= $(CC) ;
 	LINKFLAGS	?= ;
 	LINKLIBS	?= ;
 	LN			?= ln ;
-	MANDIR		?= /usr/local/man ;
 	MKDIR		?= mkdir ;
 	MV			?= mv -f ;
-	RCP			?= rcp ;
 	RM			?= rm -f ;
 	RMDIR		?= $(RM) ;
-	RSH			?= rsh ;
-	SED			?= sed ;
-	SHELLHEADER	?= "#!/bin/sh" ;
-	SHELLMODE	?= 755 ;
 	SLASH		?= / ;
 	STDHDRS		?= /usr/include ;
 	SUBDIRRULES ?= ;
@@ -339,10 +327,6 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 	SUFLIB		?= .a ;
 	SUFOBJ		?= .o ;
 	UNDEFFLAG	?= "-u _" ;
-	YACC		?= ;
-	YACCGEN		?= ;
-	YACCFILES	?= ;
-	YACCFLAGS	?= ;
 }
 
 
@@ -469,7 +453,6 @@ rule MkDir
 	    # MkDir1 has the actions
 
 	    $(<)-mkdir = true ;
-	    Depends dirs : $(<) ;
 	    MkDir1 $(<) ;
 
 	    # Recursively make parent directories.
@@ -906,35 +889,6 @@ rule FRelPath
 	}
 }
 
-rule FAppendSuffix
-{
-       # E.g., "FAppendSuffix yacc lex foo.bat : $(SUFEXE) ;"
-       # returns (yacc,lex,foo.bat) on Unix and
-       # (yacc.exe,lex.exe,foo.bat) on NT.
-
-	if $(>)
-	{
-	    local _i _o ;
-
-	    for _i in $(<)
-	    {
-		if $(_i:S)
-		{
-		    _o += $(_i) ;
-		}
-		else
-		{
-		    _o += $(_i:S=$(>)) ;
-		}
-	    }
-	    return $(_o) ;
-	}
-	else
-	{
-	    return $(<) ;
-	}
-}
-
 #
 # Operating system specific utility rules
 # First, the (generic) UNIX versions
@@ -965,81 +919,6 @@ if $(MSVCNT)
 	rule FDefines { return /D$(<) ; }
 	rule FIncludes { return /I"\"$(<)\"" ; }
 	rule FLibraryPaths { return \"/LIBPATH:$(<)\" ; }
-}
-
-##  ConcatDirs dirs
-##    Concatenates a set of directories. This is a substitute for FDirName in
-##    Jambase. It works also correctly for several rooted paths, where FDirName
-##    fails.
-##    The advantage over $(dir1)/$(dir2) is that this also works correctly if
-##    $(dir1) or $(dir2) is not set.
-rule ConcatDirs
-{
-  local i ;
-  local result = $(<[1]) ;
-  if ! $(result) { $result = "" ; }
-  local dir1 dir2 ;
-
-  for i in $(<[2-])
-  {
-    # eleminate multiple slashes because jam is somewhat buggy here
-    dir1 = [ MATCH (.*[^/]?) : $(result) ] ;
-    dir2 = [ MATCH ([^/].*) : $(i) ] ;
-    if ! $(dir1) { dir1 = "" ; }
-    if $(dir1) != "" { dir1 = $(dir1)/ ; }
-    if ! $(dir2) { dir2 = "" ; }
-    result = $(dir1)$(dir2) ;
-  }
-
-  return $(result) ;
-}
-
-##  Reverse list
-##    Reverse the order of items in the list.
-rule Reverse
-{
-  local result ;
-
-  for i in $(<)
-  {
-    result = $(i) $(result) ;
-  }
-  return $(result) ;
-}
-
-##  SplitToList var [ : separator ]
-##    Splits the value of var into a list using space as the separator unless
-##    an alterante separator is specified.
-##  IMPLEMENTATION NOTE
-##    When Jam sees an invocation of the `Match' function, it treats its first
-##    argument as a literal regular expression, and does not do any variable
-##    interpolation. This means that an expression, such as "(.*)$(sep)(.*)"
-##    will not be interpreted as expected; it will instead be interpreted as an
-##    invalid regex. To work around this limitation, we invoke `Match'
-##    indirectly.
-rule FSplitToList
-{
-  local list = ;
-  local matcher = Match ; # See IMPLEMENTATION NOTE above.
-  local unsplit = $(<) ;
-  local sep = $(2) ;
-  if ! $(sep) { sep = " " ; }
-  while $(unsplit) != ""
-  {
-    local split = [ $(matcher) "(.*)$(sep)(.*)" : $(unsplit) ] ;
-    if $(split[1]) = ""
-    {
-      list += $(unsplit) ;
-      unsplit = "" ;
-    }
-    else
-    {
-      list += $(split[2]) ;
-      unsplit = $(split[1]) ;
-    }
-  }
-
-  return [ Reverse $(list) ] ;
 }
 
 #
@@ -1740,7 +1619,7 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 
 	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 
-	Depends exe : $(TARGET) ;
+	Depends all : $(TARGET) ;
 	Depends $(TARGET) : $(_t) ;
 	NotFile $(TARGET) ;
 	Depends $(_t) : $(_s) ;
@@ -1825,14 +1704,13 @@ rule LibraryFromObjects TARGET : OBJECTS
 
 	# library depends on its member objects
 
+    Depends all : $(TARGET) ;
 	if $(KEEPOBJS)
 	{
-	    Depends obj : $(TARGET) ;
 		Depends $(TARGET) : $(_s) ;
 	}
 	else
 	{
-	    Depends lib : $(TARGET) ;
 		Depends $(TARGET) : $(_l) ;
 	}
 
@@ -1931,7 +1809,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 
-	Depends exe : $(TARGET) ;
+	Depends all : $(TARGET) ;
 	NotFile $(TARGET) ;
 	Depends $(_t) : $(_s) ;
 	MakeLocate $(_linkTargets) : $(outputPath) ;
