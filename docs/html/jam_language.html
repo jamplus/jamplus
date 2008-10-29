@@ -57,7 +57,7 @@ Statements</a></h3>
 <code><em>rulename</em> <em>field1</em> : <em>field2</em> : ... : <em>fieldN</em> ;</code><p>
  <blockquote> <p>
 Invoke a rule. A rule is invoked with values in <em>field1</em> through <em>fieldN</em> (9 max). They may be referenced in the procedure's <em>statements</em> as $(1) through $(&lt;9&gt;N). $(&lt;) and $(&gt;) are synonymous with $(1) and $(2).<p>
-<em>rulename</em> undergoes <a class="el" href="jam_language.html#language_variable_expansion">Variable Expansion</a>. If the resulting list is more than one value, each rule is invoked with the same arguments, and the result of the invocation is the concatenation of all the results.<p>
+<em>rulename</em> undergoes <a class="el" href="language_variables.html#language_variable_expansion">Variable Expansion</a>. If the resulting list is more than one value, each rule is invoked with the same arguments, and the result of the invocation is the concatenation of all the results.<p>
  </blockquote> <p>
 <code>actions [ <em>modifiers</em> ] <em>rulename</em> { <em>commands</em> }</code><p>
  <blockquote> <p>
@@ -171,128 +171,8 @@ The switch statement executes zero or one of the enclosed <em>statements</em>, d
  <blockquote> <p>
 Repeatedly execute <em>statements</em> while <em>cond</em> remains true upon entry. (See the description of <em>cond</em> expression syntax under if above).<p>
  </blockquote> <p>
- </blockquote> <h3><a class="anchor" name="language_variables">
-Variables</a></h3>
-<b>Jam</b> variables are lists of zero or more elements, with each element being a string value. An undefined variable is indistinguishable from a variable with an empty list, however, a defined variable may have one more elements which are null strings. All variables are referenced as $(<em>variable</em>).<p>
-Variables are either global or target-specific. In the latter case, the variable takes on the given value only during the target's binding, header file scanning, and updating; and during the "on &lt;i&gt;target&lt;/i&gt; &lt;i&gt;statement&lt;/I&gt;" statement.<p>
-A variable is defined with:<p>
-<table align="center" border="1" cellspacing="3" cellpadding="3">
-<tr>
-<td><code><em>variable</em> = <em>elements</em> ;</code> </td><td>The = operator replaces any previous elements of <em>variable</em> with <em>elements</em>   </td></tr>
-<tr>
-<td><code><em>variable</em> += <em>elements</em> ;</code> </td><td>The += operator adds <em>elements</em> to <em>variable</em>'s list of elements  </td></tr>
-<tr>
-<td><code><em>variable</em> -= <em>elements</em> ;</code> </td><td>The -= operator removes <em>elements</em> from <em>variable</em>'s list of elements  </td></tr>
-<tr>
-<td><code><em>variable</em> ?= <em>elements</em> ;</code> </td><td>The ?= operator sets <em>variable</em> only if it was previously unset  </td></tr>
-<tr>
-<td><code><em>variable</em> on <em>targets</em> = <em>elements</em> ;</code> </td><td>The = operator replaces any previous elements of <em>variable</em> with <em>elements</em> directly on <em>targets</em>   </td></tr>
-<tr>
-<td><code><em>variable</em> on <em>targets</em> += <em>elements</em> ;</code> </td><td>The += operator directly adds <em>elements</em> to <em>targets</em>'s <em>variable</em>'s list of elements  </td></tr>
-<tr>
-<td><code><em>variable</em> on <em>targets</em> -= <em>elements</em> ;</code> </td><td>The -= operator directly removes <em>elements</em> from <em>targets</em>'s <em>variable</em>'s list of elements  </td></tr>
-<tr>
-<td><code><em>variable</em> on <em>targets</em> ?= <em>elements</em> ;</code> </td><td>The ?= operator sets <em>variable</em> on <em>targets</em> only if it was previously unset  </td></tr>
-</table>
-<p>
-Variables referenced in updating commands will be replaced with their values; target-specific values take precedence over global values. Variables passed as arguments ($(1) and $(2)) to actions are replaced with their bound values; the "bind" modifier can be used on actions to cause other variables to be replaced with bound values. See <a href="#actionmods">Action Modifiers</a> above.<p>
-<b>Jam</b> variables are not re-exported to the environment of the shell that executes the updating actions, but the updating actions can reference <b>Jam</b> variables with $(<em>variable</em>).<h3><a class="anchor" name="language_variable_expansion">
-Variable Expansion</a></h3>
-During parsing, <b>Jam</b> performs variable expansion on each token that is not a keyword or rule name. Such tokens with embedded variable references are replaced with zero or more tokens. Variable references are of the form $(<em>v</em>) or $(<em>vm</em>), where <em>v</em> is the variable name, and <em>m</em> are optional modifiers.<p>
-Variable expansion in a rule's actions is similar to variable expansion in statements, except that the action string is tokenized at whitespace regardless of quoting.<p>
-The result of a token after variable expansion is the <em>product</em> of the components of the token, where each component is a literal substring or a list substituting a variable reference. For example:<p>
-<table width="75%" align="center" border="1" cellspacing="3" cellpadding="3">
-<tr>
-<td><code> <br>
-$(X) -&gt; a b c <br>
-t$(X) -&gt; ta tb tc <br>
-$(X)z -&gt; az bz cz <br>
-$(X)-$(X) -&gt; a-a a-b a-c b-a b-b b-c c-a c-b c-c </code>  </td></tr>
-</table>
-<p>
-The variable name and modifiers can themselves contain a variable reference, and this partakes of the product as well:<p>
-<table width="75%" align="center" border="1" cellspacing="3" cellpadding="3">
-<tr>
-<td><code> <br>
-$(X) -&gt; a b c <br>
-$(Y) -&gt; 1 2 <br>
-$(Z) -&gt; X Y <br>
-$($(Z)) -&gt; a b c 1 2</code><p>
-<code> </code>  </td></tr>
-</table>
-<p>
-Because of this product expansion, if any variable reference in a token is undefined, the result of the expansion is an empty list. If any variable element is a null string, the result propagates the non-null elements:<p>
-<table width="75%" align="center" border="1" cellspacing="3" cellpadding="3">
-<tr>
-<td><code> <br>
-$(X) -&gt; a "" <br>
-$(Y) -&gt; "" 1 <br>
-$(Z) -&gt; <br>
-*$(X)$(Y)* -&gt; *a* *a1* ** *1* <br>
-*$(X)$(Z)* -&gt;</code><p>
-<code> </code>  </td></tr>
-</table>
-<p>
-A variable element's string value can be parsed into grist and filename-related components. Modifiers to a variable are used to select elements, select components, and replace components. The modifiers are:<p>
-<table width="75%" border="1" align="center" cellspacing="3" cellpadding="3">
-<tr>
-<td><code> [<em>n</em>] </code> </td><td>Select element number <em>n</em> (starting at 1). If the variable contains fewer than <em>n</em> elements, the result is a zero-element list.  </td></tr>
-<tr>
-<td><code> [<em>n</em>-<em>m</em>] </code> </td><td>Select elements number <em>n</em> through <em>m</em>.  </td></tr>
-<tr>
-<td><code> [<em>n</em>-] </code> </td><td>Select elements number <em>n</em> through the last.  </td></tr>
-<tr>
-<td><code> :B </code> </td><td>Select filename base.  </td></tr>
-<tr>
-<td><code> :S </code> </td><td>Select (last) filename suffix.  </td></tr>
-<tr>
-<td><code> :M </code> </td><td>Select archive member name.  </td></tr>
-<tr>
-<td><code> :D </code> </td><td>Select directory path.  </td></tr>
-<tr>
-<td><code> :P </code> </td><td>Select parent directory.  </td></tr>
-<tr>
-<td><code> :G </code> </td><td>Select grist.  </td></tr>
-<tr>
-<td><code> :U </code> </td><td>Replace lowercase characters with uppercase.  </td></tr>
-<tr>
-<td><code> :L </code> </td><td>Replace uppercase characters with lowercase.  </td></tr>
-<tr>
-<td><code> :/ </code> </td><td>Convert all backslashes (\) to forward slashes (/).  </td></tr>
-<tr>
-<td><code> :\\ </code> </td><td>Convert all forward slashes (/) to backslashes (\).  </td></tr>
-<tr>
-<td><code> :I=<em>regex</em> </code> </td><td>Include all list items matching <em>regex</em>. Remove everything else.  </td></tr>
-<tr>
-<td><code> :X=<em>regex</em> </code> </td><td>Exclude all list items matching <em>regex</em>. Keep everything else.  </td></tr>
-<tr>
-<td><code> :W=<em>wildcard</em> </code> </td><td>Populate the list with directory contents matching <em>wildcard</em>.  </td></tr>
-<tr>
-<td><code> :A </code> </td><td>Expand literal.  </td></tr>
-<tr>
-<td><code> :T </code> </td><td>Expand bound name.  </td></tr>
-<tr>
-<td><code> :<em>chars</em> </code> </td><td>Select the components listed in <em>chars</em>.  </td></tr>
-<tr>
-<td><code> :G=<em>grist</em> </code> </td><td>Replace grist with <em>grist</em>.  </td></tr>
-<tr>
-<td><code> :D=<em>path</em> </code> </td><td>Replace directory with <em>path</em>.  </td></tr>
-<tr>
-<td><code> :B=<em>base</em> </code> </td><td>Replace the base part of file name with <em>base</em>.  </td></tr>
-<tr>
-<td><code> :S=<em>suf</em> </code> </td><td>Replace the suffix of file name with <em>suf</em>.  </td></tr>
-<tr>
-<td><code> :M=<em>mem</em> </code> </td><td>Replace the archive member name with <em>mem</em>.  </td></tr>
-<tr>
-<td><code> :R=<em>root</em> </code> </td><td>Prepend <em>root</em> to the whole file name, if not already rooted.  </td></tr>
-<tr>
-<td><code> :E=<em>value</em> </code> </td><td>Use <em>value</em> instead if the variable is unset.  </td></tr>
-<tr>
-<td><code> :J=<em>joinval</em> </code> </td><td>Concatentate list elements into single element, separated by <em>joinval</em>.  </td></tr>
-</table>
-<p>
-On VMS, $(var:P) is the parent directory of $(var:D); on Unix and NT, $(var:P) and $(var:D) are the same. </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Tue Oct 21 21:41:17 2008 for JamPlus manual by&nbsp;
+ </blockquote>  </div>
+<hr size="1"><address style="text-align: right;"><small>Generated on Tue Oct 28 23:35:01 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>

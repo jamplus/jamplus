@@ -16,10 +16,11 @@ ENABLED_SECTIONS  = logo_on
 ENABLE_PREPROCESSING = NO
 CASE_SENSE_NAMES  = NO
 IMAGE_PATH        = .
-INPUT             = index.dox bugs.dox builtin_rules.dox builtin_variables.dox jam_language.dox jambase_rules.dox quick_start.dox usage.dox warnings_and_errors.dox
+INPUT             = index.dox bugs.dox builtin_rules.dox builtin_variables.dox jam_language.dox jambase_rules.dox language_variables.dox quick_start.dox usage.dox warnings_and_errors.dox
 TAGFILES          =
 ALLEXTERNALS      = NO
 SEARCHENGINE      = NO
 PDF_HYPERLINKS    = YES
 USE_PDFLATEX      = YES
 STRIP_CODE_COMMENTS = NO
+

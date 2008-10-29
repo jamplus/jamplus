@@ -17,16 +17,16 @@ A sampling of the new features in the JamPlus distribution follows:
 
 <h2>Contents</h2>
 
-<ul>
-<li>\ref quick_start gets you up and running quickly.
-<li>\ref usage shows the command-line features of Jam.
-<li>\ref jam_language shows the language features of Jam.
-<li>\ref builtin_rules shows the built-in rules of Jam.
-<li>\ref builtin_variables shows the built-in variables of Jam.
-<li>\ref jambase_rules shows the list of rules available in the default <tt>Jambase.jam</tt>.
-<li>\ref warnings_and_errors shows a list of the possible warnings and errors that can be reported by Jam.
-<li>\ref bugs
-</ul>
+- \subpage quick_start gets you up and running quickly.
+- \subpage usage shows the command-line features of Jam.
+- \subpage jam_language shows the language features of Jam.
+- \subpage language_variables
+- \subpage builtin_rules shows the built-in rules of Jam.
+- \subpage builtin_variables shows the built-in variables of Jam.
+- \subpage jambase_rules shows the list of rules available in the default <tt>Jambase.jam</tt>.
+- \subpage warnings_and_errors shows a list of the possible warnings and errors that can be reported by Jam.
+- \subpage bugs
+
 
 
 <h2>Authors</h2>
