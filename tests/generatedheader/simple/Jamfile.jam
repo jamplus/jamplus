@@ -1,0 +1,9 @@
+SubDir TOP ;
+
+Application test : main.c test.c ;
+
+CONTENTS on <test>test.h = "extern void Print(const char*);" ;
+
+WriteFile <test>test.h ;
+Depends all : <test>test.h ;
+Clean clean : <test>test.h ;
