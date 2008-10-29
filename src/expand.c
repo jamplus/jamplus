@@ -355,6 +355,7 @@ var_expand(
 			origvalue = 0;
 		    }
 		    value = newvalue;
+		    sub2 = 0;
 		}
 #endif
 

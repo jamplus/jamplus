@@ -1,8 +1,13 @@
+numTests = 0 ;
+numTestsPassed = 0 ;
+
 rule TestExpansion LEFT : RIGHT
 {
+	numTests = [ Math $(numTests) + 1 ] ;
 	if $(LEFT) = $(RIGHT)
 	{
-		Echo pass: $(LEFT) ;
+#		Echo pass: $(LEFT) ;
+		numTestsPassed = [ Math $(numTestsPassed) + 1 ] ;
 	}
 	else
 	{
@@ -22,13 +27,46 @@ rule TestWildcard ACTUAL : EXPECTED
 			return ;
 		}
 	}
-	Echo pass: $(ACTUAL) ;
+#	Echo pass: $(ACTUAL) ;
 }
 
 
 #------------------------------------------------------------------------------
+var = ab cd ef gh ij kl ;
+TestExpansion $(var) : ab cd ef gh ij kl ;
+TestExpansion $(var[0]) : ab ;
+TestExpansion $(var[1]) : ab ;
+TestExpansion $(var[2]) : cd ;
+TestExpansion $(var[6]) : kl ;
+TestExpansion $(var[7]) : ;
+
+TestExpansion $(var[1-]) : ab cd ef gh ij kl ;
+TestExpansion $(var[2-]) : cd ef gh ij kl ;
+TestExpansion $(var[6-]) : kl ;
+TestExpansion $(var[7-]) : ;
+
+TestExpansion $(var[1-7]) : ab cd ef gh ij kl ;
+TestExpansion $(var[2-6]) : cd ef gh ij kl ;
+TestExpansion $(var[3-5]) : ef gh ij ;
+TestExpansion $(var[6-4]) : kl ;
+
+#------------------------------------------------------------------------------
+TestExpansion $(VAR:E=**empty**) : **empty** ;
+
+EMPTY_TEXT = some empty text ;
+TestExpansion $(VAR:E=$(EMPTY_TEXT)) : some empty text ;
+TestExpansion $(VAR[2]:E=$(EMPTY_TEXT)) : some empty text ;
+
 TestExpansion $(VAR:E=empty:US=.txt) : EMPTY.TXT ;
-TestExpansion $(VAR:E=empty) : empty ;
+
+#------------------------------------------------------------------------------
+list = list of characters to put stuff in between ;
+local var1 = $ ;
+local var2 = (list) ;
+local var1_var2 = $(var1)$(var2) ;
+TestExpansion $(var1_var2) : $(var1)$(var2) ;
+TestExpansion $(var1_var2:A) : $(list) ;
+TestExpansion @($(var1)$(var2):A) : $(list) ;
 
 #------------------------------------------------------------------------------
 VAR = /home/stuff/file.txt ;
@@ -52,12 +90,6 @@ TestExpansion included_$(top:J=_)_$(jamfile) : included_AppRoot_Jamfile.jam ;
 top = AppRoot With Directories ;
 jamfile = SomeFile.jam ;
 TestExpansion included_$(top:J=_)_$(jamfile) : included_AppRoot_With_Directories_SomeFile.jam ;
-
-#------------------------------------------------------------------------------
-list = list of characters to put stuff in between ;
-local var1 = $ ;
-local var2 = (list) ;
-TestExpansion @($(var1)$(var2):A) : $(list) ;
 
 #------------------------------------------------------------------------------
 TestExpansion $(list:J=!) : list!of!characters!to!put!stuff!in!between ;
@@ -97,3 +129,5 @@ TestExpansion $(FILE:T) : data/somefile.txt ;
 
 
 
+#------------------------------------------------------------------------------
+Echo Tests passed: $(numTestsPassed)/$(numTests) ;
