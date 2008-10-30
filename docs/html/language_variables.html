@@ -55,7 +55,8 @@ Variables referenced in updating commands will be replaced with their values; ta
 <span class="preprocessor">on anothertarget Echo $(myvar) ;</span>
 </pre></div><h2><a class="anchor" name="language_variable_expansion">
 Variable Expansion</a></h2>
-During parsing, <b>Jam</b> performs variable expansion on each token that is not a keyword or rule name. Such tokens with embedded variable references are replaced with zero or more tokens. Variable references are of the form $(<em>v</em>) or $(<em>vm</em>), where <em>v</em> is the variable name, and <em>m</em> are optional modifiers.<p>
+During parsing, <b>Jam</b> performs variable expansion on each token that is not a keyword or rule name. Such tokens with embedded variable references are replaced with zero or more tokens. Variable references are of the form $(<em>variable</em>) or $(<em>variable:modifiers</em>), where <em>variable</em> is the variable name, and <em>modifiers</em> are optional modifiers.<p>
+A literal expansion is in the form @(<em>literal</em>) or @(<em>literal:modifiers</em>). Instead of expanding a variable's contents, as with a $(<em>variable</em>) expansion, the direct contents of <em>literal</em> are used. All other behavior is the same.<p>
 Variable expansion in a rule's actions is similar to variable expansion in statements, except that the action string is tokenized at whitespace regardless of quoting.<p>
 The result of a token after variable expansion is the <em>product</em> of the components of the token, where each component is a literal substring or a list substituting a variable reference. For example:<p>
 <table width="75%" align="center" border="1" cellspacing="3" cellpadding="3">
@@ -106,7 +107,7 @@ A variable element's string value can be parsed into grist and filename-related 
 <tr>
 <td><code> :W=<em>wildcard</em> </code> </td><td>Populate the list with directory contents matching <em>wildcard</em>.  </td></tr>
 <tr>
-<td><code> :T </code> </td><td>Expand bound name.  </td></tr>
+<td><code> :T </code> </td><td>Expand the bound name of the target. Just as when expanding within an action, the BINDING is applied first. If LOCATE is set, it is used for the path. If not, SEARCH is used to look up the file.  </td></tr>
 <tr>
 <td><code> :B </code> </td><td>Select filename base.  </td></tr>
 <tr>
@@ -144,14 +145,14 @@ A variable element's string value can be parsed into grist and filename-related 
 <tr>
 <td><code> :J=<em>joinval</em> </code> </td><td>Concatenate list elements into single element, separated by <em>joinval</em>.  </td></tr>
 <tr>
-<td><code> :I=<em>regex</em> </code> </td><td>Include all list items matching <em>regex</em>. Remove everything else.  </td></tr>
+<td><code> :I=<em>regex</em> </code> </td><td>Include all list items matching <em>regex</em>. Remove everything else. More than one set of <code>:I</code> or <code>:X</code> modifiers may appear in a given expansion, and they are applied in order.  </td></tr>
 <tr>
-<td><code> :X=<em>regex</em> </code> </td><td>Exclude all list items matching <em>regex</em>. Keep everything else.  </td></tr>
+<td><code> :X=<em>regex</em> </code> </td><td>Exclude all list items matching <em>regex</em>. Keep everything else. More than one set of <code>:I</code> or <code>:X</code> modifiers may appear in a given expansion, and they are applied in order.  </td></tr>
 </table>
 <h2><a class="anchor" name="patterns_and_wildcards">
 Patterns and Wildcards</a></h2>
 When using the <code>:W</code> modifier, the following file globbing syntax is available.<p>
-<table border="1" width="600" align="center" cellspacing="3" cellpadding="3">
+<table border="1" width="75%" align="center" cellspacing="3" cellpadding="3">
 <tr>
 <td width="150"><b>Wildcard</b> </td><td width="450"><b>Description</b>  </td></tr>
 <tr>
@@ -167,7 +168,7 @@ When using the <code>:W</code> modifier, the following file globbing syntax is a
 </table>
 <p>
 Some examples follow:<p>
-<table border="1" width="600" align="center" cellspacing="3" cellpadding="3">
+<table border="1" width="75%" align="center" cellspacing="3" cellpadding="3">
 <tr>
 <td width="150"><b>Example Pattern</b> </td><td width="450"><b>Description</b> <p>
 </td></tr>
@@ -226,7 +227,7 @@ Some examples follow:<p>
 </table>
 <p>
 Finally, a couple flags are available. Flags are appended at the end of the pattern line. Each flag begins with an @ character. Spaces should not be inserted between flags unless they are intended as part of the string literal.<p>
-<table border="1" width="600" align="center" cellspacing="3" cellpadding="3">
+<table border="1" width="75%" align="center" cellspacing="3" cellpadding="3">
 <tr>
 <td width="150"><b>Flags and Other Expansions</b> </td><td width="450"><b>Description</b>  </td></tr>
 <tr>
@@ -239,7 +240,7 @@ Finally, a couple flags are available. Flags are appended at the end of the patt
 </table>
 <p>
 And a few examples:<p>
-<table border="1" width="600" align="center" cellspacing="3" cellpadding="3">
+<table border="1" width="75%" align="center" cellspacing="3" cellpadding="3">
 <tr>
 <td width="150"><b>Example Pattern</b> </td><td width="450"><b>Description</b>  </td></tr>
 <tr>
@@ -283,8 +284,96 @@ local var1_var2 = $(var1)$(var2) ;
 Echo $(var1_var2) ;               # $(list)
 Echo $(var1_var2:A) ;             # list of characters to put stuff in between
 Echo @($(var1)$(var2):A) ;        # list of characters to put stuff in between
+
+<span class="preprocessor">#------------------------------------------------------------------------------</span>
+<span class="preprocessor"></span>FILE = somefile.txt ;
+Echo $(FILE:T) ;                  # somefile.txt
+
+LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/somefile.txt
+
+BINDING on $(FILE) = newname.txt ;
+Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/newname.txt
+
+BINDING on $(FILE) = ;
+SEARCH on $(FILE) = data ;
+LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/somefile.txt
+
+LOCATE on $(FILE) = ;
+Echo $(FILE:T) ;                  # data/somefile.txt
+
+<span class="preprocessor">#------------------------------------------------------------------------------</span>
+<span class="preprocessor"></span>FILENAME = &lt;thegrist&gt;c:/some/directory/filename.txt ;
+Echo $(FILENAME:B) ;              # filename
+Echo $(FILENAME:B=anothername) ;  # &lt;thegrist&gt;c:/some/directory/anothername.txt
+Echo $(FILENAME:S) ;              # .txt
+Echo $(FILENAME:S=.dat) ;         # &lt;thegrist&gt;c:/some/directory/filename.dat
+Echo $(FILENAME:BS) ;             # filename.txt
+Echo $(FILENAME:B=anothername:S=.dat) ;  # &lt;thegrist&gt;c:/some/directory/anothername.dat
+Echo $(FILENAME:D) ;              # c:/some/directory
+Echo $(FILENAME:D=/usr/bin) ;     # &lt;thegrist&gt;/usr/bin/filename.txt
+Echo $(FILENAME:P) ;              # &lt;thegrist&gt;c:/some/directory
+Echo @($(FILENAME:P):P) ;         # &lt;thegrist&gt;c:/some
+
+Echo $(FILENAME:G) ;              # &lt;thegrist&gt;
+Echo $(FILENAME:G=anothergrist) ; # &lt;anothergrist&gt;c:/some/directory/filename.txt
+
+NEW_ROOT = d:/root/directory ;
+Echo $(FILENAME:R=<span class="stringliteral">"d:/root/directory"</span>) ; # &lt;thegrist&gt;c:/some/directory/filename.txt
+Echo @(filename.txt:R=$(NEW_ROOT)) ;     # d:/root/directory/filename.txt
+
+Echo @(lowercase_now_uppercase:U) ;      # LOWERCASE_NOW_UPPERCASE
+Echo @(UPPERCASE_NOW_LOWERCASE:L) ;      # uppercase_now_lowercase ;
+
+Echo @(backslash\\path\\:/) ;            # backslash/path/
+Echo $(FILENAME:\\) ;                    # &lt;thegrist&gt;c:\\some\\directory\\filename.txt
+
+Echo $(FILENAME:DBS) ;                   # c:/some/directory/filename.txt
+
+VAR = /home/stuff/file.txt ;
+Echo $(VAR:DB:U) ;                       # /HOME/STUFF/FILE
+
+<span class="preprocessor">#------------------------------------------------------------------------------</span>
+<span class="preprocessor"></span><span class="preprocessor"># Assuming ../sharedlib/app has the files Jamfile.jam and main.c:</span>
+<span class="preprocessor"></span>Echo @(../sharedlib/app<span class="comment">/*:WBS) ;         # Jamfile.jam main.c</span>
+<span class="comment">Echo @(@(../sharedlib/app/*:W):BS) ;     # Jamfile.jam main.c</span>
+<span class="comment"></span>
+<span class="comment">Echo @(../sharedlib/app</span><span class="comment">/**:WB=more\\dir\\file:\\) ;</span>
+<span class="comment">                                  # ..\\sharedlib\\app\\more\\dir\\file.jam</span>
+<span class="comment">                                  # ..\\sharedlib\\app\\more\\dir\\file.c</span>
+<span class="comment"></span>
+<span class="comment"></span>
+<span class="comment">#------------------------------------------------------------------------------</span>
+<span class="comment">top = AppRoot ;</span>
+<span class="comment">jamfile = Jamfile.jam ;</span>
+<span class="comment">Echo included_$(top:J=_)_$(jamfile) ;    # included_AppRoot_Jamfile.jam</span>
+<span class="comment"></span>
+<span class="comment">#------------------------------------------------------------------------------</span>
+<span class="comment">top = AppRoot With Directories ;</span>
+<span class="comment">jamfile = SomeFile.jam ;</span>
+<span class="comment">Echo included_$(top:J=_)_$(jamfile) ;    # included_AppRoot_With_Directories_SomeFile.jam</span>
+<span class="comment"></span>
+<span class="comment">#------------------------------------------------------------------------------</span>
+<span class="comment">Echo $(list:J=!) ;                # list!of!characters!to!put!stuff!in!between</span>
+<span class="comment"></span>
+<span class="comment">#------------------------------------------------------------------------------</span>
+<span class="comment">FILES = file1.c file2.c file3.c file1.h file2.h file3.h file1.obj file2.obj file3.obj ;</span>
+<span class="comment">Echo $(FILES:I=\\.c$) ;           # file1.c file2.c file3.c</span>
+<span class="comment"></span>
+<span class="comment">Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1") ;</span>
+<span class="comment">                                  # file2.c file3.c file2.obj file3.obj</span>
+<span class="comment"></span>
+<span class="comment">Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$:I=\\.c$) ;</span>
+<span class="comment">                                  # file1.c file2.c file3.c file2.obj file3.obj</span>
+<span class="comment"></span>
+<span class="comment">Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$) ;</span>
+<span class="comment">                                  # file2.obj file3.obj</span>
+<span class="comment"></span>
+<span class="comment">Echo $(FILES:X="^file1":X=\\.obj$:I=\\.h$) ;</span>
+<span class="comment">                                  # file1.h file2.h file3.h</span>
 </pre></div> </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Tue Oct 28 23:35:01 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Wed Oct 29 20:49:16 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>

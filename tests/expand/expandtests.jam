@@ -69,6 +69,54 @@ TestExpansion $(var1_var2:A) : $(list) ;
 TestExpansion @($(var1)$(var2):A) : $(list) ;
 
 #------------------------------------------------------------------------------
+FILE = somefile.txt ;
+TestExpansion $(FILE:T) : somefile.txt ;
+
+LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/somefile.txt ;
+
+BINDING on $(FILE) = newname.txt ;
+TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/newname.txt ;
+
+BINDING on $(FILE) = ;
+SEARCH on $(FILE) = data ;
+LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/somefile.txt ;
+
+LOCATE on $(FILE) = ;
+TestExpansion $(FILE:T) : data/somefile.txt ;
+
+#------------------------------------------------------------------------------
+FILENAME = <thegrist>c:/some/directory/filename.txt ;
+TestExpansion $(FILENAME:B) : filename ;
+TestExpansion $(FILENAME:B=anothername) : <thegrist>c:/some/directory/anothername.txt ;
+TestExpansion $(FILENAME:S) : .txt ;
+TestExpansion $(FILENAME:S=.dat) : <thegrist>c:/some/directory/filename.dat ;
+TestExpansion $(FILENAME:BS) : filename.txt ;
+TestExpansion $(FILENAME:B=anothername:S=.dat) : <thegrist>c:/some/directory/anothername.dat ;
+TestExpansion $(FILENAME:M) : ;
+TestExpansion @(archive(member):M) : (member) ;
+TestExpansion @(archive(member):M=anothermember) : archive(anothermember) ;
+TestExpansion $(FILENAME:D) : c:/some/directory ;
+TestExpansion $(FILENAME:D=/usr/local/bin) : <thegrist>/usr/local/bin/filename.txt ;
+TestExpansion $(FILENAME:P) : <thegrist>c:/some/directory ;
+TestExpansion @($(FILENAME:P):P) : <thegrist>c:/some ;
+
+TestExpansion $(FILENAME:G) : <thegrist> ;
+TestExpansion $(FILENAME:G=anothergrist) : <anothergrist>c:/some/directory/filename.txt ;
+
+NEW_ROOT = d:/root/directory ;
+TestExpansion $(FILENAME:R="d:/root/directory") : <thegrist>c:/some/directory/filename.txt ;
+TestExpansion @(filename.txt:R=$(NEW_ROOT)) : d:/root/directory/filename.txt ;
+
+TestExpansion @(lowercase_now_uppercase:U) : LOWERCASE_NOW_UPPERCASE ;
+TestExpansion @(UPPERCASE_NOW_LOWERCASE:L) : uppercase_now_lowercase ;
+
+TestExpansion @(backslash\\path\\:/) : backslash/path/ ;
+TestExpansion $(FILENAME:\\) : <thegrist>c:\\some\\directory\\filename.txt ;
+
+TestExpansion $(FILENAME:DBS) : c:/some/directory/filename.txt ;
+
 VAR = /home/stuff/file.txt ;
 TestExpansion $(VAR:DB:U) : /HOME/STUFF/FILE ;
 
@@ -95,39 +143,20 @@ TestExpansion included_$(top:J=_)_$(jamfile) : included_AppRoot_With_Directories
 TestExpansion $(list:J=!) : list!of!characters!to!put!stuff!in!between ;
 
 #------------------------------------------------------------------------------
-FILES = file1.c file2.c file3.c file1.o file2.o file3.o file1.s file2.s file3.s ;
-TestExpansion $(FILES:I=\\.c$:I=\\.o:X="^file1") :
-		file2.c file3.c file2.o file3.o ;
+FILES = file1.c file2.c file3.c file1.h file2.h file3.h file1.obj file2.obj file3.obj ;
+TestExpansion $(FILES:I=\\.c$) : file1.c file2.c file3.c ;
 
-TestExpansion $(FILES:I=\\.c$:I=\\.o:X="^file1":X=\\.c$:I=\\.c$) :
-		file1.c file2.c file3.c file2.o file3.o ;
+TestExpansion $(FILES:I=\\.c$:I=\\.obj:X="^file1") :
+		file2.c file3.c file2.obj file3.obj ;
 
-TestExpansion $(FILES:I=\\.c$:I=\\.o:X="^file1":X=\\.c$) :
-		file2.o file3.o ;
+TestExpansion $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$:I=\\.c$) :
+		file1.c file2.c file3.c file2.obj file3.obj ;
 
-TestExpansion $(FILES:X="^file1":X=\\.o$:I=\\.c$) :
-		file1.c file2.c file3.c ;
+TestExpansion $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$) :
+		file2.obj file3.obj ;
 
-#------------------------------------------------------------------------------
-FILE = somefile.txt ;
-TestExpansion $(FILE:T) : somefile.txt ;
-
-LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
-TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/somefile.txt ;
-
-BINDING on $(FILE) = newname.txt ;
-TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/newname.txt ;
-
-BINDING on $(FILE) = ;
-SEARCH on $(FILE) = data ;
-LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
-TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/somefile.txt ;
-
-LOCATE on $(FILE) = ;
-TestExpansion $(FILE:T) : data/somefile.txt ;
-
-
-
+TestExpansion $(FILES:X="^file1":X=\\.obj$:I=\\.h$) :
+		file1.h file2.h file3.h ;
 
 #------------------------------------------------------------------------------
 Echo Tests passed: $(numTestsPassed)/$(numTests) ;

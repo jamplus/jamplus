@@ -79,7 +79,9 @@ on anothertarget Echo $(myvar) ;
 
 \section language_variable_expansion Variable Expansion
 
-During parsing, \b Jam performs variable expansion on each token that is not a keyword or rule name.  Such tokens with embedded variable references are replaced with zero or more tokens.  Variable references are of the form \$(<i>v</i>) or \$(<i>vm</i>), where \em v is the variable name, and \em m are optional modifiers.
+During parsing, \b Jam performs variable expansion on each token that is not a keyword or rule name.  Such tokens with embedded variable references are replaced with zero or more tokens.  Variable references are of the form \$(<i>variable</i>) or \$(<i>variable:modifiers</i>), where \em variable is the variable name, and \em modifiers are optional modifiers.
+
+A literal expansion is in the form \@(<i>literal</i>) or \@(<i>literal:modifiers</i>).  Instead of expanding a variable's contents, as with a \$(<i>variable</i>) expansion, the direct contents of <i>literal</i> are used.  All other behavior is the same.
 
 Variable expansion in a rule's actions is similar to variable expansion in statements,  except that the action string is tokenized at whitespace regardless of quoting.
 
@@ -155,7 +157,7 @@ A variable element's string value can be parsed into grist and filename-related 
   </tr>
   <tr>
     <td><code> :T </code></td>
-	<td>Expand bound name.</td>
+	<td>Expand the bound name of the target.  Just as when expanding within an action, the BINDING is applied first.  If LOCATE is set, it is used for the path.  If not, SEARCH is used to look up the file.</td>
   </tr>
   <tr>
     <td><code> :B </code></td>
@@ -231,11 +233,11 @@ A variable element's string value can be parsed into grist and filename-related 
   </tr>
   <tr>
     <td><code> :I=<i>regex</i> </code></td>
-	<td>Include all list items matching <i>regex</i>.  Remove everything else.</td>
+	<td>Include all list items matching <i>regex</i>.  Remove everything else.  More than one set of <tt>:I</tt> or <tt>:X</tt> modifiers may appear in a given expansion, and they are applied in order.</td>
   </tr>
   <tr>
     <td><code> :X=<i>regex</i> </code></td>
-	<td>Exclude all list items matching <i>regex</i>.  Keep everything else.</td>
+	<td>Exclude all list items matching <i>regex</i>.  Keep everything else.  More than one set of <tt>:I</tt> or <tt>:X</tt> modifiers may appear in a given expansion, and they are applied in order.</td>
   </tr>
 </table>
 
@@ -244,7 +246,7 @@ A variable element's string value can be parsed into grist and filename-related 
 
 When using the <tt>:W</tt> modifier, the following file globbing syntax is available.
 
-<table border="1" width="600" align="center">
+<table border="1" width="75%" align="center">
   <tr>
 
     <td width="150"><b>Wildcard</b></td>
@@ -272,7 +274,7 @@ When using the <tt>:W</tt> modifier, the following file globbing syntax is avail
 
 <p>Some examples follow:</p>
 
-<table border="1" width="600"  align="center">
+<table border="1" width="75%"  align="center">
   <tr>
     <td width="150"><b>Example Pattern</b></td>
     <td width="450"><b>Description</b></td>
@@ -381,7 +383,7 @@ When using the <tt>:W</tt> modifier, the following file globbing syntax is avail
 
 <p>Finally, a couple flags are available. Flags are appended at the end of the pattern line. Each flag begins with an @ character. Spaces should not be inserted between flags unless they are intended as part of the string literal.</p>
 
-<table border="1" width="600" align="center">
+<table border="1" width="75%" align="center">
   <tr>
     <td width="150"><b>Flags and Other Expansions</b></td>
     <td width="450"><b>Description</b></td>
@@ -404,7 +406,7 @@ When using the <tt>:W</tt> modifier, the following file globbing syntax is avail
 
 <p>And a few examples:</p>
 
-<table border="1" width="600" align="center">
+<table border="1" width="75%" align="center">
   <tr>
     <td width="150"><b>Example Pattern</b></td>
     <td width="450"><b>Description</b></td>
@@ -466,6 +468,93 @@ Echo $(var1_var2) ;               # $(list)
 Echo $(var1_var2:A) ;             # list of characters to put stuff in between
 Echo @($(var1)$(var2):A) ;        # list of characters to put stuff in between
 
+#------------------------------------------------------------------------------
+FILE = somefile.txt ;
+Echo $(FILE:T) ;                  # somefile.txt
+
+LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/somefile.txt
+
+BINDING on $(FILE) = newname.txt ;
+Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/newname.txt
+
+BINDING on $(FILE) = ;
+SEARCH on $(FILE) = data ;
+LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/somefile.txt
+
+LOCATE on $(FILE) = ;
+Echo $(FILE:T) ;                  # data/somefile.txt
+
+#------------------------------------------------------------------------------
+FILENAME = <thegrist>c:/some/directory/filename.txt ;
+Echo $(FILENAME:B) ;              # filename
+Echo $(FILENAME:B=anothername) ;  # <thegrist>c:/some/directory/anothername.txt
+Echo $(FILENAME:S) ;              # .txt
+Echo $(FILENAME:S=.dat) ;         # <thegrist>c:/some/directory/filename.dat
+Echo $(FILENAME:BS) ;             # filename.txt
+Echo $(FILENAME:B=anothername:S=.dat) ;  # <thegrist>c:/some/directory/anothername.dat
+Echo $(FILENAME:D) ;              # c:/some/directory
+Echo $(FILENAME:D=/usr/bin) ;     # <thegrist>/usr/bin/filename.txt
+Echo $(FILENAME:P) ;              # <thegrist>c:/some/directory
+Echo @($(FILENAME:P):P) ;         # <thegrist>c:/some
+
+Echo $(FILENAME:G) ;              # <thegrist>
+Echo $(FILENAME:G=anothergrist) ; # <anothergrist>c:/some/directory/filename.txt
+
+NEW_ROOT = d:/root/directory ;
+Echo $(FILENAME:R="d:/root/directory") ; # <thegrist>c:/some/directory/filename.txt
+Echo @(filename.txt:R=$(NEW_ROOT)) ;     # d:/root/directory/filename.txt
+
+Echo @(lowercase_now_uppercase:U) ;      # LOWERCASE_NOW_UPPERCASE
+Echo @(UPPERCASE_NOW_LOWERCASE:L) ;      # uppercase_now_lowercase ;
+
+Echo @(backslash\\path\\:/) ;            # backslash/path/
+Echo $(FILENAME:\\) ;                    # <thegrist>c:\\some\\directory\\filename.txt
+
+Echo $(FILENAME:DBS) ;                   # c:/some/directory/filename.txt
+
+VAR = /home/stuff/file.txt ;
+Echo $(VAR:DB:U) ;                       # /HOME/STUFF/FILE
+
+#------------------------------------------------------------------------------
+# Assuming ../sharedlib/app has the files Jamfile.jam and main.c:
+Echo @(../sharedlib/app/*:WBS) ;         # Jamfile.jam main.c
+Echo @(@(../sharedlib/app/*:W):BS) ;     # Jamfile.jam main.c
+
+Echo @(../sharedlib/app/**:WB=more\\dir\\file:\\) ;
+                                  # ..\\sharedlib\\app\\more\\dir\\file.jam
+                                  # ..\\sharedlib\\app\\more\\dir\\file.c
+
+
+#------------------------------------------------------------------------------
+top = AppRoot ;
+jamfile = Jamfile.jam ;
+Echo included_$(top:J=_)_$(jamfile) ;    # included_AppRoot_Jamfile.jam
+
+#------------------------------------------------------------------------------
+top = AppRoot With Directories ;
+jamfile = SomeFile.jam ;
+Echo included_$(top:J=_)_$(jamfile) ;    # included_AppRoot_With_Directories_SomeFile.jam
+
+#------------------------------------------------------------------------------
+Echo $(list:J=!) ;                # list!of!characters!to!put!stuff!in!between
+
+#------------------------------------------------------------------------------
+FILES = file1.c file2.c file3.c file1.h file2.h file3.h file1.obj file2.obj file3.obj ;
+Echo $(FILES:I=\\.c$) ;           # file1.c file2.c file3.c
+
+Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1") ;
+                                  # file2.c file3.c file2.obj file3.obj
+
+Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$:I=\\.c$) ;
+                                  # file1.c file2.c file3.c file2.obj file3.obj
+
+Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$) ;
+                                  # file2.obj file3.obj
+
+Echo $(FILES:X="^file1":X=\\.obj$:I=\\.h$) ;
+                                  # file1.h file2.h file3.h
 \endcode
 
 
