@@ -1846,9 +1846,14 @@ rule CreatePrecompiledHeader TARGET : NAME : HEADER
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
-	HEADER ?= $(NAME:S=.h) ;
-	local cppPchFilename = $(NAME:S=.cpp:G=$(grist)) ;
-	PCH on $(cppPchFilename) = $(NAME) $(HEADER) 1 ;
+	HEADER ?= $(NAME[1]:S=.h) ;
+	local SOURCE = $(NAME[1]) ;
+	if ! $(SOURCE:S)
+	{
+		SOURCE = $(SOURCE:S=.cpp) ;
+	}
+	local cppPchFilename = $(SOURCE:G=$(grist)) ;
+	PCH on $(cppPchFilename) = $(SOURCE) $(HEADER) 1 ;
 }
 
 
@@ -1856,13 +1861,18 @@ rule UsePrecompiledHeader TARGET : NAME : HEADER : FILES
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
-	local cppPchFilename = $(NAME:S=.cpp:G=$(grist)) ;
+	local SOURCE = $(NAME[1]) ;
+	if ! $(SOURCE:S)
+	{
+		SOURCE = $(SOURCE:S=.cpp) ;
+	}
+	local cppPchFilename = $(SOURCE:G=$(grist)) ;
 	local file ;
 	for file in $(FILES:G=$(grist))
 	{
 		if $(file:S) in .cpp .c  &&  $(file) != $(cppPchFilename)
 		{
-			PCH on $(file) = $(NAME) $(HEADER) ;
+			PCH on $(file) = $(SOURCE) $(HEADER) ;
 		}
 	}
 }
@@ -1874,9 +1884,9 @@ rule PrecompiledHeader TARGET : NAME : FILES
 	{
 		NAME[1] = $(NAME[1]:S=.cpp) ;
 	}
-	NAME[2] ?= $(NAME[1]:S=.h) ;
-	CreatePrecompiledHeader $(TARGET) : $(NAME[1]) : $(NAME[2]) ;
-	UsePrecompiledHeader $(TARGET) : $(NAME[1]) : $(NAME[2]) : $(FILES) ;
+	local header = $(NAME[2]:E=$(NAME[1]:S=.h)) ;
+	CreatePrecompiledHeader $(TARGET) : $(NAME[1]) $(NAME[1]:S) : $(header) ;
+	UsePrecompiledHeader $(TARGET) : $(NAME[1]) $(NAME[1]:S) : $(header) : $(FILES) ;
 }
 
 
