@@ -194,9 +194,9 @@ path_build(
 #ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
 	    /* avoid double slash */
 	    if ( file > fileorg  &&  file[-1] != '/'  &&  file[-1] != '\\' )
-		*file++ = PATH_DELIM;
+		*file++ = pathdelim;
 #else
-	    *file++ = PATH_DELIM;
+	    *file++ = pathdelim;
 #endif
 	}
 
@@ -218,7 +218,7 @@ path_build(
 	    if( !( f->f_dir.len == 3 && f->f_dir.ptr[1] == ':' ) )
 # endif
 		if( !( f->f_dir.len == 1 && f->f_dir.ptr[0] == PATH_DELIM ) )
-		    *file++ = PATH_DELIM;
+		    *file++ = pathdelim;
 	}
 
 	if( f->f_base.len )
