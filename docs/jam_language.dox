@@ -85,6 +85,23 @@ The basic \b Jam language entity is called a rule. A rule is simply a procedure 
 
 Rules take up to 9 arguments (\$(1) through \$(9), each a list) and can have a return value (a single list). A rule's return value can be expanded in a list by enclosing the rule invocation with [ and ].
 
+Rule names can be expanded in place using the same techniques as described in \ref language_variable_expansion.
+
+\code
+FLAG = Dirty ; # or Clean
+
+rule MarkDirty
+{
+}
+
+rule MarkClean
+{
+}
+
+# Calls MarkDirty
+Mark$(FLAG) ;
+\endcode
+
 
 
 \subsection language_updating_actions Updating Actions
@@ -134,12 +151,32 @@ The following action \em modifiers are understood:
     <td>The return status of the \em commands is ignored.</td>
   </tr>
   <tr>
+    <td><tt>actions lua</tt></td>
+    <td>Flags this action contains embedded Lua script that is executed in a thread local to the running Jam process.  For more information, see \ref lua_support_actions.</td>
+  </tr>
+  <tr>
+    <td><tt>actions maxtargets #</tt></td>
+    <td>When batching files through the action, using \c maxtargets limits the number of source files passed to the action's command each time.</td>
+  </tr>
+  <tr>
     <td><tt>actions piecemeal</tt></td>
     <td>\em commands are repeatedly invoked with a subset of \$(>) small enough to fit in the command buffer on this OS.</td>
   </tr>
   <tr>
     <td><tt>actions quietly</tt></td>
     <td>The action is not echoed to the standard output.</td>
+  </tr>
+  <tr>
+    <td><tt>actions response</tt></td>
+    <td>Enables automatically generated response files.  Response files store text surrounded by <tt>@@(text...)</tt> into a temporary response file.  The <tt>@@(text)</tt> in the action is replaced with the full path to the temporary response file.
+
+\code
+actions response C++
+{
+    $(C++) @@($(2))
+}
+\endcode
+    </td>
   </tr>
   <tr>
     <td><tt>actions together</tt></td>

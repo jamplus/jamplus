@@ -1,0 +1,123 @@
+/*! \page lua_support Lua Support
+
+\section lua_support_overview Overview
+
+JamPlus has built in Lua support, provided through a minimal distribution of LuaPlus (http://luaplus.org/).  Lua script may be run during the \ref operation_parsing and during the \ref operation_updating.
+
+Any LuaBinaries capable module can run in the LuaPlus environment. Just drop the binary in the <tt>bin/LuaPlus/modules/</tt> directory.
+
+The scripts located in <tt>bin/scripts/</tt> are written in Lua, although they are executed external to the Jam executable.
+
+
+
+<hr>
+\section lua_support_rules Using Lua during the Parsing Phase
+
+There are two rules for execution of Lua script available for use during the rule parsing phase of JamPlus.  They are \ref rule_LuaString and \ref rule_LuaFile.
+
+\subsection rule_LuaString rule LuaString LUA_SCRIPT
+\addindex rule_LuaString
+
+\htmlonly <blockquote> \endhtmlonly
+
+Executes \c LUA_SCRIPT, returning any results back to the caller.
+
+\param LUA_SCRIPT Syntactically correct Lua script embedded in a string.  Only the first string list item is executed.
+\return If the Lua script doesn't return any values, the return value is an empty list.  If the Lua script does return values, the return values are transformed to a Jam string list.  Nested tables are collapsed.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+
+\subsection rule_LuaFile rule LuaFile LUA_FILENAME
+\addindex rule_LuaFile
+
+\htmlonly <blockquote> \endhtmlonly
+
+Executes \c LUA_FILENAME, returning any results back to the caller.
+
+\param LUA_FILENAME The filename of the Lua script to run.
+\return If the Lua script doesn't return any values, the return value is an empty list.  If the Lua script does return values, the return values are transformed to a Jam string list.  Nested tables are collapsed.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+
+
+
+<hr>
+\section lua_support_actions Using Lua in Actions
+
+Using the new <tt>lua</tt> modifier for an action, Lua script can be run in a thread within the Jam process.
+
+\code
+actions lua RunLuaScript
+{
+    require 'iox'; iox.Sleep($(SLEEP)); print($(TEXT))
+}
+\endcode
+
+
+
+
+
+<hr>
+\section lua_support_jam Accessing Jam from Lua
+
+Within a Lua script, it is possible to access Jam variables and execute Jam rules.
+
+\subsection lua_jam_getvar function jam_getvar([ TARGET_NAME, ] VARIABLE_NAME)
+\addindex lua_jam_getvar
+
+\htmlonly <blockquote> \endhtmlonly
+
+Retrieves \c VARIABLE_NAME from the active Jam globals and returns it as a table of strings.
+
+If \c TARGET_NAME is specified, \c VARIABLE_NAME is retrieved as if an <tt>on TARGET_NAME</tt> had been issued in Jam.
+
+\param TARGET_NAME (optional) The target to make active to retrieve \c VARIABLE_NAME from.
+\param VARIABLE_NAME The Jam variable to retrieve.
+\return All strings within the \c VARIABLE_NAME string are returned as a Lua array of strings.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+
+
+\subsection lua_jam_setvar function jam_setvar([ TARGET_NAME, ] VARIABLE_NAME, VALUE)
+\addindex lua_jam_setvar
+
+\htmlonly <blockquote> \endhtmlonly
+
+Sets \c VALUE into the active Jam global \c VARIABLE_NAME.  \c VALUE can be a boolean, number, string, or table.  Nested tables are collapsed.
+
+If \c TARGET_NAME is specified, \c VALUE is set into \c VARIABLE_NAME as if an <tt>VARIABLE_NAME on TARGET_NAME</tt> had been issued in Jam.
+
+\param TARGET_NAME (optional) The target to make active to set \c VARIABLE_NAME into.
+\param VARIABLE_NAME The Jam variable to set.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+\subsection lua_jam_evaluaterule function jam_evaluaterule(RULE_NAME [, PARAMETERS])
+\addindex lua_jam_evaluaterule
+
+\htmlonly <blockquote> \endhtmlonly
+
+Executes rule \c RULE_NAME using any optional \c PARAMETERS specified.  Returns the result as a Lua table.
+
+\param RULE_NAME The name of any valid Jam rule.
+\param PARAMETERS (optional) If specifed, the \c PARAMETERS are collapsed into a Jam string list and passed to the rule.
+\return If the Jam rule doesn't return any values, the return value is \c nil.  If the Jam rule does return values, the return values are transformed to a Lua array of strings.
+
+\htmlonly </blockquote> \endhtmlonly
+
+*/

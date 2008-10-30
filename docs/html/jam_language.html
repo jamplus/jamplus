@@ -47,7 +47,21 @@ Datatype</a></h3>
 <b>Jam</b>'s only data type is a one-dimensional list of arbitrary strings. They arise as literal (whitespace-separated) tokens in the Jambase or included files, as the result of variable expansion of those tokens, or as the return value from a rule invocation.<h3><a class="anchor" name="language_rules">
 Rules</a></h3>
 The basic <b>Jam</b> language entity is called a rule. A rule is simply a procedure definition, with a body of <b>Jam</b> statements to be run when the rule is invoked. The syntax of rule invocation make it possible to write Jamfiles that look a bit like Makefiles.<p>
-Rules take up to 9 arguments ($(1) through $(9), each a list) and can have a return value (a single list). A rule's return value can be expanded in a list by enclosing the rule invocation with [ and ].<h3><a class="anchor" name="language_updating_actions">
+Rules take up to 9 arguments ($(1) through $(9), each a list) and can have a return value (a single list). A rule's return value can be expanded in a list by enclosing the rule invocation with [ and ].<p>
+Rule names can be expanded in place using the same techniques as described in <a class="el" href="language_variables.html#language_variable_expansion">Variable Expansion</a>.<p>
+<div class="fragment"><pre class="fragment">FLAG = Dirty ; # or Clean
+
+rule MarkDirty
+{
+}
+
+rule MarkClean
+{
+}
+
+<span class="preprocessor"># Calls MarkDirty</span>
+<span class="preprocessor">Mark$(FLAG) ;</span>
+</pre></div><h3><a class="anchor" name="language_updating_actions">
 Updating Actions</a></h3>
 A rule may have updating actions associated with it, in which case arguments $(1) and $(2) are treated as built targets and sources, respectively. Updating actions are the OS shell commands to execute when updating the built targets of the rule.<p>
 When a rule with updating actions is invoked, those actions are added to those associated with its built targets ($(1)) before the rule's procedure is run. Later, to build the targets in the updating phase, the actions are passed to the OS command shell, with $(1) and $(2) replaced by bound versions of the target names. See <a class="el" href="jam_language.html#operation_binding">Binding Phase</a> above.<h3><a class="anchor" name="language_statements">
@@ -71,9 +85,20 @@ The following action <em>modifiers</em> are understood:<p>
 <tr>
 <td><code>actions ignore</code> </td><td>The return status of the <em>commands</em> is ignored.  </td></tr>
 <tr>
+<td><code>actions lua</code> </td><td>Flags this action contains embedded Lua script that is executed in a thread local to the running Jam process. For more information, see <a class="el" href="lua_support.html#lua_support_actions">Using Lua in Actions</a>.  </td></tr>
+<tr>
+<td><code>actions maxtargets #</code> </td><td>When batching files through the action, using <code>maxtargets</code> limits the number of source files passed to the action's command each time.  </td></tr>
+<tr>
 <td><code>actions piecemeal</code> </td><td><em>commands</em> are repeatedly invoked with a subset of $(&gt;) small enough to fit in the command buffer on this OS.  </td></tr>
 <tr>
 <td><code>actions quietly</code> </td><td>The action is not echoed to the standard output.  </td></tr>
+<tr>
+<td><code>actions response</code> </td><td>Enables automatically generated response files. Response files store text surrounded by <code>@(text...)</code> into a temporary response file. The <code>@(text)</code> in the action is replaced with the full path to the temporary response file.<p>
+<div class="fragment"><pre class="fragment">actions response C++
+{
+    $(C++) @@($(2))
+}
+</pre></div>   </td></tr>
 <tr>
 <td><code>actions together</code> </td><td>The $(&gt;) from multiple invocations of the same action on the same built target are concatenated together.  </td></tr>
 <tr>
@@ -172,7 +197,7 @@ The switch statement executes zero or one of the enclosed <em>statements</em>, d
 Repeatedly execute <em>statements</em> while <em>cond</em> remains true upon entry. (See the description of <em>cond</em> expression syntax under if above).<p>
  </blockquote> <p>
  </blockquote>  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Tue Oct 28 23:35:01 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Wed Oct 29 23:32:26 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>

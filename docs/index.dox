@@ -24,6 +24,7 @@ A sampling of the new features in the JamPlus distribution follows:
 - \subpage builtin_rules shows the built-in rules of Jam.
 - \subpage builtin_variables shows the built-in variables of Jam.
 - \subpage jambase_rules shows the list of rules available in the default <tt>Jambase.jam</tt>.
+- \subpage lua_support shows how Lua can communicate with Jam.
 - \subpage warnings_and_errors shows a list of the possible warnings and errors that can be reported by Jam.
 - \subpage bugs
 
