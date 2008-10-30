@@ -1,0 +1,12 @@
+SubDir TOP ;
+
+SRCS =
+		../src/main.c
+		../src/precomp.c
+		../src/precomp.h
+;
+
+PrecompiledHeader helloworld : ../src/precomp.c precomp.h : $(SRCS) ;
+
+Application helloworld : $(SRCS) ;
+
