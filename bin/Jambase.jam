@@ -14,19 +14,6 @@ rule Var {
 
 
 # Helper rule used to get value of a variable bound to specific target.
-# [ on <target> Var <var> ]
-#rule MultiVar {
-#	local key ;
-#	local value ;
-#	for key in $(1)
-#	{
-#		value += $($(key)) ;
-#	}
-#	return $(value) ;
-#}
-
-# Helper rule used to get value of a variable bound to specific target.
-# [ on <target> Var <var> ]
 rule SearchVar {
 	local key ;
 	for key in $(1)
@@ -112,8 +99,7 @@ rule FindVisualStudio VERSION
 			}
 
 		case 7.1 :
-			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft
-				VisualStudio $(VERSION) InstallDir ;
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
 			MSVCNT = [ W32_GETREG $(key) ] ;
 			if $(MSVCNT)
 			{
@@ -137,9 +123,7 @@ rule FindVisualStudio VERSION
 			}
 
 		case 6.0 :
-		    local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft
-			    DevStudio $(VERSION) Products "Microsoft Visual C++"
-			    ProductDir ;
+		    local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft DevStudio $(VERSION) Products "Microsoft Visual C++" ProductDir ;
 		    MSVCNT = [ W32_GETREG $(key) ] ;
 			return vc6 ;
 	}
