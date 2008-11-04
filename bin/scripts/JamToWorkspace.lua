@@ -710,6 +710,14 @@ MapConfigToCodeBlocksConfig =
 	['release'] = 'Release',
 }
 
+MapCompilerToCodeBlocksCompiler =
+{
+	['vs2003'] = 'msvc7',
+	['vs2005'] = 'msvc8',
+	['vs2008'] = 'msvc9',
+	['mingw'] = 'gcc',
+}
+
 local CodeBlocksProjectMetaTable = {  __index = CodeBlocksProjectMetaTable  }
 
 function CodeBlocksProjectMetaTable:_GatherSourceFolders(folder, folderList, fullPath)
@@ -739,6 +747,8 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 
 	local project = Projects[self.ProjectName]
 
+	local cbCompiler = MapCompilerToCodeBlocksCompiler[self.Options.compiler]
+
 	-- Write header.
 	table.insert(self.Contents, expand([[
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
@@ -747,13 +757,67 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 	<Project>
 		<Option title="$(ProjectName)" />
 		<Option makefile_is_custom="1" />
-		<Option compiler="msvc8" />
-]], self))
+		<Option compiler="$(Compiler)" />
+]], self, { Compiler = cbCompiler } ))
 --		<Option pch_mode="2" />
 
+	local platformName = 'win32'
+	do
+		local configName = 'debug'
+		local jamCommandLine = jamExePath ..
+				' -C' .. destinationRootPath ..
+				' -sPLATFORM=' .. platformName ..
+				' -sCONFIG=' .. configName
+
+		local configInfo =
+		{
+			Platform = platformName,
+			Config = configName,
+			CBPlatform = MapPlatformToCodeBlocksPlatform[platformName],
+			CBConfig = MapConfigToCodeBlocksConfig[configName],
+			Defines = '',
+			Includes = '',
+			Output = '',
+		}
+
+		if project and project.Name then
+			if project.Defines then
+				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+			end
+			if project.IncludePaths then
+				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
+			end
+			if project.OutputPaths then
+				configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
+			end
+			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
+		elseif not commandLines then
+			configInfo.BuildCommandLine = jamCommandLine
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
+		else
+			configInfo.BuildCommandLine = commandLines[1] or ''
+			configInfo.RebuildCommandLine = commandLines[2] or ''
+			configInfo.CleanCommandLine = commandLines[3] or ''
+		end
+
+		table.insert(self.Contents, expand([==[
+		<MakeCommands>
+			<Build command="$(BuildCommandLine)" />
+			<CompileFile command="$(BuildCommandLine)" />
+			<Clean command="$(CleanCommandLine)" />
+			<DistClean command="$(CleanCommandLine)" />
+		</MakeCommands>
+]==], configInfo, info, _G))
+
+	end
+
 	local virtualFolderInfo = { sourceFolderList = { '!Sources' } }
-	self:_GatherSourceFolders(project.Sources, virtualFolderInfo.sourceFolderList, '')
-	print(virtualFolderInfo.sourceFolderList)
+	if project then
+		self:_GatherSourceFolders(project.Sources, virtualFolderInfo.sourceFolderList, '')
+	end
 
 	table.insert(self.Contents, expand([[
 		<Option virtualFolders="$(table.concat(sourceFolderList, ';'))" />
@@ -764,7 +828,6 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 		<Build>
 ]])
 
-	local platformName = 'win32'
 	for configName in ivalues(Config.Configurations) do
 		local jamCommandLine = jamExePath ..
 				' -C' .. destinationRootPath ..
@@ -777,16 +840,37 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 			Config = configName,
 			CBPlatform = MapPlatformToCodeBlocksPlatform[platformName],
 			CBConfig = MapConfigToCodeBlocksConfig[configName],
-			Defines = table.concat(project.Defines[platformName][configName], ';'),
-			Includes = table.concat(project.IncludePaths[platformName][configName], ';'),
-			Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName],
-			BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName,
-			RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName,
-			CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName,
+			Defines = '',
+			Includes = '',
+			Output = '',
 		}
+
+		if project and project.Name then
+			if project.Defines then
+				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+			end
+			if project.IncludePaths then
+				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
+			end
+			if project.OutputPaths then
+				configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
+			end
+			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
+		elseif not commandLines then
+			configInfo.BuildCommandLine = jamCommandLine
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
+		else
+			configInfo.BuildCommandLine = commandLines[1] or ''
+			configInfo.RebuildCommandLine = commandLines[2] or ''
+			configInfo.CleanCommandLine = commandLines[3] or ''
+		end
 
 		table.insert(self.Contents, expand([==[
 			<Target title="$(CBConfig)">
+				<Option output="$(Output)" prefix_auto="0" extension_auto="0" />
 				<Option type="1" />
 				<MakeCommands>
 					<Build command="$(BuildCommandLine)" />
@@ -803,7 +887,9 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 		</Build>
 ]])
 
-	self:_WriteFiles(project.Sources, '')
+	if project then
+		self:_WriteFiles(project.Sources, '')
+	end
 
 	table.insert(self.Contents, [[
 	</Project>
