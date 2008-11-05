@@ -930,9 +930,9 @@ if $(NT)
 	}
 }
 
-actions Link bind NEEDLIBS
+actions Link
 {
-	$(LINK) $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+	"$(LINK)" $(LINKFLAGS) -o $(<[1]) $(UNDEFS) $(>) $(NEEDLIBS:T) $(LINKLIBS)
 }
 
 actions quietly MkDir1
@@ -1003,14 +1003,14 @@ if $(NT) && $(MSVCNT)
 		$(RM) "$(>:\\)"
 	}
 
-	actions response Link bind NEEDLIBS
+	actions response Link
 	{
 	PATH=%PATH%;$(MSVCNT_PATH)
-	"$(LINK:\\)" /nologo $(LINKFLAGS) /out:$(<[1]) $(UNDEFS) @@($(>) $(NEEDLIBS) "$(LINKLIBS)")
+	"$(LINK:\\)" /nologo $(LINKFLAGS) /out:$(<[1]) $(UNDEFS) @@($(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 	if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
 	if "%ERRORLEVEL%" == "1090650113" echo 1 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
 	"$(RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
-	"$(LINK:\\)" /nologo $(LINKFLAGS) /out:$(<[1]) $(UNDEFS) @@($(>) $(NEEDLIBS) "$(LINKLIBS)")
+	"$(LINK:\\)" /nologo $(LINKFLAGS) /out:$(<[1]) $(UNDEFS) @@($(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 	}
 }
 
@@ -1634,10 +1634,11 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 		[ _retrieveVar LINKLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
 
-	NEEDLIBS on $(_t) =
+	local needlibs =
 		[ _retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar NEEDLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
-	Depends $(_t) : [ on $(_t) Var NEEDLIBS ] ;
+	NEEDLIBS on $(_t) = $(needlibs) ;
+	Depends $(_t) : $(needlibs) ;
 
 	if $(MSVCNT)
 	{
@@ -1726,7 +1727,7 @@ rule LibraryFromObjects TARGET : OBJECTS
 		local _i ;
 	    for _i in $(_s)
 	    {
-		Depends $(_l)($(_i:BS)) : $(_i) ;
+			Depends $(_l)($(_i:BS)) : $(_i) ;
 	    }
 	}
 
@@ -1772,23 +1773,38 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	}
 
 	local _linkTargets = $(_t) ;
+	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 
 	local _tlib ;
 	if $(hasExportLib)
 	{
 		local _tlib = @($(TARGET)$(SUFLIB):G=$(grist)) ;
-		BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
-		Depends $(TARGET) : $(_tlib) ;
-		Depends $(_tlib) : $(_t) ;
-		MightNotUpdate $(_tlib) ;
-		_linkTargets += $(_tlib) ;
+
+		if $(COMPILER) in vs2003 vs2005 vs2008
+		{
+			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
+			Depends $(TARGET) : $(_tlib) ;
+			Depends $(_tlib) : $(_t) ;
+			MightNotUpdate $(_tlib) ;
+			_linkTargets += $(_tlib) ;
+		}
+		else if $(COMPILER) in mingw
+		{
+#			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
+			BINDING on $(_tlib) = $(_t) ;
+			MakeLocate $(_tlib) : $(outputPath) ;
+			Depends $(TARGET) : $(_tlib) ;
+			Depends $(_tlib) : $(_t) ;
+			NotFile $(_tlib) ;		# Turn this off for export libraries.
+			_linkTargets += $(_tlib) ;
+
+#			LinkFlags $(TARGET) : -Wl,--out-implib,$(_tlib:T) ;
+		}
 	}
 	else
 	{
 		Depends $(TARGET) : $(_t) ;
 	}
-
-	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 
 	Depends all : $(TARGET) ;
 	NotFile $(TARGET) ;
@@ -1813,6 +1829,10 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		}
 		LinkFlags $(TARGET) : /DLL ;
 	}
+	else if $(COMPILER) in mingw
+	{
+		LinkFlags $(TARGET) : -shared ;
+	}
 
 	LINKFLAGS on $(_linkTargets) =
 		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
@@ -1822,10 +1842,12 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	LINKLIBS on $(_linkTargets) =
 		[ _retrieveVar LINKLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
-	NEEDLIBS on $(_linkTargets) =
+
+	local needlibs =
 		[ _retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar NEEDLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
-	Depends $(_t) : [ on $(_t) Var NEEDLIBS ] ;
+	NEEDLIBS on $(_linkTargets) = $(needlibs:S=$(SUFLIB)) ;
+	Depends $(_t) : $(needlibs) ;
 
 	if $(MSVCNT)
 	{
