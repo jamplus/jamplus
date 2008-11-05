@@ -260,6 +260,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			C++FLAGS.win32.debug on *	?= [ on * Var CCFLAGS.win32.debug ] ;
 			C++FLAGS.win32.release on *	?= [ on * Var CCFLAGS.win32.release ] ;
 
+			AR			?= "$(MINGW_ROOT)/bin/ar" ru ;
 			CC			?= "$(MINGW_ROOT)/bin/gcc" ;
 			C++			?= "$(MINGW_ROOT)/bin/g++" ;
 			RANLIB		?= "$(MINGW_ROOT)/bin/ranlib" ;
