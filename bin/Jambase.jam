@@ -331,23 +331,23 @@ Always allclean clean ;
 # Rules
 #
 
-rule HdrRule
+rule HdrRule SOURCE : HEADERS
 {
 	# HdrRule source : headers ;
 
 	# N.B.	This rule is called during binding, potentially after
 	# the fate of many targets has been determined, and must be
 	# used with caution: don't add dependencies to unrelated
-	# targets, and don't set variables on $(<).
+	# targets, and don't set variables on $(SOURCE).
 
-	# Tell Jam that anything depending on $(<) also depends on $(>),
+	# Tell Jam that anything depending on $(SOURCE) also depends on $(HEADERS),
 	# set SEARCH so Jam can find the headers, but then say we don't
 	# care if we can't actually find the headers (they may have been
 	# within ifdefs),
 
-	local s = $(>:G=$(HDRGRIST:E)) ;
+	local s = $(HEADERS:G=$(HDRGRIST:E)) ;
 
-	Includes $(<) : $(s) ;
+	Includes $(SOURCE) : $(s) ;
 ## LOCAL CHANGE
 
 	# If the directory holding this header isn't in HDRSEARCH,
@@ -364,7 +364,7 @@ rule HdrRule
 	SEARCH on $(s) = $(HDRSEARCH) ;
 	NoCare $(s) ;
 
-	# Propagate on $(<) to $(>)
+	# Propagate on $(SOURCE) to $(HEADERS)
 
 	HDRSEARCH on $(s) = $(HDRSEARCH) ;
 	HDRSCAN on $(s) = $(HDRSCAN) ;
