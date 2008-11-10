@@ -142,6 +142,7 @@ path_build(
 {
 #ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
 	char *fileorg = file;
+#endif
 
 	char pathdelim = '/';
 	if ( pathdelim_oldstyle == -1 )
@@ -154,7 +155,6 @@ path_build(
 	}
 	if ( pathdelim_oldstyle )
 	    pathdelim = PATH_DELIM;
-#endif
 
 	/* Start with the grist.  If the current grist isn't */
 	/* surrounded by <>'s, add them. */
