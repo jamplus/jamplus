@@ -55,6 +55,12 @@ Jam Version Variables</a></h2>
 <tr>
 <td>JAMVERSION</td><td><b>jam</b> version, as reported by jam -v. </td></tr>
 </table>
+<h2><a class="anchor" name="language_built_in_variables_misc">
+Miscellaneous Variables</a></h2>
+<table width="75%" align="center" border="1" cellspacing="3" cellpadding="3">
+<tr>
+<td>PATHDELIM_OLDSTYLE</td><td>In JamPlus, the default path separator is a forward slash. If <code>PATHDELIM_OLDSTYLE</code> is set to 1, the default path separator is OS-specific, and the behavior mirrors the original Perforce Jam. </td></tr>
+</table>
 <h2><a class="anchor" name="built_in_variables_jamshell">
 JAMSHELL Variable</a></h2>
 When <b>jam</b> executes a rule's action block, it forks and execs a shell, passing the action block as an argument to the shell. The invocation of the shell can be controlled by $(JAMSHELL). The default on Unix is, for example:<p>
@@ -83,7 +89,7 @@ Just as <b>jam</b> expands a % to be the text of the rule's action block, it exp
 </pre></div><p>
 <hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Wed Oct 29 23:32:26 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Mon Nov 10 15:13:49 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>
