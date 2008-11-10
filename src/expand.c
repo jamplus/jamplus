@@ -368,7 +368,7 @@ var_expand(
 			/* Handle end subscript (length actually) */
 			if( sub2 >= 0 && --sub2 < 0 )
 			    break;
-			
+
 			foundfiles = fileglob( value->string );
 			newl = list_copy( newl, foundfiles );
 			list_free( foundfiles );
@@ -409,7 +409,7 @@ var_expand(
 			TARGET *t = bindtarget( valuestring );
 			pushsettings( t->settings );
 			valuestring = search( t->name, &time );
-			popsettings( t->settings );			
+			popsettings( t->settings );
 		    }
 #endif
 
@@ -529,7 +529,9 @@ var_expand(
 #ifdef OPT_EXPAND_LITERALS_EXT
 		buffer_free( &buff );
 #endif
+#ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT
 		list_free( edits.includes_excludes );
+#endif
 	    }
 
 	    /* variables & remainder were gifts from var_expand */
