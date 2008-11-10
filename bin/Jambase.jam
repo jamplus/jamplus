@@ -218,7 +218,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			MSVCBIN ?= $(MSVCNT)/bin/ ;
 
 			CCFLAGS.win32.debug on * 	= /Od /Gm /EHsc /RTC1 /MDd /W3 /Zi ;
-			CCFLAGS.win32.release on * 	= /O2 /Oi /EHsc /MD /Gy /W3 /Zi ;
+			CCFLAGS.win32.release on * 	= /O2 /Oi /EHsc /Gy /MD /W3 /Zi ;
 			C++FLAGS.win32.* on *		?= [ on * Var CCFLAGS.win32.* ] ;
 			C++FLAGS.win32.debug on *	?= [ on * Var CCFLAGS.win32.debug ] ;
 			C++FLAGS.win32.release on *	?= [ on * Var CCFLAGS.win32.release ] ;
@@ -2019,6 +2019,40 @@ rule C++Flags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
 	C++FLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
+}
+
+
+rule CRuntimeType TARGET : TYPE : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_PLATFORM ?= $(PLATFORM) ;
+	if $(COMPILER) in vs2003 vs2005 vs2008
+	{
+		if ! $(TYPE)  ||  $(TYPE) = dynamic
+		{
+			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MTd ;
+			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MT ;
+			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MDd ;
+			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) += /MD ;
+
+			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MTd ;
+			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MT ;
+			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MDd ;
+			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) += /MD ;
+		}
+		else if $(TYPE) = static
+		{
+			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MDd ;
+			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MD ;
+			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MTd ;
+			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) += /MT ;
+
+			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MDd ;
+			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MD ;
+			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MTd ;
+			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) += /MT ;
+		}
+	}
 }
 
 

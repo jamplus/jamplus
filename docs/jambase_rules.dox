@@ -11,6 +11,7 @@ documentation:
 \refitem rule_Application Application
 \refitem rule_CFlags CFlags
 \refitem rule_CppFlags C++Flags
+\refitem rule_CRuntimeType CRuntimeType
 \refitem rule_Defines Defines
 \refitem rule_ExcludeFromBuild ExcludeFromBuild
 \refitem rule_FGristDirectories FGristDirectories
@@ -143,6 +144,32 @@ For the given project \c TARGET, assign the \c FLAGS to the appropriate configur
     # Assign /clr:oldsyntax to all C++ files in managedapp for the debug
     # configuration and win32 platform.
     C++Flags managedapp : /clr:oldsyntax : debug : win32 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_CRuntimeType rule CRuntimeType TARGET : TYPE [ : THE_PLATFORM ]
+\addindex rule_CRuntimeType
+
+For the given project \c TARGET, alter the build to use either a statically linked C runtime or a dynamically linked C runtime.
+
+\note At this time, the C runtime type only affects Visual C++ applications.
+
+\param TARGET The target to assign the new C runtime to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the C runtime is changed globally.
+\param TYPE May be set to either \c static or \c dynamic.  Use \c static to select a statically linked C runtime.  Use \c dynamic to dynamically link against the C runtime.
+\param THE_PLATFORM (optional) If not specified, the default is the current platform.
+
+\code
+    # Use the statically linked C runtime for all targets.
+    CRuntimeType * : static ;
+
+    # Use the dynamically linked C runtime for the helloworld target.
+    CRuntimeType helloworld : dynamic ;
 \endcode
 
 
