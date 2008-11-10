@@ -120,4 +120,55 @@ Executes rule \c RULE_NAME using any optional \c PARAMETERS specified.  Returns 
 
 \htmlonly </blockquote> \endhtmlonly
 
+
+
+
+
+
+
+<hr>
+\section lua_support_examples Examples
+
+\code
+# Hello
+LuaString "print('Hello')" ;
+
+# 10 hi false
+Echo [ LuaString "return { 10, 'hi', false }" ] ;
+
+# 5.suf hello.suf true.suf
+var = [ LuaString "return { 5, 'hello', true }" ] ;
+Echo $(var:S=.suf) ;
+
+#------------------------------------------------------------------------------
+# Hello world!
+var = Hello world! ;
+Echo [ LuaString "return jam_getvar('var')" ] ;
+
+# Hi everyone
+LuaString "jam_setvar('var', 'Hi everyone')" ;
+Echo $(var) ;
+
+# Hi everyone
+Echo [ LuaString "return jam_getvar('var')" ] ;
+
+#------------------------------------------------------------------------------
+# The Variable Contents
+MyVariable on mytarget = The Variable Contents ;
+Echo [ LuaString "return jam_getvar('mytarget', 'MyVariable')" ] ;
+
+# **hello**
+LuaString "jam_setvar('mytarget', 'MyVariable', '**hello**')" ;
+Echo [ LuaString "return jam_getvar('mytarget', 'MyVariable')" ] ;
+
+rule ReturnList INPUT
+{
+    return **$(INPUT)** ;
+}
+
+# **MyStuff** **YourStuff**
+Echo [ LuaString "return jam_evaluaterule('ReturnList', { 'MyStuff', 'YourStuff' })" ] ;
+\endcode
+
+
 */

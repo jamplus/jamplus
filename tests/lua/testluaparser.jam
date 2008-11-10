@@ -1,0 +1,53 @@
+numTests = 0 ;
+numTestsPassed = 0 ;
+
+rule Test LEFT : RIGHT
+{
+	numTests = [ Math $(numTests) + 1 ] ;
+	if $(LEFT) = $(RIGHT)
+	{
+#		Echo pass: $(LEFT) ;
+		numTestsPassed = [ Math $(numTestsPassed) + 1 ] ;
+	}
+	else
+	{
+		Echo fail: $(LEFT) \!\= $(RIGHT) ;
+	}
+}
+
+#------------------------------------------------------------------------------
+LuaString "print('Hello')" ;
+
+Test [ LuaString "return { 10, 'hi', false }" ] : 10 hi false ;
+
+var = [ LuaString "return { 5, 'hello', true }" ] ;
+Test $(var:S=.suf) : 5.suf hello.suf true.suf ;
+
+#------------------------------------------------------------------------------
+Test [ LuaFile testluaparser.jam.lua ] : 10 Hi false ;
+
+#------------------------------------------------------------------------------
+var = Hello world! ;
+Test [ LuaString "return jam_getvar('var')" ] : Hello world! ;
+
+LuaString "jam_setvar('var', 'Hi everyone')" ;
+Test $(var) : "Hi everyone" ;
+
+Test [ LuaString "return jam_getvar('var')" ] : "Hi everyone" ;
+
+#------------------------------------------------------------------------------
+MyVariable on mytarget = The Variable Contents ;
+Test [ LuaString "return jam_getvar('mytarget', 'MyVariable')" ] : The Variable Contents ;
+
+LuaString "jam_setvar('mytarget', 'MyVariable', '**hello**')" ;
+Test [ LuaString "return jam_getvar('mytarget', 'MyVariable')" ] : **hello** ;
+
+rule ReturnList INPUT
+{
+	return **$(INPUT)** ;
+}
+
+Test [ LuaString "return jam_evaluaterule('ReturnList', { 'MyStuff', 'YourStuff' })" ] : **MyStuff** **YourStuff** ;
+
+#------------------------------------------------------------------------------
+Echo Tests passed: $(numTestsPassed)/$(numTests) ;

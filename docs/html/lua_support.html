@@ -86,8 +86,50 @@ Executes rule <code>RULE_NAME</code> using any optional <code>PARAMETERS</code> 
   </table>
 </dl>
 <dl class="return" compact><dt><b>Returns:</b></dt><dd>If the Jam rule doesn't return any values, the return value is <code>nil</code>. If the Jam rule does return values, the return values are transformed to a Lua array of strings.</dd></dl>
- </blockquote>  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Wed Oct 29 23:32:26 2008 for JamPlus manual by&nbsp;
+ </blockquote> <p>
+<hr>
+ <h2><a class="anchor" name="lua_support_examples">
+Examples</a></h2>
+<div class="fragment"><pre class="fragment"><span class="preprocessor"># Hello</span>
+<span class="preprocessor"></span>LuaString <span class="stringliteral">"print('Hello')"</span> ;
+
+<span class="preprocessor"># 10 hi false</span>
+<span class="preprocessor"></span>Echo [ LuaString <span class="stringliteral">"return { 10, 'hi', false }"</span> ] ;
+
+<span class="preprocessor"># 5.suf hello.suf true.suf</span>
+<span class="preprocessor"></span>var = [ LuaString <span class="stringliteral">"return { 5, 'hello', true }"</span> ] ;
+Echo $(var:S=.suf) ;
+
+<span class="preprocessor">#------------------------------------------------------------------------------</span>
+<span class="preprocessor"></span><span class="preprocessor"># Hello world!</span>
+<span class="preprocessor"></span>var = Hello world! ;
+Echo [ LuaString <span class="stringliteral">"return jam_getvar('var')"</span> ] ;
+
+<span class="preprocessor"># Hi everyone</span>
+<span class="preprocessor"></span>LuaString <span class="stringliteral">"jam_setvar('var', 'Hi everyone')"</span> ;
+Echo $(var) ;
+
+<span class="preprocessor"># Hi everyone</span>
+<span class="preprocessor"></span>Echo [ LuaString <span class="stringliteral">"return jam_getvar('var')"</span> ] ;
+
+<span class="preprocessor">#------------------------------------------------------------------------------</span>
+<span class="preprocessor"></span><span class="preprocessor"># The Variable Contents</span>
+<span class="preprocessor"></span>MyVariable on mytarget = The Variable Contents ;
+Echo [ LuaString <span class="stringliteral">"return jam_getvar('mytarget', 'MyVariable')"</span> ] ;
+
+<span class="preprocessor"># **hello**</span>
+<span class="preprocessor"></span>LuaString <span class="stringliteral">"jam_setvar('mytarget', 'MyVariable', '**hello**')"</span> ;
+Echo [ LuaString <span class="stringliteral">"return jam_getvar('mytarget', 'MyVariable')"</span> ] ;
+
+rule ReturnList INPUT
+{
+        <span class="keywordflow">return</span> **$(INPUT)** ;
+}
+
+<span class="preprocessor"># **MyStuff** **YourStuff**</span>
+<span class="preprocessor">Echo [ LuaString "return jam_evaluaterule('ReturnList', { 'MyStuff', 'YourStuff' })" ] ;</span>
+</pre></div> </div>
+<hr size="1"><address style="text-align: right;"><small>Generated on Mon Nov 10 14:52:00 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>
