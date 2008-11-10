@@ -99,4 +99,14 @@ When Visual Studio has loaded the <tt>helloworld.sln</tt>, you'll find it contai
 
 At this point, build as you normally would.  Change between the Debug and Release configurations if you'd like.  In fact, you can even debug as if the project were manually created!
 
+
+
+
+
+
+<hr>
+\section quick_start_02 Tutorial 2: Hello World! (statically linked)
+
+This tutorial is nearly identical to Tutorial 1, except we are going to statically link the C runtime.
+
 */

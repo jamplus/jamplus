@@ -1,0 +1,6 @@
+SubDir TOP ;
+
+CRuntimeType * : static ;
+
+Application helloworld : main.c ;
+
