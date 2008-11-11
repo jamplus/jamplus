@@ -1,4 +1,6 @@
 function md5zip(filename)
+	print("md5zip: Calculating " .. filename .. "...")
+
 	require 'md5'
 	require 'vdrive'
 
