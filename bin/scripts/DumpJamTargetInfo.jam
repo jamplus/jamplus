@@ -170,23 +170,25 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 }
 
 
-rule Application TARGETS : SOURCES
+rule Application TARGET : SOURCES
 {
-	Workspace $(TARGETS[0]) : $(TARGETS[0]) : all ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	Workspace $(TARGET) : $(TARGET) : all ;
 
-	DumpProjectInfo $(TARGETS) : $(SOURCES) : app ;
+	DumpProjectInfo $(TARGET) : $(SOURCES) : app ;
 }
 
 
-rule Library TARGETS : SOURCES : OPTIONS
+rule Library TARGET : SOURCES : OPTIONS
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	if shared in $(OPTIONS)
 	{
-		DumpProjectInfo $(TARGETS) : $(SOURCES) : shared ;
+		DumpProjectInfo $(TARGET) : $(SOURCES) : shared ;
 	}
 	else
 	{
-		DumpProjectInfo $(TARGETS) : $(SOURCES) : lib ;
+		DumpProjectInfo $(TARGET) : $(SOURCES) : lib ;
 	}
 }
 
