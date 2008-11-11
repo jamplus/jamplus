@@ -1,0 +1,134 @@
+/*! \page file_cache File Cache
+
+\section file_cache_intro Introduction
+
+JamPlus provides an MD5sum based file caching system, provided by Alen Ladavac.  Using all relevant dependency information specified during the \ref operation_parsing to guarantee absolute uniqueness within the file cache, the JamPlus file caching system is able to dramatically speed builds by retrieving the precached target contents from a (usually) shared file cache, most often located on a network share.  This can be used as a poor man's distributed build system, as one machine can populate the file cache while the other machines do a minimum of work and just merely retrieve the prebuilt targets.
+
+The most important thing to note is JamPlus will do a deep dependency scan to calculate the proper file cache entry.  If you find yourself safely using incremental builds in Jam, then the file cache feature is for you.  If, on the other hand, you haven't specified your dependencies properly in Jam and are often doing full rebuilds "just in case", steer clear of using the file cache.  It will just cause you pain.
+
+\note The file cache will only be available if the dependency cache is turned on.
+
+
+
+
+
+\section file_cache_usage Creating and Using File Caches
+
+\subsection file_cache_usage_creating Creation of a File Cache
+
+A single file cache is defined as follows:
+
+\code
+
+FILECACHE.cachename.PATH = \\\\uncshare\\networkcache\\cachename ;
+FILECACHE.cachename.GENERATE = 1 ;
+FILECACHE.cachename.USE = 1 ;
+
+\endcode
+
+The default file cache's name is \c generic.  When \ref rule_UseFileCache is specified without a \c CACHE_NAME, the default is \c generic.  Given this is the most common case, you'll most always want to declare the \b generic file cache similar to:
+
+\code
+
+FILECACHE.generic.PATH = \\\\mynetworkcacheserver\\generic ;
+# or perhaps:
+#   FILECACHE.generic.PATH = c:/netcache/generic ;
+FILECACHE.generic.GENERATE = 1 ;
+FILECACHE.generic.USE = 1 ;
+
+\endcode
+
+It is not necessary to manually create the directory populated by the file cache.
+
+When <tt>FILECACHE.cachename.GENERATE</tt> is set to \c 1, any built targets not existing in the file cache are copied to the cache and made available for the next build to retrieve.  If <tt>FILECACHE.cachename.USE</tt> is set to \c 0 and the built target does not exist in the file cache, no transfer to the cache is made.
+
+When <tt>FILECACHE.cachename.USE</tt> is set to \c 1, any available targets in the file cache are retrieved, if they match the appropriate md5sum.  If the target is not in the file cache, it is built locally.  If <tt>FILECACHE.cachename.USE</tt> is set to \c 0, the target is always built locally.  No cache access is made.
+
+Additional (generally categoric) file caches may be specified in the same way as the \b generic file cache.  Simply assign a different \c cachename, and you'll be able to access the new cache.
+
+
+
+
+
+
+
+\subsection file_cache_usage_using Using the File Cache
+
+The JamPlus file cache is turned on for a given target by using the \ref rule_UseFileCache "UseFileCache" or \ref rule_OptionalFileCache "OptionalFileCache" rules.
+
+In the example below, the only additional line over the standard Jam rule definition is the usage of the \ref rule_UseFileCache "UseFileCache" rule.  Nothing further must be specified, although there are things you can do that will break shared access to the cache.  Those will be discussed below.
+
+\code
+rule ConvertImage SOURCE
+{
+    local target = $(SOURCE:S=.image) ;
+    MakeLocate $(target) : $(LOCATE_TARGET) ;
+    Clean clean : $(target) ;
+    UseFileCache $(target) ;
+
+    Depends all : $(target) : $(SOURCE) ;
+    ConvertImageHelper $(target) : $(SOURCE) ;
+}
+\endcode
+
+
+
+
+\section file_cache_technical Technical Details
+
+To use the JamPlus file cache facility properly, the basics of how the target's \b buildmd5sum is generated is worth knowing.
+
+For any given target or dependent target, the name of the target should generally be a "shareable" gristed name, not the physical location of the target, which could vary from machine to machine.  That is, if the name of the target is <tt>c:/content/file.image</tt> on one machine and on another is <tt>d:/morecontent/file.image</tt>, the cache will never be able to share content.  A name like <tt>&lt;content&gt;file.image</tt> or just simply <tt>file.image</tt> is considered a shared name and is safe to use with the file cache.
+
+The following items are added to a target's \b buildmd5sum.
+
+-# The target's name.
+-# If \ref rule_UseCommandLine "UseCommandLine" was specified on the target, each command line entry string is summed.
+-# For each dependency, sorted by name:
+  -# The name of the dependency.
+  -# The md5sum of the physical content of the dependency is summed and added to the current \b buildmd5sum.
+  -# If \ref rule_UseCommandLine "UseCommandLine" was specified on the dependency, each command line entry string is summed.
+  -# If there are includes specified through the rule \ref rule_Includes "Includes", the string <tt>#includes</tt> is summed.
+    -# For every includes dependency, the physical content is summed and added to the current \b buildmd5sum.
+  -# Any dependents of this dependency are added.
+
+
+
+
+\section file_cache_content_md5sums Content MD5sums
+
+Without any additional guidance, the md5sum for a physical file will include all its contents.  This is always the most accurate, although the price to calculate md5sums for a large amount of content may be high.
+
+JamPlus provides an additional method of calculating md5sums by calling into a Lua script.  Any target's MD5 calculating functionality may be replaced by using the rule \ref UseMD5Callback "UseMD5Callback" on the target.
+
+Example: A PNG file is made of a small number of chunks, and each chunk has a size and a CRC.  Instead of calculating the entire file contents, we'll just collect the CRCs and sum them.
+
+\code
+require 'md5'
+
+function md5png(filename)
+    print("md5png: Calculating " .. filename .. "...")
+    local file = io.open(filename, 'rb')
+    if not file then return nil end
+
+    file:seek('cur', 8)
+
+    local md5sum = md5.new()
+    local offset
+    while true do
+        local length = select(2, string.unpack(file:read(4), '>I'))
+        local chunkType = file:read(4)
+        if chunkType == 'IEND' then break end
+        file:seek('cur', length)
+        local crc = file:read(4)
+        md5sum:update(crc)
+    end
+
+    return md5sum:digest(true)
+end
+\endcode
+
+
+
+
+*/
