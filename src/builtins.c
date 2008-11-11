@@ -87,6 +87,9 @@ static LIST* builtin_w32_getreg( PARSE *parse, LOL *args, int *jmp );
 static LIST* builtin_w32_shortname( PARSE *parse, LOL *args, int *jmp );
 #endif
 #endif
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+LIST *builtin_usemd5callback( PARSE *parse, LOL *args, int *jmp );
+#endif
 
 int glob( const char *s, const char *c );
 
@@ -199,8 +202,11 @@ load_builtins()
     bindrule( "LuaString" )->procedure =
 	parse_make( builtin_luastring, P0, P0, P0, C0, C0, 0 );
 
-	bindrule( "LuaFile" )->procedure =
+    bindrule( "LuaFile" )->procedure =
 	parse_make( builtin_luafile, P0, P0, P0, C0, C0, 0 );
+
+    bindrule( "UseMD5Callback" )->procedure =
+	parse_make( builtin_usemd5callback, P0, P0, P0, C0, C0, 0 );
 #endif
 }
 
@@ -595,7 +601,6 @@ builtin_usecommandline(
 {
 	LIST *l = lol_get( args, 0 );
 	LIST *l2 = lol_get( args, 1 );
-	const char* commandline = l2 ? l2->string : "";
 
 	for( ; l; l = list_next( l ) ) {
 	    TARGET *t = bindtarget( l->string );
@@ -805,5 +810,31 @@ builtin_w32_shortname( PARSE *parse, LOL *args, int *jmp )
 	return L0;
 }
 #endif
+#endif
+
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+/*
+ * builtin_usemd5callback() - 
+ *
+ * 
+ * 
+ */
+
+LIST *
+builtin_usemd5callback(
+	PARSE	*parse,
+	LOL	*args,
+	int	*jmp )
+{
+	LIST *l = lol_get( args, 0 );
+	LIST *l2 = lol_get( args, 1 );
+
+	for( ; l; l = list_next( l ) ) {
+	    TARGET *t = bindtarget( l->string );
+	    t->settings = addsettings( t->settings, VAR_SET, "MD5CALLBACK", list_copy( L0, l2 ) );
+	}
+
+	return L0;
+}
 #endif
 

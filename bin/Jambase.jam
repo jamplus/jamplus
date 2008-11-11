@@ -2234,13 +2234,6 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES
 }
 
 
-rule UseMD5Callback GRISTED_TARGETS : CALLBACK
-{
-	MD5CALLBACK on $(GRISTED_TARGETS) = $(CALLBACK) ;
-}
-
-
-
 rule Workspace SOLUTION_NAME : TARGETS
 {
 }
