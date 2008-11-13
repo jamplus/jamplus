@@ -503,7 +503,7 @@ var_expand(
 			    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 			    {
 				d->re = regcomp( inex->string );
-				hashenter( regexhash, (HASHDATA **)&d );
+				(void)hashenter( regexhash, (HASHDATA **)&d );
 			    }
 			    re = d->re;
 			    inex = list_next( inex );
