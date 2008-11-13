@@ -11,6 +11,7 @@ documentation:
 \refitem rule_Application Application
 \refitem rule_CFlags CFlags
 \refitem rule_CppFlags C++Flags
+\refitem rule_CppCompileOptions CppCompileOptions
 \refitem rule_CRuntimeType CRuntimeType
 \refitem rule_Defines Defines
 \refitem rule_ExcludeFromBuild ExcludeFromBuild
@@ -146,6 +147,29 @@ For the given project \c TARGET, assign the \c FLAGS to the appropriate configur
     C++Flags managedapp : /clr:oldsyntax : debug : win32 ;
 \endcode
 
+
+
+
+
+
+
+<hr>
+\section rule_CppCompileOptions rule CppCompileOptions OPTIONS
+\addindex rule_CppCompileOptions
+
+Sets options that affect how the compiler builds.
+
+\param OPTIONS The following options are available.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c outputastree - Set this if you want object files to be put in subdirectories matching the directory hierarchy of the source files.  <tt>..</tt> directory entries are changed to <tt>__</tt> so the object files stay within the build hierarchy.  The default is to put all object files in one flat directory per project.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    CppCompileOptions outputastree ;
+\endcode
 
 
 

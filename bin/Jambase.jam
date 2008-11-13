@@ -1091,15 +1091,24 @@ rule BatchCompileGroupSize TARGET : SIZE
 #   This rule will compile $(sources), and will return  the result objects.
 #
 #---------------------------------------------------------------------
+# Set this if you want object files to be put in subdirs matching dir hierarchy of source files.
+# Otherwise, all object files are put in one flat directory per project.
+rule CppCompileOptions OPTIONS
+{
+	if outputastree in $(OPTIONS)
+	{
+		__MultiCppCompile_OutputAsTree = 1 ;
+	}
+}
+
+
+__MultiCppCompile_OutputAsTree = 0 ;
+
 rule MultiCppCompile TARGET : SOURCES
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 
 	local grist = $(TARGET) ;
-
-	# Set this if you want object files to be put in subdirs matching dir hierarchy of source files.
-	# Otherwise, all object files are put in one flat directory per project.
-#	local _OutputAsTree = 0 ;
 
 	#
 	# Pass 1: Bind final flags to each file
@@ -1120,8 +1129,10 @@ rule MultiCppCompile TARGET : SOURCES
 
 		Clean clean:$(TARGET) : $(LOCATE_TARGET)/$(_VCPDB).pdb $(LOCATE_TARGET)/$(_VCPDB).idb ;
 
-		local combinedLocateTarget = [ FDirName $(LOCATE_TARGET) ] ;
-		_postmflags = "/c \"/Fo$(combinedLocateTarget:\\)\\\\\" \"/Fd$(combinedLocateTarget:\\)\\$(_VCPDB).pdb\"" ;
+		if $(__MultiCppCompile_OutputAsTree) = 0 {
+			local combinedLocateTarget = [ FDirName $(LOCATE_TARGET) ] ;
+			_postmflags = "/c \"/Fo$(combinedLocateTarget:\\)\\\\\" \"/Fd$(combinedLocateTarget:\\)\\$(_VCPDB).pdb\"" ;
+		}
 	}
 
 	local ALL_TYPES =
@@ -1175,7 +1186,9 @@ rule MultiCppCompile TARGET : SOURCES
 	HDRSCAN on $(sources) = $(HDRPATTERN) ;
 	HDRGRIST on $(sources) = $(grist) ;
 
-	MakeLocate $(sources:S=$(SUFOBJ):D=) : $(LOCATE_TARGET) ;
+	if $(__MultiCppCompile_OutputAsTree) = 0 {
+		MakeLocate $(sources:S=$(SUFOBJ):D=) : $(LOCATE_TARGET) ;
+	}
 	SEARCH on $(sources) = $(SEARCH_SOURCE) ;
 
 #	MakeLocate $(objSources:S=$(SUFOBJ):D=) : $(LOCATE_TARGET) ;
@@ -1198,7 +1211,16 @@ rule MultiCppCompile TARGET : SOURCES
 			continue ;
 		}
 
-		local _obj = $(_src:S=$(SUFOBJ):D=) ;
+		local _obj ;
+		if $(__MultiCppCompile_OutputAsTree) != 0 {
+			_obj = [ Subst $(_src:S=$(SUFOBJ)) : %.%. : __ ] ;
+			local _objdir = $(LOCATE_TARGET)/$(_obj:D) ;
+			MakeLocate $(_obj) : $(_objdir) ;
+			BINDING on $(_obj) = $(_obj:BS) ;
+			_postmflags = "/c \"/Fo$(_objdir:\\)\\\\\" \"/Fd$(LOCATE_TARGET:\\)\\$(_VCPDB).pdb\"" ;
+		} else {
+			_obj = $(_src:S=$(SUFOBJ):D=) ;
+		}
 
 		local _hdrs = $(SEARCH_SOURCE) ;
 		on $(_obj) _hdrs += $(HDRS.$(ALL_TYPES)) ;
@@ -1307,7 +1329,12 @@ rule MultiCppCompile TARGET : SOURCES
 		# start with empty lists of objects for this batch
 		local objects ;
 		# for each source in this batch
-		objects += $(_sources:S=$(SUFOBJ):D=) ;
+		local _obj ;
+		if $(__MultiCppCompile_OutputAsTree) != 0 {
+			objects += [ Subst $(_sources:S=$(SUFOBJ)) : %.%. : __ ] ;
+		} else {
+			objects += $(_sources:S=$(SUFOBJ):D=) ;
+		}
 
 		# collect produced objects (note that this is before adding the pch,
 		# because we don't want to use it in linking)
@@ -1683,6 +1710,7 @@ rule LibraryFromObjects TARGET : OBJECTS
 	local grist = $(TARGET) ;
 	local _s = $(OBJECTS:G=$(grist)) ;
 	local _l = $(TARGET:S=$(SUFLIB):G=$(TARGET)) ;
+	BINDING on $(_l) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
 
 	# library depends on its member objects
 
@@ -1705,7 +1733,8 @@ rule LibraryFromObjects TARGET : OBJECTS
 
 	if ! $(_l:D)
 	{
-	    MakeLocate $(_l) $(_l)($(_s:BS)) : $(LOCATE_TARGET) ;
+		local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
+	    MakeLocate $(_l) $(_l)($(_s:BS)) : $(outputPath) ;
 	}
 
 	if $(NOARSCAN)

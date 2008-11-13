@@ -1,0 +1,8 @@
+ProjectSubDir TOP liba : : liba ;
+
+SRCS =
+		treea/treeb/deepfile.cpp
+		../outer/outer.cpp
+;
+
+Library liba : $(SRCS) ;
