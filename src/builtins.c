@@ -63,6 +63,7 @@ LIST *builtin_exit( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_flags( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_glob( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_match( PARSE *parse, LOL *args, int *jmp );
+LIST *builtin_subst( PARSE *parse, LOL *args, int *jmp );
 #ifdef OPT_MULTIPASS_EXT
 LIST *builtin_queuejamfile( PARSE *parse, LOL *args, int *jmp );
 #endif
@@ -142,6 +143,9 @@ load_builtins()
     bindrule( "NoUpdate" )->procedure = 
     bindrule( "NOUPDATE" )->procedure = 
 	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_NOUPDATE );
+
+    bindrule( "Subst" )->procedure = 
+	parse_make( builtin_subst, P0, P0, P0, C0, C0, 0 );
 
     bindrule( "Temporary" )->procedure = 
     bindrule( "TEMPORARY" )->procedure = 
@@ -487,6 +491,40 @@ builtin_match(
 	    }
 
 	    free( (char *)re );
+	}
+
+	return result;
+}
+
+
+/*
+ * builtin_subst() - Lua-like gsub rule, regexp substitution
+ */
+
+extern int str_gsub (BUFFER *buff, const char *src, const char *p, const char *repl, int max_s);
+
+LIST *
+builtin_subst(
+	PARSE	*parse,
+	LOL	*args,
+	int	*jmp )
+{
+	LIST *liststring;
+	LIST *result = 0;
+	LIST *pattern = lol_get( args, 1 );
+	LIST *repl = lol_get( args, 2 );
+	LIST *nstr = lol_get( args, 3 );
+	int n = nstr ? atoi( nstr->string ) : -1;
+
+	/* For each string */
+
+	for( liststring = lol_get( args, 0 ); liststring; liststring = liststring->next )
+	{
+		BUFFER buff;
+		buffer_init( &buff );
+		str_gsub (&buff, liststring->string, pattern->string, repl->string, n);
+		result = list_new( result, buffer_ptr( &buff ), 0 );
+		buffer_free( &buff );
 	}
 
 	return result;

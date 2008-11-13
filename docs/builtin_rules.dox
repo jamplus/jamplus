@@ -234,6 +234,226 @@ Matches the <b>egrep</b>(1) style regular expressions \c REGEXPS against the str
 
 
 <hr>
+\section rule_Subst rule Subst LIST : PATTERN : REPL [ : MAXN ] ;
+\addindex rule_Subst
+
+\note The Subst rule comes from the Lua code base's implementation of string.gsub.  The documentation below is near verbatim from the Lua manual.
+
+Returns a copy of \c LIST in which all occurrences of the \c PATTERN have been replaced by a replacement string specified by \c REPL.  Only useful within the <tt>[ ]</tt> construct, to change the result into a list.
+
+The character <tt>%</tt> works as an escape character: any sequence in repl of the form <tt>%n</tt>, with <tt>n</tt> between 1 and 9, stands for the value of the n-th captured substring (see below).  The sequence <tt>%0</tt> stands for the whole match. The sequence <tt>%%</tt> stands for a single <tt>%</tt>.
+
+The optional last parameter n limits the maximum number of substitutions to occur. For instance, when n is 1 only the first occurrence of pattern is replaced.
+
+\code
+# __/__/dir/__/dir2
+Echo [ Subst ../../dir/../dir2 : %.%. : __ ] ;
+
+# hello hello world world
+Echo [ Subst "hello world" : "(%w+)" : "%1 %1" ] ;
+
+# hello hello world
+Echo [ Subst "hello world" : "%w+" : "%0 %0" : 1 ] ;
+
+# world hello Lua from
+Echo [ Subst "hello world from Lua" : "(%w+)%s*(%w+)" : "%2 %1" ] ;
+\endcode
+
+
+\subsection rule_Subst_Patterns Patterns
+
+
+<h4>Character Class:</h4><p>
+A <em>character class</em> is used to represent a set of characters.
+The following combinations are allowed in describing a character class:
+
+<ul>
+
+<li><b><em>x</em>:</b>
+(where <em>x</em> is not one of the <em>magic characters</em>
+
+<code>^$()%.[]*+-?</code>)
+represents the character <em>x</em> itself.
+</li>
+
+<li><b><code>.</code>:</b> (a dot) represents all characters.</li>
+
+<li><b><code>%a</code>:</b> represents all letters.</li>
+
+<li><b><code>%c</code>:</b> represents all control characters.</li>
+
+<li><b><code>%d</code>:</b> represents all digits.</li>
+
+<li><b><code>%l</code>:</b> represents all lowercase letters.</li>
+
+<li><b><code>%p</code>:</b> represents all punctuation characters.</li>
+
+<li><b><code>%s</code>:</b> represents all space characters.</li>
+
+<li><b><code>%u</code>:</b> represents all uppercase letters.</li>
+
+<li><b><code>%w</code>:</b> represents all alphanumeric characters.</li>
+
+<li><b><code>%x</code>:</b> represents all hexadecimal digits.</li>
+
+<li><b><code>%z</code>:</b> represents the character with representation 0.</li>
+
+<li><b><code>%<em>x</em></code>:</b> (where <em>x</em> is any non-alphanumeric character)
+represents the character <em>x</em>.
+This is the standard way to escape the magic characters.
+Any punctuation character (even the non magic)
+can be preceded by a '<code>%</code>'
+when used to represent itself in a pattern.
+</li>
+
+<li><b><code>[<em>set</em>]</code>:</b>
+
+represents the class which is the union of all
+characters in <em>set</em>.
+A range of characters may be specified by
+separating the end characters of the range with a '<code>-</code>'.
+All classes <code>%</code><em>x</em> described above may also be used as
+components in <em>set</em>.
+All other characters in <em>set</em> represent themselves.
+For example, <code>[%w_]</code> (or <code>[_%w]</code>)
+represents all alphanumeric characters plus the underscore,
+
+<code>[0-7]</code> represents the octal digits,
+and <code>[0-7%l%-]</code> represents the octal digits plus
+the lowercase letters plus the '<code>-</code>' character.
+
+
+<p>
+The interaction between ranges and classes is not defined.
+Therefore, patterns like <code>[%a-z]</code> or <code>[a-%%]</code>
+have no meaning.
+</li>
+
+<li><b><code>[^<em>set</em>]</code>:</b>
+represents the complement of <em>set</em>,
+where <em>set</em> is interpreted as above.
+</li>
+
+</ul><p>
+For all classes represented by single letters (<code>%a</code>, <code>%c</code>, etc.),
+the corresponding uppercase letter represents the complement of the class.
+For instance, <code>%S</code> represents all non-space characters.
+
+
+
+<p>
+The definitions of letter, space, and other character groups
+depend on the current locale.
+In particular, the class <code>[a-z]</code> may not be equivalent to <code>%l</code>.
+
+
+
+
+
+<h4>Pattern Item:</h4><p>
+A <em>pattern item</em> may be
+
+<ul>
+
+<li>
+a single character class,
+which matches any single character in the class;
+
+</li>
+
+<li>
+a single character class followed by '<code>*</code>',
+which matches 0 or more repetitions of characters in the class.
+These repetition items will always match the longest possible sequence;
+</li>
+
+<li>
+a single character class followed by '<code>+</code>',
+which matches 1 or more repetitions of characters in the class.
+These repetition items will always match the longest possible sequence;
+</li>
+
+<li>
+a single character class followed by '<code>-</code>',
+which also matches 0 or more repetitions of characters in the class.
+Unlike '<code>*</code>',
+these repetition items will always match the <em>shortest</em> possible sequence;
+
+</li>
+
+<li>
+a single character class followed by '<code>?</code>',
+which matches 0 or 1 occurrence of a character in the class;
+</li>
+
+<li>
+<code>%<em>n</em></code>, for <em>n</em> between 1 and 9;
+such item matches a substring equal to the <em>n</em>-th captured string
+(see below);
+
+</li>
+
+<li>
+<code>%b<em>xy</em></code>, where <em>x</em> and <em>y</em> are two distinct characters;
+such item matches strings that start with&nbsp;<em>x</em>, end with&nbsp;<em>y</em>,
+and where the <em>x</em> and <em>y</em> are <em>balanced</em>.
+This means that, if one reads the string from left to right,
+counting <em>+1</em> for an <em>x</em> and <em>-1</em> for a <em>y</em>,
+the ending <em>y</em> is the first <em>y</em> where the count reaches 0.
+For instance, the item <code>%b()</code> matches expressions with
+balanced parentheses.
+
+</li>
+
+</ul>
+
+
+
+
+<h4>Pattern:</h4><p>
+A <em>pattern</em> is a sequence of pattern items.
+A '<code>^</code>' at the beginning of a pattern anchors the match at the
+beginning of the subject string.
+A '<code>$</code>' at the end of a pattern anchors the match at the
+end of the subject string.
+At other positions,
+'<code>^</code>' and '<code>$</code>' have no special meaning and represent themselves.
+
+
+
+
+
+
+<h4>Captures:</h4><p>
+A pattern may contain sub-patterns enclosed in parentheses;
+they describe <em>captures</em>.
+When a match succeeds, the substrings of the subject string
+that match captures are stored (<em>captured</em>) for future use.
+Captures are numbered according to their left parentheses.
+For instance, in the pattern <code>"(a*(.)%w(%s*))"</code>,
+the part of the string matching <code>"a*(.)%w(%s*)"</code> is
+stored as the first capture (and therefore has number&nbsp;1);
+the character matching "<code>.</code>" is captured with number&nbsp;2,
+and the part matching "<code>%s*</code>" has number&nbsp;3.
+
+
+
+<p>
+As a special case, the empty capture <code>()</code> captures
+the current string position (a number).
+For instance, if we apply the pattern <code>"()aa()"</code> on the
+string <code>"flaaap"</code>, there will be two captures: 3&nbsp;and&nbsp;5.
+
+
+<p>
+A pattern cannot contain embedded zeros.  Use <code>%z</code> instead.
+
+
+
+
+
+
+<hr>
 \section rule_Math rule Math LEFT OPERATOR RIGHT ;
 \addindex rule_Math
 

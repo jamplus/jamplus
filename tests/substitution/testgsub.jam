@@ -1,0 +1,15 @@
+path = ../../dir/../dir2 ;
+Echo [ Subst $(path) : %.%. : __ ] ;
+
+x = [ Subst "hello world" : "(%w+)" : "%1 %1" ] ;
+Echo $(x) ;
+# x="hello hello world world"
+
+x = [ Subst "hello world" : "%w+" : "%0 %0" : 1 ] ;
+Echo $(x) ;
+# x="hello hello world"
+
+x = [ Subst "hello world from Lua" : "(%w+)%s*(%w+)" : "%2 %1" ] ;
+Echo $(x) ;
+# x="world hello Lua from"
+
