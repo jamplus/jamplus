@@ -1304,8 +1304,8 @@ rule MultiCppCompile TARGET : SOURCES
 		}
 		else if $(COMPILER) = mingw
 		{
-			_flags += $(_postmflags) ;
 			MFLAGS on $(_src) = $(_flags) "-c -o \"$(_obj:T)\"" ;
+			UseCommandLine $(_obj) : $(_flags) ;
 		}
 
 		newsrcs += $(_src) ;
