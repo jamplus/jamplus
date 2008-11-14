@@ -24,18 +24,37 @@ Both \$(SEARCH) and \$(LOCATE) should be set target-specific and not globally.  
 
 
 
-\section built_in_variables_hdrscan HDRSCAN and HDRRULE Variables
+\section built_in_variables_hdrscan Header Scanning Variables
 
-These two variables control header file scanning.  \$(HDRSCAN) is an <b>egrep</b>(1) pattern, with ()'s surrounding the file name, used to find file inclusion statements in source files.  Jambase uses \$(HDRPATTERN) as the pattern for \$(HDRSCAN).  \$(HDRRULE) is the name of a rule to invoke with the results of the scan: the scanned file is the target, the found files are the sources.  \$(HDRRULE) is run under the influence of the scanned file's target-specific variables.
+The \c HDRSCAN and \c HDRPATTERN variables control the default header file scanning.  HDRSCAN is an <b>egrep</b>(1) pattern, with ()'s surrounding the file name, used to find file inclusion statements in source files.  Jambase uses <tt>\$(HDRPATTERN)</tt> as the pattern for \c HDRSCAN.  \c HDRRULE is the name of a rule to invoke with the results of the scan: the scanned file is the target, the found files are the sources.  \c HDRRULE is run under the influence of the scanned file's target-specific variables.  It defaults to the Jambase \c HdrRule.
 
-Both \$(HDRSCAN) and \$(HDRRULE) must be set for header file scanning to take place, and they should be set target-specific and not globally.  If they were set globally, all files, including executables and libraries, would be scanned for header file include statements.
+Both \c HDRSCAN and \c HDRRULE must be set for header file scanning to take place, and they should be set target-specific and not globally.  If they were set globally, all files, including executables and libraries, would be scanned for header file include statements.
 
-The scanning for header file inclusions is not exact, but it is at least dynamic, so there is no need to run something like <b>makedepend</b>(GNU) to create a static dependency file. The scanning mechanism errs on the side of inclusion (i.e., it is more likely to return filenames that are not actually used by the compiler than to miss include files) because it can't tell if \#include lines are inside \#ifdefs or other conditional logic.  In Jambase, HdrRule applies the NOCARE rule to each header file found during scanning so that if the file isn't present yet doesn't cause the compilation to fail, <b>jam</b> won't care.
+The scanning for header file inclusions is not exact, but it is at least dynamic, so there is no need to run something like <b>makedepend</b>(GNU) to create a static dependency file. The scanning mechanism errs on the side of inclusion (i.e., it is more likely to return filenames that are not actually used by the compiler than to miss include files) because it can't tell if \#include lines are inside \#ifdefs or other conditional logic.  In Jambase, HdrRule applies the \ref rule_NoCare "NoCare" rule to each header file found during scanning so that if the file isn't present yet doesn't cause the compilation to fail, \b Jam won't care.
 
 Also, scanning for regular expressions only works where the included file name is literally in the source file.  It can't handle languages that allow including files using variable names (as the Jam language itself does).
 
+On Windows, header filenames are, by default, converted to lowercase.  This can be prevented by setting a target's \c HDRDOWNSHIFT variable to \c false.
+
+\subsection built_in_variables_hdrfilter Filtering Unwanted Dependencies
+
+When \c HDRFILTER is set on a target, the rule bearing the name specified in the contents of \c HDRFILTER is executed with the following signature.
+
+\code
+rule DoHeaderFilter TARGET_NAME : DEPENDENCIES : TARGET_BOUNDNAME
+{
+    # Filter any unwanted dependencies.
+    DEPENDENCIES -= bob fred ;
+    return $(DEPENDENCIES) ;
+}
+\endcode
 
 
+\subsection built_in_variables_hdrpipe Shelling Processes for Dependencies
+
+When \c HDRPIPE is set on a target, during the dependency scan for headers, the process command line specified by \c HDRPIPE is run.  Any dependencies written by the process to stdout are run through the normal \c HDRSCAN regular expression mechanism.
+
+If \c HDRPIPEFILE is set on the target, the filename specified by \c HDRPIPEFILE is opened and parsed for dependencies after the \c HDRPIPE process exits.
 
 
 
