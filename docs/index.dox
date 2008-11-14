@@ -18,7 +18,7 @@ A sampling of the new features in the JamPlus distribution follows:
 <h2>Contents</h2>
 
 - \subpage quick_start gets you up and running quickly.
-- \subpage workspaces tells how to use various tools to create Visual Studio and other IDE workspaces.
+- \subpage jamtoworkspace tells how to use JamToWorkspace to create Visual Studio and other IDE workspaces.
 - \subpage usage shows the command-line features of Jam.
 - \subpage jam_language shows the language features of Jam.
 - \subpage language_variables
