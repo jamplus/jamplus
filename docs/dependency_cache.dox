@@ -15,7 +15,7 @@ The dependency cache also stores the md5 of the 'command line' (see \ref rule_Us
 
 
 
-\section dependency_cache_usage Usage
+\section dependency_cache_usage Dependency Cache Usage
 
 In order to turn the Dependency Cache on, two variables must be set, <tt>DEPCACHE.cachename</tt> and <tt>DEPCACHE</tt>.
 
@@ -24,16 +24,22 @@ The actual name of the cache file is controlled by the <tt>DEPCACHE.cachename</t
 Setting LOCATE and SEARCH on the the <tt>DEPCACHE.cachename</tt> works as well, so you can place anywhere on disk you like or even search for it in several directories.  You may also set it in your environment to share it amongst all your projects.
 
 \code
-DEPCACHE.standard = .depcache ;
+DEPCACHE.standard = $(ALL_LOCATE_TARGET)/.depcache ;
 \endcode
 
-The \c DEPCACHE variable sets the active dependency cache.  It may be set globally or directly on a target.  If set on a target, it overrides the global value.  In most cases, the global \c DEPCACHE is all that is needed.
+The global \c DEPCACHE variable sets the active dependency cache.
 
 \code
 DEPCACHE = standard ;
 \endcode
 
-There can be as many dependency caches as are needed by assigning additional <tt>DEPCACHE.cachename</tt> file entries.  Generally, the \b standard cache refers to entries affected by the current platform and configuration.  You might also have a \b platform cache attached to targets that are platform specific but not configuration specific.  You might also have a \b global cache attached to targets that work for any platform or configuration.
+If the dependency cache needs to be changed for a target, the \ref rule_UseDepCache "UseDepCache" rule is used to override the global value.
+
+\code
+UseDepCache $(TARGET) : platform ;
+\endcode
+
+There can be as many dependency caches as are needed by assigning additional <tt>DEPCACHE.cachename</tt> file entries.  The default dependency cache is known as \b standard.  Generally, the \b standard cache refers to entries affected by the current platform and configuration.  You might also have a \b platform cache attached to targets that are platform specific but not configuration specific.  You might also have a \b global cache attached to targets that work for any platform or configuration.
 
 
 
