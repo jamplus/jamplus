@@ -65,6 +65,7 @@ The rules \ref rule_Always "Always", \ref rule_Leaves "Leaves", \ref rule_MightN
 \refitem rule_NotFile NotFile
 \refitem rule_NoUpdate NoUpdate
 \refitem rule_Temporary Temporary
+\refitem rule_UseCommandLine UseCommandLine
 \endsecreflist
 
 <hr>
@@ -145,6 +146,31 @@ Causes the timestamps on <i>targets</i> to be ignored. This has two effects:  fi
 
 Marks <i>targets</i> as temporary, allowing them to be removed after other targets that depend upon them have been updated.  If a Temporary target is missing, \b Jam uses the timestamp of the target's parent.  Jambase uses Temporary to mark object files that are archived in a library after they are built, so that they can be deleted after they are archived.
 
+
+
+
+
+
+<hr>
+\section rule_UseCommandLine rule UseCommandLine TARGETS : COMMANDLINE;
+\addindex rule_UseCommandLine
+
+The "command line" of a target, not necessarily the command line sent to a target's action, is compared against the previous build's command line for the same target.  If it differs, regardless of timestamps being equal, the target is rebuilt.
+
+\param TARGETS One or more targets to set the \c COMMANDLINE string to.
+\param COMMANDLINE A unique string to be compared against the last build.  When different, the target is rebuilt.
+
+<i>Example 1:</i> During the last build, the #defines for <tt>somefile.cpp</tt> were -DMYDEFINE -DSOMEDEFINE.  The user then alters the defines for <tt>somefile.cpp</tt> to be -DMYDEFINE -DYOURDEFINE.  <tt>somefile.cpp</tt> file will be rebuilt, even if the timestamp hasn't changed.
+
+\code
+UseCommandLine somefile.cpp : -DMYDEFINE -DYOURDEFINE ;
+\endcode
+
+<i>Example 2:</i> The file format for <b>.model</b> files changes. It is desirable to cause the .model files to be rebuilt on the next build. This can be done by altering the 'command line' to be <tt>version2</tt>.
+
+\code
+UseCommandLine $(TARGETS) : version2 ;
+\endcode
 
 
 
