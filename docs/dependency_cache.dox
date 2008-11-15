@@ -1,0 +1,50 @@
+/*! \page dependency_cache Dependency Cache
+
+\section dependency_cache_intro Introduction
+
+\note Much of this documentation comes directly from Matt Armstrong's README.header_scan_cache document in the Perforce Public Depot.
+
+When the \ref built_in_variables_hdrscan are used, Jam scans source files for other files the source files might include.  In order to speed this process up, both in the current run and subsequent runs of Jam, the dependency cache caches these scans, so the entire
+source tree need not be scanned each time \b Jam is run.  This brings the following benefits:
+
+- If a file would otherwise be scanned multiple times in a single jam run (because the same file is represented by multiple targets, perhaps each with a different grist), it will now be scanned only once.  In this way, things are faster even if the cache file is not present when Jam is run.
+
+- If a cache entry is present in the cache file when Jam starts, and the file has not changed since the last time it was scanned, Jam will not bother to re-scan it.  This markedly decreases Jam startup times for large projects.
+
+The dependency cache also stores the md5 of the 'command line' (see \ref rule_UseCommandLine) and the md5 of the content.  In fact, neither facility will work properly if the dependency cache is not available.
+
+
+
+\section dependency_cache_usage Usage
+
+In order to turn the Dependency Cache on, two variables must be set, <tt>DEPCACHE.cachename</tt> and <tt>DEPCACHE</tt>.
+
+The actual name of the cache file is controlled by the <tt>DEPCACHE.cachename</tt>.  If <tt>DEPCACHE.cachename</tt> is left unset (the default), reading and writing of a cache file is not performed.  The cache is always used internally regardless of <tt>DEPCACHE.cachename</tt>, which helps when HDRGRIST causes the same file to be scanned multiple times.
+
+Setting LOCATE and SEARCH on the the <tt>DEPCACHE.cachename</tt> works as well, so you can place anywhere on disk you like or even search for it in several directories.  You may also set it in your environment to share it amongst all your projects.
+
+\code
+DEPCACHE.standard = .depcache ;
+\endcode
+
+The \c DEPCACHE variable sets the active dependency cache.  It may be set globally or directly on a target.  If set on a target, it overrides the global value.  In most cases, the global \c DEPCACHE is all that is needed.
+
+\code
+DEPCACHE = standard ;
+\endcode
+
+There can be as many dependency caches as are needed by assigning additional <tt>DEPCACHE.cachename</tt> file entries.  Generally, the \b standard cache refers to entries affected by the current platform and configuration.  You might also have a \b platform cache attached to targets that are platform specific but not configuration specific.  You might also have a \b global cache attached to targets that work for any platform or configuration.
+
+
+
+
+
+\section dependency_cache_technical_details Technical Details
+
+- The cache stores the value of HDRPATTERN with each cache entry, and it is compared along with the file's date to determine if there is a cache hit.  If the HDRPATTERN does not match, it is treated as a cache miss.  This allows HDRPATTERN to change without worrying about stale cache entries.  It also allows the same file to be scanned multiple times with different HDRPATTERN values.
+
+- Each cache entry is given an "age" which is the maximum number of times a given header cache entry can go unused before it is purged from the cache.  This helps clean up old entries in the .jamdeps file when files move around or are removed from your project.
+
+You control the maximum age with the DEPCACHEMAXAGE variable.  If set to 0, no cache aging is performed.  Otherwise it is the number of times \b Jam must be run before an unused cache entry is purged.  The default for DEPCACHEMAXAGE if left unset is 100.
+
+*/

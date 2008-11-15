@@ -21,9 +21,10 @@ A sampling of the new features in the JamPlus distribution follows:
 - \subpage jamtoworkspace tells how to use JamToWorkspace to create Visual Studio and other IDE workspaces.
 - \subpage usage shows the command-line features of Jam.
 - \subpage jam_language shows the language features of Jam.
-- \subpage language_variables
+- \subpage language_variables shows how to use variables in the Jam language.
 - \subpage builtin_rules shows the built-in rules of Jam.
 - \subpage builtin_variables shows the built-in variables of Jam.
+- \subpage dependency_cache gives information on how to speed builds and enable the md5 command lines and file cache.
 - \subpage jambase_rules shows the list of rules available in the default <tt>Jambase.jam</tt>.
 - \subpage lua_support shows how Lua can communicate with Jam.
 - \subpage file_cache goes in-depth about the JamPlus (network) file caching feature.
