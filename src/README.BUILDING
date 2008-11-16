@@ -5,14 +5,7 @@ How to build from scratch.  From a shell prompt do this stuff...
    first time.  NOTE: Under windows, the jmake scripts described below
    use Makefile.Windows.
 
-2. Windows only: run the "vcvars32" .bat or .cmd that comes with
-   Visual C++.  This is important as the build process needs the
-   Visual C++ environment variables set up such that they have no
-   spaces in them.  Mine lives in:
-
-        C:\Program Files\Microsoft Visual Studio\VC98\Bin
-
-3. Windows: run jmake.cmd
+2. Windows: run jmake.cmd
    Unix: run jmake.sh
 
    Note: windows folks may have to remove a #include <values.h> from
