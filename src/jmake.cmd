@@ -6,7 +6,7 @@ if "%COMNTOOLS%" == "" (
  goto :end 
 )
 
-call "%COMNTOOLS%vsvars32.bat"
+if "%VCINSTALLDIR%" == "" call "%COMNTOOLS%vsvars32.bat"
 
 nmake /f Makefile.Windows
 bin.ntx86\jam.exe -sCONFIG=release -sBUILD_J=yes
