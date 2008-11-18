@@ -96,6 +96,7 @@ A number of Jam built-in variables can be used to identify runtime platform:
 \section language_built_in_variables_misc Miscellaneous Variables
 
 <table width=75% align=center>
+  <tr><td>CWD<td>The current working directory.
   <tr><td>JAM_PROCESS_PATH<td>The path where the Jam executable resides.
   <tr><td>PATHDELIM_OLDSTYLE<td>In JamPlus, the default path separator is a forward slash.  If \c PATHDELIM_OLDSTYLE is set to 1, the default path separator is OS-specific, and the behavior mirrors the original Perforce Jam.
 </table>
