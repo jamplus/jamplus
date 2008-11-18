@@ -9,4 +9,5 @@ CONTENTS on originalfile.txt = "originalfile.txt written..." ;
 #Always originalfile.txt ;
 WriteFile originalfile.txt ;
 
+# Queue Pass3.jam up for the next pass.
 QueueJamfile Pass3.jam ;

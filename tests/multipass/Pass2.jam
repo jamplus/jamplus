@@ -1,14 +1,32 @@
 Echo Pass 2 ;
 
+# Use the silly syntax for writing a file to the disk in an action.
+# I hope to revamp this soon.
 actions WriteFile
 {
 	^^($(1)|$(CONTENTS)) ;
 }
 
+# Insert Pass3.jam into the 'all' target.  If it isn't there, the file
+# won't get generated, but QueueJamFile will attempt to run it anyway,
+# resulting in an error.
 Depends all : Pass3.jam ;
+
+# Set the contents of Pass3.jam.  The Clean instruction is put directly
+# in Pass3.jam.  It can't exist before Pass3.jam exists, or Jam will
+# simply report an error when trying to delete the file.
 CONTENTS on Pass3.jam = "Echo Pass 3 written ;
-Clean clean : Pass3.jam ;" ;
-Always Pass3.jam ;
+Clean clean : Pass3.jam ;
+" ;
+
 WriteFile Pass3.jam ;
 
+# Without the Always, any changes to CONTENTS will not be written.  The
+# only time Pass3.jam will be written is when it doesn't exist.  An
+# alternative way to do this would be to enable the dependency cache and
+# UseCommandLine Pass3.jam : [ on Pass3.jam Var CONTENTS ] ;
+Always Pass3.jam ;
+
+# Queue the generated Pass3.jam.  It will have been written by the time
+# JamPlus' multipass Jamfile reader kicks in.
 QueueJamfile Pass3.jam ;

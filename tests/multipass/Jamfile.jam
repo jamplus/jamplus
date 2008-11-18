@@ -1,6 +1,11 @@
 Echo Pass 1 ;
 
+# If run without the Jambase, set the 'all' and 'clean' targets to be
+# pseudotargets.  If 'clean' isn't a pseudotarget, then Jam considers it
+# a file.  When using the 'clean' target, it will have the appearance
+# of working in the multipass system, because it is always missing.
 NotFile all clean ;
 
+# Queue Pass2.jam up for the next pass.
 QueueJamfile Pass2.jam ;
 
