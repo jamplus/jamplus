@@ -26,7 +26,7 @@ Both \$(SEARCH) and \$(LOCATE) should be set target-specific and not globally.  
 
 \section built_in_variables_hdrscan Header Scanning Variables
 
-The \c HDRSCAN and \c HDRPATTERN variables control the default header file scanning.  HDRSCAN is an <b>egrep</b>(1) pattern, with ()'s surrounding the file name, used to find file inclusion statements in source files.  Jambase uses <tt>\$(HDRPATTERN)</tt> as the pattern for \c HDRSCAN.  \c HDRRULE is the name of a rule to invoke with the results of the scan: the scanned file is the target, the found files are the sources.  \c HDRRULE is run under the influence of the scanned file's target-specific variables.  It defaults to the Jambase \c HdrRule.
+The \c HDRSCAN and \c HDRPATTERN variables control the default header file scanning.  HDRSCAN is an <b>egrep</b>(1) pattern, with ()'s surrounding the file name, used to find file inclusion statements in source files.  Jambase uses <tt>\$(HDRPATTERN)</tt> as the pattern for \c HDRSCAN.  \c HDRRULE is the name of a rule to invoke with the results of the scan: the scanned file is the target, the found files are the sources, the bound name of the target is in the third argument.  \c HDRRULE is run under the influence of the scanned file's target-specific variables.  It defaults to the Jambase \c HdrRule.
 
 Both \c HDRSCAN and \c HDRRULE must be set for header file scanning to take place, and they should be set target-specific and not globally.  If they were set globally, all files, including executables and libraries, would be scanned for header file include statements.
 
