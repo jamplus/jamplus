@@ -143,6 +143,9 @@ static LIST *headers1helper(
 		    strcmp( hdrdownshift->string, "0" ) != 0;
 	}
 
+	if ( !regexhash )
+	    regexhash = hashinit( sizeof(regexdata), "regex" );
+
 	while( rec < MAXINC && hdrscan )
 	{
 	    regexdata data, *d = &data;
