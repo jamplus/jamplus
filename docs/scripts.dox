@@ -1,0 +1,37 @@
+/*! \page scripts Scripts
+
+\section scripts_overview Overview
+
+JamPlus ships with useful scripts for the generation of Jamfiles from various sources.  Those scripts can be found in the <tt>bin/scripts/</tt> directory.
+
+\section folderstojamfile FoldersToJamfile
+
+From the current working directory, \b FoldersToJamfile recurses the directory structure and creates a Jamfile with all found files.  A source group is generated automatically for every directory.
+
+\b FoldersToJamfile currently accepts just one argument, the destination Jamfile.  It is run like so:
+
+\code
+FoldersToJamfile Jamfile.jam
+\endcode
+
+The generated Jamfile will need some basic clean up, and until the clean up has occurred, it will not run.
+
+
+
+
+
+
+
+
+\section vcprojtojamfile VCProjToJamfile
+
+\b VCProjToJamfile is capable of reading a .vcproj file from Visual Studio 2003, 2005, or 2008, and writing a Jamfile bearing the folder structure and file contents of the .vcproj.
+
+\b VCProjToJamfile accepts two arguments, the source vcproj and destination Jamfile.
+
+\code
+VCProjToJamfile Misc.vcproj Misc.jam
+\endcode
+
+*/
+

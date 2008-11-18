@@ -30,6 +30,7 @@ A sampling of the new features in the JamPlus distribution follows:
 - \subpage file_cache goes in-depth about the JamPlus (network) file caching feature.
 - \subpage warnings_and_errors shows a list of the possible warnings and errors that can be reported by Jam.
 - \subpage bugs
+- \subpage scripts lists the helper scripts that ship with JamPlus.
 
 
 
@@ -37,7 +38,7 @@ A sampling of the new features in the JamPlus distribution follows:
 
 Jam's author is Christopher Seiwald (<a href="mailto:seiwald@perforce.com">seiwald@perforce.com</A>).  Documentation is provided by <A HREF="http://www.perforce.com">Perforce Software, Inc.</A>
 
-JamPlus's primary author is Joshua Jensen (<a href="mailto:jjensen@workspacewhiz.com">jjensen@workspacewhiz.com</a>).
+JamPlus's primary maintainer is Joshua Jensen (<a href="mailto:jjensen@workspacewhiz.com">jjensen@workspacewhiz.com</a>).
 
 <i>Note: Much of this documentation is taken verbatim from the jam.html file which ships with the Perforce Jam build.</i>
 
