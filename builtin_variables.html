@@ -39,7 +39,12 @@ When <code>HDRFILTER</code> is set on a target, the rule bearing the name specif
 </pre></div><h3><a class="anchor" name="built_in_variables_hdrpipe">
 Shelling Processes for Dependencies</a></h3>
 When <code>HDRPIPE</code> is set on a target, during the dependency scan for headers, the process command line specified by <code>HDRPIPE</code> is run. Any dependencies written by the process to stdout are run through the normal <code>HDRSCAN</code> regular expression mechanism.<p>
-If <code>HDRPIPEFILE</code> is set on the target, the filename specified by <code>HDRPIPEFILE</code> is opened and parsed for dependencies after the <code>HDRPIPE</code> process exits.<h2><a class="anchor" name="built_in_variables_platform">
+If <code>HDRPIPEFILE</code> is set on the target, the filename specified by <code>HDRPIPEFILE</code> is opened and parsed for dependencies after the <code>HDRPIPE</code> process exits.<h2><a class="anchor" name="built_in_variables_semaphore">
+Semaphores</a></h2>
+At times, it is necessary to synchronize access in a multiprocessor build. The <code>SEMAPHORE</code> variable, when set on a target to be built, does just that. When the given <code>SEMAPHORE</code> value is in use by another target, any targets with the same <code>SEMAPHORE</code> will block until the currently building target is finished and releases the <code>SEMAPHORE</code> lock.<p>
+Example: The Visual C++ compiler accesses the same .pdb and .idb files. To prevent that, a <code>SEMAPHORE</code> is used:<p>
+<div class="fragment"><pre class="fragment">SEMAPHORE on $(objects) = $(LOCATE_TARGET)/$(_VCPDB).pdb ;
+</pre></div><h2><a class="anchor" name="built_in_variables_platform">
 Platform Identifier Variables</a></h2>
 A number of Jam built-in variables can be used to identify runtime platform:<p>
 <table width="75%" align="center" border="1" cellspacing="3" cellpadding="3">
@@ -71,6 +76,8 @@ Jam Version Variables</a></h2>
 <h2><a class="anchor" name="language_built_in_variables_misc">
 Miscellaneous Variables</a></h2>
 <table width="75%" align="center" border="1" cellspacing="3" cellpadding="3">
+<tr>
+<td>CWD</td><td>The current working directory. </td></tr>
 <tr>
 <td>JAM_PROCESS_PATH</td><td>The path where the Jam executable resides. </td></tr>
 <tr>
@@ -104,7 +111,7 @@ Just as <b>jam</b> expands a % to be the text of the rule's action block, it exp
 </pre></div><p>
 <hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Fri Nov 14 01:32:42 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Tue Nov 18 00:46:18 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>

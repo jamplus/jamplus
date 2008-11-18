@@ -110,7 +110,7 @@ Utility Rules</a></h2>
 The remaining rules are utility rules.<p>
 <multicol cols=3>
 <ul>
-<li><a href="builtin_rules.html#rule_Echo">Echo</a> <li><a href="builtin_rules.html#rule_Exit">Exit</a> <li><a href="builtin_rules.html#rule_Glob">Glob</a> <li><a href="builtin_rules.html#rule_Match">Match</a> <li><a href="builtin_rules.html#rule_Math">Math</a> <li><a href="builtin_rules.html#rule_MD5">MD5</a> <li><a href="builtin_rules.html#rule_MD5File">MD5File</a> <li><a href="builtin_rules.html#rule_OptionalFileCache">OptionalFileCache</a> <li><a href="builtin_rules.html#rule_Subst">Subst</a> <li><a href="builtin_rules.html#rule_UseDepCache">UseDepCache</a> <li><a href="builtin_rules.html#rule_UseFileCache">UseFileCache</a> <li><a href="builtin_rules.html#rule_UseMD5Callback">UseMD5Callback</a> </ul>
+<li><a href="builtin_rules.html#rule_Echo">Echo</a> <li><a href="builtin_rules.html#rule_Exit">Exit</a> <li><a href="builtin_rules.html#rule_Glob">Glob</a> <li><a href="builtin_rules.html#rule_Match">Match</a> <li><a href="builtin_rules.html#rule_Math">Math</a> <li><a href="builtin_rules.html#rule_MD5">MD5</a> <li><a href="builtin_rules.html#rule_MD5File">MD5File</a> <li><a href="builtin_rules.html#rule_OptionalFileCache">OptionalFileCache</a> <li><a href="builtin_rules.html#rule_QueueJamFile">QueueJamFile</a> <li><a href="builtin_rules.html#rule_Subst">Subst</a> <li><a href="builtin_rules.html#rule_UseDepCache">UseDepCache</a> <li><a href="builtin_rules.html#rule_UseFileCache">UseFileCache</a> <li><a href="builtin_rules.html#rule_UseMD5Callback">UseMD5Callback</a> <li><a href="builtin_rules.html#rule_W32_GETREG">W32_GETREG</a> </ul>
 </multicol>
 <p>
 <hr>
@@ -367,8 +367,25 @@ When a callback is assigned to <code>TARGETS</code>, a Lua function of the name 
 <span class="preprocessor">    UseMD5Callback file1.png : md5png ;</span>
 </pre></div><p>
 <hr>
+ <h2><a class="anchor" name="rule_W32_GETREG">
+rule W32_GETREG KEYS ;</a></h2>
+<p>
+Returns a registry entry, given a list of <code>KEYS</code>.<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>KEYS</em>&nbsp;</td><td>A list of keys to look up in the registry. The first key may be one of the following:</td></tr>
+  </table>
+</dl>
+<ul>
+<li>HKEY_LOCAL_MACHINE</li><li>HKEY_CURRENT_USER</li><li>HKEY_CLASSES_ROOT</li></ul>
+<p>
+<dl class="return" compact><dt><b>Returns:</b></dt><dd>Returns the found registry entry. If no registry entry was found, an empty list is returned.</dd></dl>
+<div class="fragment"><pre class="fragment">    local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio 9.0 InstallDir ;
+    MSVCNT = [ W32_GETREG $(key) ] ;
+</pre></div><p>
+<hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Mon Nov 17 22:55:30 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Tue Nov 18 00:46:18 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>
