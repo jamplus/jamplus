@@ -788,9 +788,6 @@ make0(
 	else if( t->flags & T_FLAG_TOUCHED )
 	{
 	    fate = T_FATE_TOUCHED;
-#ifdef OPT_MULTIPASS_EXT
-	    t->flags &= ~T_FLAG_TOUCHED;
-#endif
 	}
 	else if( anyhow && !( t->flags & T_FLAG_NOUPDATE ) )
 	{

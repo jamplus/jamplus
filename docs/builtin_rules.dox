@@ -339,6 +339,23 @@ If the given generated \c TARGETS are already built and stored within the file c
 
 
 <hr>
+\section rule_QueueJamFile rule QueueJamFile JAMFILE_LIST ;
+\addindex rule_QueueJamFile
+
+When \c QueueJamFile is called, a second pass on the Jam dependency graph is initiated after the \ref operation_updating.
+
+\param JAMFILE_LIST A list of one or more Jamfiles to queue for the next pass.
+
+\code
+    QueueJamFile Pass2.jam ;
+\endcode
+
+
+
+
+
+
+<hr>
 \section rule_Subst rule Subst LIST : PATTERN : REPL [ : MAXN ] ;
 \addindex rule_Subst
 

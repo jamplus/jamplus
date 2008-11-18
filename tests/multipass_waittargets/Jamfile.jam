@@ -13,6 +13,8 @@ actions piecemeal together existing Clean
 NotFile all ;
 Depends all : copiedfile.txt ;
 Depends copiedfile.txt : originalfile.txt ;
+Always clean ;
+NotFile clean ;
 Clean clean : copiedfile.txt ;
 
 QueueJamfile Pass2.jam ;

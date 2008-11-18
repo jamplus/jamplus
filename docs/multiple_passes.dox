@@ -1,0 +1,30 @@
+/*! \page multiple_passes Multiple Passes
+
+\section multiple_passes_overview Overview
+
+Stock Jam was built as a highly efficient single pass build system where all targets must be known during the \ref operation_parsing.  When the \ref operation_updating is complete, Jam assumed the build is finished and exits.
+
+JamPlus adds a facility to enable multiple passes on the dependency graph, allowing 'unknown' dependencies to be discovered during one pass and handled in the next pass.
+
+
+
+
+
+\section multiple_passes_usage Usage
+
+To initiate a second Jam pass, the \ref rule_QueueJamFile "QueueJamFile" rule must be executed.  The Jamfile to be queued may already exist, or it may be generated during the current pass or any previous pass.
+
+
+
+
+
+
+\section multiple_passes_gotchas Gotchas
+
+Multiple passes are filled with "gotchas" or, at the very least, more complexity.  Thoughts on this are listed below.
+
+When a build is initiated and a target specified on the command line, the target must exist in the dependency graph.  If the target is not in the dependency graph, the build system won't know what to do.
+
+
+*/
+

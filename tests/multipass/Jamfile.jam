@@ -1,6 +1,6 @@
 Echo Pass 1 ;
 
-NotFile all ;
+NotFile all clean ;
 
 QueueJamfile Pass2.jam ;
 

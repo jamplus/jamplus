@@ -6,7 +6,8 @@ actions WriteFile
 }
 
 Depends all : Pass3.jam ;
-CONTENTS on Pass3.jam = "Echo Pass 3 written ;" ;
+CONTENTS on Pass3.jam = "Echo Pass 3 written ;
+Clean clean : Pass3.jam ;" ;
 Always Pass3.jam ;
 WriteFile Pass3.jam ;
 
