@@ -192,6 +192,18 @@ If the given generated <code>TARGETS</code> are already built and stored within 
 <span class="preprocessor">    OptionalFileCache image2.tga : weapons ;</span>
 </pre></div><p>
 <hr>
+ <h2><a class="anchor" name="rule_QueueJamFile">
+rule QueueJamFile JAMFILE_LIST ;</a></h2>
+<p>
+When <code>QueueJamFile</code> is called, a second pass on the Jam dependency graph is initiated after the <a class="el" href="jam_language.html#operation_updating">Updating Phase</a>.<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>JAMFILE_LIST</em>&nbsp;</td><td>A list of one or more Jamfiles to queue for the next pass.</td></tr>
+  </table>
+</dl>
+<div class="fragment"><pre class="fragment">    QueueJamFile Pass2.jam ;
+</pre></div><p>
+<hr>
  <h2><a class="anchor" name="rule_Subst">
 rule Subst LIST : PATTERN : REPL [ : MAXN ] ;</a></h2>
 <p>
@@ -356,7 +368,7 @@ When a callback is assigned to <code>TARGETS</code>, a Lua function of the name 
 </pre></div><p>
 <hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Sat Nov 15 01:51:59 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Mon Nov 17 22:55:30 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>
