@@ -3,6 +3,8 @@
 *.suo
 *.user
 *.wwdb
+*.obj
+*.exe
 Debug/*
 Release/*
 LuaPlus

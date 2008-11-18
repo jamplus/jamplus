@@ -527,7 +527,7 @@ make1c( TARGET *t )
 #ifdef OPT_PERCENT_DONE_EXT
 		/* CWM - added '@' and %done to front of output */
 		int done = counts->skipped + counts->failed + counts->made;
-		float percent = (done * 99.0) / globs.updating;
+		float percent = (done * 99.0f) / globs.updating;
 		printf( "@ %2.0f%% %s ", percent, cmd->rule->name );
 #else
 		/* CWM - added '@' to front of output */
