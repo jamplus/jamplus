@@ -59,6 +59,20 @@ If \c HDRPIPEFILE is set on the target, the filename specified by \c HDRPIPEFILE
 
 
 
+\section built_in_variables_semaphore Semaphores
+
+At times, it is necessary to synchronize access in a multiprocessor build.  The \c SEMAPHORE variable, when set on a target to be built, does just that.  When the given \c SEMAPHORE value is in use by another target, any targets with the same \c SEMAPHORE will block until the currently building target is finished and releases the \c SEMAPHORE lock.
+
+Example: The Visual C++ compiler accesses the same .pdb and .idb files.  To prevent that, a \c SEMAPHORE is used:
+
+\code
+SEMAPHORE on $(objects) = $(LOCATE_TARGET)/$(_VCPDB).pdb ;
+\endcode
+
+
+
+
+
 \section built_in_variables_platform Platform Identifier Variables
 
 A number of Jam built-in variables can be used to identify runtime platform:

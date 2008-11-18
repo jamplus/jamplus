@@ -198,10 +198,12 @@ The remaining rules are utility rules.
 \refitem rule_MD5 MD5
 \refitem rule_MD5File MD5File
 \refitem rule_OptionalFileCache OptionalFileCache
+\refitem rule_QueueJamFile QueueJamFile
 \refitem rule_Subst Subst
 \refitem rule_UseDepCache UseDepCache
 \refitem rule_UseFileCache UseFileCache
 \refitem rule_UseMD5Callback UseMD5Callback
+\refitem rule_W32_GETREG W32_GETREG
 \endsecreflist
 
 <hr>
@@ -628,6 +630,30 @@ When a callback is assigned to \c TARGETS, a Lua function of the name specified 
 \code
     # Use the Lua function md5png to calculate the md5 for file1.png.
     UseMD5Callback file1.png : md5png ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_W32_GETREG rule W32_GETREG KEYS ;
+\addindex rule_W32_GETREG
+
+Returns a registry entry, given a list of \c KEYS.
+
+\param KEYS A list of keys to look up in the registry.  The first key may be one of the following:
+
+- HKEY_LOCAL_MACHINE
+- HKEY_CURRENT_USER
+- HKEY_CLASSES_ROOT
+
+\return Returns the found registry entry.  If no registry entry was found, an empty list is returned.
+
+\code
+    local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio 9.0 InstallDir ;
+    MSVCNT = [ W32_GETREG $(key) ] ;
 \endcode
 
 

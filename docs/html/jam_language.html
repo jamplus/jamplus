@@ -105,6 +105,13 @@ The following action <em>modifiers</em> are understood:<p>
 <td><code>actions updated</code> </td><td>$(&gt;) includes only source targets themselves marked for updating.  </td></tr>
 </table>
 <p>
+One final set of symbols is understood within the body of the action. It is used to write a file to disk based on the contents of an available variable.<p>
+<div class="fragment"><pre class="fragment"><span class="preprocessor"># Write a file to disk</span>
+<span class="preprocessor"></span>actions WriteFile
+{
+    ^^($(1)|$(CONTENTS))
+}
+</pre></div><p>
  </blockquote> <p>
 <code>break</code><p>
  <blockquote> <p>
@@ -197,7 +204,7 @@ The switch statement executes zero or one of the enclosed <em>statements</em>, d
 Repeatedly execute <em>statements</em> while <em>cond</em> remains true upon entry. (See the description of <em>cond</em> expression syntax under if above).<p>
  </blockquote> <p>
  </blockquote>  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Sat Nov 15 00:36:26 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Tue Nov 18 00:46:18 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>

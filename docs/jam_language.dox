@@ -188,6 +188,16 @@ actions response C++
   </tr>
 </table>
 
+One final set of symbols is understood within the body of the action.  It is used to write a file to disk based on the contents of an available variable.
+
+\code
+# Write a file to disk
+actions WriteFile
+{
+    ^^($(1)|$(CONTENTS))
+}
+\endcode
+
 \htmlonly </blockquote> \endhtmlonly
 
 
