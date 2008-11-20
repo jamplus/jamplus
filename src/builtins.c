@@ -63,7 +63,9 @@ LIST *builtin_exit( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_flags( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_glob( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_match( PARSE *parse, LOL *args, int *jmp );
+#ifdef OPT_BUILTIN_SUBST_EXT
 LIST *builtin_subst( PARSE *parse, LOL *args, int *jmp );
+#endif
 #ifdef OPT_MULTIPASS_EXT
 LIST *builtin_queuejamfile( PARSE *parse, LOL *args, int *jmp );
 #endif
@@ -144,8 +146,10 @@ load_builtins()
     bindrule( "NOUPDATE" )->procedure = 
 	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_NOUPDATE );
 
-    bindrule( "Subst" )->procedure = 
+#ifdef OPT_BUILTIN_SUBST_EXT
+	bindrule( "Subst" )->procedure = 
 	parse_make( builtin_subst, P0, P0, P0, C0, C0, 0 );
+#endif
 
     bindrule( "Temporary" )->procedure = 
     bindrule( "TEMPORARY" )->procedure = 
@@ -497,6 +501,7 @@ builtin_match(
 }
 
 
+#ifdef OPT_BUILTIN_SUBST_EXT
 /*
  * builtin_subst() - Lua-like gsub rule, regexp substitution
  */
@@ -529,6 +534,8 @@ builtin_subst(
 
 	return result;
 }
+#endif /* OPT_BUILTIN_SUBST_EXT */
+
 
 
 #ifdef OPT_MULTIPASS_EXT
