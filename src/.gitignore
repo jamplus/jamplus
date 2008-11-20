@@ -7,4 +7,6 @@
 *.exe
 Debug/*
 Release/*
+bin.*/*
+jbin.*/*
 LuaPlus
