@@ -10,10 +10,19 @@ actions piecemeal together existing Clean
 	del "$(>:\\)"
 }
 
-NotFile all ;
+# Set up the pseudotargets properly.
+NotFile all clean ;
+Always clean ;
+
+# Dependencies:
+#     all -> copiedfile.txt -> originalfile.txt
 Depends all : copiedfile.txt ;
 Depends copiedfile.txt : originalfile.txt ;
+
+# Set up the 'clean' target for the 'copiedfile.txt' target.  The interesting
+# point to be had here is the 'copiedfile.txt' target hasn't been defined
+# yet.  It will happen in an upcoming pass.
 Clean clean : copiedfile.txt ;
 
+# Queue Pass2.jam up for the next pass.
 QueueJamfile Pass2.jam ;
-

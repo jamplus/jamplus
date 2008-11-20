@@ -6,8 +6,10 @@ actions WriteFile
 }
 
 CONTENTS on originalfile.txt = "originalfile.txt written..." ;
-#Always originalfile.txt ;
 WriteFile originalfile.txt ;
+
+#Always originalfile.txt ;
 Clean clean : originalfile.txt ;
 
+# Generate the copiedfile.txt from originalfile.txt.
 Copy copiedfile.txt : originalfile.txt ;

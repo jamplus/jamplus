@@ -265,6 +265,9 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			C++			?= "$(MINGW_ROOT)/bin/g++" ;
 			RANLIB		?= "$(MINGW_ROOT)/bin/ranlib" ;
 			SUFEXE		?= .exe ;
+
+			NOARSCAN = true ;
+			NOARUPDATE = true ;
 		}
 		else
 		{

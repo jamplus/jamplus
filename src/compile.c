@@ -355,9 +355,6 @@ compile_include(
 
 	    pushsettings( t->settings );
 	    t->boundname = search( t->name, &t->time );
-#ifdef OPT_JAMFILE_BOUNDNAME_EXT
-	    var_set( "BOUNDNAME", list_new( L0, t->boundname, 0 ), VAR_SET );
-#endif
 	    popsettings( t->settings );
 
 	    /* Don't parse missing file if NOCARE set */

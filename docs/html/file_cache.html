@@ -47,11 +47,11 @@ In the example below, the only additional line over the standard Jam rule defini
 </pre></div><h2><a class="anchor" name="file_cache_technical">
 Technical Details</a></h2>
 To use the JamPlus file cache facility properly, the basics of how the target's <b>buildmd5sum</b> is generated is worth knowing.<p>
-For any given target or dependent target, the name of the target should generally be a "shareable" gristed name, not the physical location of the target, which could vary from machine to machine. That is, if the name of the target is <code>c:/content/file.image</code> on one machine and on another is <code>d:/morecontent/file.image</code>, the cache will never be able to share content. A name like <code>&lt;content&gt;file.image5</code> or just simply <code>file.image</code> is considered a shared name and is safe to use with the file cache.<p>
+For any given target or dependent target, the name of the target should generally be a "shareable" gristed name, not the physical location of the target, which could vary from machine to machine. That is, if the name of the target is <code>c:/content/file.image</code> on one machine and on another is <code>d:/morecontent/file.image</code>, the cache will never be able to share content. A name like <code>&lt;content&gt;file.image</code> or just simply <code>file.image</code> is considered a shared name and is safe to use with the file cache.<p>
 The following items are added to a target's <b>buildmd5sum</b>.<p>
 <ol type=1>
-<li>The target's name.</li><li>If UseCommandLine was specified on the target, each command line entry string is summed.</li><li>For each dependency, sorted by name:<ol type=a>
-<li>The name of the dependency.</li><li>The md5sum of the physical content of the dependency is summed and added to the current <b>buildmd5sum</b>.</li><li>If UseCommandLine was specified on the dependency, each command line entry string is summed.</li><li>If there are includes specified through the rule <a class="el" href="builtin_rules.html#rule_Includes">Includes</a>, the string <code>includes</code> is summed.<ol type=i>
+<li>The target's name.</li><li>If <a class="el" href="builtin_rules.html#rule_UseCommandLine">UseCommandLine</a> was specified on the target, each command line entry string is summed.</li><li>For each dependency, sorted by name:<ol type=a>
+<li>The name of the dependency.</li><li>The md5sum of the physical content of the dependency is summed and added to the current <b>buildmd5sum</b>.</li><li>If <a class="el" href="builtin_rules.html#rule_UseCommandLine">UseCommandLine</a> was specified on the dependency, each command line entry string is summed.</li><li>If there are includes specified through the rule <a class="el" href="builtin_rules.html#rule_Includes">Includes</a>, the string <code>includes</code> is summed.<ol type=i>
 <li>For every includes dependency, the physical content is summed and added to the current <b>buildmd5sum</b>.</li></ol>
 </li><li>Any dependents of this dependency are added.</li></ol>
 </li></ol>
@@ -83,7 +83,7 @@ function md5png(filename)
     return md5sum:digest(true)
 end
 </pre></div> </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Tue Nov 11 00:05:13 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Tue Nov 18 20:27:35 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>
