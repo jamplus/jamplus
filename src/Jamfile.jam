@@ -11,10 +11,6 @@ if $(VMS) 	{ LOCATE_TARGET ?= [.binvms] ; }
 else if $(MAC) 	{ LOCATE_TARGET ?= :bin.mac ; }
 else 		{ LOCATE_TARGET ?= bin.$(OSFULL[1]:L) ; }
 
-if $(BUILD_J)
-{
-    LOCATE_TARGET = j$(LOCATE_TARGET) ;
-}
 # Leave generated source in current directory; it would be nice to use
 # these lines below to build the source into the platform-specific
 # directory, but getting scan.c to include the right jambase.h is
@@ -105,121 +101,120 @@ rule Join
     }
 }
 
-if $(BUILD_J)
+# Improvements grabbed from //guest/craig_mcpheeters/jam/src/ on the
+# Perforce public depot (some heavily modified).
+Option OPT_HEADER_CACHE_EXT ;
+Option OPT_IMPROVED_WARNINGS_EXT ;
+Option OPT_INTERRUPT_FIX ;
+Option OPT_GRAPH_DEBUG_EXT ;
+Option OPT_SERIAL_OUTPUT_EXT ;
+Option OPT_SEMAPHORE : yes ;
+
+# Bug Fixes
+Option OPT_FIX_TEMPFILE_CRASH ;
+Option OPT_FIX_NOTFILE_NEWESTFIRST ;
+Option OPT_FIX_NT_ARSCAN_LEAK ;
+Option OPT_FIX_UPDATED ;
+
+# Improvements developed locally.
+Option OPT_PIECEMEAL_PUNT_EXT ;
+
+# Improvements
+Option OPT_IMPROVED_MEMUSE_EXT ;
+Option OPT_IMPROVED_PATIENCE_EXT ;
+Option OPT_IMPROVED_PROGRESS_EXT ;
+Option OPT_PRINT_TOTAL_TIME_EXT ;
+Option OPT_IMPROVE_DEBUG_LEVEL_HELP_EXT ;
+Option OPT_IMPROVE_DEBUG_COMPILE_EXT ;
+Option OPT_DEBUG_MAKE_PRINT_TARGET_NAME ;
+Option OPT_DEBUG_MEM_TOTALS_EXT ;
+Option OPT_IMPROVE_JOBS_SETTING_EXT ;
+
+# Features
+Option OPT_PATCHED_VERSION_VAR_EXT ;
+Option OPT_HDRRULE_BOUNDNAME_ARG_EXT : yes ;
+# No longer in the source.
+# Option OPT_BUILTIN_PWD_EXT : yes ;
+Option OPT_VAR_CWD_EXT : yes ;
+Option OPT_RESPONSE_FILES : yes ;
+Option OPT_BUILTIN_MD5_EXT : yes ;
+Option OPT_DEBUG_MAKE1_LOG_EXT ;
+if $(OS) = NT
 {
-    # Improvements grabbed from //guest/craig_mcpheeters/jam/src/ on the
-    # Perforce public depot (some heavily modified).
-    Option OPT_HEADER_CACHE_EXT ;
-    Option OPT_IMPROVED_WARNINGS_EXT ;
-    Option OPT_INTERRUPT_FIX ;
-    Option OPT_GRAPH_DEBUG_EXT ;
-    Option OPT_SERIAL_OUTPUT_EXT ;
-    Option OPT_SEMAPHORE : yes ;
+Option OPT_BUILTIN_W32_GETREG_EXT : yes ;
+Option OPT_BUILTIN_W32_SHORTNAME_EXT : yes ;
+}
 
-    # Bug Fixes
-    Option OPT_FIX_TEMPFILE_CRASH ;
-    Option OPT_FIX_NOTFILE_NEWESTFIRST ;
-    Option OPT_FIX_NT_ARSCAN_LEAK ;
-    Option OPT_FIX_UPDATED ;
+Option OPT_ACTIONS_DUMP_TEXT_EXT ;
+Option OPT_ACTION_MAXTARGETS_EXT ;
+Option OPT_BUILTIN_MATH_EXT ;
+Option OPT_BUILTIN_MD5CACHE_EXT ;
+Option OPT_BUILTIN_MD5_EXT ;
+Option OPT_BUILTIN_NEEDS_EXT ;
+Option OPT_BUILTIN_PUTENV_EXT ;
+Option OPT_BUILTIN_W32_GETREG_EXT ;
+Option OPT_BUILTIN_W32_SHORTNAME_EXT ;
+Option OPT_DEBUG_MAKE1_LOG_EXT ;
+Option OPT_DEBUG_MAKE_PRINT_TARGET_NAME ;
+Option OPT_DEBUG_MEM_TOTALS_EXT ;
+Option OPT_EXPAND_BINDING_EXT ;
+Option OPT_EXPAND_FILEGLOB_EXT ;
+Option OPT_EXPAND_INCLUDES_EXCLUDES_EXT ;
+Option OPT_EXPAND_LITERALS_EXT ;
+Option OPT_EXPAND_RULE_NAMES_EXT ;
+Option OPT_FIX_NOTFILE_NEWESTFIRST ;
+Option OPT_FIX_NT_ARSCAN_LEAK ;
+Option OPT_FIX_TEMPFILE_CRASH ;
+Option OPT_FIX_UPDATED ;
+Option OPT_GRAPH_DEBUG_EXT ;
+Option OPT_HDRPIPE_EXT ;
+Option OPT_HDRRULE_BOUNDNAME_ARG_EXT ;
+Option OPT_HEADER_CACHE_EXT ;
+Option OPT_IMPROVED_MEMUSE_EXT ;
+Option OPT_IMPROVED_PATIENCE_EXT ;
+Option OPT_IMPROVED_PROGRESS_EXT ;
+Option OPT_IMPROVED_WARNINGS_EXT ;
+Option OPT_IMPROVE_DEBUG_COMPILE_EXT ;
+Option OPT_IMPROVE_DEBUG_LEVEL_HELP_EXT ;
+Option OPT_IMPROVE_JOBS_SETTING_EXT ;
+Option OPT_INTERRUPT_FIX ;
+Option OPT_JAMFILE_BOUNDNAME_EXT ;
+Option OPT_JOB_SLOT_EXT ;
+Option OPT_MINUS_EQUALS_EXT ;
+Option OPT_MULTIPASS_EXT ;
+Option OPT_NOCARE_NODES_EXT ;
+Option OPT_NODELETE_READONLY ;
+Option OPT_PATCHED_VERSION_VAR_EXT ;
+Option OPT_PATH_BINDING_EXT ;
+Option OPT_PERCENT_DONE_EXT ;
+Option OPT_PIECEMEAL_PUNT_EXT ;
+Option OPT_PRINT_TOTAL_TIME_EXT ;
+Option OPT_RESPONSE_FILES ;
+Option OPT_ROOT_PATHS_AS_ABSOLUTE_EXT ;
+Option OPT_SCAN_SUBDIR_NOTIFY_EXT ;
+Option OPT_SEMAPHORE ;
+Option OPT_SERIAL_OUTPUT_EXT ;
+Option OPT_SETCWD_SETTING_EXT ;
+Option OPT_SET_JAMPROCESSPATH_EXT ;
+Option OPT_SLASH_MODIFIERS_EXT ;
+Option OPT_TIMESTAMP_IMMEDIATE_PARENT_CHECK_EXT2 ;
+Option OPT_TIMESTAMP_EXTENDED_PARENT_CHECK_EXT ;
+Option OPT_UPDATED_CHILD_FIX ;
+Option OPT_VAR_CWD_EXT ;
+Option OPT_BUILTIN_LUA_SUPPORT_EXT2 ;
 
-    # Improvements developed locally.
-    Option OPT_PIECEMEAL_PUNT_EXT ;
+Option OPT_EXPAND_RULE_NAMES_EXT : yes ;
 
-    # Improvements
-    Option OPT_IMPROVED_MEMUSE_EXT ;
-    Option OPT_IMPROVED_PATIENCE_EXT ;
-    Option OPT_IMPROVED_PROGRESS_EXT ;
-    Option OPT_PRINT_TOTAL_TIME_EXT ;
-    Option OPT_IMPROVE_DEBUG_LEVEL_HELP_EXT ;
-    Option OPT_IMPROVE_DEBUG_COMPILE_EXT ;
-    Option OPT_DEBUG_MAKE_PRINT_TARGET_NAME ;
-    Option OPT_DEBUG_MEM_TOTALS_EXT ;
-    Option OPT_IMPROVE_JOBS_SETTING_EXT ;
+local options = [ Join $(ALL_OPTIONS) ] ;
+LOCAL_DEFINES += JAM_OPTIONS=$(options) ;
+echo $(LOCAL_DEFINES) ;
 
-    # Features
-    Option OPT_PATCHED_VERSION_VAR_EXT ;
-    Option OPT_HDRRULE_BOUNDNAME_ARG_EXT : yes ;
-    # No longer in the source.
-    # Option OPT_BUILTIN_PWD_EXT : yes ;
-    Option OPT_VAR_CWD_EXT : yes ;
-    Option OPT_RESPONSE_FILES : yes ;
-    Option OPT_BUILTIN_MD5_EXT : yes ;
-    Option OPT_DEBUG_MAKE1_LOG_EXT ;
-    if $(OS) = NT
-    {
-	Option OPT_BUILTIN_W32_GETREG_EXT : yes ;
-	Option OPT_BUILTIN_W32_SHORTNAME_EXT : yes ;
-    }
-
-    Option OPT_ACTIONS_DUMP_TEXT_EXT ;
-    Option OPT_ACTION_MAXTARGETS_EXT ;
-    Option OPT_BUILTIN_MATH_EXT ;
-    Option OPT_BUILTIN_MD5CACHE_EXT ;
-    Option OPT_BUILTIN_MD5_EXT ;
-    Option OPT_BUILTIN_NEEDS_EXT ;
-    Option OPT_BUILTIN_PUTENV_EXT ;
-    Option OPT_BUILTIN_W32_GETREG_EXT ;
-    Option OPT_BUILTIN_W32_SHORTNAME_EXT ;
-    Option OPT_DEBUG_MAKE1_LOG_EXT ;
-    Option OPT_DEBUG_MAKE_PRINT_TARGET_NAME ;
-    Option OPT_DEBUG_MEM_TOTALS_EXT ;
-    Option OPT_EXPAND_BINDING_EXT ;
-    Option OPT_EXPAND_FILEGLOB_EXT ;
-    Option OPT_EXPAND_INCLUDES_EXCLUDES_EXT ;
-    Option OPT_EXPAND_LITERALS_EXT ;
-    Option OPT_EXPAND_RULE_NAMES_EXT ;
-    Option OPT_FIX_NOTFILE_NEWESTFIRST ;
-    Option OPT_FIX_NT_ARSCAN_LEAK ;
-    Option OPT_FIX_TEMPFILE_CRASH ;
-    Option OPT_FIX_UPDATED ;
-    Option OPT_GRAPH_DEBUG_EXT ;
-    Option OPT_HDRPIPE_EXT ;
-    Option OPT_HDRRULE_BOUNDNAME_ARG_EXT ;
-    Option OPT_HEADER_CACHE_EXT ;
-    Option OPT_IMPROVED_MEMUSE_EXT ;
-    Option OPT_IMPROVED_PATIENCE_EXT ;
-    Option OPT_IMPROVED_PROGRESS_EXT ;
-    Option OPT_IMPROVED_WARNINGS_EXT ;
-    Option OPT_IMPROVE_DEBUG_COMPILE_EXT ;
-    Option OPT_IMPROVE_DEBUG_LEVEL_HELP_EXT ;
-    Option OPT_IMPROVE_JOBS_SETTING_EXT ;
-    Option OPT_INTERRUPT_FIX ;
-    Option OPT_JAMFILE_BOUNDNAME_EXT ;
-    Option OPT_JOB_SLOT_EXT ;
-    Option OPT_MINUS_EQUALS_EXT ;
-    Option OPT_MULTIPASS_EXT ;
-    Option OPT_NOCARE_NODES_EXT ;
-    Option OPT_NODELETE_READONLY ;
-    Option OPT_PATCHED_VERSION_VAR_EXT ;
-    Option OPT_PATH_BINDING_EXT ;
-    Option OPT_PERCENT_DONE_EXT ;
-    Option OPT_PIECEMEAL_PUNT_EXT ;
-    Option OPT_PRINT_TOTAL_TIME_EXT ;
-    Option OPT_RESPONSE_FILES ;
-    Option OPT_ROOT_PATHS_AS_ABSOLUTE_EXT ;
-    Option OPT_SCAN_SUBDIR_NOTIFY_EXT ;
-    Option OPT_SEMAPHORE ;
-    Option OPT_SERIAL_OUTPUT_EXT ;
-    Option OPT_SETCWD_SETTING_EXT ;
-    Option OPT_SET_JAMPROCESSPATH_EXT ;
-    Option OPT_SLASH_MODIFIERS_EXT ;
-    Option OPT_TIMESTAMP_IMMEDIATE_PARENT_CHECK_EXT2 ;
-    Option OPT_TIMESTAMP_EXTENDED_PARENT_CHECK_EXT ;
-    Option OPT_UPDATED_CHILD_FIX ;
-    Option OPT_VAR_CWD_EXT ;
-    Option OPT_BUILTIN_LUA_SUPPORT_EXT2 ;
-
-    Option OPT_EXPAND_RULE_NAMES_EXT : yes ;
-
-    local options = [ Join $(ALL_OPTIONS) ] ;
-    LOCAL_DEFINES += JAM_OPTIONS=$(options) ;
-
-    if $(OS) = NT {
-        Defines * : NT ;
+if $(OS) = NT {
+    Defines * : NT ;
 
 #	CCFLAGS += /nologo /W3 ;
 #	CCFLAGS += /DNT ;
-	#CCFLAGS += /D_CONSOLE /D_MBCS ;
+#CCFLAGS += /D_CONSOLE /D_MBCS ;
 
 #	if $(DEBUG) {
 #	    CCFLAGS += /Zi /MLd /Od ;
@@ -230,11 +225,13 @@ if $(BUILD_J)
 
 #	LINKFLAGS += /nologo /subsystem:console /machine:I386 ;
 
-	# Reserve 5 megs for the stack.  The default of 1 meg is too
-	# small for the pathalogically recursive make1c()<->make1d()
-	# relationship when coupled with targets with large numbers of
-	# actions (as can happen with piecemeal Clean targets).
-    LinkFlags jam : /STACK:5242880 ;
+# Reserve 5 megs for the stack.  The default of 1 meg is too
+# small for the pathalogically recursive make1c()<->make1d()
+# relationship when coupled with targets with large numbers of
+# actions (as can happen with piecemeal Clean targets).
+LinkFlags jam : /STACK:5242880 ;
+
+LinkPrebuiltLibraries jam : advapi32.lib ;
 
 #	LINKLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib
 #                comdlg32.lib advapi32.lib shell32.lib ole32.lib
@@ -244,27 +241,26 @@ if $(BUILD_J)
 #                oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ;
 
 #	DEFINEFLAG ?= /D ;
-    }
-    else if $(UNIX)
-    {
-	CC = gcc ;
-	LINK = gcc ;
-	if ! $(DEBUG) {
-	    OPTIM = -O3 -fomit-frame-pointer -fstrength-reduce ;
-	}
-	CCFLAGS += -Wall ;
-#	DEFINEFLAG ?= -D ;
-    }
-    else
-    {
-	EXIT "Not configured for non-UNIX non-Windows targets" ;
-    }
-    if $(CONFIG) = debug {
-        Defines * : DEBUG_J ;
-    }
-    Defines * : $(LOCAL_DEFINES) ;
-    Defines * : YYSTACKSIZE=5000 ;
 }
+else if $(UNIX)
+{
+CC = gcc ;
+LINK = gcc ;
+if ! $(DEBUG) {
+    OPTIM = -O3 -fomit-frame-pointer -fstrength-reduce ;
+}
+CCFLAGS += -Wall ;
+#	DEFINEFLAG ?= -D ;
+}
+else
+{
+EXIT "Not configured for non-UNIX non-Windows targets" ;
+}
+if $(CONFIG) = debug {
+    Defines * : DEBUG_J ;
+}
+Defines * : $(LOCAL_DEFINES) ;
+Defines * : YYSTACKSIZE=5000 ;
 
 if $(UNIX) && $(PURE) {
     LOCATE_TARGET = $(LOCATE_TARGET)/pure ;
@@ -293,21 +289,19 @@ if $(YACC) && $(SUFEXE) = ""
 #
 # These files contain locally developed improvements.
 #
-if $(BUILD_J)
-{
-    # code += pwd.c w32_getreg.c w32_shortname.c ;
-    if OPT_BUILTIN_MD5_EXT in $(LOCAL_DEFINES) {
-	code += md5c.c ;
-    }
-    if OPT_IMPROVED_PROGRESS_EXT in $(LOCAL_DEFINES) {
-	code += progress.c ;
-    }
-    if OPT_IMPROVED_MEMUSE_EXT in $(LOCAL_DEFINES) {
-	code += mempool.c ;
-    }
-    # code primarily not written locally, but grabbed from the net
-    code += hcache.c tmpunix.c ;
+code += w32_getreg.c w32_shortname.c ;
+code += fileglob.cpp FileGlobBase.cpp ;
+if OPT_BUILTIN_MD5_EXT in $(LOCAL_DEFINES) {
+code += md5c.c ;
 }
+if OPT_IMPROVED_PROGRESS_EXT in $(LOCAL_DEFINES) {
+code += progress.c ;
+}
+if OPT_IMPROVED_MEMUSE_EXT in $(LOCAL_DEFINES) {
+code += mempool.c ;
+}
+# code primarily not written locally, but grabbed from the net
+code += hcache.c tmpunix.c ;
 #
 ### LOCAL CHANGE
 #
@@ -327,21 +321,8 @@ if $(VMS)
 # The guts of the Jamfile: how to build Jam
 #
 
-if $(BUILD_J)
-{
-#    Main 		j : jam.c jambase-j.c ;
-    LinkLibraries j : libjam ;
-    Application j : jam.c jambase-j.c ;
-#    GenFile 		jambase-j.c : mkjambase Jambase-j ;
-}
-else
-{
-#jj    Main 		jam : jam.c jambase.c ;
-    LinkLibraries 	jam : libjam ;
-    OutputPostfix jam : ;
-    Application jam : jam.c jambase-j.c ;
-#    GenFile 		jambase.c : mkjambase Jambase ;
-}
+LinkLibraries jam : libjam ;
+Application jam : jam.c jambase-j.c ;
 
 Library libjam :
 		    buffer.c builtins.c command.c compile.c $(code) expand.c
