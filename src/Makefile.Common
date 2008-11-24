@@ -58,15 +58,50 @@ DEFINES = \
 
 
 SOURCES = \
-	buffer.c builtins.c \
-	command.c compile.c execmac.c execunix.c execvms.c expand.c \
-	filent.c fileos2.c fileunix.c filevms.c glob.c hash.c hcache.c \
-	headers.c jam.c jambase-j.c jamgram.c lists.c make.c make1.c \
-	md5c.c mempool.c newstr.c option.c parse.c pathmac.c pathunix.c \
-	pathvms.c progress.c regexp.c \
-	rules.c scan.c search.c timestamp.c tmpunix.c variable.c \
-	w32_getreg.c w32_shortname.c \
-	fileglob.cpp FileGlobBase.cpp luasupport.c luagsub.c
+	buffer.c \
+	builtins.c \
+	command.c \
+	compile.c \
+	execmac.c \
+	execunix.c \
+	execvms.c \
+	expand.c \
+	filent.c \
+	fileos2.c \
+	fileunix.c \
+	filevms.c \
+	glob.c \
+	hash.c \
+	hcache.c \
+	headers.c \
+	jam.c \
+	jambase-j.c \
+	jamgram.c \
+	lists.c \
+	luasupport.c \
+	luagsub.c \
+	make.c \
+	make1.c \
+	md5c.c \
+	mempool.c \
+	newstr.c \
+	option.c \
+	parse.c \
+	pathmac.c \
+	pathunix.c \
+	pathvms.c \
+	progress.c \
+	regexp.c \
+	rules.c \
+	scan.c \
+	search.c \
+	timestamp.c \
+	tmpunix.c \
+	variable.c \
+	w32_getreg.c \
+	w32_shortname.c \
+	fileglob.cpp \
+	FileGlobBase.cpp
 
 all: $(EXENAME)
 	$(EXENAME) -f../bin/Jambase.jam -sCONFIG=release
