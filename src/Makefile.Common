@@ -66,6 +66,7 @@ SOURCES = \
 	execunix.c \
 	execvms.c \
 	expand.c \
+	filemac.c \
 	filent.c \
 	fileos2.c \
 	fileunix.c \
