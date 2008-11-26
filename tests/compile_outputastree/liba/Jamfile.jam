@@ -1,4 +1,5 @@
-ProjectSubDir TOP liba : : liba ;
+SubDir TOP liba : : liba ;
+ProjectSubDir liba ;
 
 SRCS =
 		treea/treeb/deepfile.cpp

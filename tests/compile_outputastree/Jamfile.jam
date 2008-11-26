@@ -1,13 +1,3 @@
 SubDir TOP ;
 
-CppCompileOptions outputastree ;
-
-rule ProjectSubDir TOKENS : SUBNAME : PROJECT_NAME
-{
-	SubDir $(<) : $(>) ;
-	LOCATE_TARGET = $(SUBDIR)/obj/$(PLATFORM)/$(CONFIG) ;
-	OutputPath $(PROJECT_NAME) : $(SUBDIR)/lib/$(PLATFORM)/$(CONFIG) ;
-	OutputPostfix $(PROJECT_NAME) : ;
-}
-
 SubInclude TOP liba ;
