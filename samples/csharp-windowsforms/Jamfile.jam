@@ -1,0 +1,151 @@
+if ! $(TARGETINFO_LOCATE)
+{
+
+CSC = "$(windir)/Microsoft.NET/Framework/v3.5/Csc.exe" ;
+CSCFLAGS.* on * += /noconfig /nowarn:1701,1702 /errorreport:prompt /warn:4 /filealign:512 ;
+CSCFLAGS.debug on * += /define:DEBUG;TRACE /debug+ /debug:full /optimize- ;
+REFERENCEPATHS.* on * +=
+		"C:/Program Files/Reference Assemblies/Microsoft/Framework/v3.5"
+		C:/Windows/Microsoft.NET/Framework/v2.0.50727
+;
+
+rule CSharpApplication TARGET : SOURCES : OPTIONS
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+
+	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
+	local _t = [ _retrieveOutputName $(TARGET) : SUFEXE ] ;
+	_t = $(_t:G=$(TARGET)) ;
+
+	local _s = @($(SOURCES):G=$(TARGET)) ;
+	SEARCH on $(_s) = $(SEARCH_SOURCE) ;
+
+	Depends all : $(TARGET) ;
+	Depends $(TARGET) : $(_t) ;
+	NotFile $(TARGET) ;
+	Depends $(_t) : $(_s) ;
+	MakeLocate $(_t) : $(outputPath) ;
+
+	Depends clean : clean:$(TARGET) ;
+	NotFile clean:$(TARGET) ;
+	Always clean:$(TARGET) ;
+	Clean clean:$(TARGET) : $(_t) $(_t:S=.pdb) ;
+
+	local ALL_TYPES = $(CONFIG) * ;
+
+	local _flags ;
+
+	local REFERENCEPATHS ;
+	on $(TARGET) REFERENCEPATHS += $(REFERENCEPATHS.$(ALL_TYPES)) ;
+	on * REFERENCEPATHS += $(REFERENCEPATHS.$(ALL_TYPES)) ;
+
+	local CSCDEFINES ;
+	on * CSCDEFINES += $(CSCDEFINES.$(ALL_TYPES)) ;
+	on $(TARGET) CSCDEFINES += $(CSCDEFINES.$(ALL_TYPES)) ;
+	_flags += /define:$(CSCDEFINES) ;
+
+	local CSCFLAGS ;
+	on * CSCFLAGS += $(CSCFLAGS.$(ALL_TYPES)) ;
+	on $(TARGET) CSCFLAGS += $(CSCFLAGS.$(ALL_TYPES)) ;
+	_flags += $(CSCFLAGS) ;
+
+	local needassemblies ;
+	on $(TARGET) needassemblies += $(NEEDASSEMBLIES.$(ALL_TYPES)) ;
+	on * needassemblies += $(NEEDASSEMBLIES.$(ALL_TYPES)) ;
+	SEARCH on $(needassemblies) = $(REFERENCEPATHS) ;
+	_flags += /reference:\"$(needassemblies:T)\" ;
+
+	MFLAGS on $(_t) = $(_flags) /target:winexe ;
+	UseCommandLine $(_t) : $(_flags) ;
+
+	Csc $(_t) : $(_s) ;
+}
+
+actions Csc
+{
+	$(CSC) $(MFLAGS) /out:$(1) $(2:\\)
+}
+
+} else {  # $(TARGETINFO_LOCATE)
+
+rule CSharpApplication TARGET : SOURCES : OPTIONS
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	Workspace $(TARGET) : $(TARGET) : all ;
+
+	DumpProjectInfo $(TARGET) : $(SOURCES) : app ;
+}
+
+}
+
+
+rule CscDefines TARGET : DEFINES : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_CONFIG ?= * ;
+	CSCDEFINES.$(THE_CONFIG) on $(TARGET) += $(DEFINES) ;
+}
+
+
+rule CscFlags TARGET : FLAGS : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_CONFIG ?= * ;
+	CSCFLAGS.$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
+}
+
+
+rule ReferenceAssemblies TARGET : ASSEMBLIES : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_CONFIG ?= * ;
+
+	ASSEMBLIES = $(ASSEMBLIES:G=$(TARGET)) ;
+	NEEDASSEMBLIES.$(THE_CONFIG) on $(TARGET) += $(ASSEMBLIES) ;
+}
+
+
+rule ReferencePaths TARGETS : PATHS : THE_CONFIG
+{
+	THE_CONFIG ?= * ;
+	REFERENCEPATHS.$(THE_CONFIG) on $(TARGETS) += $(PATHS:R=$(SUBDIR)) ;
+}
+
+
+
+
+PROPERTIES_SRCS =
+		Properties/AssemblyInfo.cs
+		Properties/Resources.Designer.cs
+		Properties/Settings.Designer.cs
+;
+
+
+SRCS =
+		Form1.cs
+		Form1.Designer.cs
+		Program.cs
+		$(PROPERTIES_SRCS)
+;
+
+
+SourceGroup WindowsFormsApplication : Properties : $(PROPERTIES_SRCS) ;
+
+
+CscDefines WindowsFormsApplication : OUCH ;
+
+
+ReferenceAssemblies WindowsFormsApplication :
+		System.Core.dll
+		System.Data.DataSetExtensions.dll
+		System.Data.dll
+		System.Deployment.dll
+		System.dll
+		System.Drawing.dll
+		System.Windows.Forms.dll
+		System.Xml.dll
+		System.Xml.Linq.dll
+;
+
+
+CSharpApplication WindowsFormsApplication : $(SRCS) ;
