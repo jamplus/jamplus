@@ -198,8 +198,7 @@ file_time(
  */
 
 int
-file_writeable( filename )
-char	*filename;
+file_writeable( const char* filename )
 {
     int fd;
 
@@ -560,7 +559,7 @@ int copyfile(const char *dst, const char *src, MD5SUM* md5sum)
     MD5_CTX context;
     size_t size = 0, sizeout = 0;
     FILE *fsrc = NULL, *fdst = NULL;
-    char block[1<<16];
+    unsigned char block[1<<16];
 
     /* printf("copy %s->%s\n", src, dst); */
 
@@ -645,16 +644,16 @@ const char *md5tostring(MD5SUM sum)
 
     ch = val>>4;
     if (ch >= 0xa) {
-      *pbuf++ = ch-0xa+'a';
+      *pbuf++ = (char)(ch-0xa+'a');
     } else {
-      *pbuf++ = ch+'0';
+      *pbuf++ = (char)(ch+'0');
     }
 
     ch = val&15;
     if (ch >= 0xa) {
-      *pbuf++ = ch-0xa+'a';
+      *pbuf++ = (char)(ch-0xa+'a');
     } else {
-      *pbuf++ = ch+'0';
+      *pbuf++ = (char)(ch+'0');
     }
   }
   *pbuf++ = 0;

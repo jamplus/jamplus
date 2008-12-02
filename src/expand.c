@@ -482,7 +482,6 @@ var_expand(
 #ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT
 		if ( edits.includes_excludes ) {
 		    LIST *newl = L0;
-		    LIST *comparel = L0;
 
 		    LIST *origl = l;
 
@@ -773,12 +772,12 @@ var_edit_shift(
 	if( edits->upshift )
 	{
 	    for( ; *out; ++out )
-		*out = toupper( *out );
+		*out = (char)toupper( *out );
 	}
 	else if( edits->downshift )
 	{
 	    for( ; *out; ++out )
-		*out = tolower( *out );
+		*out = (char)tolower( *out );
 	}
 }
 

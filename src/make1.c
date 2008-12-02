@@ -840,7 +840,7 @@ make1d(
 
 	/* Free this command and call make1c() to move onto next command. */
 
-	t->status = status;
+	t->status = (char)status;
 	t->cmds = (char *)cmd_next( cmd );
 
 	cmd_free( cmd );
@@ -1028,7 +1028,7 @@ make1cmds( ACTIONS *a0 )
 		    for( ; targets; targets = list_next(targets) )
 		    {
 			TARGET *t = bindtarget(targets->string);
-			TARGET *s = sources!=NULL ? bindtarget(sources->string) : NULL;
+//			TARGET *s = sources!=NULL ? bindtarget(sources->string) : NULL;
 			TARGETS *c;
 			TARGET *outt;
 			LIST *filecache = 0;
@@ -1057,7 +1057,7 @@ make1cmds( ACTIONS *a0 )
 			    MD5Init( &context );
 
 			    /* add the path of the file to the sum - it is significant because one command can create more than one file */
-			    MD5Update( &context, t->name, strlen( t->name ) );
+			    MD5Update( &context, (unsigned char*)t->name, strlen( t->name ) );
 
 			    /* add in the COMMANDLINE */
 			    if ( t->flags & T_FLAG_USECOMMANDLINE )
@@ -1070,7 +1070,7 @@ make1cmds( ACTIONS *a0 )
 					LIST *list;
 					for ( list = vars->value; list; list = list->next )
 					{
-					    MD5Update( &context, list->string, strlen( list->string ) );
+					    MD5Update( &context, (unsigned char*)list->string, strlen( list->string ) );
 					    if( DEBUG_MD5HASH )
 						printf( "\t\tCOMMANDLINE: %s\n", list->string );
 					}
@@ -1093,7 +1093,7 @@ make1cmds( ACTIONS *a0 )
 				make0calcmd5sum( c->target, 1 );
 				if ( c->target->buildmd5sum_calculated )
 				{
-				    MD5Update( &context, c->target->name, strlen( c->target->name ) );
+				    MD5Update( &context, (unsigned char*)c->target->name, strlen( c->target->name ) );
 				    MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
 				}
 			    }
@@ -1172,7 +1172,7 @@ make1cmds( ACTIONS *a0 )
 		list_free( nt );
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
 		if (DEBUG_MAKE1) {
-		    const char* desc;
+		    const char* desc = 0;
 		    if ((rule->flags & (RULE_UPDATED | RULE_EXISTING))
 			== (RULE_UPDATED | RULE_EXISTING)) {
 			desc = "updated/existing";

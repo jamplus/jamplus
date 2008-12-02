@@ -262,7 +262,7 @@ builtin_depends(
 	    }
 
 #ifdef OPT_BUILTIN_NEEDS_EXT
-	    t->depends = targetlist( t->depends, sources, parse->num==2 );
+	    t->depends = targetlist( t->depends, sources, (char)(parse->num==2) );
 #else
 	    t->depends = targetlist( t->depends, sources );
 #endif
@@ -691,13 +691,13 @@ builtin_md5(
 	    }
 	    l = lol_get(args, i);
 	    if (l) {
-		MD5Update(&context, l->string, strlen(l->string));
+		MD5Update(&context, (unsigned char*)l->string, strlen(l->string));
 		for (l = list_next(l); l; l = list_next(l)) {
 		    /* separate list items with 1 NUL character.  This
 		     * guarantees that [ MD5 a b ] is different from [
 		     * MD5 ab ] */
 		    MD5Update(&context, item_sep, sizeof(item_sep));
-		    MD5Update(&context, l->string, strlen(l->string));
+		    MD5Update(&context, (unsigned char*)l->string, strlen(l->string));
 		}
 	    }
 	}
@@ -705,11 +705,11 @@ builtin_md5(
 	MD5Final(digest, &context);
 	p = digest_string;
 	for (i = 0, p = digest_string; i < 16; i++, p += 2) {
-	    sprintf(p, "%02x", digest[i]);
+	    sprintf((char*)p, "%02x", digest[i]);
 	}
 	*p = 0;
 
-	result = list_new(L0, digest_string, 0);
+	result = list_new(L0, (const char*)digest_string, 0);
 
 	return result;
 }
@@ -769,11 +769,11 @@ builtin_md5file(
 	MD5Final(digest, &context);
 	p = digest_string;
 	for (i = 0, p = digest_string; i < 16; i++, p += 2) {
-	    sprintf(p, "%02x", digest[i]);
+	    sprintf((char*)p, "%02x", digest[i]);
 	}
 	*p = 0;
 
-	result = list_new(L0, digest_string, 0);
+	result = list_new(L0, (const char*)digest_string, 0);
 
 	return result;
 }

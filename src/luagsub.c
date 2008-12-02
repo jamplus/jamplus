@@ -344,7 +344,6 @@ static void push_onecapture (MatchState *ms, int i, const char *s,
     if (l == CAP_UNFINISHED) gsub_error("unfinished capture");
 	if (l == CAP_POSITION) {
       // lua_pushinteger(ms->L, ms->capture[i].init - ms->src_init + 1);
-	  int hi = 5;
 	  assert(0);
 	} else
       buffer_addstring(ms->buff, ms->capture[i].init, l);

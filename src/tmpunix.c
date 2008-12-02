@@ -9,10 +9,10 @@
 
 static int do_newtmp(char** name, const char* ext)
 {
-    int h;
+    int h = 0;
     int i;
     int flags;
-    int extlen;
+    int extlen = 0;
 
     if (ext) extlen = strlen(ext);
 
@@ -98,7 +98,7 @@ void tmp_release(TMPFILE* f)
 
 int tmp_write(TMPFILE* f, const char* p, int count)
 {
-    return fwrite(p, 1, count, f->file) == count;
+    return fwrite(p, 1, count, f->file) == (size_t)count;
 }
 
 int tmp_flush(TMPFILE* f)

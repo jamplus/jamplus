@@ -176,7 +176,7 @@ static LIST *headers1helper(
 
 		    if ( l > 0 )
 		    {
-			do *p++ = tolower( *target++ );
+			do *p++ = (char)tolower( *target++ );
 			while( --l );
 		    }
 

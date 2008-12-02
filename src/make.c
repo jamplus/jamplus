@@ -364,10 +364,10 @@ int  md5matchescommandline( TARGET *t )
 	    MD5Init( &context );
 	    
 	    for ( list = vars->value; list; list = list->next )
-		MD5Update( &context, list->string, strlen( list->string ) );
+		MD5Update( &context, (unsigned char*)list->string, strlen( list->string ) );
 
 	    MD5Final( t->rulemd5sum, &context );
-	    t->rulemd5sumclean = hcache_getrulemd5sum( t );
+	    t->rulemd5sumclean = (char)hcache_getrulemd5sum( t );
 	    return t->rulemd5sumclean;
 	}
     }
@@ -853,7 +853,7 @@ make0(
 
 	t->time = max( t->time, last );
 	t->leaf = leaf ? leaf : t->time ;
-	t->fate = fate;
+	t->fate = (char)fate;
 
 	/*
 	 * Step 5: sort dependents by their update time.
@@ -1067,7 +1067,7 @@ void make0calcmd5sum( TARGET *t, int source )
     MD5Init( &context );
 
     /* add the path of the file to the sum - it is significant because one command can create more than one file */
-    MD5Update( &context, t->name, strlen( t->name ) );
+    MD5Update( &context, (unsigned char*)t->name, strlen( t->name ) );
 
     if( DEBUG_MD5HASH )
 	printf( "\t\t%s\n", t->name );
@@ -1092,7 +1092,7 @@ void make0calcmd5sum( TARGET *t, int source )
 		LIST *list;
 		for ( list = vars->value; list; list = list->next )
 		{
-		    MD5Update( &context, list->string, strlen( list->string ) );
+		    MD5Update( &context, (unsigned char*)list->string, strlen( list->string ) );
 		    if( DEBUG_MD5HASH )
 			printf( "\t\tCOMMANDLINE: %s\n", list->string );
 		}
@@ -1115,7 +1115,7 @@ void make0calcmd5sum( TARGET *t, int source )
     if ( t->includes )
     {
 	const char* includesStr = "#includes";
-	MD5Update( &context, includesStr, strlen( includesStr ) );
+	MD5Update( &context, (unsigned char*)includesStr, strlen( includesStr ) );
 
 	if( DEBUG_MD5HASH )
 	    printf( "\t\t#includes:\n" );
@@ -1138,7 +1138,7 @@ void make0calcmd5sum( TARGET *t, int source )
 	{
 	    if( DEBUG_MD5HASH )
 		printf( "\t\tdepends: %s %s\n", c->target->name, md5tostring( c->target->buildmd5sum ) );
-	    MD5Update( &context, c->target->name, strlen( c->target->name ) );
+	    MD5Update( &context, (unsigned char*)c->target->name, strlen( c->target->name ) );
 	    MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
 	}
     }

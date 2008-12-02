@@ -47,7 +47,6 @@ cmd_new(
 	int	maxline )
 {
 	BUFFER buff;
-	int pos = -1;
 	CMD *cmd = (CMD *)malloc( sizeof( CMD ) );
 
 	cmd->rule = rule;
@@ -89,7 +88,7 @@ cmd_new(
 	}
 	else
 #endif
-	if (buffer_pos(&buff) < (size_t)maxline)
+	if (buffer_pos(&buff) < maxline)
 	{
 	    buffer_addstring( &cmd->commandbuff, buffer_ptr( &buff ), buffer_pos( &buff ) );
 	    buffer_free(&buff);

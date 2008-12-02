@@ -11,35 +11,35 @@
 const char*
 w32_shortname(LIST* pathlist)
 {
-	LIST* savepathlist = pathlist;
-	size_t buffer_size = 0;
-	char* temp;
-	const char* retval;
+    LIST* savepathlist = pathlist;
+    size_t buffer_size = 0;
+    char* temp;
+    const char* retval = 0;
     for ( ; pathlist ; pathlist = list_next(pathlist)) {
-        const char* text = pathlist->string;
-		buffer_size += strlen(text) + 1;
-	}
-	buffer_size++;
-	{
-		size_t retlen;
-		size_t length;
+	const char* text = pathlist->string;
+	buffer_size += strlen(text) + 1;
+    }
+    buffer_size++;
+    {
+	size_t retlen;
+	size_t length;
 
-		temp = malloc(buffer_size);
-		temp[0] = 0;
-		pathlist = savepathlist;
-		
-	    for ( ; pathlist ; pathlist = list_next(pathlist)) {
-			strcat(temp, pathlist->string);
-			if (list_next(pathlist))
-				strcat(temp, " ");
-		}
-		length = strlen(temp);
-		retlen = GetShortPathName(temp, temp, (DWORD)length);
-		if (retlen != 0 && retlen != length)
-			retval = newstr(temp);
-		free(temp);
+	temp = malloc(buffer_size);
+	temp[0] = 0;
+	pathlist = savepathlist;
+
+	for ( ; pathlist ; pathlist = list_next(pathlist)) {
+	    strcat(temp, pathlist->string);
+	    if (list_next(pathlist))
+		strcat(temp, " ");
 	}
-	return retval;
+	length = strlen(temp);
+	retlen = GetShortPathName(temp, temp, (DWORD)length);
+	if (retlen != 0 && retlen != length)
+	    retval = newstr(temp);
+	free(temp);
+    }
+    return retval;
 }
 
 #endif

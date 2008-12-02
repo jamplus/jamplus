@@ -173,7 +173,6 @@ execlua(
 {
 	int pid;
 	int slot;
-	int quote = 0;
 
 	/* Find a slot in the running commands table for this one. */
 
@@ -432,7 +431,7 @@ execcmd(
 # ifdef USE_EXECNT
 #ifdef OPT_SERIAL_OUTPUT_EXT
 	{
-	    int	out, err, fd, bad_spawn = 0, spawn_err;
+	    int	out, err, fd, bad_spawn = 0, spawn_err = -1;
 
 	    out = _dup (1);
 	    err = _dup (2);
@@ -667,7 +666,7 @@ my_wait( int *status )
 			continue;
 		    }
 #endif
-		    TerminateProcess( (HANDLE)cmdtab[i].pid, -1 );
+		    TerminateProcess( (HANDLE)cmdtab[i].pid, (UINT)-1 );
 		}
 	    }
 	}

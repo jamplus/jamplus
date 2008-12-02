@@ -184,7 +184,7 @@ read_string( BUFFER* buff )
 	if( ch == '#' ) /* Quote */
 	    filename[ i++ ] = buffer_getchar( buff );
 	else
-	    filename[ i++ ] = ch;
+	    filename[ i++ ] = (char)ch;
 	ch = buffer_getchar( buff );
     }
 
@@ -218,7 +218,7 @@ void read_md5sum( BUFFER *buff, MD5SUM sum )
       break;
     }
     if ( i&1 ) {
-      sum[i/2] = val;
+      sum[i/2] = (char)val;
       val = 0;
     }
     i++;
@@ -249,7 +249,7 @@ int read_md5sum_string( const char* str, MD5SUM sum)
       break;
     }
     if ( i&1 ) {
-      sum[i/2] = val;
+      sum[i/2] = (char)val;
       val = 0;
     }
     i++;
@@ -263,7 +263,7 @@ int read_md5sum_string( const char* str, MD5SUM sum)
 static int
 read_int( BUFFER *buff )
 {
-    int	 ch, i = 0;
+    int	 ch;
   //  char num[ 30 ];
     int value = 0;
 
@@ -613,7 +613,7 @@ hcache( TARGET *t, LIST *hdrscan )
 # ifdef DOWNSHIFT_PATHS
     p = path;
 
-    do *p++ = tolower( *target );
+    do *p++ = (char)tolower( *target );
     while( *target++ );
 
     target = path;
@@ -691,7 +691,6 @@ hcache( TARGET *t, LIST *hdrscan )
 	LIST *hdrfilter = var_get( "HDRFILTER" );
 	if ( hdrfilter )
 	{
-	    LIST *oldl = l;
 	    LOL lol;
 	    lol_init( &lol );
 	    lol_add( &lol, list_new( L0, t->name, 1 ) );
@@ -758,7 +757,7 @@ void getcachedmd5sum( TARGET *t, int source )
 # ifdef DOWNSHIFT_PATHS
     p = path;
 
-    do *p++ = tolower( *target );
+    do *p++ = (char)tolower( *target );
     while( *target++ );
 
     target = path;
@@ -829,7 +828,7 @@ void getcachedmd5sum( TARGET *t, int source )
     c->mtime = t->time;
     c->age = 0;
     memcpy(&t->contentmd5sum, &c->contentmd5sum, sizeof(t->contentmd5sum));
-    t->contentmd5sum_calculated = memcmp(md5sumempty, &t->contentmd5sum, sizeof(t->contentmd5sum)) != 0;
+    t->contentmd5sum_calculated = (char)(memcmp(md5sumempty, &t->contentmd5sum, sizeof(t->contentmd5sum)) != 0);
     memset(&t->buildmd5sum, 0, sizeof(t->buildmd5sum));
 }
 
@@ -839,7 +838,6 @@ void getcachedmd5sum( TARGET *t, int source )
 void setcachedmd5sum( TARGET *t )
 {
     HCACHEDATA cachedata, *c = &cachedata;
-    int  use_cache = 1;
     const char *target = t->boundname;
 # ifdef DOWNSHIFT_PATHS
     char path[ MAXJPATH ];
@@ -851,7 +849,7 @@ void setcachedmd5sum( TARGET *t )
 # ifdef DOWNSHIFT_PATHS
     p = path;
 
-    do *p++ = tolower( *target );
+    do *p++ = (char)tolower( *target );
     while( *target++ );
 
     target = path;
@@ -1223,7 +1221,7 @@ int hcache_getrulemd5sum( TARGET *t )
 # ifdef DOWNSHIFT_PATHS
     p = path;
 
-    do *p++ = tolower( *target );
+    do *p++ = (char)tolower( *target );
     while( *target++ );
 
     target = path;
@@ -1282,7 +1280,7 @@ void hcache_finalizerulemd5sum( TARGET *t )
 # ifdef DOWNSHIFT_PATHS
     p = path;
 
-    do *p++ = tolower( *target );
+    do *p++ = (char)tolower( *target );
     while( *target++ );
 
     target = path;

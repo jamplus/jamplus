@@ -6,8 +6,8 @@
 typedef struct _buffer {
   char *buffer;
   char static_buffer[1024];
-  size_t pos;
-  size_t buffsize;
+  int pos;
+  int buffsize;
 } BUFFER;
 
 #define buffer_init(buff) ((buff)->buffer = (char*)&(buff)->static_buffer, (buff)->pos = 0, (buff)->buffsize = 1024)
@@ -20,19 +20,19 @@ typedef struct _buffer {
 #define buffer_reset(buff) ((buff)->pos = 0)
 
 
-void buffer_openspacehelper(BUFFER *buff, size_t amount);
-void buffer_resize(BUFFER* buff, size_t size);
+void buffer_openspacehelper(BUFFER *buff, int amount);
+void buffer_resize(BUFFER* buff, int size);
 
 #define buffer_free(buff)	buffer_resize(buff, 0)
 
 #define buffer_openspace(buff, amount) \
-  if (((amount) + (buff)->pos) > (buff)->buffsize) \
+  if (((int)(amount) + (buff)->pos) > (buff)->buffsize) \
     buffer_openspacehelper((buff), (amount));
 
 #define buffer_addchar(buff, c) { buffer_openspace(buff, 1); (buff)->buffer[(buff)->pos] = (c); (buff)->pos++; }
-#define buffer_addstring(buff, str, len) { buffer_openspace(buff, len); memcpy((buff)->buffer + (buff)->pos, str, len); (buff)->pos += len; }
+#define buffer_addstring(buff, str, len) { buffer_openspace((buff), (len)); memcpy((buff)->buffer + (buff)->pos, str, (len)); (buff)->pos += (int)(len); }
 #define buffer_putchar(buff, c) (buff)->buffer[(buff)->pos] = (c)
-#define buffer_putstring(buff, str, len) { buffer_openspace(buff, len); memcpy((buff)->buffer + (buff)->pos, str, len); }
+#define buffer_putstring(buff, str, len) { buffer_openspace((buff), (len)); memcpy((buff)->buffer + (buff)->pos, str, (len)); }
 #define buffer_setpos(buff, newpos) (buff)->pos = newpos;
 #define buffer_deltapos(buff, delta) (buff)->pos += delta
 #define buffer_isempty(buff) ((buff)->pos == 0)
