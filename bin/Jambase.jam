@@ -2068,7 +2068,7 @@ rule CFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	CFLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
+	CCFLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
 }
 
 
@@ -2194,8 +2194,9 @@ rule ObjectCFlags TARGET : SOURCES : FLAGS : THE_CONFIG : THE_PLATFORM
 	local grist = $(TARGET) ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
-	CFLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(FLAGS) ;
+	local sources = $(SOURCES:I=\\.c$) ;
+	local objTargets = $(sources:S=$(SUFOBJ):G=$(grist)) ;
+	CCFLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(FLAGS) ;
 }
 
 
@@ -2205,7 +2206,8 @@ rule ObjectC++Flags TARGET : SOURCES : FLAGS : THE_CONFIG : THE_PLATFORM
 	local grist = $(TARGET) ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
+	local sources = $(SOURCES:I=\\.cpp$) ;
+	local objTargets = $(sources:S=$(SUFOBJ):G=$(grist)) ;
 	C++FLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(FLAGS) ;
 }
 
