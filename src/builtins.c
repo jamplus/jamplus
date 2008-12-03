@@ -527,7 +527,7 @@ builtin_subst(
 	{
 		BUFFER buff;
 		buffer_init( &buff );
-		str_gsub (&buff, liststring->string, pattern->string, repl->string, n);
+		str_gsub (&buff, liststring->string, pattern->string, repl ? repl->string : "", n);
 		result = list_new( result, buffer_ptr( &buff ), 0 );
 		buffer_free( &buff );
 	}
