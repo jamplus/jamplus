@@ -1,9 +1,19 @@
+if ! $(LIBA_INCLUDED)
+{
+
+LIBA_INCLUDED = true ;
+
 SubDir TOP liba : : liba ;
 ProjectSubDir liba ;
 
 SRCS =
+		rootfile.cpp
 		treea/treeb/deepfile.cpp
 		../outer/outer.cpp
 ;
 
 Library liba : $(SRCS) ;
+
+SubInclude TOP libb ;
+
+}

@@ -1,3 +1,4 @@
 SubDir TOP ;
 
 SubInclude TOP liba ;
+SubInclude TOP libb ;

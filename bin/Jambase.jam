@@ -1217,7 +1217,8 @@ rule MultiCppCompile TARGET : SOURCES
 		local _obj ;
 		if $(__MultiCppCompile_OutputAsTree) != 0 {
 			_obj = [ Subst $(_src:S=$(SUFOBJ)) : %.%. : __ ] ;
-			local _objdir = $(LOCATE_TARGET)/$(_obj:D) ;
+			_obj = [ Subst $(_obj) : \: : -- ] ;
+			local _objdir = $(_obj:DR=$(LOCATE_TARGET)) ;
 			MakeLocate $(_obj) : $(_objdir) ;
 			BINDING on $(_obj) = $(_obj:BS) ;
 			_postmflags = "/c \"/Fo$(_objdir:\\)\\\\\" \"/Fd$(LOCATE_TARGET:\\)\\$(_VCPDB).pdb\"" ;
@@ -1334,7 +1335,9 @@ rule MultiCppCompile TARGET : SOURCES
 		# for each source in this batch
 		local _obj ;
 		if $(__MultiCppCompile_OutputAsTree) != 0 {
-			objects += [ Subst $(_sources:S=$(SUFOBJ)) : %.%. : __ ] ;
+			local renamed = [ Subst $(_sources:S=$(SUFOBJ)) : %.%. : __ ] ;
+			renamed = [ Subst $(renamed) : \: : -- ] ;
+			objects += $(renamed) ;
 		} else {
 			objects += $(_sources:S=$(SUFOBJ):D=) ;
 		}

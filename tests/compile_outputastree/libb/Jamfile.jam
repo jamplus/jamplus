@@ -1,0 +1,21 @@
+if ! $(LIBB_INCLUDED)
+{
+
+LIBB_INCLUDED = true ;
+
+SubDir TOP libb : : libb ;
+ProjectSubDir libb ;
+
+SOURCE_EXTENSIONS ?= *.cpp *.c ;
+
+SRCS =
+		[ Glob $(SUBDIR) : $(SOURCE_EXTENSIONS) : 0 ]
+		onelevel/oneleveldeeper.cpp
+		../outerb/outer.cpp
+;
+
+Library libb : $(SRCS) ;
+
+SubInclude TOP liba ;
+
+}
