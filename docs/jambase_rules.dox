@@ -534,6 +534,23 @@ If using \c MkDir separately from \ref rule_MakeLocate, it is necessary to set d
 
 
 <hr>
+\section rule_NoWorkspace rule NoWorkspace WORKSPACE_NAME
+\addindex rule_NoWorkspace
+
+Workspaces are automatically generated for any executable processed while reading in the Jamfiles.  To prevent a workspace from automatically exporting, this rule is used.
+
+\param WORKSPACE_NAME The name of the new workspace to suppress the export of.
+
+\code
+	NoWorkspace lua ;
+\endcode
+
+
+
+
+
+
+<hr>
 \section rule_ObjectCFlags rule ObjectCFlags TARGET : SOURCES : FLAGS [: THE_CONFIG : THE_PLATFORM]
 \addindex rule_ObjectCFlags
 
@@ -951,12 +968,12 @@ A given Jamfile is only ever read in once, even if multiple \c SubInclude calls 
 
 
 <hr>
-\section rule_Workspace rule Workspace SOLUTION_NAME : TARGETS
+\section rule_Workspace rule Workspace WORKSPACE_NAME : TARGETS
 \addindex rule_Workspace
 
 Workspaces are automatically generated for any executable processed while reading in the Jamfiles.  To create additional workspaces, such as one that combines all executables into one workspace, the \c Workspace rule is used.
 
-\param SOLUTION_NAME The name of the new solution to generate.
+\param WORKSPACE_NAME The name of the new workspace to generate.
 \param TARGETS The list of targets representing the projects of the new workspace.
 
 \code

@@ -1278,28 +1278,30 @@ include $(jamPath)Jambase.jam ;
 	exporter.Initialize()
 
 	for _, workspace in pairs(Workspaces) do
-		local index = 1
-		while index <= #workspace.Projects do
-			local project = Projects[workspace.Projects[index]]
-			if not project then
-				print('* Project [' .. workspace.Projects[index] .. '] is in workspace [' .. workspace.Name .. '] but not defined.')
-				error()
-			end
-			if not project.CollectedForWorkspace then
-				project.CollectedForWorkspace = true
-				for projectName in ivalues(project.Libraries) do
-					if not list.find(workspace.Projects, projectName) then
-						workspace.Projects[#workspace.Projects + 1] = projectName
+		if workspace.Export == nil  or  workspace.Export == true then
+			local index = 1
+			while index <= #workspace.Projects do
+				local project = Projects[workspace.Projects[index]]
+				if not project then
+					print('* Project [' .. workspace.Projects[index] .. '] is in workspace [' .. workspace.Name .. '] but not defined.')
+					error()
+				end
+				if not project.CollectedForWorkspace then
+					project.CollectedForWorkspace = true
+					for projectName in ivalues(project.Libraries) do
+						if not list.find(workspace.Projects, projectName) then
+							workspace.Projects[#workspace.Projects + 1] = projectName
+						end
 					end
 				end
+				index = index + 1
 			end
-			index = index + 1
+
+			DumpWorkspace(workspace)
+
+			local workspaceExporter = exporter.WorkspaceExporter(workspace.Name, exporter.Options)
+			workspaceExporter:Write(destinationRootPath)
 		end
-
-		DumpWorkspace(workspace)
-
-		local workspaceExporter = exporter.WorkspaceExporter(workspace.Name, exporter.Options)
-		workspaceExporter:Write(destinationRootPath)
 	end
 
 	exporter.Shutdown()

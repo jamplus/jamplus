@@ -199,7 +199,13 @@ rule Project PROJECT_NAME : SOURCES
 }
 
 
-rule Workspace SOLUTION_NAME : TARGETS : OPTIONS
+rule NoWorkspace WORKSPACE_NAME
+{
+	Contents += "Workspaces['$(WORKSPACE_NAME)'].Export = false$(NEWLINE)" ;
+}
+
+
+rule Workspace WORKSPACE_NAME : TARGETS : OPTIONS
 {
 	Depends all : $(TARGETS) ;
 	Depends $(TARGETS) : $(TargetInfoFile) ;
@@ -210,17 +216,17 @@ rule Workspace SOLUTION_NAME : TARGETS : OPTIONS
 	}
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
-	local solutionInfo = "Workspaces['$(SOLUTION_NAME)']" ;
+	local solutionInfo = "Workspaces['$(WORKSPACE_NAME)']" ;
 
-	if ! [ on $(SOLUTION_NAME) Var first ]  ||  ( all in $(OPTIONS) )
+	if ! [ on $(WORKSPACE_NAME) Var first ]  ||  ( all in $(OPTIONS) )
 	{
-		Contents += "$(solutionInfo).Name = '$(SOLUTION_NAME)'
+		Contents += "$(solutionInfo).Name = '$(WORKSPACE_NAME)'
 $(solutionInfo).Path = '$(subdir)'
 $(solutionInfo).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'
 " ;
 		DumpProjectGroups $(solutionInfo) : $(TARGETS) ;
 
-		first on $(SOLUTION_NAME) = false ;
+		first on $(WORKSPACE_NAME) = false ;
 	}
 
 	local projectLines = "$(TAB)'$(TARGETS)',$(NEWLINE)" ;
