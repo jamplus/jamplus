@@ -387,6 +387,18 @@ If using <code>MkDir</code> separately from <a class="el" href="jambase_rules.ht
 <span class="preprocessor">    Depends sometarget : [ FGristDirectories $(TEMP)/stuff ] ;</span>
 </pre></div><p>
 <hr>
+ <h2><a class="anchor" name="rule_NoWorkspace">
+rule NoWorkspace WORKSPACE_NAME</a></h2>
+<p>
+Workspaces are automatically generated for any executable processed while reading in the Jamfiles. To prevent a workspace from automatically exporting, this rule is used.<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>WORKSPACE_NAME</em>&nbsp;</td><td>The name of the new workspace to suppress the export of.</td></tr>
+  </table>
+</dl>
+<div class="fragment"><pre class="fragment">        NoWorkspace lua ;
+</pre></div><p>
+<hr>
  <h2><a class="anchor" name="rule_ObjectCFlags">
 rule ObjectCFlags TARGET : SOURCES : FLAGS [: THE_CONFIG : THE_PLATFORM]</a></h2>
 <p>
@@ -682,12 +694,12 @@ A given Jamfile is only ever read in once, even if multiple <code>SubInclude</co
 </dl>
 <hr>
  <h2><a class="anchor" name="rule_Workspace">
-rule Workspace SOLUTION_NAME : TARGETS</a></h2>
+rule Workspace WORKSPACE_NAME : TARGETS</a></h2>
 <p>
 Workspaces are automatically generated for any executable processed while reading in the Jamfiles. To create additional workspaces, such as one that combines all executables into one workspace, the <code>Workspace</code> rule is used.<p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>SOLUTION_NAME</em>&nbsp;</td><td>The name of the new solution to generate. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>WORKSPACE_NAME</em>&nbsp;</td><td>The name of the new workspace to generate. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>TARGETS</em>&nbsp;</td><td>The list of targets representing the projects of the new workspace.</td></tr>
   </table>
 </dl>
@@ -695,7 +707,7 @@ Workspaces are automatically generated for any executable processed while readin
 </pre></div><p>
 <hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Tue Dec 2 23:28:09 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Wed Dec 3 00:14:23 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>
