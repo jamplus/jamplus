@@ -236,9 +236,15 @@ Compiles <code>SOURCES</code> and archives them into a library called <code>TARG
  <blockquote>  If <code>shared</code> is specified for <code>OPTIONS</code>, the following additional options are available:<p>
 <ul>
 <li>
-<code>windows</code> - Forces a GUI application. For Visual C++, the DLL is linked with <code>/SUBSYSTEM:WINDOWS</code>. </li>
-<li>
 <code>console</code> (default) - Builds a console application. For Visual C++, the DLL is linked with <code>/SUBSYSTEM:CONSOLE</code>. </li>
+<li>
+<code>nodefaults</code> - Avoid adding /SUBSYSTEM to the link flags. </li>
+<li>
+<code>noexportlib</code> - Don't write out an export library. </li>
+<li>
+<code>nomanifest</code> - Don't embed a manifest. </li>
+<li>
+<code>windows</code> - Forces a GUI application. For Visual C++, the DLL is linked with <code>/SUBSYSTEM:WINDOWS</code>. </li>
 </ul>
  </blockquote> <p>
 <div class="fragment"><pre class="fragment"><span class="preprocessor">    # Build a static library called mystaticlibrary from the sources</span>
@@ -689,7 +695,7 @@ Workspaces are automatically generated for any executable processed while readin
 </pre></div><p>
 <hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Tue Nov 18 20:27:35 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Tue Dec 2 23:28:09 2008 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>
