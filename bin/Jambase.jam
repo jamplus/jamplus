@@ -1721,7 +1721,7 @@ rule LibraryFromObjects TARGET : OBJECTS
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
 	local _s = $(OBJECTS:G=$(grist)) ;
-	local _l = $(TARGET:S=$(SUFLIB):G=$(TARGET)) ;
+	local _l = $(TARGET:G=$(TARGET))$(SUFLIB) ;
 	BINDING on $(_l) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
 
 	# library depends on its member objects
