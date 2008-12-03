@@ -317,7 +317,7 @@ Loads a Jam module from the <tt>bin/jammodules/</tt> directory.  When \c Include
 
 <hr>
 \section rule_Library rule Library TARGET : SOURCES : OPTIONS
-\addindex rule_Application
+\addindex rule_Library
 
 Compiles \c SOURCES and archives them into a library called \c TARGET.  Filenames with an <tt>.obj</tt> or <tt>.res</tt> are passed straight through to the linker.  Any file excluded from the build via \ref rule_ExcludeFromBuild is ignored.
 
@@ -335,8 +335,11 @@ Compiles \c SOURCES and archives them into a library called \c TARGET.  Filename
 If \c shared is specified for \c OPTIONS, the following additional options are available:
 
 <ul>
-  <li>\c windows - Forces a GUI application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
   <li>\c console (default) - Builds a console application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.</li>
+  <li>\c nodefaults - Avoid adding /SUBSYSTEM to the link flags.</li>
+  <li>\c noexportlib - Don't write out an export library.</li>
+  <li>\c nomanifest - Don't embed a manifest.</li>
+  <li>\c windows - Forces a GUI application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
 </ul>
 \htmlonly </blockquote> \endhtmlonly
 

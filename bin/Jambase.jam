@@ -1009,11 +1009,17 @@ if $(NT) && $(MSVCNT)
 	actions response Link
 	{
 	PATH=%PATH%;$(MSVCNT_PATH)
-	"$(LINK:\\)" /nologo $(LINKFLAGS) /out:$(<[1]) $(UNDEFS) @@($(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 	if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
 	if "%ERRORLEVEL%" == "1090650113" echo 1 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
 	"$(RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
-	"$(LINK:\\)" /nologo $(LINKFLAGS) /out:$(<[1]) $(UNDEFS) @@($(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	}
+
+	actions response LinkNoManifest
+	{
+	PATH=%PATH%;$(MSVCNT_PATH)
+	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 	}
 }
 
@@ -1795,7 +1801,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	local _t = [ _retrieveOutputName $(TARGET) : SUFSHAREDLIB ] ;
 	_t = $(_t:G=$(TARGET)) ;
 
-	if $(COMPILER) in vs2005 vs2008
+	if $(COMPILER) in vs2005 vs2008  &&  ! ( nomanifest in $(OPTIONS) )
 	{
 		_writeManifest $(TARGET) : $(_t) ;
 		LinkFlags $(TARGET) : /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
@@ -1857,10 +1863,12 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	if $(COMPILER) in vc6 vs2003 vs2005 vs2008
 	{
-		if windows in $(OPTIONS) {
-			LinkFlags $(TARGET) : /SUBSYSTEM:WINDOWS ;
-		} else {
-			LinkFlags $(TARGET) : /SUBSYSTEM:CONSOLE ;
+		if ! ( nodefaults in $(OPTIONS) ) {
+			if windows in $(OPTIONS) {
+				LinkFlags $(TARGET) : /SUBSYSTEM:WINDOWS ;
+			} else {
+				LinkFlags $(TARGET) : /SUBSYSTEM:CONSOLE ;
+			}
 		}
 		LinkFlags $(TARGET) : /DLL ;
 	}
@@ -1869,7 +1877,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		LinkFlags $(TARGET) : -shared ;
 	}
 
-	LINKFLAGS on $(_linkTargets) =
+	local linkFlags =
 		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
 		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : * : $(CONFIG) : $(PLATFORM) ] ]
 		[ _retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
@@ -1894,10 +1902,26 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	    Depends $(zap) : $(_t) ;
 
-		_linkManifest $(_linkTargets) ;
+		if ( nomanifest in $(OPTIONS) )
+		{
+			linkFlags -= /INCREMENTAL ;
+		}
+		else
+		{
+			_linkManifest $(_linkTargets) ;
+		}
 	}
 
-	Link $(_linkTargets) : $(_s) ;
+	LINKFLAGS on $(_linkTargets) = $(linkFlags) ;
+
+	if $(COMPILER) in vs2005 vs2008  &&  nomanifest in $(OPTIONS)
+	{
+		LinkNoManifest $(_linkTargets) : $(_s) ;
+	}
+	else
+	{
+		Link $(_linkTargets) : $(_s) ;
+	}
 
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
 }
