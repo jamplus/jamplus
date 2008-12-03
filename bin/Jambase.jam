@@ -2173,7 +2173,7 @@ rule LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 	local lib ;
 	for lib in $(LIBRARIES)
 	{
-		gristLibraries += $(lib:S=$(SUFLIB):G=$(lib)) ;
+		gristLibraries += $(lib:G=$(lib))$(SUFLIB) ;
 	}
 	NEEDLIBS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(gristLibraries) ;
 }
