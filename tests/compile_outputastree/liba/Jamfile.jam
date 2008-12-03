@@ -15,5 +15,6 @@ SRCS =
 Library liba : $(SRCS) ;
 
 SubInclude TOP libb ;
+SubInclude TOP libc ;
 
 }
