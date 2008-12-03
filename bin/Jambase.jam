@@ -1892,7 +1892,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	    MakeLocate $(zap) : $(outputPath) ;
 	    Clean clean:$(TARGET) : $(zap) ;
 
-	    Depends $(zap) : $(<) ;
+	    Depends $(zap) : $(_t) ;
 
 		_linkManifest $(_linkTargets) ;
 	}
