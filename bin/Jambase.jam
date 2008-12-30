@@ -1006,12 +1006,12 @@ if $(NT) && $(MSVCNT)
 		$(RM) "$(>:\\)"
 	}
 
-	actions response Link
+	actions response LinkDebug
 	{
 	PATH=%PATH%;$(MSVCNT_PATH)
 	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 	if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
-	if "%ERRORLEVEL%" == "1090650113" echo 1 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
+	if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
 	"$(RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
 	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 	}
@@ -1020,6 +1020,13 @@ if $(NT) && $(MSVCNT)
 	{
 	PATH=%PATH%;$(MSVCNT_PATH)
 	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	}
+
+	actions response Link
+	{
+	PATH=%PATH%;$(MSVCNT_PATH)
+	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	"$(MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
 	}
 }
 
@@ -1572,37 +1579,43 @@ actions quietly WriteFile
 	^^($(1)|$(CONTENTS))
 }
 
-rule _writeManifest TARGET : _t
+rule _writeManifest TARGET : _t : MANIFEST_TYPE
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
-	local tempEmbeddedManifest = @($(_t).embed.manifest:G=$(grist)) ;
-	MakeLocate $(tempEmbeddedManifest) : $(LOCATE_TARGET) ;
-	CONTENTS on $(tempEmbeddedManifest) =
+
+	if $(CONFIG) = debug
+	{
+		local tempEmbeddedManifest = @($(_t).embed.manifest:G=$(grist)) ;
+		MakeLocate $(tempEmbeddedManifest) : $(LOCATE_TARGET) ;
+		CONTENTS on $(tempEmbeddedManifest) =
 "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
 <assembly xmlns='urn:schemas-microsoft-com:asm.v1' manifestVersion='1.0'>
 </assembly>
 " ;
-	WriteFile $(tempEmbeddedManifest) ;
-	Clean clean:$(TARGET) : $(tempEmbeddedManifest) ;
+		WriteFile $(tempEmbeddedManifest) ;
+		Clean clean:$(TARGET) : $(tempEmbeddedManifest) ;
 
-	local tempEmbeddedRc = @($(_t).embed.rc:G=$(grist)) ;
-	Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
-	MakeLocate $(tempEmbeddedRc) : $(LOCATE_TARGET) ;
-	CONTENTS on $(tempEmbeddedRc) =
-		"1 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ \"$(LOCATE_TARGET)/$(_t:G=).embed.manifest\"" ;
-	WriteFile $(tempEmbeddedRc) ;
-	Clean clean:$(TARGET) : $(tempEmbeddedRc) ;
-	Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
+		local tempEmbeddedRc = @($(_t).embed.rc:G=$(grist)) ;
+		Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
+		MakeLocate $(tempEmbeddedRc) : $(LOCATE_TARGET) ;
+		CONTENTS on $(tempEmbeddedRc) =
+			"$(MANIFEST_TYPE) /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ \"$(LOCATE_TARGET)/$(_t:G=).embed.manifest\"" ;
+		WriteFile $(tempEmbeddedRc) ;
+		Clean clean:$(TARGET) : $(tempEmbeddedRc) ;
+		Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
 
-	local tempEmbeddedRes = [ ResourceCompiler $(TARGET) : $(tempEmbeddedRc) : quiet ] ;
-	_s += $(tempEmbeddedRes) ;
+		local tempEmbeddedRes = [ ResourceCompiler $(TARGET) : $(tempEmbeddedRc) : quiet ] ;
+		_s += $(tempEmbeddedRes) ;
 
-	local tempIntermediateManifest = @($(_t).intermediate.manifest:G=$(grist)) ;
-	MakeLocate $(tempIntermediateManifest) : $(LOCATE_TARGET) ;
-	Clean clean:$(TARGET) : $(tempIntermediateManifest) ;
+		local tempIntermediateManifest = @($(_t).intermediate.manifest:G=$(grist)) ;
+		MakeLocate $(tempIntermediateManifest) : $(LOCATE_TARGET) ;
+		Clean clean:$(TARGET) : $(tempIntermediateManifest) ;
 
-	Depends $(_t) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
+		Depends $(_t) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
+	}
+
+	MANIFEST_TYPE on $(_t) = $(MANIFEST_TYPE) ;
 }
 
 
@@ -1633,7 +1646,7 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 
 	if $(COMPILER) in vs2005 vs2008
 	{
-		_writeManifest $(TARGET) : $(_t) ;
+		_writeManifest $(TARGET) : $(_t) : 1 ;
 		LinkFlags $(TARGET) : /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 	}
 
@@ -1803,7 +1816,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	if $(COMPILER) in vs2005 vs2008  &&  ! ( nomanifest in $(OPTIONS) )
 	{
-		_writeManifest $(TARGET) : $(_t) ;
+		_writeManifest $(TARGET) : $(_t) : 2 ;
 		LinkFlags $(TARGET) : /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 	}
 
@@ -1914,14 +1927,21 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	LINKFLAGS on $(_linkTargets) = $(linkFlags) ;
 
-	if $(COMPILER) in vs2005 vs2008  &&  nomanifest in $(OPTIONS)
+	local linkRule = Link ;
+
+	if $(COMPILER) in vs2005 vs2008
 	{
-		LinkNoManifest $(_linkTargets) : $(_s) ;
+		if nomanifest in $(OPTIONS)
+		{
+			linkRule = LinkNoManifest ;
+		}
+		else if $(CONFIG) = debug
+		{
+			linkRule = LinkDebug ;
+		}
 	}
-	else
-	{
-		Link $(_linkTargets) : $(_s) ;
-	}
+
+	$(linkRule) $(_linkTargets) : $(_s) ;
 
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
 }
