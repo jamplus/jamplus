@@ -35,7 +35,7 @@ JAMBASEDATE = 2008.10.08 ;
 # Initialize variables
 #
 
-CONFIG ?= debug ;
+CONFIG ?= release ;
 
 VALID_CONFIGS ?= debug release ;
 VALID_PLATFORMS ?= win32 ;
