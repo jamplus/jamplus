@@ -1,0 +1,180 @@
+if ! $(TARGETINFO_LOCATE)
+{
+
+switch $(COMPILER)
+{
+	case vs2005 :
+		CSC = "$(windir)/Microsoft.NET/Framework/v2.0.50727/Csc.exe" ;
+		REFERENCEPATHS.* on * +=
+				"C:/Program Files/Reference Assemblies/Microsoft/Framework/v3.5"
+				$(windir)/Microsoft.NET/Framework/v2.0.50727
+		;
+
+	case vs2008 :
+		CSC = "$(windir)/Microsoft.NET/Framework/v3.5/Csc.exe" ;
+		REFERENCEPATHS.* on * +=
+				[ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Microsoft .NETFramework AssemblyFolders "Microsoft .NET Framework 3.5 Reference Assemblies" "" ]
+				$(windir)/Microsoft.NET/Framework/v2.0.50727
+		;
+}
+
+CSCFLAGS.* on * += /noconfig /nowarn:1701,1702 /errorreport:prompt /warn:4 /filealign:512 ;
+CSCFLAGS.debug on * += /define:DEBUG;TRACE /debug+ /debug:full /optimize- ;
+
+rule CSharpAssembly TARGET : SOURCES : OPTIONS
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+
+	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
+
+	local suffix = SUFEXE ;
+	if library in $(OPTIONS)
+	{
+		suffix = SUFSHAREDLIB ;
+	}
+	local _t = [ _retrieveOutputName $(TARGET) : $(suffix) ] ;
+	_t = $(_t:G=$(TARGET)) ;
+
+	local _s = $(SOURCES:I=\\.cs$:G=$(TARGET)) ;
+	SEARCH on $(_s) = $(SEARCH_SOURCE) ;
+
+	Depends all : $(TARGET) ;
+	Depends $(TARGET) : $(_t) ;
+	NotFile $(TARGET) ;
+	Depends $(_t) : $(_s) ;
+	MakeLocate $(_t) : $(outputPath) ;
+
+	Depends clean : clean:$(TARGET) ;
+	NotFile clean:$(TARGET) ;
+	Always clean:$(TARGET) ;
+	Clean clean:$(TARGET) : $(_t) $(_t:S=.pdb) ;
+
+	local ALL_TYPES = $(CONFIG) * ;
+
+	local _flags ;
+
+	local REFERENCEPATHS ;
+	on $(TARGET) REFERENCEPATHS += $(REFERENCEPATHS.$(ALL_TYPES)) ;
+	on * REFERENCEPATHS += $(REFERENCEPATHS.$(ALL_TYPES)) ;
+
+	local CSCDEFINES ;
+	on * CSCDEFINES += $(CSCDEFINES.$(ALL_TYPES)) ;
+	on $(TARGET) CSCDEFINES += $(CSCDEFINES.$(ALL_TYPES)) ;
+	_flags += /define:$(CSCDEFINES) ;
+
+	local CSCFLAGS ;
+	on * CSCFLAGS += $(CSCFLAGS.$(ALL_TYPES)) ;
+	on $(TARGET) CSCFLAGS += $(CSCFLAGS.$(ALL_TYPES)) ;
+	_flags += $(CSCFLAGS) ;
+
+	local needassemblies ;
+	on $(TARGET) needassemblies += $(NEEDASSEMBLIES.$(ALL_TYPES)) ;
+	on * needassemblies += $(NEEDASSEMBLIES.$(ALL_TYPES)) ;
+	SEARCH on $(needassemblies) = $(REFERENCEPATHS) ;
+	_flags += /reference:\"$(needassemblies:T)\" ;
+
+	if console in $(OPTIONS)
+	{
+		_flags += /target:exe ;
+	}
+	else if windows in $(OPTIONS)
+	{
+		_flags += /target:winexe ;
+	}
+	else if library in $(OPTIONS)
+	{
+		_flags += /target:library ;
+	}
+	else if module in $(OPTIONS)
+	{
+		_flags += /target:module ;
+	}
+	else
+	{
+		_flags += /target:exe ;
+	}
+
+	MFLAGS on $(_t) = $(_flags) ;
+	UseCommandLine $(_t) : $(_flags) ;
+
+	Csc $(_t) : $(_s) ;
+}
+
+
+rule CSharpApplication TARGET : SOURCES : OPTIONS
+{
+	if ! ( windows in $(OPTIONS) )  &&  ! ( console in $(OPTIONS) )
+	{
+		OPTIONS += console ;
+	}
+	CSharpAssembly $(TARGET) : $(SOURCES) : $(OPTIONS) ;
+}
+
+
+rule CSharpLibrary TARGET : SOURCES : OPTIONS
+{
+	CSharpAssembly $(TARGET) : $(SOURCES) : library $(OPTIONS) ;
+}
+
+
+actions Csc
+{
+	$(CSC) /nologo $(MFLAGS) /out:$(1) $(2:\\)
+}
+
+} else {  # $(TARGETINFO_LOCATE)
+
+rule CSharpApplication TARGET : SOURCES : OPTIONS
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	Workspace $(TARGET) : $(TARGET) : all ;
+
+	DumpProjectInfo $(TARGET) : $(SOURCES) : app ;
+}
+
+rule CSharpLibrary TARGET : SOURCES : OPTIONS
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	Workspace $(TARGET) : $(TARGET) : all ;
+
+	DumpProjectInfo $(TARGET) : $(SOURCES) : shared ;
+}
+
+}
+
+
+rule CscDefines TARGET : DEFINES : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_CONFIG ?= * ;
+	CSCDEFINES.$(THE_CONFIG) on $(TARGET) += $(DEFINES) ;
+}
+
+
+rule CscFlags TARGET : FLAGS : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_CONFIG ?= * ;
+	CSCFLAGS.$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
+}
+
+
+rule ReferenceAssemblies TARGET : ASSEMBLIES : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_CONFIG ?= * ;
+
+	ASSEMBLIES = $(ASSEMBLIES:G=$(TARGET)) ;
+	NEEDASSEMBLIES.$(THE_CONFIG) on $(TARGET) += $(ASSEMBLIES) ;
+}
+
+
+rule ReferencePaths TARGETS : PATHS : THE_CONFIG
+{
+	THE_CONFIG ?= * ;
+	REFERENCEPATHS.$(THE_CONFIG) on $(TARGETS) += $(PATHS:R=$(SUBDIR)) ;
+}
+
+
+
+
