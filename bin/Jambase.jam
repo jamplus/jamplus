@@ -1552,6 +1552,11 @@ rule _retrieveOutputName TARGET : SUFFIX_NAME : THE_CONFIG : THE_PLATFORM
 			OUTPUTPOSTFIX.*.$(THE_CONFIG)
 			OUTPUTPOSTFIX.$(THE_PLATFORM).*
 			OUTPUTPOSTFIX.*.* ] ;
+	presuffix ?= [ on * SearchVar
+			OUTPUTPOSTFIX.$(THE_PLATFORM).$(THE_CONFIG)
+			OUTPUTPOSTFIX.*.$(THE_CONFIG)
+			OUTPUTPOSTFIX.$(THE_PLATFORM).*
+			OUTPUTPOSTFIX.*.* ] ;
 	presuffix ?= .$(THE_CONFIG) ;
 	if $(presuffix) = *off*
 	{
