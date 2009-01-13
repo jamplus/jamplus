@@ -2149,6 +2149,17 @@ rule Defines TARGET : DEFINES : THE_CONFIG : THE_PLATFORM
 }
 
 
+rule DefFile TARGET : SOURCES
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	SOURCES = $(SOURCES:G=$(grist)) ;
+	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
+	Depends $(TARGET) : $(SOURCES) ;
+	LinkFlags $(TARGET) : /DEF:"$(SOURCES:T)" ;
+}
+
+
 rule ExcludeFromBuild TARGET : SOURCES
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
