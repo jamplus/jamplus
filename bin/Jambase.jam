@@ -1686,21 +1686,25 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 		}
 	}
 
-	LINKFLAGS on $(_t) =
+	local linkFlags =
 		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
 		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : * : $(CONFIG) : $(PLATFORM) ] ]
 		[ _retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
+	LINKFLAGS on $(_t) = $(linkFlags) ;
 
-	LINKLIBS on $(_t) =
+	local linkLibs =
 		[ _retrieveVar LINKLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
+	LINKLIBS on $(_t) = $(linkLibs) ;
 
-	local needlibs =
+	local needLibs =
 		[ _retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar NEEDLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
-	NEEDLIBS on $(_t) = $(needlibs) ;
-	Depends $(_t) : $(needlibs) ;
+	NEEDLIBS on $(_t) = $(needLibs) ;
+	Depends $(_t) : $(needLibs) ;
+
+	UseCommandLine $(_t) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
 	if $(MSVCNT)
 	{
@@ -1806,6 +1810,8 @@ rule LibraryFromObjects TARGET : OBJECTS
 
 	if $(CRELIB) { CreLib $(_l) : $(_s[1]) ; }
 
+	UseCommandLine $(_linkTargets) : $(_s) ;
+
 	Archive $(_l) : $(_s) ;
 
 	if $(RANLIB) { Ranlib $(_l) ; }
@@ -1905,15 +1911,16 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : * : $(CONFIG) : $(PLATFORM) ] ]
 		[ _retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
-	LINKLIBS on $(_linkTargets) =
+
+	local linkLibs =
 		[ _retrieveVar LINKLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
 
-	local needlibs =
+	local needLibs =
 		[ _retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar NEEDLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
-	NEEDLIBS on $(_linkTargets) = $(needlibs:S=$(SUFLIB)) ;
-	Depends $(_t) : $(needlibs) ;
+	NEEDLIBS on $(_linkTargets) = $(needLibs:S=$(SUFLIB)) ;
+	Depends $(_t) : $(needLibs) ;
 
 	if $(MSVCNT)
 	{
@@ -1936,6 +1943,9 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	}
 
 	LINKFLAGS on $(_linkTargets) = $(linkFlags) ;
+	LINKLIBS on $(_linkTargets) = $(linkLibs) ;
+
+	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
 	local linkRule = Link ;
 
