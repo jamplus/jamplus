@@ -620,6 +620,11 @@ rule SubDir
 			$(_top)-DOWN = $(SUBDIR_DOWN) ;
 			$(_top)-ROOT = $(SUBDIR_ROOT:E="") ;
 			$(_top) = [ FSubDirPath $(_top) ] ;
+			$(_top) = $($(_top):R=$(CWD)) ;
+
+			$(_top)-ROOT = $($(_top)) ;
+			$(_top)-UP = ;
+			$(_top)-DOWN = ;
 	    }
 
 	    # Set subdir vars for the inclusion of the Jamrules,
