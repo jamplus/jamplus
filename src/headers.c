@@ -297,7 +297,7 @@ headers1(
 	    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 	    {
 		d->re = regcomp( hdrscan->string );
-		hashenter( regexhash, (HASHDATA **)&d );
+		(void)hashenter( regexhash, (HASHDATA **)&d );
 	    }
 	    re[rec++] = d->re;
 	    hdrscan = list_next( hdrscan );

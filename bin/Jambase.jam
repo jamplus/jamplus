@@ -70,6 +70,10 @@ rule FindVisualStudio VERSION
 		case 9.0 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
 			MSVCNT = [ W32_GETREG $(key) ] ;
+			VS90COMNTOOLS = $(VS90COMNTOOLS:J=" ") ;
+			if ! $(MSVCNT) && $(VS90COMNTOOLS) {
+				MSVCNT = $(VS90COMNTOOLS) ;
+			}
 			if $(MSVCNT)
 			{
 				MSVCNT = $(MSVCNT)..\\..\\vc ;
@@ -79,6 +83,7 @@ rule FindVisualStudio VERSION
 
 				local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
 				MSSDK = [ W32_GETREG $(key) ] ;
+				MSSDK ?= $(MSVCNT) ;
 				MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
 				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
 				return vs2008 ;
@@ -87,6 +92,9 @@ rule FindVisualStudio VERSION
 		case 8.0 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
 			MSVCNT = [ W32_GETREG $(key) ] ;
+			if ! $(MSVCNT) && $(VS80COMNTOOLS) {
+				MSVCNT = $(VS80COMNTOOLS) ;
+			}
 			if $(MSVCNT)
 			{
 				MSVCNT = @($(MSVCNT)..\\..\\VC:R=$(MSVCNT)) ;
@@ -101,6 +109,9 @@ rule FindVisualStudio VERSION
 		case 7.1 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
 			MSVCNT = [ W32_GETREG $(key) ] ;
+			if ! $(MSVCNT) && $(VS71COMNTOOLS) {
+				MSVCNT = $(VS71COMNTOOLS) ;
+			}
 			if $(MSVCNT)
 			{
 				MSVCNT = $(MSVCNT)\\..\\..\\vc7 ;
@@ -116,6 +127,9 @@ rule FindVisualStudio VERSION
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft
 				VisualStudio $(VERSION) InstallDir ;
 			MSVCNT = [ W32_GETREG $(key) ] ;
+			if ! $(MSVCNT) && $(VS70COMNTOOLS) {
+				MSVCNT = $(VS70COMNTOOLS) ;
+			}
 			if $(MSVCNT)
 			{
 				MSVCNT = $(MSVCNT)\\..\\..\\vc7 ;
