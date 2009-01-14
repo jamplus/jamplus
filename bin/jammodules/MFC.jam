@@ -9,4 +9,6 @@ rule UseMFC TARGETS : OPTIONS
 
 	IncludeDirectories $(TARGETS) : "$(MSVCNT)/atlmfc/include" ;
 	LinkDirectories $(TARGETS) : "$(MSVCNT)/atlmfc/lib" ;
+
+	RcIncludeDirectories $(TARGETS) : "$(MSVCNT)/atlmfc/include" ;
 }
