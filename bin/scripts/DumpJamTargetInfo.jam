@@ -80,6 +80,7 @@ rule DumpProjectGroups prefix : TARGET
 
 rule SourceGroup TARGET : FOLDERNAME : SOURCES
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	SOURCEGROUP.$(FOLDERNAME) on $(TARGET) += $(SOURCES) ;
 	if ! $(FOLDERNAME) in [ on $(TARGET) Var SOURCEGROUPS ]
 	{
