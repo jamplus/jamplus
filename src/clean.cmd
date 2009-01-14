@@ -1,3 +1,3 @@
-del /s/q *.exe *.obj
-rmdir /s/q bin.ntx86
+del ..\bin\jam.exe
+rmdir /s/q obj
 rmdir /s/q bin.ntx86
