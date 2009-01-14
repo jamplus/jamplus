@@ -31,7 +31,7 @@ SubDir TOP *** ;
 				for _, childSourceGroup in ipairs(sourceGroup.Groups) do
 					filesText[#filesText + 1] = '\t\t$(' .. childSourceGroup.SrcsName .. ')\n'
 					sourceGroupsText[#sourceGroupsText + 1] =
-							"SourceGroup " .. Quote(childSourceGroup.FolderPath:gsub('/', '\\\\')) ..
+							"SourceGroup " .. Quote(target) .. " : " .. Quote(childSourceGroup.FolderPath:gsub('/', '\\\\')) ..
 									" : $(" .. childSourceGroup.SrcsName .. ") ;\n"
 				end
 			end
