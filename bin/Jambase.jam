@@ -2022,12 +2022,28 @@ rule ResourceCompiler PARENT : SOURCES : OPTIONS
 	Depends $(TARGETS) : $(SOURCES) ;
 	Clean clean:$(PARENT) : $(TARGETS) ;
 
-	HDRS on $(TARGETS) =
+	RCDEFINES on $(TARGETS) +=
+		[ on $(PARENT) Var RCDEFINES ]
+		[ on * Var RCDEFINES ]
+	;
+
+	RCFLAGS on $(TARGETS) +=
+		[ on $(PARENT) Var RCFLAGS ]
+		[ on * Var RCFLAGS ]
+	;
+
+	RCHDRS on $(TARGETS) +=
 		$(SEARCH_SOURCE)
-		[ _retrieveVar HDRS : $(PARENT) : $(CONFIG) : $(PLATFORM) ]
-		[ _retrieveVar HDRS : * : $(CONFIG) : $(PLATFORM) ]
+		[ on $(PARENT) Var RCHDRS ]
+		[ on * Var RCHDRS ]
 		$(SUBDIRHDRS)
 		$(STDHDRS)
+	;
+
+	UseCommandLine $(TARGETS) :
+			[ on $(TARGETS) Var RCDEFINES ]
+			[ on $(TARGETS) Var RCFLAGS ]
+			[ on $(TARGETS) Var RCHDRS ]
 	;
 
 	if quiet in $(OPTIONS)
@@ -2044,36 +2060,50 @@ rule ResourceCompiler PARENT : SOURCES : OPTIONS
 
 actions ResourceCompile
 {
-	SET INCLUDE=$(HDRS:\\J=;)
-	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(DEFINES) $(2)
+	SET INCLUDE=$(RCHDRS:\\J=;)
+	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(RCDEFINES) $(2)
 }
 
 actions quietly ResourceCompileQuiet
 {
-	SET INCLUDE=$(HDRS:\\J=;)
+	SET INCLUDE=$(RCHDRS:\\J=;)
 	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(DEFINES) $(2)
 }
 
-# for settings RCFLAGS
-rule RcFlags TARGET : RESOURCE_NAME : FLAGS
+# Set resource compiler options
+rule _RcOptions TARGET : VARIABLE : RESOURCE_NAME : OPTIONS
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
-	RCFLAGS on $(RESOURCE_NAME:S=.res:G=$(grist)) += $(FLAGS) ;
+
+	local target ;
+	if $(OPTIONS)
+	{
+		target = $(RESOURCE_NAME:S=.res:G=$(grist)) ;
+	}
+	else
+	{
+		OPTIONS = $(RESOURCE_NAME) ;
+		target = $(TARGET) ;
+	}
+
+	$(VARIABLE) on $(target) += $(OPTIONS) ;
+}
+
+
+rule RcFlags TARGET : RESOURCE_NAME : FLAGS
+{
+	_RcOptions $(TARGET) : RCFLAGS : $(RESOURCE_NAME) : $(FLAGS) ;
 }
 
 rule RcDefines TARGET : RESOURCE_NAME : DEFINES
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	local grist = $(TARGET) ;
-	DEFINES on $(RESOURCE_NAME:S=.res:G=$(grist)) += $(DEFINES) ;
+	_RcOptions $(TARGET) : RCDEFINES : $(RESOURCE_NAME) : $(DEFINES) ;
 }
 
 rule RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	local grist = $(TARGET) ;
-	HDRS on $(RESOURCE_NAME:S=.res:G=$(grist)) += $(HDRS) ;
+	_RcOptions $(TARGET) : RCHDRS : $(RESOURCE_NAME) : $(HDRS) ;
 }
 
 
