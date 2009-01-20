@@ -362,7 +362,7 @@ int  md5matchescommandline( TARGET *t )
 	    LIST *list;
 	    MD5_CTX context;
 	    MD5Init( &context );
-	    
+
 	    for ( list = vars->value; list; list = list->next )
 		MD5Update( &context, (unsigned char*)list->string, strlen( list->string ) );
 
@@ -601,11 +601,27 @@ make0(
             }
 #endif
 	    if( c->target->includes ) {
+#ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
+			/* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
+			TARGETS *n;
+			for ( n = c->target->includes->depends; n; n = n->next )
+			{
+				if( t != n->target )
+				{
+#ifdef OPT_BUILTIN_NEEDS_EXT
+					incs = targetentry( incs, n->target, 0 );
+#else /* !OPT_BUILTIN_NEEDS_EXT */
+					incs = targetentry( incs, n->target );
+#endif /* OPT_BUILTIN_NEEDS_EXT */
+				}
+			}
+#else /* !OPT_CIRCULAR_GENERATED_HEADER_FIX */
 #ifdef OPT_BUILTIN_NEEDS_EXT
 		incs = targetentry( incs, c->target->includes, 0 );
 #else
 		incs = targetentry( incs, c->target->includes );
-#endif
+#endif /* OPT_BUILTIN_NEEDS_EXT */
+#endif /* OPT_CIRCULAR_GENERATED_HEADER_FIX */
 #ifdef OPT_UPDATED_CHILD_FIX
 		/* See http://maillist.perforce.com/pipermail/jamming/2006-May/002676.html */
 		/* If the includes are newer than we are their original target

@@ -1,0 +1,8 @@
+This is $File: //guest/matt_armstrong/jam/bug/1/README $
+
+This directory contains a source tree that exhibits a bug present in
+jam 2.5rc3.
+
+Build with -j2 or higher to see the bug.  Jam goes ahead and builds
+sourceB.o before generated.h is finished building.
+
