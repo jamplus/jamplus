@@ -1162,11 +1162,15 @@ rule MultiCppCompile TARGET : SOURCES
 			case vs2008 : _VCPDB = vc90 ;
 		}
 
-		Clean clean:$(TARGET) : $(LOCATE_TARGET)/$(_VCPDB).pdb $(LOCATE_TARGET)/$(_VCPDB).idb ;
+		local vcidb = $(_VCPDB:G=$(grist):S=.idb) ;
+		_VCPDB = $(_VCPDB:G=$(grist):S=.pdb) ;
+		MakeLocate $(vcidb) $(_VCPDB) : $(LOCATE_TARGET) ;
+
+		Clean clean:$(TARGET) : $(_VCPDB) $(vcidb) ;
 
 		if $(__MultiCppCompile_OutputAsTree) = 0 {
 			local combinedLocateTarget = [ FDirName $(LOCATE_TARGET) ] ;
-			_postmflags = "/c \"/Fo$(combinedLocateTarget:\\)\\\\\" \"/Fd$(combinedLocateTarget:\\)\\$(_VCPDB).pdb\"" ;
+			_postmflags = "/c \"/Fo$(combinedLocateTarget:\\)\\\\\" \"/Fd$(_VCPDB:T)\"" ;
 		}
 	}
 
@@ -1253,7 +1257,7 @@ rule MultiCppCompile TARGET : SOURCES
 			local _objdir = $(_obj:DR=$(LOCATE_TARGET)) ;
 			MakeLocate $(_obj) : $(_objdir) ;
 			BINDING on $(_obj) = $(_obj:BS) ;
-			_postmflags = "/c \"/Fo$(_objdir:\\)\\\\\" \"/Fd$(LOCATE_TARGET:\\)\\$(_VCPDB).pdb\"" ;
+			_postmflags = "/c \"/Fo$(_objdir:\\)\\\\\" \"/Fd$(_VCPDB:T)\"" ;
 		} else {
 			_obj = $(_src:S=$(SUFOBJ):D=) ;
 		}
@@ -1396,7 +1400,7 @@ rule MultiCppCompile TARGET : SOURCES
 
 		MFLAGS on $(objects) = [ on $(_sources[1]) Var MFLAGS ] ;
 		if $(MSVCNT) {
-			SEMAPHORE on $(objects) = $(LOCATE_TARGET)/$(_VCPDB).pdb ;
+			SEMAPHORE on $(objects) = $(_VCPDB) ;
 		}
 		batched_C++ $(objects) : $(_sources) ;
 	}
