@@ -102,14 +102,11 @@ SOURCES = \
 	search.c \
 	timestamp.c \
 	tmpunix.c \
-	variable.c \
-#	w32_getreg.c \
-#	w32_shortname.c \
-	fileglob.cpp \
-	FileGlobBase.cpp
+	variable.c
 
 all: $(EXENAME)
 	$(EXENAME) -f../bin/Jambase.jam -sCONFIG=release
 
 $(EXENAME):
-	$(CC) $(TARGET) $(DEFINES) $(CFLAGS) $(SOURCES) $(LINKLIBS)
+	$(MKDIR_OBJ)
+	$(CC) $(TARGET) $(DEFINES) $(CFLAGS) $(SOURCES) $(EXTRA_SOURCES) $(LINKLIBS)
