@@ -96,8 +96,13 @@ typedef struct {
 	int	made;
 } COUNTS ;
 
+#ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
+static void make0( TARGET *t, TARGET *p, int epoch, int depth,
+		COUNTS *counts, int anyhow );
+#else
 static void make0( TARGET *t, TARGET *p, int depth,
 		COUNTS *counts, int anyhow );
+#endif
 
 static TARGETS *make0sort( TARGETS *c );
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
@@ -264,7 +269,11 @@ pass:
 	{
 	    TARGET *t = bindtarget( targets[i] );
 
+#ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
+	    make0( t, 0, i, 0, counts, anyhow );
+#else
 	    make0( t, 0, 0, counts, anyhow );
+#endif
 	}
 #ifdef OPT_GRAPH_DEBUG_EXT
 	if( DEBUG_GRAPH )
@@ -388,6 +397,9 @@ static void
 make0(
 	TARGET	*t,
 	TARGET  *p,		/* parent */
+#ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
+	int epoch,      /* top level invocation number for make0 */
+#endif
 	int	depth,		/* for display purposes */
 	COUNTS	*counts,/* for reporting */
 	int	anyhow      /* forcibly touch all (real) targets */
@@ -410,6 +422,12 @@ make0(
 	if( DEBUG_MAKEPROG )
 	    printf( "make\t--\t%s%s\n", spaces( depth ), t->name );
 
+#ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
+	if ( t->fate == T_FATE_INIT ) {
+		t->epoch = epoch;
+		t->depth = depth;
+	}
+#endif
 #ifdef OPT_MULTIPASS_EXT
 	if ( t->fate == T_FATE_INIT )
 	    t->fate = T_FATE_MAKING;
@@ -525,7 +543,11 @@ make0(
 	    /* which include each other alot. */
 
 	    if( c->target->fate == T_FATE_INIT )
+#ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
+		make0( c->target, ptime, epoch, depth + 1, counts, anyhow );
+#else
 		make0( c->target, ptime, depth + 1, counts, anyhow );
+#endif
 	    else if( c->target->fate == T_FATE_MAKING && !internal )
 		printf( "warning: %s depends on itself\n", c->target->name );
 #ifdef OPT_FIX_UPDATED
@@ -587,7 +609,11 @@ make0(
 	/* Step 3b: recursively make0() internal includes node */
 
 	if( t->includes )
+#ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
+	    make0( t->includes, p, epoch, depth + 1, counts, anyhow );
+#else
 	    make0( t->includes, p, depth + 1, counts, anyhow );
+#endif
 
 	/* Step 3c: add dependents' includes to our direct dependencies */
 
@@ -602,19 +628,37 @@ make0(
 #endif
 	    if( c->target->includes ) {
 #ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
-			/* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
-			TARGETS *n;
-			for ( n = c->target->includes->depends; n; n = n->next )
-			{
-				if( t != n->target )
+			if ( c->target->includes->epoch == epoch  &&  c->target->includes->depth <= depth ) {
+				/* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html and
+					  http://maillist.perforce.com/pipermail/jamming/2003-December/002253.html */
+				/*
+				 * Found a loop in the graph, break it by flattening the dependencies
+				 */
+				TARGETS *n;
+				for ( n = c->target->includes->depends; n; n = n->next )
 				{
+					if( t != n->target )
+					{
 #ifdef OPT_BUILTIN_NEEDS_EXT
-					incs = targetentry( incs, n->target, 0 );
+						incs = targetentry( incs, n->target, 0 );
 #else /* !OPT_BUILTIN_NEEDS_EXT */
-					incs = targetentry( incs, n->target );
+						incs = targetentry( incs, n->target );
 #endif /* OPT_BUILTIN_NEEDS_EXT */
+						if( n->target->fate == T_FATE_INIT )
+						{
+							/*
+							 * Found never visited dependent node, visit it before picking up fate and time.
+							 */
+							make0( n->target, c->target, epoch, c->target->includes->depth + 1, counts, anyhow );
+						}
+					}
 				}
 			}
+			else
+			{
+				incs = targetentry( incs, c->target->includes, 0 );
+			}
+
 #else /* !OPT_CIRCULAR_GENERATED_HEADER_FIX */
 #ifdef OPT_BUILTIN_NEEDS_EXT
 		incs = targetentry( incs, c->target->includes, 0 );

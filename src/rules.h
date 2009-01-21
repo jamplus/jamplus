@@ -182,6 +182,10 @@ struct _target {
 	char		filecache_use;
 	char		filecache_generate;
 #endif	
+#ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
+	int			epoch;
+	int			depth;
+#endif
 	char		fate;		/* make0()'s diagnosis */
 
 # define 	T_FATE_INIT	0	/* nothing done to target */
