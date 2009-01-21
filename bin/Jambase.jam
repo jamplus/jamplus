@@ -367,7 +367,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 	LINKFLAGS	?= ;
 	LINKLIBS	?= ;
 	LN			?= ln ;
-	MKDIR		?= mkdir ;
+	MKDIR		?= mkdir -p ;
 	MV			?= mv -f ;
 	RM			?= rm -f ;
 	RMDIR		?= $(RM) ;
