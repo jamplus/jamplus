@@ -6,7 +6,7 @@
  * This file is part of jam.
  *
  * License is hereby granted to use this software and distribute it
- * freely, as long as this copyright notice is retained and modifications 
+ * freely, as long as this copyright notice is retained and modifications
  * are clearly marked.
  *
  * ALL WARRANTIES ARE HEREBY DISCLAIMED.
@@ -21,11 +21,11 @@
  *
  * The top half of the code is structured such:
  *
- *                       jam 
- *                      / | \ 
+ *                       jam
+ *                      / | \
  *                 +---+  |  \
- *                /       |   \ 
- *         jamgram     option  \ 
+ *                /       |   \
+ *         jamgram     option  \
  *        /  |   \              \
  *       /   |    \              \
  *      /    |     \             |
@@ -70,7 +70,7 @@
  *	execvms.c - execute a shell script, ala VMS
  *	expand.c - expand a buffer, given variable values
  *	file*.c - scan directories and archives on *
- *	hash.c - simple in-memory hashing routines 
+ *	hash.c - simple in-memory hashing routines
  *	hcache.c - handle caching of #includes in source files
  *	headers.c - handle #includes in source files
  *	jambase.c - compilable copy of Jambase
@@ -82,11 +82,11 @@
  *	option.c - command line option processing
  *	parse.c - make and destroy parse trees as driven by the parser
  *	path*.c - manipulate file names on *
- *	hash.c - simple in-memory hashing routines 
+ *	hash.c - simple in-memory hashing routines
  *	regexp.c - Henry Spencer's regexp
  *	rules.c - access to RULEs, TARGETs, and ACTIONs
  *	scan.c - the jam yacc scanner
- *	search.c - find a target along $(SEARCH) or $(LOCATE) 
+ *	search.c - find a target along $(SEARCH) or $(LOCATE)
  *	timestamp.c - get the timestamp of a file or archive member
  *	variable.c - handle jam multi-element variables
  *
@@ -129,7 +129,11 @@
 #endif
 
 #ifdef OPT_VAR_CWD_EXT
+#if _MSC_VER
 #include <direct.h>
+#else
+#include <unistd.h>
+#endif
 #endif
 
 /* Macintosh is "special" */
@@ -173,7 +177,7 @@ struct globs globs = {
 static const char *othersyms[] = { OSMAJOR, OSMINOR, OSPLAT, JAMVERSYM,
                                    DPG_JAMVERSION, 0 } ;
 
-/* Known for sure: 
+/* Known for sure:
  *	mac needs arg_enviro
  *	OS2 needs extern environ
  */
@@ -187,7 +191,7 @@ QDGlobals qd;
 
 # ifndef use_environ
 # define use_environ environ
-# if !defined( __WATCOM__ ) && !defined( OS_OS2 ) && !defined( OS_NT ) 
+# if !defined( __WATCOM__ ) && !defined( OS_OS2 ) && !defined( OS_NT )
 extern char **environ;
 # endif
 # endif
@@ -242,7 +246,7 @@ int main( int argc, char **argv, char **arg_environ )
 	    printf( "-T      Toggle printing of target's name.\n");
 #endif /* OPT_DEBUG_MAKE_PRINT_TARGET_NAME */
             printf( "-v      Print the version of jam and exit.\n\n" );
-	    
+
 
 #ifdef OPT_IMPROVE_DEBUG_LEVEL_HELP_EXT
 	    printf( "\n" );
@@ -292,7 +296,7 @@ int main( int argc, char **argv, char **arg_environ )
 	    globs.printtarget = !globs.printtarget;
 #endif /* OPT_DEBUG_MAKE_PRINT_TARGET_NAME */
 	if( ( s = getoptval( optv, 'n', 0 ) ) )
-	    globs.noexec++, DEBUG_MAKE = DEBUG_MAKEQ = DEBUG_EXEC = 1; 
+	    globs.noexec++, DEBUG_MAKE = DEBUG_MAKEQ = DEBUG_EXEC = 1;
 
 	if( ( s = getoptval( optv, 'q', 0 ) ) )
 	    globs.quitquick = 1;
@@ -312,7 +316,7 @@ int main( int argc, char **argv, char **arg_environ )
         globs.jobs = atoi( jobs );
 	if (globs.jobs == 0)
 		globs.jobs = 1;
-}   
+}
 #endif /* OPT_IMPROVE_JOBS_SETTING_EXT */
 
 	if( ( s = getoptval( optv, 'j', 0 ) ) )
@@ -420,8 +424,8 @@ int main( int argc, char **argv, char **arg_environ )
 
 #ifdef OPT_SET_JAMPROCESSPATH_EXT
         {
-	    char fileName[_MAX_PATH];
-	    getprocesspath(fileName, _MAX_PATH);
+			char fileName[4096];
+			getprocesspath(fileName, 4096);
             var_set( "JAM_PROCESS_PATH", list_new( L0, fileName, 0 ), VAR_SET );
         }
 #endif

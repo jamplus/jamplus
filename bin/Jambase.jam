@@ -249,6 +249,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			CC			= "$(MSVCBIN)cl" ;
 			C++			= "$(CC)" ;
 			LINK		= "$(MSVCBIN)link" ;
+			MKDIR		= mkdir ;
 			MT			= "$(MSSDK)/bin/mt" ;
 			RC			= "$(MSSDK)/bin/RC" ;
 			STDHDRS		?= "$(MSSDK_STDHDRS)" ;
@@ -289,6 +290,57 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 				of the Borland or Microsoft directories. ;
 		}
 	}
+	else if $(UNIX)
+	{
+		COMPILER = gcc ;
+
+		SUFLIB	?= .a ;
+		SUFOBJ	?= .o ;
+
+		SUFSHAREDLIB ?= .so ;
+
+		NOARSCAN = true ;
+		NOARUPDATE = true ;
+
+		DEFINES.*.debug on * += _DEBUG DEBUG ;
+		DEFINES.*.release on * += NDEBUG ;
+
+		CCFLAGS.win32.debug on * 	= -g -O0 ;
+		CCFLAGS.win32.release on * 	= -g -O2 ;
+		C++FLAGS.win32.* on *		?= [ on * Var CCFLAGS.win32.* ] ;
+		C++FLAGS.win32.debug on *	?= [ on * Var CCFLAGS.win32.debug ] ;
+		C++FLAGS.win32.release on *	?= [ on * Var CCFLAGS.win32.release ] ;
+
+		switch $(OS)
+		{
+			case CYGWIN :
+				DEFINES.*.* on * += __cygwin__ ;
+				CC			?= gcc ;
+				C++			?= g++ ;
+				JAMSHELL	?= sh -c ;
+				RANLIB		?= "" ;
+				SUFEXE		?= .exe ;
+
+			case MACOSX :
+				DEFINES.*.* on * += ;
+				CC			?= gcc ;
+				C++			?= g++ ;
+
+		}
+
+		# UNIX defaults
+
+		CCFLAGS		?= ;
+		C++FLAGS	?= $(CCFLAGS) ;
+		CHMOD		?= chmod ;
+		CHGRP		?= chgrp ;
+		CHOWN		?= chown ;
+		LINKFLAGS	?= $(CCFLAGS) ;
+		LINKLIBS	?= ;
+		OPTIM		?= -O ;
+		RANLIB		?= ranlib ;
+	}
+
 
 	#
 	# General defaults; a lot like UNIX
@@ -1216,7 +1268,13 @@ rule MultiCppCompile TARGET : SOURCES
 	# for each file
 	local _src ;
 	local newsrcs ;
-	local sources = $(SOURCES:I=\\.cpp$:I=\\.c$:I=\\.cxx$I=\\$(SUFOBJ)$:I=\\$(SUFRES):G=$(grist)) ;
+	local extraSources ;
+	if $(MSVCNT)
+	{
+		extraSources = $(SOURCES:I=\\$(SUFRES)) ;
+	}
+	local sources = $(SOURCES:I=\\.cpp$:I=\\.c$:I=\\.cxx$I=\\$(SUFOBJ)$:G=$(grist)) ;
+	sources += $(extraSources) ;
 #	local objSources = $(SOURCES:I=\\$(SUFOBJ)$:I=\\$(SUFRES):G=$(grist)) ;
 #	local sources = $(SOURCES:G=$(grist)) ;
 
@@ -1342,7 +1400,7 @@ rule MultiCppCompile TARGET : SOURCES
 			MFLAGS on $(_src) = $(_flags) ;
 			UseCommandLine $(_obj) : $(_flags) ;
 		}
-		else if $(COMPILER) = mingw
+		else if $(COMPILER) in mingw gcc
 		{
 			MFLAGS on $(_src) = $(_flags) "-c -o \"$(_obj:T)\"" ;
 			UseCommandLine $(_obj) : $(_flags) ;
@@ -1426,14 +1484,13 @@ if $(MSVCNT)
 	}
 }
 
-if $(COMPILER) = mingw
+if $(COMPILER) in mingw gcc
 {
 	actions updated response batched_C++
 	{
 		$(CC) -c $(MFLAGS) $(>)
 	}
 }
-
 
 ########################################################################
 ########################################################################
@@ -1595,7 +1652,7 @@ rule _retrieveOutputName TARGET : SUFFIX_NAME : THE_CONFIG : THE_PLATFORM
 			$(SUFFIX_NAME).*
 			$(SUFFIX_NAME) ] ;
 
-	return $(target)$(presuffix:E=)$(suffix) ;
+	return $(target)$(presuffix:E=)$(suffix:E=) ;
 }
 
 
@@ -1876,7 +1933,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 			MightNotUpdate $(_tlib) ;
 			_linkTargets += $(_tlib) ;
 		}
-		else if $(COMPILER) in mingw
+		else if $(COMPILER) in mingw gcc
 		{
 #			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
 			BINDING on $(_tlib) = $(_t) ;
@@ -1888,6 +1945,10 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 #			LinkFlags $(TARGET) : -Wl,--out-implib,$(_tlib:T) ;
 		}
+#		else if $(UNIX)
+#		{
+#			Exit SharedLibraryFromObjects not implemented. ;
+#		}
 	}
 	else
 	{
@@ -1919,10 +1980,19 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		}
 		LinkFlags $(TARGET) : /DLL ;
 	}
-	else if $(COMPILER) in mingw
+	else if $(COMPILER) = mingw
 	{
 		LinkFlags $(TARGET) : -shared ;
 	}
+	else if $(COMPILER) = gcc  &&  $(OS) = MACOSX
+	{
+	#		LinkFlags $(TARGET) : -bundle -undefined dynamic_lookup ;
+		LinkFlags $(TARGET) : -dynamiclib -install_name $(_t:T) ;
+	}
+#	else if $(UNIX)
+#	{
+#		Exit SharedLibraryFromObjects not implemented. ;
+#	}
 
 	local linkFlags =
 		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
@@ -2348,7 +2418,7 @@ rule OutputName TARGET : NAME : THE_CONFIG : THE_PLATFORM
 rule OutputPath TARGET : OUTPUTPATH : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	LOCATE.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) = $(OUTPUTPATH) ;
+	LOCATE.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) = $(OUTPUTPATH:R=$(SUBDIR)) ;
 }
 
 

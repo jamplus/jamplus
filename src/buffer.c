@@ -1,6 +1,6 @@
 #include "buffer.h"
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 void buffer_openspacehelper(BUFFER *buff, int amount)
 {

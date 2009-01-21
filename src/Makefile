@@ -1,8 +1,9 @@
 # Makefile for jam
 
-CC = cc
+CC = gcc
 CFLAGS =
 EXENAME = ./jam0
+LINKLIBS = -lstdc++
 TARGET = -o $(EXENAME)
 
 # Special flavors - uncomment appropriate lines

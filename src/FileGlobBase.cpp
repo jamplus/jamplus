@@ -98,7 +98,7 @@ FileGlobBase::~FileGlobBase()
 	Expands to:
 
 	../../../../StartSearchHere\**
-		
+
 	\param inPattern The pattern to use for matching.
 **/
 void FileGlobBase::MatchPattern( const char* inPattern )
@@ -122,7 +122,7 @@ void FileGlobBase::MatchPattern( const char* inPattern )
 	while ( *srcPtr != '\0' )
 	{
 		char ch = *srcPtr;
-		
+
 		///////////////////////////////////////////////////////////////////////
 		// Check for slashes or backslashes.
 		if ( ch == '\\'  ||  ch == '/' )
@@ -212,7 +212,7 @@ void FileGlobBase::MatchPattern( const char* inPattern )
 			// Gonna finish this processing in another loop.
 			break;
 		}
-			
+
 		///////////////////////////////////////////////////////////////////////
 		// Everything else.
 		else
@@ -408,7 +408,7 @@ bool WildMatch( const char* pattern, const char *string, bool caseSensitive )
 					pattern++;
 					string++;
 				}
-				else 
+				else
 				{
 					pattern = mp;
 					string = cp++;
@@ -551,8 +551,12 @@ DoRecursion:
 	// get out of here.
 	if ( !hasWildcard )
 	{
+#if defined(WIN32)
 		// This should refer to a file.
 		struct _finddata_t finfo;
+#else
+		DIR* dirp;
+#endif
 		bool isDir = false;
 		size_t patternLen = strlen( patternBuf );
 		if ( patternBuf[ patternLen - 1 ] == '/'  ||  patternBuf[ patternLen - 1 ] == '\\' )
@@ -560,12 +564,23 @@ DoRecursion:
 		    isDir = true;
 		    patternBuf[ patternLen - 1 ] = 0;
 		}
+#if defined(WIN32)
 		intptr_t handle = _findfirst( patternBuf, &finfo );
 		if ( isDir )
 		    patternBuf[ patternLen - 1 ] = '/';
 		if ( handle != -1 )
 			FoundMatch( patternBuf );
 		_findclose( handle );
+#else
+/*		DIR* dirp = opendir(basePath[0] ? basePath : ".");
+		if (!dirp)
+			return;
+
+		// Any files found?
+		struct dirent* dp;
+		while ((dp = readdir(dirp)) != NULL)
+		{*/
+#endif
 		return;
 	}
 
@@ -590,7 +605,7 @@ DoRecursion:
 #if defined(WIN32)
 	// Do the file search with *.* in the directory specified in basePattern.
 	strcpy( basePathEndPtr, "*.*" );
-	
+
 	// Start the find.
 	struct _finddata_t finfo;
 	intptr_t handle = _findfirst( basePath, &finfo );
@@ -611,17 +626,17 @@ DoRecursion:
 				{
 					// It matched.  Let's see if the file should be ignored.
 					bool ignore = false;
-					
+
 					// Knock out "." or ".." if they haven't already been.
 					size_t len = strlen( finfo.name );
 					finfo.name[ len ] = '/';
 					finfo.name[ len + 1 ] = '\0';
-					
+
 					// See if this is a directory to ignore.
 					ignore = MatchIgnorePattern( finfo.name );
-					
+
 					finfo.name[ len ] = 0;
-					
+
 					// Should this file be ignored?
 					if ( !ignore )
 					{
@@ -637,13 +652,13 @@ DoRecursion:
 				{
 					// It matched.  Let's see if the file should be ignored.
 					bool ignore = MatchIgnorePattern( finfo.name );
-					
+
 					// Is this pattern exclusive?
 					if ( !ignore  &&  m_detail->m_exclusiveFilePatterns.begin() != m_detail->m_exclusiveFilePatterns.end() )
 					{
 						ignore = !MatchExclusivePattern( finfo.name );
 					}
-					
+
 					// Should this file be ignored?
 					if ( !ignore )
 					{
@@ -652,16 +667,16 @@ DoRecursion:
 					}
 				}
 			}
-			
+
 			// Look up the next file.
 			if ( _findnext( handle, &finfo ) == -1 )
 				break;
 		}
-		
+
 		// Close down the file find handle.
 		_findclose( handle );
 	}
-	
+
 #else
 	// Start the find.
 	DIR* dirp = opendir(basePath[0] ? basePath : ".");
@@ -678,7 +693,7 @@ DoRecursion:
 			strcpy(basePathEndPtr, dp->d_name);
 			stat(basePath, &attr);
 			*basePathEndPtr = 0;
-			
+
 			// Is the file a directory?
 			if ( (attr.st_mode & S_IFDIR) != 0  &&  !matchFiles )
 			{
@@ -687,17 +702,17 @@ DoRecursion:
 				{
 					// It matched.  Let's see if the file should be ignored.
 					bool ignore = false;
-					
+
 					// Knock out "." or ".." if they haven't already been.
 					size_t len = strlen( dp->d_name );
 					dp->d_name[ len ] = '/';
 					dp->d_name[ len + 1 ] = '\0';
-					
+
 					// See if this is a directory to ignore.
 					ignore = MatchIgnorePattern( dp->d_name );
-					
+
 					dp->d_name[ len ] = 0;
-					
+
 					// Should this file be ignored?
 					if ( !ignore )
 					{
@@ -713,13 +728,13 @@ DoRecursion:
 				{
 					// It matched.  Let's see if the file should be ignored.
 					bool ignore = MatchIgnorePattern( dp->d_name );
-					
+
 					// Is this pattern exclusive?
 					if ( !ignore  &&  m_detail->m_exclusiveFilePatterns.begin() != m_detail->m_exclusiveFilePatterns.end() )
 					{
 						ignore = !MatchExclusivePattern( dp->d_name );
 					}
-					
+
 					// Should this file be ignored?
 					if ( !ignore )
 					{
@@ -728,16 +743,16 @@ DoRecursion:
 					}
 				}
 			}
-			
+
 			// Look up the next file.
 			if ((dp = readdir(dirp)) == NULL)
 				break;
 		}
-		
+
 		// Close down the file find handle.
 		closedir( dirp );
 	}
-	
+
 #endif
 
 	// Sort the list.

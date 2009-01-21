@@ -16,7 +16,11 @@
 # include "compile.h"
 # include "filesys.h"
 # include "buffer.h"
+#if _MSC_VER
 # include <sys/utime.h>
+#else
+#include <utime.h>
+#endif
 
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 #include "luasupport.h"
@@ -45,12 +49,12 @@
  *    hcache_init() - read and parse the local .jamdeps file.
  *    hcache_done() - write a new .jamdeps file
  *    hcache() - return list of headers on target.  Use cache or do a scan.
- *    
+ *
  * The dependency file format is an ascii file with 1 line per target.
  * Each line has the following fields:
  * @boundname@ timestamp commandlinemd5sum targetmd5sum age num @file@ @file@ num @hdrscan@ @hdrscan@ ... \n
  *   where the first number is the number of headers, and the second is the
- *   number of elements in the hdrscan list.  
+ *   number of elements in the hdrscan list.
  *
  * Filenames may contain any ascii or non-ascii characters.  If they
  * contain the '@' or '#' characters, they are quoted on output and
@@ -167,14 +171,14 @@ skip_spaces( BUFFER *buff )
 
 /*
  * Read a string from the file.	 Handle quoted characters.  The
- * returned value is as returned by newstr(), so it need not be freed.	
+ * returned value is as returned by newstr(), so it need not be freed.
  */
 const char *
 read_string( BUFFER* buff )
 {
     int ch, i = 0;
     char filename[ MAXJPATH ];
-    
+
     ch = skip_spaces( buff );
     if( ch != '@' )
 	return 0;
@@ -279,7 +283,7 @@ read_int( BUFFER *buff )
     return value;
 }
 
-void 
+void
 write_string( FILE *f, const char *s )
 {
     int i = 0;
@@ -364,7 +368,7 @@ hcache_readfile(HCACHEFILE *file)
     if (!version || strcmp( version, CACHE_FILE_VERSION ) || ch != '\n' ) {
 	goto bail;
     }
-    
+
     for(;;) {
 	int i, count, ch;
 	LIST *l;
@@ -374,7 +378,7 @@ hcache_readfile(HCACHEFILE *file)
 	c->boundname = read_string( &buff );
 	if( !c->boundname ) /* Test for eof */
 	    break;
-	
+
 	c->time = read_int( &buff );
 	c->age = read_int( &buff ) + 1; /* we're getting older... */
 
@@ -468,7 +472,7 @@ static HCACHEFILE* hcachefile_get(TARGET *t)
 	if ( hcache )
 	    hcachename = hcache->string;
     }
-    
+
     if ( !hcachename )
     {
 	hcachename = newstr( "standard" );
@@ -514,7 +518,7 @@ static HCACHEFILE* hcachefile_get(TARGET *t)
 
     lasthcachefile = file;
     lasthcachefile_name = file->cachename;
-    
+
     return lasthcachefile;
 }
 
@@ -526,7 +530,7 @@ hcache_writefile(HCACHEFILE *file)
     HCACHEDATA	*c;
     int		header_count = 0;
     int		maxage;
-    
+
     if( !file  ||  !file->dirty  ||  !file->cachefilename )
 	return;
 
@@ -676,7 +680,7 @@ hcache( TARGET *t, LIST *hdrscan )
 		memset( &c->currentrulemd5sum, 0, MD5_SUMSIZE );
 		memset( &c->contentmd5sum, 0, MD5_SUMSIZE );
 		memset( &c->currentcontentmd5sum, 0, MD5_SUMSIZE );
-#endif        
+#endif
 	    }
 	}
     }
@@ -761,7 +765,7 @@ void getcachedmd5sum( TARGET *t, int source )
     while( *target++ );
 
     target = path;
-# endif 
+# endif
 
     c->boundname = target;
 
@@ -853,7 +857,7 @@ void setcachedmd5sum( TARGET *t )
     while( *target++ );
 
     target = path;
-# endif 
+# endif
 
     c->boundname = target;
 
@@ -957,7 +961,7 @@ const char *filecache_getfilename(TARGET *t, MD5SUM sum, const char* extension)
 LIST *filecache_fillvalues(TARGET *t)
 {
     LIST *filecache;
-    
+
     if ( !( t->flags & T_FLAG_USEFILECACHE ) )
 	return 0;
 
@@ -1070,7 +1074,10 @@ int filecache_retrieve(TARGET *t, MD5SUM buildmd5sum)
 	if (memcmp(blobmd5sum, t->contentmd5sum, sizeof(MD5SUM)) == 0)
 	{
 	    if (!(t->flags & T_FLAG_NOCARE))
-		_utime(t->boundname, NULL);
+//		_utime(t->boundname, NULL);
+		{
+			/* TODO */
+		}
 	    printf("%s is already the proper cached target.\n", t->name);
 	    return 1;
 	}
@@ -1225,7 +1232,7 @@ int hcache_getrulemd5sum( TARGET *t )
     while( *target++ );
 
     target = path;
-# endif 
+# endif
 
     c->boundname = target;
 
@@ -1284,7 +1291,7 @@ void hcache_finalizerulemd5sum( TARGET *t )
     while( *target++ );
 
     target = path;
-# endif 
+# endif
 
     c->boundname = target;
 

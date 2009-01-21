@@ -10,7 +10,7 @@
  * 11/04/02 (seiwald) - const-ing for string literals
  */
 
-typedef struct _buffer BUFFER;
+#include "buffer.h"
 
 void 	var_defines( const char **e );
 int	var_string( const char *in, BUFFER *buff, int outsize, LOL *lol, char separator );

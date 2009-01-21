@@ -1,5 +1,5 @@
 SubDir TOP slib-a ;
 
-OutputPath slib-a : image ;
+OutputPath slib-a : ../image ;
 LinkLibraries slib-a : lib-c ;
 Library slib-a : slib-a.c : shared ;

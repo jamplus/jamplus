@@ -58,6 +58,10 @@
 # define STRUCT_DIRENT struct dirent
 # endif
 
+#if defined( OS_MACOSX )
+#include <CoreFoundation/CFBundle.h>
+#endif
+
 # ifdef OS_COHERENT
 # include <arcoff.h>
 # define HAVE_AR
@@ -99,6 +103,12 @@ struct ar_hdr		/* archive file member header - printable ascii */
 # include <ar.h>
 # endif
 
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
+# include "md5.h"
+#endif
+
+#include <errno.h>
+
 /*
  * file_dirscan() - scan a directory for files
  */
@@ -125,8 +135,13 @@ file_dirscan(
 
 	/* Special case / : enter it */
 
+#ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
+	if( f.f_dir.len == 1 && f.f_dir.ptr[0] == '/' )
+	    (*func)( closure, dir, 0 /* not stat()'ed */, (time_t)0, 1 );
+#else
 	if( f.f_dir.len == 1 && f.f_dir.ptr[0] == '/' )
 	    (*func)( closure, dir, 0 /* not stat()'ed */, (time_t)0 );
+#endif
 
 	/* Now enter contents of directory */
 
@@ -138,6 +153,24 @@ file_dirscan(
 
 	while( dirent = readdir( d ) )
 	{
+#ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
+	    struct stat attr;
+	    f.f_base.ptr = dirent->d_name;
+	    f.f_base.len = strlen(dirent->d_name);
+	    path_build( &f, filename, 0 );
+	    stat(filename, &attr);
+	    if ( attr.st_mode & S_IFDIR )
+	    {
+		if ( dirent->d_name[0] != '.'  &&  ( dirent->d_name[1] != 0  ||  ( dirent->d_name[1] != '.'  &&  dirent->d_name[2] != 0 ) ) )
+		{
+		    (*func)( closure, filename, 1 /* stat()'ed */, attr.st_mtime, 1 );
+		}
+	    }
+	    else
+	    {
+		(*func)( closure, filename, 1 /* stat()'ed */, attr.st_mtime, 0 );
+	    }
+#else
 # ifdef old_sinix
 	    /* Broken structure definition on sinix. */
 	    f.f_base.ptr = dirent->d_name - 2;
@@ -149,6 +182,7 @@ file_dirscan(
 	    path_build( &f, filename, 0 );
 
 	    (*func)( closure, filename, 0 /* not stat()'ed */, (time_t)0 );
+#endif
 	}
 
 	closedir( d );
@@ -310,7 +344,11 @@ file_archscan(
 
 		sprintf( buf, "%s(%s)", archive, lar_name );
 
+#ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
+		(*func)( closure, buf, 1 /* time valid */, (time_t)lar_date, 0 );
+#else
 		(*func)( closure, buf, 1 /* time valid */, (time_t)lar_date );
+#endif
 	    }
 
 	    /* Position at next member */
@@ -403,6 +441,498 @@ file_archscan(
 }
 
 # endif /* AIAMAG - RS6000 AIX */
+
+#if defined(OPT_BUILTIN_MD5CACHE_EXT)  ||  defined(OPT_HEADER_CACHE_EXT)
+
+/* From LuaPlus' iox.cpp's PathCreate(). */
+int file_mkdir(const char *inPath)
+{
+	char path[MAXJPATH];
+	char* pathPtr = path;
+	char ch;
+
+	if (inPath[0] == '/'  &&  inPath[1] == '/')
+	{
+		*pathPtr++ = '\\';
+		*pathPtr++ = '\\';
+		inPath += 2;
+		while (ch = *inPath++)
+		{
+			*pathPtr++ = ch;
+			if (ch == '/')
+				break;
+		}
+	}
+
+	while (ch = *inPath++)
+	{
+		if (ch == '/')
+		{
+			*pathPtr = 0;
+			if (mkdir(path, 0777) == -1)
+				return -1;
+			*pathPtr++ = '/';
+		}
+		else
+			*pathPtr++ = ch;
+	}
+
+	return 0;
+}
+
+
+#endif
+
+
+# ifdef OPT_HDRPIPE_EXT
+/*
+// From some MSDN sample, I think.
+static int CreatePipeChild(HANDLE* child, HANDLE* inH, HANDLE* outH, HANDLE* errH, int redirect_stderr_to_stdout, LPCTSTR Command)
+{
+    SECURITY_ATTRIBUTES lsa;
+    HANDLE ChildIn;
+    HANDLE ChildOut;
+    HANDLE ChildErr = NULL;
+    SECURITY_ATTRIBUTES sa;
+    PROCESS_INFORMATION pi;
+    STARTUPINFO             si;
+    HANDLE hNul;
+
+    sa.nLength = sizeof(sa);                        // Security descriptor for INHERIT.
+    sa.lpSecurityDescriptor = 0;
+    sa.bInheritHandle       = 0;
+
+    lsa.nLength=sizeof(SECURITY_ATTRIBUTES);
+    lsa.lpSecurityDescriptor=NULL;
+    lsa.bInheritHandle=TRUE;
+
+    if (!CreatePipe(&ChildIn,inH,&lsa,0))
+    {
+	// Error.
+    }
+
+    if (!CreatePipe(outH,&ChildOut,&lsa,0))
+    {
+	// Error.
+    }
+
+    if (!redirect_stderr_to_stdout)
+    {
+	if (!CreatePipe(errH,&ChildErr,&lsa,0))
+	{
+	    // Error.
+	}
+    }
+
+    // Lets Redirect Console StdHandles - easy enough
+
+    // Dup the child handle to get separate handles for stdout and err,
+    hNul = CreateFile("NUL",
+	GENERIC_READ | GENERIC_WRITE,
+	FILE_SHARE_READ | FILE_SHARE_WRITE,
+	NULL, OPEN_EXISTING,
+	0,
+	NULL);
+
+    if (hNul != NULL)
+    {
+	// Set up members of STARTUPINFO structure.
+	memset(&si, 0, sizeof(si));
+	si.cb = sizeof(STARTUPINFO);
+	si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_HIDE;
+	si.hStdOutput = ChildOut;
+	si.hStdError    = redirect_stderr_to_stdout ? ChildOut : ChildErr;
+	si.hStdInput    = ChildIn;
+	if (CreateProcess(NULL, (char*)Command, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi) == TRUE)
+	{
+	    CloseHandle(pi.hThread);        // Thread handle not needed
+	    //fprintf(stderr, "create process success\n");
+	    *child = pi.hProcess;  // Return process handle (to get RC)
+	} else
+	    return -1;
+	CloseHandle(hNul);                                      // Close error handle,
+	CloseHandle(ChildOut);
+	if (!redirect_stderr_to_stdout)
+	    CloseHandle(ChildErr);
+	CloseHandle(ChildIn);
+    }
+    else
+    {
+	// Error.
+    }
+
+    return 0;
+}
+*/
+
+FILE* file_popen(const char *cmd, const char *mode)
+{
+/*    const char* comspec;
+    char* commandBuffer;
+    char* stderr_to_stdout;
+    int redirectStderr = 0;
+    HANDLE child;
+    HANDLE hIn = INVALID_HANDLE_VALUE, hOut = INVALID_HANDLE_VALUE, hErr = INVALID_HANDLE_VALUE;
+    int rc;
+    FILE* file;
+    int isCmd;
+
+    if (!mode  ||  !*mode  ||  (mode[0] != 'r'  &&  mode[0] != 'w'))
+	return NULL;
+
+    comspec = getenv("COMSPEC");
+    if (!comspec)
+	comspec = "cmd";
+
+    commandBuffer = (char*)malloc(strlen(comspec) + 4 + strlen(cmd) + 2 + 1);
+    strcpy(commandBuffer, comspec);
+    strcat(commandBuffer, " /c ");
+    strlwr(commandBuffer);
+    isCmd = strstr(commandBuffer, "cmd.exe") != NULL;
+    if (isCmd)
+	strcat(commandBuffer, "\"");
+    strcat(commandBuffer, cmd);
+    if (isCmd)
+	strcat(commandBuffer, "\"");
+
+    stderr_to_stdout = strstr(commandBuffer, "2>&1");
+    if (stderr_to_stdout)
+    {
+	stderr_to_stdout[0] = stderr_to_stdout[1] = stderr_to_stdout[2] = stderr_to_stdout[3] = ' ';
+	redirectStderr = 1;
+    }
+
+    rc = CreatePipeChild(&child, &hIn, &hOut, &hErr, redirectStderr, commandBuffer);
+    free(commandBuffer);
+    if (rc == -1)
+    {
+	return NULL;
+    }
+
+    if (mode[0] == 'r')
+    {
+	file = _fdopen(_open_osfhandle((long)hOut, _O_RDONLY | _O_TEXT), "rt");
+	if (hIn != INVALID_HANDLE_VALUE)
+	    CloseHandle(hIn);
+	if (hErr != INVALID_HANDLE_VALUE)
+	    CloseHandle(hErr);
+    }
+    else
+    {
+	file = _fdopen(_open_osfhandle((long)hIn, _O_WRONLY | _O_TEXT), "wt");
+	if (hOut != INVALID_HANDLE_VALUE)
+	    CloseHandle(hOut);
+	if (hErr != INVALID_HANDLE_VALUE)
+	    CloseHandle(hErr);
+    }
+    setvbuf(file, NULL, _IONBF, 0);
+
+    CloseHandle(child);
+
+    return file;
+*/
+	return 0;
+}
+
+
+int file_pclose(FILE *file)
+{
+/*    if (file)
+    {
+	fclose(file);
+	return 0;
+    }*/
+    return -1;
+}
+
+# endif /* OPT_HDRPIPE_EXT */
+
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
+
+/*
+ * copyfile() - copy one file into another. returns 1 if successful
+ */
+int copyfile(const char *dst, const char *src, MD5SUM* md5sum)
+{
+    MD5_CTX context;
+    size_t size = 0, sizeout = 0;
+    FILE *fsrc = NULL, *fdst = NULL;
+    unsigned char block[1<<16];
+
+    /* printf("copy %s->%s\n", src, dst); */
+
+    file_mkdir(dst);
+
+    fsrc = fopen(src, "rb");
+    if (fsrc==NULL) {
+	printf("cannot open %s for reading - %s\n", src, strerror(errno));
+	return 0;
+    }
+
+    fdst = fopen(dst, "wb");
+    if (fdst==NULL) {
+	fclose(fsrc);
+	printf("cannot open %s for writing - %s\n", dst, strerror(errno));
+	return 0;
+    }
+
+    if (md5sum) {
+	MD5Init(&context);
+    }
+
+    while(!feof(fsrc)) {
+	size = fread(block, 1, sizeof(block), fsrc);
+	if (size==0) {
+	    break;
+	}
+
+	if (md5sum) {
+	    MD5Update(&context, block, size);
+	}
+
+	sizeout = fwrite(block, 1, size, fdst);
+	if (sizeout!=size) {
+	    printf("error while copying %s to %s - %s\n", src, dst, strerror(errno));
+	    fclose(fsrc);
+	    fclose(fdst);
+	    return 0;
+	}
+    }
+
+    if (md5sum) {
+	MD5Final(*md5sum, &context);
+    }
+
+    fclose(fsrc);
+    fclose(fdst);
+    return 1;
+}
+
+/**
+	\internal
+	\author Jack Handy
+
+	Borrowed from http://www.codeproject.com/string/wildcmp.asp.
+	Modified by Joshua Jensen.
+**/
+static int wildmatch( const char* pattern, const char *string, int caseSensitive )
+{
+	// Handle all the letters of the pattern and the string.
+	while ( *string != 0  &&  *pattern != '*' )
+	{
+		if ( *pattern != '?' )
+		{
+			if ( caseSensitive )
+			{
+				if ( *pattern != *string )
+					return 0;
+			}
+			else
+			{
+				if ( toupper( *pattern ) != toupper( *string ) )
+					return 0;
+			}
+		}
+
+		pattern++;
+		string++;
+	}
+
+	const char* mp = NULL;
+	const char* cp = NULL;
+	while ( *string != 0 )
+	{
+		if (*pattern == '*')
+		{
+			// It's a match if the wildcard is at the end.
+			if ( *++pattern == 0 )
+			{
+				return 1;
+			}
+
+			mp = pattern;
+			cp = string + 1;
+		}
+		else
+		{
+			if ( caseSensitive )
+			{
+				if ( *pattern == *string  ||  *pattern == '?' )
+				{
+					pattern++;
+					string++;
+				}
+				else
+				{
+					pattern = mp;
+					string = cp++;
+				}
+			}
+			else
+			{
+				if ( toupper( *pattern ) == toupper( *string )  ||  *pattern == '?' )
+				{
+					pattern++;
+					string++;
+				}
+				else
+				{
+					pattern = mp;
+					string = cp++;
+				}
+			}
+		}
+	}
+
+	// Collapse remaining wildcards.
+	while ( *pattern == '*' )
+		pattern++;
+
+	return !*pattern;
+}
+
+
+int findfile(const char* wildcard, BUFFER* foundfilebuff)
+{
+	DIR* dirp;
+	struct dirent* dp;
+    const char* lastslash;
+	const char* lastslash2;
+	BUFFER pathbuff;
+
+	lastslash = strrchr(wildcard, '/');
+	lastslash2 = strrchr(wildcard, '\\');
+	lastslash = lastslash > lastslash2 ? lastslash : lastslash2;
+
+	buffer_init(&pathbuff);
+	buffer_addstring(&pathbuff, wildcard, lastslash - wildcard);
+	buffer_addchar(&pathbuff, 0);
+
+    buffer_init(foundfilebuff);
+
+	dirp = opendir(buffer_ptr(&pathbuff));
+	if (!dirp)
+	{
+		buffer_free(&pathbuff);
+		return;
+	}
+
+	// Any files found?
+	while ((dp = readdir(dirp)) != NULL)
+	{
+		if (wildmatch(lastslash + 1, dp->d_name, 1))
+		{
+			buffer_addstring(foundfilebuff, wildcard, lastslash - wildcard + 1);
+			buffer_addstring(foundfilebuff, dp->d_name, strlen(dp->d_name));
+			buffer_addchar(foundfilebuff, 0);
+			closedir(dirp);
+			return 1;
+		}
+	}
+
+	closedir(dirp);
+	return 0;
+}
+
+# include "newstr.h"
+
+/* Convert md5sum to a string representation. */
+const char *md5tostring(MD5SUM sum)
+{
+  char buffer[1024];
+  char *pbuf = buffer;
+  int ch, i, val;
+
+  /* add use md5 as filename */
+  for( i=0; i<MD5_SUMSIZE; i++ ) {
+    val = sum[i];
+
+    ch = val>>4;
+    if (ch >= 0xa) {
+      *pbuf++ = (char)(ch-0xa+'a');
+    } else {
+      *pbuf++ = (char)(ch+'0');
+    }
+
+    ch = val&15;
+    if (ch >= 0xa) {
+      *pbuf++ = (char)(ch-0xa+'a');
+    } else {
+      *pbuf++ = (char)(ch+'0');
+    }
+  }
+  *pbuf++ = 0;
+
+  return newstr(buffer);
+}
+
+
+
+/* Calculate md5sum of a file. */
+void md5file(const char *filename, MD5SUM sum)
+{
+    MD5_CTX context;
+#define BLOCK_SIZE 1024 /* file is read in blocks of custom size, just so we don't have to read the whole file at once */
+    FILE *f = fopen( filename, "rb" );
+
+    if( f == NULL ) {
+//	printf("Cannot calculate md5 for %s\n", filename);
+	memset(sum, 0, sizeof(MD5SUM));
+	return;
+    }
+
+    /* initialize the MD5 hash state */
+    MD5Init( &context );
+
+    /* for each block in the file */
+    while (!feof(f)) {
+	unsigned char block[BLOCK_SIZE];
+	size_t readsize = fread(block, 1, BLOCK_SIZE, f);
+	/* process the block - adding its values to the hash */
+	MD5Update( &context, block, readsize );
+    }
+    /* finish input processing - write the hash key to the destination buffer */
+    MD5Final( sum, &context );
+
+    fclose(f);
+}
+
+#endif
+
+#ifdef OPT_SET_JAMPROCESSPATH_EXT
+
+void getprocesspath(char* buffer, size_t bufferLen)
+{
+#if defined( OS_MACOSX )
+	CFBundleRef mainBundle = CFBundleGetMainBundle();
+	CFURLRef bundleUrl = CFBundleCopyBundleURL(mainBundle);
+	CFURLRef workingUrl = CFURLCreateCopyDeletingPathExtension(kCFAllocatorSystemDefault, bundleUrl);
+	CFStringRef workingString = CFURLCopyFileSystemPath(workingUrl, kCFURLPOSIXPathStyle);
+	CFMutableStringRef normalizedString = CFStringCreateMutableCopy(NULL, 0, workingString);
+	CFStringGetCString(normalizedString, buffer, bufferLen - 1, kCFStringEncodingUTF8);
+	CFRelease(workingUrl);
+	CFRelease(workingString);
+	CFRelease(normalizedString);
+	CFRelease(bundleUrl);
+#else
+	*buffer = 0;
+#endif
+}
+
+#endif
+
+#ifdef OPT_PRINT_TOTAL_TIME_EXT
+
+#pragma comment(lib, "winmm.lib")
+
+unsigned int getmilliseconds()
+{
+/*    return timeGetTime();*/
+	return 0;
+}
+
+#endif
 
 # endif /* USE_FILEUNIX */
 

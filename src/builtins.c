@@ -99,60 +99,60 @@ int glob( const char *s, const char *c );
 void
 load_builtins()
 {
-    bindrule( "Always" )->procedure = 
-    bindrule( "ALWAYS" )->procedure = 
+    bindrule( "Always" )->procedure =
+    bindrule( "ALWAYS" )->procedure =
 	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_TOUCHED );
 
-    bindrule( "Depends" )->procedure = 
-    bindrule( "DEPENDS" )->procedure = 
+    bindrule( "Depends" )->procedure =
+    bindrule( "DEPENDS" )->procedure =
 	parse_make( builtin_depends, P0, P0, P0, C0, C0, 0 );
 
-    bindrule( "echo" )->procedure = 
-    bindrule( "Echo" )->procedure = 
-    bindrule( "ECHO" )->procedure = 
+    bindrule( "echo" )->procedure =
+    bindrule( "Echo" )->procedure =
+    bindrule( "ECHO" )->procedure =
 	parse_make( builtin_echo, P0, P0, P0, C0, C0, 0 );
 
-    bindrule( "exit" )->procedure = 
-    bindrule( "Exit" )->procedure = 
-    bindrule( "EXIT" )->procedure = 
+    bindrule( "exit" )->procedure =
+    bindrule( "Exit" )->procedure =
+    bindrule( "EXIT" )->procedure =
 	parse_make( builtin_exit, P0, P0, P0, C0, C0, 0 );
 
-    bindrule( "Glob" )->procedure = 
-    bindrule( "GLOB" )->procedure = 
+    bindrule( "Glob" )->procedure =
+    bindrule( "GLOB" )->procedure =
 	parse_make( builtin_glob, P0, P0, P0, C0, C0, 0 );
 
-    bindrule( "Includes" )->procedure = 
-    bindrule( "INCLUDES" )->procedure = 
+    bindrule( "Includes" )->procedure =
+    bindrule( "INCLUDES" )->procedure =
 	parse_make( builtin_depends, P0, P0, P0, C0, C0, 1 );
 
-    bindrule( "Leaves" )->procedure = 
-    bindrule( "LEAVES" )->procedure = 
+    bindrule( "Leaves" )->procedure =
+    bindrule( "LEAVES" )->procedure =
 	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_LEAVES );
 
-    bindrule( "Match" )->procedure = 
-    bindrule( "MATCH" )->procedure = 
+    bindrule( "Match" )->procedure =
+    bindrule( "MATCH" )->procedure =
 	parse_make( builtin_match, P0, P0, P0, C0, C0, 0 );
 
-    bindrule( "NoCare" )->procedure = 
-    bindrule( "NOCARE" )->procedure = 
+    bindrule( "NoCare" )->procedure =
+    bindrule( "NOCARE" )->procedure =
 	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_NOCARE );
 
-    bindrule( "NOTIME" )->procedure = 
-    bindrule( "NotFile" )->procedure = 
-    bindrule( "NOTFILE" )->procedure = 
+    bindrule( "NOTIME" )->procedure =
+    bindrule( "NotFile" )->procedure =
+    bindrule( "NOTFILE" )->procedure =
 	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_NOTFILE );
 
-    bindrule( "NoUpdate" )->procedure = 
-    bindrule( "NOUPDATE" )->procedure = 
+    bindrule( "NoUpdate" )->procedure =
+    bindrule( "NOUPDATE" )->procedure =
 	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_NOUPDATE );
 
 #ifdef OPT_BUILTIN_SUBST_EXT
-	bindrule( "Subst" )->procedure = 
+	bindrule( "Subst" )->procedure =
 	parse_make( builtin_subst, P0, P0, P0, C0, C0, 0 );
 #endif
 
-    bindrule( "Temporary" )->procedure = 
-    bindrule( "TEMPORARY" )->procedure = 
+    bindrule( "Temporary" )->procedure =
+    bindrule( "TEMPORARY" )->procedure =
 	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_TEMP );
 
 #ifdef OPT_MULTIPASS_EXT
@@ -182,15 +182,15 @@ load_builtins()
 #endif
 
 #ifdef OPT_HEADER_CACHE_EXT
-    bindrule( "UseDepCache" )->procedure = 
+    bindrule( "UseDepCache" )->procedure =
  parse_make( builtin_usedepcache, P0, P0, P0, C0, C0, T_FLAG_USEDEPCACHE );
 #endif
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-    bindrule( "UseFileCache" )->procedure = 
+    bindrule( "UseFileCache" )->procedure =
  parse_make( builtin_usefilecache, P0, P0, P0, C0, C0, T_FLAG_USEFILECACHE );
 
-    bindrule( "OptionalFileCache" )->procedure = 
+    bindrule( "OptionalFileCache" )->procedure =
  parse_make( builtin_usefilecache, P0, P0, P0, C0, C0, T_FLAG_USEFILECACHE | T_FLAG_OPTIONALFILECACHE );
 
     bindrule( "UseCommandLine" )->procedure =
@@ -198,7 +198,7 @@ load_builtins()
 #endif
 
 #ifdef OPT_BUILTIN_NEEDS_EXT
-    bindrule( "MightNotUpdate" )->procedure = 
+    bindrule( "MightNotUpdate" )->procedure =
     	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_MIGHTNOTUPDATE );
 
     bindrule( "Needs" )->procedure =
@@ -221,8 +221,8 @@ load_builtins()
 /*
  * builtin_depends() - DEPENDS/INCLUDES/NEEDS rule
  *
- * The DEPENDS builtin rule appends each of the listed sources on the 
- * dependency list of each of the listed targets.  It binds both the 
+ * The DEPENDS builtin rule appends each of the listed sources on the
+ * dependency list of each of the listed targets.  It binds both the
  * targets and sources as TARGETs.
  */
 
@@ -277,7 +277,7 @@ builtin_depends(
 /*
  * builtin_echo() - ECHO rule
  *
- * The ECHO builtin rule echoes the targets to the user.  No other 
+ * The ECHO builtin rule echoes the targets to the user.  No other
  * actions are taken.
  */
 
@@ -568,10 +568,10 @@ builtin_queuejamfile(
 #ifdef OPT_HEADER_CACHE_EXT
 
 /*
- * builtin_usedepcache() - 
+ * builtin_usedepcache() -
  *
- * 
- * 
+ *
+ *
  */
 
 LIST *
@@ -632,10 +632,10 @@ builtin_usefilecache(
 }
 
 /*
- * builtin_usecommandline() - 
+ * builtin_usecommandline() -
  *
- * 
- * 
+ *
+ *
  */
 
 LIST *
@@ -811,7 +811,7 @@ builtin_math(
 	    exit( EXITBAD );
     }
 
-    itoa( result, buffer, 10 );
+	sprintf(buffer, "%d", result);
 
     return list_new(L0, buffer, 0);
 }
@@ -859,10 +859,10 @@ builtin_w32_shortname( PARSE *parse, LOL *args, int *jmp )
 
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 /*
- * builtin_usemd5callback() - 
+ * builtin_usemd5callback() -
  *
- * 
- * 
+ *
+ *
  */
 
 LIST *

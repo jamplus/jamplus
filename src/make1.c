@@ -1230,7 +1230,7 @@ make1cmds( ACTIONS *a0 )
 	    {
 		/* Build cmd: cmd_new consumes its lists. */
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
-		int thischunk = rule->maxtargets != 0 ? min(chunk, rule->maxtargets) : chunk;
+		int thischunk = rule->maxtargets != 0 ? (chunk < rule->maxtargets ? chunk : rule->maxtargets) : chunk;
 
 		CMD *cmd = cmd_new( rule,
 			list_copy( L0, nt ),
@@ -1238,8 +1238,8 @@ make1cmds( ACTIONS *a0 )
 			list_copy( L0, shell ),
 			maxline );
 /* commented so jamgram.y can compile #else
-		CMD *cmd = cmd_new( rule, 
-			list_copy( L0, nt ), 
+		CMD *cmd = cmd_new( rule,
+			list_copy( L0, nt ),
 			list_sublist( ns, start, chunk ),
 			list_copy( L0, shell ),
 			maxline );
@@ -1413,8 +1413,8 @@ make1list_unbound(
 static void
 make1list_batched(
         MD5SUM *md5forcmd,
-        LIST**plt, 
-        LIST**pls, 
+        LIST**plt,
+        LIST**pls,
         TARGETS *targets,
         TARGETS *sources,
         int     flags )
@@ -1458,7 +1458,7 @@ make1list_batched(
 	if( t->binding == T_BIND_UNBOUND )
 	    make1bind( t, 0 );
 	if( s!=NULL) {
-	    if ( s->binding == T_BIND_UNBOUND ) 
+	    if ( s->binding == T_BIND_UNBOUND )
 		make1bind( s, !( flags & RULE_EXISTING ) );
 	    if ( s->binding == T_BIND_UNBOUND )
 		printf("Warning using unbound source %s for batched action.\n", s->name);
@@ -1483,7 +1483,7 @@ make1list_batched(
 	    MD5Update( &context, t->name, strlen( t->name ) );
 	    MD5Final( t->buildmd5sum, &context );
 	    if (DEBUG_MD5HASH) {
-		printf( "Cacheable: %s buildmd5: %s org: %s\n", 
+		printf( "Cacheable: %s buildmd5: %s org: %s\n",
 		    t->boundname, md5tostring(t->buildmd5sum), md5tostring(buildsumorg) );
 	    }
 	}

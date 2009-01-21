@@ -40,7 +40,7 @@
 
 # ifdef USE_PATHUNIX
 
-extern int pathdelim_oldstyle = -1;
+int pathdelim_oldstyle = -1;
 
 /*
  * path_parse() - split a file name into dir/base/suffix/member

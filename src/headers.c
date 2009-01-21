@@ -7,10 +7,10 @@
 /*
  * headers.c - handle #includes in source files
  *
- * Using regular expressions provided as the variable $(HDRSCAN), 
+ * Using regular expressions provided as the variable $(HDRSCAN),
  * headers() searches a file for #include files and phonies up a
  * rule invocation:
- * 
+ *
  *	$(HDRRULE) <target> : <include files> ;
  *
  * External routines:
@@ -67,7 +67,7 @@ headers( TARGET *t )
 	LIST	*hdrrule;
 	LOL	lol;
 
-	if( !( hdrscan = var_get( "HDRSCAN" ) ) || 
+	if( !( hdrscan = var_get( "HDRSCAN" ) ) ||
 	    !( hdrrule = var_get( "HDRRULE" ) ) )
 	        return;
 
@@ -117,7 +117,7 @@ typedef struct
  * headers1() - using regexp, scan a file and build include LIST
  */
 
-static LIST *headers1helper( 
+static LIST *headers1helper(
 	FILE *f,
 	LIST *hdrscan )
 {
@@ -183,7 +183,7 @@ static LIST *headers1helper(
 		    *p = 0;
 		}
 		else
-# endif 
+# endif
 		{
 		memcpy( buf2, re[i]->startp[1], l );
 		buf2[ l ] = 0;
@@ -200,7 +200,7 @@ static LIST *headers1helper(
 }
 
 LIST *
-headers1( 
+headers1(
 	const char *file,
 	LIST *hdrscan )
 {
@@ -266,7 +266,7 @@ typedef struct
 static	/* Needs to be global if header caching is on */
 #endif
 LIST *
-headers1( 
+headers1(
 	const char *file,
 	LIST *hdrscan )
 {
@@ -323,7 +323,7 @@ headers1(
 #else
 		memcpy( buf2, re[i]->startp[1], l );
 		buf2[ l ] = 0;
-# endif 
+# endif
 		result = list_new( result, buf2, 0 );
 
 		if( DEBUG_HEADER )

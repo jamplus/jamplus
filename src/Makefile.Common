@@ -68,6 +68,8 @@ SOURCES = \
 	execunix.c \
 	execvms.c \
 	expand.c \
+	fileglob.cpp \
+	FileGlobBase.cpp \
 	filemac.c \
 	filent.c \
 	fileos2.c \
@@ -101,8 +103,8 @@ SOURCES = \
 	timestamp.c \
 	tmpunix.c \
 	variable.c \
-	w32_getreg.c \
-	w32_shortname.c \
+#	w32_getreg.c \
+#	w32_shortname.c \
 	fileglob.cpp \
 	FileGlobBase.cpp
 
@@ -110,5 +112,4 @@ all: $(EXENAME)
 	$(EXENAME) -f../bin/Jambase.jam -sCONFIG=release
 
 $(EXENAME):
-	mkdir obj
 	$(CC) $(TARGET) $(DEFINES) $(CFLAGS) $(SOURCES) $(LINKLIBS)

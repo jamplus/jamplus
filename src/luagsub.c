@@ -2,6 +2,7 @@
 #include "buffer.h"
 #include <stdarg.h>
 #include <assert.h>
+#include <stddef.h>
 
 /* macro to `unsign' a character */
 #define uchar(c)        ((unsigned char)(c))

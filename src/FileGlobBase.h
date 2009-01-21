@@ -7,7 +7,6 @@
 #define FILEGLOBBASE_H
 
 #include <time.h>
-#include <io.h>
 
 /**
 	The base class of all file glob matching classes.  Derived classes should

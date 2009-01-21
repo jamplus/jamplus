@@ -68,6 +68,8 @@ static int my_wait( int *status );
 # endif
 # endif
 
+#include <stdlib.h>
+
 #ifdef OPT_INTERRUPT_FIX
 int intr = 0;
 #else
@@ -503,7 +505,7 @@ execcmd(
 	    dup( fd );
 # endif
 	    execvp( argv[0], argv );
-	    _exit(127);
+	    exit(127);
 	}
 # endif
 

@@ -38,6 +38,7 @@
 # include "hash.h"
 # include "newstr.h"
 # include "buffer.h"
+#include <limits.h>
 
 static struct hash *varhash = 0;
 
