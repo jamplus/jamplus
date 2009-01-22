@@ -11,11 +11,21 @@ rule CopyFile PARENTS : TARGET : SOURCE
 	Clean clean:$(PARENTS) : $(TARGET) ;
 }
 
-
-actions CopyFile1
+if $(NT)
 {
-	$(CP) "$(2:\\)" "$(1:\\)"
+	actions CopyFile1
+	{
+		$(CP) "$(2:\\)" "$(1:\\)"
+	}
 }
+else
+{
+	actions CopyFile1
+	{
+		$(CP) $(2) $(1)
+	}
+}
+
 
 }
 else
