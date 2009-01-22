@@ -126,7 +126,9 @@ exec_init()
     tempdir = "/tmp";
 # endif
 
-    if( getenv( "TEMP" ) )
+    if( getenv( "TMPDIR" ) )
+		tempdir = getenv( "TMPDIR" );
+    else if( getenv( "TEMP" ) )
 	tempdir = getenv( "TEMP" );
     else if( getenv( "TMP" ) )
 	tempdir = getenv( "TMP" );
@@ -313,7 +315,8 @@ execcmd(
 	{
 	    char *tempdir;
 
-	    if( !( tempdir = getenv( "TEMP" ) ) &&
+	    if( !( tempdir = getenv( "TMPDIR" ) ) &&
+		!( tempdir = getenv( "TEMP" ) ) &&
 		!( tempdir = getenv( "TMP" ) ) )
 # ifdef USE_EXECNT /* CWM */
 		    tempdir = "\\temp";
