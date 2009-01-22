@@ -298,6 +298,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 		SUFOBJ	?= .o ;
 
 		SUFSHAREDLIB ?= .so ;
+		SUFMODULE ?= .so ;
 
 		NOARSCAN = true ;
 		NOARUPDATE = true ;
@@ -325,6 +326,8 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 				DEFINES.*.* on * += ;
 				CC			?= gcc ;
 				C++			?= g++ ;
+				LINK		?= $(C++) ;
+				SUFMODULE	= .dylib ;
 
 		}
 
@@ -1806,7 +1809,7 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 rule Library TARGET : SOURCES : OPTIONS
 {
 	local objects = [ MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
-	if shared in $(OPTIONS)
+	if shared in $(OPTIONS)  ||  module in $(OPTIONS)
 	{
 		SharedLibraryFromObjects $(TARGET) : $(objects) : $(OPTIONS) ;
 	}
@@ -1902,7 +1905,11 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
 	local _s = $(OBJECTS:G=$(grist)) ;
-	local _t = [ _retrieveOutputName $(TARGET) : SUFSHAREDLIB ] ;
+	local suffixName = SUFSHAREDLIB ;
+	if module in $(OPTIONS) {
+		suffixName = SUFMODULE ;
+	}
+	local _t = [ _retrieveOutputName $(TARGET) : $(suffixName) ] ;
 	_t = $(_t:G=$(TARGET)) ;
 
 	if $(COMPILER) in vs2005 vs2008  &&  ! ( nomanifest in $(OPTIONS) )
@@ -1986,8 +1993,14 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	}
 	else if $(COMPILER) = gcc  &&  $(OS) = MACOSX
 	{
-	#		LinkFlags $(TARGET) : -bundle -undefined dynamic_lookup ;
-		LinkFlags $(TARGET) : -dynamiclib -install_name $(_t:T) ;
+		if module in $(OPTIONS)
+		{
+			LinkFlags $(TARGET) : -bundle -undefined dynamic_lookup ;
+		}
+		else
+		{
+			LinkFlags $(TARGET) : -dynamiclib -install_name $(_t:T) ;
+		}
 	}
 #	else if $(UNIX)
 #	{
