@@ -815,7 +815,7 @@ int findfile(const char* wildcard, BUFFER* foundfilebuff)
 	if (!dirp)
 	{
 		buffer_free(&pathbuff);
-		return;
+		return 0;
 	}
 
 	// Any files found?
