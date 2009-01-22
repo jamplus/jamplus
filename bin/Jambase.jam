@@ -2297,12 +2297,15 @@ rule Defines TARGET : DEFINES : THE_CONFIG : THE_PLATFORM
 
 rule DefFile TARGET : SOURCES
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	local grist = $(TARGET) ;
-	SOURCES = $(SOURCES:G=$(grist)) ;
-	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
-	Depends $(TARGET) : $(SOURCES) ;
-	LinkFlags $(TARGET) : /DEF:"$(SOURCES:T)" ;
+	if $(COMPILER) in vc6 vs2002 vs2003 vs2005 vs2008
+	{
+		TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+		local grist = $(TARGET) ;
+		SOURCES = $(SOURCES:G=$(grist)) ;
+		SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
+		Depends $(TARGET) : $(SOURCES) ;
+		LinkFlags $(TARGET) : /DEF:"$(SOURCES:T)" ;
+	}
 }
 
 
