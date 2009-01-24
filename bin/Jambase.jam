@@ -178,6 +178,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 		RMDIR	?= rmdir /s/q ;
 		SLASH	?= / ;
 		SUFEXE	?= .exe ;
+		SUFMODULE ?= .dll ;
 		SUFSHAREDLIB ?= .dll ;
 		SUFRES	?= .res ;
 
