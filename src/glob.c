@@ -1,5 +1,5 @@
 /*
- * Copyright 1994 Christopher Seiwald.  All rights reserved. 
+ * Copyright 1994 Christopher Seiwald.  All rights reserved.
  *
  * This file is part of Jam - see jam.c for Copyright information.
  */
@@ -14,7 +14,7 @@
  *	[a-z]	any single character in the range a-z
  *	[^a-z]	any single character not in the range a-z
  *	\x	match x
- *	
+ *
  * External functions:
  *
  *	glob() - match a string against a simple pattern
@@ -44,7 +44,7 @@ glob(
 {
 	char bitlist[ BITLISTSIZE ];
 	const char *here;
-
+# ifdef OS_NT
 	for( ;; )
 	    switch( *c++ )
 	{
@@ -77,7 +77,75 @@ glob(
 	case '*':
 		here = s;
 
-		while( *s ) 
+		while( *s )
+			s++;
+
+		/* Try to match the rest of the pattern in a recursive */
+		/* call.  If the match fails we'll back up chars, retrying. */
+
+		while( s != here )
+		{
+			int r;
+
+			/* A fast path for the last token in a pattern */
+
+			r = *c ? glob( c, s ) : *s ? -1 : 0;
+
+			if( !r )
+				return 0;
+			else if( r < 0 )
+				return 1;
+
+			--s;
+		}
+		break;
+
+	case '\\':
+		/* Force literal match of next char. */
+
+		if( !*c || tolower( *s++ ) != tolower( *c++ ) )
+		    return 1;
+		break;
+
+	default:
+		if( tolower( *s++ ) != tolower( c[-1] ) )
+		    return 1;
+		break;
+	}
+# else
+	for( ;; )
+	    switch( *c++ )
+	{
+	case '\0':
+		return *s ? -1 : 0;
+
+	case '?':
+		if( !*s++ )
+		    return 1;
+		break;
+
+	case '[':
+		/* scan for matching ] */
+
+		here = c;
+		do if( !*c++ )
+			return 1;
+		while( here == c || *c != ']' );
+		c++;
+
+		/* build character class bitlist */
+
+		globchars( here, c, bitlist );
+
+		if( !CHECK_BIT( bitlist, *(unsigned char *)s ) )
+			return 1;
+		s++;
+		break;
+
+	case '*':
+		here = s;
+
+		while( *s )
 			s++;
 
 		/* Try to match the rest of the pattern in a recursive */
@@ -112,6 +180,7 @@ glob(
 		    return 1;
 		break;
 	}
+#endif
 }
 
 /*
@@ -119,16 +188,16 @@ glob(
  */
 
 static void
-globchars( 
-	const char *s, 
-	const char *e, 
+globchars(
+	const char *s,
+	const char *e,
 	char *b )
 {
 	int neg = 0;
 
 	memset( b, '\0', BITLISTSIZE  );
 
-	if( *s == '^') 
+	if( *s == '^')
 		neg++, s++;
 
 	while( s < e )
@@ -145,7 +214,7 @@ globchars(
 			b[ c/8 ] |= (1<<(c%8));
 		}
 	}
-			
+
 	if( neg )
 	{
 		int i;
