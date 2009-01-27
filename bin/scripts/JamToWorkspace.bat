@@ -1,1 +1,1 @@
-@%~dp0..\lua\LuaPlus %~dp0JamToWorkspace.lua %*
+@%~dp0..\lua\lua %~dp0JamToWorkspace.lua %*
