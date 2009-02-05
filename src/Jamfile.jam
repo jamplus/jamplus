@@ -11,6 +11,9 @@ if $(VMS) 	{ LOCATE_TARGET ?= [.binvms] ; }
 else if $(MAC) 	{ LOCATE_TARGET ?= :bin.mac ; }
 else 		{ LOCATE_TARGET ?= bin.$(OSFULL[1]:L)/$(CONFIG) ; }
 
+DEPCACHE.standard ?= $(LOCATE_TARGET)/.depcache ;
+DEPCACHE ?= standard ;
+
 # Leave generated source in current directory; it would be nice to use
 # these lines below to build the source into the platform-specific
 # directory, but getting scan.c to include the right jambase.h is
@@ -108,7 +111,7 @@ Option OPT_BUILTIN_MD5_EXT : yes ;
 Option OPT_BUILTIN_NEEDS_EXT ;
 Option OPT_BUILTIN_PUTENV_EXT ;
 Option OPT_BUILTIN_SUBST_EXT ;
-Option OPT_CIRCULAR_GENERATED_HEADER_FIX ;
+#Option OPT_CIRCULAR_GENERATED_HEADER_FIX ;
 if $(OS) = NT
 {
 	Option OPT_BUILTIN_W32_GETREG_EXT : yes ;
@@ -266,7 +269,7 @@ if $(VMS)
 #
 
 LinkLibraries jam : libjam ;
-OutputPostfix jam : : release ;
+OutputPostfix jam : : release releaseltcg ;
 OutputPath jam : ../bin ;
 Application jam : jam.c jambase-j.c ;
 
