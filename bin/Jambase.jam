@@ -37,7 +37,7 @@ JAMBASEDATE = 2008.10.08 ;
 
 CONFIG ?= release ;
 
-VALID_CONFIGS ?= debug release ;
+VALID_CONFIGS ?= debug release releaseltcg ;
 VALID_PLATFORMS ?= win32 ;
 
 PLATFORM ?= win32 ;
@@ -232,18 +232,26 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 
 			MSVCBIN ?= $(MSVCNT)/bin/ ;
 
-			CCFLAGS.win32.debug on * 	= /Od /Gm /EHsc /RTC1 /MDd /W3 /Zi ;
-			CCFLAGS.win32.release on * 	= /O2 /Oi /EHsc /Gy /MD /W3 /Zi ;
-			C++FLAGS.win32.* on *		?= [ on * Var CCFLAGS.win32.* ] ;
-			C++FLAGS.win32.debug on *	?= [ on * Var CCFLAGS.win32.debug ] ;
-			C++FLAGS.win32.release on *	?= [ on * Var CCFLAGS.win32.release ] ;
+			CCFLAGS.win32.debug on * 		?= /Od /Gm /EHsc /RTC1 /MDd /W3 /Zi ;
+			CCFLAGS.win32.release on * 		?= /O2 /Oi /EHsc /Gy /MD /W3 /Zi ;
+			CCFLAGS.win32.releaseltcg on * 	?= [ on * Var CCFLAGS.win32.release ] /GL ;
+			C++FLAGS.win32.* on *			?= [ on * Var CCFLAGS.win32.* ] ;
+			C++FLAGS.win32.debug on *		?= [ on * Var CCFLAGS.win32.debug ] ;
+			C++FLAGS.win32.release on *		?= [ on * Var CCFLAGS.win32.release ] ;
+			C++FLAGS.win32.releaseltcg on *	?= [ on * Var CCFLAGS.win32.releaseltcg ] ;
 
 			DEFINES.*.debug on * += _DEBUG DEBUG ;
 			DEFINES.*.release on * += NDEBUG ;
+			DEFINES.*.releaseltcg on * += NDEBUG ;
+
+			LIBFLAGS.win32.debug on * = ;
+			LIBFLAGS.win32.release on * = ;
+			LIBFLAGS.win32.releaseltcg on * = /LTCG ;
 
 			LINKDIRECTORIES.*.*	on * += $(MSSDK_LINKDIRECTORIES) ;
 			LINKFLAGS.win32.debug on * = /INCREMENTAL /DEBUG /MACHINE:X86 ;
 			LINKFLAGS.win32.release on * = /INCREMENTAL:NO /DEBUG /MACHINE:X86 /OPT:REF /OPT:ICF ;
+			LINKFLAGS.win32.releaseltcg on * = [ on * Var LINKFLAGS.win32.release ] /LTCG ;
 
 			AR			= "$(MSVCBIN)lib" ;
 			AS			= "$(MSVCBIN)masm386" ;
@@ -992,7 +1000,7 @@ if $(MSVCNT)
 
 actions updated together piecemeal Archive
 {
-	$(AR) $(<) $(>)
+	$(AR) $(LIBFLAGS) $(<) $(>)
 }
 
 actions piecemeal together existing Clean
@@ -1052,7 +1060,7 @@ if $(NOARUPDATE)
 {
 	actions Archive
 	{
-	$(AR) $(<) $(>)
+	$(AR) $(LIBFLAGS) $(<) $(>)
 	}
 }
 
@@ -1073,7 +1081,7 @@ if $(NT) && $(MSVCNT)
 	actions together piecemeal Archive
 	{
 	if exist $(<) set _$(<:B)_=$(<)
-	$(AR) /out:$(<) %_$(<:B)_% $(>)
+	$(AR) $(LIBFLAGS) /out:$(<) %_$(<:B)_% $(>)
 	}
 
 	actions piecemeal together existing Clean
@@ -1484,7 +1492,7 @@ if $(MSVCNT)
 	actions together response Archive
 	{
 	PATH=%PATH%;$(MSVCNT_PATH)
-	"$(AR)" /nologo /out:$(<) @@($(>:\\))
+	"$(AR)" /nologo $(LIBFLAGS) /out:$(<) @@($(>:\\))
 	}
 }
 
@@ -1891,6 +1899,13 @@ rule LibraryFromObjects TARGET : OBJECTS
 
 	UseCommandLine $(_linkTargets) : $(_s) ;
 
+	local libFlags =
+		[ _retrieveVar LIBFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+		[ _retrieveVar LIBFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
+	LIBFLAGS on $(_l) = $(libFlags) ;
+
+	UseCommandLine $(_l) : $(libFlags) ;
+
 	Archive $(_l) : $(_s) ;
 
 	if $(RANLIB) { Ranlib $(_l) ; }
@@ -2263,25 +2278,33 @@ rule CRuntimeType TARGET : TYPE : THE_PLATFORM
 		{
 			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MTd ;
 			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MT ;
+			CCFLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MT ;
 			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MDd ;
 			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) += /MD ;
+			CCFLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MD ;
 
 			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MTd ;
 			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MT ;
+			C++FLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MT ;
 			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MDd ;
 			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) += /MD ;
+			C++FLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MD ;
 		}
 		else if $(TYPE) = static
 		{
 			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MDd ;
 			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MD ;
+			CCFLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MD ;
 			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MTd ;
 			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) += /MT ;
+			CCFLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MT ;
 
 			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MDd ;
 			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MD ;
+			C++FLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MD ;
 			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MTd ;
 			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) += /MT ;
+			C++FLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MT ;
 		}
 	}
 }
