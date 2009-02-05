@@ -27,10 +27,10 @@
 
 #ifdef OPT_RESPONSE_FILES
 #ifdef OPT_MULTIPASS_EXT
-static int cmd_string( RULE* rule, BUFFER *buff, int outsize,
+static int cmd_string( RULE* rule, const char *in, BUFFER *buff, int outsize,
 		       LOL *lol, TMPLIST **response_files, CMD* cmd);
 #else
-static int cmd_string( RULE* rule, BUFFER *buff, int outsize,
+static int cmd_string( RULE* rule, const char *in, BUFFER *buff, int outsize,
 		       LOL *lol, TMPLIST **response_files);
 #endif /* OPT_MULTIPASS_EXT */
 #endif
@@ -72,7 +72,7 @@ cmd_new(
         buffer_init(&buff);
 #ifdef OPT_RESPONSE_FILES
 #ifdef OPT_MULTIPASS_EXT
-    	if ( cmd_string( rule, &buff, maxline, &cmd->args,
+    	if ( cmd_string( rule, rule->actions, &buff, maxline, &cmd->args,
 			&cmd->response_files, cmd ) < 0 )
 	{
 	    cmd_free( cmd );
@@ -95,7 +95,7 @@ cmd_new(
 	}
 	else
 #else
-    	if( cmd_string( rule, &buff, maxline, &cmd->args,
+    	if( cmd_string( rule, rule->actions, &buff, maxline, &cmd->args,
 			&cmd->response_files ) < 0 )
 #endif /* OPT_MULTIPASS_EXT */
 #else
@@ -157,6 +157,7 @@ cmd_free( CMD *cmd )
 static int
 cmd_string(
     RULE     *rule,
+    const char *in,
     BUFFER   *buff,
     int	      outsize,
     LOL	     *lol,
@@ -166,14 +167,13 @@ cmd_string(
 static int
 cmd_string(
     RULE     *rule,
+    const char *in,
     BUFFER   *buff,
     int	      outsize,
     LOL	     *lol,
     TMPLIST **response_files)
 #endif
 {
-    const char  *in   = rule->actions;
-
     while (*in  &&  (int)buffer_pos(buff) < outsize) {
 	int 	dollar = 0;
 	size_t	lastword;
@@ -187,7 +187,7 @@ cmd_string(
 	}
 
 	lastword = buffer_pos(buff);
-	
+
 	/* Copy non-white space, watching for variables and optionally
 	 * for response file indicators. */
 
@@ -236,11 +236,13 @@ cmd_string(
 		    char save;
 		    int expandedSize;
 		    BUFFER subbuff;
+		    BUFFER expandedsubbuff;
+		    int expandedsubbuffsize;
 
 		    save = ine[-1];
 		    ((char*)ine)[-1] = '\0';
 
-		    buffer_init( &subbuff );
+		    buffer_init(&subbuff);
 
 		    while (0 > (expandedSize = var_string(
 				     in + 2, &subbuff, 0, lol, ' '))) {
@@ -250,8 +252,14 @@ cmd_string(
 
 		    ((char*)ine)[-1] = save;
 
-		    tmp_write(r->file, buffer_ptr( &subbuff ), expandedSize - 1);
-		    buffer_free( &subbuff );
+		    buffer_init(&expandedsubbuff);
+		    expandedsubbuffsize = cmd_string(rule, buffer_ptr(&subbuff), &expandedsubbuff, outsize, lol, response_files, cmd);
+
+		    tmp_write(r->file, buffer_ptr( &expandedsubbuff ), expandedsubbuffsize - 1);
+//		    tmp_write(r->file, buffer_ptr( &subbuff ), expandedSize - 1);
+
+		    buffer_free(&expandedsubbuff);
+		    buffer_free(&subbuff);
 
 		    if (!tmp_flush(r->file)) {
 			printf("jam: I/O error on temporary file\n");
