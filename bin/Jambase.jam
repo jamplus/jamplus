@@ -1091,7 +1091,8 @@ if $(NT) && $(MSVCNT)
 
 	actions response LinkDebug
 	{
-	PATH=%PATH%;$(MSVCNT_PATH)
+	set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(MSSDK)/bin
+	set INCLUDE=$(MSSDK)/include
 	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 	if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
 	if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
@@ -1101,13 +1102,15 @@ if $(NT) && $(MSVCNT)
 
 	actions response LinkNoManifest
 	{
-	PATH=%PATH%;$(MSVCNT_PATH)
+	set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(MSSDK)/bin
+	set INCLUDE=$(MSSDK)/include
 	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 	}
 
 	actions response Link
 	{
-	PATH=%PATH%;$(MSVCNT_PATH)
+	set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(MSSDK)/bin
+	set INCLUDE=$(MSSDK)/include
 	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 	"$(MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
 	}
