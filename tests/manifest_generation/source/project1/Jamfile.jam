@@ -1,0 +1,13 @@
+SubDir TOP source project1 : : project1 ;
+
+SRCS =
+	$(SUBDIR)/project1.cpp
+;
+
+CppCompileOptions outputastree ;
+
+LOCATE_TARGET = $(SUBDIR)/obj/$(PLATFORM)/$(CONFIG) ;
+OutputPath $(PROJECT_NAME) : $(SUBDIR)/lib/$(PLATFORM)/$(CONFIG) ;
+OutputPostfix $(PROJECT_NAME) : ;
+
+Application project1 : $(SRCS) ;
