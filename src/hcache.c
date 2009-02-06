@@ -1074,10 +1074,7 @@ int filecache_retrieve(TARGET *t, MD5SUM buildmd5sum)
 	if (memcmp(blobmd5sum, t->contentmd5sum, sizeof(MD5SUM)) == 0)
 	{
 	    if (!(t->flags & T_FLAG_NOCARE))
-//		_utime(t->boundname, NULL);
-		{
-			/* TODO */
-		}
+		_utime(t->boundname, NULL);
 	    printf("%s is already the proper cached target.\n", t->name);
 	    return 1;
 	}
