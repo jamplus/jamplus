@@ -96,9 +96,6 @@ struct _action {
 #endif
 	char		running;	/* has been started */
 	char		status;		/* see TARGET status */
-#ifdef OPT_UPDATED_CHILD_FIX
-	char		touched;	/* has been started */
-#endif
 #ifdef OPT_MULTIPASS_EXT
 	int		pass;
 #endif	

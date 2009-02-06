@@ -235,10 +235,6 @@ make1a(
 	    {
 		TARGETS *targets;
 
-/*		if( actions->action->touched) {
-		    continue;
-		}
-		actions->action->touched = 1;*/
 #ifdef OPT_MULTIPASS_EXT
 		if ( actions->action->pass != actionpass )
 		    continue;
