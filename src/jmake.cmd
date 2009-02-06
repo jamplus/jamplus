@@ -1,4 +1,5 @@
 @echo off
+setlocal
 
 REM Test for Visual Studio 2008
 
