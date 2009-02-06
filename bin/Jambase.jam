@@ -1114,6 +1114,17 @@ if $(NT) && $(MSVCNT)
 	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 	"$(MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
 	}
+
+	actions RegSvr32
+	{
+	regsvr32 /s /c "$(1)"
+	}
+
+	actions existing UnRegSvr32
+	{
+	regsvr32 /s /u "$(2)"
+	}
+
 }
 
 if $(WIN98)
@@ -1928,6 +1939,12 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	if module in $(OPTIONS) {
 		suffixName = SUFMODULE ;
 	}
+
+	local regserver ;
+	if regserver in $(OPTIONS)  &&  $(COMPILER) in vc6 vs2003 vs2005 vs2008 {
+		regserver = 1 ;
+	}
+
 	local _t = [ _retrieveOutputName $(TARGET) : $(suffixName) ] ;
 	_t = $(_t:G=$(TARGET)) ;
 
@@ -1946,7 +1963,6 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	local _linkTargets = $(_t) ;
 	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 
-	local _tlib ;
 	if $(hasExportLib)
 	{
 		local _tlib = @($(TARGET)$(SUFLIB):G=$(grist)) ;
@@ -1975,6 +1991,8 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 #		{
 #			Exit SharedLibraryFromObjects not implemented. ;
 #		}
+
+		Clean clean:$(TARGET) : $(_tlib) ;
 	}
 	else
 	{
@@ -1985,6 +2003,15 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	NotFile $(TARGET) ;
 	Depends $(_t) : $(_s) ;
 	MakeLocate $(_linkTargets) : $(outputPath) ;
+
+	if $(regserver)
+	{
+		local unregserver = clean:$(TARGET):unregserver ;
+		Depends clean:$(TARGET) : $(unregserver) ;
+		NotFile $(unregserver) ;
+		Always $(unregserver) ;
+		UnRegSvr32 clean:$(TARGET):unregserver : $(_linkTargets[1]) ;
+	}
 
 	Depends clean : clean:$(TARGET) ;
 	NotFile clean:$(TARGET) ;
@@ -2045,7 +2072,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	if $(MSVCNT)
 	{
 	    # Clean the .pdb (etc) files.
-		local sufs = .pdb .map .lib .exp .ilk ;
+		local sufs = .pdb .map .exp .ilk ;
 	    local zap = $(_t:S=$(sufs)) ;
 	    MakeLocate $(zap) : $(outputPath) ;
 	    Clean clean:$(TARGET) : $(zap) ;
@@ -2083,7 +2110,13 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	$(linkRule) $(_linkTargets) : $(_s) ;
 
+	if $(regserver)
+	{
+		RegSvr32 $(_linkTargets[1]) ;
+	}
+
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
+	LINK_OBJECTS on $(TARGET) = $(_s) ;
 }
 
 
