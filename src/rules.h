@@ -91,6 +91,9 @@ struct _action {
 	RULE		*rule;
 	TARGETS		*targets;
 	TARGETS		*sources;	/* aka $(>) */
+#ifdef OPT_ACTIONS_WAIT_FIX
+	TARGET		*run_tgt;
+#endif
 	char		running;	/* has been started */
 	char		status;		/* see TARGET status */
 #ifdef OPT_UPDATED_CHILD_FIX

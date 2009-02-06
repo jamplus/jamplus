@@ -103,8 +103,9 @@ rule Join
 # Improvements grabbed from //guest/craig_mcpheeters/jam/src/ and
 # //guest/matt_armstrong/... from the Perforce public depot (some
 # heavily modified).  The list below is in alphabetical order.
-Option OPT_ACTIONS_DUMP_TEXT_EXT ;
 Option OPT_ACTION_MAXTARGETS_EXT ;
+Option OPT_ACTIONS_DUMP_TEXT_EXT ;
+Option OPT_ACTIONS_WAIT_FIX ;
 Option OPT_BUILTIN_MATH_EXT ;
 Option OPT_BUILTIN_MD5CACHE_EXT ;
 Option OPT_BUILTIN_MD5_EXT : yes ;

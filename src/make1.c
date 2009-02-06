@@ -94,6 +94,9 @@ static LIST *make1list_unbound( LIST *l, TARGETS *targets, int flags );
 #endif
 static SETTINGS *make1settings( LIST *vars );
 static void make1bind( TARGET *t, int warn );
+#ifdef OPT_ACTIONS_WAIT_FIX
+static void make1wait( TARGET *t );
+#endif
 #ifdef OPT_SERIAL_OUTPUT_EXT
 static int verifyIsRealOutput (char *input, int len);
 #endif
@@ -424,6 +427,15 @@ make1b( TARGET *t )
 #endif
 	    if( t->actions )
 	    {
+#ifdef OPT_ACTIONS_WAIT_FIX
+		/* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
+		/* Determine if an action is already running on behalf of another target, and if so, */
+		/* bail out of make1b() prior to calling make1cmds() by adding more parents to the */
+		/* in-progress target and incrementing the asynccnt of the new target. */
+		make1wait( t );
+		if ( t->asynccnt != 0 )
+		    return;
+#endif
 		++counts->total;
 
 #ifndef OPT_IMPROVED_PROGRESS_EXT
@@ -909,6 +921,9 @@ make1cmds( ACTIONS *a0 )
 		continue;
 
 	    a0->action->running = 1;
+#ifdef OPT_ACTIONS_WAIT_FIX
+	    a0->action->run_tgt = t;
+#endif
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 #if 0            /* if this action is batched (an ugly way to mark this, until we can change the parser properly) */
@@ -1162,6 +1177,9 @@ make1cmds( ACTIONS *a0 )
 	    {
 		ns = make1list( ns, a1->action->sources, rule->flags );
 		a1->action->running = 1;
+#ifdef OPT_ACTIONS_WAIT_FIX
+		a1->action->run_tgt = t;
+#endif
 	    }
 
 	    /* If doing only updated (or existing) sources, but none have */
@@ -1597,6 +1615,25 @@ make1bind(
 	t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
 	popsettings( t->settings );
 }
+
+#ifdef OPT_ACTIONS_WAIT_FIX
+static void
+make1wait( TARGET *t )
+{
+    ACTIONS *a0;
+
+    for( a0 = t->actions; a0; a0 = a0->next )
+    {
+        if( a0->action->running && a0->action->run_tgt->progress != T_MAKE_DONE )
+        {
+            a0->action->run_tgt->parents = targetentry( a0->action->run_tgt->parents, t, 0 );
+            t->asynccnt++;
+        }
+    }
+}
+#endif
+
+
 #if defined(OPT_SERIAL_OUTPUT_EXT)
 /* Ignore common noise from NT tools */
 static int
