@@ -1937,53 +1937,30 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
 	local _s = $(OBJECTS:G=$(grist)) ;
+
 	local suffixName = SUFSHAREDLIB ;
 	if module in $(OPTIONS) {
 		suffixName = SUFMODULE ;
 	}
 
-	local regserver ;
-	if regserver in $(OPTIONS)  &&  $(COMPILER) in vc6 vs2003 vs2005 vs2008 {
-		regserver = 1 ;
-	}
-
 	local _t = [ _retrieveOutputName $(TARGET) : $(suffixName) ] ;
-	_t = $(_t:G=$(TARGET)) ;
+	_t = $(_t:G=$(grist)) ;
 
-	if $(COMPILER) in vs2005 vs2008  &&  ! ( nomanifest in $(OPTIONS) )
-	{
-		_writeManifest $(TARGET) : $(_t) : 2 ;
-		LinkFlags $(TARGET) : /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
-	}
-
-	local hasExportLib = true ;
-	if noexportlib in $(OPTIONS)
-	{
-		hasExportLib = ;
-	}
-
-	local _linkTargets = $(_t) ;
 	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 
-	if $(hasExportLib)
-	{
+	local _linkTargets = $(_t) ;
+
+	if ! ( noexportlib in $(OPTIONS) ) {
 		local _tlib = @($(TARGET)$(SUFLIB):G=$(grist)) ;
 
-		if $(COMPILER) in vs2003 vs2005 vs2008
-		{
+		if $(COMPILER) in vs2003 vs2005 vs2008 {
 			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
-			Depends $(TARGET) : $(_tlib) ;
-			Depends $(_tlib) : $(_t) ;
 			MightNotUpdate $(_tlib) ;
 			_linkTargets += $(_tlib) ;
 		}
-		else if $(COMPILER) in mingw gcc
-		{
+		else if $(COMPILER) in mingw gcc {
 #			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
 			BINDING on $(_tlib) = $(_t) ;
-			MakeLocate $(_tlib) : $(outputPath) ;
-			Depends $(TARGET) : $(_tlib) ;
-			Depends $(_tlib) : $(_t) ;
 			NotFile $(_tlib) ;		# Turn this off for export libraries.
 			_linkTargets += $(_tlib) ;
 
@@ -1993,21 +1970,18 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 #		{
 #			Exit SharedLibraryFromObjects not implemented. ;
 #		}
-
-		Clean clean:$(TARGET) : $(_tlib) ;
-	}
-	else
-	{
-		Depends $(TARGET) : $(_t) ;
 	}
 
 	Depends all : $(TARGET) ;
+	Depends $(TARGET) : $(_linkTargets) ;
 	NotFile $(TARGET) ;
-	Depends $(_t) : $(_s) ;
+	Depends $(_linkTargets) : $(_s) ;
 	MakeLocate $(_linkTargets) : $(outputPath) ;
 
-	if $(regserver)
-	{
+	local regserver ;
+	if regserver in $(OPTIONS)  &&  $(COMPILER) in vc6 vs2003 vs2005 vs2008 {
+		regserver = true ;
+
 		local unregserver = clean:$(TARGET):unregserver ;
 		Depends clean:$(TARGET) : $(unregserver) ;
 		NotFile $(unregserver) ;
@@ -2024,42 +1998,34 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	Depends allclean:$(TARGET) : clean:$(TARGET) ;
 	Clean clean:$(TARGET) : $(_linkTargets) ;
 
-	if $(COMPILER) in vc6 vs2003 vs2005 vs2008
-	{
+	local linkFlags =
+		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
+		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : * : $(CONFIG) : $(PLATFORM) ] ]
+		[ _retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+		[ _retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
+
+	if $(COMPILER) in vc6 vs2003 vs2005 vs2008 {
 		if ! ( nodefaults in $(OPTIONS) ) {
 			if windows in $(OPTIONS) {
-				LinkFlags $(TARGET) : /SUBSYSTEM:WINDOWS ;
+				linkFlags += /SUBSYSTEM:WINDOWS ;
 			} else {
-				LinkFlags $(TARGET) : /SUBSYSTEM:CONSOLE ;
+				linkFlags += /SUBSYSTEM:CONSOLE ;
 			}
 		}
-		LinkFlags $(TARGET) : /DLL ;
-	}
-	else if $(COMPILER) = mingw
-	{
-		LinkFlags $(TARGET) : -shared ;
-	}
-	else if $(COMPILER) = gcc  &&  $(OS) = MACOSX
-	{
-		if module in $(OPTIONS)
-		{
-			LinkFlags $(TARGET) : -bundle -undefined dynamic_lookup ;
-		}
-		else
-		{
-			LinkFlags $(TARGET) : -dynamiclib -install_name $(_t:T) ;
+		linkFlags += /DLL ;
+	} else if $(COMPILER) = mingw {
+		linkFlags += -shared ;
+	} else if $(COMPILER) = gcc  &&  $(OS) = MACOSX {
+		if module in $(OPTIONS) {
+			linkFlags += -bundle -undefined dynamic_lookup ;
+		} else {
+			linkFlags += -dynamiclib -install_name $(_t:T) ;
 		}
 	}
 #	else if $(UNIX)
 #	{
 #		Exit SharedLibraryFromObjects not implemented. ;
 #	}
-
-	local linkFlags =
-		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
-		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : * : $(CONFIG) : $(PLATFORM) ] ]
-		[ _retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-		[ _retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
 
 	local linkLibs =
 		[ _retrieveVar LINKLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
@@ -2068,26 +2034,25 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	local needLibs =
 		[ _retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar NEEDLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
-	NEEDLIBS on $(_linkTargets) = $(needLibs:S=$(SUFLIB)) ;
-	Depends $(_t) : $(needLibs) ;
 
-	if $(MSVCNT)
-	{
+	NEEDLIBS on $(_linkTargets) = $(needLibs:S=$(SUFLIB)) ;
+	Depends $(_linkTargets) : $(needLibs) ;
+
+	if $(MSVCNT) {
 	    # Clean the .pdb (etc) files.
 		local sufs = .pdb .map .exp .ilk ;
 	    local zap = $(_t:S=$(sufs)) ;
 	    MakeLocate $(zap) : $(outputPath) ;
 	    Clean clean:$(TARGET) : $(zap) ;
 
-	    Depends $(zap) : $(_t) ;
+	    Depends $(zap) : $(_linkTargets) ;
 
-		if ( nomanifest in $(OPTIONS) )
-		{
+		if ( nomanifest in $(OPTIONS) ) {
 			linkFlags -= /INCREMENTAL ;
-		}
-		else
-		{
+		} else if $(COMPILER) in vs2005 vs2008  &&  ! ( nomanifest in $(OPTIONS) ) {
+			_writeManifest $(TARGET) : $(_linkTargets) : 2 ;
 			_linkManifest $(_linkTargets) ;
+			linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 		}
 	}
 
@@ -2098,27 +2063,22 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	local linkRule = Link ;
 
-	if $(COMPILER) in vs2005 vs2008
-	{
-		if nomanifest in $(OPTIONS)
-		{
+	if $(COMPILER) in vs2005 vs2008 {
+		if nomanifest in $(OPTIONS) {
 			linkRule = LinkNoManifest ;
-		}
-		else if $(CONFIG) = debug
-		{
+		} else if $(CONFIG) = debug {
 			linkRule = LinkDebug ;
 		}
 	}
 
 	$(linkRule) $(_linkTargets) : $(_s) ;
+	Includes $(_s) : $(_s) ;
 
-	if $(regserver)
-	{
+	if $(regserver) {
 		RegSvr32 $(_linkTargets[1]) ;
 	}
 
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
-	LINK_OBJECTS on $(TARGET) = $(_s) ;
 }
 
 
