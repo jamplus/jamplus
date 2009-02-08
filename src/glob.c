@@ -44,7 +44,7 @@ glob(
 {
 	char bitlist[ BITLISTSIZE ];
 	const char *here;
-# ifdef OS_NT
+# if defined(OS_NT)  ||  defined(OS_MACOSX)
 	for( ;; )
 	    switch( *c++ )
 	{
