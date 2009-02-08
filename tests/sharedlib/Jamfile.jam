@@ -1,6 +1,6 @@
 SubDir TOP ;
 
-ALL_LOCATE_TARGET = image ;
+ALL_LOCATE_TARGET = $(SUBDIR)/image ;
 
 SubInclude TOP app ;
 SubInclude TOP lib-c ;
