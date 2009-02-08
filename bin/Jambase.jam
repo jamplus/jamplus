@@ -1751,23 +1751,19 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
-	local _s = @($(OBJECTS):G=$(grist)) ;
+	local _s = $(OBJECTS:G=$(grist)) ;
 	local _t = [ _retrieveOutputName $(TARGET) : SUFEXE ] ;
 	_t = $(_t:G=$(grist)) ;
 
-	if $(COMPILER) in vs2005 vs2008
-	{
-		_writeManifest $(TARGET) : $(_t) : 1 ;
-		LinkFlags $(TARGET) : /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
-	}
-
 	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 
+	local _linkTargets = $(_t) ;
+
 	Depends all : $(TARGET) ;
-	Depends $(TARGET) : $(_t) ;
+	Depends $(TARGET) : $(_linkTargets) ;
 	NotFile $(TARGET) ;
-	Depends $(_t) : $(_s) ;
-	MakeLocate $(_t) : $(outputPath) ;
+	Depends $(_linkTargets) : $(_s) ;
+	MakeLocate $(_linkTargets) : $(outputPath) ;
 
 	Depends clean : clean:$(TARGET) ;
 	NotFile clean:$(TARGET) ;
@@ -1776,53 +1772,59 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 	NotFile allclean:$(TARGET) ;
 	Always allclean:$(TARGET) ;
 	Depends allclean:$(TARGET) : clean:$(TARGET) ;
-	Clean clean:$(TARGET) : $(_t) ;
-
-	if $(COMPILER) in vc5 vc6 vs2003 vs2005 vs2008
-	{
-		if windows in $(OPTIONS) {
-			LinkFlags $(TARGET) : /SUBSYSTEM:WINDOWS ;
-		} else {
-			LinkFlags $(TARGET) : /SUBSYSTEM:CONSOLE ;
-		}
-	}
+	Clean clean:$(TARGET) : $(_linkTargets) ;
 
 	local linkFlags =
 		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
 		[ FLibraryPaths [ _retrieveVar LINKDIRECTORIES : * : $(CONFIG) : $(PLATFORM) ] ]
 		[ _retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
-	LINKFLAGS on $(_t) = $(linkFlags) ;
+
+	if $(COMPILER) in vc6 vs2003 vs2005 vs2008 {
+		if windows in $(OPTIONS) {
+			linkFlags += /SUBSYSTEM:WINDOWS ;
+		} else {
+			linkFlags += /SUBSYSTEM:CONSOLE ;
+		}
+	}
 
 	local linkLibs =
 		[ _retrieveVar LINKLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
-	LINKLIBS on $(_t) = $(linkLibs) ;
 
 	local needLibs =
 		[ _retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar NEEDLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
-	NEEDLIBS on $(_t) = $(needLibs) ;
-	Depends $(_t) : $(needLibs) ;
 
-	UseCommandLine $(_t) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
+	NEEDLIBS on $(_linkTargets) = $(needLibs) ;
+	Depends $(_linkTargets) : $(needLibs) ;
 
-	if $(MSVCNT)
-	{
+	if $(MSVCNT) {
 	    # Clean the .pdb (etc) files.
 		local sufs = .pdb .map .lib .exp .ilk ;
 	    local zap = $(_t:S=$(sufs)) ;
 	    MakeLocate $(zap) : $(outputPath) ;
 	    Clean clean:$(TARGET) : $(zap) ;
 
-	    Depends $(zap) : $(<) ;
+	    Depends $(zap) : $(_linkTargets) ;
 
-		_linkManifest $(_t) ;
+		if $(COMPILER) in vs2005 vs2008  &&  ! ( nomanifest in $(OPTIONS) )
+		{
+			_writeManifest $(TARGET) : $(_t) : 1 ;
+			_linkManifest $(_t) ;
+			linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
+		}
 	}
 
-	Link $(_t) : $(_s) ;
+	LINKFLAGS on $(_linkTargets) = $(linkFlags) ;
+	LINKLIBS on $(_linkTargets) = $(linkLibs) ;
 
-	LINK_TARGET on $(TARGET) = $(_t) ;
+	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
+
+	Link $(_linkTargets) : $(_s) ;
+	Includes $(_s) : $(_s) ;
+
+	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
 }
 
 
