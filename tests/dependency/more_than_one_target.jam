@@ -6,23 +6,26 @@
 #
 #  'upd a b' : a_src b_tmp ; is executed first and not 'upd b_tmp : b_src' ;
 #
-actions upd
+rule Update
 {
-  ECHO Updating $(<) : $(>)
+    Includes $(>) : $(>) ;
 }
 
-upd a b : a_src b_tmp ;
-upd b_tmp : b_src ;
+actions Update
+{
+    Echo Updating $(<) : $(>)
+}
+
+Update a b : a_src b_tmp ;
+Update b_tmp : b_src ;
 
 # BUG!: Jam won't update dependent of 'b' before executing this action!
 # Jam will update only dependets of 'a'
 
-DEPENDS a : a_src ;
-DEPENDS b : b_tmp ;
-DEPENDS b_tmp : b_src ;
+Depends a : a_src ;
+Depends b : b_tmp ;
+Depends b_tmp : b_src ;
 
-DEPENDS all : a b ;
+Depends all : a b ;
 
-NOTFILE all ;
-NOTFILE a_src ;
-NOTFILE b_src ;
+NotFile all a_src b_src ;
