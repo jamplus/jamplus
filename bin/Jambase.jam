@@ -1695,6 +1695,10 @@ rule _writeManifest TARGET : _t : MANIFEST_TYPE
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
 
+	local tempIntermediateManifest = @($(_t).intermediate.manifest:G=$(grist)) ;
+	MakeLocate $(tempIntermediateManifest) : $(LOCATE_TARGET) ;
+	Clean clean:$(TARGET) : $(tempIntermediateManifest) ;
+
 	if $(CONFIG) = debug
 	{
 		local tempEmbeddedManifest = @($(_t).embed.manifest:G=$(grist)) ;
@@ -1718,10 +1722,6 @@ rule _writeManifest TARGET : _t : MANIFEST_TYPE
 
 		local tempEmbeddedRes = [ ResourceCompiler $(TARGET) : $(tempEmbeddedRc) : quiet ] ;
 		_s += $(tempEmbeddedRes) ;
-
-		local tempIntermediateManifest = @($(_t).intermediate.manifest:G=$(grist)) ;
-		MakeLocate $(tempIntermediateManifest) : $(LOCATE_TARGET) ;
-		Clean clean:$(TARGET) : $(tempIntermediateManifest) ;
 
 		Depends $(_t) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
 	}
