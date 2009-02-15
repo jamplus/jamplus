@@ -1500,13 +1500,13 @@ if $(MSVCNT)
 	{
 		PATH=$(MSVCNT_PATH);%PATH%
 		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(C++:\\)" /nologo @@($(>)) $(MFLAGS)
+		"$(C++:\\)" /nologo @@("$(>)") $(MFLAGS)
 	}
 
 	actions together response Archive
 	{
 	PATH=%PATH%;$(MSVCNT_PATH)
-	"$(AR)" /nologo $(LIBFLAGS) /out:$(<) @@($(>:\\))
+	"$(AR)" /nologo $(LIBFLAGS) /out:"$(<)" @@("$(>:\\)")
 	}
 }
 
