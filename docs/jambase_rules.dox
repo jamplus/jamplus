@@ -203,6 +203,28 @@ For the given project \c TARGET, alter the build to use either a statically link
 
 
 <hr>
+\section rule_DefFile rule DefFile TARGET : SOURCES
+\addindex rule_DefFile
+
+When linking the given \c TARGET, link the .def file(s) specified in \c SOURCES.
+
+\note At this time, the def file only affects Visual C++ applications.
+
+\param TARGET The target to link the def file to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES One or more \c .def files.  \c .def files are searched for in <tt>$(SEARCH_SOURCE)</tt>.
+
+\code
+    # Link the WorkspaceWhiz target against WorkspaceWhiz.def.
+    DefFile WorkspaceWhiz : WorkspaceWhiz.def ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_Defines rule Defines TARGET : DEFINES [: THE_CONFIG : THE_PLATFORM]
 \addindex rule_Defines
 
@@ -366,17 +388,20 @@ If \c shared is specified for \c OPTIONS, the following additional options are a
 For the given project \c TARGET, assign the link \c DIRECTORIES to the appropriate configuration and platform.
 
 \param TARGET The target to assign the link \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
-\param DIRECTORIES The list of link directories to apply.
+\param DIRECTORIES The list of link directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir.
 \param THE_CONFIG (optional) If not specified, the default is all configurations.
 \param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Add c:/some/directory to myproject for all configurations and
-	# all platforms.
+    # all platforms.
     LinkDirectories myproject : c:/some/directory ;
 
     # For the win32 platform, add the MFC link directory.
-	LinkDirectories myproject : "$(MSVCNT)/atlmfc/lib" : : win32 ;
+    LinkDirectories myproject : "$(MSVCNT)/atlmfc/lib" : : win32 ;
+
+    # Relative path:
+    LinkDirectories myproject : ../lib ;
 \endcode
 
 
@@ -554,7 +579,7 @@ Workspaces are automatically generated for any executable processed while readin
 \section rule_ObjectCFlags rule ObjectCFlags TARGET : SOURCES : FLAGS [: THE_CONFIG : THE_PLATFORM]
 \addindex rule_ObjectCFlags
 
-For the given \c SOURCES, assign the \c FLAGS to the appropriate configuration and platform.
+For the given \c SOURCES matching <tt>*.c</tt>, assign the \c FLAGS to the appropriate configuration and platform.
 
 \param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param SOURCES The list of sources to assign the \c FLAGS to.
@@ -578,7 +603,7 @@ For the given \c SOURCES, assign the \c FLAGS to the appropriate configuration a
 \section rule_ObjectCppFlags rule ObjectC++Flags TARGET : SOURCES : FLAGS [: THE_CONFIG : THE_PLATFORM]
 \addindex rule_ObjectCppFlags
 
-For the given \c SOURCES, assign the \c FLAGS to the appropriate configuration and platform.
+For the given \c SOURCES matching *.cpp or *.cxx, assign the \c FLAGS to the appropriate configuration and platform.
 
 \param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param SOURCES The list of sources to assign the \c FLAGS to.
@@ -700,6 +725,8 @@ By default, the output location of a generated executable or library is at \c LO
 \addindex rule_OutputPostfix
 
 The output postfix is appended to the end of the generated target name.  By default, the output postfix is .\$(CONFIG).  This means the resultant filename is \$(OUTPUTNAME).\$(CONFIG).\$(EXT).
+
+If there is no assigned output postfix for \c TARGET, then the global target \c * is checked for a postfix.
 
 \param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param POSTFIX The new output postfix of the generated target.
