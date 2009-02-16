@@ -2414,7 +2414,16 @@ rule LinkPrebuiltLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	LINKLIBS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(LIBRARIES:S=$(SUFLIB)) ;
+	local newLibraries ;
+	local lib ;
+	for lib in $(LIBRARIES) {
+		if $(lib:S) {
+			newLibraries += $(lib) ;
+		} else {
+			newLibraries += $(lib)$(SUFLIB) ;
+		}
+	}
+	LINKLIBS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(newLibraries) ;
 }
 
 
