@@ -550,7 +550,7 @@ make0(
 #endif
 	    else if( c->target->fate == T_FATE_MAKING && !internal )
 		printf( "warning: %s depends on itself\n", c->target->name );
-#ifdef OPT_FIX_UPDATED
+#if 0 //def OPT_FIX_UPDATED
 	    else if( ptime && ptime->binding != T_BIND_UNBOUND &&
 		     c->target->time > ptime->time &&
 		     c->target->fate < T_FATE_NEWER )
