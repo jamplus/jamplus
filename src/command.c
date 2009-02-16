@@ -82,8 +82,7 @@ cmd_new(
 	if (rule->flags & RULE_LUA)
 	{
 	    cmd->luastring = malloc(buffer_pos(&buff) + 1);
-	    cmd->luastring[0] = '=';
-	    memcpy(cmd->luastring + 1, buffer_ptr(&buff), buffer_pos(&buff));
+	    memcpy(cmd->luastring, buffer_ptr(&buff), buffer_pos(&buff));
 	    buffer_free(&buff);
 	}
 	else
