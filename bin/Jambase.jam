@@ -1217,6 +1217,36 @@ rule CppCompileOptions OPTIONS
 
 __MultiCppCompile_OutputAsTree = 0 ;
 
+BUILD_EXTENSIONS = .c .cpp .cxx .m $(SUFOBJ) ;
+BUILD.c.RULE = batched-C ;
+BUILD.c.COMPILER = CC ;
+BUILD.c.PREFLAGS = preCCFLAGS ;
+BUILD.c.FLAGS = CCFLAGS ;
+BUILD.c.SUBDIRFLAGS = SUBDIRCCFLAGS ;
+
+BUILD.cpp.RULE = batched-C++ ;
+BUILD.cpp.COMPILER = C++ ;
+BUILD.cpp.PREFLAGS = preC++FLAGS ;
+BUILD.cpp.FLAGS = C++FLAGS ;
+BUILD.cpp.SUBDIRFLAGS = SUBDIRC++FLAGS ;
+
+BUILD.cxx.RULE = batched-C++ ;
+BUILD.cxx.COMPILER = C++ ;
+BUILD.cxx.PREFLAGS = preC++FLAGS ;
+BUILD.cxx.FLAGS = C++FLAGS ;
+BUILD.cxx.SUBDIRFLAGS = SUBDIRC++FLAGS ;
+
+BUILD.m.RULE = batched-C ;
+BUILD.m.COMPILER = CC ;
+BUILD.m.PREFLAGS = preCCFLAGS ;
+BUILD.m.FLAGS = CCFLAGS ;
+BUILD.m.SUBDIRFLAGS = SUBDIRCCFLAGS ;
+
+if $(MSVCNT)
+{
+	COMPILE_RULES_EXTENSIONS += .res ;
+}
+
 rule MultiCppCompile TARGET : SOURCES
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
@@ -1294,13 +1324,8 @@ rule MultiCppCompile TARGET : SOURCES
 	# for each file
 	local _src ;
 	local newsrcs ;
-	local extraSources ;
-	if $(MSVCNT)
-	{
-		extraSources = $(SOURCES:I=\\$(SUFRES)) ;
-	}
-	local sources = $(SOURCES:I=\\.cpp$:I=\\.c$:I=\\.cxx$I=\\$(SUFOBJ)$:G=$(grist)) ;
-	sources += $(extraSources) ;
+	local listIncludes = :I=$(BUILD_EXTENSIONS)$ ;
+	local sources = $(SOURCES:G=$(grist):$(listIncludes:J=)) ;
 #	local objSources = $(SOURCES:I=\\$(SUFOBJ)$:I=\\$(SUFRES):G=$(grist)) ;
 #	local sources = $(SOURCES:G=$(grist)) ;
 
@@ -1329,7 +1354,7 @@ rule MultiCppCompile TARGET : SOURCES
 			continue ;
 		}
 		local ext = $(_src:S) ;
-		if $(ext) in $(SUFOBJ) $(SUFRES) {
+		if ! $(BUILD$(ext).RULE) {
 			_allobjs += $(_src) ;
 			continue ;
 		}
@@ -1355,29 +1380,12 @@ rule MultiCppCompile TARGET : SOURCES
 		# Rest
 		Depends $(_obj) : $(_src) ;
 
-		local _flags ;
-		switch $(ext) {
-			case .c :
-				CC on $(_obj) = $(CC) ;
-
-				_flags = $(preCCFLAGS) ;
-				on $(_obj) _flags += $(CCFLAGS.$(ALL_TYPES)) ;
-				_flags += $(SUBDIRCCFLAGS) ;
-
-			case .cpp :
-				C++ on $(_obj) = $(C++) ;
-
-				_flags = $(preC++FLAGS) ;
-				on $(_obj) _flags += $(C++FLAGS.$(ALL_TYPES)) ;
-				_flags += $(SUBDIRC++FLAGS) ;
-
-			case .cxx :
-				C++ on $(_obj) = $(C++) ;
-
-				_flags = $(preC++FLAGS) ;
-				on $(_obj) _flags += $(C++FLAGS.$(ALL_TYPES)) ;
-				_flags += $(SUBDIRC++FLAGS) ;
-		}
+		local BUILD_EXT = BUILD$(ext) ;
+		$($(BUILD_EXT).COMPILER) on $(_obj) = $($($(BUILD_EXT).COMPILER)) ;
+		
+		local _flags = $($($(BUILD_EXT).PREFLAGS)) ;
+		on $(_obj) _flags += $($(@($(BUILD_EXT).FLAGS).$(ALL_TYPES))) ;
+		_flags += $($($(BUILD_EXT).SUBDIRFLAGS)) ;
 
 		_flags += [ FIncludes $(_hdrs) . ] ;
 
@@ -1423,12 +1431,12 @@ rule MultiCppCompile TARGET : SOURCES
 
 			# bind flags, defines and includes to the target
 			_flags += $(_postmflags) ;
-			MFLAGS on $(_src) = $(_flags) ;
+			MFLAGS on $(_src) = $(BUILD$(ext).RULE) $(_flags) ;
 			UseCommandLine $(_obj) : $(_flags) ;
 		}
 		else if $(COMPILER) in mingw gcc
 		{
-			MFLAGS on $(_src) = $(_flags) "-c -o \"$(_obj:T)\"" ;
+			MFLAGS on $(_src) = $(BUILD$(ext).RULE) $(_flags) "-c -o \"$(_obj:T)\"" ;
 			UseCommandLine $(_obj) : $(_flags) ;
 		}
 
@@ -1482,21 +1490,31 @@ rule MultiCppCompile TARGET : SOURCES
 		# mark all objects (and pch) for cleaning
 		Clean clean:$(TARGET) : $(objects) ;
 
-		MFLAGS on $(objects) = [ on $(_sources[1]) Var MFLAGS ] ;
+		local flags ;
+		on $(_sources[1]) flags = $(MFLAGS) ;
+		MFLAGS on $(objects) = $(flags[2-]) ;
+
 		if $(MSVCNT) {
 			SEMAPHORE on $(objects) = $(_VCPDB) ;
 		}
-		batched_C++ $(objects) : $(_sources) ;
+		
+		$(flags[1]) $(objects) : $(_sources) ;
 	}
 
 	# return all produced objects
 	return $(_allobjs) ;
 }
 
-
 if $(MSVCNT)
 {
-	actions updated response batched_C++
+	actions updated response batched-C
+	{
+		PATH=$(MSVCNT_PATH);%PATH%
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(CC:\\)" /nologo @@("$(>)") $(MFLAGS)
+	}
+
+	actions updated response batched-C++
 	{
 		PATH=$(MSVCNT_PATH);%PATH%
 		SET INCLUDE=$(STDHDRS:\\J=;)
@@ -1512,9 +1530,14 @@ if $(MSVCNT)
 
 if $(COMPILER) in mingw gcc
 {
-	actions updated response batched_C++
+	actions updated response batched-C
 	{
-		$(CC) -c $(MFLAGS) $(>)
+		"$(CC)" -c $(MFLAGS) $(>)
+	}
+
+	actions updated response batched-C++
+	{
+		"$(C++)" -c $(MFLAGS) $(>)
 	}
 }
 
