@@ -11,6 +11,10 @@
 #undef LoadString
 
 /* Declarations from lua.h. */
+/*
+** pseudo-indices
+*/
+#define LUA_REGISTRYINDEX	(-10000)
 #define LUA_GLOBALSINDEX	(-10002)
 
 typedef struct lua_State lua_State;
@@ -44,6 +48,7 @@ void (*lua_close) (lua_State *L);
 
 int   (*lua_gettop) (lua_State *L);
 void  (*lua_settop) (lua_State *L, int idx);
+void (*lua_pushvalue) (lua_State *L, int idx);
 
 #define lua_isfunction(L,n)	(lua_type(L, (n)) == LUA_TFUNCTION)
 #define lua_istable(L,n)	(lua_type(L, (n)) == LUA_TTABLE)
@@ -64,8 +69,11 @@ void  (*lua_pushnumber) (lua_State *L, lua_Number n);
 void  (*lua_pushinteger) (lua_State *L, lua_Integer n);
 void  (*lua_pushstring) (lua_State *L, const char *s);
 void  (*lua_pushcclosure) (lua_State *L, lua_CFunction fn, int n);
+void  (*lua_pushboolean) (lua_State *L, int b);
 
+void  (*lua_gettable) (lua_State *L, int idx);
 void  (*lua_getfield) (lua_State *L, int idx, const char *k);
+void  (*lua_rawgeti) (lua_State *L, int idx, int n);
 void  (*lua_createtable) (lua_State *L, int narr, int nrec);
 
 void  (*lua_settable) (lua_State *L, int idx);
@@ -84,6 +92,8 @@ void (*luaL_openlibs) (lua_State *L);
 int (*luaL_loadstring) (lua_State *L, const char *s);
 int (*luaL_loadfile) (lua_State *L, const char *filename);
 lua_State *(*luaL_newstate) (void);
+int (*luaL_ref) (lua_State *L, int t);
+void (*luaL_unref) (lua_State *L, int t, int ref);
 
 
 
@@ -282,7 +292,7 @@ static int pmain (lua_State *L)
 	lua_setfield(L, LUA_GLOBALSINDEX, "jam_evaluaterule");
 
 	top = lua_gettop(L);
-	ret = luaL_loadstring(L, "require 'task'");
+	ret = luaL_loadstring(L, "require 'lanes'");
 	lua_callhelper(top, ret);
 	return 0;
 }
@@ -337,6 +347,7 @@ void lua_init()
 
 	lua_gettop = (int (*)(lua_State *))GetProcAddress(hInstance, "lua_gettop");
 	lua_settop = (void (*)(lua_State *, int))GetProcAddress(hInstance, "lua_settop");
+	lua_pushvalue = (void (*)(lua_State *, int))GetProcAddress(hInstance, "lua_pushvalue");
 
 	lua_isnumber = (int (*)(lua_State *, int))GetProcAddress(hInstance, "lua_isnumber");
 	lua_isstring = (int (*)(lua_State *, int))GetProcAddress(hInstance, "lua_isstring");
@@ -352,8 +363,11 @@ void lua_init()
 	lua_pushinteger = (void (*) (lua_State *, lua_Integer))GetProcAddress(hInstance, "lua_pushinteger");
 	lua_pushstring = (void (*) (lua_State *, const char *))GetProcAddress(hInstance, "lua_pushstring");
 	lua_pushcclosure = (void (*) (lua_State *, lua_CFunction, int))GetProcAddress(hInstance, "lua_pushcclosure");
+	lua_pushboolean = (void (*)(lua_State *, int))GetProcAddress(hInstance, "lua_pushboolean");
 
+	lua_gettable = (void (*) (lua_State *, int id))GetProcAddress(hInstance, "lua_gettable");
 	lua_getfield = (void (*)(lua_State *, int, const char *))GetProcAddress(hInstance, "lua_getfield");
+	lua_rawgeti = (void  (*) (lua_State *, int, int))GetProcAddress(hInstance, "lua_rawgeti");
 	lua_createtable = (void (*)(lua_State *, int, int))GetProcAddress(hInstance, "lua_createtable");
 
 	lua_settable = (void (*)(lua_State *, int))GetProcAddress(hInstance, "lua_settable");
@@ -368,6 +382,8 @@ void lua_init()
 	luaL_loadstring = (int (*)(lua_State *, const char *))GetProcAddress(hInstance, "luaL_loadstring");
 	luaL_loadfile = (int (*)(lua_State *, const char *))GetProcAddress(hInstance, "luaL_loadfile");
 	luaL_newstate = (lua_State *(*)(void))GetProcAddress(hInstance, "luaL_newstate");
+	luaL_ref = (int (*)(lua_State *, int))GetProcAddress(hInstance, "luaL_ref");
+	luaL_unref = (void (*)(lua_State *, int, int))GetProcAddress(hInstance, "luaL_unref");
 
 	L = luaL_newstate();
 	lua_cpcall(L, &pmain, 0);
@@ -377,62 +393,98 @@ void lua_init()
 int luahelper_taskadd(const char* taskscript)
 {
 	int ret;
+	int ref;
+	size_t taskscriptlen = strlen(taskscript);
+	char* newTaskScript;
 
 	lua_init();
 
-	lua_getfield(L, LUA_GLOBALSINDEX, "task");
-	lua_getfield(L, -1, "create");
-	lua_pushstring(L, taskscript);
+	lua_getfield(L, LUA_GLOBALSINDEX, "lanes");			/* lanes */
+	lua_getfield(L, -1, "gen");							/* lanes gen */
+	lua_pushstring(L, "*");								/* lanes gen * */
 
-	ret = lua_pcall(L, 1, -1, 0);
+	newTaskScript = malloc( taskscriptlen + 1 );
+	strncpy(newTaskScript, taskscript, taskscriptlen);
+	newTaskScript[taskscriptlen] = 0;
+	ret = luaL_loadstring(L, newTaskScript);			/* lanes gen * script */
+	free(newTaskScript);
 	if (ret != 0)
 	{
 		if (lua_isstring(L, -1))
-			printf("jam: Error creating Lua task\n%s\n", lua_tostring(L, -1));
+			printf("jam: Error compiling Lua lane\n%s\n", lua_tostring(L, -1));
 		lua_pop(L, 2);
 		return -1;
 	}
 
-	if (lua_isnumber(L, -1))
+	ret = lua_pcall(L, 2, 1, 0);						/* lanes lane_h */
+	if (ret != 0)
 	{
-		lua_Number ret = lua_tonumber(L, -1);
+		if (lua_isstring(L, -1))
+			printf("jam: Error creating Lua lane\n%s\n", lua_tostring(L, -1));
 		lua_pop(L, 2);
-		return (int)ret;
+		return -1;
 	}
 
-	lua_pop(L, 2);
-	return -1;
+	if (!lua_isfunction(L, -1))							/* lanes lane_h */
+	{
+		lua_pop(L, 2);
+		return -1;
+	}
+
+	ret = lua_pcall(L, 0, 1, 0);						/* lanes ret */
+	if (ret != 0)
+	{
+		if (lua_isstring(L, -1))
+			printf("jam: Error calling Lua lane\n%s\n", lua_tostring(L, -1));
+		lua_pop(L, 2);
+		return -1;
+	}
+	
+	ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	lua_pop(L, 1);
+	return ref;
 }
 
 
 int luahelper_taskisrunning(int taskid)
 {
-	int ret;
-
+	const char* status;
 	lua_init();
 
-	lua_getfield(L, LUA_GLOBALSINDEX, "task");
-	lua_getfield(L, -1, "isrunning");
-	lua_pushinteger(L, taskid);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, taskid);		/* lane_h */
+	lua_getfield(L, -1, "status");					/* lane_h status */
 
-	ret = lua_pcall(L, 1, -1, 0);
-	if (ret != 0)
+	status = lua_tostring(L, -1);
+	if (strcmp(status, "done") == 0)
 	{
-		if (lua_isstring(L, -1))
-			printf("jam: Error testing Lua task.isrunning\n%s\n", lua_tostring(L, -1));
 		lua_pop(L, 2);
-		return -1;
+		luaL_unref(L, LUA_REGISTRYINDEX, taskid);
+		return 0;
 	}
-
-	if (lua_isboolean(L, -1))
+	else if (strcmp(status, "error") == 0  ||  strcmp(status, "cancelled") == 0)
 	{
-		int ret = lua_toboolean(L, -1);
-		lua_pop(L, 2);
-		return ret;
+		int ret;
+
+		lua_pop(L, 1);								/* lane_h */
+		lua_getfield(L, -1, "join");				/* lane_h join(function) */
+		lua_pushvalue(L, -2);						/* lane_h join(function) lane_h */
+		ret = lua_pcall(L, 1, 3, 0);				/* lane_h nil err stack_tbl */
+		if (ret != 0)
+		{
+			if (lua_isstring(L, -1))
+				printf("jam: Error in Lua lane\n%s\n");
+			lua_pop(L, 2);
+			return 1;
+		}
+
+		lua_pop(L, 4);								/* */
+
+		luaL_unref(L, LUA_REGISTRYINDEX, taskid);
+		return 1;
 	}
 
 	lua_pop(L, 2);
-	return 0;
+	return 1;
 }
 
 
@@ -442,15 +494,18 @@ void luahelper_taskcancel(int taskid)
 
 	lua_init();
 
-	lua_getfield(L, LUA_GLOBALSINDEX, "task");
+	lua_rawgeti(L, LUA_REGISTRYINDEX, taskid);
+	lua_pushvalue(L, -1);
 	lua_getfield(L, -1, "cancel");
-	lua_pushinteger(L, taskid);
+	lua_pushvalue(L, -2);
+	lua_pushnumber(L, 0);
+	lua_pushboolean(L, 1);
 
-	ret = lua_pcall(L, 1, -1, 0);
+	ret = lua_pcall(L, 3, -1, 0);
 	if (ret != 0)
 	{
 		if (lua_isstring(L, -1))
-			printf("jam: Error testing Lua task.cancel\n%s\n", lua_tostring(L, -1));
+			printf("jam: Error running Lua task.cancel\n%s\n", lua_tostring(L, -1));
 		lua_pop(L, 2);
 		return;
 	}

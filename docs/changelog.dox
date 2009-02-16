@@ -50,7 +50,7 @@
 - Fix a bug in CFlags and ObjectCFlags where flags weren't being applied properly.
 - Add NoWorkspace rule.
 - For Visual Studio 2005 and 2008, use an incremental manifest embedding technique for Debug builds.  For Release builds, use the simple mt.exe -outputresource technique.
-- Handle manifest embedding in DLLs.
+- Handle proper manifest embedding in DLLs.
 - After checking the OutputPostfix for the current target, check the * target for a global override.
 - Account for relative paths specified for the LinkDirectories rule.
 - New rule DefFile.  Adds support for using .def files for DLL exports.
@@ -67,6 +67,7 @@
 - New configuration 'releaseltcg', a Release build with Link Time Code Generation support.
 - .idl support.
 - Add regserver option to Library for shared libraries.  On Windows, regsvr32 is run during the build to automatically register the DLL with the system.  When cleaning, regsvr32 /u is run.
+- Remove the .intermediate.manifest file on Clean for all configurations (not just Debug).
 
 
 
@@ -81,7 +82,7 @@
 
 <h3>JamToWorkspace:</h3>
 
-- Fill me in.
+- Handle more than one workspace containing the same project.
 
 
 
@@ -92,6 +93,7 @@
 - Updates to tests/compile_outputastree/ to make a Jamrules.jam with the ProjectSubDir rule in it.  The reasoning behind all this is described in a forum thread.
 - tests/compile_outputastree/: Add libc project that globs files in a generic and platform-specific manner.  This illustrates another point from a forum thread.
 - Add tests/dependency/more_than_one_target.jam.
+- Add tests/manifest_generation/.  Provided by Chris Chapman.
 
 
 

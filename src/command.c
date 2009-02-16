@@ -82,8 +82,7 @@ cmd_new(
 	if (rule->flags & RULE_LUA)
 	{
 	    cmd->luastring = malloc(buffer_pos(&buff) + 1);
-	    cmd->luastring[0] = '=';
-	    memcpy(cmd->luastring + 1, buffer_ptr(&buff), buffer_pos(&buff));
+	    memcpy(cmd->luastring, buffer_ptr(&buff), buffer_pos(&buff));
 	    buffer_free(&buff);
 	}
 	else
@@ -326,25 +325,25 @@ cmd_string(
 		    if (depth == 0) {
 			char save;
 			int expandedSize;
-			BUFFER subbuff;
+			BUFFER subbuff2;
 
 			save = ine[-1];
 			((char*)ine)[-1] = '\0';
 
-			buffer_init( &subbuff );
+			buffer_init( &subbuff2 );
 
 			while (0 > (expandedSize = var_string(
-					 in, &subbuff, 0, lol, ' '))) {
+					 in, &subbuff2, 0, lol, ' '))) {
 				printf("jam: out of memory");
 				exit(EXITBAD);
 			    }
 
 			((char*)ine)[-1] = save;
 
-			fwrite(buffer_ptr( &subbuff ), 1, expandedSize - 1, file);
+			fwrite(buffer_ptr( &subbuff2 ), 1, expandedSize - 1, file);
 			fflush(file);
 			fclose(file);
-			buffer_free( &subbuff );
+			buffer_free( &subbuff2 );
 		    }
 		}
 
