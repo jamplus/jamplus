@@ -1500,13 +1500,13 @@ if $(MSVCNT)
 	{
 		PATH=$(MSVCNT_PATH);%PATH%
 		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(C++:\\)" /nologo @@($(>)) $(MFLAGS)
+		"$(C++:\\)" /nologo @@("$(>)") $(MFLAGS)
 	}
 
 	actions together response Archive
 	{
 	PATH=%PATH%;$(MSVCNT_PATH)
-	"$(AR)" /nologo $(LIBFLAGS) /out:$(<) @@($(>:\\))
+	"$(AR)" /nologo $(LIBFLAGS) /out:"$(<)" @@("$(>:\\)")
 	}
 }
 
@@ -1695,13 +1695,13 @@ rule _writeManifest TARGET : _t : MANIFEST_TYPE
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
 
-	local tempIntermediateManifest = @($(_t).intermediate.manifest:G=$(grist)) ;
+	local tempIntermediateManifest = @($(_t[1]).intermediate.manifest:G=$(grist)) ;
 	MakeLocate $(tempIntermediateManifest) : $(LOCATE_TARGET) ;
 	Clean clean:$(TARGET) : $(tempIntermediateManifest) ;
 
 	if $(CONFIG) = debug
 	{
-		local tempEmbeddedManifest = @($(_t).embed.manifest:G=$(grist)) ;
+		local tempEmbeddedManifest = @($(_t[1]).embed.manifest:G=$(grist)) ;
 		MakeLocate $(tempEmbeddedManifest) : $(LOCATE_TARGET) ;
 		CONTENTS on $(tempEmbeddedManifest) =
 "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
@@ -1711,11 +1711,11 @@ rule _writeManifest TARGET : _t : MANIFEST_TYPE
 		WriteFile $(tempEmbeddedManifest) ;
 		Clean clean:$(TARGET) : $(tempEmbeddedManifest) ;
 
-		local tempEmbeddedRc = @($(_t).embed.rc:G=$(grist)) ;
+		local tempEmbeddedRc = @($(_t[1]).embed.rc:G=$(grist)) ;
 		Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
 		MakeLocate $(tempEmbeddedRc) : $(LOCATE_TARGET) ;
 		CONTENTS on $(tempEmbeddedRc) =
-			"$(MANIFEST_TYPE) /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ \"$(LOCATE_TARGET)/$(_t:G=).embed.manifest\"" ;
+			"$(MANIFEST_TYPE) /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ \"$(LOCATE_TARGET)/$(_t[1]:G=).embed.manifest\"" ;
 		WriteFile $(tempEmbeddedRc) ;
 		Clean clean:$(TARGET) : $(tempEmbeddedRc) ;
 		Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;

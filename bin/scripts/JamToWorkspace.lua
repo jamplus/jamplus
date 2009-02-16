@@ -397,7 +397,7 @@ function VisualStudioProjectMetaTable:Write(outputPath, commandLines)
 ]])
 
 	if project then
-		self:_WriteFiles(project.Sources, '\t\t')
+		self:_WriteFiles(project.SourcesTree, '\t\t')
 	end
 
 	table.insert(self.Contents, [[
@@ -816,7 +816,7 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 
 	local virtualFolderInfo = { sourceFolderList = { '!Sources' } }
 	if project then
-		self:_GatherSourceFolders(project.Sources, virtualFolderInfo.sourceFolderList, '')
+		self:_GatherSourceFolders(project.SourcesTree, virtualFolderInfo.sourceFolderList, '')
 	end
 
 	table.insert(self.Contents, expand([[
@@ -888,7 +888,7 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 ]])
 
 	if project then
-		self:_WriteFiles(project.Sources, '')
+		self:_WriteFiles(project.SourcesTree, '')
 	end
 
 	table.insert(self.Contents, [[
@@ -1064,15 +1064,15 @@ Exporters =
 
 
 function BuildSourceTree(project)
-	-- Add Jamfile.jam.
-	table.insert(project.Sources, project.Jamfile)
-
 	-- Filter files.
 	local files = {}
 	local sourcesMap = {}
-	for source in ivalues(project.Sources) do
+	for _, source in ipairs(project.Sources) do
 		sourcesMap[source:lower()] = source
 	end
+
+	-- Add Jamfile.jam.
+	sourcesMap[project.Jamfile:lower()] = project.Jamfile
 
 	if project.SourceGroups then
 		for sourceGroupName, sourceGroup in pairs(project.SourceGroups) do
@@ -1092,8 +1092,8 @@ function BuildSourceTree(project)
 
 	FolderTree.Sort(files)
 
-	project.Sources = files
-	project.SourceGroups = nil
+	project.SourcesTree = files
+--	project.SourceGroups = nil
 end
 
 
@@ -1149,6 +1149,7 @@ function DumpWorkspace(workspace)
 	{
 		jamPath:gsub('\\', '/') .. '/Jambase.jam'
 	}
+	Projects[buildWorkspaceName].SourcesTree = Projects[buildWorkspaceName].Sources
 	local projectExporter = exporter.ProjectExporter(buildWorkspaceName, exporter.Options)
 	projectExporter:Write(destinationRootPath)
 
