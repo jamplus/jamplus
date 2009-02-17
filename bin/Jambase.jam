@@ -1339,16 +1339,6 @@ rule MultiCppCompile TARGET : SOURCES
 	}
 	SEARCH on $(sources) = $(SEARCH_SOURCE) ;
 
-#	MakeLocate $(objSources:S=$(SUFOBJ):D=) : $(LOCATE_TARGET) ;
-#	SEARCH on $(objSources) = $(SEARCH_SOURCE) ;
-
-#	for _src in $(_objSources) {
-#		on $(_src) if $(EXCLUDED_FROM_BUILD) = true {
-#			continue ;
-#		}
-#		_allobjs += $(_src) ;
-#	}
-
 	for _src in $(sources) {
 		on $(_src) if $(EXCLUDED_FROM_BUILD) = true {
 			continue ;
@@ -1382,7 +1372,7 @@ rule MultiCppCompile TARGET : SOURCES
 
 		local BUILD_EXT = BUILD$(ext) ;
 		$($(BUILD_EXT).COMPILER) on $(_obj) = $($($(BUILD_EXT).COMPILER)) ;
-		
+
 		local _flags = $($($(BUILD_EXT).PREFLAGS)) ;
 		on $(_obj) _flags += $($(@($(BUILD_EXT).FLAGS).$(ALL_TYPES))) ;
 		_flags += $($($(BUILD_EXT).SUBDIRFLAGS)) ;
@@ -1497,7 +1487,7 @@ rule MultiCppCompile TARGET : SOURCES
 		if $(MSVCNT) {
 			SEMAPHORE on $(objects) = $(_VCPDB) ;
 		}
-		
+
 		$(flags[1]) $(objects) : $(_sources) ;
 	}
 
