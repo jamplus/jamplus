@@ -1244,7 +1244,7 @@ BUILD.m.SUBDIRFLAGS = SUBDIRCCFLAGS ;
 
 if $(MSVCNT)
 {
-	COMPILE_RULES_EXTENSIONS += .res ;
+	BUILD_EXTENSIONS += .res ;
 }
 
 rule MultiCppCompile TARGET : SOURCES
@@ -1322,10 +1322,10 @@ rule MultiCppCompile TARGET : SOURCES
 	local _allobjs = ;
 
 	# for each file
-	local _src ;
-	local newsrcs ;
-	local listIncludes = :I=$(BUILD_EXTENSIONS)$ ;
-	local sources = $(SOURCES:G=$(grist):$(listIncludes:J=)) ;
+	local dollar = $ ;
+	local colon = ":" ;
+	local listIncludes = @(I=\\$(BUILD_EXTENSIONS)$:J=$(colon)) ;
+	local sources = @($(dollar)(SOURCES$(colon)$(listIncludes)):A:G=$(grist)) ;
 #	local objSources = $(SOURCES:I=\\$(SUFOBJ)$:I=\\$(SUFRES):G=$(grist)) ;
 #	local sources = $(SOURCES:G=$(grist)) ;
 
@@ -1339,12 +1339,15 @@ rule MultiCppCompile TARGET : SOURCES
 	}
 	SEARCH on $(sources) = $(SEARCH_SOURCE) ;
 
+	local newsrcs ;
+	local _src ;
 	for _src in $(sources) {
 		on $(_src) if $(EXCLUDED_FROM_BUILD) = true {
 			continue ;
 		}
 		local ext = $(_src:S) ;
-		if ! $(BUILD$(ext).RULE) {
+		local BUILD_EXT = BUILD$(ext) ;
+		if ! $($(BUILD_EXT).RULE) {
 			_allobjs += $(_src) ;
 			continue ;
 		}
@@ -1370,11 +1373,10 @@ rule MultiCppCompile TARGET : SOURCES
 		# Rest
 		Depends $(_obj) : $(_src) ;
 
-		local BUILD_EXT = BUILD$(ext) ;
 		$($(BUILD_EXT).COMPILER) on $(_obj) = $($($(BUILD_EXT).COMPILER)) ;
 
 		local _flags = $($($(BUILD_EXT).PREFLAGS)) ;
-		on $(_obj) _flags += $($(@($(BUILD_EXT).FLAGS).$(ALL_TYPES))) ;
+		on $(_obj) _flags += $($($(BUILD_EXT).FLAGS).$(ALL_TYPES)) ;
 		_flags += $($($(BUILD_EXT).SUBDIRFLAGS)) ;
 
 		_flags += [ FIncludes $(_hdrs) . ] ;
