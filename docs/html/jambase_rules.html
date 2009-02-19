@@ -133,6 +133,21 @@ For the given project <code>TARGET</code>, alter the build to use either a stati
 <span class="preprocessor">    CRuntimeType helloworld : dynamic ;</span>
 </pre></div><p>
 <hr>
+ <h2><a class="anchor" name="rule_DefFile">
+rule DefFile TARGET : SOURCES</a></h2>
+<p>
+When linking the given <code>TARGET</code>, link the .def file(s) specified in <code>SOURCES</code>.<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>At this time, the def file only affects Visual C++ applications.</dd></dl>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target to link the def file to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>SOURCES</em>&nbsp;</td><td>One or more <code></code>.def files. <code></code>.def files are searched for in <code></code>.</td></tr>
+  </table>
+</dl>
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # Link the WorkspaceWhiz target against WorkspaceWhiz.def.</span>
+<span class="preprocessor">    DefFile WorkspaceWhiz : WorkspaceWhiz.def ;</span>
+</pre></div><p>
+<hr>
  <h2><a class="anchor" name="rule_Defines">
 rule Defines TARGET : DEFINES [: THE_CONFIG : THE_PLATFORM]</a></h2>
 <p>
@@ -263,17 +278,20 @@ For the given project <code>TARGET</code>, assign the link <code>DIRECTORIES</co
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target to assign the link <code>DIRECTORIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>DIRECTORIES</em>&nbsp;</td><td>The list of link directories to apply. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>DIRECTORIES</em>&nbsp;</td><td>The list of link directories to apply. Absolute paths are used directly. Relative paths are local to <code></code>. That is, they are relative to the subdirectory specified via <a class="el" href="jambase_rules.html#rule_SubDir">rule SubDir TOP d1...dn : SUBNAME</a>. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>THE_CONFIG</em>&nbsp;</td><td>(optional) If not specified, the default is all configurations. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>THE_PLATFORM</em>&nbsp;</td><td>(optional) If not specified, the default is all platforms.</td></tr>
   </table>
 </dl>
 <div class="fragment"><pre class="fragment"><span class="preprocessor">    # Add c:/some/directory to myproject for all configurations and</span>
-<span class="preprocessor"></span><span class="preprocessor">        # all platforms.</span>
+<span class="preprocessor"></span><span class="preprocessor">    # all platforms.</span>
 <span class="preprocessor"></span>    LinkDirectories myproject : c:/some/directory ;
 
 <span class="preprocessor">    # For the win32 platform, add the MFC link directory.</span>
-<span class="preprocessor">        LinkDirectories myproject : "$(MSVCNT)/atlmfc/lib" : : win32 ;</span>
+<span class="preprocessor"></span>    LinkDirectories myproject : <span class="stringliteral">"$(MSVCNT)/atlmfc/lib"</span> : : win32 ;
+
+<span class="preprocessor">    # Relative path:</span>
+<span class="preprocessor">    LinkDirectories myproject : ../lib ;</span>
 </pre></div><p>
 <hr>
  <h2><a class="anchor" name="rule_LinkFlags">
@@ -402,7 +420,7 @@ Workspaces are automatically generated for any executable processed while readin
  <h2><a class="anchor" name="rule_ObjectCFlags">
 rule ObjectCFlags TARGET : SOURCES : FLAGS [: THE_CONFIG : THE_PLATFORM]</a></h2>
 <p>
-For the given <code>SOURCES</code>, assign the <code>FLAGS</code> to the appropriate configuration and platform.<p>
+For the given <code>SOURCES</code> matching <code>*.c</code>, assign the <code>FLAGS</code> to the appropriate configuration and platform.<p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target containing the <code>SOURCES</code>. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
@@ -420,7 +438,7 @@ For the given <code>SOURCES</code>, assign the <code>FLAGS</code> to the appropr
  <h2><a class="anchor" name="rule_ObjectCppFlags">
 rule ObjectC++Flags TARGET : SOURCES : FLAGS [: THE_CONFIG : THE_PLATFORM]</a></h2>
 <p>
-For the given <code>SOURCES</code>, assign the <code>FLAGS</code> to the appropriate configuration and platform.<p>
+For the given <code>SOURCES</code> matching *.cpp or *.cxx, assign the <code>FLAGS</code> to the appropriate configuration and platform.<p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target containing the <code>SOURCES</code>. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
@@ -512,6 +530,7 @@ By default, the output location of a generated executable or library is at <code
 rule OutputPostfix TARGET : POSTFIX : THE_CONFIG : THE_PLATFORM</a></h2>
 <p>
 The output postfix is appended to the end of the generated target name. By default, the output postfix is .$(CONFIG). This means the resultant filename is $(OUTPUTNAME).$(CONFIG).$(EXT).<p>
+If there is no assigned output postfix for <code>TARGET</code>, then the global target <code>*</code> is checked for a postfix.<p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target to affect the output path change on. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
@@ -707,7 +726,7 @@ Workspaces are automatically generated for any executable processed while readin
 </pre></div><p>
 <hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Wed Dec 3 00:14:23 2008 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Wed Feb 18 23:39:33 2009 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>
