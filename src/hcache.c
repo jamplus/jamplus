@@ -659,6 +659,19 @@ hcache( TARGET *t, LIST *hdrscan )
 		c->age = 0; /* The entry has been used, its young again */
 		++hits;
 		l = list_copy( 0, c->includes );
+		{
+			LIST *hdrfilter = var_get( "HDRFILTER" );
+			if ( hdrfilter )
+			{
+				LOL lol;
+				lol_init( &lol );
+				lol_add( &lol, list_new( L0, t->name, 1 ) );
+				lol_add( &lol, l );
+				lol_add( &lol, list_new( L0, t->boundname, 0 ) );
+				l = evaluate_rule( hdrfilter->string, &lol, L0 );
+				lol_free( &lol );
+			}
+		}
 		return l;
 	    }
 	    else {
@@ -691,6 +704,8 @@ hcache( TARGET *t, LIST *hdrscan )
 
     l = headers1( c->boundname, hdrscan );
 
+	c->includes = list_copy( 0, l );
+
     {
 	LIST *hdrfilter = var_get( "HDRFILTER" );
 	if ( hdrfilter )
@@ -705,14 +720,10 @@ hcache( TARGET *t, LIST *hdrscan )
 	}
     }
 
-//    if ( file )
-    {
 	c->time = t->time;
 	c->age = 0;
 
-	c->includes = list_copy( 0, l );
 	c->hdrscan = list_copy( 0, hdrscan );
-    }
 
     return l;
 }
