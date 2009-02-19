@@ -372,7 +372,18 @@ make1b( TARGET *t )
 #ifdef OPT_BUILTIN_NEEDS_EXT
 	/* If we found a MightNotUpdate flag and there was an update, mark the fate as updated. */
 	if ( childmightnotupdate  &&  childupdated  &&  t->fate == T_FATE_STABLE )
-	    t->fate = T_FATE_UPDATE;
+	      t->fate = T_FATE_UPDATE;
+	if ( t->flags & T_FLAG_MIGHTNOTUPDATE  &&  t->actions ) {
+#ifdef OPT_ACTIONS_WAIT_FIX
+	    /* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
+	    /* Determine if an action is already running on behalf of another target, and if so, */
+	    /* bail out of make1b() prior to calling make1cmds() by adding more parents to the */
+	    /* in-progress target and incrementing the asynccnt of the new target. */
+	    make1wait( t );
+	    if ( t->asynccnt != 0 )
+		return;
+#endif
+	}
 #endif
 
 	/* If actions on deps have failed, bail. */
