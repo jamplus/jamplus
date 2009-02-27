@@ -1738,7 +1738,11 @@ rule _writeManifest TARGET : _t : MANIFEST_TYPE
 		local tempEmbeddedRes = [ ResourceCompiler $(TARGET) : $(tempEmbeddedRc) : quiet ] ;
 		_s += $(tempEmbeddedRes) ;
 
-		Depends $(_t) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
+		Depends $(_t[1]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
+		if $(_t[2])
+		{
+			Includes $(_t[2]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
+		}
 	}
 
 	MANIFEST_TYPE on $(_t) = $(MANIFEST_TYPE) ;
