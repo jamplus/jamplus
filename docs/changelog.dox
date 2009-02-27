@@ -4,7 +4,7 @@
 
 <h3>New features for 0.3:</h3>
 
-- Mac OS X build works.
+- Mac OS X build mostly works, but there is still a lot of work to build in the necessary rules to create a full Carbon or Cocoa app.
 
 
 
@@ -27,12 +27,14 @@
 
 <h3>Jam Executable:</h3>
 
-- Until it can be fixed, turned off a broken optimization when scanning paths.
+- Until it can be fixed, turned off a broken optimization when scanning paths.  On a no-op build with Noel's test, this saved 1/10 of a second.
 - In the Subst rule, handle the case where the replacement string isn't specified and instead, treat it as an empty string.
 - New patch from the mailing list at http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html as suggested by Andreas Fredriksson.  #ifdef'ed as OPT_CIRCULAR_GENERATED_HEADER_FIX.  As I recall from past experiments with this patch, it can slow down the dependency check considerably.  In my tests today, I noticed no discernable slowdown, and it fixes the Bug #10, too.
 - Add OPT_ACTIONS_WAIT_FIX using the patch found at http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html.
 - glob.c: On Windows machines, glob files in a case insensitive manner.
 - Allow nested response file generation; that is, when expanding a variable to generate one response file, other response files may be embedded.
+- Apply the HDRFILTER to cached header lists, too.
+- Preserve the header list before the HDRFILTER touches it.
 
 
 
@@ -109,9 +111,16 @@
 
 - Visual Studio 2005 and 2008 solution and vcproj files.
 
+
+
+
+
 <h3>Documentation:</h3>
 
 - In some manner, every JamPlus feature is documented (we hope).
+
+
+
 
 <h3>Jam Executable:</h3>
 
@@ -132,6 +141,7 @@
 - Added Subst rule, based on Lua's string.gsub.
 - Added CppCompileOptions.
 - Bug fix for multiple passes.
+- Changed Lua multithreading to use Lua Lanes.
 
 
 
@@ -172,6 +182,9 @@
 - Moved the \c MSVCNT_PATH first in the \c PATH.
 - Get rid of top-level dependencies that don't mean anything.
 - Removed unused script and targets.
+- Quote C/C++ files on the command line for Visual C++.
+- Handle separate C/C++ compilation.
+- LinkPrebuiltLibraries does not append an extension if an extension already exists.
 
 
 
@@ -208,6 +221,7 @@
 - Very simple generatedheader test added.
 - tests/source_and_jamfiles_separate example added.
 - Batch file in samples/sharedlib/ to create a CodeBlocks MinGW project.
+- Fixed up the sharedlib/ sample to work better multiplatform.
 - Lua parsing phase examples in tests/lua/testluaparser.jam and tests/lua/testluaparser.jam.lua
 - Added tutorial 02-helloworld-static.
 - Useful output in the filecache_luamd5callback test.
