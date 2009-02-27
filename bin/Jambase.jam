@@ -1841,7 +1841,7 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
 	Link $(_linkTargets) : $(_s) ;
-	Includes $(_s) : $(_s) ;
+#	Includes $(_s) : $(_s) ;
 
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
 }
@@ -2091,7 +2091,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	}
 
 	$(linkRule) $(_linkTargets) : $(_s) ;
-	Includes $(_s) : $(_s) ;
+#	Includes $(_s) : $(_s) ;
 
 	if $(regserver) {
 		RegSvr32 $(_linkTargets[1]) ;
