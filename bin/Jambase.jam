@@ -1974,6 +1974,8 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 		if $(COMPILER) in vs2003 vs2005 vs2008 {
 			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
+			Depends $(TARGET) : $(_tlib) ;
+			Depends $(_tlib) : $(_t) ;
 			MightNotUpdate $(_tlib) ;
 			_linkTargets += $(_tlib) ;
 		}
@@ -1992,9 +1994,10 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	}
 
 	Depends all : $(TARGET) ;
-	Depends $(TARGET) : $(_linkTargets) ;
+#	Depends $(TARGET) : $(_linkTargets) ;
 	NotFile $(TARGET) ;
-	Depends $(_linkTargets) : $(_s) ;
+#	Depends $(_linkTargets) : $(_s) ;
+	Depends $(_t) : $(_s) ;
 	MakeLocate $(_linkTargets) : $(outputPath) ;
 
 	local regserver ;
@@ -2055,7 +2058,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		[ _retrieveVar NEEDLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
 
 	NEEDLIBS on $(_linkTargets) = $(needLibs:S=$(SUFLIB)) ;
-	Depends $(_linkTargets) : $(needLibs) ;
+	Depends $(_t) : $(needLibs) ;
 
 	if $(MSVCNT) {
 	    # Clean the .pdb (etc) files.
