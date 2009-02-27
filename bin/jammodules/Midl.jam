@@ -1,7 +1,18 @@
 if ! $(TARGETINFO_LOCATE)
 {
 
-MIDL = "$(MSSDK)/bin/midl" ;
+switch $(COMPILER)
+{
+	case vs2005 :
+		local binPath = @($(MSVCNT)/../Common7/Tools/Bin:R=) ;
+		LINK_PATHS += $(binPath) ;
+		MIDL = "$(binPath)/Midl" ;
+
+	case vs2008 :
+		LINK_PATHS += $(MSSDK)/bin ;
+		MIDL = "$(MSSDK)/bin/midl" ;
+}
+
 MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
 MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
 
