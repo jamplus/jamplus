@@ -228,7 +228,6 @@ make1a(
 	for( c = t->depends; c && !intr; c = c->next )
 	    make1a( c->target, t );
 
-#if 0
 #ifdef OPT_UPDATED_CHILD_FIX
 	{
 	    ACTIONS *actions;
@@ -247,7 +246,6 @@ make1a(
 		}
 	    }
 	}
-#endif
 #endif
 
 	t->progress = T_MAKE_ACTIVE;
