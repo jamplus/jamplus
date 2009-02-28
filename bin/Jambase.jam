@@ -1993,6 +1993,10 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 #			Exit SharedLibraryFromObjects not implemented. ;
 #		}
 	}
+	else
+	{
+		Depends $(TARGET) : $(_t) ;
+	}
 
 	Depends all : $(TARGET) ;
 #	Depends $(TARGET) : $(_linkTargets) ;
