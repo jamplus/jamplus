@@ -18,12 +18,13 @@ rule UsePrecompiledHeader NAME : HEADER : FILES
 
 EMPTY = "" ;
 
-rule LinkLibraries
+rule LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	if $(PLATFORM) = *  &&  $(CONFIG) = *
 	{
 		local projectsString = "	'$(>)',$(NEWLINE)" ;
-		Contents += "Projects['$(<)'].Libraries = concat(Projects['$(<)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
+		Contents += "Projects['$(TARGET)'].Libraries = concat(Projects['$(TARGET)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
 		Contents += "$(projectsString:J=$(EMPTY))})$(NEWLINE)" ;
 	}
 }
