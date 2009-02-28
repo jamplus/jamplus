@@ -1194,6 +1194,7 @@ rule GroupByVar1
 
 rule BatchCompileGroupSize TARGET : SIZE
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	BATCH_COMPILE_GROUP_SIZE on $(TARGET) = $(SIZE) ;
 }
 
