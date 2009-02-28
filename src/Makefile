@@ -1,5 +1,10 @@
 # Makefile for jam
 
+# Portions used from the Lua 5.1.4 makefile.
+
+# Your platform. See PLATS for possible values.
+PLAT = none
+
 CC = gcc
 CFLAGS =
 EXENAME = ./jam0
@@ -33,5 +38,16 @@ TARGET = -o $(EXENAME)
 
 # QNX rtp (neutrino)
 #CC = gcc
+
+PLATS = macosx
+
+default: $(PLAT)
+
+none:
+	@echo "Please choose a platform"
+	@echo "    $(PLATS)"
+
+macosx:
+	$(MAKE) all LINKLIBS="$(LINKLIBS) -framework CoreFoundation"
 
 include Makefile.Common
