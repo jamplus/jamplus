@@ -252,7 +252,7 @@ cmd_string(
 		    ((char*)ine)[-1] = save;
 
 		    buffer_init(&expandedsubbuff);
-		    expandedsubbuffsize = cmd_string(rule, buffer_ptr(&subbuff), &expandedsubbuff, outsize, lol, response_files, cmd);
+		    expandedsubbuffsize = cmd_string(rule, buffer_ptr(&subbuff), &expandedsubbuff, INT_MAX, lol, response_files, cmd);
 
 		    tmp_write(r->file, buffer_ptr( &expandedsubbuff ), expandedsubbuffsize - 1);
 //		    tmp_write(r->file, buffer_ptr( &subbuff ), expandedSize - 1);
