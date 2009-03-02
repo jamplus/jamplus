@@ -1319,6 +1319,14 @@ rule MultiCppCompile TARGET : SOURCES
 	on * preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
 	on $(TARGET) preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
 
+	local flagsToRemove ;
+	on * flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
+	on $(TARGET) flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
+	
+	local flagsToAdd ;
+	on * flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+	on $(TARGET) flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+
 	# start with empty list of all generated objects
 	local _allobjs = ;
 
@@ -1424,11 +1432,15 @@ rule MultiCppCompile TARGET : SOURCES
 
 			# bind flags, defines and includes to the target
 			_flags += $(_postmflags) ;
+			if $(flagsToRemove) { _flags -= $(flagsToRemove) ; }
+			if $(flagsToAdd) { _flags += $(flagsToAdd) ; }
 			MFLAGS on $(_src) = $(BUILD$(ext).RULE) $(_flags) ;
 			UseCommandLine $(_obj) : $(_flags) ;
 		}
 		else if $(COMPILER) in mingw gcc
 		{
+			if $(flagsToRemove) { _flags -= $(flagsToRemove) ; }
+			if $(flagsToAdd) { _flags += $(flagsToAdd) ; }
 			MFLAGS on $(_src) = $(BUILD$(ext).RULE) $(_flags) "-c -o \"$(_obj:T)\"" ;
 			UseCommandLine $(_obj) : $(_flags) ;
 		}
@@ -2293,6 +2305,26 @@ rule C++Flags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
 }
 
 
+rule AddFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_CONFIG ?= * ;
+	THE_PLATFORM ?= * ;
+	FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
+	FLAGS_TO_REMOVE.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) -= $(FLAGS) ;
+}
+
+
+rule RemoveFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_CONFIG ?= * ;
+	THE_PLATFORM ?= * ;
+	FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) -= $(FLAGS) ;
+	FLAGS_TO_REMOVE.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
+}
+
+
 rule CRuntimeType TARGET : TYPE : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
@@ -2301,35 +2333,29 @@ rule CRuntimeType TARGET : TYPE : THE_PLATFORM
 	{
 		if ! $(TYPE)  ||  $(TYPE) = dynamic
 		{
-			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MTd ;
-			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MT ;
-			CCFLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MT ;
-			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MDd ;
-			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) += /MD ;
-			CCFLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MD ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).debug on $(TARGET) -= /MDd ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).release on $(TARGET) -= /MD ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MD ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).debug on $(TARGET) += /MTd ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).release on $(TARGET) += /MT ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MT ;
 
-			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MTd ;
-			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MT ;
-			C++FLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MT ;
-			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MDd ;
-			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) += /MD ;
-			C++FLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MD ;
+			FLAGS_TO_ADD.$(THE_PLATFORM).debug on $(TARGET) += /MDd ;
+			FLAGS_TO_ADD.$(THE_PLATFORM).release on $(TARGET) += /MD ;
+			FLAGS_TO_ADD.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MD ;
 		}
 		else if $(TYPE) = static
 		{
-			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MDd ;
-			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MD ;
-			CCFLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MD ;
-			CCFLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MTd ;
-			CCFLAGS.$(THE_PLATFORM).release on $(TARGET) += /MT ;
-			CCFLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MT ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).debug on $(TARGET) -= /MTd ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).release on $(TARGET) -= /MT ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MT ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).debug on $(TARGET) += /MDd ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).release on $(TARGET) += /MD ;
+			FLAGS_TO_REMOVE.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MD ;
 
-			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) -= /MDd ;
-			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) -= /MD ;
-			C++FLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MD ;
-			C++FLAGS.$(THE_PLATFORM).debug on $(TARGET) += /MTd ;
-			C++FLAGS.$(THE_PLATFORM).release on $(TARGET) += /MT ;
-			C++FLAGS.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MT ;
+			FLAGS_TO_ADD.$(THE_PLATFORM).debug on $(TARGET) += /MTd ;
+			FLAGS_TO_ADD.$(THE_PLATFORM).release on $(TARGET) += /MT ;
+			FLAGS_TO_ADD.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MT ;
 		}
 	}
 }
