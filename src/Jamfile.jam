@@ -5,7 +5,7 @@
 #
 # Put executables in platform-specific  subdirectory.
 
-CRuntimeType * : static ;
+CRuntimeType jam libjam : static ;
 
 if $(VMS) 	{ LOCATE_TARGET ?= [.binvms] ; }
 else if $(MAC) 	{ LOCATE_TARGET ?= :bin.mac ; }
