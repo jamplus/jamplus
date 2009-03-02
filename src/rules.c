@@ -319,6 +319,13 @@ addsettings(
 
 	if( !v )
 	{
+#ifdef OPT_MINUS_EQUALS_EXT
+	    if (setflag == VAR_REMOVE)
+	    {
+		list_free( value );
+		return head;
+	    }
+#endif
 #ifdef OPT_IMPROVED_MEMUSE_EXT
 	    if (!settings_pool) {
 		settings_pool = mempool_create("SETTINGS", sizeof(SETTINGS));
@@ -349,6 +356,7 @@ addsettings(
 	case VAR_REMOVE:
 	    /* Remove value from existing */
 	    v->value = list_remove( v->value, value );
+	    list_free( value );
 	    break;
 #endif
 

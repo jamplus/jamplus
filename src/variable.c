@@ -280,6 +280,7 @@ var_set(
 	case VAR_REMOVE:
 	    /* Remove values */
 	    v->value = list_remove( v->value, value );
+	    list_free( value );
 	    break;
 #endif
 

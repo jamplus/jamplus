@@ -90,7 +90,8 @@ list_remove(
 	if ( !found )
 	    newlist = list_new( newlist, list->string, 0 );
     }
-    
+
+    list_free( l );
     return newlist;
 }
 
