@@ -24,6 +24,7 @@
 
 # include "command.h"
 # include "buffer.h"
+# include <limits.h>
 
 #ifdef OPT_RESPONSE_FILES
 #ifdef OPT_MULTIPASS_EXT
