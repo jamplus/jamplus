@@ -1995,6 +1995,9 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		else if $(COMPILER) in mingw gcc {
 #			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
 			BINDING on $(_tlib) = $(_t) ;
+			MakeLocate $(_tlib) : $(outputPath) ;
+			Depends $(TARGET) : $(_tlib) ;
+			Depends $(_tlib) : $(_t) ;
 			NotFile $(_tlib) ;		# Turn this off for export libraries.
 			_linkTargets += $(_tlib) ;
 
