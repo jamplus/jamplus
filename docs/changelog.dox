@@ -1,5 +1,21 @@
 /*! \page changelog Changelog
 
+\section version0_3_rc2 Changes since version 0.3-rc1
+
+- Building: Make jmake.sh executable.
+- Bootstrapping: Force make invocations to specify a platform.
+- JamToWorkspace: Fix from Lucas Meijer for handling ActiveProject specified targets with LinkLibraries.
+- Fix an issue with embedded response files where it would complain if the command line exceeded 10240 characters.  Found by Lucas Meijer.
+- Jambase: Add support to BatchCompileGroupSize to handle the ActiveProject rule.
+- Jambase: In the Library rule, the dependency chain was broken for the noexportlib option.
+- Jambase: CRuntimeType only worked for the * target.  Now it works for project targets, too.
+- Bootstrapping: Set the CRuntimeType for the jam and libjam targets specifically.
+- -= bug fixes.
+- Fix a compilation issue on Mac with INT_MAX.
+- Jambase: Fix the shared library support on Mac OS X.
+
+
+
 \section version0_3 Version 0.3
 
 <h3>New features for 0.3:</h3>
@@ -35,6 +51,7 @@
 - Allow nested response file generation; that is, when expanding a variable to generate one response file, other response files may be embedded.
 - Apply the HDRFILTER to cached header lists, too.
 - Preserve the header list before the HDRFILTER touches it.
+- -= bug fixes.
 
 
 
@@ -70,6 +87,7 @@
 - .idl support.
 - Add regserver option to Library for shared libraries.  On Windows, regsvr32 is run during the build to automatically register the DLL with the system.  When cleaning, regsvr32 /u is run.
 - Remove the .intermediate.manifest file on Clean for all configurations (not just Debug).
+- CRuntimeType only worked for the * target.  Now it works for project targets, too.
 
 
 
