@@ -501,17 +501,17 @@ var_expand(
 			    data.name = inex->string;
 			    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 			    {
-				d->re = regcomp( inex->string );
+				d->re = jam_regcomp( inex->string );
 				(void)hashenter( regexhash, (HASHDATA **)&d );
 			    }
 			    re = d->re;
 			    inex = list_next( inex );
 
 			    if ( mod == 'X' ) {
-				if( regexec( re, l->string ) )
+				if( jam_regexec( re, l->string ) )
 				    remove = 1;
 			    } else {
-				if( regexec( re, l->string ) )
+				if( jam_regexec( re, l->string ) )
 				    remove = 0;
 			    }
 			}

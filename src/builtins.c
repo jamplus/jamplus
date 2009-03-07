@@ -463,12 +463,12 @@ builtin_match(
 
 	for( l = lol_get( args, 0 ); l; l = l->next )
 	{
-	    regexp *re = regcomp( l->string );
+	    regexp *re = jam_regcomp( l->string );
 
 	    /* For each string to match against */
 
 	    for( r = lol_get( args, 1 ); r; r = r->next )
-		if( regexec( re, r->string ) )
+		if( jam_regexec( re, r->string ) )
 	    {
 		int i, top;
 

@@ -18,8 +18,8 @@ typedef struct regexp {
 	char program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
 
-regexp *regcomp( const char *exp );
-int regexec( regexp *prog, const char *string );
+regexp *jam_regcomp( const char *exp );
+int jam_regexec( regexp *prog, const char *string );
 void regerror( const char *s );
 
 /*

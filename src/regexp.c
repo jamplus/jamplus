@@ -1,5 +1,5 @@
 /*
- * regcomp and regexec -- regsub and regerror are elsewhere
+ * jam_regcomp and jam_regexec -- regsub and regerror are elsewhere
  *
  *	Copyright (c) 1986 by University of Toronto.
  *	Written by Henry Spencer.  Not derived from licensed software.
@@ -26,7 +26,7 @@
  *** THIS IS AN ALTERED VERSION.  It was altered by John Gilmore,
  *** hoptoad!gnu, on 28 Dec 1986, to optimize characters quoted with \.
  *** THIS IS AN ALTERED VERSION.  It was altered by James A. Woods,
- *** ames!jaw, on 19 June 1987, to quash a regcomp() redundancy.
+ *** ames!jaw, on 19 June 1987, to quash a jam_regcomp() redundancy.
  *** THIS IS AN ALTERED VERSION.  It was altered by Christopher Seiwald
  *** seiwald@vix.com, on 28 August 1993, for use in jam.  Regmagic.h
  *** was moved into regexp.h, and the include of regexp.h now uses "'s
@@ -64,10 +64,10 @@
  * Regstart and reganch permit very fast decisions on suitable starting points
  * for a match, cutting down the work a lot.  Regmust permits fast rejection
  * of lines that cannot possibly match.  The regmust tests are costly enough
- * that regcomp() supplies a regmust only if the r.e. contains something
+ * that jam_regcomp() supplies a regmust only if the r.e. contains something
  * potentially expensive (at present, the only such thing detected is * or +
  * at the start of the r.e., which can involve a lot of backup).  Regmlen is
- * supplied because the test in regexec() needs it and regcomp() is computing
+ * supplied because the test in jam_regexec() needs it and jam_regcomp() is computing
  * it anyway.
  */
 
@@ -168,7 +168,7 @@
 #define	WORST		0	/* Worst case. */
 
 /*
- * Global work variables for regcomp().
+ * Global work variables for jam_regcomp().
  */
 static char *regparse;		/* Input-scan pointer. */
 static int regnpar;		/* () count. */
@@ -177,7 +177,7 @@ static char *regcode;		/* Code-emit pointer; &regdummy = don't. */
 static long regsize;		/* Code size. */
 
 /*
- * Forward declarations for regcomp()'s friends.
+ * Forward declarations for jam_regcomp()'s friends.
  */
 #ifndef STATIC
 #define	STATIC	static
@@ -197,7 +197,7 @@ STATIC int strcspn();
 #endif
 
 /*
- - regcomp - compile a regular expression into internal code
+ - jam_regcomp - compile a regular expression into internal code
  *
  * We can't allocate space until we know how big the compiled form will be,
  * but we can't compile it (and thus know how big it is) until we've got a
@@ -212,7 +212,7 @@ STATIC int strcspn();
  * of the structure of the compiled regexp.
  */
 regexp *
-regcomp( const char *exp )
+jam_regcomp( const char *exp )
 {
 	register regexp *r;
 	register char *scan;
@@ -763,11 +763,11 @@ regoptail(
 }
 
 /*
- * regexec and friends
+ * jam_regexec and friends
  */
 
 /*
- * Global work variables for regexec().
+ * Global work variables for jam_regexec().
  */
 static const char *reginput;	/* String-input pointer. */
 static char *regbol;		/* Beginning of input, for ^ check. */
@@ -788,10 +788,10 @@ STATIC char *regprop();
 #endif
 
 /*
- - regexec - match a regexp against a string
+ - jam_regexec - match a regexp against a string
  */
 int
-regexec(
+jam_regexec(
 	register regexp *prog,
 	register const char *string )
 {

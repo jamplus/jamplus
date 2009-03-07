@@ -152,7 +152,7 @@ static LIST *headers1helper(
 	    data.name = hdrscan->string;
 	    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 	    {
-		d->re = regcomp( hdrscan->string );
+		d->re = jam_regcomp( hdrscan->string );
 		(void)hashenter( regexhash, (HASHDATA **)&d );
 	    }
 	    re[rec++] = d->re;
@@ -162,7 +162,7 @@ static LIST *headers1helper(
 	while( fgets( buf, sizeof( buf ), f ) )
 	{
 	    for( i = 0; i < rec; i++ )
-		if( regexec( re[i], buf ) && re[i]->startp[1] )
+		if( jam_regexec( re[i], buf ) && re[i]->startp[1] )
 	    {
 		/* Copy and terminate extracted string. */
 
@@ -296,7 +296,7 @@ headers1(
 	    data.name = hdrscan->string;
 	    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 	    {
-		d->re = regcomp( hdrscan->string );
+		d->re = jam_regcomp( hdrscan->string );
 		(void)hashenter( regexhash, (HASHDATA **)&d );
 	    }
 	    re[rec++] = d->re;
@@ -306,7 +306,7 @@ headers1(
 	while( fgets( buf, sizeof( buf ), f ) )
 	{
 	    for( i = 0; i < rec; i++ )
-		if( regexec( re[i], buf ) && re[i]->startp[1] )
+		if( jam_regexec( re[i], buf ) && re[i]->startp[1] )
 	    {
 		/* Copy and terminate extracted string. */
 
