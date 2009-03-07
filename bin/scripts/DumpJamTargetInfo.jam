@@ -167,7 +167,6 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 		DumpSourceGroups $(project) : $(TARGETS) ;
 	}
 
-	Depends all : $(TARGETS) ;
 	Depends $(TARGETS) : $(TargetInfoFile) ;
 }
 
@@ -178,6 +177,7 @@ rule Application TARGET : SOURCES
 	Workspace $(TARGET) : $(TARGET) : all ;
 
 	DumpProjectInfo $(TARGET) : $(SOURCES) : app ;
+	Depends all : $(TARGET) ;
 }
 
 
@@ -192,6 +192,7 @@ rule Library TARGET : SOURCES : OPTIONS
 	{
 		DumpProjectInfo $(TARGET) : $(SOURCES) : lib ;
 	}
+	Depends all : $(TARGET) ;
 }
 
 
@@ -209,7 +210,7 @@ rule NoWorkspace WORKSPACE_NAME
 
 rule Workspace WORKSPACE_NAME : TARGETS : OPTIONS
 {
-	Depends all : $(TARGETS) ;
+#	Depends all : $(TARGETS) ;
 	Depends $(TARGETS) : $(TargetInfoFile) ;
 
 	if $(PLATFORM) != *
