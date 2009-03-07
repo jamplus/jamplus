@@ -1278,24 +1278,37 @@ include $(jamPath)Jambase.jam ;
 	-- Export everything.
 	exporter.Initialize()
 
+	-- Iterate all the workspaces.
 	for _, workspace in pairs(Workspaces) do
 		if workspace.Export == nil  or  workspace.Export == true then
 			local index = 1
+
+			-- Rid ourselves of duplicates.
+			local usedProjects = {}
 			while index <= #workspace.Projects do
-				local project = Projects[workspace.Projects[index]]
+				local projectName = workspace.Projects[index]
+				if usedProjects[projectName] then
+					table.remove(workspace.Projects, index)
+				else
+					usedProjects[projectName] = true
+					index = index + 1
+				end
+			end
+
+			-- Add any of the listed projects' libraries.
+			for index = 1, #workspace.Projects do
+				local projectName = workspace.Projects[index]
+				local project = Projects[projectName]
 				if not project then
-					print('* Project [' .. workspace.Projects[index] .. '] is in workspace [' .. workspace.Name .. '] but not defined.')
+					print('* Project [' .. projectName .. '] is in workspace [' .. workspace.Name .. '] but not defined.')
 					error()
 				end
-				if not project.CollectedForWorkspace then
-					project.CollectedForWorkspace = true
-					for projectName in ivalues(project.Libraries) do
-						if not list.find(workspace.Projects, projectName) then
-							workspace.Projects[#workspace.Projects + 1] = projectName
-						end
+				for projectName in ivalues(project.Libraries) do
+					if not usedProjects[projectName] then
+						workspace.Projects[#workspace.Projects + 1] = projectName
+						usedProjects[projectName] = true
 					end
 				end
-				index = index + 1
 			end
 
 			DumpWorkspace(workspace)
