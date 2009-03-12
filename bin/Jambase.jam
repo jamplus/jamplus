@@ -38,9 +38,19 @@ JAMBASEDATE = 2008.10.08 ;
 CONFIG ?= release ;
 
 VALID_CONFIGS ?= debug release releaseltcg ;
-VALID_PLATFORMS ?= win32 ;
 
-PLATFORM ?= win32 ;
+switch $(OS)
+{
+	case NT :
+		VALID_PLATFORMS ?= win32 ;
+
+		PLATFORM ?= win32 ;
+		
+	case MACOSX :
+		VALID_PLATFORMS ?= macosx ;
+		
+		PLATFORM ?= macosx ;
+}
 
 if ! $(CONFIG) in * $(VALID_CONFIGS)
 {
@@ -337,6 +347,10 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 				C++			?= g++ ;
 				LINK		?= $(C++) ;
 				SUFMODULE	= .dylib ;
+				
+				MACOSX_SDK	= /Developer/SDKs/MacOSX10.4u.sdk ;
+				CCFLAGS.*.*	?= -isysroot $(MACOSX_SDK) ;
+				C++FLAGS.*. ?= -isysroot $(MACOSX_SDK) ;
 
 		}
 
