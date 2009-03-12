@@ -461,7 +461,11 @@
  */
 
 # ifndef MAXLINE
+# ifdef NT
 # define MAXLINE 10240	/* longest 'together' actions' */
+# else
+# define MAXLINE INT_MAX
+# endif
 # endif
 
 # ifndef EXITOK
