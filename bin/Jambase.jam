@@ -427,6 +427,8 @@ Always allclean clean ;
 # Rules
 #
 
+GENERATED_HEADERS = ;
+
 rule HdrRule SOURCE : HEADERS
 {
 	# HdrRule source : headers ;
@@ -458,7 +460,17 @@ rule HdrRule SOURCE : HEADERS
 
 ## LOCAL CHANGE
 	SEARCH on $(s) = $(HDRSEARCH) ;
-	NoCare $(s) ;
+	
+	if $(GENERATED_HEADERS) {
+		local header ;
+		for header in $(s) {
+			if ! $(header) in $(GENERATED_HEADERS) {
+				NoCare $(header) ;
+			}
+		}
+	} else {
+		NoCare $(s) ;
+	}
 
 	# Propagate on $(SOURCE) to $(HEADERS)
 
