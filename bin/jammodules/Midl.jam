@@ -19,6 +19,7 @@ MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
 # OPTIONS = proxy ;
 rule MidlFlags PARENT : BASE_NAME : OPTIONS
 {
+	BASE_NAME = $(BASE_NAME:L) ;
 	BASE_NAME = $(BASE_NAME:G=<$(PARENT)>) ;
 	local tlbFile = $(BASE_NAME:S=.tlb) ;
 	local hFile = $(BASE_NAME:S=.h) ;
@@ -85,7 +86,7 @@ rule MidlCompiler PARENT : SOURCE
 actions Midl
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_PATH);%PATH%
-	set INCLUDE=$(MSSDK)/include;%INCLUDE%
+	set INCLUDE=$(MSSDK_STDHDRS:J=;);%INCLUDE%
 	"$(MIDL)" $(FLAGS) /out $(1[1]:D) $(2)
 }
 
