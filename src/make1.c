@@ -1688,7 +1688,7 @@ printResponseFiles(CMD* cmd)
 	if (!f) {
 	    printf("error: could not open temp file\n");
 	} else {
-	    char buffer[CMDBUF];
+	    char buffer[10240];
 	    size_t bytes;
 
 	    while (1) {

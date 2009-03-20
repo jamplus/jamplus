@@ -466,7 +466,7 @@
 # ifdef NT
 # define MAXLINE 10240	/* longest 'together' actions' */
 # else
-# define MAXLINE (INT_MAX/2)
+# define MAXLINE INT_MAX
 # endif
 # endif
 
@@ -491,7 +491,7 @@
 # ifdef NT
 # define CMDBUF 10240
 # else
-# define CMDBUF (INT_MAX/2)
+# define CMDBUF INT_MAX
 # endif
 #endif
 
