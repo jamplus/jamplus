@@ -1,21 +1,5 @@
 /*! \page changelog Changelog
 
-\section version0_3_rc2 Changes since version 0.3-rc1
-
-- Building: Make jmake.sh executable.
-- Bootstrapping: Force make invocations to specify a platform.
-- JamToWorkspace: Fix from Lucas Meijer for handling ActiveProject specified targets with LinkLibraries.
-- Fix an issue with embedded response files where it would complain if the command line exceeded 10240 characters.  Found by Lucas Meijer.
-- Jambase: Add support to BatchCompileGroupSize to handle the ActiveProject rule.
-- Jambase: In the Library rule, the dependency chain was broken for the noexportlib option.
-- Jambase: CRuntimeType only worked for the * target.  Now it works for project targets, too.
-- Bootstrapping: Set the CRuntimeType for the jam and libjam targets specifically.
-- -= bug fixes.
-- Fix a compilation issue on Mac with INT_MAX.
-- Jambase: Fix the shared library support on Mac OS X.
-
-
-
 \section version0_3 Version 0.3
 
 <h3>New features for 0.3:</h3>
@@ -31,6 +15,7 @@
 - jmake.cmd now checks for different versions of MSVC using both registry values and envvars.
 - Added clean.cmd, used to clean bootstrapping results.
 - Bootstrapped Jam builds as a releaseltcg configuration.
+- Force make invocations to specify a platform.
 
 
 
@@ -43,51 +28,53 @@
 
 <h3>Jam Executable:</h3>
 
-- Until it can be fixed, turned off a broken optimization when scanning paths.  On a no-op build with Noel's test, this saved 1/10 of a second.
+- Until it can be fixed, turned off a broken optimization when scanning paths.  On a no-op build with Noel's test, this saved 1/10 of a second.  Unfortunately, there were corner cases that caused the optimization to choke.
 - In the Subst rule, handle the case where the replacement string isn't specified and instead, treat it as an empty string.
-- New patch from the mailing list at http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html as suggested by Andreas Fredriksson.  #ifdef'ed as OPT_CIRCULAR_GENERATED_HEADER_FIX.  As I recall from past experiments with this patch, it can slow down the dependency check considerably.  In my tests today, I noticed no discernable slowdown, and it fixes the Bug #10, too.
-- Add OPT_ACTIONS_WAIT_FIX using the patch found at http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html.
+- New patch from the mailing list at http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html as suggested by Andreas Fredriksson.  <tt>#ifdef</tt>'ed as <tt>OPT_CIRCULAR_GENERATED_HEADER_FIX</tt>.
+- Add <tt>OPT_ACTIONS_WAIT_FIX</tt> using the patch found at http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html.
 - glob.c: On Windows machines, glob files in a case insensitive manner.
 - Allow nested response file generation; that is, when expanding a variable to generate one response file, other response files may be embedded.
-- Apply the HDRFILTER to cached header lists, too.
-- Preserve the header list before the HDRFILTER touches it.
-- -= bug fixes.
+- Apply the <tt>HDRFILTER</tt> to cached header lists, too.  This allows a complete list to be stored within the dependency cache file, and then the list can be filtered to whatever the build scripts desire.  Previously, the filtered list was stored in the dependency cache file, and there was no way to apply an alternate algorithm at a later point.
+- A few <tt>-=</tt> bug fixes.
+
 
 
 
 
 <h3>Jambase:</h3>
 
-- Default the build configuration to release instead of debug.
-- Fix to change the colon following a drive letter to a -- for the output directory in MultiCppCompile when outputastree is turned on.
-- Fixed SharedLibraryFromObjects from causing a circular dependency: targetname -> targetname.lib -> targetname.
-- The Library rule has a new nodefaults option.  Currently, its only use is to avoid adding /SUBSYSTEM to the link flags.
-- The Library rule has a new nomanifest option to turn off the embedding of a manifest.
-- The Library rule has a new noexportlib option that turns off the writing of the export library.
+- Defaulted the build configuration to release instead of debug.
+- Fix to change the colon following a drive letter to a -- for the output directory in MultiCppCompile when outputastree is turned on.  This happens when absolute paths are passed into MultiCppCompile.
+- Fixed SharedLibraryFromObjects (called from \ref rule_Library "Library" with the <tt>shared</tt> option) from causing a circular dependency: targetname -> targetname.lib -> targetname.
+- The \ref rule_Library "Library" rule has a new <tt>nodefaults</tt> option.  Currently, its only use is to avoid adding /SUBSYSTEM to the link flags in Visual C++ builds.
+- The \ref rule_Library "Library" rule has a new nomanifest option to turn off the embedding of a manifest in Visual C++ 8.0 and 9.0 builds.
+- The \ref rule_Library "Library" rule has a new noexportlib option that turns off the insertion of the writing of the export (import) library.
 - For a library, append the SUFLIB instead of using the :S modifier.  This fixes library names that have periods in them.
-- ObjectCFlags and ObjectC++Flags now only apply their flags to files of the appropriate types.
-- Fix a bug in CFlags and ObjectCFlags where flags weren't being applied properly.
-- Add NoWorkspace rule.
-- For Visual Studio 2005 and 2008, use an incremental manifest embedding technique for Debug builds.  For Release builds, use the simple mt.exe -outputresource technique.
-- Handle proper manifest embedding in DLLs.
-- After checking the OutputPostfix for the current target, check the * target for a global override.
-- Account for relative paths specified for the LinkDirectories rule.
-- New rule DefFile.  Adds support for using .def files for DLL exports.
-- When compiling resources, pick up defines, flags, and include directories from the .rc file, the pseudotarget parent, and the * global target.
+- \ref rule_ObjectCFlags "ObjectCFlags" and \ref rule_ObjectC++Flags "ObjectC++Flags" now only apply their flags to files of the appropriate types.
+- Fix a bug in \ref rule_CFlags "CFlags" and \ref rule_ObjectCFlags "ObjectCFlags" where flags weren't being applied properly.
+- Add \ref rule_NoWorkspace "NoWorkspace" rule.
+- For Visual Studio 2005 and 2008, use an incremental manifest embedding technique for Debug builds.  For Release builds, use the simple <tt>mt.exe -outputresource</tt> technique.
+- Handle proper manifest embedding in DLLs by applying the <tt>;2</tt> modifier to the tool.
+- After checking the \ref rule_OutputPostfix "OutputPostfix" for the current target, check the <tt>*</tt> target for a global override.
+- Handle relative paths specified for the \ref rule_LinkDirectories "LinkDirectories" rule.
+- New rule \ref rule_DefFile "DefFile".  Adds support for using .def files for DLL exports.
+- When compiling resources with \rule ref_ResourceCompiler, pick up defines, flags, and include directories from the .rc file, the pseudotarget parent, and the * global target.
 - Resource Compiler: If any of the defines, flags, or include directories change from the last Jam run, rebuild the resource.
-- Rules RcDefines, RcFlags, and RcIncludeDirectories accept either 2 or 3 parameters.  If 2 parameters are specified, the options are applied to TARGET.  If 3 parameters are specified, the options are applied to RESOURCE_NAME.
-- SourceGroup can accept an optional TARGET, using the active target if TARGET isn't specified.
-- ** Possibly breaking change... let me know if it is an issue. ***  JamToWorkspace was architected to work when the SubDir root was preloaded with an absolute path.  With the Jambase rework within JamPlus, it expected the same thing.  This blows up when JamToWorkspace is not used and when a build is run from the root Jamfile.  This change makes a generated SubDir root an absolute path.  It works in all cases I've tried.
-- Make Application and Library pay attention to changes in the link flags, libraries, or objects.  When a change is made from the last build, the executable or library is relinked (or rearchived).
+- Rules \ref rule_RcDefines "RcDefines", \ref rule_RcFlags "RcFlags", and \ref rule_RcIncludeDirectories "RcIncludeDirectories" accept either 2 or 3 parameters.  If 2 parameters are specified, the options are applied to <tt>TARGET</tt>.  If 3 parameters are specified, the options are applied to <tt>RESOURCE_NAME</tt>.
+- \ref rule_SourceGroup "SourceGroup" can accept an optional <tt>TARGET</tt>, using the active target if <tt>TARGET</tt> isn't specified.
+- ** Possibly breaking change... let me know if it is an issue. ***  \ref jamtoworkspace "JamToWorkspace" was architected to work when the \ref rule_SubDir "SubDir" root was preloaded with an absolute path.  With the Jambase rework within JamPlus, it expected the same thing.  This blows up when JamToWorkspace is not used and when a build is run from the root Jamfile.  This change makes a generated \ref rule_SubDir "SubDir" root an absolute path.  It works in all cases I've tried.
+- Make \ref rule_Application "Application" and \ref rule_Library "Library" pay attention to changes in the link flags, libraries, or objects.  When a change is made from the last build, the executable or library is relinked (or rearchived).
 - When detecting MSVC versions, Jambase.jam now tries envvars, not just the registry.  Seems that some installations don't have appropriate keys in the registry, and some don't have the envvars, so this should work for both.
-- In cases where LOCATE_TARGET isn't set, the vcx0.pdb files didn't get cleaned up.  This is now fixed and prettier than before.
-- When calculating the absolute path from the relative path in OutputPath, handle the case where SUBDIR hasn't been set.
-- Library accepts an option 'module'.  When specified on OS X, a bundle is created.  For other platforms, a module is created just like a normal shared library.
-- New configuration 'releaseltcg', a Release build with Link Time Code Generation support.
-- .idl support.
-- Add regserver option to Library for shared libraries.  On Windows, regsvr32 is run during the build to automatically register the DLL with the system.  When cleaning, regsvr32 /u is run.
+- In cases where \c LOCATE_TARGET isn't set, the \c vcx0.pdb files didn't get cleaned up.  This is now fixed and prettier than before.
+- When calculating the absolute path from the relative path in \ref rule_OutputPath "OutputPath", handle the case where SUBDIR hasn't been set.
+- \ref rule_Library "Library" accepts an option '<tt>module</tt>'.  When specified on OS X, a bundle is created.  For other platforms, a module is created just like a normal shared library.
+- New configuration 'releaseltcg', a Release build with Link Time Code Generation support.  Access it with the Jam command line option <tt>-sCONFIG=releaseltcg</tt>.
+- Added .idl support.  Tested with both Workspace Whiz and LuaPlus.
+- Add <tt>regserver</tt> option to \ref rule_Library "Library" for shared libraries.  On Windows, <b>regsvr32</b> is run during the build to automatically register the DLL with the system.  When cleaning, <b>regsvr32 /u </b>is run.
 - Remove the .intermediate.manifest file on Clean for all configurations (not just Debug).
 - CRuntimeType only worked for the * target.  Now it works for project targets, too.
+- Add support to \ref rule_BatchCompileGroupSize "BatchCompileGroupSize" to handle the \ref rule_ActiveProject "ActiveProject" rule.
+- In the \ref rule_Library "Library" rule, the dependency chain was broken for the <tt>noexportlib</tt> option.
 
 
 
@@ -103,7 +90,9 @@
 <h3>JamToWorkspace:</h3>
 
 - Handle more than one workspace containing the same project.
-
+- Because libraries and executables were getting added to the 'all' target, sometimes unintended builds would happen when generating a workspace.  This dependency has been removed.
+- Remove duplicate projects from the same workspace.
+- Fix from Lucas Meijer for handling \ref rule_ActiveProject "ActiveProject" specified targets with \ref rule_LinkLibraries "LinkLibraries".
 
 
 

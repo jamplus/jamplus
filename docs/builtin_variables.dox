@@ -49,6 +49,19 @@ rule DoHeaderFilter TARGET_NAME : DEPENDENCIES : TARGET_BOUNDNAME
 }
 \endcode
 
+\c HDRFILTER can also be used to translate dependency names:
+
+\code
+# Reading our special file format, DEPENDENCIES may come in as $(environment_variable)/filename.
+# Translate it.
+rule DoHeaderFilter TARGET_NAME : DEPENDENCIES : TARGET_BOUNDNAME
+{
+    # Filter any unwanted dependencies.
+	DEPENDENCIES = $(DEPENDENCIES:A) ;
+    return $(DEPENDENCIES) ;
+}
+\endcode
+
 
 \subsection built_in_variables_hdrpipe Shelling Processes for Dependencies
 

@@ -2,6 +2,10 @@
 
 \section cmd_intro Introduction
 
+In the <tt>Jambase.jam</tt> that ships with JamPlus, the default build configuration is Release.
+
+The <tt>Jambase.jam</tt> rules attempt to detect the compiler on the machine.  It can successfully detect and run Visual C++ 6, Visual Studio 2003, Visual Studio 2005, and Visual Studio 2008.
+
 If [square] brackets are used the argument is optional.
 
 Here is an alphabetically sorted list of all commands with references to their
@@ -9,6 +13,7 @@ documentation:
 \secreflist
 \refitem rule_ActiveProject ActiveProject
 \refitem rule_Application Application
+\refitem rule_BatchCompileGroupSize BatchCompileGroupSize
 \refitem rule_CFlags CFlags
 \refitem rule_CppFlags C++Flags
 \refitem rule_CppCompileOptions CppCompileOptions
@@ -25,6 +30,7 @@ documentation:
 \refitem rule_Lump Lump
 \refitem rule_MakeLocate MakeLocate
 \refitem rule_MkDir MkDir
+\refitem rule_NoWorkspace NoWorkspace
 \refitem rule_ObjectCFlags ObjectCFlags
 \refitem rule_ObjectCppFlags ObjectC++Flags
 \refitem rule_ObjectDefines ObjectDefines
@@ -85,6 +91,26 @@ Compiles \c SOURCES and links them into \c TARGET.  Filenames with an <tt>.obj</
     Application helloworld : helloworld.cpp ;
 \endcode
 
+
+
+
+
+
+
+<hr>
+\section rule BatchCompileGroupSize TARGET [ : SIZE ]
+\addindex rule_BatchCompileGroupSize
+
+For the given project \c TARGET, only allow \c SIZE files to be batch compiled in a given compiler execution.
+
+\param TARGET The target to assign the \c SIZE information to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SIZE (optional) The maximum number of files to allow to compile on a given compiler execution.  If not specified, there is no limit to the number of batch compiled files.
+
+\code
+    # wxLua takes so long to build that we don't properly take advantage of
+	# multithreading without splitting up the build some.
+	BatchCompileGroupSize wxLua : 5 ;
+\endcode
 
 
 
@@ -361,6 +387,7 @@ If \c shared is specified for \c OPTIONS, the following additional options are a
   <li>\c nodefaults - Avoid adding /SUBSYSTEM to the link flags.</li>
   <li>\c noexportlib - Don't write out an export library.</li>
   <li>\c nomanifest - Don't embed a manifest.</li>
+  <li>\c regserver - On Windows, <b>regsvr32</b> is run during the build to automatically register the DLL with the system.  When cleaning, <b>regsvr32 /u </b>is run.
   <li>\c windows - Forces a GUI application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
 </ul>
 \htmlonly </blockquote> \endhtmlonly
@@ -844,10 +871,27 @@ For workspaces that support grouping of projects into folders, the \c ProjectGro
 
 
 <hr>
-\section rule_RcDefines rule RcDefines TARGET : RESOURCE_NAME : DEFINES
+\section rule_RcDefines rule RcDefines TARGET [ : RESOURCE_NAME ] : DEFINES
 \addindex rule_RcDefines
 
-To be documented.
+For the given project \c TARGET, assign the \c DEFINES for the resource file compilation.
+
+\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param RESOURCE_NAME (optional) When present, the \c DEFINES are applied to the specified \c .rc file.
+\param DEFINES The list of defines to apply.
+
+\code
+    # Make #defines available for ABC and DEF=5 in all of someproject's
+	# .rc files.
+    RcDefines someproject : ABC DEF=5 ;
+
+    # Add a WIN32 define globally.
+    RcDefines * : WIN32 ;
+
+    # For the AddIn.rc file, add a #define called SPECIAL_BUILD:
+    RcDefines myproject : AddIn.rc : SPECIAL_BUILD ;
+\endcode
+
 
 
 
@@ -859,7 +903,23 @@ To be documented.
 \section rule_RcFlags rule RcFlags TARGET : RESOURCE_NAME : FLAGS
 \addindex rule_RcFlags
 
-To be documented.
+For the given project \c TARGET, assign the \c FLAGS for the resource file compilation.
+
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param RESOURCE_NAME (optional) When present, the \c FLAGS are applied to the specified \c .rc file.
+\param FLAGS The list of flags to apply.
+
+\code
+    # Turn on verbose mode for all of someproject's .rc files.
+    RcFlags someproject : /v ;
+
+    # Add the /y flag to all .rc files.
+    RcFlags * : /y ;
+
+    # For the AddIn.rc file, turn on verbose mode.
+    RcFlags myproject : AddIn.rc : /v ;
+\endcode
+
 
 
 
@@ -871,7 +931,23 @@ To be documented.
 \section rule_RcIncludeDirectories rule RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
 \addindex rule_RcIncludeDirectories
 
-To be documented.
+For the given project \c TARGET, assign the include directories specified in \c HDRS to the resource file compilation.
+
+\param TARGET The target to assign the \c HDRS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the include directories are made available globally.
+\param RESOURCE_NAME (optional) When present, the \c HDRS are applied to the specified \c .rc file.
+\param HDRS The list of include directories to apply.
+
+\code
+    # Make include directories available for all of someproject's .rc files.
+    RcIncludeDirectories someproject : c:/mylibrary ;
+
+    # Add $(LOCATE_SOURCE) include directory to all .rc files.
+    RcIncludeDirectories * : $(LOCATE_SOURCE) ;
+
+    # For the AddIn.rc file, add $(LOCATE_SOURCE) as a search path.
+    RcIncludeDirectories myproject : AddIn.rc : $(LOCATE_SOURCE) ;
+\endcode
+
 
 
 
@@ -884,6 +960,12 @@ To be documented.
 \addindex rule_ResourceCompiler
 
 Compiles a resource <tt>.rc</tt> file into a <tt>.res</tt> file.
+
+#defines made available by the \ref rule_RcDefines rule are applied in the following order: <tt>PARENT</tt> then <tt>*</tt>. 
+
+Compilation flags made available by the \ref rule_RcFlags rule are applied in the following order: <tt>PARENT</tt> then <tt>*</tt>. 
+
+Include directories made available by the \ref rule_RcIncludeDirectories are looked up in this order: <tt>$(SEARCH_SOURCE)</tt>, <tt>PARENT</tt>, <tt>*</tt>, <tt>$(SUBDIRHDRS)</tt>, then <tt>$(STDHDRS)</tt>.
 
 \param PARENT The parent target to which the resource file belongs.  This is needed to properly grist the resource filenames.
 \param SOURCES The <tt>.rc</tt> file to be compiled.

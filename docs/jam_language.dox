@@ -176,6 +176,16 @@ actions response C++
     $(C++) @@($(2))
 }
 \endcode
+
+It is valid to nest the generation of response files.  In the example below, the file list is written to a temporary response file and the filename is inserted in the place of <tt>@($(2))</tt>.  In a secondary response file, the <tt>-filelist</tt> parameter and the first response filename are added.  This response filename is then passed to the C++ compiler.
+
+
+\code
+actions response C++
+{
+    $(C++) @@(-filelist @($(2)))
+}
+\endcode
     </td>
   </tr>
   <tr>

@@ -1,0 +1,48 @@
+/*! \page building Bootstrapping/Building
+
+\section building_overview Overview
+
+JamPlus comes with some simple makefiles to bootstrap the initial build of the JamPlus executable.  A good portion of the makefile contents in <tt>Makefile.Common</tt> are shared between the Visual C++ NMake-based build and the GCC-based make build.
+
+
+
+
+\section building_visualc Building for Visual C++
+
+The Visual C++ build uses Visual Studio's Link Time Code Generation support to create a highly optimized executable.
+
+In order to build JamPlus using the Visual C++ compiler, do the following:
+
+\code
+cd src
+jmake
+\endcode
+
+When finished, the Jam executable will have been built as <tt>bin/jam.exe</tt>
+
+Alternatively, Visual Studio 2005 and 2008 solution and project files are maintained.  The solution names are <tt>src/jam.VS2005.sln</tt> and <tt>src/jam.VS2008.sln</tt>.  Note: When using a Visual Studio 2005/2008 Release build, the Jam executable is nowhere near as fast as the command-line generated Link Time Code Generated version.
+
+To clean the Visual C++ build, run:
+
+\code
+cd src
+clean
+\endcode
+
+
+
+
+
+\section building_macosx Building for Mac OS X
+
+In order to build JamPlus on Mac OS X, do the following:
+
+\code
+cd src
+make macosx
+\endcode
+
+When finished, the Jam executable will have been built as <tt>bin/jam</tt>.
+
+
+*/

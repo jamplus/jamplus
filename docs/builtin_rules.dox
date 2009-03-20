@@ -236,6 +236,8 @@ Blurts out the message \c ARGS to stdout and then exits with a failure status.
 
 Scans \c DIRECTORIES for files matching \c PATTERNS, returning the list of matching files (with directory prepended, unless the optional \c PREPEND is set to \c 0 or \c false).  \c PATTERNS uses the same syntax as in the \ref statements_switch "switch" statement.  Only useful within the <tt>[ ]</tt> construct, to change the result into a list.
 
+On Windows, the glob matching is performed in a case insensitive manner.
+
 \code
     # Returns all files and directories.  Directories have a / appended.
     # Directories . and .. are not returned.
@@ -358,7 +360,7 @@ When \c QueueJamFile is called, a second pass on the Jam dependency graph is ini
 
 
 <hr>
-\section rule_Subst rule Subst LIST : PATTERN : REPL [ : MAXN ] ;
+\section rule_Subst rule Subst LIST : PATTERN [ : REPL [ : MAXN ] ] ;
 \addindex rule_Subst
 
 \note The Subst rule comes from the Lua code base's implementation of string.gsub.  The documentation below is near verbatim from the Lua manual.
@@ -368,6 +370,11 @@ Returns a copy of \c LIST in which all occurrences of the \c PATTERN have been r
 The character <tt>%</tt> works as an escape character: any sequence in repl of the form <tt>%n</tt>, with <tt>n</tt> between 1 and 9, stands for the value of the n-th captured substring (see below).  The sequence <tt>%0</tt> stands for the whole match. The sequence <tt>%%</tt> stands for a single <tt>%</tt>.
 
 The optional last parameter n limits the maximum number of substitutions to occur. For instance, when n is 1 only the first occurrence of pattern is replaced.
+
+\param LIST The list of strings to apply the regular expression substitution algorithm to.
+\param PATTERN The regular expression pattern to search for within \c LIST.  If the pattern is found, it is replaced with \c REPL.
+\param REPL (optional) If specified, any patterns matched with \c PATTERN are replaced with the contents of \c REPL.  If not specified, the replacement string is empty.
+\param MAXN (optional) The maximum number of substitutions to occur.
 
 \code
 # __/__/dir/__/dir2
