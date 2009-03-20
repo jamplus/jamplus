@@ -129,6 +129,7 @@ rule CSharpApplication TARGET : SOURCES : OPTIONS
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	Workspace $(TARGET) : $(TARGET) : all ;
 
+	Depends all : $(TARGET) ;
 	DumpProjectInfo $(TARGET) : $(SOURCES) : app ;
 }
 
@@ -137,6 +138,7 @@ rule CSharpLibrary TARGET : SOURCES : OPTIONS
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	Workspace $(TARGET) : $(TARGET) : all ;
 
+	Depends all : $(TARGET) ;
 	DumpProjectInfo $(TARGET) : $(SOURCES) : shared ;
 }
 
