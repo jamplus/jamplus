@@ -34,4 +34,4 @@ ReferenceAssemblies WindowsFormsApplication :
 ;
 
 
-CSharpApplication WindowsFormsApplication : $(SRCS) ;
+CSharpApplication WindowsFormsApplication : $(SRCS) : windows ;
