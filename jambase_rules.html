@@ -8,10 +8,12 @@
 <div class="contents">
 <h1><a class="anchor" name="jambase_rules">Jambase Rules </a></h1><h2><a class="anchor" name="cmd_intro">
 Introduction</a></h2>
+In the <code>Jambase.jam</code> that ships with JamPlus, the default build configuration is Release.<p>
+The <code>Jambase.jam</code> rules attempt to detect the compiler on the machine. It can successfully detect and run Visual C++ 6, Visual Studio 2003, Visual Studio 2005, and Visual Studio 2008.<p>
 If [square] brackets are used the argument is optional.<p>
 Here is an alphabetically sorted list of all commands with references to their documentation: <multicol cols=3>
 <ul>
-<li><a href="jambase_rules.html#rule_ActiveProject">ActiveProject</a> <li><a href="jambase_rules.html#rule_Application">Application</a> <li><a href="jambase_rules.html#rule_CFlags">CFlags</a> <li><a href="jambase_rules.html#rule_CppFlags">C++Flags</a> <li><a href="jambase_rules.html#rule_CppCompileOptions">CppCompileOptions</a> <li><a href="jambase_rules.html#rule_CRuntimeType">CRuntimeType</a> <li><a href="jambase_rules.html#rule_Defines">Defines</a> <li><a href="jambase_rules.html#rule_ExcludeFromBuild">ExcludeFromBuild</a> <li><a href="jambase_rules.html#rule_FGristDirectories">FGristDirectories</a> <li><a href="jambase_rules.html#rule_IncludeDirectories">IncludeDirectories</a> <li><a href="jambase_rules.html#rule_IncludeModule">IncludeModule</a> <li><a href="jambase_rules.html#rule_Library">Library</a> <li><a href="jambase_rules.html#rule_LinkDirectories">LinkDirectories</a> <li><a href="jambase_rules.html#rule_LinkLibraries">LinkLibraries</a> <li><a href="jambase_rules.html#rule_LinkPrebuiltLibraries">LinkPrebuiltLibrariess</a> <li><a href="jambase_rules.html#rule_Lump">Lump</a> <li><a href="jambase_rules.html#rule_MakeLocate">MakeLocate</a> <li><a href="jambase_rules.html#rule_MkDir">MkDir</a> <li><a href="jambase_rules.html#rule_ObjectCFlags">ObjectCFlags</a> <li><a href="jambase_rules.html#rule_ObjectCppFlags">ObjectC++Flags</a> <li><a href="jambase_rules.html#rule_ObjectDefines">ObjectDefines</a> <li><a href="jambase_rules.html#rule_ObjectIncludeDirectories">ObjectIncludeDirectories</a> <li><a href="jambase_rules.html#rule_OutputName">OutputName</a> <li><a href="jambase_rules.html#rule_OutputPath">OutputPath</a> <li><a href="jambase_rules.html#rule_OutputPostfix">OutputPostfix</a> <li><a href="jambase_rules.html#rule_OutputSuffix">OutputSuffix</a> <li><a href="jambase_rules.html#rule_PrecompiledHeader">PrecompiledHeader</a> <li><a href="jambase_rules.html#rule_Project">Project</a> <li><a href="jambase_rules.html#rule_ProjectGroup">ProjectGroup</a> <li><a href="jambase_rules.html#rule_RcDefines">RcDefines</a> <li><a href="jambase_rules.html#rule_RcFlags">RcFlags</a> <li><a href="jambase_rules.html#rule_RcIncludeDirectories">RcIncludeDirectories</a> <li><a href="jambase_rules.html#rule_ResourceCompiler">ResourceCompiler</a> <li><a href="jambase_rules.html#rule_RmTemps">RmTemps</a> <li><a href="jambase_rules.html#rule_SearchSource">SearchSource</a> <li><a href="jambase_rules.html#rule_SourceGroup">SourceGroup</a> <li><a href="jambase_rules.html#rule_SubDir">SubDir</a> <li><a href="jambase_rules.html#rule_SubInclude">SubInclude</a> <li><a href="jambase_rules.html#rule_Workspace">Workspace</a> </ul>
+<li><a href="jambase_rules.html#rule_ActiveProject">ActiveProject</a> <li><a href="jambase_rules.html#rule_Application">Application</a> <li><a href=".html#">BatchCompileGroupSize</a> <li><a href="jambase_rules.html#rule_CFlags">CFlags</a> <li><a href="jambase_rules.html#rule_CppFlags">C++Flags</a> <li><a href="jambase_rules.html#rule_CppCompileOptions">CppCompileOptions</a> <li><a href="jambase_rules.html#rule_CRuntimeType">CRuntimeType</a> <li><a href="jambase_rules.html#rule_Defines">Defines</a> <li><a href="jambase_rules.html#rule_ExcludeFromBuild">ExcludeFromBuild</a> <li><a href="jambase_rules.html#rule_FGristDirectories">FGristDirectories</a> <li><a href="jambase_rules.html#rule_IncludeDirectories">IncludeDirectories</a> <li><a href="jambase_rules.html#rule_IncludeModule">IncludeModule</a> <li><a href="jambase_rules.html#rule_Library">Library</a> <li><a href="jambase_rules.html#rule_LinkDirectories">LinkDirectories</a> <li><a href="jambase_rules.html#rule_LinkLibraries">LinkLibraries</a> <li><a href="jambase_rules.html#rule_LinkPrebuiltLibraries">LinkPrebuiltLibrariess</a> <li><a href="jambase_rules.html#rule_Lump">Lump</a> <li><a href="jambase_rules.html#rule_MakeLocate">MakeLocate</a> <li><a href="jambase_rules.html#rule_MkDir">MkDir</a> <li><a href="jambase_rules.html#rule_NoWorkspace">NoWorkspace</a> <li><a href="jambase_rules.html#rule_ObjectCFlags">ObjectCFlags</a> <li><a href="jambase_rules.html#rule_ObjectCppFlags">ObjectC++Flags</a> <li><a href="jambase_rules.html#rule_ObjectDefines">ObjectDefines</a> <li><a href="jambase_rules.html#rule_ObjectIncludeDirectories">ObjectIncludeDirectories</a> <li><a href="jambase_rules.html#rule_OutputName">OutputName</a> <li><a href="jambase_rules.html#rule_OutputPath">OutputPath</a> <li><a href="jambase_rules.html#rule_OutputPostfix">OutputPostfix</a> <li><a href="jambase_rules.html#rule_OutputSuffix">OutputSuffix</a> <li><a href="jambase_rules.html#rule_PrecompiledHeader">PrecompiledHeader</a> <li><a href="jambase_rules.html#rule_Project">Project</a> <li><a href="jambase_rules.html#rule_ProjectGroup">ProjectGroup</a> <li><a href="jambase_rules.html#rule_RcDefines">RcDefines</a> <li><a href="jambase_rules.html#rule_RcFlags">RcFlags</a> <li><a href="jambase_rules.html#rule_RcIncludeDirectories">RcIncludeDirectories</a> <li><a href="jambase_rules.html#rule_ResourceCompiler">ResourceCompiler</a> <li><a href="jambase_rules.html#rule_RmTemps">RmTemps</a> <li><a href="jambase_rules.html#rule_SearchSource">SearchSource</a> <li><a href="jambase_rules.html#rule_SourceGroup">SourceGroup</a> <li><a href="jambase_rules.html#rule_SubDir">SubDir</a> <li><a href="jambase_rules.html#rule_SubInclude">SubInclude</a> <li><a href="jambase_rules.html#rule_Workspace">Workspace</a> </ul>
 </multicol>
 <p>
 The following is a list of rules available in <code>bin/Jambase.jam</code>.<p>
@@ -45,6 +47,21 @@ Compiles <code>SOURCES</code> and links them into <code>TARGET</code>. Filenames
 </ul>
  </blockquote> <p>
 <div class="fragment"><pre class="fragment">    Application helloworld : helloworld.cpp ;
+</pre></div><p>
+<hr>
+ <h2><a class="anchor" name="rule">
+BatchCompileGroupSize TARGET [ : SIZE ]</a></h2>
+<p>
+For the given project <code>TARGET</code>, only allow <code>SIZE</code> files to be batch compiled in a given compiler execution.<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target to assign the <code>SIZE</code> information to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>SIZE</em>&nbsp;</td><td>(optional) The maximum number of files to allow to compile on a given compiler execution. If not specified, there is no limit to the number of batch compiled files.</td></tr>
+  </table>
+</dl>
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # wxLua takes so long to build that we don't properly take advantage of</span>
+<span class="preprocessor"></span><span class="preprocessor">        # multithreading without splitting up the build some.</span>
+<span class="preprocessor">        BatchCompileGroupSize wxLua : 5 ;</span>
 </pre></div><p>
 <hr>
  <h2><a class="anchor" name="rule_CFlags">
@@ -258,6 +275,8 @@ Compiles <code>SOURCES</code> and archives them into a library called <code>TARG
 <code>noexportlib</code> - Don't write out an export library. </li>
 <li>
 <code>nomanifest</code> - Don't embed a manifest. </li>
+<li>
+<code>regserver</code> - On Windows, <b>regsvr32</b> is run during the build to automatically register the DLL with the system. When cleaning, <b>regsvr32 /u </b>is run. </li>
 <li>
 <code>windows</code> - Forces a GUI application. For Visual C++, the DLL is linked with <code>/SUBSYSTEM:WINDOWS</code>. </li>
 </ul>
@@ -619,24 +638,76 @@ For workspaces that support grouping of projects into folders, the <code>Project
 </pre></div><p>
 <hr>
  <h2><a class="anchor" name="rule_RcDefines">
-rule RcDefines TARGET : RESOURCE_NAME : DEFINES</a></h2>
+rule RcDefines TARGET [ : RESOURCE_NAME ] : DEFINES</a></h2>
 <p>
-To be documented.<p>
+For the given project <code>TARGET</code>, assign the <code>DEFINES</code> for the resource file compilation.<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target to assign the <code>DEFINES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>RESOURCE_NAME</em>&nbsp;</td><td>(optional) When present, the <code>DEFINES</code> are applied to the specified <code></code>.rc file. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>DEFINES</em>&nbsp;</td><td>The list of defines to apply.</td></tr>
+  </table>
+</dl>
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # Make #defines available for ABC and DEF=5 in all of someproject's</span>
+<span class="preprocessor"></span><span class="preprocessor">        # .rc files.</span>
+<span class="preprocessor"></span>    RcDefines someproject : ABC DEF=5 ;
+
+<span class="preprocessor">    # Add a WIN32 define globally.</span>
+<span class="preprocessor"></span>    RcDefines * : WIN32 ;
+
+<span class="preprocessor">    # For the AddIn.rc file, add a #define called SPECIAL_BUILD:</span>
+<span class="preprocessor">    RcDefines myproject : AddIn.rc : SPECIAL_BUILD ;</span>
+</pre></div><p>
 <hr>
  <h2><a class="anchor" name="rule_RcFlags">
 rule RcFlags TARGET : RESOURCE_NAME : FLAGS</a></h2>
 <p>
-To be documented.<p>
+For the given project <code>TARGET</code>, assign the <code>FLAGS</code> for the resource file compilation.<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target to assign the <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the flags are made available globally. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>RESOURCE_NAME</em>&nbsp;</td><td>(optional) When present, the <code>FLAGS</code> are applied to the specified <code></code>.rc file. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>FLAGS</em>&nbsp;</td><td>The list of flags to apply.</td></tr>
+  </table>
+</dl>
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # Turn on verbose mode for all of someproject's .rc files.</span>
+<span class="preprocessor"></span>    RcFlags someproject : /v ;
+
+<span class="preprocessor">    # Add the /y flag to all .rc files.</span>
+<span class="preprocessor"></span>    RcFlags * : /y ;
+
+<span class="preprocessor">    # For the AddIn.rc file, turn on verbose mode.</span>
+<span class="preprocessor">    RcFlags myproject : AddIn.rc : /v ;</span>
+</pre></div><p>
 <hr>
  <h2><a class="anchor" name="rule_RcIncludeDirectories">
 rule RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS</a></h2>
 <p>
-To be documented.<p>
+For the given project <code>TARGET</code>, assign the include directories specified in <code>HDRS</code> to the resource file compilation.<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target to assign the <code>HDRS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the include directories are made available globally. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>RESOURCE_NAME</em>&nbsp;</td><td>(optional) When present, the <code>HDRS</code> are applied to the specified <code></code>.rc file. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>HDRS</em>&nbsp;</td><td>The list of include directories to apply.</td></tr>
+  </table>
+</dl>
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # Make include directories available for all of someproject's .rc files.</span>
+<span class="preprocessor"></span>    RcIncludeDirectories someproject : c:/mylibrary ;
+
+<span class="preprocessor">    # Add $(LOCATE_SOURCE) include directory to all .rc files.</span>
+<span class="preprocessor"></span>    RcIncludeDirectories * : $(LOCATE_SOURCE) ;
+
+<span class="preprocessor">    # For the AddIn.rc file, add $(LOCATE_SOURCE) as a search path.</span>
+<span class="preprocessor">    RcIncludeDirectories myproject : AddIn.rc : $(LOCATE_SOURCE) ;</span>
+</pre></div><p>
 <hr>
  <h2><a class="anchor" name="rule_ResourceCompiler">
 rule ResourceCompiler PARENT : SOURCES : OPTIONS</a></h2>
 <p>
 Compiles a resource <code>.rc</code> file into a <code>.res</code> file.<p>
+defines made available by the <a class="el" href="jambase_rules.html#rule_RcDefines">rule RcDefines TARGET [ : RESOURCE_NAME ] : DEFINES</a> rule are applied in the following order: <code>PARENT</code> then <code>*</code>.<p>
+Compilation flags made available by the <a class="el" href="jambase_rules.html#rule_RcFlags">rule RcFlags TARGET : RESOURCE_NAME : FLAGS</a> rule are applied in the following order: <code>PARENT</code> then <code>*</code>.<p>
+Include directories made available by the <a class="el" href="jambase_rules.html#rule_RcIncludeDirectories">rule RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS</a> are looked up in this order: <code></code>, <code>PARENT</code>, <code>*</code>, <code></code>, then <code></code>.<p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>PARENT</em>&nbsp;</td><td>The parent target to which the resource file belongs. This is needed to properly grist the resource filenames. </td></tr>
@@ -726,7 +797,7 @@ Workspaces are automatically generated for any executable processed while readin
 </pre></div><p>
 <hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Thu Feb 26 22:31:01 2009 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Thu Mar 19 23:02:40 2009 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.7 </small></address>
 </body>
