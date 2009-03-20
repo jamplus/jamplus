@@ -82,8 +82,10 @@
 <h3>Jam Modules:</h3>
 
 - New CSharp Jam module: Adds rules CSharpAssembly, CSharpApplication, CSharpLibrary, CscDefines, CscFlags, ReferenceAssemblies, and ReferencePaths.
+- DirectX module: It is now a requirement to specify the \c link option to get the proper DirectX link directories in your path.  Previously, this happened automatically, applying link flags even to static libraries.
 - DotNet module: Add VS2008 support.
 - MFC Jam module: Add the atlmfc/ path to the resource compiler includes.
+- MFC module: It is now a requirement to specify the \c link option to get the proper MFC link directories in your path.  Previously, this happened automatically, applying link flags even to static libraries.
 - Midl Jam module: New rules MidlFlags and MidlCompiler for building .idl files.
 
 
