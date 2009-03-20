@@ -460,11 +460,13 @@
  * Jam implementation misc.
  */
 
+#include <limits.h>
+
 # ifndef MAXLINE
 # ifdef NT
 # define MAXLINE 10240	/* longest 'together' actions' */
 # else
-# define MAXLINE INT_MAX
+# define MAXLINE (INT_MAX/2)
 # endif
 # endif
 
@@ -489,7 +491,7 @@
 # ifdef NT
 # define CMDBUF 10240
 # else
-# define CMDBUF MAXINT
+# define CMDBUF (INT_MAX/2)
 # endif
 #endif
 
