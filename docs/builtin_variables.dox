@@ -41,25 +41,25 @@ On Windows, header filenames are, by default, converted to lowercase.  This can 
 When \c HDRFILTER is set on a target, the rule bearing the name specified in the contents of \c HDRFILTER is executed with the following signature.
 
 \code
-rule DoHeaderFilter TARGET_NAME : DEPENDENCIES : TARGET_BOUNDNAME
-{
-    # Filter any unwanted dependencies.
-    DEPENDENCIES -= bob fred ;
-    return $(DEPENDENCIES) ;
-}
+    rule DoHeaderFilter TARGET_NAME : DEPENDENCIES : TARGET_BOUNDNAME
+    {
+        # Filter any unwanted dependencies.
+        DEPENDENCIES -= bob fred ;
+        return $(DEPENDENCIES) ;
+    }
 \endcode
 
 \c HDRFILTER can also be used to translate dependency names:
 
 \code
-# Reading our special file format, DEPENDENCIES may come in as $(environment_variable)/filename.
-# Translate it.
-rule DoHeaderFilter TARGET_NAME : DEPENDENCIES : TARGET_BOUNDNAME
-{
-    # Filter any unwanted dependencies.
-	DEPENDENCIES = $(DEPENDENCIES:A) ;
-    return $(DEPENDENCIES) ;
-}
+    # Reading our special file format, DEPENDENCIES may come in as $(environment_variable)/filename.
+    # Translate it.
+    rule DoHeaderFilter TARGET_NAME : DEPENDENCIES : TARGET_BOUNDNAME
+    {
+        # Filter any unwanted dependencies.
+        DEPENDENCIES = $(DEPENDENCIES:A) ;
+        return $(DEPENDENCIES) ;
+    }
 \endcode
 
 
@@ -79,7 +79,7 @@ At times, it is necessary to synchronize access in a multiprocessor build.  The 
 Example: The Visual C++ compiler accesses the same .pdb and .idb files.  To prevent that, a \c SEMAPHORE is used:
 
 \code
-SEMAPHORE on $(objects) = $(LOCATE_TARGET)/$(_VCPDB).pdb ;
+    SEMAPHORE on $(objects) = $(LOCATE_TARGET)/$(_VCPDB).pdb ;
 \endcode
 
 

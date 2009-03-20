@@ -22,6 +22,7 @@ To initiate a second Jam pass, the \ref rule_QueueJamFile "QueueJamFile" rule mu
 
 \section multiple_passes_example1 Example 1
 
+\htmlonly <blockquote> \endhtmlonly
 \code
 ###############################################################################
 # Jamfile.jam
@@ -35,9 +36,10 @@ NotFile all clean ;
 # Queue Pass2.jam up for the next pass.
 QueueJamfile Pass2.jam ;
 \endcode
+\htmlonly </blockquote> \endhtmlonly
 
 
-
+\htmlonly <blockquote> \endhtmlonly
 \code
 ###############################################################################
 # Pass2.jam
@@ -75,7 +77,7 @@ Always Pass3.jam ;
 # JamPlus' multipass Jamfile reader kicks in.
 QueueJamfile Pass3.jam ;
 \endcode
-
+\htmlonly </blockquote> \endhtmlonly
 
 
 \section multiple_passes_gotchas Gotchas

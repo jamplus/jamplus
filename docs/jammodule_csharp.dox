@@ -1,0 +1,190 @@
+/*! \page jammodule_csharp C# Rules
+
+\section jammodule_csharp_ruleslist List of Rules
+
+\secreflist
+\refitem rule_CscDefines CscDefines
+\refitem rule_CscFlags CscFlags
+\refitem rule_CSharpApplication CSharpApplication
+\refitem rule_CSharpAssembly CSharpAssembly
+\refitem rule_CSharpLibrary CSharpLibrary
+\refitem rule_ReferenceAssemblies ReferenceAssemblies
+\refitem rule_ReferencePaths ReferencePaths
+\endsecreflist
+
+
+
+
+
+
+\section jammodule_csharp_rules Rules
+
+<hr>
+\section rule_CscDefines rule CscDefines TARGET : DEFINES [ : THE_CONFIG ]
+\addindex rule_CscDefines
+
+For the given C# project \c TARGET, assign the \c DEFINES to the configuration \c THE_CONFIG.
+
+\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param DEFINES The list of defines to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+
+\code
+    # Make #defines available for ABC and DEF=5 in csharpproject for all
+    # configurations and all platforms.
+    CscDefines csharpproject : ABC DEF=5 ;
+
+    # Add a GHI define globally.
+    CscDefines * : GHI ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_CscFlags rule CscFlags TARGET : FLAGS [ : THE_CONFIG ]
+\addindex rule_CscFlags
+
+For the given C# project \c TARGET, assign the \c FLAGS to the configuration \c THE_CONFIG.
+
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+
+\code
+    # Assign /platform:x86 to all configurations of the target csharpapp.
+    CscFlags csharpapp : /platform:x86 ;
+
+    # Turn on optimizations for the Release configuration.
+    CscFlags csharpapp : /optimize+ : release ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_CSharpApplication rule CSharpApplication TARGET : SOURCES [ : OPTIONS ]
+\addindex rule_CSharpApplication
+
+Compiles C# \c SOURCES and links them into \c TARGET.  This is just a passthrough rule for rule_CSharpAssembly "CSharpAssembly".
+
+\code
+    CSharpApplication helloworld : helloworld.cs ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_CSharpAssembly rule CSharpAssembly TARGET : SOURCES [ : OPTIONS ]
+\addindex rule_CSharpAssembly
+
+Compiles C# \c SOURCES and links them into \c TARGET.
+
+\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of <tt>.cs</tt> files to link into the application.
+\param OPTIONS (optional) The following options are available:
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c console (default) - Builds a console application.</li>
+  <li>\c library - Builds a library.</li>
+  <li>\c module - Builds a module.</li>
+  <li>\c windows - Builds a GUI application.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    CSharpAssembly helloworld : helloworld.cs ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_CSharpLibrary rule CSharpLibrary TARGET : SOURCES [ : OPTIONS ]
+\addindex rule_CSharpLibrary
+
+Compiles C# \c SOURCES and links them into the library \c TARGET.  This is just a passthrough rule for rule_CSharpAssembly "CSharpAssembly" with the \c library option.
+
+\code
+    CSharpLibrary mylibrary : mysource.cs ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_ReferenceAssemblies rule ReferenceAssemblies TARGET : ASSEMBLIES [ : THE_CONFIG ]
+\addindex rule_ReferenceAssemblies
+
+Makes \c TARGET depend on \c ASSEMBLIES and includes them during linking.
+
+\param TARGET The target to link \c ASSEMBLIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param ASSEMBLIES The list of assemblies to apply.  These libraries are prebuilt assemblies, such as System.Core.dll.  For those assemblies generated from the \ref rule_CSharpAssembly "CSharpAssembly" rule, use the "LinkAssemblies" rule.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+
+\code
+    ReferenceAssemblies WindowsFormsApplication :
+        System.Core.dll
+        System.Data.DataSetExtensions.dll
+        System.Data.dll
+        System.Deployment.dll
+        System.dll
+        System.Drawing.dll
+        System.Windows.Forms.dll
+        System.Xml.dll
+        System.Xml.Linq.dll
+    ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ReferencePaths rule ReferencePaths TARGET : PATHS [ : THE_CONFIG ]
+\addindex rule_ReferencePaths
+
+For the given project \c TARGET, make the reference search paths \c PATHS available to configuration \c THE_CONFIG.
+
+\param TARGET The target to assign the reference paths to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param PATHS The list of reference search paths to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+
+\code
+    # Add c:/assemblies to myproject for all configurations.
+    ReferencePaths myproject : c:/assemblies ;
+
+    # Relative path:
+    ReferencePaths myproject : ../libs ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+*/
+

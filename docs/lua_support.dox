@@ -54,12 +54,14 @@ Executes \c LUA_FILENAME, returning any results back to the caller.
 
 Using the new <tt>lua</tt> modifier for an action, Lua script can be run in a thread within the Jam process.
 
+\htmlonly <blockquote> \endhtmlonly
 \code
 actions lua RunLuaScript
 {
     require 'iox'; iox.Sleep($(SLEEP)); print($(TEXT))
 }
 \endcode
+\htmlonly </blockquote> \endhtmlonly
 
 
 
@@ -129,6 +131,7 @@ Executes rule \c RULE_NAME using any optional \c PARAMETERS specified.  Returns 
 <hr>
 \section lua_support_examples Examples
 
+\htmlonly <blockquote> \endhtmlonly
 \code
 # Hello
 LuaString "print('Hello')" ;
@@ -169,6 +172,7 @@ rule ReturnList INPUT
 # **MyStuff** **YourStuff**
 Echo [ LuaString "return jam_evaluaterule('ReturnList', { 'MyStuff', 'YourStuff' })" ] ;
 \endcode
+\htmlonly </blockquote> \endhtmlonly
 
 
 */

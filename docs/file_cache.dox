@@ -18,6 +18,7 @@ The most important thing to note is JamPlus will do a deep dependency scan to ca
 
 A single file cache is defined as follows:
 
+\htmlonly <blockquote> \endhtmlonly
 \code
 
 FILECACHE.cachename.PATH = \\\\uncshare\\networkcache\\cachename ;
@@ -25,9 +26,11 @@ FILECACHE.cachename.GENERATE = 1 ;
 FILECACHE.cachename.USE = 1 ;
 
 \endcode
+\htmlonly </blockquote> \endhtmlonly
 
 The default file cache's name is \c generic.  When \ref rule_UseFileCache is specified without a \c CACHE_NAME, the default is \c generic.  Given this is the most common case, you'll most always want to declare the \b generic file cache similar to:
 
+\htmlonly <blockquote> \endhtmlonly
 \code
 
 FILECACHE.generic.PATH = \\\\mynetworkcacheserver\\generic ;
@@ -37,6 +40,7 @@ FILECACHE.generic.GENERATE = 1 ;
 FILECACHE.generic.USE = 1 ;
 
 \endcode
+\htmlonly </blockquote> \endhtmlonly
 
 It is not necessary to manually create the directory populated by the file cache.
 
@@ -58,6 +62,7 @@ The JamPlus file cache is turned on for a given target by using the \ref rule_Us
 
 In the example below, the only additional line over the standard Jam rule definition is the usage of the \ref rule_UseFileCache "UseFileCache" rule.  Nothing further must be specified, although there are things you can do that will break shared access to the cache.  Those will be discussed below.
 
+\htmlonly <blockquote> \endhtmlonly
 \code
 rule ConvertImage SOURCE
 {
@@ -70,6 +75,7 @@ rule ConvertImage SOURCE
     ConvertImageHelper $(target) : $(SOURCE) ;
 }
 \endcode
+\htmlonly </blockquote> \endhtmlonly
 
 
 
@@ -88,7 +94,7 @@ The following items are added to a target's \b buildmd5sum.
   -# The name of the dependency.
   -# The md5sum of the physical content of the dependency is summed and added to the current \b buildmd5sum.
   -# If \ref rule_UseCommandLine "UseCommandLine" was specified on the dependency, each command line entry string is summed.
-  -# If there are includes specified through the rule \ref rule_Includes "Includes", the string <tt>#includes</tt> is summed.
+  -# If there are includes specified through the rule \ref rule_Includes "Includes", the string <tt>\#includes</tt> is summed.
     -# For every includes dependency, the physical content is summed and added to the current \b buildmd5sum.
   -# Any dependents of this dependency are added.
 
@@ -99,10 +105,11 @@ The following items are added to a target's \b buildmd5sum.
 
 Without any additional guidance, the md5sum for a physical file will include all its contents.  This is always the most accurate, although the price to calculate md5sums for a large amount of content may be high.
 
-JamPlus provides an additional method of calculating md5sums by calling into a Lua script.  Any target's MD5 calculating functionality may be replaced by using the rule \ref UseMD5Callback "UseMD5Callback" on the target.
+JamPlus provides an additional method of calculating md5sums by calling into a Lua script.  Any target's MD5 calculating functionality may be replaced by using the rule \ref rule_UseMD5Callback "UseMD5Callback" on the target.
 
 Example: A PNG file is made of a small number of chunks, and each chunk has a size and a CRC.  Instead of calculating the entire file contents, we'll just collect the CRCs and sum them.
 
+\htmlonly <blockquote> \endhtmlonly
 \code
 require 'md5'
 
@@ -127,6 +134,7 @@ function md5png(filename)
     return md5sum:digest(true)
 end
 \endcode
+\htmlonly </blockquote> \endhtmlonly
 
 
 

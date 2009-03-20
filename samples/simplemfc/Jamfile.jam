@@ -21,7 +21,7 @@ IncludeModule MFC ;
 
 ActiveProject SimpleMFC ;
 
-UseMFC : shared ;
+UseMFC : link shared ;
 
 Lump : SRCS : SimpleMFCLump : stdafx : stdafx.h : cpp ;
 

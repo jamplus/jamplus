@@ -21,7 +21,7 @@
 
 <h3>Documentation:</h3>
 
-- Fill me in.
+- Large number of documentation updates, including the documenting of the Jam modules.
 
 
 
@@ -30,7 +30,7 @@
 
 - Until it can be fixed, turned off a broken optimization when scanning paths.  On a no-op build with Noel's test, this saved 1/10 of a second.  Unfortunately, there were corner cases that caused the optimization to choke.
 - In the Subst rule, handle the case where the replacement string isn't specified and instead, treat it as an empty string.
-- New patch from the mailing list at http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html as suggested by Andreas Fredriksson.  <tt>#ifdef</tt>'ed as <tt>OPT_CIRCULAR_GENERATED_HEADER_FIX</tt>.
+- New patch from the mailing list at http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html as suggested by Andreas Fredriksson.  <tt>\#ifdef</tt>'ed as <tt>OPT_CIRCULAR_GENERATED_HEADER_FIX</tt>.
 - Add <tt>OPT_ACTIONS_WAIT_FIX</tt> using the patch found at http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html.
 - glob.c: On Windows machines, glob files in a case insensitive manner.
 - Allow nested response file generation; that is, when expanding a variable to generate one response file, other response files may be embedded.
@@ -50,7 +50,7 @@
 - The \ref rule_Library "Library" rule has a new nomanifest option to turn off the embedding of a manifest in Visual C++ 8.0 and 9.0 builds.
 - The \ref rule_Library "Library" rule has a new noexportlib option that turns off the insertion of the writing of the export (import) library.
 - For a library, append the SUFLIB instead of using the :S modifier.  This fixes library names that have periods in them.
-- \ref rule_ObjectCFlags "ObjectCFlags" and \ref rule_ObjectC++Flags "ObjectC++Flags" now only apply their flags to files of the appropriate types.
+- \ref rule_ObjectCFlags "ObjectCFlags" and \ref rule_ObjectCppFlags "ObjectC++Flags" now only apply their flags to files of the appropriate types.
 - Fix a bug in \ref rule_CFlags "CFlags" and \ref rule_ObjectCFlags "ObjectCFlags" where flags weren't being applied properly.
 - Add \ref rule_NoWorkspace "NoWorkspace" rule.
 - For Visual Studio 2005 and 2008, use an incremental manifest embedding technique for Debug builds.  For Release builds, use the simple <tt>mt.exe -outputresource</tt> technique.
@@ -58,7 +58,7 @@
 - After checking the \ref rule_OutputPostfix "OutputPostfix" for the current target, check the <tt>*</tt> target for a global override.
 - Handle relative paths specified for the \ref rule_LinkDirectories "LinkDirectories" rule.
 - New rule \ref rule_DefFile "DefFile".  Adds support for using .def files for DLL exports.
-- When compiling resources with \rule ref_ResourceCompiler, pick up defines, flags, and include directories from the .rc file, the pseudotarget parent, and the * global target.
+- When compiling resources with \ref rule_ResourceCompiler, pick up defines, flags, and include directories from the .rc file, the pseudotarget parent, and the * global target.
 - Resource Compiler: If any of the defines, flags, or include directories change from the last Jam run, rebuild the resource.
 - Rules \ref rule_RcDefines "RcDefines", \ref rule_RcFlags "RcFlags", and \ref rule_RcIncludeDirectories "RcIncludeDirectories" accept either 2 or 3 parameters.  If 2 parameters are specified, the options are applied to <tt>TARGET</tt>.  If 3 parameters are specified, the options are applied to <tt>RESOURCE_NAME</tt>.
 - \ref rule_SourceGroup "SourceGroup" can accept an optional <tt>TARGET</tt>, using the active target if <tt>TARGET</tt> isn't specified.
@@ -112,6 +112,7 @@
 
 
 
+<hr>
 \section version0_2 Version 0.2
 
 <h3>New features for 0.2:</h3>
@@ -162,7 +163,7 @@
 - Exits when an incorrect platform or configuration is specified.
 - Added \ref rule_OutputPostfix "OutputPostfix", \ref rule_OutputPostfixClear "OutputPostfixClear", and \ref rule_OutputSuffix "OutputSuffix".
 - For Visual Studio 2005, made the Microsoft .NET SDK include and library paths available.
-- WINDOWS was not a side-by-side #define with WIN32.  Fixed.
+- WINDOWS was not a side-by-side \#define with WIN32.  Fixed.
 - Attempt to load a Jamrules-style file called $(_top).jamrules.
 - Fix import library dependencies for DLLs.
 - Allow an additional optional \ref rule_SubDir "SubDir" parameter denoting a 'target' in the grist.  LOCATE_SOURCE, LOCATE_TARGET, and SOURCE_GRIST all append it.
@@ -171,8 +172,8 @@
 - Added \ref rule_BatchCompileGroupSize "BatchCompileGroupSize".  The default batch compilation group size is unlimited.
 - Fixed precompiled header support to allow precompiled header .cpp files with relative paths attached to the name.  Uses the \ref built_in_variables_binding_binding_search_locate "BINDING" to control the output location.
 - Assign \c LINK_TARGET variable to the \c TARGET when setting up an executable or shared library link, so later post-build steps can get access to the binary without a complex look up.
-- \ref rule_Library "Library's" \c OPTIONS now accepts 'noexportlib'.
-- Re-added \ref rule_ObjectCFlags "ObjectCFlags" and \ref rule_ObjectC++Flags "ObjectC++Flags".
+- \ref rule_Library "Library's" \c OPTIONS now accepts <tt>noexportlib</tt>.
+- Re-added \ref rule_ObjectCFlags "ObjectCFlags" and \ref rule_ObjectCppFlags "ObjectC++Flags".
 - Added \c rule_FGristDirectories "FGristDirectories" rule.
 - \ref rule_Lump "Lump" rule handles .cxx.
 - \ref rule_PrecompiledHeader "PrecompiledHeader" rule accepts a shortened version where the .cpp and .h are determined by a single parameter.
@@ -184,7 +185,7 @@
 - Change grists to be project level and not subdirectory level.
 - LINKDIRECTORIES was set up wrong and put in the global variable list.  This is corrected now, and the initial LINKDIRECTORIES is assigned to *.
 - Moved \c DEFINES down with the platform they represent.
-- Change <dir> grist to <!dir!>.
+- Change \<dir\> grist to \<!dir!\>.
 - Minor clean up for calculation of \c MSVCNT and \c MSVCNT_PATH.
 - Moved the \c MSVCNT_PATH first in the \c PATH.
 - Get rid of top-level dependencies that don't mean anything.
@@ -213,7 +214,7 @@
 
 - For the source Jamfile path, handle the case where Jamfile.jam is not specified.
 - When a project is specified as existing in a workspace but has not been defined, pop up an error message instead of crashing.
-- Handle quotes inside the preprocessor #defines.
+- Handle quotes inside the preprocessor \#defines.
 - Fix JamToWorkspace conversion when the target name is implicit and specified through ActiveProject.
 
 

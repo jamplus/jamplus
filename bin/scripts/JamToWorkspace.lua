@@ -167,7 +167,7 @@ function CreateTargetInfoFiles()
 			'-d0',
 		}
 
-		print('Dumping platform [' .. platform .. '] and config [' .. config .. ']...')
+		print('Writing platform [' .. platform .. '] and config [' .. config .. ']...')
 		local p, i, o = popen2('"' .. jamExePath .. '"', unpack(collectConfigurationArgs))
 --		print(jamExePath .. ' ' .. table.concat(collectConfigurationArgs, ' '))
 --		print(p, i, o)

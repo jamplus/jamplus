@@ -13,7 +13,7 @@
 
 This makes it possible to write scripts that process Jam debugging output that look for potential errors, such as re-defining a rule or action that is part of Jambase.
 
-- Environment variable to set number of jobs.  For multi-processor systems, the -j<x> command line option can provide significant build time savings.  JamPlus will read from the environment variable JAM_JOBS the default number of jobs to spawn.
+- Environment variable to set number of jobs.  For multi-processor systems, the -j\<x\> command line option can provide significant build time savings.  JamPlus will read from the environment variable JAM_JOBS the default number of jobs to spawn.
 - Multiprocess output is kept separate and displayed all at once when the process completes. This prevents interleaving of unrelated output from multiple concurrently running processes.
 
 */

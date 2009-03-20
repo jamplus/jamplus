@@ -48,27 +48,27 @@ Variables referenced in updating commands will be replaced with their values; ta
 \b Jam variables are not re-exported to the environment of the shell that executes the updating actions, but the updating actions can reference \b Jam variables with \$(<i>variable</i>).
 
 \code
-# If myvar hasn't been assigned yet, assign the string list ab and cd.
-myvar ?= ab cd ;
+    # If myvar hasn't been assigned yet, assign the string list ab and cd.
+    myvar ?= ab cd ;
 
-# Replace myvar's contents with ef and gh.
-myvar = ef gh ;
+    # Replace myvar's contents with ef and gh.
+    myvar = ef gh ;
 
-# Add some additional elements to myvar.
-myvar += ij kl ;        # myvar = ef gh ij kl
+    # Add some additional elements to myvar.
+    myvar += ij kl ;        # myvar = ef gh ij kl
 
-# Remove some elements from myvar.
-myvar -= gh kl ;        # myvar = ef ij
+    # Remove some elements from myvar.
+    myvar -= gh kl ;        # myvar = ef ij
 
-# sometarget.myvar = zx cv
-myvar on sometarget = zx cv ;
+    # sometarget.myvar = zx cv
+    myvar on sometarget = zx cv ;
 
-# This prints zx cv.
-on sometarget Echo $(myvar) ;
+    # This prints zx cv.
+    on sometarget Echo $(myvar) ;
 
-# This prints ef ij, because myvar doesn't exist on anothertarget, and so it
-# falls through to the global myvar.
-on anothertarget Echo $(myvar) ;
+    # This prints ef ij, because myvar doesn't exist on anothertarget, and so it
+    # falls through to the global myvar.
+    on anothertarget Echo $(myvar) ;
 \endcode
 
 
@@ -416,7 +416,7 @@ When using the <tt>:W</tt> modifier, the following file globbing syntax is avail
     <td>Recursively lists all directories under Src/, but directories called .git/ and .svn/ are filtered.</td>
   </tr>
   <tr>
-    <td><code>Src/**@=*.lua@=README</span></code></td>
+    <td><code>Src/**@=*.lua@=README</code></td>
     <td>Recursively lists all files under Src/ which match *.lua or README. All other files are ignored.</td>
   </tr>
   <tr>
@@ -435,126 +435,126 @@ When using the <tt>:W</tt> modifier, the following file globbing syntax is avail
 \section variable_expansion_examples Variable Expansion Examples
 
 \code
-var = ab cd ef gh ij kl ;
+    var = ab cd ef gh ij kl ;
 
-Echo $(var) ;                     # ab cd ef gh ij kl
-Echo $(var[0]) ;                  # ab
-Echo $(var[2]) ;                  # cd
-Echo $(var[6]) ;                  # kl
-Echo $(var[7]) ;                  #
+    Echo $(var) ;                     # ab cd ef gh ij kl
+    Echo $(var[0]) ;                  # ab
+    Echo $(var[2]) ;                  # cd
+    Echo $(var[6]) ;                  # kl
+    Echo $(var[7]) ;                  #
 
-Echo $(var[1-]) ;                 # ab cd ef gh ij kl
-Echo $(var[2-]) ;                 # cd ef gh ij kl
-Echo $(var[6-]) ;                 # kl
-Echo $(var[7-]) ;                 #
+    Echo $(var[1-]) ;                 # ab cd ef gh ij kl
+    Echo $(var[2-]) ;                 # cd ef gh ij kl
+    Echo $(var[6-]) ;                 # kl
+    Echo $(var[7-]) ;                 #
 
-Echo $(var[1-7]) ;                # ab cd ef gh ij kl
-Echo $(var[2-6]) ;                # cd ef gh ij kl
-Echo $(var[3-5]) ;                # ef gh ij
-Echo $(var[6-4]) ;                # kl
+    Echo $(var[1-7]) ;                # ab cd ef gh ij kl
+    Echo $(var[2-6]) ;                # cd ef gh ij kl
+    Echo $(var[3-5]) ;                # ef gh ij
+    Echo $(var[6-4]) ;                # kl
 
-#------------------------------------------------------------------------------
-Echo $(VAR:E=**empty**) ;         # empty
+    #------------------------------------------------------------------------------
+    Echo $(VAR:E=**empty**) ;         # empty
 
-EMPTY_TEXT = some empty text ;
-Echo $(VAR:E=$(EMPTY_TEXT)) ;     # some empty text
+    EMPTY_TEXT = some empty text ;
+    Echo $(VAR:E=$(EMPTY_TEXT)) ;     # some empty text
 
-#------------------------------------------------------------------------------
-list = list of characters to put stuff in between ;
-local var1 = $ ;
-local var2 = (list) ;
-local var1_var2 = $(var1)$(var2) ;
-Echo $(var1_var2) ;               # $(list)
-Echo $(var1_var2:A) ;             # list of characters to put stuff in between
-Echo @($(var1)$(var2):A) ;        # list of characters to put stuff in between
+    #------------------------------------------------------------------------------
+    list = list of characters to put stuff in between ;
+    local var1 = $ ;
+    local var2 = (list) ;
+    local var1_var2 = $(var1)$(var2) ;
+    Echo $(var1_var2) ;               # $(list)
+    Echo $(var1_var2:A) ;             # list of characters to put stuff in between
+    Echo @($(var1)$(var2):A) ;        # list of characters to put stuff in between
 
-#------------------------------------------------------------------------------
-FILE = somefile.txt ;
-Echo $(FILE:T) ;                  # somefile.txt
+    #------------------------------------------------------------------------------
+    FILE = somefile.txt ;
+    Echo $(FILE:T) ;                  # somefile.txt
 
-LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
-Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/somefile.txt
+    LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+    Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/somefile.txt
 
-BINDING on $(FILE) = newname.txt ;
-Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/newname.txt
+    BINDING on $(FILE) = newname.txt ;
+    Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/newname.txt
 
-BINDING on $(FILE) = ;
-SEARCH on $(FILE) = data ;
-LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
-Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/somefile.txt
+    BINDING on $(FILE) = ;
+    SEARCH on $(FILE) = data ;
+    LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
+    Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/somefile.txt
 
-LOCATE on $(FILE) = ;
-Echo $(FILE:T) ;                  # data/somefile.txt
+    LOCATE on $(FILE) = ;
+    Echo $(FILE:T) ;                  # data/somefile.txt
 
-#------------------------------------------------------------------------------
-FILENAME = <thegrist>c:/some/directory/filename.txt ;
-Echo $(FILENAME:B) ;              # filename
-Echo $(FILENAME:B=anothername) ;  # <thegrist>c:/some/directory/anothername.txt
-Echo $(FILENAME:S) ;              # .txt
-Echo $(FILENAME:S=.dat) ;         # <thegrist>c:/some/directory/filename.dat
-Echo $(FILENAME:BS) ;             # filename.txt
-Echo $(FILENAME:B=anothername:S=.dat) ;  # <thegrist>c:/some/directory/anothername.dat
-Echo $(FILENAME:D) ;              # c:/some/directory
-Echo $(FILENAME:D=/usr/bin) ;     # <thegrist>/usr/bin/filename.txt
-Echo $(FILENAME:P) ;              # <thegrist>c:/some/directory
-Echo @($(FILENAME:P):P) ;         # <thegrist>c:/some
+    #------------------------------------------------------------------------------
+    FILENAME = <thegrist>c:/some/directory/filename.txt ;
+    Echo $(FILENAME:B) ;              # filename
+    Echo $(FILENAME:B=anothername) ;  # <thegrist>c:/some/directory/anothername.txt
+    Echo $(FILENAME:S) ;              # .txt
+    Echo $(FILENAME:S=.dat) ;         # <thegrist>c:/some/directory/filename.dat
+    Echo $(FILENAME:BS) ;             # filename.txt
+    Echo $(FILENAME:B=anothername:S=.dat) ;  # <thegrist>c:/some/directory/anothername.dat
+    Echo $(FILENAME:D) ;              # c:/some/directory
+    Echo $(FILENAME:D=/usr/bin) ;     # <thegrist>/usr/bin/filename.txt
+    Echo $(FILENAME:P) ;              # <thegrist>c:/some/directory
+    Echo @($(FILENAME:P):P) ;         # <thegrist>c:/some
 
-Echo $(FILENAME:G) ;              # <thegrist>
-Echo $(FILENAME:G=anothergrist) ; # <anothergrist>c:/some/directory/filename.txt
+    Echo $(FILENAME:G) ;              # <thegrist>
+    Echo $(FILENAME:G=anothergrist) ; # <anothergrist>c:/some/directory/filename.txt
 
-NEW_ROOT = d:/root/directory ;
-Echo $(FILENAME:R="d:/root/directory") ; # <thegrist>c:/some/directory/filename.txt
-Echo @(filename.txt:R=$(NEW_ROOT)) ;     # d:/root/directory/filename.txt
+    NEW_ROOT = d:/root/directory ;
+    Echo $(FILENAME:R="d:/root/directory") ; # <thegrist>c:/some/directory/filename.txt
+    Echo @(filename.txt:R=$(NEW_ROOT)) ;     # d:/root/directory/filename.txt
 
-Echo @(lowercase_now_uppercase:U) ;      # LOWERCASE_NOW_UPPERCASE
-Echo @(UPPERCASE_NOW_LOWERCASE:L) ;      # uppercase_now_lowercase ;
+    Echo @(lowercase_now_uppercase:U) ;      # LOWERCASE_NOW_UPPERCASE
+    Echo @(UPPERCASE_NOW_LOWERCASE:L) ;      # uppercase_now_lowercase ;
 
-Echo @(backslash\\path\\:/) ;            # backslash/path/
-Echo $(FILENAME:\\) ;                    # <thegrist>c:\\some\\directory\\filename.txt
+    Echo @(backslash\\path\\:/) ;            # backslash/path/
+    Echo $(FILENAME:\\) ;                    # <thegrist>c:\\some\\directory\\filename.txt
 
-Echo $(FILENAME:DBS) ;                   # c:/some/directory/filename.txt
+    Echo $(FILENAME:DBS) ;                   # c:/some/directory/filename.txt
 
-VAR = /home/stuff/file.txt ;
-Echo $(VAR:DB:U) ;                       # /HOME/STUFF/FILE
+    VAR = /home/stuff/file.txt ;
+    Echo $(VAR:DB:U) ;                       # /HOME/STUFF/FILE
 
-#------------------------------------------------------------------------------
-# Assuming ../sharedlib/app has the files Jamfile.jam and main.c:
-Echo @(../sharedlib/app/*:WBS) ;         # Jamfile.jam main.c
-Echo @(@(../sharedlib/app/*:W):BS) ;     # Jamfile.jam main.c
+    #------------------------------------------------------------------------------
+    # Assuming ../sharedlib/app has the files Jamfile.jam and main.c:
+    Echo @(../sharedlib/app/*:WBS) ;         # Jamfile.jam main.c
+    Echo @(@(../sharedlib/app/*:W):BS) ;     # Jamfile.jam main.c
 
-Echo @(../sharedlib/app/**:WB=more\\dir\\file:\\) ;
-                                  # ..\\sharedlib\\app\\more\\dir\\file.jam
-                                  # ..\\sharedlib\\app\\more\\dir\\file.c
+    Echo @(../sharedlib/app/**:WB=more\\dir\\file:\\) ;
+                                            # ..\\sharedlib\\app\\more\\dir\\file.jam
+                                            # ..\\sharedlib\\app\\more\\dir\\file.c
 
 
-#------------------------------------------------------------------------------
-top = AppRoot ;
-jamfile = Jamfile.jam ;
-Echo included_$(top:J=_)_$(jamfile) ;    # included_AppRoot_Jamfile.jam
+    #------------------------------------------------------------------------------
+    top = AppRoot ;
+    jamfile = Jamfile.jam ;
+    Echo included_$(top:J=_)_$(jamfile) ;    # included_AppRoot_Jamfile.jam
 
-#------------------------------------------------------------------------------
-top = AppRoot With Directories ;
-jamfile = SomeFile.jam ;
-Echo included_$(top:J=_)_$(jamfile) ;    # included_AppRoot_With_Directories_SomeFile.jam
+    #------------------------------------------------------------------------------
+    top = AppRoot With Directories ;
+    jamfile = SomeFile.jam ;
+    Echo included_$(top:J=_)_$(jamfile) ;    # included_AppRoot_With_Directories_SomeFile.jam
 
-#------------------------------------------------------------------------------
-Echo $(list:J=!) ;                # list!of!characters!to!put!stuff!in!between
+    #------------------------------------------------------------------------------
+    Echo $(list:J=!) ;                # list!of!characters!to!put!stuff!in!between
 
-#------------------------------------------------------------------------------
-FILES = file1.c file2.c file3.c file1.h file2.h file3.h file1.obj file2.obj file3.obj ;
-Echo $(FILES:I=\\.c$) ;           # file1.c file2.c file3.c
+    #------------------------------------------------------------------------------
+    FILES = file1.c file2.c file3.c file1.h file2.h file3.h file1.obj file2.obj file3.obj ;
+    Echo $(FILES:I=\\.c$) ;           # file1.c file2.c file3.c
 
-Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1") ;
-                                  # file2.c file3.c file2.obj file3.obj
+    Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1") ;
+                                    # file2.c file3.c file2.obj file3.obj
 
-Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$:I=\\.c$) ;
-                                  # file1.c file2.c file3.c file2.obj file3.obj
+    Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$:I=\\.c$) ;
+                                    # file1.c file2.c file3.c file2.obj file3.obj
 
-Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$) ;
-                                  # file2.obj file3.obj
+    Echo $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$) ;
+                                    # file2.obj file3.obj
 
-Echo $(FILES:X="^file1":X=\\.obj$:I=\\.h$) ;
-                                  # file1.h file2.h file3.h
+    Echo $(FILES:X="^file1":X=\\.obj$:I=\\.h$) ;
+                                    # file1.h file2.h file3.h
 \endcode
 
 

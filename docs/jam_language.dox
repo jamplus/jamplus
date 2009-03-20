@@ -28,13 +28,13 @@ Collectively, the purpose of the \c Jambase and the \c Jamfile is to name built 
 
 \subsubsection operation_binding_binding Binding
 
-After parsing, \b Jam recursively descends the dependency graph and binds every file target with a location in the filesystem.
+ parsing, \b Jam recursively descends the dependency graph and binds every file target with a location in the filesystem.
 
 \subsubsection operation_binding_targets Targets
 
 Any string value in \b Jam can represent a target, and it does so if the \ref rule_Depends "Depends", \ref rule_Includes "Includes", or \ref rule_Needs "Needs" rules make it part of the dependency graph. <i>Build targets</i> are files to be updated. <i>Source targets</i> are the files used in updating build targets. Build targets and source targets are collectively referred to as file targets, and frequently build targets are source targets for other build targets. <i>Pseudotargets</i> are symbols which represent dependencies on other targets, but which are not themselves associated with any real file.
 
-A file target's identifier is generally the file's name, which can be absolutely rooted, relative to the directory of jam's invocation, or simply local (no directory). Most often it is the last case, and the actual file path is bound using the \$(BINDING), \$(SEARCH), and \$(LOCATE) special variables. See \ref language_built_in_variables_binding_search_locate below. A local filename is optionally qualified with "grist," a string value used to assure uniqueness. A file target with an identifier of the form <i>file(member)</i> is a library member (usually an ar(1) archive on UNIX).
+A file target's identifier is generally the file's name, which can be absolutely rooted, relative to the directory of jam's invocation, or simply local (no directory). Most often it is the last case, and the actual file path is bound using the \$(BINDING), \$(SEARCH), and \$(LOCATE) special variables. See \ref built_in_variables_binding_binding_search_locate. A local filename is optionally qualified with "grist," a string value used to assure uniqueness. A file target with an identifier of the form <i>file(member)</i> is a library member (usually an ar(1) archive on UNIX).
 
 The use of \$(BINDING), \$(SEARCH), and \$(LOCATE) allows \b Jam to separate the the location of files from their names, so that Jamfiles can refer to files locally (i.e. relative to the Jamfile's directory), yet still be usable when \b Jam is invoked from a distant directory. The use of grist allows files with the same name to be identified uniquely, so that \b Jam can read a whole directory tree of Jamfiles and not mix up same-named targets.
 
@@ -44,7 +44,7 @@ After binding each target, \b Jam determines whether the target needs updating, 
 
 \subsubsection operation_binding_header_file_scanning Header File Scanning
 
-During the binding phase, \b Jam also performs "header" file scanning, where it looks inside source files for the implicit dependencies on other files caused by C's \#include syntax (or whatever is appropriate for other file formats). This is controlled by the special variables \$(HDRSCAN) and \$(HDRRULE). The result of the scan is formed into a rule invocation, with the scanned file as the target and the found included file names as the sources. Note that this is the only case where rules are invoked outside the parsing phase. See \ref language_built_in_variables_hdrscan below.
+During the binding phase, \b Jam also performs "header" file scanning, where it looks inside source files for the implicit dependencies on other files caused by C's \#include syntax (or whatever is appropriate for other file formats). This is controlled by the special variables \$(HDRSCAN) and \$(HDRRULE). The result of the scan is formed into a rule invocation, with the scanned file as the target and the found included file names as the sources. Note that this is the only case where rules are invoked outside the parsing phase. See \ref built_in_variables_hdrscan.
 
 
 \subsection operation_updating Updating Phase
@@ -88,18 +88,18 @@ Rules take up to 9 arguments (\$(1) through \$(9), each a list) and can have a r
 Rule names can be expanded in place using the same techniques as described in \ref language_variable_expansion.
 
 \code
-FLAG = Dirty ; # or Clean
+    FLAG = Dirty ; # or Clean
 
-rule MarkDirty
-{
-}
+    rule MarkDirty
+    {
+    }
 
-rule MarkClean
-{
-}
+    rule MarkClean
+    {
+    }
 
-# Calls MarkDirty
-Mark$(FLAG) ;
+    # Calls MarkDirty
+    Mark$(FLAG) ;
 \endcode
 
 
@@ -201,11 +201,11 @@ actions response C++
 One final set of symbols is understood within the body of the action.  It is used to write a file to disk based on the contents of an available variable.
 
 \code
-# Write a file to disk
-actions WriteFile
-{
-    ^^($(1)|$(CONTENTS))
-}
+    # Write a file to disk
+    actions WriteFile
+    {
+        ^^($(1)|$(CONTENTS))
+    }
 \endcode
 
 \htmlonly </blockquote> \endhtmlonly
@@ -396,7 +396,7 @@ The switch statement executes zero or one of the enclosed <i>statements</i>, dep
   </tr>
   <tr>
     <td><code>\\<i>x</i></code></td>
-    <td>match <i>x</i> (escapes the other wildcards)</i></td>
+    <td>match <i>x</i> (escapes the other wildcards)</td>
   </tr>
 </table>
 

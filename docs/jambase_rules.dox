@@ -71,7 +71,7 @@ Set the default project target to use when the target isn't specified.  This wor
 
 
 <hr>
-\section rule_Application rule Application TARGET : SOURCES : OPTIONS
+\section rule_Application rule Application TARGET : SOURCES [ : OPTIONS ]
 \addindex rule_Application
 
 Compiles \c SOURCES and links them into \c TARGET.  Filenames with an <tt>.obj</tt> or <tt>.res</tt> are passed straight through to the linker.  Any file excluded from the build via \ref rule_ExcludeFromBuild is ignored.
@@ -98,7 +98,7 @@ Compiles \c SOURCES and links them into \c TARGET.  Filenames with an <tt>.obj</
 
 
 <hr>
-\section rule BatchCompileGroupSize TARGET [ : SIZE ]
+\section rule_BatchCompileGroupSize rule BatchCompileGroupSize TARGET [ : SIZE ]
 \addindex rule_BatchCompileGroupSize
 
 For the given project \c TARGET, only allow \c SIZE files to be batch compiled in a given compiler execution.
@@ -118,7 +118,7 @@ For the given project \c TARGET, only allow \c SIZE files to be batch compiled i
 
 
 <hr>
-\section rule_CFlags rule CFlags TARGET : FLAGS [: THE_CONFIG : THE_PLATFORM]
+\section rule_CFlags rule CFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_CFlags
 
 For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.
@@ -149,7 +149,7 @@ For the given project \c TARGET, assign the \c FLAGS to the appropriate configur
 
 
 <hr>
-\section rule_CppFlags rule C++Flags TARGET : FLAGS [: THE_CONFIG : THE_PLATFORM]
+\section rule_CppFlags rule C++Flags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_CppFlags
 
 For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.
@@ -251,7 +251,7 @@ When linking the given \c TARGET, link the .def file(s) specified in \c SOURCES.
 
 
 <hr>
-\section rule_Defines rule Defines TARGET : DEFINES [: THE_CONFIG : THE_PLATFORM]
+\section rule_Defines rule Defines TARGET : DEFINES [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_Defines
 
 For the given project \c TARGET, assign the \c DEFINES to the appropriate configuration and platform.
@@ -320,7 +320,7 @@ Given a list of \c DIRECTORIES, a gristed version of each is returned.  Currentl
 
 
 <hr>
-\section rule_IncludeDirectories rule IncludeDirectories TARGET : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
+\section rule_IncludeDirectories rule IncludeDirectories TARGET : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_IncludeDirectories
 
 For the given project \c TARGET, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
@@ -364,7 +364,7 @@ Loads a Jam module from the <tt>bin/jammodules/</tt> directory.  When \c Include
 
 
 <hr>
-\section rule_Library rule Library TARGET : SOURCES : OPTIONS
+\section rule_Library rule Library TARGET : SOURCES [ : OPTIONS ]
 \addindex rule_Library
 
 Compiles \c SOURCES and archives them into a library called \c TARGET.  Filenames with an <tt>.obj</tt> or <tt>.res</tt> are passed straight through to the linker.  Any file excluded from the build via \ref rule_ExcludeFromBuild is ignored.
@@ -409,13 +409,13 @@ If \c shared is specified for \c OPTIONS, the following additional options are a
 
 
 <hr>
-\section rule_LinkDirectories rule LinkDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
+\section rule_LinkDirectories rule LinkDirectories TARGET : DIRECTORIES [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_LinkDirectories
 
 For the given project \c TARGET, assign the link \c DIRECTORIES to the appropriate configuration and platform.
 
 \param TARGET The target to assign the link \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
-\param DIRECTORIES The list of link directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir.
+\param DIRECTORIES The list of link directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
 \param THE_CONFIG (optional) If not specified, the default is all configurations.
 \param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
@@ -438,7 +438,7 @@ For the given project \c TARGET, assign the link \c DIRECTORIES to the appropria
 
 
 <hr>
-\section rule_LinkFlags rule LinkFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+\section rule_LinkFlags rule LinkFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_LinkFlags
 
 For the given project \c TARGET, assign the link \c FLAGS to the appropriate configuration and platform.
@@ -461,7 +461,7 @@ For the given project \c TARGET, assign the link \c FLAGS to the appropriate con
 
 
 <hr>
-\section rule_LinkLibraries rule LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
+\section rule_LinkLibraries rule LinkLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_LinkLibraries
 
 Makes \c TARGET depend on Jam generated \c LIBRARIES and includes them during linking.
@@ -482,7 +482,7 @@ Makes \c TARGET depend on Jam generated \c LIBRARIES and includes them during li
 
 
 <hr>
-\section rule_LinkPrebuiltLibraries rule LinkPrebuiltLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
+\section rule_LinkPrebuiltLibraries rule LinkPrebuiltLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_LinkPrebuiltLibraries
 
 Makes \c TARGET depend on \c LIBRARIES and includes them during linking.
@@ -503,7 +503,7 @@ Makes \c TARGET depend on \c LIBRARIES and includes them during linking.
 
 
 <hr>
-\section rule_Lump rule Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER : PCH_HEADER_FILENAME : LUMP_EXT : EXTRA_INCLUDE_PATHS
+\section rule_Lump rule Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME [ : PCH_HEADER : PCH_HEADER_FILENAME : LUMP_EXT : EXTRA_INCLUDE_PATHS ]
 \addindex rule_Lump
 
 Generates a <tt>.c</tt> or <tt>.cpp</tt> file containing an <tt>\#include</tt> amalgamation of files passed into the rule.
@@ -603,7 +603,7 @@ Workspaces are automatically generated for any executable processed while readin
 
 
 <hr>
-\section rule_ObjectCFlags rule ObjectCFlags TARGET : SOURCES : FLAGS [: THE_CONFIG : THE_PLATFORM]
+\section rule_ObjectCFlags rule ObjectCFlags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_ObjectCFlags
 
 For the given \c SOURCES matching <tt>*.c</tt>, assign the \c FLAGS to the appropriate configuration and platform.
@@ -627,7 +627,7 @@ For the given \c SOURCES matching <tt>*.c</tt>, assign the \c FLAGS to the appro
 
 
 <hr>
-\section rule_ObjectCppFlags rule ObjectC++Flags TARGET : SOURCES : FLAGS [: THE_CONFIG : THE_PLATFORM]
+\section rule_ObjectCppFlags rule ObjectC++Flags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_ObjectCppFlags
 
 For the given \c SOURCES matching *.cpp or *.cxx, assign the \c FLAGS to the appropriate configuration and platform.
@@ -651,7 +651,7 @@ For the given \c SOURCES matching *.cpp or *.cxx, assign the \c FLAGS to the app
 
 
 <hr>
-\section rule_ObjectDefines rule ObjectDefines TARGET : SOURCES : DEFINES [: THE_CONFIG : THE_PLATFORM]
+\section rule_ObjectDefines rule ObjectDefines TARGET : SOURCES : DEFINES [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_ObjectDefines
 
 For the given \c SOURCES, assign the \c DEFINES to the appropriate configuration and platform.
@@ -675,7 +675,7 @@ For the given \c SOURCES, assign the \c DEFINES to the appropriate configuration
 
 
 <hr>
-\section rule_ObjectIncludeDirectories rule ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
+\section rule_ObjectIncludeDirectories rule ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_ObjectIncludeDirectories
 
 For the given \c SOURCES, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
@@ -699,7 +699,7 @@ For the given \c SOURCES, assign the \c INCLUDEPATHS to the appropriate configur
 
 
 <hr>
-\section rule_OutputName rule OutputName TARGET : NAME : THE_CONFIG : THE_PLATFORM
+\section rule_OutputName rule OutputName TARGET : NAME [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_OutputName
 
 By default, the name of a generated executable or library is determined by the name of the \c TARGET.  \c OutputName is used to override the name of the executable or library.
@@ -722,7 +722,7 @@ By default, the name of a generated executable or library is determined by the n
 
 
 <hr>
-\section rule_OutputPath rule OutputPath TARGET : OUTPUTPATH : THE_CONFIG : THE_PLATFORM
+\section rule_OutputPath rule OutputPath TARGET : OUTPUTPATH [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_OutputPath
 
 By default, the output location of a generated executable or library is at \c LOCATE_TARGET.  \c OutputPath is used to override the output location of the executable or library.
@@ -748,7 +748,7 @@ By default, the output location of a generated executable or library is at \c LO
 
 
 <hr>
-\section rule_OutputPostfix rule OutputPostfix TARGET : POSTFIX : THE_CONFIG : THE_PLATFORM
+\section rule_OutputPostfix rule OutputPostfix TARGET : POSTFIX [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_OutputPostfix
 
 The output postfix is appended to the end of the generated target name.  By default, the output postfix is .\$(CONFIG).  This means the resultant filename is \$(OUTPUTNAME).\$(CONFIG).\$(EXT).
@@ -783,7 +783,28 @@ If there is no assigned output postfix for \c TARGET, then the global target \c 
 
 
 <hr>
-\section rule_OutputSuffix rule OutputSuffix TARGET : SUFFIX : THE_CONFIG : THE_PLATFORM
+\section rule_OutputPostfixClear rule OutputPostfixClear TARGET : THE_CONFIG : THE_PLATFORM
+\addindex rule_OutputPostfixClear
+
+Clear the output postfix.
+
+\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    OutputPostfix LuaPlusShared : .debug : debug ;
+	OutputPostfixClear LuaPlusShared : debug ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_OutputSuffix rule OutputSuffix TARGET : SUFFIX [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_OutputSuffix
 
 The output suffix is the file extension of the generated target.  By default, the output suffix is appropriate for an executable or library.
@@ -900,7 +921,7 @@ For the given project \c TARGET, assign the \c DEFINES for the resource file com
 
 
 <hr>
-\section rule_RcFlags rule RcFlags TARGET : RESOURCE_NAME : FLAGS
+\section rule_RcFlags rule RcFlags TARGET [ : RESOURCE_NAME ] : FLAGS
 \addindex rule_RcFlags
 
 For the given project \c TARGET, assign the \c FLAGS for the resource file compilation.
@@ -928,7 +949,7 @@ For the given project \c TARGET, assign the \c FLAGS for the resource file compi
 
 
 <hr>
-\section rule_RcIncludeDirectories rule RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
+\section rule_RcIncludeDirectories rule RcIncludeDirectories TARGET [ : RESOURCE_NAME ] : HDRS
 \addindex rule_RcIncludeDirectories
 
 For the given project \c TARGET, assign the include directories specified in \c HDRS to the resource file compilation.
@@ -956,12 +977,12 @@ For the given project \c TARGET, assign the include directories specified in \c 
 
 
 <hr>
-\section rule_ResourceCompiler rule ResourceCompiler PARENT : SOURCES : OPTIONS
+\section rule_ResourceCompiler rule ResourceCompiler PARENT : SOURCES [ : OPTIONS ]
 \addindex rule_ResourceCompiler
 
 Compiles a resource <tt>.rc</tt> file into a <tt>.res</tt> file.
 
-#defines made available by the \ref rule_RcDefines rule are applied in the following order: <tt>PARENT</tt> then <tt>*</tt>. 
+\#defines made available by the \ref rule_RcDefines rule are applied in the following order: <tt>PARENT</tt> then <tt>*</tt>. 
 
 Compilation flags made available by the \ref rule_RcFlags rule are applied in the following order: <tt>PARENT</tt> then <tt>*</tt>. 
 

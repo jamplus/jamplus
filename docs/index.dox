@@ -27,6 +27,7 @@ A sampling of the new features in the JamPlus distribution follows:
 - \subpage builtin_variables shows the built-in variables of JamPlus.
 - \subpage dependency_cache gives information on how to speed builds and enable the md5 command lines and file cache.
 - \subpage jambase_rules shows the list of rules available in the default <tt>Jambase.jam</tt>.
+- \subpage jam_modules lists the various Jam modules that ship with JamPlus.
 - \subpage multiple_passes shows how you can add multiple passes to your JamPlus build.
 - \subpage lua_support shows how Lua can communicate with JamPlus.
 - \subpage file_cache goes in-depth about the JamPlus (network) file caching feature.

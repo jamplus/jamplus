@@ -1,0 +1,23 @@
+/*! \page jam_modules JamPlus Modules
+
+\section jam_modules_intro Introduction
+
+JamPlus comes with a number of helper modules, above and beyond the capabilities in the Jambase.  (In fact, some of those features should probably move into a Jam module.)  The modules are <tt>.jam</tt> files that exist in a <tt>jammodules/</tt> directory next to the Jam executable.
+
+Modules are loaded using the rule \ref rule_IncludeModule "IncludeModule".
+
+\section jam_modules_list List of Jam Modules
+
+The following represents the list of provided Jam modules:
+
+- \subpage jammodule_copydirectory "CopyDirectory" - Copies the file contents of a source directory to a destination directory.
+- \subpage jammodule_copyfile "CopyFile" - Copies a single file.
+- \subpage jammodule_csharp "CSharp" - Various rules to build C# applications and assemblies.
+- \subpage jammodule_directx "DirectX" - DirectX SDK settings.
+- \subpage jammodule_dotnet "DotNet" - Some .NET helper rules, primarily for C++/CLI applications.
+- \subpage jammodule_mfc "MFC" - MFC settings.
+- \subpage jammodule_midl "Midl" - Support for compiling .idl files.
+- \subpage jammodule_wxwidgets "wxWidgets" - wxWidgets settings.
+
+*/
+

@@ -14,8 +14,8 @@ The Visual C++ build uses Visual Studio's Link Time Code Generation support to c
 In order to build JamPlus using the Visual C++ compiler, do the following:
 
 \code
-cd src
-jmake
+    cd src
+    jmake
 \endcode
 
 When finished, the Jam executable will have been built as <tt>bin/jam.exe</tt>
@@ -25,8 +25,8 @@ Alternatively, Visual Studio 2005 and 2008 solution and project files are mainta
 To clean the Visual C++ build, run:
 
 \code
-cd src
-clean
+    cd src
+    clean
 \endcode
 
 
@@ -38,8 +38,8 @@ clean
 In order to build JamPlus on Mac OS X, do the following:
 
 \code
-cd src
-make macosx
+    cd src
+    make macosx
 \endcode
 
 When finished, the Jam executable will have been built as <tt>bin/jam</tt>.

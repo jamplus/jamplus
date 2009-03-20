@@ -1,14 +1,16 @@
-rule UseMFC TARGETS : OPTIONS
+rule UseMFC TARGET : OPTIONS
 {
-	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 
-	if shared in $(OPTIONS)
-	{
-		Defines $(TARGETS) : _AFXDLL ;
+	if shared in $(OPTIONS) {
+		Defines $(TARGET) : _AFXDLL ;
 	}
 
-	IncludeDirectories $(TARGETS) : "$(MSVCNT)/atlmfc/include" ;
-	LinkDirectories $(TARGETS) : "$(MSVCNT)/atlmfc/lib" ;
+	IncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
+	
+	if link in $(OPTIONS) {
+		LinkDirectories $(TARGET) : "$(MSVCNT)/atlmfc/lib" ;
+	}
 
-	RcIncludeDirectories $(TARGETS) : "$(MSVCNT)/atlmfc/include" ;
+	RcIncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
 }

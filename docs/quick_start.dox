@@ -67,7 +67,7 @@ This is all well and good if you have one of the Visual Studio compilers, but if
 
 After a build, you may notice there are a number of extra files in the directory that weren't there before.  These are generally compiler intermediates, and we'll soon learn how to redirect them elsewhere.
 
-For now, instead of leaving behind various junk files, Jam can clean up after itself using the \b clean target.  Targets on the Jam command line are specified \i after the command line flags.  Various examples follow:
+For now, instead of leaving behind various junk files, Jam can clean up after itself using the \b clean target.  Targets on the Jam command line are specified <i>after</i> the command line flags.  Various examples follow:
 
 \code
 rem Cleans the Debug build.

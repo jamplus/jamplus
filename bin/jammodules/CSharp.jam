@@ -169,10 +169,11 @@ rule ReferenceAssemblies TARGET : ASSEMBLIES : THE_CONFIG
 }
 
 
-rule ReferencePaths TARGETS : PATHS : THE_CONFIG
+rule ReferencePaths TARGET : PATHS : THE_CONFIG
 {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
-	REFERENCEPATHS.$(THE_CONFIG) on $(TARGETS) += $(PATHS:R=$(SUBDIR)) ;
+	REFERENCEPATHS.$(THE_CONFIG) on $(TARGET) += $(PATHS:R=$(SUBDIR)) ;
 }
 
 
