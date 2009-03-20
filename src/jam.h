@@ -486,7 +486,11 @@
 # define MAXARGC 32	/* words in $(JAMSHELL) */
 
 #ifdef OPT_PIECEMEAL_PUNT_EXT
+# ifdef NT
 # define CMDBUF 10240
+# else
+# define CMDBUF MAXINT
+# endif
 #endif
 
 /* Jam private definitions below. */
