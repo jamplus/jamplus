@@ -50,20 +50,6 @@ function list.find(searchList, value)
 	end
 end
 
--- popen2()
-function popen2(...)
-	local in_rd, in_wr = io.pipe()
-	local out_rd, out_wr = io.pipe()
-	local proc, err = os.spawn{stdin = in_rd, stdout = out_wr, ...}
-	in_rd:close(); out_wr:close()
-	if not proc then
-		in_wr:close(); out_rd:close()
-		return proc, err
-	end
-	return proc, out_rd, in_wr
-end
-
-
 function ErrorHandler(inMessage)
 	message = {}
 	table.insert(message, [[
@@ -164,15 +150,15 @@ function CreateTargetInfoFiles()
 			'-sTARGETINFO_LOCATE=' .. destinationRootPath .. 'TargetInfo/',
 			'-sPLATFORM=' .. platform,
 			'-sCONFIG=' .. config,
-			'-d0',
+--			'-d0',
 		}
 
 		print('Writing platform [' .. platform .. '] and config [' .. config .. ']...')
-		local p, i, o = popen2('"' .. jamExePath .. '"', unpack(collectConfigurationArgs))
+		for line in ex.lines{'"' .. jamExePath .. '"', unpack(collectConfigurationArgs)} do
+--			print(line)
+		end
 --		print(jamExePath .. ' ' .. table.concat(collectConfigurationArgs, ' '))
 --		print(p, i, o)
-		io.write(i:read("*a"))
-		p:wait()
 	end
 
 	DumpConfig('*', '*')
