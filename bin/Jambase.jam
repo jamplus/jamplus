@@ -297,6 +297,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			AR			?= "$(MINGW_ROOT)/bin/ar" ru ;
 			CC			?= "$(MINGW_ROOT)/bin/gcc" ;
 			C++			?= "$(MINGW_ROOT)/bin/g++" ;
+			MKDIR		?= mkdir ;
 			RANLIB		?= "$(MINGW_ROOT)/bin/ranlib" ;
 			SUFEXE		?= .exe ;
 
