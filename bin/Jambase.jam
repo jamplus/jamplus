@@ -30,7 +30,7 @@ TAB = "	" ;
 NEWLINE = "
 " ;
 
-JAMBASEDATE = 2008.10.08 ;
+JAMBASE_VERSION = "JamPlus 0.3 (2009.03.20)" ;
 
 # Initialize variables
 #

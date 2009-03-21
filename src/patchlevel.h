@@ -1,7 +1,8 @@
 /* Keep JAMVERSYM in sync with VERSION. */
 /* It can be accessed as $(JAMVERSION) in the Jamfile. */
 
-#define VERSION "2.5"
+#define JAM_VERSION "2.5"
+#define JAMPLUS_VERSION "0.3"
 #define JAMVERSYM "JAMVERSION=2.5"
 
 #ifdef OPT_PATCHED_VERSION_VAR_EXT

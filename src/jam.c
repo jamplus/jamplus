@@ -276,8 +276,8 @@ int main( int argc, char **argv, char **arg_environ )
 
 	if( ( s = getoptval( optv, 'v', 0 ) ) )
 	{
-	    printf( "Jam %s. %s. ", VERSION, OSMINOR );
-	    printf( "Copyright 1993-2002 Christopher Seiwald.\n" );
+	    printf( "JamPlus %s (based on Jam %s). %s.\n", JAMPLUS_VERSION, JAM_VERSION, OSMINOR );
+	    printf( "    Jam is Copyright 1993-2002 Christopher Seiwald.\n" );
 #ifdef OPT_PATCHED_VERSION_VAR_EXT
 	    printf( "PATCHED_VERSION %s.%s\n",
 		    PATCHED_VERSION_MAJOR, PATCHED_VERSION_MINOR);
