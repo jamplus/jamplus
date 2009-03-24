@@ -19,7 +19,7 @@ if not vcproj then
 	os.exit(-1)
 end
 
-local xml = xmlize(vcproj)
+local xml = xmlize.luaize(vcproj)
 
 local function RecurseFilters(filters, folderPath)
 	if not filters then return end
