@@ -1,4 +1,4 @@
-require 'std'
+require 'getopt'
 require 'glob'
 
 package.path = (debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. "/?.lua;" .. package.path
