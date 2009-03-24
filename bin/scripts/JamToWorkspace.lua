@@ -3,7 +3,6 @@
 -------------------------------------------------------------------------------
 require 'getopt'
 require 'ex'
-require 'iox'
 require 'md5'
 require 'uuid'
 local expand = require 'expand'
@@ -12,8 +11,8 @@ scriptPath = ((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\')
 package.path = scriptPath .. "?.lua;" .. package.path
 require 'FolderTree'
 
-jamPath = iox.PathMakeAbsolute(scriptPath .. '../'):gsub('\\', '/')
-jamExePath = iox.PathMakeAbsolute(jamPath .. 'jam.exe')
+jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
+jamExePath = os.path.combine(jamPath, 'jam.exe')
 
 Config =
 {
@@ -42,7 +41,7 @@ function ivalues(t)
 	end
 end
 
-function list.find(searchList, value)
+function list_find(searchList, value)
 	for index = 1, #searchList do
 		if searchList[index] == value then
 			return index
@@ -80,7 +79,7 @@ end
 
 
 function WriteFileIfModified(filename, contents)
-	local writeFile = iox.access(filename) == -1
+	local writeFile = not os.path.exists(filename)
 	if not writeFile then
 		local md5Contents = md5.digest(contents)
 		local md5File = md5.new()
@@ -88,7 +87,7 @@ function WriteFileIfModified(filename, contents)
 		writeFile = md5Contents ~= md5File:digest()
 	end
 	if writeFile then
-		iox.PathCreate(filename)
+		os.mkdir(filename)
 		io.writeall(filename, contents)
 		io.writeall(filename .. '.cache', contents)
 	end
@@ -150,7 +149,7 @@ function CreateTargetInfoFiles()
 			'-sTARGETINFO_LOCATE=' .. destinationRootPath .. 'TargetInfo/',
 			'-sPLATFORM=' .. platform,
 			'-sCONFIG=' .. config,
---			'-d0',
+			'-d0',
 		}
 
 		print('Writing platform [' .. platform .. '] and config [' .. config .. ']...')
@@ -1084,8 +1083,8 @@ end
 
 
 function DumpProject(project)
-	local outPath = iox.PathCombine(destinationRootPath, project.RelativePath) .. '/'
-	iox.PathCreate(outPath)
+	local outPath = os.path.combine(destinationRootPath, project.RelativePath) .. '/'
+	os.mkdir(outPath)
 
 	BuildSourceTree(project)
 
@@ -1171,7 +1170,7 @@ function BuildProject()
 	local exporter = Exporters[opts.gen]
 	exporter.Options.compiler = opts.compiler or opts.gen
 
-	iox.PathCreate(destinationRootPath)
+	os.mkdir(destinationRootPath)
 
 	locateTargetText =
 	{
@@ -1311,7 +1310,7 @@ end
 ProcessCommandLine()
 
 -- Turn the source code root into an absolute path based on the current working directory.
-sourceJamfilePath = iox.PathMakeAbsolute(nonOpts[1]):gsub('\\', '/')
+sourceJamfilePath = os.path.simplify(os.path.make_absolute(nonOpts[1]))
 sourceRootPath, sourceJamfile = sourceJamfilePath:match('(.+/)(.*)')
 if not sourceRootPath or not sourceJamfile then
 	sourceRootPath = sourceJamfilePath
@@ -1325,7 +1324,7 @@ Config.SubIncludes =
 }
 
 -- Do the same with the destination.
-destinationRootPath = iox.PathAddBackslash(iox.PathMakeAbsolute(nonOpts[2] or '.')):gsub('\\', '/')
+destinationRootPath = os.path.simplify(os.path.add_slash(os.path.make_absolute(nonOpts[2] or '.')))
 
 -- Load the config file.
 if opts.config then
