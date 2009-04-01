@@ -48,6 +48,6 @@ none:
 	@echo "    $(PLATS)"
 
 macosx:
-	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions" LINKLIBS="$(LINKLIBS) -framework CoreFoundation"
+	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions" LINKLIBS="$(LINKLIBS) -framework CoreFoundation -framework CoreServices"
 
 include Makefile.Common

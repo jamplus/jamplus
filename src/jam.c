@@ -142,6 +142,10 @@
 # include <QuickDraw.h>
 # endif
 
+# ifdef OS_MACOSX
+# include <CoreServices/CoreServices.h>
+# endif
+
 /* And UNIX for this */
 
 # ifdef unix
@@ -310,6 +314,7 @@ int main( int argc, char **argv, char **arg_environ )
 #endif /* OPT_IMPROVE_JOBS_SETTING_EXT */
 
 #ifdef OPT_IMPROVE_JOBS_SETTING_EXT
+#ifdef OS_NT
 {
     const char *jobs = getenv("NUMBER_OF_PROCESSORS");
     if (jobs)
@@ -317,6 +322,10 @@ int main( int argc, char **argv, char **arg_environ )
 	if (globs.jobs == 0)
 		globs.jobs = 1;
 }
+#elif defined(OS_MACOSX)
+	globs.jobs = MPProcessors();
+#endif
+
 #endif /* OPT_IMPROVE_JOBS_SETTING_EXT */
 
 	if( ( s = getoptval( optv, 'j', 0 ) ) )

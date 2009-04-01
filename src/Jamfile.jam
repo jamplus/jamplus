@@ -202,7 +202,7 @@ else
 }
 if $(OS) = MACOSX
 {
-	LinkFlags jam : -framework CoreFoundation ;
+	LinkFlags jam : -framework CoreFoundation -framework CoreServices ;
 }
 if $(CONFIG) = debug {
     Defines * : DEBUG_J ;
