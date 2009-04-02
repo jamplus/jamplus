@@ -11,7 +11,7 @@
 # second pass build instructions are put into the dependency graph and
 # executed.
 
-sDEPCACHE.standard = .depcache ;
+DEPCACHE.standard = .depcache ;
 DEPCACHE = standard ;
 
 rule ConvertInputToOutput PARENTS : SRCS : PRIORITY
