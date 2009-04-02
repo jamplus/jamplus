@@ -244,6 +244,19 @@ make_fixprogress(
 
 LIST *queuedjamfiles;
 
+typedef struct _queuedfileinfo QUEUEDFILEINFO;
+
+struct _queuedfileinfo {
+	int priority;
+	const char *filename;
+} ;
+
+int compare_queuedfileinfo( const void *_left, const void *_right ) {
+	QUEUEDFILEINFO *left = (QUEUEDFILEINFO*)_left;
+	QUEUEDFILEINFO *right = (QUEUEDFILEINFO*)_right;
+	return left->priority < right->priority;
+}
+
 #endif
 
 int
@@ -318,6 +331,10 @@ pass:
 	{
 		LIST *l = queuedjamfiles;
 		LIST *origl = l;
+		int i = 0;
+		int count = 0;
+		QUEUEDFILEINFO* sortedfiles;
+
 		queuedjamfiles = L0;
 
 		for( i = 0; i < n_targets; i++ )
@@ -327,12 +344,32 @@ pass:
 		++actionpass;
 
 		for( ; l; l = list_next( l ) ) {
-			TARGET *t = bindtarget( l->string );
+			++count;
+		}
+		
+		sortedfiles = malloc( sizeof( QUEUEDFILEINFO ) * count );
+		i = 0;
+		for( l = origl; l; l = list_next( l ) ) {
+			char *colon = strchr( l->string, ':' );
+			TARGET *t;
+			*colon = 0;
+			t = bindtarget( l->string );
+			*colon = ':';
 			pushsettings( t->settings );
 			t->boundname = search( t->name, &t->time );
 			popsettings( t->settings );
-			parse_file( t->boundname );
+			sortedfiles[i].priority = atoi( colon + 1 );
+			sortedfiles[i].filename = t->boundname;
+			++i;
 		}
+
+		qsort( sortedfiles,	count, sizeof( QUEUEDFILEINFO ), compare_queuedfileinfo );
+
+		for ( i = 0; i < count; ++i ) {
+			parse_file( sortedfiles[ i ].filename );
+		}
+
+		free( sortedfiles );
 
 		list_free( origl );
 

@@ -215,11 +215,12 @@ hashdone( struct hash *hp )
 	if( !hp )
 	    return;
 
-	if( DEBUG_MEM )
-	    hashstat( hp );
+    if( hp->tab.base ) {
+        if( DEBUG_MEM )
+            hashstat( hp );
 
-	if( hp->tab.base )
 		free( (char *)hp->tab.base );
+    }
 	for( i = 0; i <= hp->items.list; i++ )
 		free( hp->items.lists[i].base );
 	free( (char *)hp );

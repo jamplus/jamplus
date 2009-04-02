@@ -555,9 +555,25 @@ builtin_queuejamfile(
 	int	*jmp )
 {
 	LIST *l = lol_get( args, 0 );
+	LIST *l2 = lol_get( args, 1 );
+	char priority[ 100 ];
+	size_t priorityLen;
+
+	if ( l2 ) {
+		sprintf( priority, ":%d", atoi( l2->string ) );
+		priorityLen = strlen( priority );
+	} else {
+		strcpy( priority, ":0" );
+		priorityLen = 2;
+	}
 
 	for( ; l; l = list_next( l ) ) {
-		queuedjamfiles = list_new( queuedjamfiles, l->string, 1 );
+		size_t stringLen = strlen( l->string );
+		char *filename = malloc( stringLen + priorityLen + 1 );
+		strncpy( filename, l->string, stringLen );
+		strcpy( filename + stringLen, priority );
+		queuedjamfiles = list_new( queuedjamfiles, filename, 0 );
+		free( filename );
 	}
 
 	return L0;
