@@ -12,7 +12,7 @@ package.path = scriptPath .. "?.lua;" .. package.path
 require 'FolderTree'
 
 jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
-jamExePath = os.path.combine(jamPath, 'jam.exe')
+jamExePath = os.path.combine(jamPath, 'jam')
 
 Config =
 {
