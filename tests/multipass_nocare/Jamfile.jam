@@ -1,0 +1,43 @@
+
+rule CopyRule TARGET : SOURCE
+{
+    Depends all : $(TARGET) : $(SOURCE) ;
+    CopyAction $(TARGET) : $(SOURCE) ;
+}
+
+actions CopyAction
+{
+    $(CP) $(2) $(1)
+}
+
+PASS_NUM ?= 1 ;
+
+if $(PASS_NUM) = 1
+{
+    Echo Pass 1 ;
+
+    QueueJamfile $(JAMFILE) ;
+    PASS_NUM = 2 ;
+}
+else if $(PASS_NUM) = 2
+{
+    Echo Pass 2 ;
+
+    Depends NoCare.cpp : NoCare.h ;
+    NoCare NoCare.h ;
+
+    Depends Care.cpp : Care.h ;
+
+    CopyRule NoCare.o : NoCare.cpp ;
+    CopyRule Care.o : Care.cpp ;
+
+    if ! $(IGNORE_PASS_3)
+    {
+        QueueJamfile $(JAMFILE) ;
+        PASS_NUM = 3 ;
+    }
+}
+else
+{
+    Echo Pass 3 ;
+}
