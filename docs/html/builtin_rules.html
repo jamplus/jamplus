@@ -194,15 +194,22 @@ If the given generated <code>TARGETS</code> are already built and stored within 
 </pre></div><p>
 <hr>
  <h2><a class="anchor" name="rule_QueueJamFile">
-rule QueueJamFile JAMFILE_LIST ;</a></h2>
+rule QueueJamFile JAMFILE_LIST [ : PRIORITY ] ;</a></h2>
 <p>
-When <code>QueueJamFile</code> is called, a second pass on the Jam dependency graph is initiated after the <a class="el" href="jam_language.html#operation_updating">Updating Phase</a>.<p>
+When <code>QueueJamFile</code> is called, a second pass on the Jam dependency graph is initiated after the <a class="el" href="jam_language.html#operation_updating">Updating Phase</a>. Further documentation on this can be found on the <a class="el" href="multiple_passes.html">Multiple Passes</a> page.<p>
+Queued Jamfiles are processed in the order they are queued. There may be cases where the queued order does not allow for proper processing of the Jamfiles. In the event that Jamfile order matters for the upcoming pass, <code>PRIORITY</code> may be applied. When a priority isn't given, the default priority is 0. A queued Jamfile with priority of 100 will be parsed before a Jamfile with a priority of 0. Likewise, a queued Jamfile with a priority of -50 will be parsed after a Jamfile with a priority of 0.<p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>JAMFILE_LIST</em>&nbsp;</td><td>A list of one or more Jamfiles to queue for the next pass.</td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>JAMFILE_LIST</em>&nbsp;</td><td>A list of one or more Jamfiles to queue for the next pass. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>PRIORITY</em>&nbsp;</td><td>(optional) A numeric priority. If not specified, the default is 0.</td></tr>
   </table>
 </dl>
-<div class="fragment"><pre class="fragment">    QueueJamFile Pass2.jam ;
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # Queue Pass2.jam for the second pass.</span>
+<span class="preprocessor"></span>    QueueJamFile Pass2.jam ;
+
+<span class="preprocessor">    # Queue me_first.jam with a higher priority than me_second.jam.</span>
+<span class="preprocessor"></span>    QueueJamFile me_second.jam ;  # Priority of 0.
+    QueueJamFile me_first.jam : 1000 ;  # Parse me_first.jam and then me_second.jam.
 </pre></div><p>
 <hr>
  <h2><a class="anchor" name="rule_Subst">
@@ -394,7 +401,7 @@ Returns a registry entry, given a list of <code>KEYS</code>.<p>
 </pre></div><p>
 <hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Fri Mar 20 17:39:01 2009 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Wed Apr 1 23:04:00 2009 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.8 </small></address>
 </body>

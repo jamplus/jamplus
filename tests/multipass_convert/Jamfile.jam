@@ -1,0 +1,106 @@
+# In this test, we don't know the names of the targets yet.  In other words,
+# we don't know which files actually need to be built.  The lists of files to
+# be built are in variously named input.txt files.
+#
+# In the first pass, an action is called that converts the input file to a
+# generated Jamfile containing the build instructions for the second pass.
+# Each of those generated Jamfiles are queued to be executed during the second
+# pass.
+#
+# After the first pass completes, the generated Jamfiles are parsed.  The
+# second pass build instructions are put into the dependency graph and
+# executed.
+
+sDEPCACHE.standard = .depcache ;
+DEPCACHE = standard ;
+
+rule ConvertInputToOutput PARENTS : SRCS : PRIORITY
+{
+	local JAM_SRCS = $(SRCS).jam ;
+	Depends $(PARENTS) : $(JAM_SRCS) : $(SRCS) ;
+	UseCommandLine $(JAM_SRCS) : version2 ;
+
+	local source ;
+	for source in $(SRCS) {
+		PARENTS on $(source).jam = $(PARENTS) ;
+		ConvertInputToJam $(source).jam : $(source) : $(PARENTS) ;
+	}
+	
+	QueueJamfile $(JAM_SRCS) : $(PRIORITY) ;
+}
+
+
+actions lua ConvertInputToJam
+{
+	local text = {}
+	text[#text + 1] = 'Clean clean : "$(1)" ;\n' ;
+	
+	for line in io.lines([[$(2)]]) do
+		text[#text + 1] = ('Clean clean : "%s" ;\n'):format(line)
+		text[#text + 1] = ('WriteOutput "$(PARENTS)" : "%s" ;\n'):format(line)
+	end
+	io.writeall([[$(1)]], table.concat(text))
+}
+
+
+rule WriteOutput PARENTS : TARGET
+{
+	Echo WriteOutput $(PARENTS) - $(TARGET) ;
+
+	Depends $(PARENTS) : $(TARGET) ;
+	Clean clean : $(TARGET) ;
+	
+	CONTENTS on $(TARGET) = "Writing output for $(TARGET)" ;
+	WriteFile $(TARGET) ;
+}
+
+
+
+
+
+
+rule ConvertAlternateInputToAlternateOutput PARENTS : SRCS : PRIORITY
+{
+	local JAM_SRCS = $(SRCS).jam ;
+	Depends $(PARENTS) : $(JAM_SRCS) : $(SRCS) ;
+
+	local source ;
+	for source in $(SRCS) {
+		UseCommandLine $(source).jam : version1 ;
+		ConvertAlternateInputToJam $(source).jam : $(source) ;
+	}
+	
+	QueueJamfile $(JAM_SRCS) : $(PRIORITY) ;
+}
+
+
+actions lua ConvertAlternateInputToJam
+{
+	local text = {}
+	text[#text + 1] = 'Clean clean : "$(1)" ;\n' ;
+	
+	for line in io.lines([[$(2)]]) do
+		text[#text + 1] = ('Clean clean : "%s" ;\n'):format(line)
+		text[#text + 1] = ('WriteAlternateOutput "%s" ;\n'):format(line)
+	end
+	io.writeall([[$(1)]], table.concat(text))
+}
+
+
+rule WriteAlternateOutput TARGET
+{
+	Echo WriteAlternateOutput $(TARGET) ;
+
+	Depends all : $(TARGET) ;
+	Clean clean : $(TARGET) ;
+	
+	CONTENTS on $(TARGET) = "Writing alternate output for $(TARGET)" ;
+	WriteFile $(TARGET) ;
+}
+
+
+
+
+ConvertInputToOutput all : input1.txt : 1000 ;
+ConvertAlternateInputToAlternateOutput all : alternate_input1.txt ;
+ConvertInputToOutput all : input2.txt : 999 ;

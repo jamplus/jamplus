@@ -345,7 +345,7 @@ make1b( TARGET *t )
 	    failed = c->target->name;
 	    t->status = c->target->status;
 #ifdef OPT_MULTIPASS_EXT
-	    if ( c->target->fate == T_FATE_MISSING || t->status == EXEC_CMD_NEXTPASS )
+	    if ( ( c->target->fate == T_FATE_MISSING  &&  ! ( c->target->flags & T_FLAG_NOCARE ) ) || t->status == EXEC_CMD_NEXTPASS )
 	    {
 		missing = 1;
 		if ( queuedjamfiles )
@@ -628,7 +628,7 @@ make1c( TARGET *t )
 		    actions->action->status = t->status;
 
 #ifdef OPT_MULTIPASS_EXT
-		if ( t->fate == T_FATE_MISSING  &&  !t->actions  &&  queuedjamfiles )
+		if ( t->fate == T_FATE_MISSING  &&  !( t->flags & T_FLAG_NOCARE )  &&  !t->actions  &&  queuedjamfiles )
 		{
 			t->status = EXEC_CMD_NEXTPASS;
 		}
