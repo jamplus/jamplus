@@ -211,7 +211,7 @@ timestamp(
 			    ( ( ( buf[0] >= 'a'  &&  buf[0] <= 'z' )  ||  ( buf[0] >= 'A'  &&  buf[0] <= 'Z' ) )  &&
 				buf[1] == ':' )  ||  ( buf[0] == '/'  ||  buf[0] == '\\' );
 #else
-			int absolute = buf[0] != '/';
+			int absolute = buf[0] == '/';
 #endif
 
 			/* Go until we've reached the topmost parent directory. */
