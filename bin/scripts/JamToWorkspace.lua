@@ -144,9 +144,9 @@ function CreateTargetInfoFiles()
 	function DumpConfig(platform, config)
 		local collectConfigurationArgs =
 		{
-			'"-C' .. destinationRootPath .. '"',
-			'"-sJAMFILE=' .. destinationRootPath .. 'DumpJamTargetInfo.jam"',
-			'-sTARGETINFO_LOCATE=' .. destinationRootPath .. 'TargetInfo/',
+			os.path.escape('-C' .. destinationRootPath),
+			os.path.escape('-sJAMFILE=' .. destinationRootPath .. 'DumpJamTargetInfo.jam'),
+			os.path.escape('-sTARGETINFO_LOCATE=' .. destinationRootPath .. 'TargetInfo/'),
 			'-sPLATFORM=' .. platform,
 			'-sCONFIG=' .. config,
 			'-d0',
