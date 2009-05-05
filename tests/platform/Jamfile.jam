@@ -1,0 +1,9 @@
+SubDir TOP ;
+
+DEPCACHE.standard = .jamcache ;
+DEPCACHE = standard ;
+
+Defines platform : USING_WIN32 : : win32 ;
+Defines platform : USING_MACOSX : : macosx ;
+
+Application platform : platform.c file2.c ;
