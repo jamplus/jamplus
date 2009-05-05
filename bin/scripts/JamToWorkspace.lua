@@ -12,7 +12,7 @@ package.path = scriptPath .. "?.lua;" .. package.path
 require 'FolderTree'
 
 jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
-jamExePath = os.path.combine(jamPath, 'jam')
+jamExePath = os.path.escape(os.path.combine(jamPath, 'jam'))
 
 Config =
 {
@@ -28,6 +28,14 @@ Compilers =
 	{ 'vc6',	'Visual C++ 6' },
 	{ 'mingw',	'MinGW' },
 }
+
+if os.getenv("OS") == "Windows_NT" then
+	Platform = 'win32'
+elseif os.getenv("OSTYPE") == "darwin9.0" then
+	Platform = 'macosx'
+else
+	Platform = 'macosx'
+end
 
 local buildWorkspaceName = '!BuildWorkspace'
 local updateWorkspaceName = '!UpdateWorkspace'
@@ -153,17 +161,17 @@ function CreateTargetInfoFiles()
 		}
 
 		print('Writing platform [' .. platform .. '] and config [' .. config .. ']...')
-		for line in ex.lines{'"' .. jamExePath .. '"', unpack(collectConfigurationArgs)} do
---			print(line)
+		for line in ex.lines{jamExePath, unpack(collectConfigurationArgs)} do
+			print(line)
 		end
 --		print(jamExePath .. ' ' .. table.concat(collectConfigurationArgs, ' '))
 --		print(p, i, o)
 	end
 
 	DumpConfig('*', '*')
-	DumpConfig('win32', '*')
+	DumpConfig(Platform, '*')
 	for config in ivalues(Config.Configurations) do
-		DumpConfig('win32', config)
+		DumpConfig(Platform, config)
 	end
 end
 
@@ -180,9 +188,9 @@ function ReadTargetInfoFiles()
 	end
 
 	ReadTargetInfo('*', '*')
-	ReadTargetInfo('win32', '*')
+	ReadTargetInfo(Platform, '*')
 	for config in ivalues(Config.Configurations) do
-		ReadTargetInfo('win32', config)
+		ReadTargetInfo(Platform, config)
 	end
 
 	AutoWriteMetaTable.active = false
@@ -197,6 +205,7 @@ end
 MapPlatformToVSPlatform =
 {
 	['win32'] = 'Win32',
+	['macosx'] = 'Mac OS X',
 }
 
 MapConfigToVSConfig =
@@ -279,12 +288,12 @@ function VisualStudioProjectMetaTable:Write(outputPath, commandLines)
 	<Configurations>
 ]])
 
-	local platformName = 'win32'
+	local platformName = Platform
 	for configName in ivalues(Config.Configurations) do
-		local jamCommandLine = jamExePath ..
-				' -C' .. destinationRootPath ..
-				' -sPLATFORM=' .. platformName ..
-				' -sCONFIG=' .. configName
+		local jamCommandLine = jamExePath .. ' ' ..
+				os.path.escape('-C' .. destinationRootPath) .. ' ' ..
+				'-sPLATFORM=' .. platformName .. ' ' ..
+				'-sCONFIG=' .. configName
 
 		local configInfo =
 		{
@@ -558,7 +567,7 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 ]])
 
-	local platformName = 'win32'
+	local platformName = Platform
 	for configName in ivalues(Config.Configurations) do
 		local configInfo =
 		{
@@ -746,13 +755,13 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 ]], self, { Compiler = cbCompiler } ))
 --		<Option pch_mode="2" />
 
-	local platformName = 'win32'
+	local platformName = Platform
 	do
 		local configName = 'debug'
-		local jamCommandLine = jamExePath ..
-				' -C' .. destinationRootPath ..
-				' -sPLATFORM=' .. platformName ..
-				' -sCONFIG=' .. configName
+		local jamCommandLine = jamExePath .. ' ' ..
+				os.path.escape('-C' .. destinationRootPath) .. ' ' ..
+				'-sPLATFORM=' .. platformName .. ' ' ..
+				'-sCONFIG=' .. configName
 
 		local configInfo =
 		{
@@ -814,10 +823,10 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 ]])
 
 	for configName in ivalues(Config.Configurations) do
-		local jamCommandLine = jamExePath ..
-				' -C' .. destinationRootPath ..
-				' -sPLATFORM=' .. platformName ..
-				' -sCONFIG=' .. configName
+		local jamCommandLine = jamExePath .. ' ' ..
+				os.path.escape('-C' .. destinationRootPath) .. ' ' ..
+				'-sPLATFORM=' .. platformName .. ' ' ..
+				'-sCONFIG=' .. configName
 
 		local configInfo =
 		{
@@ -1246,16 +1255,29 @@ include $(jamPath)Jambase.jam ;
 	CreateTargetInfoFiles()
 	ReadTargetInfoFiles()
 
-	-- Write jam.bat.
-	io.writeall(destinationRootPath .. 'jam.bat',
-			'@"' .. jamExePath .. '" "-C' .. destinationRootPath .. '" %*\n')
+	if os.getenv("OS") == "Windows_NT" then
+		-- Write jam.bat.
+		io.writeall(destinationRootPath .. 'jam.bat',
+			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
-	-- Write UpdateWorkspace.bat.
-	local contents = '@"' .. scriptPath .. 'JamToWorkspace.bat" --gen=' ..
-			opts.gen .. ' --compiler=' .. exporter.Options.compiler .. ' '
-	contents = contents .. '"--config=' .. destinationRootPath .. '\\UpdateWorkspace.config" '
-	contents = contents .. '"' .. sourceJamfilePath .. '"\n'
-	io.writeall(destinationRootPath .. 'UpdateWorkspace.bat', contents)
+		-- Write UpdateWorkspace.bat.
+		io.writeall(destinationRootPath .. 'JamToWorkspace.sh',
+				("@%s --gen=%s --compiler=%s --config=%s %s\n"):format(
+				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen, exporter.Options.compiler,
+				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
+				os.path.escape(sourceJamfilePath)))
+	else
+		-- Write jam.sh.
+		io.writeall(destinationRootPath .. 'jam.sh',
+				jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
+
+		-- Write UpdateWorkspace.sh.
+		io.writeall(destinationRootPath .. 'UpdateWorkspace.sh',
+				("@%s --gen=%s --compiler=%s --config=%s %s\n"):format(
+				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen, exporter.Options.compiler,
+				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
+				os.path.escape(sourceJamfilePath)))
+	end
 
 	-- Write UpdateWorkspace.config.
 	LuaDumpObject(destinationRootPath .. 'UpdateWorkspace.config', 'Config', Config)
