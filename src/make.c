@@ -150,31 +150,12 @@ void onintr( int disp );
 int actionpass = 0;
 
 void
-make_fixprogress_init(
-	     TARGET	*t )
-{
-    TARGETS *c;
-
-    if ( t->flags & T_FLAG_FIXPROGRESS_VISIT1 )
-	return;
-
-    t->flags |= T_FLAG_FIXPROGRESS_VISIT1;
-    t->flags &= ~T_FLAG_FIXPROGRESS_VISIT2;
-
-    for( c = t->depends; c; c = c->next )
-    {
-	make_fixprogress_init( c->target );
-    }
-}
-
-void
 make_fixparents(
 	    TARGETS *targets )
 {
     for ( ; targets; targets = targets->next )
     {
-	targets->target->flags &= ~T_FLAG_FIXPROGRESS_VISIT1;
-	if ( targets->target->flags & T_FLAG_FIXPROGRESS_VISIT2 )
+	if ( targets->target->flags & T_FLAG_FIXPROGRESS_VISITED )
 	    continue;
 	if ( targets->target->fate != T_FATE_TOUCHED )
 	    targets->target->fate = T_FATE_INIT;
@@ -190,10 +171,9 @@ make_fixprogress(
     TARGETS *c;
     ACTIONS *actions;
 
-    t->flags &= ~T_FLAG_FIXPROGRESS_VISIT1;
-    if ( t->flags & T_FLAG_FIXPROGRESS_VISIT2 )
+    if ( t->flags & T_FLAG_FIXPROGRESS_VISITED )
         return;
-    t->flags |= T_FLAG_FIXPROGRESS_VISIT2;
+    t->flags |= T_FLAG_FIXPROGRESS_VISITED;
 
     if ( t->fate == T_FATE_INIT  ||  t->fate == T_FATE_TOUCHED  ||  t->fate == T_FATE_MISSING  ||
 	    t->fate == T_FATE_STABLE  ||
@@ -468,6 +448,7 @@ make0(
 #ifdef OPT_MULTIPASS_EXT
 	if ( t->fate == T_FATE_INIT )
 	    t->fate = T_FATE_MAKING;
+    t->flags &= ~T_FLAG_FIXPROGRESS_VISITED;
 #else
 	t->fate = T_FATE_MAKING;
 #endif
