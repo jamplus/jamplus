@@ -364,6 +364,14 @@ yylex()
 		goto eof;
 	    }
 
+#ifdef OPT_FIND_BAD_SEMICOLON_USAGE_EXT
+	    if( !notkeyword   &&  b - 1 > buf  &&  ( buf[0] == ';'  ||  *(b - 1) == ';' ) )
+	    {
+		yyerror( "found semicolon at the beginning or end of a token.\n\tSurround semicolons with whitespace." );
+		goto eof;
+	    }
+#endif
+
 	    /* We looked ahead a character - back up. */
 
 	    if( c != EOF )
