@@ -27,14 +27,20 @@ Compilers =
 	{ 'vs2002', 'Visual Studio 2002' },
 	{ 'vc6',	'Visual C++ 6' },
 	{ 'mingw',	'MinGW' },
+	{ 'gcc',	'gcc' },
 }
 
 if os.getenv("OS") == "Windows_NT" then
 	Platform = 'win32'
-elseif os.getenv("OSTYPE") == "darwin9.0" then
-	Platform = 'macosx'
+	uname = 'windows'
 else
-	Platform = 'macosx'
+	local f = io.popen('uname')
+	uname = f:read('*a'):lower():gsub('\n', '')
+	f:close()
+	
+	if uname == 'darwin' then
+		Platform = 'macosx'
+	end
 end
 
 local buildWorkspaceName = '!BuildWorkspace'
@@ -1255,13 +1261,13 @@ include $(jamPath)Jambase.jam ;
 	CreateTargetInfoFiles()
 	ReadTargetInfoFiles()
 
-	if os.getenv("OS") == "Windows_NT" then
+	if uname == 'windows' then
 		-- Write jam.bat.
 		io.writeall(destinationRootPath .. 'jam.bat',
 			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
 		-- Write UpdateWorkspace.bat.
-		io.writeall(destinationRootPath .. 'JamToWorkspace.sh',
+		io.writeall(destinationRootPath .. 'JamToWorkspace.bat',
 				("@%s --gen=%s --compiler=%s --config=%s %s\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen, exporter.Options.compiler,
 				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
@@ -1270,13 +1276,15 @@ include $(jamPath)Jambase.jam ;
 		-- Write jam.sh.
 		io.writeall(destinationRootPath .. 'jam.sh',
 				jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
+		os.chmod(destinationRootPath .. 'jam.sh', 777)
 
 		-- Write UpdateWorkspace.sh.
 		io.writeall(destinationRootPath .. 'UpdateWorkspace.sh',
-				("@%s --gen=%s --compiler=%s --config=%s %s\n"):format(
+				("%s --gen=%s --compiler=%s --config=%s %s\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen, exporter.Options.compiler,
 				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
 				os.path.escape(sourceJamfilePath)))
+		os.chmod(destinationRootPath .. 'UpdateWorkspace.sh', 777)
 	end
 
 	-- Write UpdateWorkspace.config.
