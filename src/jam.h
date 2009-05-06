@@ -318,6 +318,7 @@
 # define unix
 # define OSMINOR "OS=MACOSX"
 # define OS_MACOSX
+# define DOWNSHIFT_PATHS
 # endif
 # ifdef __osf__
 # define OSMINOR "OS=OSF"
