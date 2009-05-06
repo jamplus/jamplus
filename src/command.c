@@ -88,6 +88,13 @@ cmd_new(
 	}
 	else
 #endif
+#ifdef OPT_ACTIONS_DUMP_TEXT_EXT
+	if (rule->flags & RULE_WRITEFILE)
+	{
+	    buffer_free(&buff);
+	}
+	else
+#endif
 	if (buffer_pos(&buff) < maxline)
 	{
 	    buffer_addstring( &cmd->commandbuff, buffer_ptr( &buff ), buffer_pos( &buff ) );
@@ -174,7 +181,6 @@ cmd_string(
     TMPLIST **response_files)
 #endif
 {
-    char force_empty = 0;
     while (*in  &&  (int)buffer_pos(buff) < outsize) {
 	int 	dollar = 0;
 	size_t	lastword;
@@ -275,7 +281,7 @@ cmd_string(
 		const char *ine;
 		int depth;
 
-		force_empty = 1;
+		rule->flags |= RULE_WRITEFILE;
 		ine = in + 3;
 		depth = 1;
 		while (*ine && *ine != '|' && depth > 0) {
@@ -386,11 +392,6 @@ cmd_string(
     if ((int)buffer_pos(buff) >= outsize)
 	return -1;
     buffer_addchar(buff, 0);
-    if (force_empty) {
-	buffer_setpos(buff, 0);
-	buffer_putchar(buff, 0);
-	return 0;
-    }
     return buffer_pos(buff);
 }
 #endif

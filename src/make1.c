@@ -584,6 +584,12 @@ make1c( TARGET *t )
 	    }
 	    else
 #endif
+#ifdef OPT_ACTIONS_DUMP_TEXT_EXT
+	    if (cmd->rule->flags & RULE_WRITEFILE)
+	    {
+	    }
+	    else
+#endif
 	    if( globs.noexec )
 	    {
 #ifdef OPT_SERIAL_OUTPUT_EXT

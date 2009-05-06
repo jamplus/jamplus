@@ -69,6 +69,9 @@ struct _rule {
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 # define	RULE_MAXTARGETS	0x200	/* cmd specific maxtargets */
 /* commented out so jamgram.y can compile #endif */
+#ifdef OPT_ACTIONS_DUMP_TEXT_EXT
+# define	RULE_WRITEFILE	0x400	/* this action writes a file and is done */
+#endif
 
 	int		maxline;
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
