@@ -109,15 +109,15 @@ end
 
 
 function ProcessCommandLine()
-	JambaseFlags = { { Key = 'COMPILER', Value = '$(compiler)' } }
+	JamFlags = { }
 
-	function ProcessJambaseFlags(newarg, oldarg)
+	function ProcessJamFlags(newarg, oldarg)
 		local key, value = newarg:match('(.+)=(.+)')
 		if not key then
-			errors = { 'Invalid --jambaseflags ' .. newarg .. '.  Must be in KEY=VALUE form.' }
+			errors = { 'Invalid --jamflags ' .. newarg .. '.  Must be in KEY=VALUE form.' }
 			Usage()
 		end
-		JambaseFlags[#JambaseFlags + 1] = { Key = key, Value = value }
+		JamFlags[#JamFlags + 1] = { Key = key, Value = value }
 	end
 
 	local options = Options {
@@ -125,7 +125,7 @@ function ProcessCommandLine()
 		Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
 		Option {{"postfix"}, "Extra text for the IDE project name"},
 		Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
-		Option {{"jambaseflags"}, "Extra flags to put in the Jambase in KEY=VALUE form", "Req", 'JAMBASE_FLAGS', ProcessJambaseFlags },
+		Option {{"jamflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
 	}
 
 	function Usage()
@@ -1266,8 +1266,20 @@ DEPCACHE = standard ;
 		end
 		jambaseText[#jambaseText + 1] = '\n'
 	end
-
-	for _, info in ipairs(JambaseFlags) do
+	
+	local hasCOMPILER = false
+	for _, info in ipairs(Config.JamFlags) do
+		if info.Key == 'COMPILER' then
+			hasCOMPILER = true
+			break
+		end
+	end
+	
+	if not hasCOMPILER then
+		table.insert(Config.JamFlags, 1, { Key = 'COMPILER', Value = exporter.Options.compiler })
+	end
+	
+	for _, info in ipairs(Config.JamFlags) do
 		jambaseText[#jambaseText + 1] = expand(info.Key .. ' = ' .. info.Value .. ' ;\n', exporter.Options, _G)
 	end
 	jambaseText[#jambaseText + 1] = expand([[
@@ -1286,9 +1298,9 @@ include $(jamPath)Jambase.jam ;
 			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
 		-- Write UpdateWorkspace.bat.
-		io.writeall(destinationRootPath .. 'JamToWorkspace.bat',
-				("@%s --gen=%s --compiler=%s --config=%s %s\n"):format(
-				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen, exporter.Options.compiler,
+		io.writeall(destinationRootPath .. 'UpdateWorkspace.bat',
+				("@%s --gen=%s --config=%s %s\n"):format(
+				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen,
 				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
 				os.path.escape(sourceJamfilePath)))
 	else
@@ -1299,8 +1311,8 @@ include $(jamPath)Jambase.jam ;
 
 		-- Write UpdateWorkspace.sh.
 		io.writeall(destinationRootPath .. 'UpdateWorkspace.sh',
-				("%s --gen=%s --compiler=%s --config=%s %s\n"):format(
-				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen, exporter.Options.compiler,
+				("%s --gen=%s --config=%s %s\n"):format(
+				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen,
 				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
 				os.path.escape(sourceJamfilePath)))
 		os.chmod(destinationRootPath .. 'UpdateWorkspace.sh', 777)
@@ -1371,6 +1383,8 @@ Config.SubIncludes =
 {
 	{ 'AppRoot', '$(sourceRootPath)', sourceJamfile },
 }
+
+Config.JamFlags = JamFlags
 
 -- Do the same with the destination.
 destinationRootPath = os.path.simplify(os.path.add_slash(os.path.make_absolute(nonOpts[2] or '.')))
