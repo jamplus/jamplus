@@ -1,0 +1,11 @@
+#rule Defines
+#{
+#}
+
+Defines someapp :
+	YEAH
+;
+
+Echo "This has a : in it." ;
+Echo "This is missing a space": ;
+

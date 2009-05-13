@@ -365,10 +365,18 @@ yylex()
 	    }
 
 #ifdef OPT_FIND_BAD_SEMICOLON_USAGE_EXT
-	    if( !notkeyword   &&  b - 1 > buf  &&  ( buf[0] == ';'  ||  *(b - 1) == ';' ) )
+	    if( !notkeyword   &&  b - 1 > buf )
 	    {
-		yyerror( "found semicolon at the beginning or end of a token.\n\tSurround semicolons with whitespace." );
-		goto eof;
+		if ( buf[0] == ';'  ||  *(b - 1) == ';' )
+		{
+		    yyerror( "found semicolon at the beginning or end of a token.\n\tSurround semicolons with whitespace." );
+		    goto eof;
+		}
+		if ( buf[0] == ':'  ||  *(b - 1) == ':' )
+		{
+		    yyerror( "found colon at the beginning or end of a token.\n\tSurround colons with whitespace." );
+		    goto eof;
+		}
 	    }
 #endif
 

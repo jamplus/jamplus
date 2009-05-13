@@ -54,12 +54,12 @@ switch $(OS)
 
 if ! $(CONFIG) in * $(VALID_CONFIGS)
 {
-	Exit * jam: CONFIG must be one of the following: $(VALID_CONFIGS:J=$(SPACE)) ;
+	Exit "* jam: CONFIG must be one of the following:" $(VALID_CONFIGS:J=$(SPACE)) ;
 }
 
 if ! $(PLATFORM) in * $(VALID_PLATFORMS)
 {
-	Exit * jam: PLATFORM must be one of the following: $(VALID_PLATFORMS:J=$(SPACE)) ;
+	Exit "* jam: PLATFORM must be one of the following:" $(VALID_PLATFORMS:J=$(SPACE)) ;
 }
 
 #
@@ -557,9 +557,9 @@ rule MkDir
 	    {
 	        switch $(s)
 		{
-		case *:   : s = ;
-		case *:\\ : s = ;
-		case *:/ : s = ;
+		case "*:"   : s = ;
+		case "*:\\" : s = ;
+		case "*:/" : s = ;
 		}
 	    }
 
@@ -713,7 +713,7 @@ rule SubDir
 
 			if $(SUBDIR_DOWN) && $(_tokens)
 			{
-				Echo Warning: SubDir $(<) misplaced! ;
+				Echo "Warning: SubDir $(<) misplaced!" ;
 			}
 
 			# We'll remember the relative (UP/DOWN) path that
