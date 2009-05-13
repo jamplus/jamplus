@@ -254,7 +254,7 @@ execlua(
 
 void
 execcmd( 
-	char *string,
+	const char *string,
 #ifdef OPT_SERIAL_OUTPUT_EXT
 	void (*func)( const char* outputname, void *closure, int status ),
 #else
@@ -345,7 +345,7 @@ execcmd(
 
 	if ( !p  ||  !*p )
 	{
-		char* p2 = string;
+		const char* p2 = string;
 		while ( *p2 != '"'  &&  *p2 != 0 )
 			p2++;
 		if ( *p2 == '"' )

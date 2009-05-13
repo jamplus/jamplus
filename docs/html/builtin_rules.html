@@ -212,6 +212,27 @@ Queued Jamfiles are processed in the order they are queued. There may be cases w
     QueueJamFile me_first.jam : 1000 ;  # Parse me_first.jam and then me_second.jam.
 </pre></div><p>
 <hr>
+ <h2><a class="anchor" name="rule_Shell">
+rule Shell COMMANDS ;</a></h2>
+<p>
+The <code>Shell</code> rule is used to execute one or more <code>COMMANDS</code> and return the output to the user. Each command specified in the <code>COMMANDS</code> list is executed immediately, one after another. The results of a command execution are returned to the caller.<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>COMMANDS</em>&nbsp;</td><td>A list of one or more commands, each executed serially.</td></tr>
+  </table>
+</dl>
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # Copy file1.txt to file2.txt, ignoring output.</span>
+<span class="preprocessor"></span>    Shell <span class="stringliteral">"copy file1.txt file2.txt"</span> ;
+
+<span class="preprocessor">    # Grab a directory listing.</span>
+<span class="preprocessor"></span>        dir_listing = [ Shell dir ] ;
+        
+<span class="preprocessor">        # Grab two directory listings.</span>
+<span class="preprocessor"></span>        dir_listings = [ Shell <span class="stringliteral">"dir *.tga"</span> <span class="stringliteral">"dir *.png"</span> ]
+        Echo dir *.tga - $(dir_listings[1]) ;
+        Echo dir *.png - $(dir_listings[2]) ;
+</pre></div><p>
+<hr>
  <h2><a class="anchor" name="rule_Subst">
 rule Subst LIST : PATTERN [ : REPL [ : MAXN ] ] ;</a></h2>
 <p>
@@ -401,7 +422,7 @@ Returns a registry entry, given a list of <code>KEYS</code>.<p>
 </pre></div><p>
 <hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Wed Apr 1 23:04:00 2009 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Tue May 12 20:06:12 2009 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.8 </small></address>
 </body>

@@ -368,6 +368,32 @@ Queued Jamfiles are processed in the order they are queued.  There may be cases 
 
 
 <hr>
+\section rule_Shell rule Shell COMMANDS ;
+\addindex rule_Shell
+
+The \c Shell rule is used to execute one or more \c COMMANDS and return the output to the user.  Each command specified in the \c COMMANDS list is executed immediately, one after another.  The results of a command execution are returned to the caller.
+
+\param COMMANDS A list of one or more commands, each executed serially.
+
+\code
+    # Copy file1.txt to file2.txt, ignoring output.
+    Shell "copy file1.txt file2.txt" ;
+
+    # Grab a directory listing.
+	dir_listing = [ Shell dir ] ;
+	
+	# Grab two directory listings.
+	dir_listings = [ Shell "dir *.tga" "dir *.png" ]
+	Echo dir *.tga - $(dir_listings[1]) ;
+	Echo dir *.png - $(dir_listings[2]) ;
+\endcode
+
+
+
+
+
+
+<hr>
 \section rule_Subst rule Subst LIST : PATTERN [ : REPL [ : MAXN ] ] ;
 \addindex rule_Subst
 

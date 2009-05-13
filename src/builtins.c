@@ -50,6 +50,10 @@
 # include "luasupport.h"
 #endif
 
+#ifdef OPT_SERIAL_OUTPUT_EXT
+# include "execcmd.h"
+#endif
+
 /*
  * compile_builtin() - define builtin rules
  */
@@ -92,6 +96,10 @@ static LIST* builtin_w32_shortname( PARSE *parse, LOL *args, int *jmp );
 #endif
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 LIST *builtin_usemd5callback( PARSE *parse, LOL *args, int *jmp );
+#endif
+
+#ifdef OPT_SERIAL_OUTPUT_EXT
+LIST *builtin_shell( PARSE *parse, LOL *args, int *jmp );
 #endif
 
 int glob( const char *s, const char *c );
@@ -215,6 +223,10 @@ load_builtins()
 
     bindrule( "UseMD5Callback" )->procedure =
 	parse_make( builtin_usemd5callback, P0, P0, P0, C0, C0, 0 );
+#endif
+#ifdef OPT_SERIAL_OUTPUT_EXT
+    bindrule( "Shell" )->procedure =
+	parse_make( builtin_shell, P0, P0, P0, C0, C0, 0 );
 #endif
 }
 
@@ -899,3 +911,67 @@ builtin_usemd5callback(
 }
 #endif
 
+
+
+#ifdef OPT_SERIAL_OUTPUT_EXT
+
+/*
+ * builtin_shell() -
+ *
+ *
+ *
+ */
+
+static void shell_done( const char* outputname, void *closure, int status )
+{
+    char* buffer;
+    long size;
+    LIST **list = (LIST**)closure;
+    FILE *file = fopen(outputname, "rb");
+    if (!file)
+	return;
+    if (fseek(file, 0, SEEK_END) != 0) {
+	fclose(file);
+	return;
+    }
+    size = ftell(file);
+
+    fseek(file, 0, SEEK_SET);
+
+    buffer = malloc(size + 1);
+    if (fread(buffer, 1, size, file) != size) {
+	free(buffer);
+	fclose(file);
+	return;
+    }
+    buffer[size] = 0;
+
+    *list = list_new(*list, buffer, 0);
+
+    free(buffer);
+    fclose(file);
+}
+
+
+LIST *
+builtin_shell(
+	PARSE	*parse,
+	LOL	*args,
+	int	*jmp )
+{
+    LIST *l = lol_get( args, 0 );
+    LIST *shell = var_get( "JAMSHELL" );	/* shell is per-target */
+
+    LIST *output = L0;
+
+    exec_init();
+    for( ; l; l = list_next( l ) ) {
+        execcmd( l->string, shell_done, &output, shell );
+	execwait();
+    }
+    exec_done();
+
+    return output;
+}
+
+#endif
