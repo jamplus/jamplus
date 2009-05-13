@@ -335,7 +335,7 @@ make1b( TARGET *t )
 		    }
 		}
 		/* If it didn't have the MightNotUpdate flag but did update, mark it. */
-		else if ( c->target->fate > T_FATE_STABLE )
+		else if ( c->target->fate > T_FATE_STABLE  &&  !c->needs )
 		    childupdated = 1;
 	    }
 #endif
