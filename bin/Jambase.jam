@@ -1979,7 +1979,7 @@ rule LibraryFromObjects TARGET : OBJECTS
 		[ _retrieveVar LIBFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
 	LIBFLAGS on $(_l) = $(libFlags) ;
 
-	UseCommandLine $(_l) : $(libFlags) ;
+	UseCommandLine $(_l) : $(libFlags) $(_s) ;
 
 	Archive $(_l) : $(_s) ;
 
