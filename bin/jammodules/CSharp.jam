@@ -1,25 +1,70 @@
 if ! $(TARGETINFO_LOCATE)
 {
 
-switch $(COMPILER)
+CSCFLAGS.* on * += /noconfig /nowarn:1701,1702 /warn:4 ;
+CSCFLAGS.debug on * += /define:DEBUG;TRACE /debug+ /debug:full /optimize- ;
+
+CSC_COMPILER ?= vs2008 ;
+
+switch $(CSC_COMPILER)
 {
 	case vs2005 :
-		CSC = "$(windir)/Microsoft.NET/Framework/v2.0.50727/Csc.exe" ;
+		CSC = "\"$(windir)/Microsoft.NET/Framework/v2.0.50727/Csc.exe\"" ;
 		REFERENCEPATHS.* on * +=
 				"C:/Program Files/Reference Assemblies/Microsoft/Framework/v3.5"
 				$(windir)/Microsoft.NET/Framework/v2.0.50727
 		;
+		CSCFLAGS.* on * += /errorreport:prompt /filealign:512 ;
 
 	case vs2008 :
-		CSC = "$(windir)/Microsoft.NET/Framework/v3.5/Csc.exe" ;
+		CSC = "\"$(windir)/Microsoft.NET/Framework/v3.5/Csc.exe\"" /nologo ;
 		REFERENCEPATHS.* on * +=
 				[ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Microsoft .NETFramework AssemblyFolders "Microsoft .NET Framework 3.5 Reference Assemblies" "" ]
 				$(windir)/Microsoft.NET/Framework/v2.0.50727
 		;
+		CSCFLAGS.* on * += /errorreport:prompt /filealign:512 ;
+		
+	case mono :
+		local registryRootPath ;
+		if $(NT)
+		{
+#			registryRootPath = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Novell Mono 2.4 SdkInstallRoot ] ;
+		}
+
+		local PATHS =
+			"$(Mono_ROOT_DIR:J=$(SPACE))/"
+			$(registryRootPath:/J=$(SPACE))
+		;
+		
+		if $(NT)
+		{
+			PATHS +=
+				"$(ProgramFiles:/J=$(SPACE))/"
+			;
+		}
+		
+		local PATH_SUFFIXES =
+			Mono-2.4
+		;
+
+		local gmcs = [ Glob $(PATHS)$(PATH_SUFFIXES)/bin : gmcs ] ;
+		if ! $(gmcs)
+		{
+			Exit Mono not found. ;
+		}
+
+		Mono_ROOT = [ Match (.+)/bin/gmcs : $(gmcs[1]) ] ;
+		
+		if $(NT)
+		{
+			CSC = "\"$(Mono_ROOT)/bin/gmcs.bat\"" ;
+		}
+		else
+		{
+			CSC = "\"$(Mono_ROOT)/bin/gmcs\"" ;
+		}		
 }
 
-CSCFLAGS.* on * += /noconfig /nowarn:1701,1702 /errorreport:prompt /warn:4 /filealign:512 ;
-CSCFLAGS.debug on * += /define:DEBUG;TRACE /debug+ /debug:full /optimize- ;
 
 rule CSharpAssembly TARGET : SOURCES : OPTIONS
 {
@@ -119,7 +164,7 @@ rule CSharpLibrary TARGET : SOURCES : OPTIONS
 
 actions Csc
 {
-	$(CSC) /nologo $(MFLAGS) /out:$(1) $(2:\\)
+	$(CSC) $(MFLAGS) /out:$(1) $(2:\\)
 }
 
 } else {  # $(TARGETINFO_LOCATE)

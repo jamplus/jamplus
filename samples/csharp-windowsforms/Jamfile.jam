@@ -25,7 +25,6 @@ ReferenceAssemblies WindowsFormsApplication :
 		System.Core.dll
 		System.Data.DataSetExtensions.dll
 		System.Data.dll
-		System.Deployment.dll
 		System.dll
 		System.Drawing.dll
 		System.Windows.Forms.dll

@@ -22,6 +22,7 @@ JamToWorkspace
     [ -gen=<i>GENERATOR</i> ]
     [ -compiler=<i>COMPILER</i> ]
     [ -config=<i>CONFIG</i> ]
+    [ -jambaseflags=<i>KEY=VALUE</i> ]
     <i>source-jamfile</i>
     [ <i>path-to-destination</i> ]
 </pre>
@@ -50,11 +51,22 @@ JamToWorkspace
 	    <li> \c vs2003 - Visual Studio 2003.
 	    <li> \c vc6 - Visual C++ 6.
 	    <li> \c mingw - MinGW.
+	    <li> \c gcc - GCC.
 	  </ul>
 
   <tr>
     <td valign=top width=20%><code> -config=<i>CONFIG</i> </code>
 	<td> Provides various configuration options to JamToWorkspace.  <i>CONFIG</i> is the name of the configuration file.
+
+  <tr>
+    <td valign=top width=20%><code> -jambaseflags=<i>KEY=VALUE</i> </code>
+	<td> Provides additional configuration options when generating the out of source build's redirection Jambase.jam.  <i>KEY</i> is the name of a variable known to Jam, such as \c CSC_COMPILER.  <i>VALUE</i> is the value to set that Jam variable to.
+
+	  <i>Examples:</i>
+
+	  <ul>
+	    <li> <tt>CSC_COMPILER=mono</tt> (or <tt>vs2005</tt> or <tt>vs2008</tt>)
+      </ul>
 
   <tr>
     <td valign=top width=20%><code> source-jamfile </code>

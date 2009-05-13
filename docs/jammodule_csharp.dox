@@ -1,5 +1,13 @@
 /*! \page jammodule_csharp C# Rules
 
+The CSharp module currently has no automatic detection of C# compilers available on the system.  For that reason, the variable \c CSC_COMPILER is provided.  \c CSC_COMPILER may be set to one of the following values before the CSharp module is loaded.  It is advised to pass \c CSC_COMPILER to Jam from the command line.
+
+<ul>
+  <li>\c mono - Use an available Mono compiler on the system.
+  <li>\c vs2005 - Use the .NET Framework 2.0.
+  <li>\c vs2008 (default) - Use the .NET Framework 3.5.
+</ul>
+
 \section jammodule_csharp_ruleslist List of Rules
 
 \secreflist

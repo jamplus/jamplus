@@ -109,19 +109,26 @@ end
 
 
 function ProcessCommandLine()
+	JambaseFlags = { { Key = 'COMPILER', Value = '$(compiler)' } }
+
+	function ProcessJambaseFlags(newarg, oldarg)
+		local key, value = newarg:match('(.+)=(.+)')
+		if not key then
+			errors = { 'Invalid --jambaseflags ' .. newarg .. '.  Must be in KEY=VALUE form.' }
+			Usage()
+		end
+		JambaseFlags[#JambaseFlags + 1] = { Key = key, Value = value }
+	end
+
 	local options = Options {
 		Option {{"gen"}, "Set a project generator", "Req", 'GENERATOR'},
 		Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
 		Option {{"postfix"}, "Extra text for the IDE project name"},
 		Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
+		Option {{"jambaseflags"}, "Extra flags to put in the Jambase in KEY=VALUE form", "Req", 'JAMBASE_FLAGS', ProcessJambaseFlags },
 	}
 
-	nonOpts, opts, errors = getopt.getOpt (arg, options)
-	if #errors > 0  or
-		(#nonOpts ~= 1  and  #nonOpts ~= 2) or
-		not opts.gen or
-		not Exporters[opts.gen]
-	then
+	function Usage()
 		print (table.concat (errors, "\n") .. "\n" ..
 				getopt.usageInfo ("Usage: JamToWorkspace [options] <source-jamfile> <path-to-destination>",
 				options))
@@ -151,6 +158,15 @@ function ProcessCommandLine()
 		print(getopt.usageInfo("\nAvailable compilers:", compilerOptions))
 
 		os.exit(-1)
+	end
+	
+	nonOpts, opts, errors = getopt.getOpt (arg, options)
+	if #errors > 0  or
+		(#nonOpts ~= 1  and  #nonOpts ~= 2) or
+		not opts.gen or
+		not Exporters[opts.gen]
+	then
+		Usage();
 	end
 end
 
@@ -1251,8 +1267,11 @@ DEPCACHE = standard ;
 		jambaseText[#jambaseText + 1] = '\n'
 	end
 
+	for _, info in ipairs(JambaseFlags) do
+		jambaseText[#jambaseText + 1] = expand(info.Key .. ' = ' .. info.Value .. ' ;\n', exporter.Options, _G)
+	end
 	jambaseText[#jambaseText + 1] = expand([[
-COMPILER = $(compiler) ;
+
 include $(jamPath)Jambase.jam ;
 ]], exporter.Options, _G)
 	io.writeall(destinationRootPath .. 'Jambase.jam', table.concat(jambaseText))
