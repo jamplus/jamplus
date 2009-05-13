@@ -8,7 +8,7 @@
 CRuntimeType jam libjam : static ;
 
 if $(VMS) 	{ LOCATE_TARGET ?= [.binvms] ; }
-else if $(MAC) 	{ LOCATE_TARGET ?= :bin.mac ; }
+else if $(MAC) 	{ LOCATE_TARGET ?= ":bin.mac" ; }
 else 		{ LOCATE_TARGET ?= bin.$(OSFULL[1]:L)/$(CONFIG) ; }
 
 DEPCACHE.standard ?= $(LOCATE_TARGET)/.depcache ;
@@ -163,13 +163,10 @@ Option OPT_SETCWD_SETTING_EXT ;
 Option OPT_SET_JAMPROCESSPATH_EXT ;
 Option OPT_SLASH_MODIFIERS_EXT ;
 Option OPT_TIMESTAMP_IMMEDIATE_PARENT_CHECK_EXT2 ;
-Option OPT_TIMESTAMP_EXTENDED_PARENT_CHECK_EXT ;
+Option OPT_TIMESTAMP_EXTENDED_PARENT_CHECK_EXT2 ;
 Option OPT_UPDATED_CHILD_FIX ;
 Option OPT_VAR_CWD_EXT : yes ;
-if $(OS) = NT
-{
-	Option OPT_BUILTIN_LUA_SUPPORT_EXT ;
-}
+Option OPT_BUILTIN_LUA_SUPPORT_EXT ;
 
 
 local options = [ Join $(ALL_OPTIONS) ] ;
