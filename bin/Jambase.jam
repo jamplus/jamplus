@@ -45,10 +45,10 @@ switch $(OS)
 		VALID_PLATFORMS ?= win32 ;
 
 		PLATFORM ?= win32 ;
-		
+
 	case MACOSX :
 		VALID_PLATFORMS ?= macosx ;
-		
+
 		PLATFORM ?= macosx ;
 }
 
@@ -348,7 +348,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 				C++			?= g++ ;
 				LINK		?= $(C++) ;
 				SUFMODULE	= .dylib ;
-				
+
 				MACOSX_SDK	= /Developer/SDKs/MacOSX10.4u.sdk ;
 				CCFLAGS.*.*	?= -isysroot $(MACOSX_SDK) ;
 				C++FLAGS.*. ?= -isysroot $(MACOSX_SDK) ;
@@ -461,7 +461,7 @@ rule HdrRule SOURCE : HEADERS
 
 ## LOCAL CHANGE
 	SEARCH on $(s) = $(HDRSEARCH) ;
-	
+
 	if $(GENERATED_HEADERS) {
 		local header ;
 		for header in $(s) {
@@ -1349,7 +1349,7 @@ rule MultiCppCompile TARGET : SOURCES
 	local flagsToRemove ;
 	on * flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
 	on $(TARGET) flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
-	
+
 	local flagsToAdd ;
 	on * flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
 	on $(TARGET) flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
@@ -2092,7 +2092,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 				[ _retrieveVar INSTALL_NAME_PATH : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 				[ _retrieveVar INSTALL_NAME_PATH : * : $(CONFIG) : $(PLATFORM) ] ;
 			if ! $(installName)
-			{ 
+			{
 				installName = $(_t:TD) ;
 			}
 			else
