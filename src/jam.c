@@ -432,11 +432,11 @@ int main( int argc, char **argv, char **arg_environ )
 #endif
 
 #ifdef OPT_SET_JAMPROCESSPATH_EXT
-        {
-			char fileName[4096];
-			getprocesspath(fileName, 4096);
-            var_set( "JAM_PROCESS_PATH", list_new( L0, fileName, 0 ), VAR_SET );
-        }
+	{
+	    char fileName[4096];
+	    getprocesspath(fileName, 4096);
+	    var_set( "JAM_PROCESS_PATH", list_new( L0, fileName, 0 ), VAR_SET );
+	}
 #endif
 
 	/*
