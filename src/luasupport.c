@@ -6,9 +6,14 @@
 #include "compile.h"
 #include "rules.h"
 #include "variable.h"
+#include "filesys.h"
 
+#ifdef OS_NT 
 #include <windows.h>
 #undef LoadString
+#else
+#include <dlfcn.h>
+#endif
 
 /* Declarations from lua.h. */
 /*
@@ -298,11 +303,24 @@ static int pmain (lua_State *L)
 }
 
 
+static void* lua_loadsymbol(void* handle, const char* symbol)
+{
+#ifdef OS_NT
+	return GetProcAddress(handle, symbol);
+#else
+	return dlsym(handle, symbol);
+#endif
+}
+
+
 void lua_init()
 {
 	LIST *luaSharedLibrary;
-	HINSTANCE hInstance = NULL;
-	char *ptr;
+#ifdef OS_NT
+	HINSTANCE handle = NULL;
+#else
+	void* handle = NULL;
+#endif
 
 	if (L)
 		return;
@@ -314,76 +332,80 @@ void lua_init()
 #endif
 	if (luaSharedLibrary)
 	{
-		hInstance = LoadLibrary(luaSharedLibrary->string);
-	}
-	if (!hInstance)
-	{
-		char fileName[_MAX_PATH];
-		GetModuleFileName(NULL, fileName, _MAX_PATH);
-
-		ptr = strrchr(fileName, '\\');
-		if (!ptr)
-			ptr = strrchr(fileName, '/');
-		if (!ptr)
-		{
-			printf("jam: Error loading Lua shared library: %s\n", fileName);
-			exit(EXITBAD);
-		}
-		ptr++;
-#ifdef _DEBUG
-		strcpy(ptr, "lua\\LuaPlus_1100.debug.dll");
+#ifdef OS_NT
+		handle = LoadLibrary(luaSharedLibrary->string);
 #else
-		strcpy(ptr, "lua\\LuaPlus_1100.dll");
+		handle = dlopen(luaSharedLibrary->string, RTLD_LAZY);
 #endif
-		hInstance = LoadLibrary(fileName);
-		if (!hInstance)
+	}
+	if (!handle)
+	{
+		char fileName[4096];
+		getprocesspath(fileName, 4096);
+		
+#ifdef OS_NT
+#ifdef _DEBUG
+		strcat(fileName, "lua/luaplus_1100.debug.dll");
+#else
+		strcat(fileName, "lua/luaplus_1100.dll");
+#endif
+		handle = LoadLibrary(fileName);
+#else
+#ifdef _DEBUG
+		strcat(fileName, "/lua/luaplus_1100.debug.so");
+#else
+		strcat(fileName, "/lua/luaplus_1100.so");
+#endif
+		handle = dlopen(fileName, RTLD_LAZY);
+#endif
+		if (!handle)
 		{
-			printf("jam: Unable to find the LuaPlus DLL.\n");
+			printf("jam: Unable to find the LuaPlus shared library.\n");
 			exit(EXITBAD);
 		}
 	}
 
-	lua_close = (void (*)(lua_State *))GetProcAddress(hInstance, "lua_close");
+	lua_close = (void (*)(lua_State *))lua_loadsymbol(handle, "lua_close");
 
-	lua_gettop = (int (*)(lua_State *))GetProcAddress(hInstance, "lua_gettop");
-	lua_settop = (void (*)(lua_State *, int))GetProcAddress(hInstance, "lua_settop");
-	lua_pushvalue = (void (*)(lua_State *, int))GetProcAddress(hInstance, "lua_pushvalue");
+	lua_gettop = (int (*)(lua_State *))lua_loadsymbol(handle, "lua_gettop");
+	lua_settop = (void (*)(lua_State *, int))lua_loadsymbol(handle, "lua_settop");
+	lua_pushvalue = (void (*)(lua_State *, int))lua_loadsymbol(handle, "lua_pushvalue");
 
-	lua_isnumber = (int (*)(lua_State *, int))GetProcAddress(hInstance, "lua_isnumber");
-	lua_isstring = (int (*)(lua_State *, int))GetProcAddress(hInstance, "lua_isstring");
-	lua_type = (int (*)(lua_State *, int))GetProcAddress(hInstance, "lua_type");
+	lua_isnumber = (int (*)(lua_State *, int))lua_loadsymbol(handle, "lua_isnumber");
+	lua_isstring = (int (*)(lua_State *, int))lua_loadsymbol(handle, "lua_isstring");
+	lua_type = (int (*)(lua_State *, int))lua_loadsymbol(handle, "lua_type");
 
-	lua_tonumber = (lua_Number (*)(lua_State *, int))GetProcAddress(hInstance, "lua_tonumber");
-	lua_toboolean = (int (*)(lua_State *, int))GetProcAddress(hInstance, "lua_toboolean");
-	lua_tolstring = (const char *(*)(lua_State *, int, size_t *))GetProcAddress(hInstance, "lua_tolstring");
-	lua_objlen = (size_t (*)(lua_State *, int))GetProcAddress(hInstance, "lua_objlen");
+	lua_tonumber = (lua_Number (*)(lua_State *, int))lua_loadsymbol(handle, "lua_tonumber");
+	lua_toboolean = (int (*)(lua_State *, int))lua_loadsymbol(handle, "lua_toboolean");
+	lua_tolstring = (const char *(*)(lua_State *, int, size_t *))lua_loadsymbol(handle, "lua_tolstring");
+	lua_objlen = (size_t (*)(lua_State *, int))lua_loadsymbol(handle, "lua_objlen");
 
-	lua_pushnil = (void (*) (lua_State *))GetProcAddress(hInstance, "lua_pushnil");
-	lua_pushnumber = (void (*) (lua_State *, lua_Number))GetProcAddress(hInstance, "lua_pushnumber");
-	lua_pushinteger = (void (*) (lua_State *, lua_Integer))GetProcAddress(hInstance, "lua_pushinteger");
-	lua_pushstring = (void (*) (lua_State *, const char *))GetProcAddress(hInstance, "lua_pushstring");
-	lua_pushcclosure = (void (*) (lua_State *, lua_CFunction, int))GetProcAddress(hInstance, "lua_pushcclosure");
-	lua_pushboolean = (void (*)(lua_State *, int))GetProcAddress(hInstance, "lua_pushboolean");
+	lua_pushnil = (void (*) (lua_State *))lua_loadsymbol(handle, "lua_pushnil");
+	lua_pushnumber = (void (*) (lua_State *, lua_Number))lua_loadsymbol(handle, "lua_pushnumber");
+	lua_pushinteger = (void (*) (lua_State *, lua_Integer))lua_loadsymbol(handle, "lua_pushinteger");
+	lua_pushstring = (void (*) (lua_State *, const char *))lua_loadsymbol(handle, "lua_pushstring");
+	lua_pushcclosure = (void (*) (lua_State *, lua_CFunction, int))lua_loadsymbol(handle, "lua_pushcclosure");
+	lua_pushboolean = (void (*)(lua_State *, int))lua_loadsymbol(handle, "lua_pushboolean");
 
-	lua_gettable = (void (*) (lua_State *, int id))GetProcAddress(hInstance, "lua_gettable");
-	lua_getfield = (void (*)(lua_State *, int, const char *))GetProcAddress(hInstance, "lua_getfield");
-	lua_rawgeti = (void  (*) (lua_State *, int, int))GetProcAddress(hInstance, "lua_rawgeti");
-	lua_createtable = (void (*)(lua_State *, int, int))GetProcAddress(hInstance, "lua_createtable");
+	lua_gettable = (void (*) (lua_State *, int id))lua_loadsymbol(handle, "lua_gettable");
+	lua_getfield = (void (*)(lua_State *, int, const char *))lua_loadsymbol(handle, "lua_getfield");
+	lua_rawgeti = (void  (*) (lua_State *, int, int))lua_loadsymbol(handle, "lua_rawgeti");
+	lua_createtable = (void (*)(lua_State *, int, int))lua_loadsymbol(handle, "lua_createtable");
 
-	lua_settable = (void (*)(lua_State *, int))GetProcAddress(hInstance, "lua_settable");
-	lua_setfield = (void (*)(lua_State *, int, const char *))GetProcAddress(hInstance, "lua_setfield");
+	lua_settable = (void (*)(lua_State *, int))lua_loadsymbol(handle, "lua_settable");
+	lua_setfield = (void (*)(lua_State *, int, const char *))lua_loadsymbol(handle, "lua_setfield");
 
-	lua_pcall = (int (*)(lua_State *, int, int, int))GetProcAddress(hInstance, "lua_pcall");
-	lua_cpcall = (int (*)(lua_State *, lua_CFunction, void *))GetProcAddress(hInstance, "lua_cpcall");
+	lua_pcall = (int (*)(lua_State *, int, int, int))lua_loadsymbol(handle, "lua_pcall");
+	lua_cpcall = (int (*)(lua_State *, lua_CFunction, void *))lua_loadsymbol(handle, "lua_cpcall");
 
-	lua_next = (int (*)(lua_State *, int))GetProcAddress(hInstance, "lua_next");
+	lua_next = (int (*)(lua_State *, int))lua_loadsymbol(handle, "lua_next");
 
-	luaL_openlibs = (void (*)(lua_State *))GetProcAddress(hInstance, "luaL_openlibs");
-	luaL_loadstring = (int (*)(lua_State *, const char *))GetProcAddress(hInstance, "luaL_loadstring");
-	luaL_loadfile = (int (*)(lua_State *, const char *))GetProcAddress(hInstance, "luaL_loadfile");
-	luaL_newstate = (lua_State *(*)(void))GetProcAddress(hInstance, "luaL_newstate");
-	luaL_ref = (int (*)(lua_State *, int))GetProcAddress(hInstance, "luaL_ref");
-	luaL_unref = (void (*)(lua_State *, int, int))GetProcAddress(hInstance, "luaL_unref");
+	luaL_openlibs = (void (*)(lua_State *))lua_loadsymbol(handle, "luaL_openlibs");
+	luaL_loadstring = (int (*)(lua_State *, const char *))lua_loadsymbol(handle, "luaL_loadstring");
+	luaL_loadfile = (int (*)(lua_State *, const char *))lua_loadsymbol(handle, "luaL_loadfile");
+	luaL_newstate = (lua_State *(*)(void))lua_loadsymbol(handle, "luaL_newstate");
+	luaL_ref = (int (*)(lua_State *, int))lua_loadsymbol(handle, "luaL_ref");
+	luaL_unref = (void (*)(lua_State *, int, int))lua_loadsymbol(handle, "luaL_unref");
 
 	L = luaL_newstate();
 	lua_cpcall(L, &pmain, 0);
