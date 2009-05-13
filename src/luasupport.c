@@ -346,9 +346,9 @@ void lua_init()
 
 #ifdef OS_NT
 #ifdef _DEBUG
-	strcat(fileName, "lua/luaplus_1100.debug.dll");
+	strcat(fileName, "/lua/luaplus_1100.debug.dll");
 #else
-	strcat(fileName, "lua/luaplus_1100.dll");
+	strcat(fileName, "/lua/luaplus_1100.dll");
 #endif
 	handle = LoadLibrary(fileName);
 #else
