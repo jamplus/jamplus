@@ -8,7 +8,7 @@
 #include "variable.h"
 #include "filesys.h"
 
-#ifdef OS_NT 
+#ifdef OS_NT
 #include <windows.h>
 #undef LoadString
 #else
@@ -83,6 +83,7 @@ void  (*lua_createtable) (lua_State *L, int narr, int nrec);
 
 void  (*lua_settable) (lua_State *L, int idx);
 void  (*lua_setfield) (lua_State *L, int idx, const char *k);
+void  (*lua_rawseti) (lua_State *L, int idx, int n);
 
 int   (*lua_pcall) (lua_State *L, int nargs, int nresults, int errfunc);
 int   (*lua_cpcall) (lua_State *L, lua_CFunction func, void *ud);
@@ -342,7 +343,7 @@ void lua_init()
 	{
 		char fileName[4096];
 		getprocesspath(fileName, 4096);
-		
+
 #ifdef OS_NT
 #ifdef _DEBUG
 		strcat(fileName, "lua/luaplus_1100.debug.dll");
@@ -394,6 +395,7 @@ void lua_init()
 
 	lua_settable = (void (*)(lua_State *, int))lua_loadsymbol(handle, "lua_settable");
 	lua_setfield = (void (*)(lua_State *, int, const char *))lua_loadsymbol(handle, "lua_setfield");
+	lua_rawseti = (void (*)(lua_State *, int, int))lua_loadsymbol(handle, "lua_rawseti");
 
 	lua_pcall = (int (*)(lua_State *, int, int, int))lua_loadsymbol(handle, "lua_pcall");
 	lua_cpcall = (int (*)(lua_State *, lua_CFunction, void *))lua_loadsymbol(handle, "lua_cpcall");
@@ -461,7 +463,7 @@ int luahelper_taskadd(const char* taskscript)
 		lua_pop(L, 2);
 		return -1;
 	}
-	
+
 	ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	lua_pop(L, 1);
 	return ref;
@@ -588,55 +590,62 @@ int luahelper_md5callback(const char *filename, MD5SUM sum, const char* callback
 
 LIST *
 builtin_luastring(
-				  PARSE	*parse,
-				  LOL		*args,
-				  int		*jmp)
+		  PARSE	*parse,
+		  LOL		*args,
+		  int		*jmp)
 {
-	int top;
-	int ret;
+    int top;
+    int ret;
 
-	LIST *l = lol_get(args, 0);
-	if (!l)
-	{
-		printf("jam: No argument passed to LuaString\n");
-		exit(EXITBAD);
-	}
-	lua_init();
-	top = lua_gettop(L);
-	ret = luaL_loadstring(L, l->string);
-	return lua_callhelper(top, ret);
+    LIST *l = lol_get(args, 0);
+    if (!l)
+    {
+	printf("jam: No argument passed to LuaString\n");
+	exit(EXITBAD);
+    }
+    lua_init();
+    top = lua_gettop(L);
+    ret = luaL_loadstring(L, l->string);
+    return lua_callhelper(top, ret);
 }
 
 
 LIST *
 builtin_luafile(
-				PARSE	*parse,
-				LOL		*args,
-				int		*jmp)
+		PARSE	*parse,
+		LOL		*args,
+		int		*jmp)
 {
-	int top;
-	int ret;
+    int top;
+    int ret;
+    LIST *l2;
+    int index = 0;
 
-	LIST *l = lol_get(args, 0);
-	if (!l)
-	{
-		printf("jam: No argument passed to LuaFile\n");
-		exit(EXITBAD);
-	}
-	lua_init();
-	top = lua_gettop(L);
-	ret = luaL_loadfile(L, l->string);
-	return lua_callhelper(top, ret);
+    LIST *l = lol_get(args, 0);
+    if (!l) {
+	printf("jam: No argument passed to LuaFile\n");
+	exit(EXITBAD);
+    }
+    lua_init();
+    top = lua_gettop(L);
+    lua_newtable(L);
+    for (l2 = lol_get(args, 1); l2; l2 = l2->next) {
+	lua_pushstring(L, l2->string);
+	lua_rawseti(L, -2, ++index);
+    }
+    lua_setfield(L, LUA_GLOBALSINDEX, "arg");
+    ret = luaL_loadfile(L, l->string);
+    return lua_callhelper(top, ret);
 }
 
 
 void lua_shutdown()
 {
-	if (L)
-	{
-		lua_close(L);
-		L = NULL;
-	}
+    if (L)
+    {
+	lua_close(L);
+	L = NULL;
+    }
 }
 
 #endif

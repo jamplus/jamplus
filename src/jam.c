@@ -136,6 +136,10 @@
 #endif
 #endif
 
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+# include "luasupport.h"
+#endif
+
 /* Macintosh is "special" */
 
 # ifdef OS_MAC
@@ -220,6 +224,39 @@ int main( int argc, char **argv, char **arg_environ )
 # endif
 
 	argc--, argv++;
+
+	if ( strcmp( argv[0], "--jamtoworkspace" ) == 0  ||
+		strcmp( argv[0], "--folderstojamfile" ) == 0  ||
+		strcmp( argv[0], "--vcprojtojamfile" ) == 0 ) {
+	    char processPath[4096];
+	    LOL lol;
+	    LIST *filename;
+	    LIST *args;
+	    int i;
+	    const char* name = argv[0] + 2;
+
+	    argc--, argv++;
+
+	    getprocesspath( processPath, sizeof( processPath ) );
+	    strcat( processPath, "/scripts/" );
+	    strcat( processPath, name );
+	    strcat( processPath, ".lua" );
+	    filename = list_new( L0, processPath, 0 );
+
+	    lol_init( &lol );
+	    lol_add( &lol, filename );
+
+	    args = L0;
+	    for ( i = 0; i < argc; ++i ) {
+		args = list_new( args, argv[ i ], 0 );
+	    }
+	    lol_add( &lol, args );
+
+	    builtin_luafile( 0, &lol, 0 );
+	    lol_free( &lol );
+
+	    return EXITOK;
+	}
 
 #ifdef OPT_SETCWD_SETTING_EXT
 	if( ( n = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qv", optv ) ) < 0 )
