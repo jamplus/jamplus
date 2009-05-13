@@ -587,6 +587,11 @@ make1c( TARGET *t )
 #ifdef OPT_ACTIONS_DUMP_TEXT_EXT
 	    if (cmd->rule->flags & RULE_WRITEFILE)
 	    {
+#ifdef OPT_SERIAL_OUTPUT_EXT
+		make1d( 0, t, EXEC_CMD_OK );
+#else
+		make1d( t, EXEC_CMD_OK );
+#endif
 	    }
 	    else
 #endif
