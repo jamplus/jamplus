@@ -1,0 +1,8 @@
+SRCS =
+	myfile.cpp;
+
+Application test : $(SRCS) ;
+
+Echo "This has a ; in it." ;
+Echo "This is missing a space"; ;
+
