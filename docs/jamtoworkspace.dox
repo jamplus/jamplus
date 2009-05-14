@@ -22,7 +22,7 @@ JamToWorkspace
     [ -gen=<i>GENERATOR</i> ]
     [ -compiler=<i>COMPILER</i> ]
     [ -config=<i>CONFIG</i> ]
-    [ -jambaseflags=<i>KEY=VALUE</i> ]
+    [ -jamflags=<i>KEY=VALUE</i> ]
     <i>source-jamfile</i>
     [ <i>path-to-destination</i> ]
 </pre>
@@ -59,7 +59,7 @@ JamToWorkspace
 	<td> Provides various configuration options to JamToWorkspace.  <i>CONFIG</i> is the name of the configuration file.
 
   <tr>
-    <td valign=top width=20%><code> -jambaseflags=<i>KEY=VALUE</i> </code>
+    <td valign=top width=20%><code> -jamflags=<i>KEY=VALUE</i> </code>
 	<td> Provides additional configuration options when generating the out of source build's redirection Jambase.jam.  <i>KEY</i> is the name of a variable known to Jam, such as \c CSC_COMPILER.  <i>VALUE</i> is the value to set that Jam variable to.
 
 	  <i>Examples:</i>
