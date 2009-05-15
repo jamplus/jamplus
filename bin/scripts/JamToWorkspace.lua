@@ -1056,6 +1056,8 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 
 ]])
 
+	AssignEntryUuids()
+
 	-- Write PBXFileReferences.
 	table.insert(self.Contents, [[
 	/* Begin PBXFileReference section */
