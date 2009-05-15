@@ -1033,38 +1033,37 @@ end
 local XcodeProjectMetaTable = {  __index = XcodeProjectMetaTable  }
 
 function XcodeProjectMetaTable:Write(outputPath, commandLines)
-	local filename = outputPath .. self.ProjectName .. '.vcproj'
+	local filename = outputPath .. self.ProjectName .. '.xcodeproj/project.pbxproj'
+	os.mkdir(filename)
 
 	local info = ProjectExportInfo[self.ProjectName]
 	if not info then
-		info = { Name = self.ProjectName, Filename = filename, Uuid = uuid.new():upper() }
+		info = { Name = self.ProjectName, Filename = filename, Uuid = XcodeUuid() }
 		ProjectExportInfo[self.ProjectName] = info
 	end
 
 	local project = Projects[self.ProjectName]
 
 	-- Write header.
-	table.insert(self.Contents, expand([[
-<?xml version="1.0" encoding="Windows-1252"?>
-<XcodeProject
-	ProjectType="Visual C++"
-]]))
+	table.insert(self.Contents, [[
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
 
-	if self.Options.vs2003 then
-		table.insert(self.Contents, expand([[
-	Version="7.10"
-	Name="$(Name)"
-	ProjectGUID="$(Uuid:upper())"
-	Keyword="MakeFileProj">
-]], info))
-	elseif self.Options.vs2005 then
-		table.insert(self.Contents, expand([[
-	Version="8.00"
-	Name="$(Name)"
-	ProjectGUID="$(Uuid:upper())"
-	RootNamespace="$(Name)"
-	>
-]], info))
+]])
+
+	-- Write PBXFileReferences.
+	table.insert(self.Contents, [[
+	/* Begin PBXFileReference section */
+]])
+	
+
+	
+--[=====[
 	elseif self.Options.vs2008 then
 		table.insert(self.Contents, expand([[
 	Version="9.00"
@@ -1073,30 +1072,6 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	RootNamespace="$(Name)"
 	>
 ]], info))
-	end
-
-	-- Write Platforms section.
-	if self.Options.vs2003 then
-		table.insert(self.Contents, [[
-	<Platforms>
-		<Platform
-			Name="Win32"/>
-	</Platforms>
-]])
-	elseif self.Options.vs2005 or self.Options.vs2008 then
-		table.insert(self.Contents, [[
-	<Platforms>
-		<Platform
-			Name="Win32"
-		/>
-	</Platforms>
-]])
-
-	-- Write ToolFiles section.
-		table.insert(self.Contents, [[
-	<ToolFiles>
-	</ToolFiles>
-]])
 	end
 
 	-- Write Configurations header.
@@ -1224,8 +1199,9 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, [[
 </XcodeProject>
 ]])
+]=====]
 
-	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n'):gsub('\n', '\r\n')
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
 
 	WriteFileIfModified(filename, self.Contents)
 end
@@ -1297,7 +1273,7 @@ end
 
 
 function XcodeSolutionMetaTable:Write(outputPath)
-	local filename = outputPath .. self.Name .. '.sln'
+--[=====[	local filename = outputPath .. self.Name .. '.sln'
 
 	local workspace = Workspaces[self.Name]
 
@@ -1474,6 +1450,7 @@ EndGlobal
 	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n'):gsub('\n', '\r\n')
 
 	WriteFileIfModified(filename, self.Contents)
+]=====]
 end
 
 function XcodeSolution(solutionName, options)
