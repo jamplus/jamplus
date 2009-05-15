@@ -1026,6 +1026,10 @@ end
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
+function XcodeUuid()
+	print(uuid.new():gsub('%-', ''):upper():sub(1, 24))
+end
+
 local XcodeProjectMetaTable = {  __index = XcodeProjectMetaTable  }
 
 function XcodeProjectMetaTable:Write(outputPath, commandLines)
