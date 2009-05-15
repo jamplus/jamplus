@@ -225,9 +225,9 @@ int main( int argc, char **argv, char **arg_environ )
 
 	argc--, argv++;
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-	if ( strcmp( argv[0], "--jamtoworkspace" ) == 0  ||
+	if ( argc > 0  &&  ( strcmp( argv[0], "--jamtoworkspace" ) == 0  ||
 		strcmp( argv[0], "--folderstojamfile" ) == 0  ||
-		strcmp( argv[0], "--vcprojtojamfile" ) == 0 ) {
+		strcmp( argv[0], "--vcprojtojamfile" ) == 0 ) ) {
 	    char processPath[4096];
 	    LOL lol;
 	    LIST *filename;
