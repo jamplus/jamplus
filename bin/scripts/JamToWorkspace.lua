@@ -16,7 +16,7 @@ jamExePath = os.path.escape(os.path.combine(jamPath, 'jam'))
 
 Config =
 {
-	Configurations = { 'debug', 'release' }
+	Configurations = { 'debug', 'release', 'releaseltcg' }
 }
 
 Compilers =
