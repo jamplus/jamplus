@@ -4,7 +4,14 @@ if ! $(TARGETINFO_LOCATE)
 CSCFLAGS.* on * += /noconfig /nowarn:1701,1702 /warn:4 ;
 CSCFLAGS.debug on * += /define:DEBUG;TRACE /debug+ /debug:full /optimize- ;
 
-CSC_COMPILER ?= vs2008 ;
+if $(NT)
+{
+	CSC_COMPILER ?= vs2008 ;
+}
+else
+{
+	CSC_COMPILER ?= mono ;
+}
 
 switch $(CSC_COMPILER)
 {
@@ -30,9 +37,13 @@ switch $(CSC_COMPILER)
 		{
 #			registryRootPath = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Novell Mono 2.4 SdkInstallRoot ] ;
 		}
+		else
+		{
+			Mono_ROOT_DIR ?= /usr ;
+		}
 
 		local PATHS =
-			"$(Mono_ROOT_DIR:J=$(SPACE))/"
+			"$(Mono_ROOT_DIR:J=$(SPACE))"
 			$(registryRootPath:/J=$(SPACE))
 		;
 		
@@ -43,9 +54,13 @@ switch $(CSC_COMPILER)
 			;
 		}
 		
-		local PATH_SUFFIXES =
-			Mono-2.4
-		;
+		local PATH_SUFFIXES = "" ;
+		if $(NT)
+		{
+			PATH_SUFFIXES +=
+					Mono-2.4
+			;
+		}
 
 		local gmcs = [ Glob $(PATHS)$(PATH_SUFFIXES)/bin : gmcs ] ;
 		if ! $(gmcs)
@@ -61,7 +76,7 @@ switch $(CSC_COMPILER)
 		}
 		else
 		{
-			CSC = "\"$(Mono_ROOT)/bin/gmcs\"" ;
+			CSC = $(Mono_ROOT)/bin/gmcs ;
 		}		
 }
 
@@ -161,10 +176,19 @@ rule CSharpLibrary TARGET : SOURCES : OPTIONS
 	CSharpAssembly $(TARGET) : $(SOURCES) : library $(OPTIONS) ;
 }
 
-
-actions Csc
+if $(CSC_COMPILER) in vs2005 vs2008
 {
-	$(CSC) $(MFLAGS) /out:$(1) $(2:\\)
+	actions Csc
+	{
+		$(CSC) $(MFLAGS) /out:$(1) $(2:\\)
+	}
+}
+else
+{
+	actions Csc
+	{
+		$(CSC) $(MFLAGS) /out:$(1) $(2)
+	}
 }
 
 } else {  # $(TARGETINFO_LOCATE)
