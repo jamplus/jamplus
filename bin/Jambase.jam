@@ -350,8 +350,8 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 				SUFMODULE	= .dylib ;
 
 				MACOSX_SDK	= /Developer/SDKs/MacOSX10.4u.sdk ;
-				CCFLAGS.*.*	?= -isysroot $(MACOSX_SDK) ;
-				C++FLAGS.*. ?= -isysroot $(MACOSX_SDK) ;
+				CCFLAGS.*.*	on * += -isysroot $(MACOSX_SDK) ;
+				C++FLAGS.*.* on * += -isysroot $(MACOSX_SDK) ;
 
 		}
 
