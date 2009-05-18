@@ -326,11 +326,11 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 		DEFINES.*.debug on * += _DEBUG DEBUG ;
 		DEFINES.*.release on * += NDEBUG ;
 
-		CCFLAGS.win32.debug on * 	= -g -O0 ;
-		CCFLAGS.win32.release on * 	= -g -O2 ;
-		C++FLAGS.win32.* on *		?= [ on * Var CCFLAGS.win32.* ] ;
-		C++FLAGS.win32.debug on *	?= [ on * Var CCFLAGS.win32.debug ] ;
-		C++FLAGS.win32.release on *	?= [ on * Var CCFLAGS.win32.release ] ;
+		CCFLAGS.*.debug on * 	= -g -O0 ;
+		CCFLAGS.*.release on * 	= -g -O2 ;
+		C++FLAGS.*.* on *		?= [ on * Var CCFLAGS.*.* ] ;
+		C++FLAGS.*.debug on *	?= [ on * Var CCFLAGS.*.debug ] ;
+		C++FLAGS.*.release on *	?= [ on * Var CCFLAGS.*.release ] ;
 
 		switch $(OS)
 		{
