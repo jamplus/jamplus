@@ -10,7 +10,7 @@ if $(NT)
 }
 else
 {
-	CSC_COMPILER ?= mono ;
+	CSC_COMPILER ?= gmcs ;
 }
 
 switch $(CSC_COMPILER)
@@ -31,7 +31,7 @@ switch $(CSC_COMPILER)
 		;
 		CSCFLAGS.* on * += /errorreport:prompt /filealign:512 ;
 		
-	case mono :
+	case gmcs :
 		local registryRootPath ;
 		if $(NT)
 		{
