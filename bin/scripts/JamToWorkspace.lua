@@ -1044,14 +1044,17 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		}
 		ProjectExportInfo[self.ProjectName] = info
 	end
-	if not info.Uuid then
-		info.Uuid = XcodeUuid()
-	end
 	if not info.LegacyTargetUuid then
 		info.LegacyTargetUuid = XcodeUuid()
 	end
 	if not info.LegacyTargetBuildConfigurationListUuid then
 		info.LegacyTargetBuildConfigurationListUuid = XcodeUuid()
+	end
+	if not info.ProjectUuid then
+		info.ProjectUuid = XcodeUuid()
+	end
+	if not info.ProjectBuildConfigurationListUuid then
+		info.ProjectBuildConfigurationListUuid = XcodeUuid()
 	end
 
 	local project = Projects[self.ProjectName]
@@ -1069,19 +1072,19 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 ]])
 
 	if not info.EntryUuids then
-		info.EntryUuids = { ['project:' .. self.ProjectName] = info.Uuid }
+		info.EntryUuids = { }
 	end
 	self.EntryUuids = info.EntryUuids
 	
---	project.SourcesTree.folder = 'project:' .. self.ProjectName
---	local sourcesTree = { project.SourcesTree }
-	self:_AssignEntryUuids(project.SourcesTree, '')
+	project.SourcesTree.folder = self.ProjectName
+	local sourcesTree = { project.SourcesTree }
+	self:_AssignEntryUuids(sourcesTree, '')
 
 	-- Write PBXFileReferences.
 	table.insert(self.Contents, [[
 	/* Begin PBXFileReference section */
 ]])
-	self:_WritePBXFileReferences(project.SourcesTree)
+	self:_WritePBXFileReferences(sourcesTree)
 	table.insert(self.Contents, [[
 	/* End PBXFileReference section */
 
@@ -1089,14 +1092,10 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 
 	-- Write PBXGroups.
 	table.insert(self.Contents, '\t/* Begin PBXGroup section */\n')
-	self:_WritePBXGroup(info.Uuid, info.Name, project.SourcesTree, '')
-	self:_RecursePBXGroups(project.SourcesTree, '')
+	self:_WritePBXGroups(sourcesTree, '')
 	table.insert(self.Contents, '\t/* End PBXGroup section */\n\n')
 	
 	-- Write PBXLegacyTarget.
-	table.insert(self.Contents, '\t/* Begin PBXLegacyTarget section */\n')
-	
-	local legacyTargetUuid = XcodeUuid()
 	table.insert(self.Contents, '/* Begin PBXLegacyTarget section */\n')
 	table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, info.Name))
 	table.insert(self.Contents, '\t\t\tisa = PBXLegacyTarget;\n')
@@ -1111,7 +1110,26 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, '\t\t\tpassBuildSettingsInEnvironment = 1;\n')
 	table.insert(self.Contents, '\t\t\tproductName = helloworld;\n')
 	table.insert(self.Contents, '\t\t};\n')
-	table.insert(self.Contents, '/* End PBXLegacyTarget section */\n')
+	table.insert(self.Contents, '/* End PBXLegacyTarget section */\n\n')
+
+	-- Write PBXProject.
+	table.insert(self.Contents, '/* Begin PBXProject section */\n')
+	table.insert(self.Contents, ("\t\t%s /* Project object */ = {\n"):format(info.ProjectUuid))
+	info.GroupUuid = info.EntryUuids[sourcesTree[1].folder .. '/']
+	table.insert(self.Contents, expand([[
+			isa = PBXProject;
+			buildConfigurationList = $(ProjectBuildConfigurationListUuid) /* Build configuration list for PBXProject "$(Name)" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = $(GroupUuid) /* $(Name) */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				$(LegacyTargetUuid) /* $(Name) */,
+			);
+		};
+]], info))
+	table.insert(self.Contents, '/* End PBXProject section */\n')
 
 	
 --[=====[
@@ -1315,12 +1333,12 @@ function XcodeProjectMetaTable:_WritePBXGroup(uuid, name, children, fullPath)
 	table.insert(self.Contents, '\t};\n')
 end
 	
-function XcodeProjectMetaTable:_RecursePBXGroups(folder, fullPath)
+function XcodeProjectMetaTable:_WritePBXGroups(folder, fullPath)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
 			local fullFolderName = fullPath .. entry.folder .. '/'
 			self:_WritePBXGroup(self.EntryUuids[fullFolderName], entry.folder, entry, fullFolderName)
-			self:_RecursePBXGroups(entry, fullFolderName)
+			self:_WritePBXGroups(entry, fullFolderName)
 		end
 	end
 end
