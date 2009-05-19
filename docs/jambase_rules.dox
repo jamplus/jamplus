@@ -322,6 +322,28 @@ Given a list of \c DIRECTORIES, a gristed version of each is returned.  Currentl
 
 
 <hr>
+\section rule_ForceInclude rule ForceInclude TARGET : INCLUDES [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_ForceInclude
+
+For the given project \c TARGET, assign the \c INCLUDES to the appropriate configuration and platform, causing that project's compilation to force the inclusion of the header before anything else.
+
+\param TARGET The target to assign the \c INCLUDES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param INCLUDES The list of header files to force include.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Automatically #include myheader.h for all source files listed in myproject.
+    ForceInclude myproject : myheader.h ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_IncludeDirectories rule IncludeDirectories TARGET : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_IncludeDirectories
 

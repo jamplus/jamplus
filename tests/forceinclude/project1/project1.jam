@@ -1,0 +1,5 @@
+SubDir TOP project1 ;
+
+ForceInclude project1 : ../common/print.h ;
+LinkLibraries project1 : common ;
+Application project1 : project1.cpp ;
