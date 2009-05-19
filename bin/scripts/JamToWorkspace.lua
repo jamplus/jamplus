@@ -1027,7 +1027,7 @@ end
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 function XcodeUuid()
-	print(uuid.new():gsub('%-', ''):upper():sub(1, 24))
+	return uuid.new():gsub('%-', ''):upper():sub(1, 24)
 end
 
 local XcodeProjectMetaTable = {  __index = XcodeProjectMetaTable  }
@@ -1056,14 +1056,47 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 
 ]])
 
-	AssignEntryUuids()
+	if not info.EntryUuids then
+		info.EntryUuids = { ['project:' .. self.ProjectName] = info.Uuid }
+	end
+	self.EntryUuids = info.EntryUuids
+	
+--	project.SourcesTree.folder = 'project:' .. self.ProjectName
+--	local sourcesTree = { project.SourcesTree }
+	self:_AssignEntryUuids(project.SourcesTree, '')
 
 	-- Write PBXFileReferences.
 	table.insert(self.Contents, [[
 	/* Begin PBXFileReference section */
 ]])
-	
+	self:_WritePBXFileReferences(project.SourcesTree)
+	table.insert(self.Contents, [[
+	/* End PBXFileReference section */
 
+]])
+
+	-- Write PBXGroups.
+	table.insert(self.Contents, '\t/* Begin PBXGroup section */\n')
+	self:_WritePBXGroup(info.Uuid, info.Name, project.SourcesTree, '')
+	self:_RecursePBXGroups(project.SourcesTree, '')
+	table.insert(self.Contents, '\t/* End PBXGroup section */\n\n')
+--[[
+	/* Begin PBXLegacyTarget section */
+			C267CFA7AEF9410A87F2C883 /* helloworld */ = {
+				isa = PBXLegacyTarget;
+				buildArgumentsString = "-C/Users/joshua/src/jamplus/samples/tutorials/01-helloworld/build/ $(ACTION)";
+				buildConfigurationList = 1DEB918F08733D9F0010E9CD /* Build configuration list for PBXLegacyTarget "helloworld" */;
+				buildPhases = (
+				);
+				buildToolPath = /users/joshua/src/jamplus/bin/jam;
+				dependencies = (
+				);
+				name = helloworld;
+				passBuildSettingsInEnvironment = 1;
+				productName = helloworld;
+			};
+	/* End PBXLegacyTarget section */
+]]
 	
 --[=====[
 	elseif self.Options.vs2008 then
@@ -1219,23 +1252,62 @@ function XcodeProject(projectName, options)
 end
 
 
-function XcodeProjectMetaTable:_WriteFiles(folder, tabs)
+function XcodeProjectMetaTable:_AssignEntryUuids(folder, fullPath)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
-			table.insert(self.Contents, tabs .. '<Filter\n')
-			table.insert(self.Contents, tabs .. '\tName="' .. entry.folder .. '"\n')
-			table.insert(self.Contents, tabs .. '\t>\n')
-			self:_WriteFiles(entry, tabs .. '\t')
-			table.insert(self.Contents, tabs .. '</Filter>\n')
+			local fullFolderName = fullPath .. entry.folder .. '/'
+			if not self.EntryUuids[fullFolderName] then
+				self.EntryUuids[fullFolderName] = XcodeUuid()
+			end
+			self:_AssignEntryUuids(entry, fullFolderName)
 		else
-			table.insert(self.Contents, tabs .. '<File\n')
-			table.insert(self.Contents, tabs .. '\tRelativePath="' .. entry:gsub('/', '\\') .. '"\n')
-			table.insert(self.Contents, tabs .. '\t>\n')
-			table.insert(self.Contents, tabs .. '</File>\n')
+			if not self.EntryUuids[entry] then
+				self.EntryUuids[entry] = XcodeUuid()
+			end
 		end
 	end
 end
 
+
+function XcodeProjectMetaTable:_WritePBXFileReferences(folder)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			self:_WritePBXFileReferences(entry)
+		else
+			table.insert(self.Contents, ('\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode%s; path = "%s"; sourceTree = "<group>"; };\n'):format(
+					self.EntryUuids[entry], entry, os.path.get_extension(entry), entry))
+		end
+	end
+end
+
+
+function XcodeProjectMetaTable:_WritePBXGroup(uuid, name, children, fullPath)
+	table.insert(self.Contents, ('\t%s /* %s */ = {\n'):format(uuid, name))
+	table.insert(self.Contents, '\t\tisa = PBXGroup;\n')
+	table.insert(self.Contents, '\t\tchildren = (\n')
+	for entry in ivalues(children) do
+		if type(entry) == 'table' then
+			local fullFolderName = fullPath .. entry.folder .. '/'
+			table.insert(self.Contents, '\t\t\t' .. self.EntryUuids[fullFolderName] .. ' /* ' .. entry.folder .. ' */,\n')
+		else
+			table.insert(self.Contents, '\t\t\t' .. self.EntryUuids[entry] .. ' /* ' .. entry .. ' */,\n')
+		end
+	end
+	table.insert(self.Contents, '\t\t);\n')
+	table.insert(self.Contents, '\t\tname = ' .. name .. ';\n')
+	table.insert(self.Contents, '\t\tsourceTree = "<group>";\n')
+	table.insert(self.Contents, '\t};\n')
+end
+	
+function XcodeProjectMetaTable:_RecursePBXGroups(folder, fullPath)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			local fullFolderName = fullPath .. entry.folder .. '/'
+			self:_WritePBXGroup(self.EntryUuids[fullFolderName], entry.folder, entry, fullFolderName)
+			self:_RecursePBXGroups(entry, fullFolderName)
+		end
+	end
+end
 
 
 
@@ -1646,6 +1718,12 @@ function DumpWorkspace(workspace)
 	projectExporter:Write(destinationRootPath)
 
 	-- Write the !UpdateWorkspace project
+	Projects[updateWorkspaceName] = {}
+	Projects[updateWorkspaceName].Sources =
+	{
+		jamPath:gsub('\\', '/') .. '/Jambase.jam'
+	}
+	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
 	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options)
 	projectExporter:Write(destinationRootPath,
 		{
