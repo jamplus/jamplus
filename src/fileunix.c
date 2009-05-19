@@ -451,26 +451,21 @@ int file_mkdir(const char *inPath)
 	char* pathPtr = path;
 	char ch;
 
-	if (inPath[0] == '/'  &&  inPath[1] == '/')
-	{
-		*pathPtr++ = '\\';
-		*pathPtr++ = '\\';
-		inPath += 2;
-		while (ch = *inPath++)
-		{
-			*pathPtr++ = ch;
-			if (ch == '/')
-				break;
-		}
+	if (*inPath == '/') {
+		++inPath;			// Skip the initial /
+		*pathPtr++ = '/';
 	}
-
+	
 	while (ch = *inPath++)
 	{
 		if (ch == '/')
 		{
 			*pathPtr = 0;
-			if (mkdir(path, 0777) == -1)
+			if (mkdir(path, 0777)  &&  errno != EEXIST)
+			{
+				int err = errno;
 				return -1;
+			}
 			*pathPtr++ = '/';
 		}
 		else
