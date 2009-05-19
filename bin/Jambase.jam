@@ -2489,6 +2489,14 @@ rule LinkFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
 }
 
 
+rule LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM
+{
+	if $(PLATFORM) = macosx {
+		LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	}
+}
+
+
 rule LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;

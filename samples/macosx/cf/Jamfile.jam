@@ -1,5 +1,5 @@
 SubDir TOP ;
 
-LinkFlags cf : -framework CoreFoundation ;
+LinkFrameworks cf : CoreFoundation ;
 
 Application cf : main.c ;

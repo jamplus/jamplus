@@ -25,8 +25,10 @@ documentation:
 \refitem rule_IncludeModule IncludeModule
 \refitem rule_Library Library
 \refitem rule_LinkDirectories LinkDirectories
+\refitem rule_LinkFlags LinkFlags
+\refitem rule_LinkFrameworks LinkFrameworks
 \refitem rule_LinkLibraries LinkLibraries
-\refitem rule_LinkPrebuiltLibraries LinkPrebuiltLibrariess
+\refitem rule_LinkPrebuiltLibraries LinkPrebuiltLibraries
 \refitem rule_Lump Lump
 \refitem rule_MakeLocate MakeLocate
 \refitem rule_MkDir MkDir
@@ -452,6 +454,29 @@ For the given project \c TARGET, assign the link \c FLAGS to the appropriate con
     LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.debug.dll : debug ;
     LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.dll : release ;
     LinkFlags ManagedLuaPlus : /KEYFILE:\"$(SEARCH_SOURCE)/ManagedLuaPlus.snk\" ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_LinkFrameworks rule LinkFrameworks TARGET : FRAMEWORKS [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_LinkFrameworks
+
+\note This rule is only valid on Mac OS X.
+
+Links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are set, so changes to the framework will not be relinked.
+
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param FRAMEWORKS The list of frameworks to link.  The frameworks are specified without an extension.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    LinkFrameworks MyApp : CoreFoundation ;
 \endcode
 
 
