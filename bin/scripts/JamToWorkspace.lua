@@ -1038,8 +1038,20 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 
 	local info = ProjectExportInfo[self.ProjectName]
 	if not info then
-		info = { Name = self.ProjectName, Filename = filename, Uuid = XcodeUuid() }
+		info = {
+			Name = self.ProjectName,
+			Filename = filename,
+		}
 		ProjectExportInfo[self.ProjectName] = info
+	end
+	if not info.Uuid then
+		info.Uuid = XcodeUuid()
+	end
+	if not info.LegacyTargetUuid then
+		info.LegacyTargetUuid = XcodeUuid()
+	end
+	if not info.LegacyTargetBuildConfigurationListUuid then
+		info.LegacyTargetBuildConfigurationListUuid = XcodeUuid()
 	end
 
 	local project = Projects[self.ProjectName]
@@ -1080,23 +1092,27 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	self:_WritePBXGroup(info.Uuid, info.Name, project.SourcesTree, '')
 	self:_RecursePBXGroups(project.SourcesTree, '')
 	table.insert(self.Contents, '\t/* End PBXGroup section */\n\n')
---[[
-	/* Begin PBXLegacyTarget section */
-			C267CFA7AEF9410A87F2C883 /* helloworld */ = {
-				isa = PBXLegacyTarget;
-				buildArgumentsString = "-C/Users/joshua/src/jamplus/samples/tutorials/01-helloworld/build/ $(ACTION)";
-				buildConfigurationList = 1DEB918F08733D9F0010E9CD /* Build configuration list for PBXLegacyTarget "helloworld" */;
-				buildPhases = (
-				);
-				buildToolPath = /users/joshua/src/jamplus/bin/jam;
-				dependencies = (
-				);
-				name = helloworld;
-				passBuildSettingsInEnvironment = 1;
-				productName = helloworld;
-			};
-	/* End PBXLegacyTarget section */
-]]
+	
+	-- Write PBXLegacyTarget.
+	table.insert(self.Contents, '\t/* Begin PBXLegacyTarget section */\n')
+	
+	local legacyTargetUuid = XcodeUuid()
+	table.insert(self.Contents, '/* Begin PBXLegacyTarget section */\n')
+	table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, info.Name))
+	table.insert(self.Contents, '\t\t\tisa = PBXLegacyTarget;\n')
+	table.insert(self.Contents, '\t\t\tbuildArgumentsString = "-C' .. destinationRootPath .. ' $(ACTION)";\n')
+	table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. info.LegacyTargetBuildConfigurationListUuid .. '/* Build configuration list for PBXLegacyTarget "' .. info.Name .. '" */;\n')
+	table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
+	table.insert(self.Contents, '\t\t\t);\n')
+	table.insert(self.Contents, '\t\t\tbuildToolPath = ' .. jamExePath .. ';\n')
+	table.insert(self.Contents, '\t\t\tdependencies = (\n')
+	table.insert(self.Contents, '\t\t\t);\n')
+	table.insert(self.Contents, '\t\t\tname = ' .. info.Name .. ';\n')
+	table.insert(self.Contents, '\t\t\tpassBuildSettingsInEnvironment = 1;\n')
+	table.insert(self.Contents, '\t\t\tproductName = helloworld;\n')
+	table.insert(self.Contents, '\t\t};\n')
+	table.insert(self.Contents, '/* End PBXLegacyTarget section */\n')
+
 	
 --[=====[
 	elseif self.Options.vs2008 then
