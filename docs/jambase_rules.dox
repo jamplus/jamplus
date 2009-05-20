@@ -722,6 +722,29 @@ For the given \c SOURCES, assign the \c DEFINES to the appropriate configuration
 
 
 <hr>
+\section rule_ObjectForceInclude rule ObjectForceInclude TARGET : SOURCES : INCLUDES [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_ObjectForceInclude
+
+For the given \c SOURCES, assign the \c INCLUDES to the appropriate configuration and platform, causing that project's compilation to force the inclusion of the header before anything else.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of sources to assign the force include flag to.
+\param INCLUDES The list of header files to force include.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Automatically #include ../common/print.h in libA.cpp.
+    ObjectForceInclude libA : libA.cpp : ../common/print.h ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_ObjectIncludeDirectories rule ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_ObjectIncludeDirectories
 

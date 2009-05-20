@@ -2588,6 +2588,22 @@ rule ObjectDefines TARGET : SOURCES : DEFINES : THE_CONFIG : THE_PLATFORM
 }
 
 
+rule ObjectForceInclude TARGET : SOURCES : INCLUDES : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	THE_CONFIG ?= * ;
+	THE_PLATFORM ?= * ;
+	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
+	local variableFlags = CCFLAGS C++FLAGS ;
+	if $(COMPILER) in vc6 vs2002 vs2003 vs2005 vs2008 {
+		$(variableFlags).$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += "/FI$(INCLUDES)" ;
+	} else {
+		$(variableFlags).$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += "-include $(INCLUDES)" ;
+	}
+}
+
+
 rule ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;

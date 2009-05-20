@@ -2,3 +2,4 @@ SubDir TOP ;
 
 SubInclude TOP project1 : project1 ;
 SubInclude TOP common : common ;
+SubInclude TOP libA : libA ;
