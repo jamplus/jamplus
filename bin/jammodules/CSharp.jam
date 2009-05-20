@@ -32,52 +32,42 @@ switch $(CSC_COMPILER)
 		CSCFLAGS.* on * += /errorreport:prompt /filealign:512 ;
 		
 	case gmcs :
-		local registryRootPath ;
-		if $(NT)
-		{
-#			registryRootPath = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Novell Mono 2.4 SdkInstallRoot ] ;
-		}
-		else
-		{
-			Mono_ROOT_DIR ?= /usr ;
-		}
+		if ! $(Mono_ROOT)  ||  ! $(CSC) {
+			if ! $(NT) {
+				Mono_ROOT ?= /usr ;
+			}
 
-		local PATHS =
-			"$(Mono_ROOT_DIR:J=$(SPACE))"
-			$(registryRootPath:/J=$(SPACE))
-		;
-		
-		if $(NT)
-		{
-			PATHS +=
-				"$(ProgramFiles:/J=$(SPACE))/"
+			local PATHS =
+				"$(Mono_ROOT:J=$(SPACE))"
 			;
-		}
 		
-		local PATH_SUFFIXES = "" ;
-		if $(NT)
-		{
-			PATH_SUFFIXES +=
-					Mono-2.4
-			;
-		}
-
-		local gmcs = [ Glob $(PATHS)$(PATH_SUFFIXES)/bin : gmcs ] ;
-		if ! $(gmcs)
-		{
-			Exit Mono not found. ;
-		}
-
-		Mono_ROOT = [ Match (.+)/bin/gmcs : $(gmcs[1]) ] ;
+			local PATH_SUFFIXES = "" ;
 		
-		if $(NT)
-		{
-			CSC = "\"$(Mono_ROOT)/bin/gmcs.bat\"" ;
+			if $(NT) {
+				PATH_SUFFIXES +=
+						Mono-2.4
+				;
+
+				local registryRootPath = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Novell Mono 2.4 SdkInstallRoot ] ;
+				PATHS +=
+					"$(ProgramFiles:/J=$(SPACE))/"
+					"$(registryRootPath:/J=$(SPACE))"
+				;
+			}
+
+			local gmcs = [ Glob $(PATHS)$(PATH_SUFFIXES)/bin : gmcs ] ;
+			if ! $(gmcs) {
+				Exit Mono not found. ;
+			}
+
+			Mono_ROOT = [ Match (.+)/bin/gmcs : $(gmcs[1]) ] ;
+		
+			if $(NT) {
+				CSC ?= "\"$(Mono_ROOT)/bin/gmcs.bat\"" ;
+			} else {
+				CSC ?= $(Mono_ROOT)/bin/gmcs ;
+			}
 		}
-		else
-		{
-			CSC = $(Mono_ROOT)/bin/gmcs ;
-		}		
 }
 
 
