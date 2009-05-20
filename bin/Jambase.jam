@@ -348,11 +348,6 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 				C++			?= g++ ;
 				LINK		?= $(C++) ;
 				SUFMODULE	= .dylib ;
-
-				MACOSX_SDK	= /Developer/SDKs/MacOSX10.4u.sdk ;
-				CCFLAGS.*.*	on * += -isysroot $(MACOSX_SDK) ;
-				C++FLAGS.*.* on * += -isysroot $(MACOSX_SDK) ;
-
 		}
 
 		# UNIX defaults
@@ -2678,6 +2673,46 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES
 
 rule Workspace WORKSPACE_NAME : TARGETS
 {
+}
+
+
+rule MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
+	if $(PLATFORM) != macosx { return ; }
+
+	local isysroot ;
+	switch $(SDK_PLATFORM) {
+		case macosx :
+			isysroot = /Developer/SDKs ;
+			SDK_VERSION ?= 10.5 ;
+			switch $(SDK_VERSION) {
+				case 10.4u :	isysroot = $(isysroot)/MacOSX10.4u.sdk ;
+				case 10.5 :		isysroot = $(isysroot)/MacOSX10.5.sdk ;
+				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
+			}
+		
+		case iphone :
+			isysroot = /Developer/Platforms/iPhoneOS.platform/Developer/SDKs ;
+			SDK_VERSION ?= 2.2 ;
+			switch $(SDK_VERSION) {
+				case 2.0 :	isysroot = $(isysroot)/iPhoneOS2.0.sdk ;
+				case 2.1 :	isysroot = $(isysroot)/iPhoneOS2.1.sdk ;
+				case 2.2 :	isysroot = $(isysroot)/iPhoneOS2.2.sdk ;
+				case * :	Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
+			}
+
+		case iphonesimulator :
+			isysroot = /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs ;
+			SDK_VERSION ?= 2.2 ;
+			switch $(SDK_VERSION) {
+				case 2.0 :	isysroot = $(isysroot)/iPhoneSimulator2.0.sdk ;
+				case 2.1 :	isysroot = $(isysroot)/iPhoneSimulator2.1.sdk ;
+				case 2.2 :	isysroot = $(isysroot)/iPhoneSimulator2.2.sdk ;
+				case * :	Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
+			}
+	}
+
+	CCFLAGS.*.* on $(TARGET) = -isysroot $(isysroot) ;
+	C++FLAGS.*.* on $(TARGET) = -isysroot $(isysroot) ;
 }
 
 

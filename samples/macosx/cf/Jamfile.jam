@@ -1,5 +1,6 @@
 SubDir TOP ;
 
+MacOSX_SDK cf : macosx : 10.4u ;
 LinkFrameworks cf : CoreFoundation ;
 
 Application cf : main.c ;
