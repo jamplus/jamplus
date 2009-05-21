@@ -1082,18 +1082,18 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 
 	-- Write PBXFileReferences.
 	table.insert(self.Contents, [[
-	/* Begin PBXFileReference section */
+/* Begin PBXFileReference section */
 ]])
 	self:_WritePBXFileReferences(sourcesTree)
 	table.insert(self.Contents, [[
-	/* End PBXFileReference section */
+/* End PBXFileReference section */
 
 ]])
 
 	-- Write PBXGroups.
-	table.insert(self.Contents, '\t/* Begin PBXGroup section */\n')
+	table.insert(self.Contents, '/* Begin PBXGroup section */\n')
 	self:_WritePBXGroups(sourcesTree, '')
-	table.insert(self.Contents, '\t/* End PBXGroup section */\n\n')
+	table.insert(self.Contents, '/* End PBXGroup section */\n\n')
 	
 	-- Write PBXLegacyTarget.
 	table.insert(self.Contents, '/* Begin PBXLegacyTarget section */\n')
@@ -1129,7 +1129,82 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 			);
 		};
 ]], info))
-	table.insert(self.Contents, '/* End PBXProject section */\n')
+	table.insert(self.Contents, '/* End PBXProject section */\n\n')
+
+	-- Write XCBuildConfigurations.
+	if not info.LegacyTargetConfigUuids then
+		info.LegacyTargetConfigUuids = {}
+
+		for _, config in ipairs(Config.Configurations) do
+			info.LegacyTargetConfigUuids[config] = XcodeUuid()
+		end
+	end
+
+	if not info.ProjectConfigUuids then
+		info.ProjectConfigUuids = {}
+
+		for _, config in ipairs(Config.Configurations) do
+			info.ProjectConfigUuids[config] = XcodeUuid()
+		end
+	end
+
+	table.insert(self.Contents, '/* Begin XCBuildConfiguration section */\n')
+
+	-- Write legacy target configurations.
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t" .. info.LegacyTargetConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
+		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
+		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+		table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = " .. self.ProjectName .. ";\n")
+		table.insert(self.Contents, "\t\t\t};\n")
+		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
+		table.insert(self.Contents, "\t\t};\n")
+	end
+	
+	-- Write project configurations.
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t" .. info.ProjectConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
+		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
+		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+		table.insert(self.Contents, "\t\t\t};\n")
+		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
+		table.insert(self.Contents, "\t\t};\n")
+	end
+
+	table.insert(self.Contents, '/* End XCBuildConfiguration section */\n\n')
+
+
+	-- Write XCConfigurationLists.
+	table.insert(self.Contents, "/* Begin XCConfigurationList section */\n")
+
+	table.insert(self.Contents, "\t\t" .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. self.ProjectName .. '" */ = {\n')
+	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
+	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t\t\t" .. info.LegacyTargetConfigUuids[config] .. " /* " .. config .. " */,\n")
+	end
+	table.insert(self.Contents, "\t\t\t);\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = release;\n")
+	table.insert(self.Contents, "\t\t};\n\n")
+	
+	table.insert(self.Contents, "\t\t" .. info.ProjectBuildConfigurationListUuid .. ' /* Build configuration list for PBXProject "' .. self.ProjectName .. '" */ = {\n')
+	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
+	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t\t\t" .. info.LegacyTargetConfigUuids[config] .. " /* " .. config .. " */,\n")
+	end
+	table.insert(self.Contents, "\t\t\t);\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = release;\n")
+	table.insert(self.Contents, "\t\t};\n")
+	
+	table.insert(self.Contents, "/* End XCConfigurationList section */\n\n")
+	
+	table.insert(self.Contents, "\t};\n")
+	table.insert(self.Contents, "\trootObject = " .. info.GroupUuid .. " /* Project object */;\n")
+	table.insert(self.Contents, "}\n")
+	
 
 	
 --[=====[
@@ -1308,7 +1383,7 @@ function XcodeProjectMetaTable:_WritePBXFileReferences(folder)
 		if type(entry) == 'table' then
 			self:_WritePBXFileReferences(entry)
 		else
-			table.insert(self.Contents, ('\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode%s; path = "%s"; sourceTree = "<group>"; };\n'):format(
+			table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode%s; path = "%s"; sourceTree = "<group>"; };\n'):format(
 					self.EntryUuids[entry], entry, os.path.get_extension(entry), entry))
 		end
 	end
@@ -1316,21 +1391,21 @@ end
 
 
 function XcodeProjectMetaTable:_WritePBXGroup(uuid, name, children, fullPath)
-	table.insert(self.Contents, ('\t%s /* %s */ = {\n'):format(uuid, name))
-	table.insert(self.Contents, '\t\tisa = PBXGroup;\n')
-	table.insert(self.Contents, '\t\tchildren = (\n')
+	table.insert(self.Contents, ('\t\t%s /* %s */ = {\n'):format(uuid, name))
+	table.insert(self.Contents, '\t\t\tisa = PBXGroup;\n')
+	table.insert(self.Contents, '\t\t\tchildren = (\n')
 	for entry in ivalues(children) do
 		if type(entry) == 'table' then
 			local fullFolderName = fullPath .. entry.folder .. '/'
-			table.insert(self.Contents, '\t\t\t' .. self.EntryUuids[fullFolderName] .. ' /* ' .. entry.folder .. ' */,\n')
+			table.insert(self.Contents, '\t\t\t\t' .. self.EntryUuids[fullFolderName] .. ' /* ' .. entry.folder .. ' */,\n')
 		else
-			table.insert(self.Contents, '\t\t\t' .. self.EntryUuids[entry] .. ' /* ' .. entry .. ' */,\n')
+			table.insert(self.Contents, '\t\t\t\t' .. self.EntryUuids[entry] .. ' /* ' .. entry .. ' */,\n')
 		end
 	end
-	table.insert(self.Contents, '\t\t);\n')
-	table.insert(self.Contents, '\t\tname = ' .. name .. ';\n')
-	table.insert(self.Contents, '\t\tsourceTree = "<group>";\n')
-	table.insert(self.Contents, '\t};\n')
+	table.insert(self.Contents, '\t\t\t);\n')
+	table.insert(self.Contents, '\t\t\tname = ' .. name .. ';\n')
+	table.insert(self.Contents, '\t\t\tsourceTree = "<group>";\n')
+	table.insert(self.Contents, '\t\t};\n')
 end
 	
 function XcodeProjectMetaTable:_WritePBXGroups(folder, fullPath)
