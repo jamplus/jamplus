@@ -1036,6 +1036,11 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	local filename = outputPath .. self.ProjectName .. '.xcodeproj/project.pbxproj'
 	os.mkdir(filename)
 
+	local jamCommandLine = jamExePath .. ' ' ..
+			os.path.escape('-C' .. destinationRootPath) --.. ' ' ..
+--			'-sPLATFORM=' .. platformName .. ' ' ..
+--			'-sCONFIG=' .. configName
+
 	local info = ProjectExportInfo[self.ProjectName]
 	if not info then
 		info = {
@@ -1206,7 +1211,195 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, "\trootObject = " .. info.ProjectUuid .. " /* Project object */;\n")
 	table.insert(self.Contents, "}\n")
 	
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
 
+	WriteFileIfModified(filename, self.Contents)
+
+	---------------------------------------------------------------------------
+	-- Write username.pbxuser with the executable settings
+	---------------------------------------------------------------------------
+	local ConfigInfo = {}
+	local platformName = Platform
+	for configName in ivalues(Config.Configurations) do
+		local configInfo =
+		{
+			Platform = platformName,
+			Config = configName,
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+			Defines = '',
+			Includes = '',
+			OutputPath = '',
+			OutputName = '',
+		}
+		ConfigInfo[configName] = configInfo
+
+		if project and project.Name then
+			if project.Defines then
+				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+			end
+			if project.IncludePaths then
+				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
+			end
+			if project.OutputPaths then
+				configInfo.OutputPath = project.OutputPaths[platformName][configName]
+				configInfo.OutputName = project.OutputNames[platformName][configName]
+			end
+			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
+		elseif not commandLines then
+			configInfo.BuildCommandLine = jamCommandLine
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
+		else
+			configInfo.BuildCommandLine = commandLines[1] or ''
+			configInfo.RebuildCommandLine = commandLines[2] or ''
+			configInfo.CleanCommandLine = commandLines[3] or ''
+		end
+	end
+	
+	for configName in ivalues(Config.Configurations) do
+		local configInfo = ConfigInfo[configName]
+		if not info.ExecutableInfo then
+			info.ExecutableInfo = {}
+		end
+		
+		local executableConfig = info.ExecutableInfo[configName]
+		if not executableConfig then
+			executableConfig = {}
+			info.ExecutableInfo[configName] = executableConfig
+		end
+		
+		if not executableConfig.Uuid then
+			executableConfig.Uuid = XcodeUuid()
+		end
+		
+		if not executableConfig.FileReferenceUuid then
+			executableConfig.FileReferenceUuid = XcodeUuid()
+		end
+	end
+	
+	local extraData = {}
+	extraData.activeConfig = Config.Configurations[1]
+	extraData.activeExecutable = info.ExecutableInfo[extraData.activeConfig].Uuid
+
+	local filename = outputPath .. self.ProjectName .. '.xcodeproj/' .. os.getenv('USER') .. '.pbxuser'
+
+	self.Contents = {}
+	table.insert(self.Contents, [[
+// !$*UTF8*$!
+{
+]])
+
+	table.insert(self.Contents, expand([[
+	$(ProjectUuid) /* Project object */ = {
+		activeBuildConfigurationName = $(activeConfig);
+		activeExecutable = $(activeExecutable) /* $(Name) */;
+		activeTarget = $(LegacyTargetUuid) /* $(Name) */;
+		executables = (
+]], extraData, info))
+
+	for configName in ivalues(Config.Configurations) do
+		local configInfo = ConfigInfo[configName]
+		local executableConfig = info.ExecutableInfo[configName]
+		
+		table.insert(self.Contents, '\t\t\t' .. executableConfig.Uuid .. ' /* ' .. configInfo.OutputName .. ' */,\n')
+	end
+	
+	table.insert(self.Contents, [[
+		);
+		userBuildSettings = {
+		};
+	};
+]])
+
+	table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, self.ProjectName))
+	table.insert(self.Contents, '\t\tactiveExec = 0;\n')
+	table.insert(self.Contents, '\t}\n')
+
+	for configName in ivalues(Config.Configurations) do
+		local configInfo = ConfigInfo[configName]
+		if not info.ExecutableInfo then
+			info.ExecutableInfo = {}
+		end
+		
+		local executableConfig = info.ExecutableInfo[configName]
+		if not executableConfig then
+			executableConfig = {}
+			info.ExecutableInfo[configName] = executableConfig
+		end
+		
+		if not executableConfig.Uuid then
+			executableConfig.Uuid = XcodeUuid()
+		end
+		
+		if not executableConfig.FileReferenceUuid then
+			executableConfig.FileReferenceUuid = XcodeUuid()
+		end
+		extraData.OutputName = configInfo.OutputName
+
+		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.Uuid, configInfo.OutputName))
+		table.insert(self.Contents, expand([[
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+			"PBXLSLaunchAction-0" = {
+				PBXLSLaunchAction = 0;
+				PBXLSLaunchStartAction = 1;
+				PBXLSLaunchStdioStyle = 2;
+				PBXLSLaunchStyle = 0;
+				class = PBXLSRunLaunchConfig;
+				commandLineArgs = (
+				);
+				displayName = "Executable Runner";
+				environment = {
+				};
+				identifier = com.apple.Xcode.launch.runConfig;
+				remoteHostInfo = "";
+				startActionInfo = "";
+			};
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		launchableReference = $(FileReferenceUuid) /* $(OutputName) */;
+		libgmallocEnabled = 0;
+		name = helloworld;
+		sourceDirectories = (
+		);
+	};
+]], executableConfig, info, extraData))
+
+		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.FileReferenceUuid, configInfo.OutputName))
+		table.insert(self.Contents, [[
+		isa = PBXFileReference;
+		lastKnownFileType = text;
+]])
+		table.insert(self.Contents, '\t\tname = ' .. configInfo.OutputName .. ';\n')
+		table.insert(self.Contents, '\t\tpath = ' .. configInfo.OutputPath .. ';\n')
+		table.insert(self.Contents, [[
+		sourceTree = "<group>";
+	};
+]])
+	end
+		
+	table.insert(self.Contents, '}\n')
+
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
+
+	WriteFileIfModified(filename, self.Contents)
 	
 --[=====[
 	elseif self.Options.vs2008 then
@@ -1345,10 +1538,6 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 </XcodeProject>
 ]])
 ]=====]
-
-	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
-
-	WriteFileIfModified(filename, self.Contents)
 end
 
 function XcodeProject(projectName, options)
