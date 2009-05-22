@@ -1316,7 +1316,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 
 	table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, self.ProjectName))
 	table.insert(self.Contents, '\t\tactiveExec = 0;\n')
-	table.insert(self.Contents, '\t}\n')
+	table.insert(self.Contents, '\t};\n')
 
 	for configName in ivalues(Config.Configurations) do
 		local configInfo = ConfigInfo[configName]
