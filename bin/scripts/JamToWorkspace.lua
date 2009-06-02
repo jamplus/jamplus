@@ -1104,11 +1104,11 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, '/* Begin PBXLegacyTarget section */\n')
 	table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, info.Name))
 	table.insert(self.Contents, '\t\t\tisa = PBXLegacyTarget;\n')
-	table.insert(self.Contents, '\t\t\tbuildArgumentsString = "-C' .. destinationRootPath .. ' -sPLATFORM=$(PLATFORM) -sCONFIG=$(CONFIG) $(ACTION)";\n')
+	table.insert(self.Contents, '\t\t\tbuildArgumentsString = "\\\"-sPLATFORM=$(PLATFORM) -sCONFIG=$(CONFIG)\\\" $(ACTION) $(TARGET_NAME)";\n')
 	table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. info.Name .. '" */;\n')
 	table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
 	table.insert(self.Contents, '\t\t\t);\n')
-	table.insert(self.Contents, '\t\t\tbuildToolPath = ' .. jamExePath .. ';\n')
+	table.insert(self.Contents, '\t\t\tbuildToolPath = ' .. os.path.combine(destinationRootPath, 'xcodejam') .. ';\n')
 	table.insert(self.Contents, '\t\t\tdependencies = (\n')
 	table.insert(self.Contents, '\t\t\t);\n')
 	table.insert(self.Contents, '\t\t\tname = ' .. info.Name .. ';\n')
@@ -1848,6 +1848,21 @@ function XcodeInitialize()
 	if not ProjectExportInfo then
 		ProjectExportInfo = {}
 	end
+
+	io.writeall(destinationRootPath .. 'xcodejam', [[
+#!/bin/sh
+SCRIPT_PATH=`dirname $0`
+TARGET_NAME=
+if [ "$3" = "" ]; then
+	TARGET_NAME=$2
+elif [ "$2" = build ]; then
+	TARGET_NAME=$3
+elif [ "$2" = clean ]; then
+	TARGET_NAME=clean:$3
+fi
+$SCRIPT_PATH/jam $1 $TARGET_NAME
+]])
+	os.chmod(destinationRootPath .. 'xcodejam', 777)
 end
 
 
@@ -2161,18 +2176,19 @@ include $(jamPath)Jambase.jam ;
 				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
 				os.path.escape(sourceJamfilePath)))
 	else
-		-- Write jam.sh.
-		io.writeall(destinationRootPath .. 'jam.sh',
+		-- Write jam shell script.
+		io.writeall(destinationRootPath .. 'jam',
+				'#!/bin/sh\n' ..
 				jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
-		os.chmod(destinationRootPath .. 'jam.sh', 777)
+		os.chmod(destinationRootPath .. 'jam', 777)
 
 		-- Write UpdateWorkspace.sh.
-		io.writeall(destinationRootPath .. 'UpdateWorkspace.sh',
-				("%s --gen=%s --config=%s %s\n"):format(
+		io.writeall(destinationRootPath .. 'updateworkspace',
+				("#!/bin/sh\n%s --gen=%s --config=%s %s\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen,
 				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
 				os.path.escape(sourceJamfilePath)))
-		os.chmod(destinationRootPath .. 'UpdateWorkspace.sh', 777)
+		os.chmod(destinationRootPath .. 'UpdateWorkspace', 777)
 	end
 
 	-- Write UpdateWorkspace.config.
