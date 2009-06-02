@@ -1104,7 +1104,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, '/* Begin PBXLegacyTarget section */\n')
 	table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, info.Name))
 	table.insert(self.Contents, '\t\t\tisa = PBXLegacyTarget;\n')
-	table.insert(self.Contents, '\t\t\tbuildArgumentsString = "-C' .. destinationRootPath .. ' $(ACTION)";\n')
+	table.insert(self.Contents, '\t\t\tbuildArgumentsString = "-C' .. destinationRootPath .. ' -sPLATFORM=$(PLATFORM) -sCONFIG=$(CONFIG) $(ACTION)";\n')
 	table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. info.Name .. '" */;\n')
 	table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
 	table.insert(self.Contents, '\t\t\t);\n')
@@ -1113,7 +1113,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, '\t\t\t);\n')
 	table.insert(self.Contents, '\t\t\tname = ' .. info.Name .. ';\n')
 	table.insert(self.Contents, '\t\t\tpassBuildSettingsInEnvironment = 1;\n')
-	table.insert(self.Contents, '\t\t\tproductName = helloworld;\n')
+	table.insert(self.Contents, '\t\t\tproductName = ' .. self.ProjectName .. ';\n')
 	table.insert(self.Contents, '\t\t};\n')
 	table.insert(self.Contents, '/* End PBXLegacyTarget section */\n\n')
 
@@ -1161,6 +1161,9 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
 		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
 		table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = " .. self.ProjectName .. ";\n")
+		table.insert(self.Contents, "\t\t\t\tTARGET_NAME = " .. self.ProjectName .. ";\n")
+		table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. Platform .. ";\n")
+		table.insert(self.Contents, "\t\t\t\tCONFIG = " .. config .. ";\n")
 		table.insert(self.Contents, "\t\t\t};\n")
 		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
 		table.insert(self.Contents, "\t\t};\n")
@@ -1171,6 +1174,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		table.insert(self.Contents, "\t\t" .. info.ProjectConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
 		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
 		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+		table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
 		table.insert(self.Contents, "\t\t\t\tSDKROOT = macosx10.5;\n")
 		table.insert(self.Contents, "\t\t\t};\n")
 		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
@@ -1339,6 +1343,18 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		end
 		extraData.OutputName = configInfo.OutputName
 
+		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.FileReferenceUuid, configInfo.OutputName))
+		table.insert(self.Contents, [[
+		isa = PBXFileReference;
+		lastKnownFileType = text;
+]])
+		table.insert(self.Contents, '\t\tname = ' .. configInfo.OutputName .. ';\n')
+		table.insert(self.Contents, '\t\tpath = ' .. configInfo.OutputPath .. configInfo.OutputName .. ';\n')
+		table.insert(self.Contents, [[
+		sourceTree = "<absolute>";
+	};
+]])
+
 		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.Uuid, configInfo.OutputName))
 		table.insert(self.Contents, expand([[
 		isa = PBXExecutable;
@@ -1376,23 +1392,11 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		executableUserSymbolLevel = 0;
 		launchableReference = $(FileReferenceUuid) /* $(OutputName) */;
 		libgmallocEnabled = 0;
-		name = helloworld;
+		name = $(OutputName);
 		sourceDirectories = (
 		);
 	};
 ]], executableConfig, info, extraData))
-
-		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.FileReferenceUuid, configInfo.OutputName))
-		table.insert(self.Contents, [[
-		isa = PBXFileReference;
-		lastKnownFileType = text;
-]])
-		table.insert(self.Contents, '\t\tname = ' .. configInfo.OutputName .. ';\n')
-		table.insert(self.Contents, '\t\tpath = ' .. configInfo.OutputPath .. ';\n')
-		table.insert(self.Contents, [[
-		sourceTree = "<group>";
-	};
-]])
 	end
 		
 	table.insert(self.Contents, '}\n')
