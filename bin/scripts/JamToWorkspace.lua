@@ -1406,21 +1406,6 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	WriteFileIfModified(filename, self.Contents)
 	
 --[=====[
-	elseif self.Options.vs2008 then
-		table.insert(self.Contents, expand([[
-	Version="9.00"
-	Name="$(Name)"
-	ProjectGUID="$(Uuid:upper())"
-	RootNamespace="$(Name)"
-	>
-]], info))
-	end
-
-	-- Write Configurations header.
-	table.insert(self.Contents, [[
-	<Configurations>
-]])
-
 	local platformName = Platform
 	for configName in ivalues(Config.Configurations) do
 		local jamCommandLine = jamExePath .. ' ' ..
@@ -1510,36 +1495,6 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	-- Write Configurations footer.
 	table.insert(self.Contents, [[
 	</Configurations>
-]])
-
-	-- Write References.
-	table.insert(self.Contents, [[
-	<References>
-	</References>
-]])
-
-	-- Write Files.
-	table.insert(self.Contents, [[
-	<Files>
-]])
-
-	if project then
-		self:_WriteFiles(project.SourcesTree, '\t\t')
-	end
-
-	table.insert(self.Contents, [[
-	</Files>
-]])
-
-	-- Write Globals.
-	table.insert(self.Contents, [[
-	<Globals>
-	</Globals>
-]])
-
-	-- Write footer.
-	table.insert(self.Contents, [[
-</XcodeProject>
 ]])
 ]=====]
 end
@@ -1843,7 +1798,8 @@ end
 
 
 function XcodeInitialize()
-	local chunk = loadfile(destinationRootPath .. 'XcodeProjectExportInfo.lua')
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local chunk = loadfile(outPath .. 'XcodeProjectExportInfo.lua')
 	if chunk then chunk() end
 	if not ProjectExportInfo then
 		ProjectExportInfo = {}
@@ -1867,7 +1823,8 @@ end
 
 
 function XcodeShutdown()
-	LuaDumpObject(destinationRootPath .. 'XcodeProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	LuaDumpObject(outPath .. 'XcodeProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
 end
 
 
@@ -1980,7 +1937,7 @@ end
 
 
 function DumpProject(project)
-	local outPath = os.path.combine(destinationRootPath, project.RelativePath) .. '/'
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects', project.RelativePath) .. '/'
 	os.mkdir(outPath)
 
 	BuildSourceTree(project)
@@ -2024,6 +1981,8 @@ end
 
 
 function DumpWorkspace(workspace)
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	
 	-- Write the !BuildWorkspace project
 	local exporter = Exporters[opts.gen]
 	Projects[buildWorkspaceName] = {}
@@ -2033,7 +1992,7 @@ function DumpWorkspace(workspace)
 	}
 	Projects[buildWorkspaceName].SourcesTree = Projects[buildWorkspaceName].Sources
 	local projectExporter = exporter.ProjectExporter(buildWorkspaceName, exporter.Options)
-	projectExporter:Write(destinationRootPath)
+	projectExporter:Write(outPath)
 
 	-- Write the !UpdateWorkspace project
 	Projects[updateWorkspaceName] = {}
@@ -2043,7 +2002,7 @@ function DumpWorkspace(workspace)
 	}
 	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
 	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options)
-	projectExporter:Write(destinationRootPath,
+	projectExporter:Write(outPath,
 		{
 			destinationRootPath .. 'UpdateWorkspace.bat',
 			destinationRootPath .. 'UpdateWorkspace.bat',
@@ -2173,7 +2132,7 @@ include $(jamPath)Jambase.jam ;
 		io.writeall(destinationRootPath .. 'UpdateWorkspace.bat',
 				("@%s --gen=%s --config=%s %s\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen,
-				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
+				os.path.escape(destinationRootPath .. '/updateworkspace.config'),
 				os.path.escape(sourceJamfilePath)))
 	else
 		-- Write jam shell script.
@@ -2186,13 +2145,13 @@ include $(jamPath)Jambase.jam ;
 		io.writeall(destinationRootPath .. 'updateworkspace',
 				("#!/bin/sh\n%s --gen=%s --config=%s %s\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen,
-				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
+				os.path.escape(destinationRootPath .. '/updateworkspace.config'),
 				os.path.escape(sourceJamfilePath)))
 		os.chmod(destinationRootPath .. 'UpdateWorkspace', 777)
 	end
 
-	-- Write UpdateWorkspace.config.
-	LuaDumpObject(destinationRootPath .. 'UpdateWorkspace.config', 'Config', Config)
+	-- Write updateworkspace.config.
+	LuaDumpObject(destinationRootPath .. 'updateworkspace.config', 'Config', Config)
 
 	-- Export everything.
 	exporter.Initialize()
