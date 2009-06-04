@@ -2199,6 +2199,14 @@ rule PrecompiledHeader TARGET : NAME : FILES
 }
 
 
+rule NoPrecompiledHeader TARGET : FILES
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	NOPCH on $(FILES:G=$(grist)) = 1 ;
+}
+
+
 ########################################################################
 ########################################################################
 
