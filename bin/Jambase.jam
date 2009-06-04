@@ -2585,7 +2585,7 @@ rule ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS : THE_CONFIG : THE
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
 	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
-	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(INCLUDEPATHS) ;
+	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(INCLUDEPATHS:R=$(SUBDIR)) ;
 }
 
 
