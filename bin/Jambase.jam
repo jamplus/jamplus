@@ -1302,43 +1302,42 @@ rule MultiCppCompile TARGET : SOURCES
 			$(PLATFORM).*
 			*.*
 	;
-
+	
 	local postHDRS ;
-	on $(TARGET) postHDRS += $(HDRS.$(ALL_TYPES)) ;
-	on * postHDRS += $(HDRS.$(ALL_TYPES)) ;
-	postHDRS +=
-			$(SUBDIRHDRS)
-			$(STDHDRS)
-	;
-
 	local postREFERENCEDIRECTORIES ;
-	if $(MSVCNT)
-	{
-		on $(TARGET) postREFERENCEDIRECTORIES += $(REFERENCEDIRECTORIES.$(ALL_TYPES)) ;
-		on * postREFERENCEDIRECTORIES += $(REFERENCEDIRECTORIES.$(ALL_TYPES)) ;
-		postREFERENCEDIRECTORIES = /I\"$(postREFERENCEDIRECTORIES)\" /AI\"$(postREFERENCEDIRECTORIES)\" ;
-	}
-
 	local preDEFINES ;
-	on * preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
-	on $(TARGET) preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
-	preDEFINES = [ FDefines $(preDEFINES) ] ;
-
 	local preCCFLAGS ;
-	on * preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
-	on $(TARGET) preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
-
 	local preC++FLAGS ;
-	on * preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
-	on $(TARGET) preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
-
 	local flagsToRemove ;
-	on * flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
-	on $(TARGET) flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
-
 	local flagsToAdd ;
-	on * flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
-	on $(TARGET) flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+
+	on * {
+		postHDRS += $(HDRS.$(ALL_TYPES)) ;
+		if $(MSVCNT) {
+			local flags = /I /AI ;
+			postREFERENCEDIRECTORIES += $(flags)\"$(REFERENCEDIRECTORIES.$(ALL_TYPES))\" ;
+		}
+		preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
+		preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
+		preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
+		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
+		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+	}
+	
+	on $(TARGET) {
+		postHDRS = $(HDRS.$(ALL_TYPES)) $(postHDRS) ;
+		if $(MSVCNT) {
+			local flags = /I /AI ;
+			postREFERENCEDIRECTORIES = $(flags)\"$(REFERENCEDIRECTORIES.$(ALL_TYPES))\" $(postREFERENCEDIRECTORIES) ;
+		}
+		preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
+		preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
+		preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
+		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
+		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+	}
+	
+	preDEFINES = [ FDefines $(preDEFINES) ] ;
 
 	# start with empty list of all generated objects
 	local _allobjs = ;
@@ -1445,8 +1444,8 @@ rule MultiCppCompile TARGET : SOURCES
 
 			# bind flags, defines and includes to the target
 			_flags += $(_postmflags) ;
-			if $(flagsToRemove) { _flags -= $(flagsToRemove) ; }
-			if $(flagsToAdd) { _flags += $(flagsToAdd) ; }
+			_flags -= $(flagsToRemove) ;
+			_flags += $(flagsToAdd) ;
 			MFLAGS on $(_src) = $(BUILD$(ext).RULE) $(_flags) ;
 			UseCommandLine $(_obj) : $(_flags) ;
 		}
