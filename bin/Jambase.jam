@@ -1524,18 +1524,18 @@ rule MultiCppCompile TARGET : SOURCES
 
 if $(MSVCNT)
 {
-	actions updated response batched-C
+	actions updated response CC
 	{
 		PATH=$(MSVCNT_PATH);%PATH%
 		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(CC:\\)" /nologo @@("$(>)") $(MFLAGS)
+		"$(CC:\\)" /nologo @@($(MFLAGS) "$(>)")
 	}
 
-	actions updated response batched-C++
+	actions updated response C++
 	{
 		PATH=$(MSVCNT_PATH);%PATH%
 		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(C++:\\)" /nologo @@("$(>)") $(MFLAGS)
+		"$(C++:\\)" /nologo @@($(MFLAGS) "$(>)")
 	}
 
 	actions together response Archive
@@ -1547,12 +1547,12 @@ if $(MSVCNT)
 
 if $(COMPILER) in mingw gcc
 {
-	actions updated response batched-C
+	actions updated response CC
 	{
 		"$(CC)" -c $(MFLAGS) $(>)
 	}
 
-	actions updated response batched-C++
+	actions updated response C++
 	{
 		"$(C++)" -c $(MFLAGS) $(>)
 	}
