@@ -1896,7 +1896,8 @@ rule LibraryFromObjects TARGET : OBJECTS
 	local grist = $(TARGET) ;
 	local _s = $(OBJECTS:G=$(grist)) ;
 	local _l = $(TARGET:G=$(TARGET))$(SUFLIB) ;
-	BINDING on $(_l) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
+	local _lBINDING = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
+	BINDING on $(_l) = $(_lBINDING) ;
 
 	# library depends on its member objects
 
@@ -1921,6 +1922,7 @@ rule LibraryFromObjects TARGET : OBJECTS
 	{
 		local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 	    MakeLocate $(_l) $(_l)($(_s:BS)) : $(outputPath) ;
+		BINDING on $(_l)($(_s:BS)) = $(_lBINDING) ;
 	}
 
 	if $(NOARSCAN)
@@ -1956,8 +1958,6 @@ rule LibraryFromObjects TARGET : OBJECTS
 	Clean clean:$(TARGET) : $(_l) ;
 
 	if $(CRELIB) { CreLib $(_l) : $(_s[1]) ; }
-
-	UseCommandLine $(_linkTargets) : $(_s) ;
 
 	local libFlags =
 		[ _retrieveVar LIBFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
