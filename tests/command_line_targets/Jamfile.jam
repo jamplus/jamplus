@@ -1,0 +1,20 @@
+SubDir TOP ;
+
+for target in $(JAM_COMMAND_LINE_TARGETS) {
+	ACTIVE_TARGETS.$(target) = 1 ;
+}
+
+local all_clean = all clean ;
+
+if $(ACTIVE_TARGETS.$(all_clean))  ||  $(ACTIVE_TARGETS.appA) {
+	Echo Building appA... ;
+	Application appA : appA.cpp ;
+}
+
+
+if $(ACTIVE_TARGETS.$(all_clean))  ||  $(ACTIVE_TARGETS.appB) {
+	Echo Building appB... ;
+	Application appB : appB.cpp ;
+}
+
+
