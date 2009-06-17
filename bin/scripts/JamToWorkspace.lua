@@ -350,6 +350,10 @@ function VisualStudioProjectMetaTable:Write(outputPath, commandLines)
 			configInfo.RebuildCommandLine = commandLines[2] or ''
 			configInfo.CleanCommandLine = commandLines[3] or ''
 		end
+		
+		configInfo.BuildCommandLine = configInfo.BuildCommandLine:gsub('"', '\\&quot;')
+		configInfo.RebuildCommandLine = configInfo.RebuildCommandLine:gsub('"', '\\&quot;')
+		configInfo.CleanCommandLine = configInfo.CleanCommandLine:gsub('"', '\\&quot;')
 
 		if self.Options.vs2003 then
 			table.insert(self.Contents, expand([==[
