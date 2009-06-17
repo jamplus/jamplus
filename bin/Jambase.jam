@@ -1865,7 +1865,18 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
-	Link $(_linkTargets) : $(_s) ;
+	local linkRule = Link ;
+
+	if $(COMPILER) in vs2005 vs2008 {
+		if nomanifest in $(OPTIONS) {
+			linkRule = LinkNoManifest ;
+		} else if $(CONFIG) = debug {
+			linkRule = LinkDebug ;
+		}
+	}
+
+	$(linkRule) $(_linkTargets) : $(_s) ;
+
 #	Includes $(_s) : $(_s) ;
 
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
