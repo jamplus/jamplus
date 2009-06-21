@@ -1471,7 +1471,7 @@ rule MultiCppCompile TARGET : SOURCES
 			_flags += -I $(LOCATE_SOURCE) ;
 		}
 
-		_flags += [ FIncludes $(_hdrs) ] ;
+		_flags += [ FIncludes . $(_hdrs) ] ;
 
 		_flags += $(preDEFINES) ;
 		on $(_obj) _flags += [ FDefines $(DEFINES.$(ALL_TYPES)) ] ;
