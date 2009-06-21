@@ -1242,47 +1242,19 @@ __MultiCppCompile_OutputAsTree = 0 ;
 
 BUILD_EXTENSIONS = $(SUFOBJ) ;
 
-BUILD_EXTENSIONS += .c ;
-BUILD.c.RULE = batched-C ;
-BUILD.c.COMPILER = CC ;
-BUILD.c.PREFLAGS = preCCFLAGS ;
-BUILD.c.FLAGS = CCFLAGS ;
-BUILD.c.SUBDIRFLAGS = SUBDIRCCFLAGS ;
+rule AddBuildExtensions TYPE : EXTS
+{
+	BUILD_EXTENSIONS += $(EXTS) ;
+	BUILD_EXTENSIONS.$(TYPE) += $(EXTS) ;
+	BUILD$(EXTS).RULE = $(TYPE) ;
+	BUILD$(EXTS).COMPILER = $(TYPE) ;
+	BUILD$(EXTS).PREFLAGS = pre$(TYPE)FLAGS ;
+	BUILD$(EXTS).FLAGS = $(TYPE)FLAGS ;
+	BUILD$(EXTS).SUBDIRFLAGS = SUBDIR$(TYPE)FLAGS ;
+}
 
-BUILD_EXTENSIONS += .cpp ;
-BUILD.cpp.RULE = batched-C++ ;
-BUILD.cpp.COMPILER = C++ ;
-BUILD.cpp.PREFLAGS = preC++FLAGS ;
-BUILD.cpp.FLAGS = C++FLAGS ;
-BUILD.cpp.SUBDIRFLAGS = SUBDIRC++FLAGS ;
-
-BUILD_EXTENSIONS += .cxx ;
-BUILD.cxx.RULE = batched-C++ ;
-BUILD.cxx.COMPILER = C++ ;
-BUILD.cxx.PREFLAGS = preC++FLAGS ;
-BUILD.cxx.FLAGS = C++FLAGS ;
-BUILD.cxx.SUBDIRFLAGS = SUBDIRC++FLAGS ;
-
-BUILD_EXTENSIONS += .m ;
-BUILD.m.RULE = batched-C ;
-BUILD.m.COMPILER = CC ;
-BUILD.m.PREFLAGS = preCCFLAGS ;
-BUILD.m.FLAGS = CCFLAGS ;
-BUILD.m.SUBDIRFLAGS = SUBDIRCCFLAGS ;
-
-BUILD_EXTENSIONS += .mm ;
-BUILD.mm.RULE = batched-C ;
-BUILD.mm.COMPILER = CC ;
-BUILD.mm.PREFLAGS = preCCFLAGS ;
-BUILD.mm.FLAGS = CCFLAGS ;
-BUILD.mm.SUBDIRFLAGS = SUBDIRCCFLAGS ;
-
-BUILD_EXTENSIONS += .s ;
-BUILD.s.RULE = batched-C ;
-BUILD.s.COMPILER = CC ;
-BUILD.s.PREFLAGS = preCCFLAGS ;
-BUILD.s.FLAGS = CCFLAGS ;
-BUILD.s.SUBDIRFLAGS = SUBDIRCCFLAGS ;
+AddBuildExtensions CC : .c .m .mm .s ;
+AddBuildExtensions C++ : .cc .cpp .cxx ;
 
 if $(MSVCNT)
 {
@@ -1330,43 +1302,42 @@ rule MultiCppCompile TARGET : SOURCES
 			$(PLATFORM).*
 			*.*
 	;
-
+	
 	local postHDRS ;
-	on $(TARGET) postHDRS += $(HDRS.$(ALL_TYPES)) ;
-	on * postHDRS += $(HDRS.$(ALL_TYPES)) ;
-	postHDRS +=
-			$(SUBDIRHDRS)
-			$(STDHDRS)
-	;
-
 	local postREFERENCEDIRECTORIES ;
-	if $(MSVCNT)
-	{
-		on $(TARGET) postREFERENCEDIRECTORIES += $(REFERENCEDIRECTORIES.$(ALL_TYPES)) ;
-		on * postREFERENCEDIRECTORIES += $(REFERENCEDIRECTORIES.$(ALL_TYPES)) ;
-		postREFERENCEDIRECTORIES = /I\"$(postREFERENCEDIRECTORIES)\" /AI\"$(postREFERENCEDIRECTORIES)\" ;
-	}
-
 	local preDEFINES ;
-	on * preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
-	on $(TARGET) preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
-	preDEFINES = [ FDefines $(preDEFINES) ] ;
-
 	local preCCFLAGS ;
-	on * preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
-	on $(TARGET) preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
-
 	local preC++FLAGS ;
-	on * preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
-	on $(TARGET) preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
-
 	local flagsToRemove ;
-	on * flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
-	on $(TARGET) flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
-
 	local flagsToAdd ;
-	on * flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
-	on $(TARGET) flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+
+	on * {
+		postHDRS += $(HDRS.$(ALL_TYPES)) ;
+		if $(MSVCNT) {
+			local flags = /I /AI ;
+			postREFERENCEDIRECTORIES += $(flags)\"$(REFERENCEDIRECTORIES.$(ALL_TYPES))\" ;
+		}
+		preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
+		preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
+		preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
+		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
+		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+	}
+	
+	on $(TARGET) {
+		postHDRS = $(HDRS.$(ALL_TYPES)) $(postHDRS) ;
+		if $(MSVCNT) {
+			local flags = /I /AI ;
+			postREFERENCEDIRECTORIES = $(flags)\"$(REFERENCEDIRECTORIES.$(ALL_TYPES))\" $(postREFERENCEDIRECTORIES) ;
+		}
+		preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
+		preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
+		preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
+		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
+		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+	}
+	
+	preDEFINES = [ FDefines $(preDEFINES) ] ;
 
 	# start with empty list of all generated objects
 	local _allobjs = ;
@@ -1473,8 +1444,8 @@ rule MultiCppCompile TARGET : SOURCES
 
 			# bind flags, defines and includes to the target
 			_flags += $(_postmflags) ;
-			if $(flagsToRemove) { _flags -= $(flagsToRemove) ; }
-			if $(flagsToAdd) { _flags += $(flagsToAdd) ; }
+			_flags -= $(flagsToRemove) ;
+			_flags += $(flagsToAdd) ;
 			MFLAGS on $(_src) = $(BUILD$(ext).RULE) $(_flags) ;
 			UseCommandLine $(_obj) : $(_flags) ;
 		}
@@ -1553,18 +1524,18 @@ rule MultiCppCompile TARGET : SOURCES
 
 if $(MSVCNT)
 {
-	actions updated response batched-C
+	actions updated response CC
 	{
 		PATH=$(MSVCNT_PATH);%PATH%
 		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(CC:\\)" /nologo @@("$(>)") $(MFLAGS)
+		"$(CC:\\)" /nologo @@($(MFLAGS) "$(>)")
 	}
 
-	actions updated response batched-C++
+	actions updated response C++
 	{
 		PATH=$(MSVCNT_PATH);%PATH%
 		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(C++:\\)" /nologo @@("$(>)") $(MFLAGS)
+		"$(C++:\\)" /nologo @@($(MFLAGS) "$(>)")
 	}
 
 	actions together response Archive
@@ -1576,12 +1547,12 @@ if $(MSVCNT)
 
 if $(COMPILER) in mingw gcc
 {
-	actions updated response batched-C
+	actions updated response CC
 	{
 		"$(CC)" -c $(MFLAGS) $(>)
 	}
 
-	actions updated response batched-C++
+	actions updated response C++
 	{
 		"$(C++)" -c $(MFLAGS) $(>)
 	}
@@ -1620,7 +1591,7 @@ rule Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER :
 		if [ on $(file:G=$(grist)) Var EXCLUDED_FROM_BUILD ] = true {
 			continue ;
 		}
-		if $(file:S) in .c .cpp .cxx  &&  $(file) != $(PCH_SOURCE_FILENAME)
+		if $(file:S) in $(BUILD_EXTENSIONS.CC) $(BUILD_EXTENSIONS.C++)  &&  $(file) != $(PCH_SOURCE_FILENAME)
 		{
 			line = "#include \"$(file)\"$(NEWLINE)" ;
 			contents = $(contents)$(line) ;
@@ -1925,7 +1896,8 @@ rule LibraryFromObjects TARGET : OBJECTS
 	local grist = $(TARGET) ;
 	local _s = $(OBJECTS:G=$(grist)) ;
 	local _l = $(TARGET:G=$(TARGET))$(SUFLIB) ;
-	BINDING on $(_l) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
+	local _lBINDING = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
+	BINDING on $(_l) = $(_lBINDING) ;
 
 	# library depends on its member objects
 
@@ -1950,6 +1922,7 @@ rule LibraryFromObjects TARGET : OBJECTS
 	{
 		local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
 	    MakeLocate $(_l) $(_l)($(_s:BS)) : $(outputPath) ;
+		BINDING on $(_l)($(_s:BS)) = $(_lBINDING) ;
 	}
 
 	if $(NOARSCAN)
@@ -1985,8 +1958,6 @@ rule LibraryFromObjects TARGET : OBJECTS
 	Clean clean:$(TARGET) : $(_l) ;
 
 	if $(CRELIB) { CreLib $(_l) : $(_s[1]) ; }
-
-	UseCommandLine $(_linkTargets) : $(_s) ;
 
 	local libFlags =
 		[ _retrieveVar LIBFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
@@ -2225,6 +2196,14 @@ rule PrecompiledHeader TARGET : NAME : FILES
 	local header = $(NAME[2]:E=$(NAME[1]:S=.h)) ;
 	CreatePrecompiledHeader $(TARGET) : $(NAME[1]) $(NAME[1]:S) : $(header) ;
 	UsePrecompiledHeader $(TARGET) : $(NAME[1]) $(NAME[1]:S) : $(header) : $(FILES) ;
+}
+
+
+rule NoPrecompiledHeader TARGET : FILES
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	NOPCH on $(FILES:G=$(grist)) = 1 ;
 }
 
 
@@ -2606,7 +2585,7 @@ rule ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS : THE_CONFIG : THE
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
 	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
-	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(INCLUDEPATHS) ;
+	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(INCLUDEPATHS:R=$(SUBDIR)) ;
 }
 
 
