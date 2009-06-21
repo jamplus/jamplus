@@ -1276,9 +1276,9 @@ rule AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO
 }
 
 AddBuildExtensions CC : .c .s : CC : $(SUFOBJ) "" : 1 : 1 ;
-AddBuildExtensions M : .m : M : $(SUFOBJ) "" : 1 : 1 ;
+AddBuildExtensions M : .m : CC : $(SUFOBJ) "" : 1 : 1 ;
 AddBuildExtensions C++ : .cc .cpp .cxx : C++ : $(SUFOBJ) "" : 1 : 1 ;
-AddBuildExtensions MM : .mm : MM : $(SUFOBJ) "" : 1 : 1 ;
+AddBuildExtensions MM : .mm : C++ : $(SUFOBJ) "" : 1 : 1 ;
 AddBuildExtensions PCH : .h : PCH : "" .gch : 0 : 0 ;
 
 if $(MSVCNT)
