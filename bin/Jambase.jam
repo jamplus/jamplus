@@ -301,6 +301,11 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			RANLIB		?= "$(MINGW_ROOT)/bin/ranlib" ;
 			SUFEXE		?= .exe ;
 
+			PCHCCFLAGS = -x c-header ;
+			PCHC++FLAGS = -x c++-header ;
+			PCHMFLAGS = -x objective-c-header ;
+			PCHMMFLAGS = -x objective-c++-header ;
+
 			NOARSCAN = true ;
 			NOARUPDATE = true ;
 		}
@@ -332,6 +337,12 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 		C++FLAGS.*.debug on *	?= [ on * Var CCFLAGS.*.debug ] ;
 		C++FLAGS.*.release on *	?= [ on * Var CCFLAGS.*.release ] ;
 
+		MFLAGS.*.debug on * 	= -g -O0 ;
+		MFLAGS.*.release on * 	= -g -O2 ;
+		MMFLAGS.*.* on *		?= [ on * Var MFLAGS.*.* ] ;
+		MMFLAGS.*.debug on *	?= [ on * Var MFLAGS.*.debug ] ;
+		MMFLAGS.*.release on *	?= [ on * Var MFLAGS.*.release ] ;
+
 		switch $(OS)
 		{
 			case CYGWIN :
@@ -361,6 +372,11 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 		LINKLIBS	?= ;
 		OPTIM		?= -O ;
 		RANLIB		?= ranlib ;
+
+		PCHCCFLAGS = -x c-header ;
+		PCHC++FLAGS = -x c++-header ;
+		PCHMFLAGS = -x objective-c-header ;
+		PCHMMFLAGS = -x objective-c++-header ;
 	}
 
 
@@ -1242,19 +1258,28 @@ __MultiCppCompile_OutputAsTree = 0 ;
 
 BUILD_EXTENSIONS = $(SUFOBJ) ;
 
-rule AddBuildExtensions TYPE : EXTS
+rule AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO_LINK
 {
-	BUILD_EXTENSIONS += $(EXTS) ;
+	if $(ADD_TO_EXTENSIONS) = 1 {
+		BUILD_EXTENSIONS += $(EXTS) ;
+	}
 	BUILD_EXTENSIONS.$(TYPE) += $(EXTS) ;
-	BUILD$(EXTS).RULE = $(TYPE) ;
+	BUILD$(EXTS).RULE = $(RULE) ;
+	BUILD$(EXTS).TYPE = $(TYPE) ;
 	BUILD$(EXTS).COMPILER = $(TYPE) ;
 	BUILD$(EXTS).PREFLAGS = pre$(TYPE)FLAGS ;
 	BUILD$(EXTS).FLAGS = $(TYPE)FLAGS ;
 	BUILD$(EXTS).SUBDIRFLAGS = SUBDIR$(TYPE)FLAGS ;
+	BUILD$(EXTS).SUFOBJ = $(SUFOBJ) ;
+	BUILD$(EXTS).ADD_TO_LINK = $(ADD_TO_LINK) ;
+	BUILD$(EXTS).PCHFLAGS = PCH$(TYPE)FLAGS ;
 }
 
-AddBuildExtensions CC : .c .m .mm .s ;
-AddBuildExtensions C++ : .cc .cpp .cxx ;
+AddBuildExtensions CC : .c .s : CC : $(SUFOBJ) "" : 1 : 1 ;
+AddBuildExtensions M : .m : M : $(SUFOBJ) "" : 1 : 1 ;
+AddBuildExtensions C++ : .cc .cpp .cxx : C++ : $(SUFOBJ) "" : 1 : 1 ;
+AddBuildExtensions MM : .mm : MM : $(SUFOBJ) "" : 1 : 1 ;
+AddBuildExtensions PCH : .h : PCH : "" .gch : 0 : 0 ;
 
 if $(MSVCNT)
 {
@@ -1308,6 +1333,8 @@ rule MultiCppCompile TARGET : SOURCES
 	local preDEFINES ;
 	local preCCFLAGS ;
 	local preC++FLAGS ;
+	local preMFLAGS ;
+	local preMMFLAGS ;
 	local flagsToRemove ;
 	local flagsToAdd ;
 
@@ -1320,6 +1347,8 @@ rule MultiCppCompile TARGET : SOURCES
 		preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
 		preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
 		preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
+		preMFLAGS += $(MFLAGS.$(ALL_TYPES)) ;
+		preMMFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
 		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
 		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
 	}
@@ -1333,6 +1362,8 @@ rule MultiCppCompile TARGET : SOURCES
 		preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
 		preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
 		preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
+		preMFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
+		preMMFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
 		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
 		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
 	}
@@ -1355,17 +1386,16 @@ rule MultiCppCompile TARGET : SOURCES
 	HDRSCAN on $(sources) = $(HDRPATTERN) ;
 	HDRGRIST on $(sources) = $(grist) ;
 
-	if $(__MultiCppCompile_OutputAsTree) = 0 {
-		MakeLocate $(sources:S=$(SUFOBJ):D=) : $(LOCATE_TARGET) ;
-	}
 	SEARCH on $(sources) = $(SEARCH_SOURCE) ;
 
 	local newsrcs ;
 	local _src ;
+
 	for _src in $(sources) {
 		on $(_src) if $(EXCLUDED_FROM_BUILD) = true {
 			continue ;
 		}
+
 		local ext = $(_src:S) ;
 		local BUILD_EXT = BUILD$(ext) ;
 		if ! $($(BUILD_EXT).RULE) {
@@ -1373,16 +1403,46 @@ rule MultiCppCompile TARGET : SOURCES
 			continue ;
 		}
 
+		if $(COMPILER) in mingw gcc
+		{
+			# if the source should create pch
+			local _pch ;
+			on $(_src) _pch = $(PCH) ;
+			if $(_pch)  &&  $(_pch[3]) {
+				local _pchName = $(_pch[1]:BS=.h:G=$(grist)) ;
+				newsrcs += $(_pchName) ;
+
+				local _pchFilename = $(_pchName).gch ;
+				PCHFLAGS.$(PLATFORM).$(CONFIG) on $(_pchFilename) += $($($(BUILD_EXT).PCHFLAGS)) ;
+
+				Depends $(_pchFilename) : $(_src) ;
+			}
+		}
+
+		newsrcs += $(_src) ;
+	}
+
+	for _src in $(newsrcs) {
+		local ext = $(_src:S) ;
+		local BUILD_EXT = BUILD$(ext) ;
+
+		local sufobj = $($(BUILD_EXT).SUFOBJ) ;
+
 		local _obj ;
+		if $(sufobj[1]) {
+			_obj = $(_src:S=$(sufobj[1]):D=)$(sufobj[2]) ;
+		} else {
+			_obj = $(_src)$(sufobj[2]) ;
+		}
 		if $(__MultiCppCompile_OutputAsTree) != 0 {
-			_obj = [ Subst $(_src:S=$(SUFOBJ)) : %.%. : __ ] ;
+			_obj = [ Subst $(_obj) : %.%. : __ ] ;
 			_obj = [ Subst $(_obj) : \: : -- ] ;
 			local _objdir = $(_obj:DR=$(LOCATE_TARGET)) ;
 			MakeLocate $(_obj) : $(_objdir) ;
 			BINDING on $(_obj) = $(_obj:BS) ;
 			_postmflags = "/c \"/Fo$(_objdir:\\)\\\\\" \"/Fd$(_VCPDB:T)\"" ;
 		} else {
-			_obj = $(_src:S=$(SUFOBJ):D=) ;
+			MakeLocate $(_obj) : $(LOCATE_TARGET) ;
 		}
 
 		local _hdrs = $(SEARCH_SOURCE) ;
@@ -1400,7 +1460,18 @@ rule MultiCppCompile TARGET : SOURCES
 		on $(_obj) _flags += $($($(BUILD_EXT).FLAGS).$(ALL_TYPES)) ;
 		_flags += $($($(BUILD_EXT).SUBDIRFLAGS)) ;
 
-		_flags += [ FIncludes $(_hdrs) . ] ;
+		# if the source should create pch
+		local _nopch ;
+		local _pch ;
+		on $(_src) {
+			_nopch = $(NOPCH) ;
+			_pch = $(PCH) ;
+		}
+		if $(_pch) {
+			_flags += -I $(LOCATE_SOURCE) ;
+		}
+
+		_flags += [ FIncludes $(_hdrs) ] ;
 
 		_flags += $(preDEFINES) ;
 		on $(_obj) _flags += [ FDefines $(DEFINES.$(ALL_TYPES)) ] ;
@@ -1410,54 +1481,53 @@ rule MultiCppCompile TARGET : SOURCES
 		if $(MSVCNT) {
 			_flags += $(postREFERENCEDIRECTORIES) ;
 
-			# if the source should create pch
-			local _pch ;
-			on $(_src) _pch = $(PCH) ;
-			if $(_pch) {
-				local _nopch ;
-				on $(_src) _nopch = $(NOPCH) ;
-				if $(_pch[3]) {
-					# add extra flags to enable pch creation
-					local _pchFilename = $(_pch[1]).pch ;
-					local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
-					_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
-					_flags += /Yc$(_pch[2]) ;  # h file
-					# mark that it will be created by compilation through srcref
-					_pchFilename = $(_pchFilename:G=$(grist)) ;
-					BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
-					MakeLocate $(_pchFilename) : $(LOCATE_TARGET) ;
-					Depends $(_pchFilename) : $(_src) ;
-					Clean clean:$(TARGET) : $(_pchFilename) ;
+			if $(_pch[3]) {
+				# add extra flags to enable pch creation
+				local _pchFilename = $(_pch[1]).pch ;
+				local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
+				_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
+				_flags += /Yc$(_pch[2]) ;  # h file
+				# mark that it will be created by compilation through srcref
+				_pchFilename = $(_pchFilename:G=$(grist)) ;
+				BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
+				MakeLocate $(_pchFilename) : $(LOCATE_TARGET) ;
+				Depends $(_pchFilename) : $(_src) ;
+				Clean clean:$(TARGET) : $(_pchFilename) ;
 
-				# if the source should use pch
-				} else if $(_pch[2]) && ! $(_nopch) {
-					# add extra flags to enable pch loading
-					local _pchFilename = $(_pch[1]).pch ;
-					local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
-					_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
-					_flags += /Yu$(_pch[2]) ;  # h file
-					# mark that compilation will depend on it
-					_pchFilename = $(_pchFilename:G=$(grist)) ;
-					Includes $(_src) : $(_pchFilename) ;
-				}
+			# if the source should use pch
+			} else if $(_pch[2]) && ! $(_nopch) {
+				# add extra flags to enable pch loading
+				local _pchFilename = $(_pch[1]).pch ;
+				local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
+				_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
+				_flags += /Yu$(_pch[2]) ;  # h file
+				# mark that compilation will depend on it
+				_pchFilename = $(_pchFilename:G=$(grist)) ;
+				Includes $(_src) : $(_pchFilename) ;
 			}
 
 			# bind flags, defines and includes to the target
 			_flags += $(_postmflags) ;
-			_flags -= $(flagsToRemove) ;
-			_flags += $(flagsToAdd) ;
-			MFLAGS on $(_src) = $(BUILD$(ext).RULE) $(_flags) ;
-			UseCommandLine $(_obj) : $(_flags) ;
 		}
 		else if $(COMPILER) in mingw gcc
 		{
-			if $(flagsToRemove) { _flags -= $(flagsToRemove) ; }
-			if $(flagsToAdd) { _flags += $(flagsToAdd) ; }
-			MFLAGS on $(_src) = $(BUILD$(ext).RULE) $(_flags) "-c -o \"$(_obj:T)\"" ;
-			UseCommandLine $(_obj) : $(_flags) ;
+			if $(_pch)  &&  ! $(_nopch) {
+				local _pchFilename = @($(_pch[1]:BS=.h).gch:G=$(grist)) ;
+				
+				# if the source should use pch
+				if $(_pch[2]) {
+					# mark that compilation will depend on it
+					Includes $(_src) : $(_pchFilename) ;
+				}
+			}
+
+			_flags += "-c -o \"$(_obj:T)\"" ;
 		}
 
-		newsrcs += $(_src) ;
+		_flags -= $(flagsToRemove) ;
+		_flags += $(flagsToAdd) ;
+		MFLAGS on $(_src) = $(BUILD$(ext).RULE) $(sufobj) $(BUILD$(ext).ADD_TO_LINK) $(_flags) ;
+		UseCommandLine $(_obj) : $(_flags) ;
 	}
 
 	#
@@ -1475,25 +1545,34 @@ rule MultiCppCompile TARGET : SOURCES
 	while $(newsrcs) {
 		_sources = [ GroupByVar1 newsrcs : MFLAGS : $(batchCompileGroupSize) ] ;
 
-		# start with empty lists of objects for this batch
-		local objects ;
-		# for each source in this batch
-		local _obj ;
-		if $(__MultiCppCompile_OutputAsTree) != 0 {
-			local renamed = [ Subst $(_sources:S=$(SUFOBJ)) : %.%. : __ ] ;
-			renamed = [ Subst $(renamed) : \: : -- ] ;
-			objects += $(renamed) ;
-		} else {
-			objects += $(_sources:S=$(SUFOBJ):D=) ;
+		local _pch1 ;
+		local sufobj ;
+		local addToLink ;
+		on $(_sources[1]) {
+			_pch1 = $(PCH) ;
+			sufobj = $(MFLAGS[2]) $(MFLAGS[3]) ;
+			addToLink = $(MFLAGS[4]) ;
 		}
 
-		# collect produced objects (note that this is before adding the pch,
-		# because we don't want to use it in linking)
-		_allobjs += $(objects) ;
+		# start with empty lists of objects for this batch
+		local objects ;
+		if $(sufobj[1]) {
+			objects = $(_sources:S=$(sufobj[1]):D=)$(sufobj[2]) ;
+		} else {
+			objects = $(_sources)$(sufobj[2]) ;
+		}
+		if $(__MultiCppCompile_OutputAsTree) != 0 {
+			objects = [ Subst $(objects) : %.%. : __ ] ;
+			objects = [ Subst $(objects) : \: : -- ] ;
+		}
+
+		if $(addToLink) = 1 {
+			# collect produced objects (note that this is before adding the pch,
+			# because we don't want to use it in linking)
+			_allobjs += $(objects) ;
+		}
 
 		# if this batch will also create a pch
-		local _pch1 ;
-		on $(_sources[1]) _pch1 = $(PCH) ;
 		if $(MSVCNT) {
 			if $(_pch1[3]) {
 				local _pchFilename = $(_pch1[1]).pch ;
@@ -1503,13 +1582,19 @@ rule MultiCppCompile TARGET : SOURCES
 				objects += $(_pchFilename) ;
 			}
 		}
+		else if $(COMPILER) in mingw gcc {
+			if $(_pch1[3]) {
+				local _pchFilename = @($(_pch1[1]:BS=.h).gch:G=$(grist)) ;
+				Depends $(objects) : $(_pchFilename) ;
+			}
+		}
 
 		# mark all objects (and pch) for cleaning
 		Clean clean:$(TARGET) : $(objects) ;
 
 		local flags ;
 		on $(_sources[1]) flags = $(MFLAGS) ;
-		MFLAGS on $(objects) = $(flags[2-]) ;
+		MFLAGS on $(objects) = $(flags[5-]) ;
 
 		if $(MSVCNT) {
 			SEMAPHORE on $(objects) = $(_VCPDB) ;
@@ -1553,6 +1638,11 @@ if $(COMPILER) in mingw gcc
 	}
 
 	actions updated response C++
+	{
+		"$(C++)" -c $(MFLAGS) $(>)
+	}
+
+	actions updated response PCH
 	{
 		"$(C++)" -c $(MFLAGS) $(>)
 	}
