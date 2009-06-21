@@ -166,7 +166,7 @@ function ProcessCommandLine()
 		not opts.gen or
 		not Exporters[opts.gen]
 	then
-		Usage();
+		Usage()
 	end
 end
 
@@ -234,6 +234,7 @@ MapConfigToVSConfig =
 {
 	['debug'] = 'Debug',
 	['release'] = 'Release',
+	['releaseltcg'] = 'Release LTCG'
 }
 
 local VisualStudioProjectMetaTable = {  __index = VisualStudioProjectMetaTable  }
