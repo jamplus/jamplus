@@ -1,6 +1,7 @@
 SubDir TOP ;
 
 SRCS =
+		../src/file.c
 		../src/main.c
 		../src/precomp.c
 		../src/precomp.h
