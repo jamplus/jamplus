@@ -2435,7 +2435,7 @@ rule ForceInclude TARGET : INCLUDES : THE_CONFIG : THE_PLATFORM
 	if $(COMPILER) in vc6 vs2002 vs2003 vs2005 vs2008 {
 		AddFlags $(TARGET) : "/FI$(INCLUDES)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 	} else {
-		AddFlags $(TARGET) : "-include $(INCLUDES)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+		AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 	}
 }
 
