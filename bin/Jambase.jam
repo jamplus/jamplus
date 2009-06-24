@@ -1173,6 +1173,18 @@ if $(WIN98)
     }
 }
 
+
+#
+# Mac OS X specific actions
+#
+
+if $(OS) = MACOSX {
+	actions response Link
+	{
+		"$(LINK)" $(LINKFLAGS) -o $(<[1]) $(UNDEFS) -filelist @($(>:J=$(NEWLINE))) $(NEEDLIBS:T) $(LINKLIBS)
+	}
+}
+
 ########################################################################
 # The original MultiCppCompile rule was provided by Alen Ladavac.
 ########################################################################
