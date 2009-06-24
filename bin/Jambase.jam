@@ -1418,14 +1418,14 @@ rule MultiCppCompile TARGET : SOURCES
 			# if the source should create pch
 			local _pch ;
 			on $(_src) _pch = $(PCH) ;
-			if $(_pch)  &&  $(_pch[3]) {
-				local _pchName = $(_pch[1]:BS=.h:G=$(grist)) ;
+			if $(_pch[4]) {
+				local _pchName = @($(_pch[3]:LBS):G=$(grist)) ;
 				newsrcs += $(_pchName) ;
 
 				local _pchFilename = $(_pchName).gch ;
 				PCHFLAGS.$(PLATFORM).$(CONFIG) on $(_pchFilename) += $($($(BUILD_EXT).PCHFLAGS)) ;
 
-				Depends $(_pchFilename) : $(_src) ;
+#				Depends $(_pchFilename) : $(_src) ;
 			}
 		}
 
@@ -1439,12 +1439,12 @@ rule MultiCppCompile TARGET : SOURCES
 		local sufobj = $($(BUILD_EXT).SUFOBJ) ;
 
 		local _obj ;
-		if $(sufobj[1]) {
-			_obj = $(_src:S=$(sufobj[1]):D=)$(sufobj[2]) ;
-		} else {
-			_obj = $(_src)$(sufobj[2]) ;
-		}
 		if $(__MultiCppCompile_OutputAsTree) != 0 {
+			if $(sufobj[1]) {
+				_obj = $(_src:S=$(sufobj[1]))$(sufobj[2]) ;
+			} else {
+				_obj = $(_src)$(sufobj[2]) ;
+			}
 			_obj = [ Subst $(_obj) : %.%. : __ ] ;
 			_obj = [ Subst $(_obj) : \: : -- ] ;
 			local _objdir = $(_obj:DR=$(LOCATE_TARGET)) ;
@@ -1452,6 +1452,11 @@ rule MultiCppCompile TARGET : SOURCES
 			BINDING on $(_obj) = $(_obj:BS) ;
 			_postmflags = "/c \"/Fo$(_objdir:\\)\\\\\" \"/Fd$(_VCPDB:T)\"" ;
 		} else {
+			if $(sufobj[1]) {
+				_obj = $(_src:S=$(sufobj[1]):D=)$(sufobj[2]) ;
+			} else {
+				_obj = $(_src)$(sufobj[2]) ;
+			}
 			MakeLocate $(_obj) : $(LOCATE_TARGET) ;
 		}
 
@@ -1491,9 +1496,9 @@ rule MultiCppCompile TARGET : SOURCES
 		if $(MSVCNT) {
 			_flags += $(postREFERENCEDIRECTORIES) ;
 
-			if $(_pch[3]) {
+			if $(_pch[4]) {
 				# add extra flags to enable pch creation
-				local _pchFilename = $(_pch[1]).pch ;
+				local _pchFilename = $(_pch[3]:LBS).pch ;
 				local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
 				_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
 				_flags += /Yc$(_pch[2]) ;  # h file
@@ -1507,7 +1512,7 @@ rule MultiCppCompile TARGET : SOURCES
 			# if the source should use pch
 			} else if $(_pch[2]) && ! $(_nopch) {
 				# add extra flags to enable pch loading
-				local _pchFilename = $(_pch[1]).pch ;
+				local _pchFilename = $(_pch[3]:LBS).pch ;
 				local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
 				_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
 				_flags += /Yu$(_pch[2]) ;  # h file
@@ -1522,7 +1527,8 @@ rule MultiCppCompile TARGET : SOURCES
 		else if $(COMPILER) in mingw gcc
 		{
 			if $(_pch)  &&  ! $(_nopch) {
-				local _pchFilename = @($(_pch[1]:BS=.h).gch:G=$(grist)) ;
+				local _pchName = @($(_pch[3]:LBS):G=$(grist)) ;
+				local _pchFilename = $(_pchFilename).gch ;
 				
 				# if the source should use pch
 				if $(_pch[2]) {
@@ -1566,14 +1572,20 @@ rule MultiCppCompile TARGET : SOURCES
 
 		# start with empty lists of objects for this batch
 		local objects ;
-		if $(sufobj[1]) {
-			objects = $(_sources:S=$(sufobj[1]):D=)$(sufobj[2]) ;
-		} else {
-			objects = $(_sources)$(sufobj[2]) ;
-		}
 		if $(__MultiCppCompile_OutputAsTree) != 0 {
+			if $(sufobj[1]) {
+				objects = $(_sources:S=$(sufobj[1]))$(sufobj[2]) ;
+			} else {
+				objects = $(_sources)$(sufobj[2]) ;
+			}
 			objects = [ Subst $(objects) : %.%. : __ ] ;
 			objects = [ Subst $(objects) : \: : -- ] ;
+		} else {
+			if $(sufobj[1]) {
+				objects = $(_sources:S=$(sufobj[1]):D=)$(sufobj[2]) ;
+			} else {
+				objects = $(_sources)$(sufobj[2]) ;
+			}
 		}
 
 		if $(addToLink) = 1 {
@@ -1584,8 +1596,8 @@ rule MultiCppCompile TARGET : SOURCES
 
 		# if this batch will also create a pch
 		if $(MSVCNT) {
-			if $(_pch1[3]) {
-				local _pchFilename = $(_pch1[1]).pch ;
+			if $(_pch1[4]) {
+				local _pchFilename = $(_pch1[3]:LBS).pch ;
 				_pchFilename = $(_pchFilename:G=$(grist)) ;
 				Depends $(objects) : $(_pchFilename) ;
 				# add that pch as output
@@ -1594,7 +1606,8 @@ rule MultiCppCompile TARGET : SOURCES
 		}
 		else if $(COMPILER) in mingw gcc {
 			if $(_pch1[3]) {
-				local _pchFilename = @($(_pch1[1]:BS=.h).gch:G=$(grist)) ;
+				local _pchName = @($(_pch[3]:LBS):G=$(grist)) ;
+				local _pchFilename = $(_pchName).gch ;
 				Depends $(objects) : $(_pchFilename) ;
 			}
 		}
@@ -2305,8 +2318,8 @@ rule PrecompiledHeader TARGET : NAME : FILES
 		NAME[1] = $(NAME[1]:S=.cpp) ;
 	}
 	local header = $(NAME[2]:E=$(NAME[1]:S=.h)) ;
-	CreatePrecompiledHeader $(TARGET) : $(NAME[1]) $(NAME[1]:S) : $(header) ;
-	UsePrecompiledHeader $(TARGET) : $(NAME[1]) $(NAME[1]:S) : $(header) : $(FILES) ;
+	CreatePrecompiledHeader $(TARGET) : $(NAME[1]) $(NAME[1]:S) : $(header) $(NAME[3]:E=$(header)) ;
+	UsePrecompiledHeader $(TARGET) : $(NAME[1]) $(NAME[1]:S) : $(header) $(NAME[3]:E=$(header)) : $(FILES) ;
 }
 
 
