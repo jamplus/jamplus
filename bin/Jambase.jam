@@ -1378,8 +1378,6 @@ rule MultiCppCompile TARGET : SOURCES
 	local colon = ":" ;
 	local listIncludes = @(I=\\$(BUILD_EXTENSIONS)$:J=$(colon)) ;
 	local sources = @($(dollar)(SOURCES$(colon)$(listIncludes)):A:G=$(grist)) ;
-#	local objSources = $(SOURCES:I=\\$(SUFOBJ)$:I=\\$(SUFRES):G=$(grist)) ;
-#	local sources = $(SOURCES:G=$(grist)) ;
 
 	# source needs to be scanned for header dependencies
 	HDRRULE on $(sources) = HdrRule ;
