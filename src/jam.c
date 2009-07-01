@@ -558,6 +558,24 @@ int main( int argc, char **argv, char **arg_environ )
 	}
 #endif
 
+#ifdef OPT_SET_JAMCOMMANDLINETARGETS_EXT
+	{
+		/* Go through the list of targets specified on the command line, */
+		/* and add them to a variable called JAM_COMMAND_LINE_TARGETS. */
+		LIST* l = L0;		
+		int n_targets = argc ? argc : 1;
+		const char** targets = argc ? (const char**)argv : &all;
+		int i;
+		
+		for ( i = 0; i < n_targets; ++i )
+		{
+			l = list_new( l, targets[ i ], 0 );
+		}
+		
+		var_set( "JAM_COMMAND_LINE_TARGETS", l, VAR_SET );
+	}
+#endif
+
 	/* Parse ruleset */
 
 	for( n = 0; s = getoptval( optv, 'f', n ); n++ )

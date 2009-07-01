@@ -690,7 +690,7 @@ make0(
 		    also needs to be marked newer. This is needed so that 'updated'
 		    correctly will include the original target in the $(<) variable. */
 		if(
-			c->target->includes->time > ptime->time )
+			c->target->includes->time > ptime->time || c->target->includes->fate > T_FATE_STABLE)
 		    c->target->fate = max( T_FATE_NEWER, c->target->fate );
 #endif
 	    }
