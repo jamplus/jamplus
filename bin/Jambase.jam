@@ -1528,7 +1528,7 @@ rule MultiCppCompile TARGET : SOURCES
 		{
 			if $(_pch)  &&  ! $(_nopch) {
 				local _pchName = @($(_pch[3]:LBS):G=$(grist)) ;
-				local _pchFilename = $(_pchFilename).gch ;
+				local _pchFilename = $(_pchName).gch ;
 				
 				# if the source should use pch
 				if $(_pch[2]) {
