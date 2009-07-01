@@ -1,4 +1,7 @@
 SubDir TOP project1 ;
 
+ActiveProject project1 ;
+
+ObjectIncludeDirectories : adefine.cpp : ../shared ;
 LinkLibraries project1 : common ;
-Application project1 : project1.cpp ;
+Application project1 : project1.cpp adefine.cpp ;
