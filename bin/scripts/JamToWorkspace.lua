@@ -16,7 +16,7 @@ jamExePath = os.path.escape(os.path.combine(jamPath, 'jam'))
 
 Config =
 {
-	Configurations = { 'debug', 'release' }
+	Configurations = { 'debug', 'release', 'releaseltcg' }
 }
 
 Compilers =
@@ -166,7 +166,7 @@ function ProcessCommandLine()
 		not opts.gen or
 		not Exporters[opts.gen]
 	then
-		Usage();
+		Usage()
 	end
 end
 
@@ -234,6 +234,7 @@ MapConfigToVSConfig =
 {
 	['debug'] = 'Debug',
 	['release'] = 'Release',
+	['releaseltcg'] = 'Release LTCG'
 }
 
 local VisualStudioProjectMetaTable = {  __index = VisualStudioProjectMetaTable  }
@@ -1025,6 +1026,846 @@ end
 
 
 
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+function XcodeUuid()
+	return uuid.new():gsub('%-', ''):upper():sub(1, 24)
+end
+
+local XcodeProjectMetaTable = {  __index = XcodeProjectMetaTable  }
+
+function XcodeProjectMetaTable:Write(outputPath, commandLines)
+	local filename = outputPath .. self.ProjectName .. '.xcodeproj/project.pbxproj'
+	os.mkdir(filename)
+
+	local jamCommandLine = jamExePath .. ' ' ..
+			os.path.escape('-C' .. destinationRootPath) --.. ' ' ..
+--			'-sPLATFORM=' .. platformName .. ' ' ..
+--			'-sCONFIG=' .. configName
+
+	local info = ProjectExportInfo[self.ProjectName]
+	if not info then
+		info = {
+			Name = self.ProjectName,
+			Filename = filename,
+		}
+		ProjectExportInfo[self.ProjectName] = info
+	end
+	if not info.LegacyTargetUuid then
+		info.LegacyTargetUuid = XcodeUuid()
+	end
+	if not info.LegacyTargetBuildConfigurationListUuid then
+		info.LegacyTargetBuildConfigurationListUuid = XcodeUuid()
+	end
+	if not info.ProjectUuid then
+		info.ProjectUuid = XcodeUuid()
+	end
+	if not info.ProjectBuildConfigurationListUuid then
+		info.ProjectBuildConfigurationListUuid = XcodeUuid()
+	end
+
+	local project = Projects[self.ProjectName]
+
+	-- Write header.
+	table.insert(self.Contents, [[
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+]])
+
+	if not info.EntryUuids then
+		info.EntryUuids = { }
+	end
+	self.EntryUuids = info.EntryUuids
+	
+	project.SourcesTree.folder = self.ProjectName
+	local sourcesTree = { project.SourcesTree }
+	self:_AssignEntryUuids(sourcesTree, '')
+
+	-- Write PBXFileReferences.
+	table.insert(self.Contents, [[
+/* Begin PBXFileReference section */
+]])
+	self:_WritePBXFileReferences(sourcesTree)
+	table.insert(self.Contents, [[
+/* End PBXFileReference section */
+
+]])
+
+	-- Write PBXGroups.
+	table.insert(self.Contents, '/* Begin PBXGroup section */\n')
+	self:_WritePBXGroups(sourcesTree, '')
+	table.insert(self.Contents, '/* End PBXGroup section */\n\n')
+	
+	-- Write PBXLegacyTarget.
+	table.insert(self.Contents, '/* Begin PBXLegacyTarget section */\n')
+	table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, info.Name))
+	table.insert(self.Contents, '\t\t\tisa = PBXLegacyTarget;\n')
+	table.insert(self.Contents, '\t\t\tbuildArgumentsString = "\\\"-sPLATFORM=$(PLATFORM) -sCONFIG=$(CONFIG)\\\" $(ACTION) $(TARGET_NAME)";\n')
+	table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. info.Name .. '" */;\n')
+	table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
+	table.insert(self.Contents, '\t\t\t);\n')
+	table.insert(self.Contents, '\t\t\tbuildToolPath = ' .. os.path.combine(destinationRootPath, 'xcodejam') .. ';\n')
+	table.insert(self.Contents, '\t\t\tdependencies = (\n')
+	table.insert(self.Contents, '\t\t\t);\n')
+	table.insert(self.Contents, '\t\t\tname = ' .. info.Name .. ';\n')
+	table.insert(self.Contents, '\t\t\tpassBuildSettingsInEnvironment = 1;\n')
+	table.insert(self.Contents, '\t\t\tproductName = ' .. self.ProjectName .. ';\n')
+	table.insert(self.Contents, '\t\t};\n')
+	table.insert(self.Contents, '/* End PBXLegacyTarget section */\n\n')
+
+	-- Write PBXProject.
+	table.insert(self.Contents, '/* Begin PBXProject section */\n')
+	table.insert(self.Contents, ("\t\t%s /* Project object */ = {\n"):format(info.ProjectUuid))
+	info.GroupUuid = info.EntryUuids[sourcesTree[1].folder .. '/']
+	table.insert(self.Contents, expand([[
+			isa = PBXProject;
+			buildConfigurationList = $(ProjectBuildConfigurationListUuid) /* Build configuration list for PBXProject "$(Name)" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = $(GroupUuid) /* $(Name) */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				$(LegacyTargetUuid) /* $(Name) */,
+			);
+		};
+]], info))
+	table.insert(self.Contents, '/* End PBXProject section */\n\n')
+
+	-- Write XCBuildConfigurations.
+	if not info.LegacyTargetConfigUuids then
+		info.LegacyTargetConfigUuids = {}
+
+		for _, config in ipairs(Config.Configurations) do
+			info.LegacyTargetConfigUuids[config] = XcodeUuid()
+		end
+	end
+
+	if not info.ProjectConfigUuids then
+		info.ProjectConfigUuids = {}
+
+		for _, config in ipairs(Config.Configurations) do
+			info.ProjectConfigUuids[config] = XcodeUuid()
+		end
+	end
+
+	table.insert(self.Contents, '/* Begin XCBuildConfiguration section */\n')
+
+	-- Write legacy target configurations.
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t" .. info.LegacyTargetConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
+		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
+		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+		table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = " .. self.ProjectName .. ";\n")
+		table.insert(self.Contents, "\t\t\t\tTARGET_NAME = " .. self.ProjectName .. ";\n")
+		table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. Platform .. ";\n")
+		table.insert(self.Contents, "\t\t\t\tCONFIG = " .. config .. ";\n")
+		table.insert(self.Contents, "\t\t\t};\n")
+		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
+		table.insert(self.Contents, "\t\t};\n")
+	end
+	
+	-- Write project configurations.
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t" .. info.ProjectConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
+		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
+		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+		table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
+		table.insert(self.Contents, "\t\t\t\tSDKROOT = macosx10.5;\n")
+		table.insert(self.Contents, "\t\t\t};\n")
+		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
+		table.insert(self.Contents, "\t\t};\n")
+	end
+
+	table.insert(self.Contents, '/* End XCBuildConfiguration section */\n\n')
+
+
+	-- Write XCConfigurationLists.
+	table.insert(self.Contents, "/* Begin XCConfigurationList section */\n")
+
+	table.insert(self.Contents, "\t\t" .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. self.ProjectName .. '" */ = {\n')
+	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
+	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t\t\t" .. info.LegacyTargetConfigUuids[config] .. " /* " .. config .. " */,\n")
+	end
+	table.insert(self.Contents, "\t\t\t);\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = release;\n")
+	table.insert(self.Contents, "\t\t};\n\n")
+	
+	table.insert(self.Contents, "\t\t" .. info.ProjectBuildConfigurationListUuid .. ' /* Build configuration list for PBXProject "' .. self.ProjectName .. '" */ = {\n')
+	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
+	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t\t\t" .. info.ProjectConfigUuids[config] .. " /* " .. config .. " */,\n")
+	end
+	table.insert(self.Contents, "\t\t\t);\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = release;\n")
+	table.insert(self.Contents, "\t\t};\n")
+	
+	table.insert(self.Contents, "/* End XCConfigurationList section */\n\n")
+	
+	table.insert(self.Contents, "\t};\n")
+	table.insert(self.Contents, "\trootObject = " .. info.ProjectUuid .. " /* Project object */;\n")
+	table.insert(self.Contents, "}\n")
+	
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
+
+	WriteFileIfModified(filename, self.Contents)
+
+	---------------------------------------------------------------------------
+	-- Write username.pbxuser with the executable settings
+	---------------------------------------------------------------------------
+	local ConfigInfo = {}
+	local platformName = Platform
+	for configName in ivalues(Config.Configurations) do
+		local configInfo =
+		{
+			Platform = platformName,
+			Config = configName,
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+			Defines = '',
+			Includes = '',
+			OutputPath = '',
+			OutputName = '',
+		}
+		ConfigInfo[configName] = configInfo
+
+		if project and project.Name then
+			if project.Defines then
+				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+			end
+			if project.IncludePaths then
+				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
+			end
+			if project.OutputPaths then
+				configInfo.OutputPath = project.OutputPaths[platformName][configName]
+				configInfo.OutputName = project.OutputNames[platformName][configName]
+			end
+			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
+		elseif not commandLines then
+			configInfo.BuildCommandLine = jamCommandLine
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
+		else
+			configInfo.BuildCommandLine = commandLines[1] or ''
+			configInfo.RebuildCommandLine = commandLines[2] or ''
+			configInfo.CleanCommandLine = commandLines[3] or ''
+		end
+	end
+	
+	for configName in ivalues(Config.Configurations) do
+		local configInfo = ConfigInfo[configName]
+		if not info.ExecutableInfo then
+			info.ExecutableInfo = {}
+		end
+		
+		local executableConfig = info.ExecutableInfo[configName]
+		if not executableConfig then
+			executableConfig = {}
+			info.ExecutableInfo[configName] = executableConfig
+		end
+		
+		if not executableConfig.Uuid then
+			executableConfig.Uuid = XcodeUuid()
+		end
+		
+		if not executableConfig.FileReferenceUuid then
+			executableConfig.FileReferenceUuid = XcodeUuid()
+		end
+	end
+	
+	local extraData = {}
+	extraData.activeConfig = Config.Configurations[1]
+	extraData.activeExecutable = info.ExecutableInfo[extraData.activeConfig].Uuid
+
+	local filename = outputPath .. self.ProjectName .. '.xcodeproj/' .. os.getenv('USER') .. '.pbxuser'
+
+	self.Contents = {}
+	table.insert(self.Contents, [[
+// !$*UTF8*$!
+{
+]])
+
+	table.insert(self.Contents, expand([[
+	$(ProjectUuid) /* Project object */ = {
+		activeBuildConfigurationName = $(activeConfig);
+		activeExecutable = $(activeExecutable) /* $(Name) */;
+		activeTarget = $(LegacyTargetUuid) /* $(Name) */;
+		executables = (
+]], extraData, info))
+
+	for configName in ivalues(Config.Configurations) do
+		local configInfo = ConfigInfo[configName]
+		local executableConfig = info.ExecutableInfo[configName]
+		
+		table.insert(self.Contents, '\t\t\t' .. executableConfig.Uuid .. ' /* ' .. configInfo.OutputName .. ' */,\n')
+	end
+	
+	table.insert(self.Contents, [[
+		);
+		userBuildSettings = {
+		};
+	};
+]])
+
+	table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, self.ProjectName))
+	table.insert(self.Contents, '\t\tactiveExec = 0;\n')
+	table.insert(self.Contents, '\t};\n')
+
+	for configName in ivalues(Config.Configurations) do
+		local configInfo = ConfigInfo[configName]
+		if not info.ExecutableInfo then
+			info.ExecutableInfo = {}
+		end
+		
+		local executableConfig = info.ExecutableInfo[configName]
+		if not executableConfig then
+			executableConfig = {}
+			info.ExecutableInfo[configName] = executableConfig
+		end
+		
+		if not executableConfig.Uuid then
+			executableConfig.Uuid = XcodeUuid()
+		end
+		
+		if not executableConfig.FileReferenceUuid then
+			executableConfig.FileReferenceUuid = XcodeUuid()
+		end
+		extraData.OutputName = configInfo.OutputName
+
+		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.FileReferenceUuid, configInfo.OutputName))
+		table.insert(self.Contents, [[
+		isa = PBXFileReference;
+		lastKnownFileType = text;
+]])
+		table.insert(self.Contents, '\t\tname = ' .. configInfo.OutputName .. ';\n')
+		table.insert(self.Contents, '\t\tpath = ' .. configInfo.OutputPath .. configInfo.OutputName .. ';\n')
+		table.insert(self.Contents, [[
+		sourceTree = "<absolute>";
+	};
+]])
+
+		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.Uuid, configInfo.OutputName))
+		table.insert(self.Contents, expand([[
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+			"PBXLSLaunchAction-0" = {
+				PBXLSLaunchAction = 0;
+				PBXLSLaunchStartAction = 1;
+				PBXLSLaunchStdioStyle = 2;
+				PBXLSLaunchStyle = 0;
+				class = PBXLSRunLaunchConfig;
+				commandLineArgs = (
+				);
+				displayName = "Executable Runner";
+				environment = {
+				};
+				identifier = com.apple.Xcode.launch.runConfig;
+				remoteHostInfo = "";
+				startActionInfo = "";
+			};
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		launchableReference = $(FileReferenceUuid) /* $(OutputName) */;
+		libgmallocEnabled = 0;
+		name = $(OutputName);
+		sourceDirectories = (
+		);
+	};
+]], executableConfig, info, extraData))
+	end
+		
+	table.insert(self.Contents, '}\n')
+
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
+
+	WriteFileIfModified(filename, self.Contents)
+	
+--[=====[
+	local platformName = Platform
+	for configName in ivalues(Config.Configurations) do
+		local jamCommandLine = jamExePath .. ' ' ..
+				os.path.escape('-C' .. destinationRootPath) .. ' ' ..
+				'-sPLATFORM=' .. platformName .. ' ' ..
+				'-sCONFIG=' .. configName
+
+		local configInfo =
+		{
+			Platform = platformName,
+			Config = configName,
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+			Defines = '',
+			Includes = '',
+			Output = '',
+		}
+
+		if project and project.Name then
+			if project.Defines then
+				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+			end
+			if project.IncludePaths then
+				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
+			end
+			if project.OutputPaths then
+				configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
+			end
+			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
+		elseif not commandLines then
+			configInfo.BuildCommandLine = jamCommandLine
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
+		else
+			configInfo.BuildCommandLine = commandLines[1] or ''
+			configInfo.RebuildCommandLine = commandLines[2] or ''
+			configInfo.CleanCommandLine = commandLines[3] or ''
+		end
+
+		if self.Options.vs2003 then
+			table.insert(self.Contents, expand([==[
+		<Configuration
+			Name="$(VSConfig)|$(VSPlatform)"
+			OutputDirectory="$$(ConfigurationName)"
+			IntermediateDirectory="$$(ConfigurationName)"
+			ConfigurationType="0"
+			BuildLogFile="$(destinationRootPath:gsub('\\', '/'))temp-$(Platform)-$(Config)/BuildLog.htm">
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="$(BuildCommandLine)"
+				ReBuildCommandLine="$(RebuildCommandLine)"
+				CleanCommandLine="$(CleanCommandLine)"
+				Output="$(Output)"
+			/>
+		</Configuration>
+]==], configInfo, info, _G))
+
+		elseif self.Options.vs2005 or self.Options.vs2008 then
+			table.insert(self.Contents, expand([==[
+		<Configuration
+			Name="$(VSConfig)|$(VSPlatform)"
+			OutputDirectory="$$(ConfigurationName)"
+			IntermediateDirectory="$$(ConfigurationName)"
+			ConfigurationType="0"
+			BuildLogFile="$(destinationRootPath:gsub('\\', '/'))temp-$(Platform)-$(Config)/BuildLog.htm"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="$(BuildCommandLine)"
+				ReBuildCommandLine="$(RebuildCommandLine)"
+				CleanCommandLine="$(CleanCommandLine)"
+				Output="$(Output)"
+				PreprocessorDefinitions="$(Defines)"
+				IncludeSearchPath="$(Includes)"
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+]==], configInfo, info, _G))
+		end
+	end
+
+	-- Write Configurations footer.
+	table.insert(self.Contents, [[
+	</Configurations>
+]])
+
+	-- Write References.
+	table.insert(self.Contents, [[
+	<References>
+	</References>
+]])
+
+	-- Write Files.
+	table.insert(self.Contents, [[
+	<Files>
+]])
+
+	if project then
+		self:_WriteFiles(project.SourcesTree, '\t\t')
+	end
+
+	table.insert(self.Contents, [[
+	</Files>
+]])
+
+	-- Write Globals.
+	table.insert(self.Contents, [[
+	<Globals>
+	</Globals>
+]])
+
+	-- Write footer.
+	table.insert(self.Contents, [[
+</XcodeProject>
+]])
+]=====]
+end
+
+function XcodeProject(projectName, options)
+	return setmetatable(
+		{
+			Contents = {},
+			ProjectName = projectName,
+			Options = options,
+		}, { __index = XcodeProjectMetaTable }
+	)
+end
+
+
+function XcodeProjectMetaTable:_AssignEntryUuids(folder, fullPath)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			local fullFolderName = fullPath .. entry.folder .. '/'
+			if not self.EntryUuids[fullFolderName] then
+				self.EntryUuids[fullFolderName] = XcodeUuid()
+			end
+			self:_AssignEntryUuids(entry, fullFolderName)
+		else
+			if not self.EntryUuids[entry] then
+				self.EntryUuids[entry] = XcodeUuid()
+			end
+		end
+	end
+end
+
+
+function XcodeProjectMetaTable:_WritePBXFileReferences(folder)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			self:_WritePBXFileReferences(entry)
+		else
+			table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode%s; path = "%s"; sourceTree = "<group>"; };\n'):format(
+					self.EntryUuids[entry], entry, os.path.get_extension(entry), entry))
+		end
+	end
+end
+
+
+function XcodeProjectMetaTable:_WritePBXGroup(uuid, name, children, fullPath)
+	table.insert(self.Contents, ('\t\t%s /* %s */ = {\n'):format(uuid, name))
+	table.insert(self.Contents, '\t\t\tisa = PBXGroup;\n')
+	table.insert(self.Contents, '\t\t\tchildren = (\n')
+	for entry in ivalues(children) do
+		if type(entry) == 'table' then
+			local fullFolderName = fullPath .. entry.folder .. '/'
+			table.insert(self.Contents, '\t\t\t\t' .. self.EntryUuids[fullFolderName] .. ' /* ' .. entry.folder .. ' */,\n')
+		else
+			table.insert(self.Contents, '\t\t\t\t' .. self.EntryUuids[entry] .. ' /* ' .. entry .. ' */,\n')
+		end
+	end
+	table.insert(self.Contents, '\t\t\t);\n')
+	table.insert(self.Contents, '\t\t\tname = ' .. name .. ';\n')
+	table.insert(self.Contents, '\t\t\tsourceTree = "<group>";\n')
+	table.insert(self.Contents, '\t\t};\n')
+end
+	
+function XcodeProjectMetaTable:_WritePBXGroups(folder, fullPath)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			local fullFolderName = fullPath .. entry.folder .. '/'
+			self:_WritePBXGroup(self.EntryUuids[fullFolderName], entry.folder, entry, fullFolderName)
+			self:_WritePBXGroups(entry, fullFolderName)
+		end
+	end
+end
+
+
+
+
+local XcodeSolutionMetaTable = {  __index = XcodeSolutionMetaTable  }
+
+function XcodeSolutionMetaTable:_GatherSolutionFolders(folder, folderList, fullPath)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			local solutionFolder = fullPath .. '\\' .. entry.folder
+			table.insert(folderList, solutionFolder)
+			self:_GatherSolutionFolders(entry, folderList, solutionFolder)
+		end
+	end
+end
+
+
+function XcodeSolutionMetaTable:_WriteNestedProjects(folder, fullPath)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			local solutionFolder = fullPath .. '\\' .. entry.folder
+			if folder.folder then
+				table.insert(self.Contents, expand([[
+		$(Child) = $(Parent)
+]], {  Child = ProjectExportInfo[solutionFolder].Uuid, Parent = ProjectExportInfo[fullPath].Uuid  }))
+			end
+			self:_WriteNestedProjects(entry, solutionFolder)
+		else
+			if folder.folder then
+				table.insert(self.Contents, expand([[
+		$(Child) = $(Parent)
+]], {  Child = ProjectExportInfo[entry].Uuid, Parent = ProjectExportInfo[fullPath].Uuid  }))
+			end
+		end
+	end
+end
+
+
+function XcodeSolutionMetaTable:Write(outputPath)
+--[=====[	local filename = outputPath .. self.Name .. '.sln'
+
+	local workspace = Workspaces[self.Name]
+
+	-- Write header.
+	table.insert(self.Contents, '\xef\xbb\xbf\n')
+
+	if self.Options.vs2003 then
+		table.insert(self.Contents, [[
+Microsoft Visual Studio Solution File, Format Version 8.00
+]])
+	elseif self.Options.vs2005 then
+		table.insert(self.Contents, [[
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+]])
+	elseif self.Options.vs2008 then
+		table.insert(self.Contents, [[
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+]])
+	end
+
+	-- Write projects.
+	for projectName in ivalues(workspace.Projects) do
+		local info = ProjectExportInfo[projectName]
+		if self.Options.vs2003 then
+			table.insert(self.Contents, expand([[
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+]], info))
+		elseif self.Options.vs2005 or self.Options.vs2008 then
+			table.insert(self.Contents, expand([[
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
+EndProject
+]], info))
+		end
+	end
+
+	-- Write the folders we use.
+	local folderList = {}
+	self:_GatherSolutionFolders(workspace.ProjectTree, folderList, '')
+
+	-- !BuildWorkspace
+	local info = ProjectExportInfo[buildWorkspaceName]
+	table.insert(self.Contents, expand([[
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
+EndProject
+]], info))
+
+	-- !UpdateWorkspace
+	local info = ProjectExportInfo[updateWorkspaceName]
+	table.insert(self.Contents, expand([[
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
+EndProject
+]], info))
+
+	for solutionFolderName in ivalues(folderList) do
+		local info = ProjectExportInfo[solutionFolderName]
+		if not info then
+			info =
+			{
+				Name = solutionFolderName:match('.*\\(.+)'),
+				Filename = solutionFolderName,
+				Uuid = uuid.new():upper()
+			}
+			ProjectExportInfo[solutionFolderName] = info
+		end
+
+		table.insert(self.Contents, expand([[
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "$(Name)", "$(Name)", "$(Uuid)"
+EndProject
+]], info))
+	end
+
+	-- Begin writing the Global section.
+	table.insert(self.Contents, [[
+Global
+]])
+
+	table.insert(self.Contents, [[
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+]])
+
+	local platformName = Platform
+	for configName in ivalues(Config.Configurations) do
+		local configInfo =
+		{
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+		}
+		table.insert(self.Contents, expand([[
+		$(VSConfig)|$(VSPlatform) = $(VSConfig)|$(VSPlatform)
+]], configInfo))
+	end
+
+	table.insert(self.Contents, [[
+	EndGlobalSection
+]])
+
+	-------------------
+	table.insert(self.Contents, [[
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+]])
+
+	for configName in ivalues(Config.Configurations) do
+		local info = ProjectExportInfo[buildWorkspaceName]
+		local configInfo =
+		{
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+		}
+		table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
+]], configInfo, info))
+
+			table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).Build.0 = $(VSConfig)|$(VSPlatform)
+]], configInfo, info))
+	end
+
+	for configName in ivalues(Config.Configurations) do
+		local info = ProjectExportInfo[updateWorkspaceName]
+		local configInfo =
+		{
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+		}
+		table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
+]], configInfo, info))
+	end
+
+	for projectName in ivalues(workspace.Projects) do
+		local info = ProjectExportInfo[projectName]
+		for configName in ivalues(Config.Configurations) do
+			local configInfo =
+			{
+				VSPlatform = MapPlatformToVSPlatform[platformName],
+				VSConfig = MapConfigToVSConfig[configName],
+			}
+			table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
+]], configInfo, info))
+		end
+	end
+
+	table.insert(self.Contents, [[
+	EndGlobalSection
+]])
+
+	table.insert(self.Contents, [[
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+]])
+
+	table.insert(self.Contents, [[
+	GlobalSection(NestedProjects) = preSolution
+]])
+
+	self:_WriteNestedProjects(workspace.ProjectTree, '')
+
+	table.insert(self.Contents, [[
+	EndGlobalSection
+]])
+
+	-- Write EndGlobal section.
+	table.insert(self.Contents, [[
+EndGlobal
+]])
+
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n'):gsub('\n', '\r\n')
+
+	WriteFileIfModified(filename, self.Contents)
+]=====]
+end
+
+function XcodeSolution(solutionName, options)
+	return setmetatable(
+		{
+			Contents = {},
+			Name = solutionName,
+			Options = options,
+		}, { __index = XcodeSolutionMetaTable }
+	)
+end
+
+
+
+function XcodeInitialize()
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local chunk = loadfile(outPath .. 'XcodeProjectExportInfo.lua')
+	if chunk then chunk() end
+	if not ProjectExportInfo then
+		ProjectExportInfo = {}
+	end
+
+	io.writeall(destinationRootPath .. 'xcodejam', [[
+#!/bin/sh
+SCRIPT_PATH=`dirname $0`
+TARGET_NAME=
+if [ "$3" = "" ]; then
+	TARGET_NAME=$2
+elif [ "$2" = build ]; then
+	TARGET_NAME=$3
+elif [ "$2" = clean ]; then
+	TARGET_NAME=clean:$3
+fi
+$SCRIPT_PATH/jam $1 $TARGET_NAME
+]])
+	os.chmod(destinationRootPath .. 'xcodejam', 777)
+end
+
+
+function XcodeShutdown()
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	LuaDumpObject(outPath .. 'XcodeProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
+end
+
+
+
+
+
 Exporters =
 {
 	vs2003 =
@@ -1076,7 +1917,20 @@ Exporters =
 		Options =
 		{
 		}
-	}
+	},
+
+	xcode =
+	{
+		Initialize = XcodeInitialize,
+		ProjectExporter = XcodeProject,
+		WorkspaceExporter = XcodeSolution,
+		Shutdown = XcodeShutdown,
+		Description = 'Generate Xcode project',
+		Options =
+		{
+		}
+	},
+
 }
 
 
@@ -1118,7 +1972,7 @@ end
 
 
 function DumpProject(project)
-	local outPath = os.path.combine(destinationRootPath, project.RelativePath) .. '/'
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects', project.RelativePath) .. '/'
 	os.mkdir(outPath)
 
 	BuildSourceTree(project)
@@ -1162,6 +2016,8 @@ end
 
 
 function DumpWorkspace(workspace)
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	
 	-- Write the !BuildWorkspace project
 	local exporter = Exporters[opts.gen]
 	Projects[buildWorkspaceName] = {}
@@ -1171,11 +2027,17 @@ function DumpWorkspace(workspace)
 	}
 	Projects[buildWorkspaceName].SourcesTree = Projects[buildWorkspaceName].Sources
 	local projectExporter = exporter.ProjectExporter(buildWorkspaceName, exporter.Options)
-	projectExporter:Write(destinationRootPath)
+	projectExporter:Write(outPath)
 
 	-- Write the !UpdateWorkspace project
+	Projects[updateWorkspaceName] = {}
+	Projects[updateWorkspaceName].Sources =
+	{
+		jamPath:gsub('\\', '/') .. '/Jambase.jam'
+	}
+	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
 	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options)
-	projectExporter:Write(destinationRootPath,
+	projectExporter:Write(outPath,
 		{
 			destinationRootPath .. 'UpdateWorkspace.bat',
 			destinationRootPath .. 'UpdateWorkspace.bat',
@@ -1305,25 +2167,26 @@ include $(jamPath)Jambase.jam ;
 		io.writeall(destinationRootPath .. 'UpdateWorkspace.bat',
 				("@%s --gen=%s --config=%s %s\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen,
-				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
+				os.path.escape(destinationRootPath .. '/updateworkspace.config'),
 				os.path.escape(sourceJamfilePath)))
 	else
-		-- Write jam.sh.
-		io.writeall(destinationRootPath .. 'jam.sh',
+		-- Write jam shell script.
+		io.writeall(destinationRootPath .. 'jam',
+				'#!/bin/sh\n' ..
 				jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
-		os.chmod(destinationRootPath .. 'jam.sh', 777)
+		os.chmod(destinationRootPath .. 'jam', 777)
 
 		-- Write UpdateWorkspace.sh.
-		io.writeall(destinationRootPath .. 'UpdateWorkspace.sh',
-				("%s --gen=%s --config=%s %s\n"):format(
+		io.writeall(destinationRootPath .. 'updateworkspace',
+				("#!/bin/sh\n%s --gen=%s --config=%s %s\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen,
-				os.path.escape(destinationRootPath .. '/UpdateWorkspace.config'),
+				os.path.escape(destinationRootPath .. '/updateworkspace.config'),
 				os.path.escape(sourceJamfilePath)))
-		os.chmod(destinationRootPath .. 'UpdateWorkspace.sh', 777)
+		os.chmod(destinationRootPath .. 'UpdateWorkspace', 777)
 	end
 
-	-- Write UpdateWorkspace.config.
-	LuaDumpObject(destinationRootPath .. 'UpdateWorkspace.config', 'Config', Config)
+	-- Write updateworkspace.config.
+	LuaDumpObject(destinationRootPath .. 'updateworkspace.config', 'Config', Config)
 
 	-- Export everything.
 	exporter.Initialize()
