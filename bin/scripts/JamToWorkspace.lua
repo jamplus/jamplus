@@ -1497,6 +1497,36 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, [[
 	</Configurations>
 ]])
+
+	-- Write References.
+	table.insert(self.Contents, [[
+	<References>
+	</References>
+]])
+
+	-- Write Files.
+	table.insert(self.Contents, [[
+	<Files>
+]])
+
+	if project then
+		self:_WriteFiles(project.SourcesTree, '\t\t')
+	end
+
+	table.insert(self.Contents, [[
+	</Files>
+]])
+
+	-- Write Globals.
+	table.insert(self.Contents, [[
+	<Globals>
+	</Globals>
+]])
+
+	-- Write footer.
+	table.insert(self.Contents, [[
+</XcodeProject>
+]])
 ]=====]
 end
 
