@@ -619,7 +619,7 @@ make0(
 		    }
 		}
 #endif
-		c->target->fate = T_FATE_NEWER;
+//		c->target->fate = T_FATE_NEWER;
 	    }
 #endif
 	}
