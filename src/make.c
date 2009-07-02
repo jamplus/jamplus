@@ -640,7 +640,7 @@ make0(
 	for( c = t->depends; c; c = c->next ) {
 #ifdef OPT_BUILTIN_NEEDS_EXT
             /* If this is a "Needs" dependency, don't care about its timestamp. */
-            if (c->needs  ||  (t->flags & (T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS))) {
+            if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE)) {
               continue;
             }
 #endif
@@ -712,7 +712,7 @@ make0(
 	{
 #ifdef OPT_BUILTIN_NEEDS_EXT
             /* If this is a "Needs" dependency, don't care about its timestamp. */
-            if (c->needs  ||  (t->flags & (T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS))) {
+            if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE)) {
               continue;
             }
 #endif
@@ -1204,7 +1204,7 @@ void make0calcmd5sum( TARGET *t, int source )
     for( c = t->depends; c; c = c->next )
     {
 	/* If this is a "Needs" dependency, don't care about its contents. */
-        if (c->needs  ||  (t->flags & (T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS)))
+        if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE))
 	{
 	    continue;
 	}
