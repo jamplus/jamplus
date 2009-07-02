@@ -2558,9 +2558,9 @@ rule ForceInclude TARGET : INCLUDES : THE_CONFIG : THE_PLATFORM
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
 	if $(COMPILER) in vc6 vs2002 vs2003 vs2005 vs2008 {
-		AddFlags $(TARGET) : "/FI$(INCLUDES)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+		AddFlags $(TARGET) : "/FI$(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 	} else {
-		AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+		AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 	}
 }
 
@@ -2570,7 +2570,7 @@ rule IncludeDirectories TARGET : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(INCLUDEPATHS:R=$(SUBDIR)) ;
+	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(INCLUDEPATHS:R=$(SUBDIR:E="")) ;
 }
 
 
@@ -2588,7 +2588,7 @@ rule LinkDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	LINKDIRECTORIES.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(DIRECTORIES:R=$(SUBDIR)) ;
+	LINKDIRECTORIES.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(DIRECTORIES:R=$(SUBDIR:E="")) ;
 }
 
 
@@ -2710,7 +2710,7 @@ rule ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS : THE_CONFIG : THE
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
 	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
-	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(INCLUDEPATHS:R=$(SUBDIR)) ;
+	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(INCLUDEPATHS:R=$(SUBDIR:E="")) ;
 }
 
 
