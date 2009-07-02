@@ -46,7 +46,10 @@ w32_getreg(LIST* pathlist)
 	    pathlist = list_next(pathlist);
 	    break;
 	}
+	++keydefs;
     }
+
+    if (!keydefs->keyname) return 0;
 
     for ( ; pathlist ; pathlist = list_next(pathlist)) {
         const char* text = pathlist->string;
