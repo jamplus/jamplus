@@ -700,7 +700,8 @@ end
 
 
 function VisualStudioInitialize()
-	local chunk = loadfile(destinationRootPath .. 'VSProjectExportInfo.lua')
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local chunk = loadfile(outPath .. 'VSProjectExportInfo.lua')
 	if chunk then chunk() end
 	if not ProjectExportInfo then
 		ProjectExportInfo = {}
@@ -709,7 +710,8 @@ end
 
 
 function VisualStudioShutdown()
-	LuaDumpObject(destinationRootPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	LuaDumpObject(outPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
 end
 
 
@@ -2039,8 +2041,8 @@ function DumpWorkspace(workspace)
 	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options)
 	projectExporter:Write(outPath,
 		{
-			destinationRootPath .. 'UpdateWorkspace.bat',
-			destinationRootPath .. 'UpdateWorkspace.bat',
+			outPath .. 'UpdateWorkspace.bat',
+			outPath .. 'UpdateWorkspace.bat',
 		}
 	)
 
@@ -2067,7 +2069,8 @@ function BuildProject()
 	local exporter = Exporters[opts.gen]
 	exporter.Options.compiler = opts.compiler or opts.gen
 
-	os.mkdir(destinationRootPath)
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	os.mkdir(outPath)
 
 	locateTargetText =
 	{
@@ -2164,10 +2167,10 @@ include $(jamPath)Jambase.jam ;
 			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
 		-- Write UpdateWorkspace.bat.
-		io.writeall(destinationRootPath .. 'UpdateWorkspace.bat',
-				("@%s --gen=%s --config=%s %s\n"):format(
+		io.writeall(outPath .. 'updateworkspace.bat',
+				("@%s --gen=%s --config=%s %s ..\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen,
-				os.path.escape(destinationRootPath .. '/updateworkspace.config'),
+				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath)))
 	else
 		-- Write jam shell script.
@@ -2177,16 +2180,16 @@ include $(jamPath)Jambase.jam ;
 		os.chmod(destinationRootPath .. 'jam', 777)
 
 		-- Write UpdateWorkspace.sh.
-		io.writeall(destinationRootPath .. 'updateworkspace',
-				("#!/bin/sh\n%s --gen=%s --config=%s %s\n"):format(
+		io.writeall(outPath .. 'updateworkspace',
+				("#!/bin/sh\n%s --gen=%s --config=%s %s ..\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen,
-				os.path.escape(destinationRootPath .. '/updateworkspace.config'),
+				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath)))
-		os.chmod(destinationRootPath .. 'UpdateWorkspace', 777)
+		os.chmod(outPath .. 'updateworkspace', 777)
 	end
 
-	-- Write updateworkspace.config.
-	LuaDumpObject(destinationRootPath .. 'updateworkspace.config', 'Config', Config)
+	-- Write workspace.config.
+	LuaDumpObject(destinationRootPath .. 'workspace.config', 'Config', Config)
 
 	-- Export everything.
 	exporter.Initialize()
@@ -2226,8 +2229,9 @@ include $(jamPath)Jambase.jam ;
 
 			DumpWorkspace(workspace)
 
+			local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
 			local workspaceExporter = exporter.WorkspaceExporter(workspace.Name, exporter.Options)
-			workspaceExporter:Write(destinationRootPath)
+			workspaceExporter:Write(outPath)
 		end
 	end
 
