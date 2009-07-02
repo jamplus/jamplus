@@ -144,21 +144,22 @@ struct _target {
 # define	T_FLAG_NOUPDATE	0x20	/* NOUPDATE applied */
 # define	T_FLAG_INTERNAL	0x40	/* internal INCLUDES node */
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-# define	T_FLAG_USEFILECACHE	    0x80	/* use md5sum instead of timestamp for this target */
-# define	T_FLAG_OPTIONALFILECACHE    0x100	/*  */
-# define	T_FLAG_USECOMMANDLINE    0x200 /* use md5sum command line */
+# define	T_FLAG_USEFILECACHE	    0x80  /* attempt retrieval of the target from the file cache */
+# define	T_FLAG_OPTIONALFILECACHE    0x100 /*  */
+# define	T_FLAG_USECOMMANDLINE	    0x200 /* use md5sum command line */
+# define	T_FLAG_SCANCONTENTS	    0x400 /* use md5sum instead of timestamp for this target */
 #endif
 #ifdef OPT_GRAPH_DEBUG_EXT
-# define	T_FLAG_VISITED	0x400	/* used in debugging */
+# define	T_FLAG_VISITED	0x800	/* used in debugging */
 #endif /* OPT_GRAPH_DEBUG_EXT */
 # ifdef OPT_MULTIPASS_EXT
-# define	T_FLAG_FIXPROGRESS_VISITED	0x800	/*  */
+# define	T_FLAG_FIXPROGRESS_VISITED	0x1000	/*  */
 #endif
 #ifdef OPT_HEADER_CACHE_EXT
-# define	T_FLAG_USEDEPCACHE    0x1000   /* a target-specificdep cache has been set */
+# define	T_FLAG_USEDEPCACHE    0x2000   /* a target-specificdep cache has been set */
 #endif
 #ifdef OPT_BUILTIN_NEEDS_EXT
-# define 	T_FLAG_MIGHTNOTUPDATE    0x2000	/* MightNotUpdate applied */
+# define 	T_FLAG_MIGHTNOTUPDATE    0x4000	/* MightNotUpdate applied */
 #endif
 
 	char		binding;	/* how target relates to real file */
@@ -180,6 +181,7 @@ struct _target {
 	char		rulemd5sumchecked;
 	char		rulemd5sumclean;
 	char		contentmd5sum_calculated;
+	char		contentmd5sum_changed;
 	char		buildmd5sum_calculated;
 	char		filecache_use;
 	char		filecache_generate;

@@ -1,0 +1,18 @@
+DEPCACHE.standard = .jamcache ;
+DEPCACHE = standard ;
+
+SubDir TOP ;
+
+Application test : main.c test.c ;
+
+CONTENTS on <test>generated.h = "extern void Print(const char*);
+" ;
+WriteFile <test>generated.h ;
+Always <test>generated.h ;
+MakeLocate <test>generated.h : . ;
+ScanContents <test>generated.h ;
+
+Depends <test>main.c : <test>generated.h ;
+
+Depends all : <test>generated.h ;
+Clean clean : <test>generated.h ;

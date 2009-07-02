@@ -7,7 +7,7 @@ require 'md5'
 require 'uuid'
 local expand = require 'expand'
 
-scriptPath = ((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()
+scriptPath = os.path.simplify(os.path.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()))
 package.path = scriptPath .. "?.lua;" .. package.path
 require 'FolderTree'
 
@@ -244,7 +244,7 @@ function VisualStudioProjectMetaTable:Write(outputPath, commandLines)
 
 	local info = ProjectExportInfo[self.ProjectName]
 	if not info then
-		info = { Name = self.ProjectName, Filename = filename, Uuid = uuid.new():upper() }
+		info = { Name = self.ProjectName, Filename = filename, Uuid = '{' .. uuid.new():upper() .. '}' }
 		ProjectExportInfo[self.ProjectName] = info
 	end
 
@@ -574,7 +574,7 @@ EndProject
 			{
 				Name = solutionFolderName:match('.*\\(.+)'),
 				Filename = solutionFolderName,
-				Uuid = uuid.new():upper()
+				Uuid = '{' .. uuid.new():upper() .. '}'
 			}
 			ProjectExportInfo[solutionFolderName] = info
 		end
@@ -700,7 +700,8 @@ end
 
 
 function VisualStudioInitialize()
-	local chunk = loadfile(destinationRootPath .. 'VSProjectExportInfo.lua')
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local chunk = loadfile(outPath .. 'VSProjectExportInfo.lua')
 	if chunk then chunk() end
 	if not ProjectExportInfo then
 		ProjectExportInfo = {}
@@ -709,7 +710,8 @@ end
 
 
 function VisualStudioShutdown()
-	LuaDumpObject(destinationRootPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	LuaDumpObject(outPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
 end
 
 
@@ -1113,7 +1115,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. info.Name .. '" */;\n')
 	table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
 	table.insert(self.Contents, '\t\t\t);\n')
-	table.insert(self.Contents, '\t\t\tbuildToolPath = ' .. os.path.combine(destinationRootPath, 'xcodejam') .. ';\n')
+	table.insert(self.Contents, '\t\t\tbuildToolPath = ' .. os.path.combine(outputPath, 'xcodejam') .. ';\n')
 	table.insert(self.Contents, '\t\t\tdependencies = (\n')
 	table.insert(self.Contents, '\t\t\t);\n')
 	table.insert(self.Contents, '\t\t\tname = ' .. info.Name .. ';\n')
@@ -1640,184 +1642,6 @@ end
 
 
 function XcodeSolutionMetaTable:Write(outputPath)
---[=====[	local filename = outputPath .. self.Name .. '.sln'
-
-	local workspace = Workspaces[self.Name]
-
-	-- Write header.
-	table.insert(self.Contents, '\xef\xbb\xbf\n')
-
-	if self.Options.vs2003 then
-		table.insert(self.Contents, [[
-Microsoft Visual Studio Solution File, Format Version 8.00
-]])
-	elseif self.Options.vs2005 then
-		table.insert(self.Contents, [[
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-]])
-	elseif self.Options.vs2008 then
-		table.insert(self.Contents, [[
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-]])
-	end
-
-	-- Write projects.
-	for projectName in ivalues(workspace.Projects) do
-		local info = ProjectExportInfo[projectName]
-		if self.Options.vs2003 then
-			table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-]], info))
-		elseif self.Options.vs2005 or self.Options.vs2008 then
-			table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
-EndProject
-]], info))
-		end
-	end
-
-	-- Write the folders we use.
-	local folderList = {}
-	self:_GatherSolutionFolders(workspace.ProjectTree, folderList, '')
-
-	-- !BuildWorkspace
-	local info = ProjectExportInfo[buildWorkspaceName]
-	table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
-EndProject
-]], info))
-
-	-- !UpdateWorkspace
-	local info = ProjectExportInfo[updateWorkspaceName]
-	table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
-EndProject
-]], info))
-
-	for solutionFolderName in ivalues(folderList) do
-		local info = ProjectExportInfo[solutionFolderName]
-		if not info then
-			info =
-			{
-				Name = solutionFolderName:match('.*\\(.+)'),
-				Filename = solutionFolderName,
-				Uuid = uuid.new():upper()
-			}
-			ProjectExportInfo[solutionFolderName] = info
-		end
-
-		table.insert(self.Contents, expand([[
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "$(Name)", "$(Name)", "$(Uuid)"
-EndProject
-]], info))
-	end
-
-	-- Begin writing the Global section.
-	table.insert(self.Contents, [[
-Global
-]])
-
-	table.insert(self.Contents, [[
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-]])
-
-	local platformName = Platform
-	for configName in ivalues(Config.Configurations) do
-		local configInfo =
-		{
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-		}
-		table.insert(self.Contents, expand([[
-		$(VSConfig)|$(VSPlatform) = $(VSConfig)|$(VSPlatform)
-]], configInfo))
-	end
-
-	table.insert(self.Contents, [[
-	EndGlobalSection
-]])
-
-	-------------------
-	table.insert(self.Contents, [[
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-]])
-
-	for configName in ivalues(Config.Configurations) do
-		local info = ProjectExportInfo[buildWorkspaceName]
-		local configInfo =
-		{
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-		}
-		table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
-]], configInfo, info))
-
-			table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).Build.0 = $(VSConfig)|$(VSPlatform)
-]], configInfo, info))
-	end
-
-	for configName in ivalues(Config.Configurations) do
-		local info = ProjectExportInfo[updateWorkspaceName]
-		local configInfo =
-		{
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-		}
-		table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
-]], configInfo, info))
-	end
-
-	for projectName in ivalues(workspace.Projects) do
-		local info = ProjectExportInfo[projectName]
-		for configName in ivalues(Config.Configurations) do
-			local configInfo =
-			{
-				VSPlatform = MapPlatformToVSPlatform[platformName],
-				VSConfig = MapConfigToVSConfig[configName],
-			}
-			table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
-]], configInfo, info))
-		end
-	end
-
-	table.insert(self.Contents, [[
-	EndGlobalSection
-]])
-
-	table.insert(self.Contents, [[
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-]])
-
-	table.insert(self.Contents, [[
-	GlobalSection(NestedProjects) = preSolution
-]])
-
-	self:_WriteNestedProjects(workspace.ProjectTree, '')
-
-	table.insert(self.Contents, [[
-	EndGlobalSection
-]])
-
-	-- Write EndGlobal section.
-	table.insert(self.Contents, [[
-EndGlobal
-]])
-
-	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n'):gsub('\n', '\r\n')
-
-	WriteFileIfModified(filename, self.Contents)
-]=====]
 end
 
 function XcodeSolution(solutionName, options)
@@ -1840,9 +1664,8 @@ function XcodeInitialize()
 		ProjectExportInfo = {}
 	end
 
-	io.writeall(destinationRootPath .. 'xcodejam', [[
+	io.writeall(outPath .. 'xcodejam', [[
 #!/bin/sh
-SCRIPT_PATH=`dirname $0`
 TARGET_NAME=
 if [ "$3" = "" ]; then
 	TARGET_NAME=$2
@@ -1851,9 +1674,9 @@ elif [ "$2" = build ]; then
 elif [ "$2" = clean ]; then
 	TARGET_NAME=clean:$3
 fi
-$SCRIPT_PATH/jam $1 $TARGET_NAME
+]] .. os.path.escape(os.path.combine(destinationRootPath, 'jam')) .. [[ $1 $TARGET_NAME
 ]])
-	os.chmod(destinationRootPath .. 'xcodejam', 777)
+	os.chmod(outPath .. 'xcodejam', 777)
 end
 
 
@@ -2039,8 +1862,8 @@ function DumpWorkspace(workspace)
 	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options)
 	projectExporter:Write(outPath,
 		{
-			destinationRootPath .. 'UpdateWorkspace.bat',
-			destinationRootPath .. 'UpdateWorkspace.bat',
+			outPath .. 'UpdateWorkspace.bat',
+			outPath .. 'UpdateWorkspace.bat',
 		}
 	)
 
@@ -2067,7 +1890,8 @@ function BuildProject()
 	local exporter = Exporters[opts.gen]
 	exporter.Options.compiler = opts.compiler or opts.gen
 
-	os.mkdir(destinationRootPath)
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	os.mkdir(outPath)
 
 	locateTargetText =
 	{
@@ -2164,10 +1988,10 @@ include $(jamPath)Jambase.jam ;
 			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
 		-- Write UpdateWorkspace.bat.
-		io.writeall(destinationRootPath .. 'UpdateWorkspace.bat',
-				("@%s --gen=%s --config=%s %s\n"):format(
+		io.writeall(outPath .. 'updateworkspace.bat',
+				("@%s --gen=%s --config=%s %s ..\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen,
-				os.path.escape(destinationRootPath .. '/updateworkspace.config'),
+				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath)))
 	else
 		-- Write jam shell script.
@@ -2177,16 +2001,16 @@ include $(jamPath)Jambase.jam ;
 		os.chmod(destinationRootPath .. 'jam', 777)
 
 		-- Write UpdateWorkspace.sh.
-		io.writeall(destinationRootPath .. 'updateworkspace',
-				("#!/bin/sh\n%s --gen=%s --config=%s %s\n"):format(
+		io.writeall(outPath .. 'updateworkspace',
+				("#!/bin/sh\n%s --gen=%s --config=%s %s ..\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen,
-				os.path.escape(destinationRootPath .. '/updateworkspace.config'),
+				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath)))
-		os.chmod(destinationRootPath .. 'UpdateWorkspace', 777)
+		os.chmod(outPath .. 'updateworkspace', 777)
 	end
 
-	-- Write updateworkspace.config.
-	LuaDumpObject(destinationRootPath .. 'updateworkspace.config', 'Config', Config)
+	-- Write workspace.config.
+	LuaDumpObject(destinationRootPath .. 'workspace.config', 'Config', Config)
 
 	-- Export everything.
 	exporter.Initialize()
@@ -2226,8 +2050,9 @@ include $(jamPath)Jambase.jam ;
 
 			DumpWorkspace(workspace)
 
+			local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
 			local workspaceExporter = exporter.WorkspaceExporter(workspace.Name, exporter.Options)
-			workspaceExporter:Write(destinationRootPath)
+			workspaceExporter:Write(outPath)
 		end
 	end
 

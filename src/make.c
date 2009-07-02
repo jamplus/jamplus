@@ -619,7 +619,7 @@ make0(
 		    }
 		}
 #endif
-		c->target->fate = T_FATE_NEWER;
+//		c->target->fate = T_FATE_NEWER;
 	    }
 #endif
 	}
@@ -1325,6 +1325,7 @@ dependGraphOutput( TARGET *t, int depth )
 	if( t->flags & T_FLAG_INTERNAL ) printf ("INTERNAL ");
 #ifdef OPT_BUILTIN_NEEDS_EXT
 	if( t->flags & T_FLAG_MIGHTNOTUPDATE ) printf ("MIGHTNOTUPDATE ");
+	if( t->flags & T_FLAG_SCANCONTENTS ) printf ("SCANCONTENTS ");
 #endif
 	printf( "\n" );
     }
