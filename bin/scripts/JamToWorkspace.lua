@@ -244,7 +244,7 @@ function VisualStudioProjectMetaTable:Write(outputPath, commandLines)
 
 	local info = ProjectExportInfo[self.ProjectName]
 	if not info then
-		info = { Name = self.ProjectName, Filename = filename, Uuid = uuid.new():upper() }
+		info = { Name = self.ProjectName, Filename = filename, Uuid = '{' .. uuid.new():upper() .. '}' }
 		ProjectExportInfo[self.ProjectName] = info
 	end
 
@@ -574,7 +574,7 @@ EndProject
 			{
 				Name = solutionFolderName:match('.*\\(.+)'),
 				Filename = solutionFolderName,
-				Uuid = uuid.new():upper()
+				Uuid = '{' .. uuid.new():upper() .. '}'
 			}
 			ProjectExportInfo[solutionFolderName] = info
 		end
