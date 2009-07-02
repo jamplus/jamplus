@@ -7,7 +7,7 @@ require 'md5'
 require 'uuid'
 local expand = require 'expand'
 
-scriptPath = ((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()
+scriptPath = os.path.simplify(os.path.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()))
 package.path = scriptPath .. "?.lua;" .. package.path
 require 'FolderTree'
 
@@ -1115,7 +1115,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. info.Name .. '" */;\n')
 	table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
 	table.insert(self.Contents, '\t\t\t);\n')
-	table.insert(self.Contents, '\t\t\tbuildToolPath = ' .. os.path.combine(destinationRootPath, 'xcodejam') .. ';\n')
+	table.insert(self.Contents, '\t\t\tbuildToolPath = ' .. os.path.combine(outputPath, 'xcodejam') .. ';\n')
 	table.insert(self.Contents, '\t\t\tdependencies = (\n')
 	table.insert(self.Contents, '\t\t\t);\n')
 	table.insert(self.Contents, '\t\t\tname = ' .. info.Name .. ';\n')
@@ -1664,9 +1664,8 @@ function XcodeInitialize()
 		ProjectExportInfo = {}
 	end
 
-	io.writeall(destinationRootPath .. 'xcodejam', [[
+	io.writeall(outPath .. 'xcodejam', [[
 #!/bin/sh
-SCRIPT_PATH=`dirname $0`
 TARGET_NAME=
 if [ "$3" = "" ]; then
 	TARGET_NAME=$2
@@ -1675,9 +1674,9 @@ elif [ "$2" = build ]; then
 elif [ "$2" = clean ]; then
 	TARGET_NAME=clean:$3
 fi
-$SCRIPT_PATH/jam $1 $TARGET_NAME
+]] .. os.path.escape(os.path.combine(destinationRootPath, 'jam')) .. [[ $1 $TARGET_NAME
 ]])
-	os.chmod(destinationRootPath .. 'xcodejam', 777)
+	os.chmod(outPath .. 'xcodejam', 777)
 end
 
 
