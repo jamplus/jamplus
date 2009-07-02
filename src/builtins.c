@@ -203,6 +203,10 @@ load_builtins()
 
     bindrule( "UseCommandLine" )->procedure =
 	parse_make( builtin_usecommandline, P0, P0, P0, C0, C0, T_FLAG_USECOMMANDLINE );
+
+    bindrule( "ScanContents" )->procedure =
+    bindrule( "SCANCONTENTS" )->procedure =
+	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_SCANCONTENTS );
 #endif
 
 #ifdef OPT_BUILTIN_NEEDS_EXT

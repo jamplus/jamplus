@@ -144,9 +144,10 @@ struct _target {
 # define	T_FLAG_NOUPDATE	0x20	/* NOUPDATE applied */
 # define	T_FLAG_INTERNAL	0x40	/* internal INCLUDES node */
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-# define	T_FLAG_USEFILECACHE	    0x80	/* use md5sum instead of timestamp for this target */
-# define	T_FLAG_OPTIONALFILECACHE    0x100	/*  */
-# define	T_FLAG_USECOMMANDLINE    0x200 /* use md5sum command line */
+# define	T_FLAG_USEFILECACHE	    0x80  /* attempt retrieval of the target from the file cache */
+# define	T_FLAG_OPTIONALFILECACHE    0x100 /*  */
+# define	T_FLAG_USECOMMANDLINE	    0x200 /* use md5sum command line */
+# define	T_FLAG_SCANCONTENTS	    0x400 /* use md5sum instead of timestamp for this target */
 #endif
 #ifdef OPT_GRAPH_DEBUG_EXT
 # define	T_FLAG_VISITED	0x400	/* used in debugging */
@@ -180,6 +181,7 @@ struct _target {
 	char		rulemd5sumchecked;
 	char		rulemd5sumclean;
 	char		contentmd5sum_calculated;
+	char		contentmd5sum_changed;
 	char		buildmd5sum_calculated;
 	char		filecache_use;
 	char		filecache_generate;

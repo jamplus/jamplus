@@ -640,7 +640,7 @@ make0(
 	for( c = t->depends; c; c = c->next ) {
 #ifdef OPT_BUILTIN_NEEDS_EXT
             /* If this is a "Needs" dependency, don't care about its timestamp. */
-            if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE)) {
+            if (c->needs  ||  (t->flags & (T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS))) {
               continue;
             }
 #endif
@@ -712,7 +712,7 @@ make0(
 	{
 #ifdef OPT_BUILTIN_NEEDS_EXT
             /* If this is a "Needs" dependency, don't care about its timestamp. */
-            if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE)) {
+            if (c->needs  ||  (t->flags & (T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS))) {
               continue;
             }
 #endif
@@ -1204,7 +1204,7 @@ void make0calcmd5sum( TARGET *t, int source )
     for( c = t->depends; c; c = c->next )
     {
 	/* If this is a "Needs" dependency, don't care about its contents. */
-        if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE))
+        if (c->needs  ||  (t->flags & (T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS)))
 	{
 	    continue;
 	}
@@ -1325,6 +1325,7 @@ dependGraphOutput( TARGET *t, int depth )
 	if( t->flags & T_FLAG_INTERNAL ) printf ("INTERNAL ");
 #ifdef OPT_BUILTIN_NEEDS_EXT
 	if( t->flags & T_FLAG_MIGHTNOTUPDATE ) printf ("MIGHTNOTUPDATE ");
+	if( t->flags & T_FLAG_SCANCONTENTS ) printf ("SCANCONTENTS ");
 #endif
 	printf( "\n" );
     }

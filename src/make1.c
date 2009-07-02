@@ -274,6 +274,7 @@ make1b( TARGET *t )
 #endif
 #ifdef OPT_BUILTIN_NEEDS_EXT
 	int childmightnotupdate = 0;
+	int childscancontents = 0;
 	int childupdated = 0;
 #endif
 
@@ -330,13 +331,25 @@ make1b( TARGET *t )
 		    /* Grab the generated target's timestamp. */
 		    if ( file_time( c->target->boundname, &timestamp ) == 0 ) {
 			/* If the child's timestamp is greater that the target's timestamp, then it updated. */
-			if ( timestamp > t->time )
-			    childupdated = 1;
+			if ( timestamp > t->time ) {
+			    if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
+				childscancontents = 1;
+				if ( getcachedmd5sum( c->target, 1 ) )
+				    childupdated = 1;
+			    } else
+				childupdated = 1;
+			}
 		    }
 		}
 		/* If it didn't have the MightNotUpdate flag but did update, mark it. */
-		else if ( c->target->fate > T_FATE_STABLE  &&  !c->needs )
-		    childupdated = 1;
+		else if ( c->target->fate > T_FATE_STABLE  &&  !c->needs ) {
+		    if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
+			childscancontents = 1;
+			if ( getcachedmd5sum( c->target, 1 ) )
+			    childupdated = 1;
+		    } else
+			childupdated = 1;
+		}
 	    }
 #endif
 
@@ -371,7 +384,29 @@ make1b( TARGET *t )
 	/* If we found a MightNotUpdate flag and there was an update, mark the fate as updated. */
 	if ( childmightnotupdate  &&  childupdated  &&  t->fate == T_FATE_STABLE )
 	      t->fate = T_FATE_UPDATE;
-	if ( t->flags & T_FLAG_MIGHTNOTUPDATE  &&  t->actions ) {
+	if ( childscancontents  &&  !childupdated ) {
+	    if ( t->includes ) {
+		for( c = t->includes->depends; c; c = c->next ) {
+		    if ( c->target->fate > T_FATE_STABLE  &&  !c->needs ) {
+			if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
+			    if ( getcachedmd5sum( c->target, 1 ) ) {
+				childupdated = 1;
+				break;
+			    }
+			} else {
+			    childupdated = 1;
+			    break;
+			}
+		    }
+		}
+	    }
+
+	    if ( !childupdated )
+		t->fate = T_FATE_STABLE;
+	}
+	if ( t->fate == T_FATE_UPDATE  &&  !childupdated )
+	    t->fate = T_FATE_STABLE;
+	if ( t->flags & ( T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS )  &&  t->actions ) {
 #ifdef OPT_ACTIONS_WAIT_FIX
 	    /* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
 	    /* Determine if an action is already running on behalf of another target, and if so, */

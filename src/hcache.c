@@ -740,7 +740,7 @@ int ismd5empty( MD5SUM md5sum )
  * Get cached md5sum of a file. If none found, or not up to date, if the file is source
  * try to recalculate the sum. If not, then return empty sum (all zeroes).
  */
-void getcachedmd5sum( TARGET *t, int source )
+int getcachedmd5sum( TARGET *t, int source )
 {
     HCACHEDATA cachedata, *c = &cachedata;
     int  use_cache = 1;
@@ -752,20 +752,17 @@ void getcachedmd5sum( TARGET *t, int source )
 #endif
 
     if ( t->contentmd5sum_calculated )
-	return;
+	return t->contentmd5sum_changed;
 
     if (!source) {
 	memset(&t->buildmd5sum, 0, sizeof(t->buildmd5sum));
 	memset(&t->contentmd5sum, 0, sizeof(t->contentmd5sum));
-	return;
+	t->contentmd5sum_calculated = 1;
+	t->contentmd5sum_changed = 0;
+	return t->contentmd5sum_changed;
     }
 
     file = hcachefile_get( t );
-//    if ( !file ) {
-//	memset(&t->buildmd5sum, 0, sizeof(t->buildmd5sum));
-//	memset(&t->contentmd5sum, 0, sizeof(t->contentmd5sum));
-//	return;
-//    }
 
     ++queries;
 
@@ -782,7 +779,10 @@ void getcachedmd5sum( TARGET *t, int source )
 
     if( hashcheck( file->hcachehash, (HASHDATA **) &c ) )
     {
-	if( c->mtime != t->time )
+	if ( t->time == 0 ) {
+	    /* This file was generated.  Grab its timestamp. */
+	    file_time( c->boundname, &c->mtime );
+	} else if( c->mtime != t->time )
 	    use_cache = 0;
 
 	if ( use_cache ) {
@@ -794,9 +794,10 @@ void getcachedmd5sum( TARGET *t, int source )
 		printf( "- content md5: %s (%s)\n", t->boundname, md5tostring(c->contentmd5sum));
 	    c->age = 0; /* The entry has been used, its young again */
 	    ++hits;
+	    t->contentmd5sum_changed = 0;
 	    memcpy(&t->contentmd5sum, &c->contentmd5sum, sizeof(t->contentmd5sum));
 	    t->contentmd5sum_calculated = 1;
-	    return;
+	    return t->contentmd5sum_changed;
 	}
 	else {
 	    if( DEBUG_MD5HASH )
@@ -818,33 +819,44 @@ void getcachedmd5sum( TARGET *t, int source )
     /* 'c' points at the cache entry.  Its out of date. */
 
     {
+	MD5SUM origmd5sum;
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-    LIST *md5callback;
-
-    pushsettings( t->settings );
-    md5callback = var_get( "MD5CALLBACK" );
-    popsettings( t->settings );
-
-    if ( md5callback )
-    {
-	luahelper_md5callback(t->boundname, c->contentmd5sum, md5callback->string);
-    }
-    else
-    {
+	LIST *md5callback;
 #endif
-    md5file( t->boundname, c->contentmd5sum );
+
+	memcpy( &origmd5sum, &c->contentmd5sum, sizeof( MD5SUM ) );
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-    }
+	pushsettings( t->settings );
+	md5callback = var_get( "MD5CALLBACK" );
+	popsettings( t->settings );
+
+	if ( md5callback )
+	{
+	    luahelper_md5callback(t->boundname, c->contentmd5sum, md5callback->string);
+	}
+	else
+	{
 #endif
+	    md5file( t->boundname, c->contentmd5sum );
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+        }
+#endif
+	t->contentmd5sum_changed = memcmp( &origmd5sum, &c->contentmd5sum, sizeof( MD5SUM ) ) != 0;
     }
     if( DEBUG_MD5HASH )
 	printf( "- content md5: %s (%s)\n", t->boundname, md5tostring(c->contentmd5sum));
 
     c->mtime = t->time;
+    if ( c->mtime == 0 ) {
+	/* This file was generated.  Grab its timestamp. */
+	file_time( c->boundname, &c->mtime );
+    }
     c->age = 0;
     memcpy(&t->contentmd5sum, &c->contentmd5sum, sizeof(t->contentmd5sum));
     t->contentmd5sum_calculated = (char)(memcmp(md5sumempty, &t->contentmd5sum, sizeof(t->contentmd5sum)) != 0);
     memset(&t->buildmd5sum, 0, sizeof(t->buildmd5sum));
+
+    return t->contentmd5sum_changed;
 }
 
 /*
