@@ -512,7 +512,7 @@ rule FGristDirectories DIRECTORIES
 }
 
 
-rule MakeLocate
+rule MakeLocate TARGETS : DIRECTORY
 {
 	# MakeLocate targets : directory ;
 
@@ -522,12 +522,13 @@ rule MakeLocate
 	# Note we grist the directory name with 'dir',
 	# so that directory path components and other
 	# targets don't conflict.
-
-	if $(>)
+	
+	if $(DIRECTORY)
 	{
-	    LOCATE on $(<) = $(>) ;
-	    Depends $(<) : $(>[1]:G=!dir!) ;
-	    MkDir $(>[1]:G=!dir!) ;
+		DIRECTORY = $(DIRECTORY:R=$(SUBDIR:E="")) ;
+	    LOCATE on $(TARGETS) = $(DIRECTORY) ;
+	    Depends $(TARGETS) : $(DIRECTORY[1]:G=!dir!) ;
+	    MkDir $(DIRECTORY[1]:G=!dir!) ;
 	}
 }
 
