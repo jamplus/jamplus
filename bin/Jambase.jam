@@ -331,17 +331,21 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 		DEFINES.*.debug on * += _DEBUG DEBUG ;
 		DEFINES.*.release on * += NDEBUG ;
 
-		CCFLAGS.*.debug on * 	= -g -O0 ;
-		CCFLAGS.*.release on * 	= -g -O2 ;
-		C++FLAGS.*.* on *		?= [ on * Var CCFLAGS.*.* ] ;
-		C++FLAGS.*.debug on *	?= [ on * Var CCFLAGS.*.debug ] ;
-		C++FLAGS.*.release on *	?= [ on * Var CCFLAGS.*.release ] ;
+		CCFLAGS.*.debug on * 		= -g -O0 ;
+		CCFLAGS.*.release on * 		= -g -O2 ;
+		CCFLAGS.*.releaseltcg on * 	= -g -O3 ;
+		C++FLAGS.*.* on *			?= [ on * Var CCFLAGS.*.* ] ;
+		C++FLAGS.*.debug on *		?= [ on * Var CCFLAGS.*.debug ] ;
+		C++FLAGS.*.release on *		?= [ on * Var CCFLAGS.*.release ] ;
+		C++FLAGS.*.releaseltcg on *	?= [ on * Var CCFLAGS.*.releaseltcg ] ;
 
-		MFLAGS.*.debug on * 	= -g -O0 ;
-		MFLAGS.*.release on * 	= -g -O2 ;
-		MMFLAGS.*.* on *		?= [ on * Var MFLAGS.*.* ] ;
-		MMFLAGS.*.debug on *	?= [ on * Var MFLAGS.*.debug ] ;
-		MMFLAGS.*.release on *	?= [ on * Var MFLAGS.*.release ] ;
+		MFLAGS.*.debug on * 		= -g -O0 ;
+		MFLAGS.*.release on * 		= -g -O2 ;
+		MFLAGS.*.releaseltcg on * 	= -g -O2 ;
+		MMFLAGS.*.* on *			?= [ on * Var MFLAGS.*.* ] ;
+		MMFLAGS.*.debug on *		?= [ on * Var MFLAGS.*.debug ] ;
+		MMFLAGS.*.release on *		?= [ on * Var MFLAGS.*.release ] ;
+		MMFLAGS.*.releaseltcg on *	?= [ on * Var MFLAGS.*.releaseltcg ] ;
 
 		switch $(OS)
 		{
