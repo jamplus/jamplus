@@ -1044,9 +1044,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	os.mkdir(filename)
 
 	local jamCommandLine = jamExePath .. ' ' ..
-			os.path.escape('-C' .. destinationRootPath) --.. ' ' ..
---			'-sPLATFORM=' .. platformName .. ' ' ..
---			'-sCONFIG=' .. configName
+			os.path.escape('-C' .. destinationRootPath)
 
 	local info = ProjectExportInfo[self.ProjectName]
 	if not info then
@@ -1411,129 +1409,6 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
 
 	WriteFileIfModified(filename, self.Contents)
-	
---[=====[
-	local platformName = Platform
-	for configName in ivalues(Config.Configurations) do
-		local jamCommandLine = jamExePath .. ' ' ..
-				os.path.escape('-C' .. destinationRootPath) .. ' ' ..
-				'-sPLATFORM=' .. platformName .. ' ' ..
-				'-sCONFIG=' .. configName
-
-		local configInfo =
-		{
-			Platform = platformName,
-			Config = configName,
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-			Defines = '',
-			Includes = '',
-			Output = '',
-		}
-
-		if project and project.Name then
-			if project.Defines then
-				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
-			end
-			if project.IncludePaths then
-				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
-			end
-			if project.OutputPaths then
-				configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
-			end
-			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
-			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
-			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
-		elseif not commandLines then
-			configInfo.BuildCommandLine = jamCommandLine
-			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
-			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
-		else
-			configInfo.BuildCommandLine = commandLines[1] or ''
-			configInfo.RebuildCommandLine = commandLines[2] or ''
-			configInfo.CleanCommandLine = commandLines[3] or ''
-		end
-
-		if self.Options.vs2003 then
-			table.insert(self.Contents, expand([==[
-		<Configuration
-			Name="$(VSConfig)|$(VSPlatform)"
-			OutputDirectory="$$(ConfigurationName)"
-			IntermediateDirectory="$$(ConfigurationName)"
-			ConfigurationType="0"
-			BuildLogFile="$(destinationRootPath:gsub('\\', '/'))temp-$(Platform)-$(Config)/BuildLog.htm">
-			<Tool
-				Name="VCNMakeTool"
-				BuildCommandLine="$(BuildCommandLine)"
-				ReBuildCommandLine="$(RebuildCommandLine)"
-				CleanCommandLine="$(CleanCommandLine)"
-				Output="$(Output)"
-			/>
-		</Configuration>
-]==], configInfo, info, _G))
-
-		elseif self.Options.vs2005 or self.Options.vs2008 then
-			table.insert(self.Contents, expand([==[
-		<Configuration
-			Name="$(VSConfig)|$(VSPlatform)"
-			OutputDirectory="$$(ConfigurationName)"
-			IntermediateDirectory="$$(ConfigurationName)"
-			ConfigurationType="0"
-			BuildLogFile="$(destinationRootPath:gsub('\\', '/'))temp-$(Platform)-$(Config)/BuildLog.htm"
-			>
-			<Tool
-				Name="VCNMakeTool"
-				BuildCommandLine="$(BuildCommandLine)"
-				ReBuildCommandLine="$(RebuildCommandLine)"
-				CleanCommandLine="$(CleanCommandLine)"
-				Output="$(Output)"
-				PreprocessorDefinitions="$(Defines)"
-				IncludeSearchPath="$(Includes)"
-				ForcedIncludes=""
-				AssemblySearchPath=""
-				ForcedUsingAssemblies=""
-				CompileAsManaged=""
-			/>
-		</Configuration>
-]==], configInfo, info, _G))
-		end
-	end
-
-	-- Write Configurations footer.
-	table.insert(self.Contents, [[
-	</Configurations>
-]])
-
-	-- Write References.
-	table.insert(self.Contents, [[
-	<References>
-	</References>
-]])
-
-	-- Write Files.
-	table.insert(self.Contents, [[
-	<Files>
-]])
-
-	if project then
-		self:_WriteFiles(project.SourcesTree, '\t\t')
-	end
-
-	table.insert(self.Contents, [[
-	</Files>
-]])
-
-	-- Write Globals.
-	table.insert(self.Contents, [[
-	<Globals>
-	</Globals>
-]])
-
-	-- Write footer.
-	table.insert(self.Contents, [[
-</XcodeProject>
-]])
-]=====]
 end
 
 function XcodeProject(projectName, options)
