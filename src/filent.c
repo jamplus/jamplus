@@ -713,7 +713,7 @@ void getprocesspath(char* buffer, size_t bufferLen)
 
 #pragma comment(lib, "winmm.lib")
 
-unsigned int getmilliseconds()
+unsigned long long getmilliseconds()
 {
     return timeGetTime();
 }
