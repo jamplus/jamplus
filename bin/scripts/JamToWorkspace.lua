@@ -1743,6 +1743,9 @@ function DumpWorkspace(workspace)
 	)
 
 	if exporter.Options.vs2005 or exporter.Options.vs2008 then
+		if not workspace.ProjectGroups then
+			workspace.ProjectGroups = {}
+		end
 		local jamSupport = workspace.ProjectGroups['!JamSupport']
 		if not jamSupport then
 			jamSupport = {}

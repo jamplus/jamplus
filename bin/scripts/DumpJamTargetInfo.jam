@@ -52,61 +52,36 @@ rule DumpSources prefix : SOURCES
 
 rule ProjectGroup TARGET : FOLDERNAME : PROJECTS
 {
-	PROJECTGROUP.$(FOLDERNAME) on $(TARGET) += $(PROJECTS) ;
-	if ! $(FOLDERNAME) in [ on $(TARGET) Var PROJECTGROUPS ]
+	if $(PLATFORM) != *  ||  $(CONFIG) != *  {  return ;  }
+	if ! $(FOLDERNAME)  ||  ! $(SOURCES)  {  return ;  }
+
+	local workspace ;
+	for workspace in $(TARGET)
 	{
-		PROJECTGROUPS on $(TARGET) += $(FOLDERNAME) ;
+		local prefix = "Workspaces[ [[$(workspace)]] ]" ;
+		Contents += "$(prefix).ProjectGroups[ [[$(FOLDERNAME)]] ] = concat($(prefix).ProjectGroups[ [[$(FOLDERNAME)]] ], $(NEWLINE){$(NEWLINE)" ;
+		Contents += "$(TAB)$(TAB)[[$(PROJECTS)]],$(NEWLINE)" ;
+		Contents += "})$(NEWLINE)" ;
 	}
-}
-
-
-rule DumpProjectGroups prefix : TARGET
-{
-	Contents += "$(prefix).ProjectGroups = {$(NEWLINE)" ;
-
-	local folderName ;
-	for folderName in [ on $(TARGET) Var PROJECTGROUPS ]
-	{
-		Contents += "$(TAB)[ [[$(folderName)]] ] = {$(NEWLINE)" ;
-		local project ;
-		for project in [ on $(TARGET) Var PROJECTGROUP.$(folderName) ]
-		{
-			Contents += "$(TAB)$(TAB)[[$(project)]],$(NEWLINE)" ;
-		}
-		Contents += "$(TAB)},$(NEWLINE)" ;
-	}
-	Contents += "}$(NEWLINE)" ;
 }
 
 
 rule SourceGroup TARGET : FOLDERNAME : SOURCES
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	SOURCEGROUP.$(FOLDERNAME) on $(TARGET) += $(SOURCES) ;
-	if ! $(FOLDERNAME) in [ on $(TARGET) Var SOURCEGROUPS ]
-	{
-		SOURCEGROUPS on $(TARGET) += $(FOLDERNAME) ;
-	}
-}
+	if $(PLATFORM) != *  ||  $(CONFIG) != *  {  return ;  }
+	if ! $(FOLDERNAME)  ||  ! $(SOURCES)  {  return ;  }
 
-
-rule DumpSourceGroups prefix : TARGET
-{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;	
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
-	Contents += "$(prefix).SourceGroups = {$(NEWLINE)" ;
 
-	local folderName ;
-	for folderName in [ on $(TARGET) Var SOURCEGROUPS ]
+	local project ;
+	for project in $(TARGET)
 	{
-		Contents += "$(TAB)[ [[$(folderName)]] ] = {$(NEWLINE)" ;
-		local source ;
-		for source in [ on $(TARGET) Var SOURCEGROUP.$(folderName) ]
-		{
-			Contents += "$(TAB)$(TAB)[[$(source:R=$(subdir))]],$(NEWLINE)" ;
-		}
-		Contents += "$(TAB)},$(NEWLINE)" ;
+		local prefix = "Projects[ [[$(project)]] ]" ;
+		Contents += "$(prefix).SourceGroups[ [[$(FOLDERNAME)]] ] = concat($(prefix).SourceGroups[ [[$(FOLDERNAME)]] ], $(NEWLINE){$(NEWLINE)" ;
+		Contents += "$(TAB)$(TAB)[[$(SOURCES:R=$(subdir))]],$(NEWLINE)" ;
+		Contents += "})$(NEWLINE)" ;
 	}
-	Contents += "}$(NEWLINE)" ;
 }
 
 
@@ -164,7 +139,6 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 	if $(PLATFORM) = *  &&  $(CONFIG) = *
 	{
 		DumpSources $(project) : $(SOURCES) ;
-		DumpSourceGroups $(project) : $(TARGETS) ;
 	}
 
 	Depends $(TARGETS) : $(TargetInfoFile) ;
@@ -227,11 +201,9 @@ rule Workspace WORKSPACE_NAME : TARGETS : OPTIONS
 $(solutionInfo).Path = '$(subdir)'
 $(solutionInfo).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'
 " ;
-		DumpProjectGroups $(solutionInfo) : $(TARGETS) ;
-
 		first on $(WORKSPACE_NAME) = false ;
 	}
-
+	
 	local projectLines = "$(TAB)'$(TARGETS)',$(NEWLINE)" ;
 	Contents += "$(solutionInfo).Projects = concat($(solutionInfo).Projects, $(NEWLINE){$(NEWLINE)$(projectLines)})$(NEWLINE)" ;
 }
@@ -254,7 +226,7 @@ Contents = "-- This file is generated.  Do not modify.$(NEWLINE)$(NEWLINE)" ;
 
 if $(PLATFORM) = *
 {
-	Contents += "local function concat(l, r)
+	Contents += "function concat(l, r)
 	local out = {}
 	if l then
 		for _, v in ipairs(l) do
