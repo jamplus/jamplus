@@ -262,6 +262,7 @@ make1a(
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 static char filecache_buffer[ 1024 ];
+int  md5matchescommandline( TARGET *t );
 #endif
 
 static void
@@ -390,7 +391,7 @@ make1b( TARGET *t )
 				for( c = t->includes->depends; c; c = c->next ) {
 					if ( c->target->fate > T_FATE_STABLE  &&  !c->needs ) {
 						if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
-							if ( getcachedmd5sum( c->target, 1 ) ) {
+							if ( getcachedmd5sum( c->target, 1 )  ||  !md5matchescommandline( c->target ) ) {
 								childupdated = 1;
 								break;
 							}
@@ -408,7 +409,8 @@ make1b( TARGET *t )
 			t->fate = T_FATE_UPDATE;
 	}
 	if ( t->fate == T_FATE_UPDATE  &&  !childupdated )
-	    t->fate = T_FATE_STABLE;
+		if ( md5matchescommandline( t ) )
+		    t->fate = T_FATE_STABLE;
 	if ( t->flags & ( T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS )  &&  t->actions ) {
 #ifdef OPT_ACTIONS_WAIT_FIX
 	    /* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
