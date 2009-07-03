@@ -213,7 +213,7 @@ int main( int argc, char **argv, char **arg_environ )
 	int		anyhow = 0;
 	int		status;
 #ifdef OPT_PRINT_TOTAL_TIME_EXT
-	unsigned int	start;
+	unsigned long long	start;
 	start = getmilliseconds();
 //	time_t		start;
 //	time(&start);
@@ -632,7 +632,7 @@ int main( int argc, char **argv, char **arg_environ )
 
 #ifdef OPT_PRINT_TOTAL_TIME_EXT
 	{
-	    unsigned int now;
+	    unsigned long long now;
 //	    time_t now;
 	    long elapsed;
 	    const char* elapsed_logfile_name;

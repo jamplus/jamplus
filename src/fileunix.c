@@ -919,12 +919,13 @@ void getprocesspath(char* buffer, size_t bufferLen)
 
 #ifdef OPT_PRINT_TOTAL_TIME_EXT
 
-#pragma comment(lib, "winmm.lib")
+#include <sys/time.h>
 
-unsigned int getmilliseconds()
+unsigned long long getmilliseconds()
 {
-/*    return timeGetTime();*/
-	return 0;
+	struct timeval tv;
+	gettimeofday(&tv, 0);
+	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
 #endif

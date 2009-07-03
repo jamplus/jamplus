@@ -46,5 +46,5 @@ void getprocesspath(char* buffer, size_t bufferLen);
 #endif
 
 #ifdef OPT_PRINT_TOTAL_TIME_EXT
-unsigned int getmilliseconds();
+unsigned long long getmilliseconds();
 #endif
