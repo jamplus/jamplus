@@ -39,7 +39,7 @@ rule DumpSources prefix : SOURCES
 {
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 	Contents += "$(prefix).Sources = {$(NEWLINE)" ;
-	for source in $(SOURCES:R=$(subdir))
+	for source in $(SOURCES:TR=$(subdir))
 	{
 		if ! $(source:S) in $(SUFOBJ) $(SUFRES)
 		{
@@ -79,7 +79,7 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES
 	{
 		local prefix = "Projects[ [[$(project)]] ]" ;
 		Contents += "$(prefix).SourceGroups[ [[$(FOLDERNAME)]] ] = concat($(prefix).SourceGroups[ [[$(FOLDERNAME)]] ], $(NEWLINE){$(NEWLINE)" ;
-		Contents += "$(TAB)$(TAB)[[$(SOURCES:R=$(subdir))]],$(NEWLINE)" ;
+		Contents += "$(TAB)$(TAB)[[$(SOURCES:TR=$(subdir))]],$(NEWLINE)" ;
 		Contents += "})$(NEWLINE)" ;
 	}
 }
