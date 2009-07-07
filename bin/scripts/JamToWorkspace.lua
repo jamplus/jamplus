@@ -1037,22 +1037,73 @@ function XcodeUuid()
 	return uuid.new():gsub('%-', ''):upper():sub(1, 24)
 end
 
+
+function XcodeHelper_AssignEntryUuids(entryUuids, folder, fullPath)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			local fullFolderName = fullPath .. entry.folder .. '/'
+			if not entryUuids[fullFolderName] then
+				entryUuids[fullFolderName] = XcodeUuid()
+			end
+			XcodeHelper_AssignEntryUuids(entryUuids, entry, fullFolderName)
+		else
+			if not entryUuids[entry] then
+				entryUuids[entry] = XcodeUuid()
+			end
+		end
+	end
+end
+
+
+function XcodeHelper_WritePBXGroup(contents, entryUuids, uuid, name, children, fullPath)
+	table.insert(contents, ('\t\t%s /* %s */ = {\n'):format(uuid, name))
+	table.insert(contents, '\t\t\tisa = PBXGroup;\n')
+	table.insert(contents, '\t\t\tchildren = (\n')
+	for entry in ivalues(children) do
+		if type(entry) == 'table' then
+			local fullFolderName = fullPath .. entry.folder .. '/'
+			table.insert(contents, '\t\t\t\t' .. entryUuids[fullFolderName] .. ' /* ' .. entry.folder .. ' */,\n')
+		else
+			table.insert(contents, '\t\t\t\t' .. entryUuids[entry] .. ' /* ' .. entry .. ' */,\n')
+		end
+	end
+	table.insert(contents, '\t\t\t);\n')
+	table.insert(contents, '\t\t\tname = "' .. name .. '";\n')
+	table.insert(contents, '\t\t\tsourceTree = "<group>";\n')
+	table.insert(contents, '\t\t};\n')
+end
+	
+
+function XcodeHelper_WritePBXGroups(contents, entryUuids, folder, fullPath)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			local fullFolderName = fullPath .. entry.folder .. '/'
+			XcodeHelper_WritePBXGroup(contents, entryUuids, entryUuids[fullFolderName], entry.folder, entry, fullFolderName)
+			XcodeHelper_WritePBXGroups(contents, entryUuids, entry, fullFolderName)
+		end
+	end
+end
+
+
+
 local XcodeProjectMetaTable = {  __index = XcodeProjectMetaTable  }
 
 function XcodeProjectMetaTable:Write(outputPath, commandLines)
+	local projectsPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+
 	local filename = outputPath .. self.ProjectName .. '.xcodeproj/project.pbxproj'
 	os.mkdir(filename)
 
 	local jamCommandLine = jamExePath .. ' ' ..
 			os.path.escape('-C' .. destinationRootPath)
 
-	local info = ProjectExportInfo[self.ProjectName]
+	local info = ProjectExportInfo[self.ProjectName:lower()]
 	if not info then
 		info = {
 			Name = self.ProjectName,
 			Filename = filename,
 		}
-		ProjectExportInfo[self.ProjectName] = info
+		ProjectExportInfo[self.ProjectName:lower()] = info
 	end
 	if not info.LegacyTargetUuid then
 		info.LegacyTargetUuid = XcodeUuid()
@@ -1088,7 +1139,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	
 	project.SourcesTree.folder = self.ProjectName
 	local sourcesTree = { project.SourcesTree }
-	self:_AssignEntryUuids(sourcesTree, '')
+	XcodeHelper_AssignEntryUuids(info.EntryUuids, sourcesTree, '')
 
 	-- Write PBXFileReferences.
 	table.insert(self.Contents, [[
@@ -1102,23 +1153,31 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 
 	-- Write PBXGroups.
 	table.insert(self.Contents, '/* Begin PBXGroup section */\n')
-	self:_WritePBXGroups(sourcesTree, '')
+	XcodeHelper_WritePBXGroups(self.Contents, self.EntryUuids, sourcesTree, '')
 	table.insert(self.Contents, '/* End PBXGroup section */\n\n')
 	
 	-- Write PBXLegacyTarget.
 	table.insert(self.Contents, '/* Begin PBXLegacyTarget section */\n')
 	table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, info.Name))
 	table.insert(self.Contents, '\t\t\tisa = PBXLegacyTarget;\n')
-	table.insert(self.Contents, '\t\t\tbuildArgumentsString = "\\\"-sPLATFORM=$(PLATFORM) -sCONFIG=$(CONFIG)\\\" $(ACTION) $(TARGET_NAME)";\n')
+	if commandLines and commandLines[1] then
+		table.insert(self.Contents, '\t\t\tbuildArgumentsString = "";\n')
+	else
+		table.insert(self.Contents, '\t\t\tbuildArgumentsString = "\\\"-sPLATFORM=$(PLATFORM) -sCONFIG=$(CONFIG)\\\" $(ACTION) $(TARGET_NAME)";\n')
+	end
 	table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. info.Name .. '" */;\n')
 	table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
 	table.insert(self.Contents, '\t\t\t);\n')
-	table.insert(self.Contents, '\t\t\tbuildToolPath = ' .. os.path.combine(outputPath, 'xcodejam') .. ';\n')
+	if commandLines and commandLines[1] then
+		table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. commandLines[1] .. '";\n')
+	else
+		table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. os.path.combine(projectsPath, 'xcodejam') .. '";\n')
+	end
 	table.insert(self.Contents, '\t\t\tdependencies = (\n')
 	table.insert(self.Contents, '\t\t\t);\n')
-	table.insert(self.Contents, '\t\t\tname = ' .. info.Name .. ';\n')
+	table.insert(self.Contents, '\t\t\tname = "' .. info.Name .. '";\n')
 	table.insert(self.Contents, '\t\t\tpassBuildSettingsInEnvironment = 1;\n')
-	table.insert(self.Contents, '\t\t\tproductName = ' .. self.ProjectName .. ';\n')
+	table.insert(self.Contents, '\t\t\tproductName = "' .. self.ProjectName .. '";\n')
 	table.insert(self.Contents, '\t\t};\n')
 	table.insert(self.Contents, '/* End PBXLegacyTarget section */\n\n')
 
@@ -1165,8 +1224,8 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		table.insert(self.Contents, "\t\t" .. info.LegacyTargetConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
 		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
 		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
-		table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = " .. self.ProjectName .. ";\n")
-		table.insert(self.Contents, "\t\t\t\tTARGET_NAME = " .. self.ProjectName .. ";\n")
+		table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = \"" .. self.ProjectName .. "\";\n")
+		table.insert(self.Contents, "\t\t\t\tTARGET_NAME = \"" .. self.ProjectName .. "\";\n")
 		table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. Platform .. ";\n")
 		table.insert(self.Contents, "\t\t\t\tCONFIG = " .. config .. ";\n")
 		table.insert(self.Contents, "\t\t\t};\n")
@@ -1348,20 +1407,21 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		end
 		extraData.OutputName = configInfo.OutputName
 
-		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.FileReferenceUuid, configInfo.OutputName))
-		table.insert(self.Contents, [[
+		if configInfo.OutputName ~= '' then
+			table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.FileReferenceUuid, configInfo.OutputName))
+			table.insert(self.Contents, [[
 		isa = PBXFileReference;
 		lastKnownFileType = text;
 ]])
-		table.insert(self.Contents, '\t\tname = ' .. configInfo.OutputName .. ';\n')
-		table.insert(self.Contents, '\t\tpath = ' .. configInfo.OutputPath .. configInfo.OutputName .. ';\n')
-		table.insert(self.Contents, [[
+			table.insert(self.Contents, '\t\tname = ' .. configInfo.OutputName .. ';\n')
+			table.insert(self.Contents, '\t\tpath = "' .. configInfo.OutputPath .. configInfo.OutputName .. '";\n')
+			table.insert(self.Contents, [[
 		sourceTree = "<absolute>";
 	};
 ]])
 
-		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.Uuid, configInfo.OutputName))
-		table.insert(self.Contents, expand([[
+			table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.Uuid, configInfo.OutputName))
+			table.insert(self.Contents, expand([[
 		isa = PBXExecutable;
 		activeArgIndices = (
 		);
@@ -1402,6 +1462,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		);
 	};
 ]], executableConfig, info, extraData))
+		end
 	end
 		
 	table.insert(self.Contents, '}\n')
@@ -1422,23 +1483,6 @@ function XcodeProject(projectName, options)
 end
 
 
-function XcodeProjectMetaTable:_AssignEntryUuids(folder, fullPath)
-	for entry in ivalues(folder) do
-		if type(entry) == 'table' then
-			local fullFolderName = fullPath .. entry.folder .. '/'
-			if not self.EntryUuids[fullFolderName] then
-				self.EntryUuids[fullFolderName] = XcodeUuid()
-			end
-			self:_AssignEntryUuids(entry, fullFolderName)
-		else
-			if not self.EntryUuids[entry] then
-				self.EntryUuids[entry] = XcodeUuid()
-			end
-		end
-	end
-end
-
-
 function XcodeProjectMetaTable:_WritePBXFileReferences(folder)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
@@ -1451,72 +1495,242 @@ function XcodeProjectMetaTable:_WritePBXFileReferences(folder)
 end
 
 
-function XcodeProjectMetaTable:_WritePBXGroup(uuid, name, children, fullPath)
-	table.insert(self.Contents, ('\t\t%s /* %s */ = {\n'):format(uuid, name))
-	table.insert(self.Contents, '\t\t\tisa = PBXGroup;\n')
-	table.insert(self.Contents, '\t\t\tchildren = (\n')
-	for entry in ivalues(children) do
-		if type(entry) == 'table' then
-			local fullFolderName = fullPath .. entry.folder .. '/'
-			table.insert(self.Contents, '\t\t\t\t' .. self.EntryUuids[fullFolderName] .. ' /* ' .. entry.folder .. ' */,\n')
-		else
-			table.insert(self.Contents, '\t\t\t\t' .. self.EntryUuids[entry] .. ' /* ' .. entry .. ' */,\n')
-		end
-	end
-	table.insert(self.Contents, '\t\t\t);\n')
-	table.insert(self.Contents, '\t\t\tname = ' .. name .. ';\n')
-	table.insert(self.Contents, '\t\t\tsourceTree = "<group>";\n')
-	table.insert(self.Contents, '\t\t};\n')
-end
-	
-function XcodeProjectMetaTable:_WritePBXGroups(folder, fullPath)
-	for entry in ivalues(folder) do
-		if type(entry) == 'table' then
-			local fullFolderName = fullPath .. entry.folder .. '/'
-			self:_WritePBXGroup(self.EntryUuids[fullFolderName], entry.folder, entry, fullFolderName)
-			self:_WritePBXGroups(entry, fullFolderName)
-		end
-	end
-end
-
-
-
 
 local XcodeSolutionMetaTable = {  __index = XcodeSolutionMetaTable  }
 
-function XcodeSolutionMetaTable:_GatherSolutionFolders(folder, folderList, fullPath)
+function XcodeSolutionMetaTable:_WritePBXFileReferences(folder)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
-			local solutionFolder = fullPath .. '\\' .. entry.folder
-			table.insert(folderList, solutionFolder)
-			self:_GatherSolutionFolders(entry, folderList, solutionFolder)
+			self:_WritePBXFileReferences(entry)
+		else
+			local projectInfo = ProjectExportInfo[entry]
+			if projectInfo then
+				table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "%s.xcodeproj"; path = "%s"; sourceTree = SOURCE_ROOT; };\n'):format(
+						self.EntryUuids[entry], entry, projectInfo.Name, os.path.simplify(os.path.remove_slash(os.path.remove_filename(projectInfo.Filename)))))
+			end
 		end
 	end
 end
 
 
-function XcodeSolutionMetaTable:_WriteNestedProjects(folder, fullPath)
-	for entry in ivalues(folder) do
+function XcodeSolutionMetaTable:_WriteProjectReferences(folder, fullPath)
+	for _, entry in ipairs(folder) do
 		if type(entry) == 'table' then
-			local solutionFolder = fullPath .. '\\' .. entry.folder
-			if folder.folder then
-				table.insert(self.Contents, expand([[
-		$(Child) = $(Parent)
-]], {  Child = ProjectExportInfo[solutionFolder].Uuid, Parent = ProjectExportInfo[fullPath].Uuid  }))
-			end
-			self:_WriteNestedProjects(entry, solutionFolder)
+			local fullFolderName = fullPath .. entry.folder .. '/'
+			self:_WriteProjectReferences(entry, fullFolderName)
 		else
-			if folder.folder then
-				table.insert(self.Contents, expand([[
-		$(Child) = $(Parent)
-]], {  Child = ProjectExportInfo[entry].Uuid, Parent = ProjectExportInfo[fullPath].Uuid  }))
-			end
+			table.insert(self.Contents, '\t\t\t\t{\n')
+			table.insert(self.Contents, '\t\t\t\t\tProductGroup = ' .. self.EntryUuids[fullPath] .. ' /* ' .. ' */;\n')
+			table.insert(self.Contents, '\t\t\t\t\tProjectRef = ' .. self.EntryUuids[entry] .. ' /* ' .. entry .. '.xcodeproj */;\n')
+			table.insert(self.Contents, '\t\t\t\t},\n')
+		end
+	end
+end
+
+
+function XcodeSolutionMetaTable:_AppendXcodeproj(folder)
+	for index, entry in ipairs(folder) do
+		if type(entry) == 'table' then
+			self:_AppendXcodeproj(entry)
+		else
+			folder[index] = entry .. '.xcodeproj'
 		end
 	end
 end
 
 
 function XcodeSolutionMetaTable:Write(outputPath)
+	local projectsPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+
+	local filename = outputPath .. self.Name .. '.workspace.xcodeproj/project.pbxproj'
+	os.mkdir(filename)
+
+	local workspace = Workspaces[self.Name]
+	local workspaceName = self.Name .. '.workspace'
+
+	local info = ProjectExportInfo[workspaceName:lower()]
+	if not info then
+		info = {
+			Name = workspaceName,
+			Filename = filename,
+		}
+		ProjectExportInfo[workspaceName:lower()] = info
+	end
+	if not info.LegacyTargetUuid then
+		info.LegacyTargetUuid = XcodeUuid()
+	end
+	if not info.LegacyTargetBuildConfigurationListUuid then
+		info.LegacyTargetBuildConfigurationListUuid = XcodeUuid()
+	end
+	if not info.ProjectUuid then
+		info.ProjectUuid = XcodeUuid()
+	end
+	if not info.ProjectBuildConfigurationListUuid then
+		info.ProjectBuildConfigurationListUuid = XcodeUuid()
+	end
+
+	local project = Projects[self.Name .. '.workspace']
+
+	-- Write header.
+	table.insert(self.Contents, [[
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+]])
+
+	if not info.EntryUuids then
+		info.EntryUuids = { }
+	end
+	self.EntryUuids = info.EntryUuids
+	
+	workspace.ProjectTree.folder = self.Name .. '.workspace'
+	local workspaceTree = { workspace.ProjectTree }
+	XcodeHelper_AssignEntryUuids(info.EntryUuids, workspaceTree, '')
+
+	-- Write PBXFileReferences.
+	table.insert(self.Contents, [[
+/* Begin PBXFileReference section */
+]])
+	self:_WritePBXFileReferences(workspaceTree)
+	table.insert(self.Contents, [[
+/* End PBXFileReference section */
+
+]])
+
+	-- Write PBXGroups.
+	table.insert(self.Contents, '/* Begin PBXGroup section */\n')
+	XcodeHelper_WritePBXGroups(self.Contents, info.EntryUuids, workspaceTree, '')
+	table.insert(self.Contents, '/* End PBXGroup section */\n\n')
+
+	-- Write PBXLegacyTarget.
+	table.insert(self.Contents, '/* Begin PBXLegacyTarget section */\n')
+	table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, info.Name))
+	table.insert(self.Contents, '\t\t\tisa = PBXLegacyTarget;\n')
+	table.insert(self.Contents, '\t\t\tbuildArgumentsString = "\\\"-sPLATFORM=$(PLATFORM) -sCONFIG=$(CONFIG)\\\" $(ACTION) $(TARGET_NAME)";\n')
+	table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. info.Name .. '" */;\n')
+	table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
+	table.insert(self.Contents, '\t\t\t);\n')
+	table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. os.path.combine(projectsPath, 'xcodejam') .. '";\n')
+	table.insert(self.Contents, '\t\t\tdependencies = (\n')
+	table.insert(self.Contents, '\t\t\t);\n')
+	table.insert(self.Contents, '\t\t\tname = "' .. info.Name .. '";\n')
+	table.insert(self.Contents, '\t\t\tpassBuildSettingsInEnvironment = 1;\n')
+	table.insert(self.Contents, '\t\t\tproductName = "' .. self.Name .. '";\n')
+	table.insert(self.Contents, '\t\t};\n')
+	table.insert(self.Contents, '/* End PBXLegacyTarget section */\n\n')
+
+	-- Write PBXProject.
+	table.insert(self.Contents, '/* Begin PBXProject section */\n')
+	table.insert(self.Contents, ("\t\t%s /* Project object */ = {\n"):format(info.ProjectUuid))
+	info.GroupUuid = info.EntryUuids[workspaceTree[1].folder .. '/']
+	table.insert(self.Contents, expand([[
+			isa = PBXProject;
+			buildConfigurationList = $(ProjectBuildConfigurationListUuid) /* Build configuration list for PBXProject "$(Name)" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = $(GroupUuid);
+			projectDirPath = "";
+]], info))
+--projectReferences = (
+--	self:_WriteProjectReferences(workspaceTree, '')
+--);
+	table.insert(self.Contents, expand([[
+			projectRoot = "";
+			targets = (
+				$(LegacyTargetUuid) /* $(Name) */,
+			);
+		};
+]], info))
+	table.insert(self.Contents, '/* End PBXProject section */\n\n')
+
+	-- Write XCBuildConfigurations.
+	if not info.LegacyTargetConfigUuids then
+		info.LegacyTargetConfigUuids = {}
+
+		for _, config in ipairs(Config.Configurations) do
+			info.LegacyTargetConfigUuids[config] = XcodeUuid()
+		end
+	end
+
+	if not info.ProjectConfigUuids then
+		info.ProjectConfigUuids = {}
+
+		for _, config in ipairs(Config.Configurations) do
+			info.ProjectConfigUuids[config] = XcodeUuid()
+		end
+	end
+
+	table.insert(self.Contents, '/* Begin XCBuildConfiguration section */\n')
+
+	-- Write legacy target configurations.
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t" .. info.LegacyTargetConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
+		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
+		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+		table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = " .. 'all' .. ";\n")
+		table.insert(self.Contents, "\t\t\t\tTARGET_NAME = " .. 'all' .. ";\n")
+		table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. Platform .. ";\n")
+		table.insert(self.Contents, "\t\t\t\tCONFIG = " .. config .. ";\n")
+		table.insert(self.Contents, "\t\t\t};\n")
+		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
+		table.insert(self.Contents, "\t\t};\n")
+	end
+	
+	-- Write project configurations.
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t" .. info.ProjectConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
+		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
+		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+		table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
+		table.insert(self.Contents, "\t\t\t\tSDKROOT = macosx10.5;\n")
+		table.insert(self.Contents, "\t\t\t};\n")
+		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
+		table.insert(self.Contents, "\t\t};\n")
+	end
+
+	table.insert(self.Contents, '/* End XCBuildConfiguration section */\n\n')
+
+
+	-- Write XCConfigurationLists.
+	table.insert(self.Contents, "/* Begin XCConfigurationList section */\n")
+
+	table.insert(self.Contents, "\t\t" .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. self.Name .. '" */ = {\n')
+	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
+	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t\t\t" .. info.LegacyTargetConfigUuids[config] .. " /* " .. config .. " */,\n")
+	end
+	table.insert(self.Contents, "\t\t\t);\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = release;\n")
+	table.insert(self.Contents, "\t\t};\n\n")
+	
+	table.insert(self.Contents, "\t\t" .. info.ProjectBuildConfigurationListUuid .. ' /* Build configuration list for PBXProject "' .. self.Name .. '" */ = {\n')
+	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
+	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
+	for _, config in ipairs(Config.Configurations) do
+		table.insert(self.Contents, "\t\t\t\t" .. info.ProjectConfigUuids[config] .. " /* " .. config .. " */,\n")
+	end
+	table.insert(self.Contents, "\t\t\t);\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = release;\n")
+	table.insert(self.Contents, "\t\t};\n")
+	
+	table.insert(self.Contents, "/* End XCConfigurationList section */\n\n")
+	
+	table.insert(self.Contents, "\t};\n")
+
+	table.insert(self.Contents, "\trootObject = " .. info.ProjectUuid .. " /* Project object */;\n")
+	table.insert(self.Contents, "}\n")
+	
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
+	WriteFileIfModified(filename, self.Contents)
+
 end
 
 function XcodeSolution(solutionName, options)
@@ -1692,12 +1906,14 @@ function BuildProjectTree(workspace)
 	projectsMap[buildWorkspaceName:lower()] = true
 	projectsMap[updateWorkspaceName:lower()] = true
 
-	for projectGroupName, projectGroup in pairs(workspace.ProjectGroups) do
-		for projectName in ivalues(projectGroup) do
-			local lowerProjectName = projectName:lower()
-			if projectsMap[lowerProjectName] then
-				FolderTree.InsertName(projects, projectGroupName, projectName)
-				projectsMap[lowerProjectName] = nil
+	if workspace.ProjectGroups then
+		for projectGroupName, projectGroup in pairs(workspace.ProjectGroups) do
+			for projectName in ivalues(projectGroup) do
+				local lowerProjectName = projectName:lower()
+				if projectsMap[lowerProjectName] then
+					FolderTree.InsertName(projects, projectGroupName, projectName)
+					projectsMap[lowerProjectName] = nil
+				end
 			end
 		end
 	end
@@ -1735,31 +1951,44 @@ function DumpWorkspace(workspace)
 	}
 	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
 	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options)
-	projectExporter:Write(outPath,
-		{
-			outPath .. 'UpdateWorkspace.bat',
-			outPath .. 'UpdateWorkspace.bat',
-		}
-	)
 
-	if exporter.Options.vs2005 or exporter.Options.vs2008 then
-		if not workspace.ProjectGroups then
-			workspace.ProjectGroups = {}
-		end
-		local jamSupport = workspace.ProjectGroups['!JamSupport']
-		if not jamSupport then
-			jamSupport = {}
-			workspace.ProjectGroups['!JamSupport'] = jamSupport
-		end
-		table.insert(jamSupport, buildWorkspaceName)
-		table.insert(jamSupport, updateWorkspaceName)
+	local updateWorkspaceCommandLines
+	if uname == 'windows' then
+		updateWorkspaceCommandLines =
+		{
+			outPath .. 'updateworkspace.bat',
+			outPath .. 'updateworkspace.bat',
+		}
+	else
+		updateWorkspaceCommandLines =
+		{
+			outPath .. 'updateworkspace',
+			outPath .. 'updateworkspace',
+		}
 	end
+	
+	projectExporter:Write(outPath, updateWorkspaceCommandLines)
+
+	if not workspace.ProjectGroups then
+		workspace.ProjectGroups = {}
+	end
+	local jamSupport = workspace.ProjectGroups['!JamSupport']
+	if not jamSupport then
+		jamSupport = {}
+		workspace.ProjectGroups['!JamSupport'] = jamSupport
+	end
+	table.insert(jamSupport, buildWorkspaceName)
+	table.insert(jamSupport, updateWorkspaceName)
 
 	BuildProjectTree(workspace)
 
 	for projectName in ivalues(workspace.Projects) do
 		local project = Projects[projectName]
-		DumpProject(project)
+		if project then
+			DumpProject(project)
+		else
+			print('* Attempting to write unknown project [' .. projectName .. '].')
+		end
 	end
 end
 
@@ -1865,7 +2094,7 @@ include $(jamPath)Jambase.jam ;
 		io.writeall(destinationRootPath .. 'jam.bat',
 			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
-		-- Write UpdateWorkspace.bat.
+		-- Write updateworkspace.bat.
 		io.writeall(outPath .. 'updateworkspace.bat',
 				("@%s --gen=%s --config=%s %s ..\n"):format(
 				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen,
