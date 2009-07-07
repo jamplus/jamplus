@@ -1,0 +1,20 @@
+DEPCACHE.standard = .depcache ;
+DEPCACHE = standard ;
+
+actions TestAction {
+	echo Executing test action for $(<)
+	echo _ >$(<)
+}
+
+rule TestVersion {
+	return "2" ;
+}
+
+rule Test TARGET {
+	Depends all : $(TARGET) ;
+	Clean clean : $(TARGET) ;
+	UseCommandLine $(TARGET) : [ TestVersion ] ;
+	TestAction $(TARGET) ;
+}
+
+Test "1" ;
