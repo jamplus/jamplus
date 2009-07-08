@@ -1488,8 +1488,8 @@ function XcodeProjectMetaTable:_WritePBXFileReferences(folder)
 		if type(entry) == 'table' then
 			self:_WritePBXFileReferences(entry)
 		else
-			table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode%s; path = "%s"; sourceTree = "<group>"; };\n'):format(
-					self.EntryUuids[entry], entry, os.path.get_extension(entry), entry))
+			table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode%s; name = "%s"; path = "%s"; sourceTree = "<group>"; };\n'):format(
+					self.EntryUuids[entry], entry, os.path.get_extension(entry), os.path.remove_directory(entry), entry))
 		end
 	end
 end
