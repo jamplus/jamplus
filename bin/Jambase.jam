@@ -1371,7 +1371,7 @@ rule MultiCppCompile TARGET : SOURCES
 		preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
 		preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
 		preMFLAGS += $(MFLAGS.$(ALL_TYPES)) ;
-		preMMFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
+		preMMFLAGS += $(MMFLAGS.$(ALL_TYPES)) ;
 		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
 		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
 	}
@@ -1385,8 +1385,8 @@ rule MultiCppCompile TARGET : SOURCES
 		preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
 		preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
 		preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
-		preMFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
-		preMMFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
+		preMFLAGS += $(MFLAGS.$(ALL_TYPES)) ;
+		preMMFLAGS += $(MMFLAGS.$(ALL_TYPES)) ;
 		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
 		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
 	}
