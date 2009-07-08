@@ -269,6 +269,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			C++			= "$(CC)" ;
 			LINK		= "$(MSVCBIN)link" ;
 			MKDIR		= mkdir ;
+			MKDIR_RECURSIVE = ;
 			MT			= "$(MSSDK)/bin/mt" ;
 			RC			= "$(MSSDK)/bin/RC" ;
 			STDHDRS		?= "$(MSSDK_STDHDRS)" ;
@@ -298,6 +299,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			CC			?= "$(MINGW_ROOT)/bin/gcc" ;
 			C++			?= "$(MINGW_ROOT)/bin/g++" ;
 			MKDIR		?= mkdir ;
+			MKDIR_RECURSIVE = ;
 			RANLIB		?= "$(MINGW_ROOT)/bin/ranlib" ;
 			SUFEXE		?= .exe ;
 
@@ -374,6 +376,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 		CHOWN		?= chown ;
 		LINKFLAGS	?= $(CCFLAGS) ;
 		LINKLIBS	?= ;
+		MKDIR_RECURSIVE = 1 ;
 		OPTIM		?= -O ;
 		RANLIB		?= ranlib ;
 
@@ -572,27 +575,30 @@ rule MkDir
 	    if $(NT)
 	    {
 	        switch $(s)
-		{
-		case "*:"   : s = ;
-		case "*:\\" : s = ;
-		case "*:/" : s = ;
-		}
+			{
+				case "*:"   : s = ;
+				case "*:\\" : s = ;
+				case "*:/" : s = ;
+			}
 	    }
 
 	    if $(s) = $(<)
 	    {
-		# The parent is the same as the dir.
-		# We're at the root, which some OS's can't stat, so we mark
-		# it as NotFile.
+			# The parent is the same as the dir.
+			# We're at the root, which some OS's can't stat, so we mark
+			# it as NotFile.
 
 	        NotFile $(s) ;
 	    }
 	    else if $(s:G=)
 	    {
-		# There's a parent; recurse.
+			if ! $(MKDIR_RECURSIVE)
+			{
+				# There's a parent; recurse.
 
-		Depends $(<) : $(s) ;
-		MkDir $(s) ;
+				Depends $(<) : $(s) ;
+				MkDir $(s) ;
+			}
 	    }
 	}
 }
@@ -1066,7 +1072,7 @@ actions Link
 
 actions quietly MkDir1
 {
-	$(MKDIR) $(<)
+	$(MKDIR) "$(<)"
 }
 
 if $(NT)
