@@ -1502,15 +1502,54 @@ end
 
 local XcodeWorkspaceMetaTable = {  __index = XcodeWorkspaceMetaTable  }
 
-function XcodeSolutionMetaTable:_WritePBXFileReferences(folder)
+local function _XcodeProjectSortFunction(left, right)
+	local leftType = type(left)
+	local rightType = type(right)
+	if leftType == 'table'  and  rightType == 'table' then
+		return left.folder:lower() < right.folder:lower()
+	end
+	if leftType == 'table' then
+		return true
+	end
+	if rightType == 'table' then
+		return false
+	end
+	return left:lower() < right:lower()
+end
+
+
+function XcodeWorkspaceMetaTable:_WritePBXFileReferences(folder)
+	table.sort(folder, _XcodeProjectSortFunction)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
 			self:_WritePBXFileReferences(entry)
 		else
-			local projectInfo = ProjectExportInfo[entry]
-			if projectInfo then
-				table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "%s.xcodeproj"; path = "%s"; sourceTree = SOURCE_ROOT; };\n'):format(
-						self.EntryUuids[entry], entry, projectInfo.Name, os.path.simplify(os.path.remove_slash(os.path.remove_filename(projectInfo.Filename)))))
+			table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode%s; name = "%s"; path = "%s"; sourceTree = "<group>"; };\n'):format(
+					self.EntryUuids[entry], entry, os.path.get_extension(entry), os.path.remove_directory(entry), entry))
+		end
+	end
+end
+
+
+
+function XcodeWorkspaceMetaTable:_WritePBXProjectFileReferences(folder, workspace)
+	table.sort(folder, _XcodeProjectSortFunction)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			self:_WritePBXProjectFileReferences(entry, workspace)
+		else
+			if os.path.get_extension(entry) == '.xcodeproj' then
+				local projectName = os.path.remove_extension(entry)
+				local projectInfo = ProjectExportInfo[projectName:lower()]
+				if projectInfo then
+					table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "%s"; path = "%s"; sourceTree = SOURCE_ROOT; };\n'):format(
+							self.EntryUuids[entry], entry, projectName, os.path.simplify(os.path.remove_slash(os.path.remove_filename(projectInfo.Filename)))))
+				end
+
+				self:_WritePBXFileReferences({ Projects[projectName].SourcesTree })
+			else
+				table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode%s; name = "%s"; path = "%s"; sourceTree = "<group>"; };\n'):format(
+						self.EntryUuids[entry], entry, os.path.get_extension(entry), os.path.remove_directory(entry), entry))
 			end
 		end
 	end
@@ -1533,11 +1572,13 @@ end
 
 
 function XcodeWorkspaceMetaTable:_AppendXcodeproj(folder)
-	for index, entry in ipairs(folder) do
+	for index = 1, #folder do
+		local entry = folder[index]
 		if type(entry) == 'table' then
 			self:_AppendXcodeproj(entry)
 		else
 			folder[index] = entry .. '.xcodeproj'
+			folder[#folder + 1] = Projects[entry].SourcesTree 
 		end
 	end
 end
@@ -1573,8 +1614,6 @@ function XcodeWorkspaceMetaTable:Write(outputPath)
 		info.ProjectBuildConfigurationListUuid = XcodeUuid()
 	end
 
-	local project = Projects[self.Name .. '.workspace']
-
 	-- Write header.
 	table.insert(self.Contents, [[
 // !$*UTF8*$!
@@ -1592,6 +1631,7 @@ function XcodeWorkspaceMetaTable:Write(outputPath)
 	end
 	self.EntryUuids = info.EntryUuids
 	
+	self:_AppendXcodeproj(workspace.ProjectTree)
 	workspace.ProjectTree.folder = self.Name .. '.workspace'
 	local workspaceTree = { workspace.ProjectTree }
 	XcodeHelper_AssignEntryUuids(info.EntryUuids, workspaceTree, '')
@@ -1600,7 +1640,7 @@ function XcodeWorkspaceMetaTable:Write(outputPath)
 	table.insert(self.Contents, [[
 /* Begin PBXFileReference section */
 ]])
-	self:_WritePBXFileReferences(workspaceTree)
+	self:_WritePBXProjectFileReferences(workspaceTree, workspace)
 	table.insert(self.Contents, [[
 /* End PBXFileReference section */
 
@@ -1994,6 +2034,9 @@ function DumpWorkspace(workspace)
 			print('* Attempting to write unknown project [' .. projectName .. '].')
 		end
 	end
+
+	workspace.Projects[#workspace.Projects + 1] = buildWorkspaceName
+	workspace.Projects[#workspace.Projects + 1] = updateWorkspaceName
 end
 
 
