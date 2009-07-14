@@ -1500,7 +1500,7 @@ end
 
 
 
-local XcodeSolutionMetaTable = {  __index = XcodeSolutionMetaTable  }
+local XcodeWorkspaceMetaTable = {  __index = XcodeWorkspaceMetaTable  }
 
 function XcodeSolutionMetaTable:_WritePBXFileReferences(folder)
 	for entry in ivalues(folder) do
@@ -1517,7 +1517,7 @@ function XcodeSolutionMetaTable:_WritePBXFileReferences(folder)
 end
 
 
-function XcodeSolutionMetaTable:_WriteProjectReferences(folder, fullPath)
+function XcodeWorkspaceMetaTable:_WriteProjectReferences(folder, fullPath)
 	for _, entry in ipairs(folder) do
 		if type(entry) == 'table' then
 			local fullFolderName = fullPath .. entry.folder .. '/'
@@ -1532,7 +1532,7 @@ function XcodeSolutionMetaTable:_WriteProjectReferences(folder, fullPath)
 end
 
 
-function XcodeSolutionMetaTable:_AppendXcodeproj(folder)
+function XcodeWorkspaceMetaTable:_AppendXcodeproj(folder)
 	for index, entry in ipairs(folder) do
 		if type(entry) == 'table' then
 			self:_AppendXcodeproj(entry)
@@ -1543,7 +1543,7 @@ function XcodeSolutionMetaTable:_AppendXcodeproj(folder)
 end
 
 
-function XcodeSolutionMetaTable:Write(outputPath)
+function XcodeWorkspaceMetaTable:Write(outputPath)
 	local projectsPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
 
 	local filename = outputPath .. self.Name .. '.workspace.xcodeproj/project.pbxproj'
@@ -1737,13 +1737,13 @@ function XcodeSolutionMetaTable:Write(outputPath)
 
 end
 
-function XcodeSolution(solutionName, options)
+function XcodeWorkspace(solutionName, options)
 	return setmetatable(
 		{
 			Contents = {},
 			Name = solutionName,
 			Options = options,
-		}, { __index = XcodeSolutionMetaTable }
+		}, { __index = XcodeWorkspaceMetaTable }
 	)
 end
 
@@ -1839,7 +1839,7 @@ Exporters =
 	{
 		Initialize = XcodeInitialize,
 		ProjectExporter = XcodeProject,
-		WorkspaceExporter = XcodeSolution,
+		WorkspaceExporter = XcodeWorkspace,
 		Shutdown = XcodeShutdown,
 		Description = 'Generate Xcode project',
 		Options =
