@@ -534,18 +534,20 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 	-- Write projects.
 	for projectName in ivalues(workspace.Projects) do
 		local info = ProjectExportInfo[projectName]
-		if self.Options.vs2003 then
-			table.insert(self.Contents, expand([[
+		if info then
+			if self.Options.vs2003 then
+				table.insert(self.Contents, expand([[
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
 ]], info))
-		elseif self.Options.vs2005 or self.Options.vs2008 then
-			table.insert(self.Contents, expand([[
+			elseif self.Options.vs2005 or self.Options.vs2008 then
+				table.insert(self.Contents, expand([[
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
 EndProject
 ]], info))
+			end
 		end
 	end
 
@@ -645,15 +647,17 @@ Global
 
 	for projectName in ivalues(workspace.Projects) do
 		local info = ProjectExportInfo[projectName]
-		for configName in ivalues(Config.Configurations) do
-			local configInfo =
-			{
-				VSPlatform = MapPlatformToVSPlatform[platformName],
-				VSConfig = MapConfigToVSConfig[configName],
-			}
-			table.insert(self.Contents, expand([[
+		if info then
+			for configName in ivalues(Config.Configurations) do
+				local configInfo =
+				{
+					VSPlatform = MapPlatformToVSPlatform[platformName],
+					VSConfig = MapConfigToVSConfig[configName],
+				}
+				table.insert(self.Contents, expand([[
 		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
 ]], configInfo, info))
+			end
 		end
 	end
 
