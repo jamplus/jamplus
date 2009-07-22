@@ -1,5 +1,123 @@
 /*! \page changelog Changelog
 
+\section version0_4 Version 0.4
+
+<h3>New features for 0.4:</h3>
+
+- Mac OS X build is largely functional.
+- Xcode projects can be generated from Jamfile sources.
+
+
+
+<h3>Bootstrapping/Building:</h3>
+
+
+
+
+<h3>Documentation:</h3>
+
+- Large number of documentation updates, including the documenting of the Jam modules.
+
+
+
+
+<h3>Jam Executable:</h3>
+
+- Mac OS X build: Default the number of Jam jobs to the number of processors on the machine, just like the Windows build.
+- In multipass builds where the NoCare flag has been applied to a target that is missing, do not attempt to move the missing file's build to the next pass.  Properly process it in the current pass.
+- Add a PRIORITY parameter to QueueJamFile.  Queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.
+- Multipass support past 2 passes was broken.  It is fixed now.
+- If an action is empty, don't put any of the whitespace through.  It dies on Unix shells.
+- Added support for misplaced semicolon and colon detection in the parser, #ifdef'ed as OPT_FIND_BAD_SEMICOLON_USAGE_EXT.  If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace.  You may need to quote strings that didn't need to be quoted before.
+- Mac OS X has a case insensitive file system.  Turned on the DOWNSHIFT_PATHS #define to compensate for that.
+- Add a new built-in command, Shell, used for executing shell commands and retrieving their output.
+- Beginnings of bringing Lua support online for Mac OS X.
+- Minor fix to OPT_BUILTIN_NEEDS_EXT for certain conditions when Needs is used with MightNotUpdate.
+- The beginnings of support for new Jam command line options to build the workspace, convert folders to a Jamfile, and convert the contents of a .vcproj to a Jamfile.  These command line options currently mirror the bin/scripts/ equivalent Lua scripts.  I expect to rename these for greater ease of use.
+- Fix the Mac OS X directory creation under certain instances in the function file_mkdir().
+
+
+
+
+
+
+<h3>Jambase:</h3>
+
+- Add InstallNamePath rule.  This is currently available only on Mac OS X to provide the -install_name flag to the linker.
+- When the list of files in an archive changes, populate the archive again.  This solves the bug where removing a file from the list of files in an archive left the removed file in the archive.
+- Jambase: Support .m, .mm, and .s files.  This support is for GNU only compilers.
+- Add -isysroot compiler flags for Mac OS X.
+- Jambase: Fix optimization flags for GCC platforms.
+- Jambase: Add LinkFrameworks rule for linking against frameworks on Mac OS X.
+- Jambase: Add ForceInclude rule, which forces the inclusion of the listed header files before any other #include lines.
+- Jambase: Add ObjectForceInclude rule.
+    * Jambase: Revamp the assignment of C/C++ extensions.  They can now be created through the public rule AddBuildExtensions.
+    * Jambase: Lump rule now accepts all CC and C++ extensions.
+    * Jambase: Add new NoPrecompiledHeader rule to turn off precompiled headers for the specified files.
+    * Jambase: ObjectIncludeDirectories now roots relative paths against $(SUBDIR).
+
+
+
+
+
+
+
+
+<h3>Jam Modules:</h3>
+
+- CSharp module: On NT, choose vs2008 as the default (still needs discovery like the C++ compiler).  Now, on other platforms, choose mono.
+- CSharp module: Properly find Mono at /usr/bin.
+- CSharp module: Renamed the Mono CSC_COMPILER to gmcs.  This is the C# 2.0 compiler for Mono.  Mono isn't a compiler; it is a collection of components making up the open source .NET Framework implementation.
+- CSharp Jam module: Fix discovery of gmcs.  Also allow CSC to be set externally and use that as an override when finding the C# compiler.
+- DotNet module: Add windows/Microsoft.NET/Framework/v2.0.50727 to the include directories.
+- wxWidgets module: Add a call to RcIncludeDirectories to allow access to the proper wxWidgets resources.
+
+
+
+
+
+
+
+
+
+<h3>JamToWorkspace:</h3>
+
+- JamToWorkspace now runs on Mac OS X.  Visual Studio projects can be output on Mac OS X without issue.
+- Additional command line option --jamflags added.  Any KEY=VALUE pairs specified on the command line are automatically added to the top of the generated Jambase.jam.
+- Xcode support.
+
+
+
+
+
+
+
+
+
+
+<h3>Samples:</h3>
+
+- Samples: Added samples/macosx/cf, a simple CoreFoundation command line test.
+- Tests: Add tests/forceinclude.
+- Tests: Add tests/multipass_convert, an example of using the QueueJamFile PRIORITY parameter.
+- Tests: Add tests/multipass_nocare, provided by Chris Munn, to illustrate the NoCare Jam executable fix.
+- Tests: Add tests/multiplatform, a test involving multiplatform #defines.
+- Tests: Add tests/semicolon/ to test OPT_FIND_BAD_SEMICOLON_USAGE_EXT.
+- Tests: Add tests/shell.
+
+
+
+
+
+
+<h3>VCProjToJamfile:</h3>
+
+
+
+
+
+
+
 \section version0_3 Version 0.3
 
 <h3>New features for 0.3:</h3>

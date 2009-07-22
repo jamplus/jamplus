@@ -348,7 +348,7 @@ If the given generated \c TARGETS are already built and stored within the file c
 
 When \c QueueJamFile is called, a second pass on the Jam dependency graph is initiated after the \ref operation_updating.  Further documentation on this can be found on the \ref multiple_passes page.
 
-Queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event that Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.  When a priority isn't given, the default priority is 0.  A queued Jamfile with priority of 100 will be parsed before a Jamfile with a priority of 0.  Likewise, a queued Jamfile with a priority of -50 will be parsed after a Jamfile with a priority of 0.
+Queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.  When a priority isn't given, the default priority is 0.  A queued Jamfile with priority of 100 will be parsed before a Jamfile with a priority of 0.  Likewise, a queued Jamfile with a priority of -50 will be parsed after a Jamfile with a priority of 0.
 
 \param JAMFILE_LIST A list of one or more Jamfiles to queue for the next pass.
 \param PRIORITY (optional) A numeric priority.  If not specified, the default is 0.
@@ -381,7 +381,7 @@ The \c Shell rule is used to execute one or more \c COMMANDS and return the outp
 
     # Grab a directory listing.
 	dir_listing = [ Shell dir ] ;
-	
+
 	# Grab two directory listings.
 	dir_listings = [ Shell "dir *.tga" "dir *.png" ]
 	Echo dir *.tga - $(dir_listings[1]) ;
