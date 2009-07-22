@@ -77,6 +77,29 @@ rule FindVisualStudio VERSION
 
 	switch $(VERSION)
 	{
+		case 10.0 :
+			local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+			MSVCNT = [ W32_GETREG $(key) ] ;
+
+			VS100COMNTOOLS = $(VS100COMNTOOLS:J=" ") ;
+			if ! $(MSVCNT) && $(VS100COMNTOOLS) {
+				MSVCNT = $(VS100COMNTOOLS) ;
+			}
+			if $(MSVCNT)
+			{
+				MSVCNT = $(MSVCNT)..\\..\\vc ;
+				MSVCNT = $(MSVCNT:R=$(MSVCNT)) ;
+				MSVCNT_PATH = $(MSVCNT)/../Common7/IDE ;
+				VS2010 = 1 ;
+
+				local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
+				MSSDK = [ W32_GETREG $(key) ] ;
+				MSSDK ?= $(MSVCNT) ;
+				MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
+				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
+				return vs2010 ;
+			}
+
 		case 9.0 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
 			MSVCNT = [ W32_GETREG $(key) ] ;
@@ -198,7 +221,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			if ! $(MSVCNT)
 			{
 				MSVCNT_PATH = ;
-				for ver in $(VISUAL_STUDIO_FORCE_VERSION) 9.0 8.0 7.1 7.0 6.0
+				for ver in $(VISUAL_STUDIO_FORCE_VERSION) 10.0 9.0 8.0 7.1 7.0 6.0
 				{
 					COMPILER = [ FindVisualStudio $(ver) ] ;
 					if $(COMPILER)
@@ -217,7 +240,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			COMPILER = $(THE_COMPILER) ;
 		}
 
-		if $(COMPILER) in vc6 vs2003 vs2005 vs2008
+		if $(COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010
 		{
 			SUFLIB	?= .lib ;
 			SUFOBJ	?= .obj ;
@@ -234,6 +257,8 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 					COMPILER = [ FindVisualStudio 8.0 ] ;
 				case vs2008 :
 					COMPILER = [ FindVisualStudio 9.0 ] ;
+				case vs2010 :
+					COMPILER = [ FindVisualStudio 10.0 ] ;
 			}
 
 			DEFINES.win32.* on * += WIN32 WINDOWS _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE ;
@@ -1330,6 +1355,7 @@ rule MultiCppCompile TARGET : SOURCES
 			case vs2003 : _VCPDB = vc70 ;
 			case vs2005 : _VCPDB = vc80 ;
 			case vs2008 : _VCPDB = vc90 ;
+			case vs2010 : _VCPDB = vc90 ;
 		}
 
 		local vcidb = $(_VCPDB:G=$(grist):S=.idb) ;
@@ -1948,7 +1974,7 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 		[ _retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
 
-	if $(COMPILER) in vc6 vs2003 vs2005 vs2008 {
+	if $(COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 {
 		if windows in $(OPTIONS) {
 			linkFlags += /SUBSYSTEM:WINDOWS ;
 		} else {
@@ -1976,7 +2002,7 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 
 	    Depends $(zap) : $(_linkTargets) ;
 
-		if $(COMPILER) in vs2005 vs2008  &&  ! ( nomanifest in $(OPTIONS) )
+		if $(COMPILER) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) )
 		{
 			_writeManifest $(TARGET) : $(_t) : 1 ;
 			_linkManifest $(_t) ;
@@ -2132,7 +2158,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	if ! ( noexportlib in $(OPTIONS) ) {
 		local _tlib = @($(TARGET)$(SUFLIB):G=$(grist)) ;
 
-		if $(COMPILER) in vs2003 vs2005 vs2008 {
+		if $(COMPILER) in vs2003 vs2005 vs2008 vs2010 {
 			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
 			Depends $(TARGET) : $(_tlib) ;
 			Depends $(_tlib) : $(_t) ;
@@ -2168,7 +2194,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	MakeLocate $(_linkTargets) : $(outputPath) ;
 
 	local regserver ;
-	if regserver in $(OPTIONS)  &&  $(COMPILER) in vc6 vs2003 vs2005 vs2008 {
+	if regserver in $(OPTIONS)  &&  $(COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 {
 		regserver = true ;
 
 		local unregserver = clean:$(TARGET):unregserver ;
@@ -2193,7 +2219,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		[ _retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ _retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
 
-	if $(COMPILER) in vc6 vs2003 vs2005 vs2008 {
+	if $(COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 {
 		if ! ( nodefaults in $(OPTIONS) ) {
 			if windows in $(OPTIONS) {
 				linkFlags += /SUBSYSTEM:WINDOWS ;
@@ -2250,7 +2276,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 		if ( nomanifest in $(OPTIONS) ) {
 			linkFlags -= /INCREMENTAL ;
-		} else if $(COMPILER) in vs2005 vs2008  &&  ! ( nomanifest in $(OPTIONS) ) {
+		} else if $(COMPILER) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) ) {
 			_writeManifest $(TARGET) : $(_linkTargets) : 2 ;
 			_linkManifest $(_linkTargets) ;
 			linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
@@ -2264,7 +2290,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	local linkRule = Link ;
 
-	if $(COMPILER) in vs2005 vs2008 {
+	if $(COMPILER) in vs2005 vs2008 vs2010 {
 		if nomanifest in $(OPTIONS) {
 			linkRule = LinkNoManifest ;
 		} else if $(CONFIG) = debug {
@@ -2499,7 +2525,7 @@ rule CRuntimeType TARGET : TYPE : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_PLATFORM ?= $(PLATFORM) ;
-	if $(COMPILER) in vs2003 vs2005 vs2008
+	if $(COMPILER) in vs2003 vs2005 vs2008 vs2010
 	{
 		if ! $(TYPE)  ||  $(TYPE) = dynamic
 		{
@@ -2542,7 +2568,7 @@ rule Defines TARGET : DEFINES : THE_CONFIG : THE_PLATFORM
 
 rule DefFile TARGET : SOURCES
 {
-	if $(COMPILER) in vc6 vs2002 vs2003 vs2005 vs2008
+	if $(COMPILER) in vc6 vs2002 vs2003 vs2005 vs2008 vs2010
 	{
 		TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 		local grist = $(TARGET) ;
@@ -2567,7 +2593,7 @@ rule ForceInclude TARGET : INCLUDES : THE_CONFIG : THE_PLATFORM
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	if $(COMPILER) in vc6 vs2002 vs2003 vs2005 vs2008 {
+	if $(COMPILER) in vc6 vs2002 vs2003 vs2005 vs2008 vs2010 {
 		AddFlags $(TARGET) : "/FI$(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 	} else {
 		AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
@@ -2705,7 +2731,7 @@ rule ObjectForceInclude TARGET : SOURCES : INCLUDES : THE_CONFIG : THE_PLATFORM
 	THE_PLATFORM ?= * ;
 	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
 	local variableFlags = CCFLAGS C++FLAGS ;
-	if $(COMPILER) in vc6 vs2002 vs2003 vs2005 vs2008 {
+	if $(COMPILER) in vc6 vs2002 vs2003 vs2005 vs2008 vs2010 {
 		$(variableFlags).$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += "/FI$(INCLUDES:R=$(SUBDIR:E=""))" ;
 	} else {
 		$(variableFlags).$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += "-include $(INCLUDES:R=$(SUBDIR:E=""))" ;
