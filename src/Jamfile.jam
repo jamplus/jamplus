@@ -255,7 +255,31 @@ code += hcache.c tmpunix.c ;
 # How to build the compiled in jambase.
 #
 
-#jjMain		mkjambase : mkjambase.c ;
+rule GenFile PARENT : TARGET : COMMAND : DEPS
+{
+	local _t = $(TARGET:G=$(PARENT)) ;
+	local _s ;
+	on $(COMMAND) _s = $(LINK_TARGET) ;
+
+	Depends $(_t) : $(_s[1]) $(COMMAND[2-]) ;
+	GenFile1 $(_t) : $(_s[1]) $(COMMAND[2-]) ;
+	Clean clean : $(_t) ;
+}
+
+rule GenFile1
+{
+	MakeLocate $(<) : $(LOCATE_SOURCE) ;
+	SEARCH on $(>) = $(SEARCH_SOURCE) ;
+}
+
+actions GenFile1
+{
+	"$(>[1])" "$(<)" "$(>[2-])"
+}
+
+OutputPostfix * : : release releaseltcg ;
+
+Application mkjambase : mkjambase.c ;
 
 if $(VMS)
 {
@@ -268,6 +292,7 @@ if $(VMS)
 # The guts of the Jamfile: how to build Jam
 #
 
+GenFile jam : jambase-j.c : mkjambase Jambase-j ;
 LinkLibraries jam : libjam ;
 OutputPostfix jam : : release releaseltcg ;
 OutputPath jam : ../bin ;
