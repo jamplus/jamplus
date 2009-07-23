@@ -140,6 +140,11 @@
 # include "luasupport.h"
 #endif
 
+#ifdef OPT_SCRIPTS_PASSTHROUGH_EXT
+#include <io.h>
+#include "execcmd.h"
+#endif
+
 /* Macintosh is "special" */
 
 # ifdef OS_MAC
@@ -224,39 +229,116 @@ int main( int argc, char **argv, char **arg_environ )
 # endif
 
 	argc--, argv++;
-#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-	if ( argc > 0  &&  ( strcmp( argv[0], "--jamtoworkspace" ) == 0  ||
-		strcmp( argv[0], "--folderstojamfile" ) == 0  ||
-		strcmp( argv[0], "--vcprojtojamfile" ) == 0 ) ) {
-	    char processPath[4096];
-	    LOL lol;
-	    LIST *filename;
-	    LIST *args;
-	    int i;
-	    const char* name = argv[0] + 2;
+#ifdef OPT_SCRIPTS_PASSTHROUGH_EXT
+    {
+        int argstartindex;
+        for ( argstartindex = 0; argstartindex < argc; ++argstartindex ) {
+            if ( argv[argstartindex][0] == '-'  &&  argv[argstartindex][1] == '-' ) {
+                char processPath[4096];
+                int i;
+                int size;
+                const char* name = argv[argstartindex] + 2;
+                char* scriptPath;
+                char* ptr;
+                char* commandLine;
 
-	    argc--, argv++;
+                getprocesspath( processPath, sizeof( processPath ) );
 
-	    getprocesspath( processPath, sizeof( processPath ) );
-	    strcat( processPath, "/scripts/" );
-	    strcat( processPath, name );
-	    strcat( processPath, ".lua" );
-	    filename = list_new( L0, processPath, 0 );
+                scriptPath = malloc( strlen( processPath ) + 1 + strlen( name ) + 4 + 1 );
+                strcpy( scriptPath, processPath );
+                strcat( scriptPath, "/" );
+                strcat( scriptPath, name );
 
-	    lol_init( &lol );
-	    lol_add( &lol, filename );
+# ifdef NT
+                ptr = scriptPath + strlen( scriptPath );
+                strcat( ptr, ".bat" );
+                if ( access( scriptPath, 0 ) == -1 ) {
+                    strcat( ptr, ".cmd" );
+                    if ( access( scriptPath, 0 ) == -1 ) {
+                        strcat( ptr, ".exe" );
+                        if ( access( scriptPath, 0 ) == -1 ) {
+                            printf("* Unable to access script %s.\n", name);
+                            exit(-1);
+                        }
+                    }
+                }
+# else
+                ptr = scriptPath + strlen( scriptPath );
+                if ( access( scriptPath, 0 ) == -1 ) {
+                    strcat( ptr, ".sh" );
+                    if ( access( scriptPath, 0 ) == -1 ) {
+                        printf("* Unable to access script %s.\n", name);
+                        exit(-1);
+                    }
+                }
+# endif
 
-	    args = L0;
-	    for ( i = 0; i < argc; ++i ) {
-		args = list_new( args, argv[ i ], 0 );
-	    }
-	    lol_add( &lol, args );
+                size = 4;
+                for ( i = argstartindex; i < argc; ++i ) {
+                    int needsEscape = 0;
+                    const char* argvptr = i == argstartindex ? scriptPath : argv[i];
+                    while ( *argvptr ) {
+                        if ( *argvptr == ' ' )
+                            needsEscape++;
+                        ++size;
+                        ++argvptr;
+                    }
+                    size += needsEscape + 1;
+                }
 
-	    builtin_luafile( 0, &lol, 0 );
-	    lol_free( &lol );
+                commandLine = malloc( size + 1 );
+                ptr = commandLine;
 
-	    return EXITOK;
-	}
+                for ( i = argstartindex; i < argc; ++i ) {
+                    int needsEscape = i == 0 ? 1 : 0;
+                    const char* argvptr = i == argstartindex ? scriptPath : argv[i];
+                    if ( !needsEscape ) {
+                        while ( *argvptr ) {
+                            if ( *argvptr == ' ' ) {
+                                needsEscape = 1;
+                                break;
+                            }
+                            ++argvptr;
+                        }
+                    }
+#ifdef NT
+                    if ( needsEscape )
+                        *ptr++ = '"';
+#endif
+
+                    argvptr = i == argstartindex ? scriptPath : argv[i];
+                    while ( *argvptr ) {
+#ifndef NT
+                        if ( *argvptr == ' ' )
+                            *ptr++ = '\\';
+#endif
+                        *ptr++ = *argvptr++;
+                    }
+
+#ifdef NT
+                    if ( needsEscape )
+                        *ptr++ = '"';
+#endif
+                    *ptr++ = ' ';
+                }
+
+                *ptr = 0;
+
+                putenv( OSMINOR );
+                putenv( OSPLAT );
+
+                exec_init();
+                execcmd( commandLine, NULL, NULL, NULL, 0 );
+                execwait();
+                exec_done();
+
+                free( commandLine );
+                free( scriptPath );
+
+                return EXITOK;
+            }
+        }
+    }
 #endif
 
 #ifdef OPT_SETCWD_SETTING_EXT
@@ -562,16 +644,16 @@ int main( int argc, char **argv, char **arg_environ )
 	{
 		/* Go through the list of targets specified on the command line, */
 		/* and add them to a variable called JAM_COMMAND_LINE_TARGETS. */
-		LIST* l = L0;		
+		LIST* l = L0;
 		int n_targets = argc ? argc : 1;
 		const char** targets = argc ? (const char**)argv : &all;
 		int i;
-		
+
 		for ( i = 0; i < n_targets; ++i )
 		{
 			l = list_new( l, targets[ i ], 0 );
 		}
-		
+
 		var_set( "JAM_COMMAND_LINE_TARGETS", l, VAR_SET );
 	}
 #endif

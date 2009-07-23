@@ -1,17 +1,17 @@
 require 'getopt'
 require 'xmlize'
 
-package.path = (debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. "/?.lua;" .. package.path
-require 'WriteJamfileHelper'
-
 local options = Options {}
 local nonOpts, opts, errors = getopt.getOpt(arg, options)
 if #errors > 0  or  #nonOpts ~= 2 then
 	print(table.concat (errors, "\n") .. "\n" ..
-			getopt.usageInfo ("Usage: VCProjToJamfile [options] <source-vcproj> <destination-jamfile>",
+			getopt.usageInfo ("Usage: jam --vcprojtojamfile [options] <source-vcproj> <destination-jamfile>",
 			options))
 	os.exit(-1)
 end
+
+package.path = (debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. "/?.lua;" .. package.path
+require 'WriteJamfileHelper'
 
 local vcproj = io.readall(nonOpts[1])
 if not vcproj then

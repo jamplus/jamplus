@@ -9,7 +9,7 @@ local options = Options {}
 local nonOpts, opts, errors = getopt.getOpt(arg, options)
 if #errors > 0  or  #nonOpts ~= 1 then
 	print(table.concat (errors, "\n") .. "\n" ..
-			getopt.usageInfo ("Usage: FoldersToJam [options] <destination-jamfile>",
+			getopt.usageInfo ("Usage: jam --folderstojamfile [options] <destination-jamfile>",
 			options))
 	os.exit(-1)
 end

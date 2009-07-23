@@ -108,7 +108,7 @@ SOURCES = \
 	variable.c
 
 all: $(EXENAME)
-	$(EXENAME) -f../bin/Jambase.jam -sCONFIG=releaseltcg
+	$(EXENAME) -f../bin/jammodules/CopyFile.jam -f../bin/Jambase.jam -sCONFIG=releaseltcg
 
 $(EXENAME):
 	$(MKDIR_OBJ)

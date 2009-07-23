@@ -12,7 +12,14 @@ package.path = scriptPath .. "?.lua;" .. package.path
 require 'FolderTree'
 
 jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
-jamExePath = os.path.escape(os.path.combine(jamPath, 'jam'))
+
+local OS = os.getenv("OS")
+local OSPLAT = os.getenv("OSPLAT")
+if not OS  or  not OSPLAT then
+	print('*** JamToWorkspace must be called directly from Jam.')
+	print('\njam --jamtoworkspace ...')
+end
+jamExePath = os.path.escape(os.path.combine(jamPath, OS:lower() .. OSPLAT:lower(), 'jam'))
 
 Config =
 {
@@ -21,6 +28,7 @@ Config =
 
 Compilers =
 {
+	{ 'vs2010', 'Visual Studio 2010' },
 	{ 'vs2008', 'Visual Studio 2008' },
 	{ 'vs2005', 'Visual Studio 2005' },
 	{ 'vs2003', 'Visual Studio 2003' },
@@ -30,7 +38,7 @@ Compilers =
 	{ 'gcc',	'gcc' },
 }
 
-if os.getenv("OS") == "Windows_NT" then
+if OS == "NT" then
 	Platform = 'win32'
 	uname = 'windows'
 else
@@ -38,7 +46,7 @@ else
 	uname = f:read('*a'):lower():gsub('\n', '')
 	f:close()
 	
-	if uname == 'darwin' then
+	if OS == "MACOSX" then
 		Platform = 'macosx'
 	end
 end
@@ -237,9 +245,9 @@ MapConfigToVSConfig =
 	['releaseltcg'] = 'Release LTCG'
 }
 
-local VisualStudioProjectMetaTable = {  __index = VisualStudioProjectMetaTable  }
+local VisualStudio200xProjectMetaTable = {  __index = VisualStudio200xProjectMetaTable  }
 
-function VisualStudioProjectMetaTable:Write(outputPath, commandLines)
+function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 	local filename = outputPath .. self.ProjectName .. '.vcproj'
 
 	local info = ProjectExportInfo[self.ProjectName]
@@ -441,18 +449,18 @@ function VisualStudioProjectMetaTable:Write(outputPath, commandLines)
 	WriteFileIfModified(filename, self.Contents)
 end
 
-function VisualStudioProject(projectName, options)
+function VisualStudio200xProject(projectName, options)
 	return setmetatable(
 		{
 			Contents = {},
 			ProjectName = projectName,
 			Options = options,
-		}, { __index = VisualStudioProjectMetaTable }
+		}, { __index = VisualStudio200xProjectMetaTable }
 	)
 end
 
 
-function VisualStudioProjectMetaTable:_WriteFiles(folder, tabs)
+function VisualStudio200xProjectMetaTable:_WriteFiles(folder, tabs)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
 			table.insert(self.Contents, tabs .. '<Filter\n')
@@ -473,9 +481,9 @@ end
 
 
 
-local VisualStudioSolutionMetaTable = {  __index = VisualStudioSolutionMetaTable  }
+local VisualStudio200xSolutionMetaTable = {  __index = VisualStudio200xSolutionMetaTable  }
 
-function VisualStudioSolutionMetaTable:_GatherSolutionFolders(folder, folderList, fullPath)
+function VisualStudio200xSolutionMetaTable:_GatherSolutionFolders(folder, folderList, fullPath)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
 			local solutionFolder = fullPath .. '\\' .. entry.folder
@@ -486,7 +494,7 @@ function VisualStudioSolutionMetaTable:_GatherSolutionFolders(folder, folderList
 end
 
 
-function VisualStudioSolutionMetaTable:_WriteNestedProjects(folder, fullPath)
+function VisualStudio200xSolutionMetaTable:_WriteNestedProjects(folder, fullPath)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
 			local solutionFolder = fullPath .. '\\' .. entry.folder
@@ -507,7 +515,7 @@ function VisualStudioSolutionMetaTable:_WriteNestedProjects(folder, fullPath)
 end
 
 
-function VisualStudioSolutionMetaTable:Write(outputPath)
+function VisualStudio200xSolutionMetaTable:Write(outputPath)
 	local filename = outputPath .. self.Name .. '.sln'
 
 	local workspace = Workspaces[self.Name]
@@ -691,19 +699,19 @@ EndGlobal
 	WriteFileIfModified(filename, self.Contents)
 end
 
-function VisualStudioSolution(solutionName, options)
+function VisualStudio200xSolution(solutionName, options)
 	return setmetatable(
 		{
 			Contents = {},
 			Name = solutionName,
 			Options = options,
-		}, { __index = VisualStudioSolutionMetaTable }
+		}, { __index = VisualStudio200xSolutionMetaTable }
 	)
 end
 
 
 
-function VisualStudioInitialize()
+function VisualStudio200xInitialize()
 	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
 	local chunk = loadfile(outPath .. 'VSProjectExportInfo.lua')
 	if chunk then chunk() end
@@ -713,7 +721,483 @@ function VisualStudioInitialize()
 end
 
 
-function VisualStudioShutdown()
+function VisualStudio200xShutdown()
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	LuaDumpObject(outPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
+end
+
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local VisualStudio201xProjectMetaTable = {  __index = VisualStudio201xProjectMetaTable  }
+
+function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
+	local filename = outputPath .. self.ProjectName .. '.vcxproj'
+
+	local info = ProjectExportInfo[self.ProjectName]
+	if not info then
+		info = { Name = self.ProjectName, Filename = filename, Uuid = '{' .. uuid.new():upper() .. '}' }
+		ProjectExportInfo[self.ProjectName] = info
+	end
+
+	local project = Projects[self.ProjectName]
+
+	-- Write header.
+	table.insert(self.Contents, expand([[
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+]]))
+
+	-- Write Configurations header
+	table.insert(self.Contents, [[
+  <ItemGroup Label="ProjectConfigurations">
+]])
+
+	local platformName = Platform
+	for configName in ivalues(Config.Configurations) do
+		local configInfo =
+		{
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+		}
+		table.insert(self.Contents, expand([==[
+    <ProjectConfiguration Include="$(VSConfig)|$(VSPlatform)">
+      <Configuration>$(VSConfig)</Configuration>
+      <Platform>$(VSPlatform)</Platform>
+    </ProjectConfiguration>
+]==], configInfo, info, _G))
+	end
+
+	table.insert(self.Contents, [[
+  </ItemGroup>
+]])
+
+	-- Write Globals
+	table.insert(self.Contents, expand([[
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>$(Uuid)</ProjectGUID>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <Keyword>MakeFileProj</Keyword>
+    <ProjectName>$(Name)</ProjectName>
+  </PropertyGroup>
+]], info))
+
+	table.insert(self.Contents, [[
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+]])
+
+	table.insert(self.Contents, [[
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+]])
+
+	-- Write Configurations.
+	local platformName = Platform
+	for configName in ivalues(Config.Configurations) do
+		local jamCommandLine = jamExePath .. ' ' ..
+				os.path.escape('-C' .. destinationRootPath) .. ' ' ..
+				'-sPLATFORM=' .. platformName .. ' ' ..
+				'-sCONFIG=' .. configName
+
+		local configInfo =
+		{
+			Platform = platformName,
+			Config = configName,
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+			Defines = '',
+			Includes = '',
+			Output = '',
+		}
+
+		if project and project.Name then
+			if project.Defines then
+				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+			end
+			if project.IncludePaths then
+				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
+			end
+			if project.OutputPaths then
+				configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
+			end
+			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
+		elseif not commandLines then
+			configInfo.BuildCommandLine = jamCommandLine
+			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
+			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
+		else
+			configInfo.BuildCommandLine = commandLines[1] or ''
+			configInfo.RebuildCommandLine = commandLines[2] or ''
+			configInfo.CleanCommandLine = commandLines[3] or ''
+		end
+		
+		configInfo.BuildCommandLine = configInfo.BuildCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
+		configInfo.RebuildCommandLine = configInfo.RebuildCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
+		configInfo.CleanCommandLine = configInfo.CleanCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
+
+		table.insert(self.Contents, expand([==[
+  <PropertyGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <BuildLogFile>$(destinationRootPath:gsub('/', '\\'))temp-$(Platform)-$(Config)/$$(MSBuildProjectName).log</BuildLogFile>
+    <NMakeBuildCommandLine>$(BuildCommandLine)</NMakeBuildCommandLine>
+    <NMakeOutput>$(Output)</NMakeOutput>
+    <NMakeCleanCommandLine>$(CleanCommandLine)</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>$(RebuildCommandLine)</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>$(Defines)</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>$(Includes)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+]==], configInfo, info, _G))
+	end
+
+	-- Write Files.
+	table.insert(self.Contents, [[
+  <ItemGroup>
+]])
+	self:_WriteFilesFlat(project.SourcesTree)
+	table.insert(self.Contents, [[
+  </ItemGroup>
+]])
+	
+	table.insert(self.Contents, [[
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+]])
+
+	-- Write footer.
+	table.insert(self.Contents, [[
+</Project>
+]])
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n'):gsub('\n', '\r\n')
+
+	WriteFileIfModified(filename, self.Contents)
+
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	-- Write the .vcxproj.filters file.
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	local filename = outputPath .. self.ProjectName .. '.vcxproj.filters'
+	self.Contents = {}
+
+	-- Write header.
+	table.insert(self.Contents, [[
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+]])
+
+	-- Write folders.
+	table.insert(self.Contents, [[
+  <ItemGroup>
+]])
+
+	if project then
+		self:_WriteFolders(project.SourcesTree, '')
+	end
+
+	table.insert(self.Contents, [[
+  </ItemGroup>
+]])	
+
+	-- Write Files.
+	table.insert(self.Contents, [[
+  <ItemGroup>
+]])
+
+	if project then
+		self:_WriteFiles(project.SourcesTree, '')
+	end
+
+	table.insert(self.Contents, [[
+  </ItemGroup>
+]])	
+
+	-- Write footer.
+	table.insert(self.Contents, [[
+</Project>
+]])
+
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n'):gsub('\n', '\r\n')
+
+	WriteFileIfModified(filename, self.Contents)
+end
+
+function VisualStudio201xProject(projectName, options)
+	return setmetatable(
+		{
+			Contents = {},
+			ProjectName = projectName,
+			Options = options,
+		}, { __index = VisualStudio201xProjectMetaTable }
+	)
+end
+
+
+function VisualStudio201xProjectMetaTable:_WriteFolders(folder, filter)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			if filter ~= '' then filter = filter .. '\\' end
+			filter = filter .. entry.folder
+			self:_WriteFolders(entry, filter)
+			table.insert(self.Contents, [[
+    <Filter Include="]] .. filter .. [[">
+    </Filter>
+]])
+		end
+	end
+end
+
+
+function VisualStudio201xProjectMetaTable:_WriteFiles(folder, filter)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			if filter ~= '' then filter = filter .. '\\' end
+			filter = filter .. entry.folder
+			self:_WriteFiles(entry, filter)
+		else
+			table.insert(self.Contents, '    <None Include="' .. entry:gsub('/', '\\') .. '">\n')
+			table.insert(self.Contents, '      <Filter>' .. filter .. '</Filter>\n')
+			table.insert(self.Contents, '    </None>\n')
+		end
+	end
+end
+
+
+function VisualStudio201xProjectMetaTable:_WriteFilesFlat(folder)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			self:_WriteFilesFlat(entry)
+		else
+			table.insert(self.Contents, '    <None Include="' .. entry:gsub('/', '\\') .. '" />\n')
+		end
+	end
+end
+
+
+
+
+
+
+local VisualStudio201xSolutionMetaTable = {  __index = VisualStudio201xSolutionMetaTable  }
+
+function VisualStudio201xSolutionMetaTable:_GatherSolutionFolders(folder, folderList, fullPath)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			local solutionFolder = fullPath .. '\\' .. entry.folder
+			table.insert(folderList, solutionFolder)
+			self:_GatherSolutionFolders(entry, folderList, solutionFolder)
+		end
+	end
+end
+
+
+function VisualStudio201xSolutionMetaTable:_WriteNestedProjects(folder, fullPath)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			local solutionFolder = fullPath .. '\\' .. entry.folder
+			if folder.folder then
+				table.insert(self.Contents, expand([[
+		$(Child) = $(Parent)
+]], {  Child = ProjectExportInfo[solutionFolder].Uuid, Parent = ProjectExportInfo[fullPath].Uuid  }))
+			end
+			self:_WriteNestedProjects(entry, solutionFolder)
+		else
+			if folder.folder then
+				table.insert(self.Contents, expand([[
+		$(Child) = $(Parent)
+]], {  Child = ProjectExportInfo[entry].Uuid, Parent = ProjectExportInfo[fullPath].Uuid  }))
+			end
+		end
+	end
+end
+
+
+function VisualStudio201xSolutionMetaTable:Write(outputPath)
+	local filename = outputPath .. self.Name .. '.sln'
+
+	local workspace = Workspaces[self.Name]
+
+	-- Write header.
+	table.insert(self.Contents, '\xef\xbb\xbf\n')
+
+	table.insert(self.Contents, [[
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 10
+]])
+
+	-- Write projects.
+	for projectName in ivalues(workspace.Projects) do
+		local info = ProjectExportInfo[projectName]
+		table.insert(self.Contents, expand([[
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
+EndProject
+]], info))
+	end
+
+	-- Write the folders we use.
+	local folderList = {}
+	self:_GatherSolutionFolders(workspace.ProjectTree, folderList, '')
+
+	-- !BuildWorkspace
+	local info = ProjectExportInfo[buildWorkspaceName]
+	table.insert(self.Contents, expand([[
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
+EndProject
+]], info))
+
+	-- !UpdateWorkspace
+	local info = ProjectExportInfo[updateWorkspaceName]
+	table.insert(self.Contents, expand([[
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
+EndProject
+]], info))
+
+	for solutionFolderName in ivalues(folderList) do
+		local info = ProjectExportInfo[solutionFolderName]
+		if not info then
+			info =
+			{
+				Name = solutionFolderName:match('.*\\(.+)'),
+				Filename = solutionFolderName,
+				Uuid = '{' .. uuid.new():upper() .. '}'
+			}
+			ProjectExportInfo[solutionFolderName] = info
+		end
+
+		table.insert(self.Contents, expand([[
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "$(Name)", "$(Name)", "$(Uuid)"
+EndProject
+]], info))
+	end
+
+	-- Begin writing the Global section.
+	table.insert(self.Contents, [[
+Global
+]])
+
+	table.insert(self.Contents, [[
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+]])
+
+	local platformName = Platform
+	for configName in ivalues(Config.Configurations) do
+		local configInfo =
+		{
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+		}
+		table.insert(self.Contents, expand([[
+		$(VSConfig)|$(VSPlatform) = $(VSConfig)|$(VSPlatform)
+]], configInfo))
+	end
+
+	table.insert(self.Contents, [[
+	EndGlobalSection
+]])
+
+	-------------------
+	table.insert(self.Contents, [[
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+]])
+
+	for configName in ivalues(Config.Configurations) do
+		local info = ProjectExportInfo[buildWorkspaceName]
+		local configInfo =
+		{
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+		}
+		table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
+]], configInfo, info))
+
+		table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).Build.0 = $(VSConfig)|$(VSPlatform)
+]], configInfo, info))
+	end
+
+	for configName in ivalues(Config.Configurations) do
+		local info = ProjectExportInfo[updateWorkspaceName]
+		local configInfo =
+		{
+			VSPlatform = MapPlatformToVSPlatform[platformName],
+			VSConfig = MapConfigToVSConfig[configName],
+		}
+		table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
+]], configInfo, info))
+	end
+
+	for projectName in ivalues(workspace.Projects) do
+		local info = ProjectExportInfo[projectName]
+		for configName in ivalues(Config.Configurations) do
+			local configInfo =
+			{
+				VSPlatform = MapPlatformToVSPlatform[platformName],
+				VSConfig = MapConfigToVSConfig[configName],
+			}
+			table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
+]], configInfo, info))
+		end
+	end
+
+	table.insert(self.Contents, [[
+	EndGlobalSection
+]])
+
+	table.insert(self.Contents, [[
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+]])
+
+	table.insert(self.Contents, [[
+	GlobalSection(NestedProjects) = preSolution
+]])
+
+	self:_WriteNestedProjects(workspace.ProjectTree, '')
+
+	table.insert(self.Contents, [[
+	EndGlobalSection
+]])
+
+	-- Write EndGlobal section.
+	table.insert(self.Contents, [[
+EndGlobal
+]])
+
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n'):gsub('\n', '\r\n')
+
+	WriteFileIfModified(filename, self.Contents)
+end
+
+function VisualStudio201xSolution(solutionName, options)
+	return setmetatable(
+		{
+			Contents = {},
+			Name = solutionName,
+			Options = options,
+		}, { __index = VisualStudio201xSolutionMetaTable }
+	)
+end
+
+
+
+function VisualStudio201xInitialize()
+	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local chunk = loadfile(outPath .. 'VSProjectExportInfo.lua')
+	if chunk then chunk() end
+	if not ProjectExportInfo then
+		ProjectExportInfo = {}
+	end
+end
+
+
+function VisualStudio201xShutdown()
 	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
 	LuaDumpObject(outPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
 end
@@ -1826,10 +2310,10 @@ Exporters =
 {
 	vs2003 =
 	{
-		Initialize = VisualStudioInitialize,
-		ProjectExporter = VisualStudioProject,
-		WorkspaceExporter = VisualStudioSolution,
-		Shutdown = VisualStudioShutdown,
+		Initialize = VisualStudio200xInitialize,
+		ProjectExporter = VisualStudio200xProject,
+		WorkspaceExporter = VisualStudio200xSolution,
+		Shutdown = VisualStudio200xShutdown,
 		Description = 'Generate Visual Studio 2003 solutions and projects.',
 		Options =
 		{
@@ -1839,10 +2323,10 @@ Exporters =
 
 	vs2005 =
 	{
-		Initialize = VisualStudioInitialize,
-		ProjectExporter = VisualStudioProject,
-		WorkspaceExporter = VisualStudioSolution,
-		Shutdown = VisualStudioShutdown,
+		Initialize = VisualStudio200xInitialize,
+		ProjectExporter = VisualStudio200xProject,
+		WorkspaceExporter = VisualStudio200xSolution,
+		Shutdown = VisualStudio200xShutdown,
 		Description = 'Generate Visual Studio 2005 solutions and projects.',
 		Options =
 		{
@@ -1852,14 +2336,27 @@ Exporters =
 
 	vs2008 =
 	{
-		Initialize = VisualStudioInitialize,
-		ProjectExporter = VisualStudioProject,
-		WorkspaceExporter = VisualStudioSolution,
-		Shutdown = VisualStudioShutdown,
+		Initialize = VisualStudio200xInitialize,
+		ProjectExporter = VisualStudio200xProject,
+		WorkspaceExporter = VisualStudio200xSolution,
+		Shutdown = VisualStudio200xShutdown,
 		Description = 'Generate Visual Studio 2008 solutions and projects.',
 		Options =
 		{
 			vs2008 = true,
+		}
+	},
+
+	vs2010 =
+	{
+		Initialize = VisualStudio201xInitialize,
+		ProjectExporter = VisualStudio201xProject,
+		WorkspaceExporter = VisualStudio201xSolution,
+		Shutdown = VisualStudio201xShutdown,
+		Description = 'Generate Visual Studio 2010 solutions and projects.',
+		Options =
+		{
+			vs2010 = true,
 		}
 	},
 
@@ -2138,26 +2635,28 @@ include $(jamPath)Jambase.jam ;
 
 	if uname == 'windows' then
 		-- Write jam.bat.
-		io.writeall(destinationRootPath .. 'jam.bat',
+		local jamScript = os.path.combine(destinationRootPath, 'jam.bat')
+		io.writeall(os.path.escape(jamScript),
 			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
 		-- Write updateworkspace.bat.
 		io.writeall(outPath .. 'updateworkspace.bat',
-				("@%s --gen=%s --config=%s %s ..\n"):format(
-				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen,
+				("@%s --workspace --gen=%s --config=%s %s ..\n"):format(
+				os.path.escape(jamScript), opts.gen,
 				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath)))
 	else
 		-- Write jam shell script.
-		io.writeall(destinationRootPath .. 'jam',
+		local jamScript = os.path.combine(destinationRootPath, 'jam')
+		io.writeall(os.path.escape(jamScript),
 				'#!/bin/sh\n' ..
 				jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
-		os.chmod(destinationRootPath .. 'jam', 777)
+		os.chmod(jamScript, 777)
 
 		-- Write UpdateWorkspace.sh.
 		io.writeall(outPath .. 'updateworkspace',
-				("#!/bin/sh\n%s --gen=%s --config=%s %s ..\n"):format(
-				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen,
+				("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s ..\n"):format(
+				os.path.escape(jamScript), opts.gen,
 				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath)))
 		os.chmod(outPath .. 'updateworkspace', 777)

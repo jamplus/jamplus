@@ -261,7 +261,11 @@ execcmd(
 	void (*func)( void *closure, int status ),
 #endif
 	void *closure,
-	LIST *shell )
+	LIST *shell,
+#ifdef OPT_SERIAL_OUTPUT_EXT
+    int serialOutput
+#endif
+    )
 {
 	int pid;
 	int slot;
@@ -435,6 +439,7 @@ execcmd(
 
 # ifdef USE_EXECNT
 #ifdef OPT_SERIAL_OUTPUT_EXT
+    if ( serialOutput )
 	{
 	    int	out, err, fd, bad_spawn = 0, spawn_err = -1;
 
@@ -466,15 +471,18 @@ execcmd(
 		exit( EXITBAD );
 	    }
 	}
+    else
 
-# else /* Not serial */
+#endif
+    {
 
 	if( ( pid = spawnvp( P_NOWAIT, argv[0], argv ) ) == -1 )
 	{
 	    perror( "spawn" );
 	    exit( EXITBAD );
 	}
-#endif
+
+    }
 # else
 # ifdef NO_VFORK
 	if ((pid = fork()) == 0) 
@@ -598,6 +606,7 @@ execwait()
 	cmdtab[ i ].lua = 0;
 #endif
 
+    if (cmdtab[ i ].func)
 #ifdef OPT_SERIAL_OUTPUT_EXT
 	(*cmdtab[ i ].func)(cmdtab[ i ].outputFilename,
 			    cmdtab[ i ].closure, rstat);

@@ -7,9 +7,9 @@
 
 CRuntimeType jam libjam : static ;
 
-if $(VMS) 	{ LOCATE_TARGET ?= [.binvms] ; }
+if $(VMS) 		{ LOCATE_TARGET ?= [.binvms] ; }
 else if $(MAC) 	{ LOCATE_TARGET ?= ":bin.mac" ; }
-else 		{ LOCATE_TARGET ?= bin.$(OSFULL[1]:L)/$(CONFIG) ; }
+else 			{ LOCATE_TARGET ?= bin.$(OSFULL[1]:L)/$(CONFIG) ; }
 
 DEPCACHE.standard ?= $(LOCATE_TARGET)/.depcache ;
 DEPCACHE ?= standard ;
@@ -20,8 +20,8 @@ DEPCACHE ?= standard ;
 # hard: with ""'s, it always gets the bootstrap version; with <>'s,
 # it won't find the bootstrap version.
 
-# SEARCH_SOURCE ?= $(LOCATE_TARGET) $(DOT) ;
-# LOCATE_SOURCE ?= $(LOCATE_TARGET) ;
+SEARCH_SOURCE ?= $(LOCATE_TARGET) $(DOT) ;
+LOCATE_SOURCE ?= $(LOCATE_TARGET) ;
 
 #
 # We have some different files for UNIX, VMS, and NT.
@@ -36,21 +36,21 @@ else 		{ code = execunix.c fileunix.c pathunix.c ; }
 
 # For jam profiling/debugging.
 
-if $(PROFILE)
-{
-	CCFLAGS += -pg ;
-	LINKFLAGS += -pg ;
-	LOCATE_TARGET = $(LOCATE_TARGET)/pg ;
-}
+#if $(PROFILE)
+#{
+#	CCFLAGS += -pg ;
+#	LINKFLAGS += -pg ;
+#	LOCATE_TARGET = $(LOCATE_TARGET)/pg ;
+#}
 
 if $(DEBUG)
 {
-	if $(OS) != NT {
-	    CCFLAGS += -g ;
-	    LINKFLAGS += -g ;
-	}
+#	if $(OS) != NT {
+#	    CCFLAGS += -g ;
+#	    LINKFLAGS += -g ;
+#	}
 	LOCATE_TARGET = $(LOCATE_TARGET)-g ;
-	OPTIM = ;
+#	OPTIM = ;
 }
 
 # Do we know yacc?
@@ -157,6 +157,7 @@ Option OPT_PRINT_TOTAL_TIME_EXT ;
 Option OPT_RESPONSE_FILES : yes ;
 Option OPT_ROOT_PATHS_AS_ABSOLUTE_EXT ;
 Option OPT_SCAN_SUBDIR_NOTIFY_EXT ;
+Option OPT_SCRIPTS_PASSTHROUGH_EXT ;
 Option OPT_SEMAPHORE : yes ;
 Option OPT_SERIAL_OUTPUT_EXT ;
 Option OPT_SETCWD_SETTING_EXT ;
@@ -182,7 +183,7 @@ if $(OS) = NT {
 	# actions (as can happen with piecemeal Clean targets).
 	LinkFlags jam : /STACK:5242880 ;
 
-	LinkPrebuiltLibraries jam : advapi32.lib ;
+	LinkPrebuiltLibraries jam : advapi32 ;
 }
 else if $(UNIX)
 {
@@ -255,7 +256,31 @@ code += hcache.c tmpunix.c ;
 # How to build the compiled in jambase.
 #
 
-#jjMain		mkjambase : mkjambase.c ;
+rule GenFile PARENT : TARGET : COMMAND : DEPS
+{
+	local _t = $(TARGET:G=$(PARENT)) ;
+	local _s ;
+	on $(COMMAND) _s = $(LINK_TARGET) ;
+
+	Depends $(_t) : $(_s[1]) $(COMMAND[2-]) ;
+	GenFile1 $(_t) : $(_s[1]) $(COMMAND[2-]) ;
+	Clean clean : $(_t) ;
+}
+
+rule GenFile1
+{
+	MakeLocate $(<) : $(LOCATE_SOURCE) ;
+	SEARCH on $(>) = $(SEARCH_SOURCE) ;
+}
+
+actions GenFile1
+{
+	"$(>[1])" "$(<)" "$(>[2-])"
+}
+
+OutputPostfix * : : release releaseltcg ;
+
+Application mkjambase : mkjambase.c ;
 
 if $(VMS)
 {
@@ -268,9 +293,10 @@ if $(VMS)
 # The guts of the Jamfile: how to build Jam
 #
 
+local BIN_PATH = ../bin/$(OSFULL[1]:L) ;
+GenFile jam : jambase-j.c : mkjambase Jambase-j ;
 LinkLibraries jam : libjam ;
-OutputPostfix jam : : release releaseltcg ;
-OutputPath jam : ../bin ;
+OutputPath jam : $(BIN_PATH) ;
 Application jam : jam.c jambase-j.c ;
 
 Library libjam :
@@ -279,6 +305,53 @@ Library libjam :
 		    newstr.c option.c parse.c regexp.c rules.c scan.c
 		    search.c timestamp.c variable.c ;
 
+
+local file ;
+for file in [ Glob $(OS) : *.* : 0 ]
+{
+	CopyFile all : $(BIN_PATH)/$(file) : $(OS)/$(file) ;
+}
+
+if $(LUA_BIN)
+{
+	local LUA_SRCS =
+			lua/base.lua
+			lua/ex.lua
+			lua/expand.lua
+			lua/getopt.lua
+			lua/io_ext.lua
+			lua/lanes.lua
+			lua/list.lua
+			lua/object.lua
+			lua/string_ext.lua
+			lua/table_ext.lua
+			lua/xmlize.lua
+			lua/lxp/lom.lua
+	;
+	
+	if $(OS) = NT
+	{
+		LUA_SRCS +=
+			lua.exe
+			lua5.1.dll
+			lua51.dll
+			luaplus_1100.dll
+			modules/ex.dll
+			modules/glob.dll
+			modules/lua51-lanes.dll
+			modules/lxp.dll
+			modules/md5.dll
+			modules/uuid.dll
+			modules/vdrive.dll
+		;
+	}
+	
+	local file ;
+	for file in $(LUA_SRCS)
+	{
+		CopyFile all : $(BIN_PATH)/lua/$(file) : $(LUA_BIN)/$(file) ;
+	}			
+}	
 
 #if $(BINDIR) 	{ InstallBin $(BINDIR) : jam ; }
 

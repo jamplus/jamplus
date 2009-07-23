@@ -18,7 +18,11 @@ void execcmd(
 	void (*func)( void *closure, int status ),
 #endif
 	void *closure,
-	LIST *shell );
+	LIST *shell,
+#ifdef OPT_SERIAL_OUTPUT_EXT
+    int serialOutput
+#endif
+    );
 
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 void
