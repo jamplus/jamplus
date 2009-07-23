@@ -12,7 +12,14 @@ package.path = scriptPath .. "?.lua;" .. package.path
 require 'FolderTree'
 
 jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
-jamExePath = os.path.escape(os.path.combine(jamPath, 'jam'))
+
+local OS = os.getenv("OS")
+local OSPLAT = os.getenv("OSPLAT")
+if not OS  or  not OSPLAT then
+	print('*** JamToWorkspace must be called directly from Jam.')
+	print('\njam --jamtoworkspace ...')
+end
+jamExePath = os.path.escape(os.path.combine(jamPath, OS:lower() .. OSPLAT:lower(), 'jam'))
 
 Config =
 {
@@ -31,7 +38,7 @@ Compilers =
 	{ 'gcc',	'gcc' },
 }
 
-if os.getenv("OS") == "Windows_NT" then
+if OS == "NT" then
 	Platform = 'win32'
 	uname = 'windows'
 else
@@ -39,7 +46,7 @@ else
 	uname = f:read('*a'):lower():gsub('\n', '')
 	f:close()
 	
-	if uname == 'darwin' then
+	if OS == "MACOSX" then
 		Platform = 'macosx'
 	end
 end
@@ -2581,26 +2588,28 @@ include $(jamPath)Jambase.jam ;
 
 	if uname == 'windows' then
 		-- Write jam.bat.
-		io.writeall(destinationRootPath .. 'jam.bat',
+		local jamScript = os.path.combine(destinationRootPath, 'jam.bat')
+		io.writeall(os.path.escape(jamScript),
 			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
 		-- Write updateworkspace.bat.
 		io.writeall(outPath .. 'updateworkspace.bat',
-				("@%s --gen=%s --config=%s %s ..\n"):format(
-				os.path.escape(scriptPath .. 'JamToWorkspace.bat'), opts.gen,
+				("@%s --workspace --gen=%s --config=%s %s ..\n"):format(
+				os.path.escape(jamScript), opts.gen,
 				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath)))
 	else
 		-- Write jam shell script.
-		io.writeall(destinationRootPath .. 'jam',
+		local jamScript = os.path.combine(destinationRootPath, 'jam')
+		io.writeall(os.path.escape(jamScript),
 				'#!/bin/sh\n' ..
 				jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
-		os.chmod(destinationRootPath .. 'jam', 777)
+		os.chmod(jamScript, 777)
 
 		-- Write UpdateWorkspace.sh.
 		io.writeall(outPath .. 'updateworkspace',
-				("#!/bin/sh\n%s --gen=%s --config=%s %s ..\n"):format(
-				os.path.escape(scriptPath .. 'JamToWorkspace.sh'), opts.gen,
+				("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s ..\n"):format(
+				os.path.escape(jamScript), opts.gen,
 				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath)))
 		os.chmod(outPath .. 'updateworkspace', 777)

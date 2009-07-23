@@ -970,7 +970,7 @@ builtin_shell(
 
     exec_init();
     for( ; l; l = list_next( l ) ) {
-        execcmd( l->string, shell_done, &output, shell );
+        execcmd( l->string, shell_done, &output, shell, 1 );
 	execwait();
     }
     exec_done();

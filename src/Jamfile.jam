@@ -157,6 +157,7 @@ Option OPT_PRINT_TOTAL_TIME_EXT ;
 Option OPT_RESPONSE_FILES : yes ;
 Option OPT_ROOT_PATHS_AS_ABSOLUTE_EXT ;
 Option OPT_SCAN_SUBDIR_NOTIFY_EXT ;
+Option OPT_SCRIPTS_PASSTHROUGH_EXT ;
 Option OPT_SEMAPHORE : yes ;
 Option OPT_SERIAL_OUTPUT_EXT ;
 Option OPT_SETCWD_SETTING_EXT ;
@@ -292,10 +293,10 @@ if $(VMS)
 # The guts of the Jamfile: how to build Jam
 #
 
+local BIN_PATH = ../bin/$(OSFULL[1]:L) ;
 GenFile jam : jambase-j.c : mkjambase Jambase-j ;
 LinkLibraries jam : libjam ;
-OutputPostfix jam : : release releaseltcg ;
-OutputPath jam : ../bin ;
+OutputPath jam : $(BIN_PATH) ;
 Application jam : jam.c jambase-j.c ;
 
 Library libjam :
@@ -305,6 +306,13 @@ Library libjam :
 		    search.c timestamp.c variable.c ;
 
 
+local file ;
+for file in [ Glob $(OS) : *.* : 0 ]
+{
+	CopyFile all : $(BIN_PATH)/$(file) : $(OS)/$(file) ;
+}
+			
+			
 #if $(BINDIR) 	{ InstallBin $(BINDIR) : jam ; }
 
 #

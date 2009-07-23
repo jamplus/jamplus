@@ -2,4 +2,5 @@
 *.dll
 *.ilk
 *.pdb
-lua
+lua/
+ntx86/

@@ -534,7 +534,7 @@ rule IncludeModule MODULE_NAME
 	}
 	$(include_marker) = true ;
 
-	include $(JAM_PROCESS_PATH)/jammodules/$(MODULE_NAME).jam ;
+	include $(JAM_PROCESS_PATH)/../jammodules/$(MODULE_NAME).jam ;
 }
 
 
