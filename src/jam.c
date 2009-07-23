@@ -141,7 +141,7 @@
 #endif
 
 #ifdef OPT_SCRIPTS_PASSTHROUGH_EXT
-#include <io.h>
+#include <stdlib.h>
 #include "execcmd.h"
 #endif
 

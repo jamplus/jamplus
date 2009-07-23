@@ -505,6 +505,8 @@ execcmd(
 	if ((pid = vfork()) == 0) 
    	{
 # ifdef OPT_SERIAL_OUTPUT_EXT
+		if ( serialOutput )
+		{
 	    int fd;
 
 	    close( 1 );
@@ -514,6 +516,7 @@ execcmd(
 		      O_WRONLY | O_TRUNC | O_CREAT, 0644 );
 	    dup( fd );
 	    dup( fd );
+		}
 # endif
 	    execvp( argv[0], argv );
 	    exit(127);

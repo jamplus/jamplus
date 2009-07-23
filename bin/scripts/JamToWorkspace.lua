@@ -138,7 +138,7 @@ function ProcessCommandLine()
 
 	function Usage()
 		print (table.concat (errors, "\n") .. "\n" ..
-				getopt.usageInfo ("Usage: JamToWorkspace [options] <source-jamfile> <path-to-destination>",
+				getopt.usageInfo ("Usage: jam --workspace [options] <source-jamfile> <path-to-destination>",
 				options))
 
 		local sortedExporters = {}

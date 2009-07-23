@@ -314,35 +314,59 @@ for file in [ Glob $(OS) : *.* : 0 ]
 
 if $(LUA_BIN)
 {
-	local LUA_SRCS =
-			lua/base.lua
-			lua/ex.lua
-			lua/expand.lua
-			lua/getopt.lua
-			lua/io_ext.lua
-			lua/lanes.lua
-			lua/list.lua
-			lua/object.lua
-			lua/string_ext.lua
-			lua/table_ext.lua
-			lua/xmlize.lua
-			lua/lxp/lom.lua
-	;
-	
+	local LUA_SRCS ;
 	if $(OS) = NT
 	{
-		LUA_SRCS +=
-			lua.exe
-			lua5.1.dll
-			lua51.dll
-			luaplus_1100.dll
-			modules/ex.dll
-			modules/glob.dll
-			modules/lua51-lanes.dll
-			modules/lxp.dll
-			modules/md5.dll
-			modules/uuid.dll
-			modules/vdrive.dll
+		LUA_SRCS =
+				lua.exe
+				lua5.1.dll
+				lua51.dll
+				luaplus_1100.dll
+				lua/base.lua
+				lua/ex.lua
+				lua/expand.lua
+				lua/getopt.lua
+				lua/io_ext.lua
+				lua/lanes.lua
+				lua/list.lua
+				lua/object.lua
+				lua/string_ext.lua
+				lua/table_ext.lua
+				lua/xmlize.lua
+				lua/lxp/lom.lua
+				modules/ex.dll
+				modules/glob.dll
+				modules/lua51-lanes.dll
+				modules/lxp.dll
+				modules/md5.dll
+				modules/uuid.dll
+				modules/vdrive.dll
+		;
+	}
+	else
+	{
+		LUA_SRCS =
+				lua
+				luaplus_1100.so
+				share/lua/5.1/base.lua
+				share/lua/5.1/ex.lua
+				share/lua/5.1/expand.lua
+				share/lua/5.1/getopt.lua
+				share/lua/5.1/io_ext.lua
+				share/lua/5.1/lanes.lua
+				share/lua/5.1/list.lua
+				share/lua/5.1/object.lua
+				share/lua/5.1/string_ext.lua
+				share/lua/5.1/table_ext.lua
+				share/lua/5.1/xmlize.lua
+				share/lua/5.1/lxp/lom.lua
+				lib/lua/5.1/ex.dylib
+				lib/lua/5.1/glob.dylib
+				lib/lua/5.1/lua51-lanes.dylib
+				lib/lua/5.1/lxp.dylib
+				lib/lua/5.1/md5.dylib
+				lib/lua/5.1/uuid.dylib
+				lib/lua/5.1/vdrive.dylib
 		;
 	}
 	
