@@ -311,8 +311,48 @@ for file in [ Glob $(OS) : *.* : 0 ]
 {
 	CopyFile all : $(BIN_PATH)/$(file) : $(OS)/$(file) ;
 }
-			
-			
+
+if $(LUA_BIN)
+{
+	local LUA_SRCS =
+			lua/base.lua
+			lua/ex.lua
+			lua/expand.lua
+			lua/getopt.lua
+			lua/io_ext.lua
+			lua/lanes.lua
+			lua/list.lua
+			lua/object.lua
+			lua/string_ext.lua
+			lua/table_ext.lua
+			lua/xmlize.lua
+			lua/lxp/lom.lua
+	;
+	
+	if $(OS) = NT
+	{
+		LUA_SRCS +=
+			lua.exe
+			lua5.1.dll
+			lua51.dll
+			luaplus_1100.dll
+			modules/ex.dll
+			modules/glob.dll
+			modules/lua51-lanes.dll
+			modules/lxp.dll
+			modules/md5.dll
+			modules/uuid.dll
+			modules/vdrive.dll
+		;
+	}
+	
+	local file ;
+	for file in $(LUA_SRCS)
+	{
+		CopyFile all : $(BIN_PATH)/lua/$(file) : $(LUA_BIN)/$(file) ;
+	}			
+}	
+
 #if $(BINDIR) 	{ InstallBin $(BINDIR) : jam ; }
 
 #
