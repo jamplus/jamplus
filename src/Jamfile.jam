@@ -20,8 +20,8 @@ DEPCACHE ?= standard ;
 # hard: with ""'s, it always gets the bootstrap version; with <>'s,
 # it won't find the bootstrap version.
 
-# SEARCH_SOURCE ?= $(LOCATE_TARGET) $(DOT) ;
-# LOCATE_SOURCE ?= $(LOCATE_TARGET) ;
+SEARCH_SOURCE ?= $(LOCATE_TARGET) $(DOT) ;
+LOCATE_SOURCE ?= $(LOCATE_TARGET) ;
 
 #
 # We have some different files for UNIX, VMS, and NT.
