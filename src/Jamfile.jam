@@ -7,9 +7,9 @@
 
 CRuntimeType jam libjam : static ;
 
-if $(VMS) 	{ LOCATE_TARGET ?= [.binvms] ; }
+if $(VMS) 		{ LOCATE_TARGET ?= [.binvms] ; }
 else if $(MAC) 	{ LOCATE_TARGET ?= ":bin.mac" ; }
-else 		{ LOCATE_TARGET ?= bin.$(OSFULL[1]:L)/$(CONFIG) ; }
+else 			{ LOCATE_TARGET ?= bin.$(OSFULL[1]:L)/$(CONFIG) ; }
 
 DEPCACHE.standard ?= $(LOCATE_TARGET)/.depcache ;
 DEPCACHE ?= standard ;
@@ -36,21 +36,21 @@ else 		{ code = execunix.c fileunix.c pathunix.c ; }
 
 # For jam profiling/debugging.
 
-if $(PROFILE)
-{
-	CCFLAGS += -pg ;
-	LINKFLAGS += -pg ;
-	LOCATE_TARGET = $(LOCATE_TARGET)/pg ;
-}
+#if $(PROFILE)
+#{
+#	CCFLAGS += -pg ;
+#	LINKFLAGS += -pg ;
+#	LOCATE_TARGET = $(LOCATE_TARGET)/pg ;
+#}
 
 if $(DEBUG)
 {
-	if $(OS) != NT {
-	    CCFLAGS += -g ;
-	    LINKFLAGS += -g ;
-	}
+#	if $(OS) != NT {
+#	    CCFLAGS += -g ;
+#	    LINKFLAGS += -g ;
+#	}
 	LOCATE_TARGET = $(LOCATE_TARGET)-g ;
-	OPTIM = ;
+#	OPTIM = ;
 }
 
 # Do we know yacc?
@@ -182,7 +182,7 @@ if $(OS) = NT {
 	# actions (as can happen with piecemeal Clean targets).
 	LinkFlags jam : /STACK:5242880 ;
 
-	LinkPrebuiltLibraries jam : advapi32.lib ;
+	LinkPrebuiltLibraries jam : advapi32 ;
 }
 else if $(UNIX)
 {
