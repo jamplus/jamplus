@@ -41,6 +41,7 @@ Compilers =
 if OS == "NT" then
 	Platform = 'win32'
 	uname = 'windows'
+	Config.Platforms = { 'win32' }
 else
 	local f = io.popen('uname')
 	uname = f:read('*a'):lower():gsub('\n', '')
@@ -48,6 +49,8 @@ else
 	
 	if OS == "MACOSX" then
 		Platform = 'macosx'
+		
+		Config.Platforms = { 'macosx' } -- , 'iphone', 'iphonesimulator' }
 	end
 end
 
@@ -199,9 +202,11 @@ function CreateTargetInfoFiles()
 	end
 
 	DumpConfig('*', '*')
-	DumpConfig(Platform, '*')
-	for config in ivalues(Config.Configurations) do
-		DumpConfig(Platform, config)
+	for platformName in ivalues(Config.Platforms) do
+		DumpConfig(platformName, '*')
+		for configName in ivalues(Config.Configurations) do
+			DumpConfig(platformName, configName)
+		end
 	end
 end
 
@@ -218,9 +223,11 @@ function ReadTargetInfoFiles()
 	end
 
 	ReadTargetInfo('*', '*')
-	ReadTargetInfo(Platform, '*')
-	for config in ivalues(Config.Configurations) do
-		ReadTargetInfo(Platform, config)
+	for platformName in ivalues(Config.Platforms) do
+		ReadTargetInfo(platformName, '*')
+		for configName in ivalues(Config.Configurations) do
+			ReadTargetInfo(platformName, configName)
+		end
 	end
 
 	AutoWriteMetaTable.active = false
@@ -604,16 +611,17 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 ]])
 
-	local platformName = Platform
-	for configName in ivalues(Config.Configurations) do
-		local configInfo =
-		{
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-		}
-		table.insert(self.Contents, expand([[
+	for platformName in ivalues(Config.Platforms) do
+		for configName in ivalues(Config.Configurations) do
+			local configInfo =
+			{
+				VSPlatform = MapPlatformToVSPlatform[platformName],
+				VSConfig = MapConfigToVSConfig[configName],
+			}
+			table.insert(self.Contents, expand([[
 		$(VSConfig)|$(VSPlatform) = $(VSConfig)|$(VSPlatform)
 ]], configInfo))
+		end
 	end
 
 	table.insert(self.Contents, [[
@@ -625,46 +633,52 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 ]])
 
-	for configName in ivalues(Config.Configurations) do
-		local info = ProjectExportInfo[buildWorkspaceName]
-		local configInfo =
-		{
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-		}
-		table.insert(self.Contents, expand([[
+	for platformName in ivalues(Config.Platforms) do
+		for configName in ivalues(Config.Configurations) do
+			local info = ProjectExportInfo[buildWorkspaceName]
+			local configInfo =
+			{
+				VSPlatform = MapPlatformToVSPlatform[platformName],
+				VSConfig = MapConfigToVSConfig[configName],
+			}
+			table.insert(self.Contents, expand([[
 		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
 ]], configInfo, info))
 
 			table.insert(self.Contents, expand([[
 		$(Uuid).$(VSConfig)|$(VSPlatform).Build.0 = $(VSConfig)|$(VSPlatform)
 ]], configInfo, info))
+		end
 	end
 
-	for configName in ivalues(Config.Configurations) do
-		local info = ProjectExportInfo[updateWorkspaceName]
-		local configInfo =
-		{
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-		}
-		table.insert(self.Contents, expand([[
+	for platformName in ivalues(Config.Platforms) do
+		for configName in ivalues(Config.Configurations) do
+			local info = ProjectExportInfo[updateWorkspaceName]
+			local configInfo =
+			{
+				VSPlatform = MapPlatformToVSPlatform[platformName],
+				VSConfig = MapConfigToVSConfig[configName],
+			}
+			table.insert(self.Contents, expand([[
 		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
 ]], configInfo, info))
+		end
 	end
 
 	for projectName in ivalues(workspace.Projects) do
 		local info = ProjectExportInfo[projectName]
 		if info then
-			for configName in ivalues(Config.Configurations) do
-				local configInfo =
-				{
-					VSPlatform = MapPlatformToVSPlatform[platformName],
-					VSConfig = MapConfigToVSConfig[configName],
-				}
-				table.insert(self.Contents, expand([[
+			for platformName in ivalues(Config.Platforms) do
+				for configName in ivalues(Config.Configurations) do
+					local configInfo =
+					{
+						VSPlatform = MapPlatformToVSPlatform[platformName],
+						VSConfig = MapConfigToVSConfig[configName],
+					}
+					table.insert(self.Contents, expand([[
 		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
 ]], configInfo, info))
+				end
 			end
 		end
 	end
@@ -1593,18 +1607,6 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		}
 		ProjectExportInfo[self.ProjectName:lower()] = info
 	end
-	if not info.LegacyTargetUuid then
-		info.LegacyTargetUuid = XcodeUuid()
-	end
-	if not info.LegacyTargetBuildConfigurationListUuid then
-		info.LegacyTargetBuildConfigurationListUuid = XcodeUuid()
-	end
-	if not info.ProjectUuid then
-		info.ProjectUuid = XcodeUuid()
-	end
-	if not info.ProjectBuildConfigurationListUuid then
-		info.ProjectBuildConfigurationListUuid = XcodeUuid()
-	end
 
 	local project = Projects[self.ProjectName]
 
@@ -1643,7 +1645,22 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, '/* Begin PBXGroup section */\n')
 	XcodeHelper_WritePBXGroups(self.Contents, self.EntryUuids, sourcesTree, '')
 	table.insert(self.Contents, '/* End PBXGroup section */\n\n')
-	
+
+	if type(info.LegacyTargetUuid) ~= 'string' then
+		info.LegacyTargetUuid = XcodeUuid()
+	end
+	if type(info.LegacyTargetBuildConfigurationListUuid) ~= 'string' then
+		info.LegacyTargetBuildConfigurationListUuid = XcodeUuid()
+	end
+	if type(info.ProjectUuid) ~= 'string' then
+		info.ProjectUuid = XcodeUuid()
+	end
+	if type(info.ProjectBuildConfigurationListUuid) ~= 'string' then
+		info.ProjectBuildConfigurationListUuid = XcodeUuid()
+	end
+
+	info.GroupUuid = info.EntryUuids[sourcesTree[1].folder .. '/']
+
 	-- Write PBXLegacyTarget.
 	table.insert(self.Contents, '/* Begin PBXLegacyTarget section */\n')
 	table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, info.Name))
@@ -1672,7 +1689,6 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	-- Write PBXProject.
 	table.insert(self.Contents, '/* Begin PBXProject section */\n')
 	table.insert(self.Contents, ("\t\t%s /* Project object */ = {\n"):format(info.ProjectUuid))
-	info.GroupUuid = info.EntryUuids[sourcesTree[1].folder .. '/']
 	table.insert(self.Contents, expand([[
 			isa = PBXProject;
 			buildConfigurationList = $(ProjectBuildConfigurationListUuid) /* Build configuration list for PBXProject "$(Name)" */;
@@ -1688,79 +1704,95 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 ]], info))
 	table.insert(self.Contents, '/* End PBXProject section */\n\n')
 
-	-- Write XCBuildConfigurations.
-	if not info.LegacyTargetConfigUuids then
-		info.LegacyTargetConfigUuids = {}
+	for _, platformName in ipairs(Config.Platforms) do
+		-- Write XCBuildConfigurations.
+		table.insert(self.Contents, '/* Begin XCBuildConfiguration section */\n')
+
+		-- Write legacy target configurations.
+		if type(info.LegacyTargetConfigUuids) ~= 'table' then
+			info.LegacyTargetConfigUuids = {}
+		end
+		
+		if type(info.LegacyTargetConfigUuids[platformName]) ~= 'table' then
+			info.LegacyTargetConfigUuids[platformName] = {}
+			for _, config in ipairs(Config.Configurations) do
+				info.LegacyTargetConfigUuids[platformName][config] = XcodeUuid()
+			end
+		end
 
 		for _, config in ipairs(Config.Configurations) do
-			info.LegacyTargetConfigUuids[config] = XcodeUuid()
+			local platformAndConfigText = platformName .. ' - ' .. config
+			table.insert(self.Contents, "\t\t" .. info.LegacyTargetConfigUuids[platformName][config] .. ' /* ' .. platformAndConfigText .. ' */ = {\n')
+			table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
+			table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+			table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = \"" .. self.ProjectName .. "\";\n")
+			table.insert(self.Contents, "\t\t\t\tTARGET_NAME = \"" .. self.ProjectName .. "\";\n")
+			table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. platformName .. ";\n")
+			table.insert(self.Contents, "\t\t\t\tCONFIG = " .. config .. ";\n")
+			table.insert(self.Contents, "\t\t\t};\n")
+			table.insert(self.Contents, '\t\t\tname = "' .. platformAndConfigText .. '";\n')
+			table.insert(self.Contents, "\t\t};\n")
 		end
-	end
-
-	if not info.ProjectConfigUuids then
-		info.ProjectConfigUuids = {}
-
-		for _, config in ipairs(Config.Configurations) do
-			info.ProjectConfigUuids[config] = XcodeUuid()
-		end
-	end
-
-	table.insert(self.Contents, '/* Begin XCBuildConfiguration section */\n')
-
-	-- Write legacy target configurations.
-	for _, config in ipairs(Config.Configurations) do
-		table.insert(self.Contents, "\t\t" .. info.LegacyTargetConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
-		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
-		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
-		table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = \"" .. self.ProjectName .. "\";\n")
-		table.insert(self.Contents, "\t\t\t\tTARGET_NAME = \"" .. self.ProjectName .. "\";\n")
-		table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. Platform .. ";\n")
-		table.insert(self.Contents, "\t\t\t\tCONFIG = " .. config .. ";\n")
-		table.insert(self.Contents, "\t\t\t};\n")
-		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
-		table.insert(self.Contents, "\t\t};\n")
-	end
 	
-	-- Write project configurations.
-	for _, config in ipairs(Config.Configurations) do
-		table.insert(self.Contents, "\t\t" .. info.ProjectConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
-		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
-		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
-		table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
-		table.insert(self.Contents, "\t\t\t\tSDKROOT = macosx10.5;\n")
-		table.insert(self.Contents, "\t\t\t};\n")
-		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
-		table.insert(self.Contents, "\t\t};\n")
-	end
+		-- Write project configurations.
+		if type(info.ProjectConfigUuids) ~= 'table' then
+			info.ProjectConfigUuids = {}
+		end
+		
+		if type(info.ProjectConfigUuids[platformName]) ~= 'table' then
+			info.ProjectConfigUuids[platformName] = {}
+			for _, config in ipairs(Config.Configurations) do
+				info.ProjectConfigUuids[platformName][config] = XcodeUuid()
+			end
+		end
 
-	table.insert(self.Contents, '/* End XCBuildConfiguration section */\n\n')
+		for _, config in ipairs(Config.Configurations) do
+			local platformAndConfigText = platformName .. ' - ' .. config
+			table.insert(self.Contents, "\t\t" .. info.ProjectConfigUuids[platformName][config] .. ' /* ' .. platformAndConfigText .. ' */ = {\n')
+			table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
+			table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+			table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
+			table.insert(self.Contents, "\t\t\t\tSDKROOT = macosx10.5;\n")
+			table.insert(self.Contents, "\t\t\t};\n")
+			table.insert(self.Contents, '\t\t\tname = "' .. platformAndConfigText .. '";\n')
+			table.insert(self.Contents, "\t\t};\n")
+		end
+
+		table.insert(self.Contents, '/* End XCBuildConfiguration section */\n\n')
+	end
 
 
 	-- Write XCConfigurationLists.
 	table.insert(self.Contents, "/* Begin XCConfigurationList section */\n")
 
-	table.insert(self.Contents, "\t\t" .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. self.ProjectName .. '" */ = {\n')
+	table.insert(self.Contents, "\t\t" .. info.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. info.Name .. '" */ = {\n')
 	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
 	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
-	for _, config in ipairs(Config.Configurations) do
-		table.insert(self.Contents, "\t\t\t\t" .. info.LegacyTargetConfigUuids[config] .. " /* " .. config .. " */,\n")
+	for _, platformName in ipairs(Config.Platforms) do
+		for _, config in ipairs(Config.Configurations) do
+			local platformAndConfigText = platformName .. ' - ' .. config
+			table.insert(self.Contents, "\t\t\t\t" .. info.LegacyTargetConfigUuids[platformName][config] .. " /* " .. platformAndConfigText .. " */,\n")
+		end
 	end
 	table.insert(self.Contents, "\t\t\t);\n")
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = release;\n")
 	table.insert(self.Contents, "\t\t};\n\n")
-	
-	table.insert(self.Contents, "\t\t" .. info.ProjectBuildConfigurationListUuid .. ' /* Build configuration list for PBXProject "' .. self.ProjectName .. '" */ = {\n')
+
+	table.insert(self.Contents, "\t\t" .. info.ProjectBuildConfigurationListUuid .. ' /* Build configuration list for PBXProject "' .. info.Name .. '" */ = {\n')
 	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
 	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
-	for _, config in ipairs(Config.Configurations) do
-		table.insert(self.Contents, "\t\t\t\t" .. info.ProjectConfigUuids[config] .. " /* " .. config .. " */,\n")
+	for _, platformName in ipairs(Config.Platforms) do
+		for _, config in ipairs(Config.Configurations) do
+			local platformAndConfigText = platformName .. ' - ' .. config
+			table.insert(self.Contents, "\t\t\t\t" .. info.ProjectConfigUuids[platformName][config] .. " /* " .. platformAndConfigText .. " */,\n")
+		end
 	end
 	table.insert(self.Contents, "\t\t\t);\n")
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = release;\n")
 	table.insert(self.Contents, "\t\t};\n")
-	
+
 	table.insert(self.Contents, "/* End XCConfigurationList section */\n\n")
 	
 	table.insert(self.Contents, "\t};\n")
@@ -1774,71 +1806,79 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	---------------------------------------------------------------------------
 	-- Write username.pbxuser with the executable settings
 	---------------------------------------------------------------------------
-	local ConfigInfo = {}
-	local platformName = Platform
-	for configName in ivalues(Config.Configurations) do
-		local configInfo =
-		{
-			Platform = platformName,
-			Config = configName,
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-			Defines = '',
-			Includes = '',
-			OutputPath = '',
-			OutputName = '',
-		}
-		ConfigInfo[configName] = configInfo
-
-		if project and project.Name then
-			if project.Defines then
-				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
-			end
-			if project.IncludePaths then
-				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
-			end
-			if project.OutputPaths then
-				configInfo.OutputPath = project.OutputPaths[platformName][configName]
-				configInfo.OutputName = project.OutputNames[platformName][configName]
-			end
-			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
-			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
-			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
-		elseif not commandLines then
-			configInfo.BuildCommandLine = jamCommandLine
-			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
-			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
-		else
-			configInfo.BuildCommandLine = commandLines[1] or ''
-			configInfo.RebuildCommandLine = commandLines[2] or ''
-			configInfo.CleanCommandLine = commandLines[3] or ''
-		end
+	if type(info.ExecutableInfo) ~= 'table' then
+		info.ExecutableInfo = {}
 	end
+
+	local ConfigInfo = {}
+	for _, platformName in ipairs(Config.Platforms) do
+		ConfigInfo[platformName] = {}
+		for configName in ivalues(Config.Configurations) do
+			local configInfo =
+			{
+				Platform = platformName,
+				Config = configName,
+				VSPlatform = MapPlatformToVSPlatform[platformName],
+				VSConfig = MapConfigToVSConfig[configName],
+				Defines = '',
+				Includes = '',
+				OutputPath = '',
+				OutputName = '',
+			}
+			ConfigInfo[platformName][configName] = configInfo
+
+			if project and project.Name then
+				if project.Defines then
+					configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+				end
+				if project.IncludePaths then
+					configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
+				end
+				if project.OutputPaths then
+					configInfo.OutputPath = project.OutputPaths[platformName][configName]
+					configInfo.OutputName = project.OutputNames[platformName][configName]
+				end
+				configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
+				configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
+				configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
+			elseif not commandLines then
+				configInfo.BuildCommandLine = jamCommandLine
+				configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
+				configInfo.CleanCommandLine = jamCommandLine .. ' clean'
+			else
+				configInfo.BuildCommandLine = commandLines[1] or ''
+				configInfo.RebuildCommandLine = commandLines[2] or ''
+				configInfo.CleanCommandLine = commandLines[3] or ''
+			end
+		end
 	
-	for configName in ivalues(Config.Configurations) do
-		local configInfo = ConfigInfo[configName]
-		if not info.ExecutableInfo then
-			info.ExecutableInfo = {}
+		if type(info.ExecutableInfo[platformName]) ~= 'table' then
+			info.ExecutableInfo[platformName] = {}
 		end
+	
+		for configName in ivalues(Config.Configurations) do
+			local configInfo = ConfigInfo[platformName][configName]
 		
-		local executableConfig = info.ExecutableInfo[configName]
-		if not executableConfig then
-			executableConfig = {}
-			info.ExecutableInfo[configName] = executableConfig
-		end
+			local executableConfig = info.ExecutableInfo[platformName][configName]
+			if not executableConfig then
+				executableConfig = {}
+				info.ExecutableInfo[platformName][configName] = executableConfig
+			end
 		
-		if not executableConfig.Uuid then
-			executableConfig.Uuid = XcodeUuid()
-		end
+			if not executableConfig.Uuid then
+				executableConfig.Uuid = XcodeUuid()
+			end
 		
-		if not executableConfig.FileReferenceUuid then
-			executableConfig.FileReferenceUuid = XcodeUuid()
+			if not executableConfig.FileReferenceUuid then
+				executableConfig.FileReferenceUuid = XcodeUuid()
+			end
 		end
 	end
 	
 	local extraData = {}
+	extraData.activePlatform = Config.Platforms[1]
 	extraData.activeConfig = Config.Configurations[1]
-	extraData.activeExecutable = info.ExecutableInfo[extraData.activeConfig].Uuid
+	extraData.activeExecutable = info.ExecutableInfo[extraData.activePlatform][extraData.activeConfig].Uuid
 
 	local filename = outputPath .. self.ProjectName .. '.xcodeproj/' .. os.getenv('USER') .. '.pbxuser'
 
@@ -1848,7 +1888,8 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 {
 ]])
 
-	table.insert(self.Contents, expand([[
+	for _, platformName in ipairs(Config.Platforms) do
+		table.insert(self.Contents, expand([[
 	$(ProjectUuid) /* Project object */ = {
 		activeBuildConfigurationName = $(activeConfig);
 		activeExecutable = $(activeExecutable) /* $(Name) */;
@@ -1856,60 +1897,52 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		executables = (
 ]], extraData, info))
 
-	for configName in ivalues(Config.Configurations) do
-		local configInfo = ConfigInfo[configName]
-		local executableConfig = info.ExecutableInfo[configName]
+		for configName in ivalues(Config.Configurations) do
+			local configInfo = ConfigInfo[platformName][configName]
+			local executableConfig = info.ExecutableInfo[platformName][configName]
 		
-		table.insert(self.Contents, '\t\t\t' .. executableConfig.Uuid .. ' /* ' .. configInfo.OutputName .. ' */,\n')
-	end
+			table.insert(self.Contents, '\t\t\t' .. executableConfig.Uuid .. ' /* ' .. configInfo.OutputName .. ' */,\n')
+		end
 	
-	table.insert(self.Contents, [[
+		table.insert(self.Contents, [[
 		);
 		userBuildSettings = {
 		};
 	};
 ]])
 
-	table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, self.ProjectName))
-	table.insert(self.Contents, '\t\tactiveExec = 0;\n')
-	table.insert(self.Contents, '\t};\n')
+		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, self.ProjectName))
+		table.insert(self.Contents, '\t\tactiveExec = 0;\n')
+		table.insert(self.Contents, '\t};\n')
 
-	for configName in ivalues(Config.Configurations) do
-		local configInfo = ConfigInfo[configName]
-		if not info.ExecutableInfo then
-			info.ExecutableInfo = {}
-		end
+		for configName in ivalues(Config.Configurations) do
+			local configInfo = ConfigInfo[platformName][configName]
+			local executableConfig = info.ExecutableInfo[platformName][configName]
 		
-		local executableConfig = info.ExecutableInfo[configName]
-		if not executableConfig then
-			executableConfig = {}
-			info.ExecutableInfo[configName] = executableConfig
-		end
+			if not executableConfig.Uuid then
+				executableConfig.Uuid = XcodeUuid()
+			end
 		
-		if not executableConfig.Uuid then
-			executableConfig.Uuid = XcodeUuid()
-		end
-		
-		if not executableConfig.FileReferenceUuid then
-			executableConfig.FileReferenceUuid = XcodeUuid()
-		end
-		extraData.OutputName = configInfo.OutputName
+			if not executableConfig.FileReferenceUuid then
+				executableConfig.FileReferenceUuid = XcodeUuid()
+			end
+			extraData.OutputName = configInfo.OutputName
 
-		if configInfo.OutputName ~= '' then
-			table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.FileReferenceUuid, configInfo.OutputName))
-			table.insert(self.Contents, [[
+			if configInfo.OutputName ~= '' then
+				table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.FileReferenceUuid, configInfo.OutputName))
+				table.insert(self.Contents, [[
 		isa = PBXFileReference;
 		lastKnownFileType = text;
 ]])
-			table.insert(self.Contents, '\t\tname = ' .. configInfo.OutputName .. ';\n')
-			table.insert(self.Contents, '\t\tpath = "' .. configInfo.OutputPath .. configInfo.OutputName .. '";\n')
-			table.insert(self.Contents, [[
+				table.insert(self.Contents, '\t\tname = ' .. configInfo.OutputName .. ';\n')
+				table.insert(self.Contents, '\t\tpath = "' .. configInfo.OutputPath .. configInfo.OutputName .. '";\n')
+				table.insert(self.Contents, [[
 		sourceTree = "<absolute>";
 	};
 ]])
 
-			table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.Uuid, configInfo.OutputName))
-			table.insert(self.Contents, expand([[
+				table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.Uuid, configInfo.OutputName))
+				table.insert(self.Contents, expand([[
 		isa = PBXExecutable;
 		activeArgIndices = (
 		);
@@ -1950,6 +1983,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		);
 	};
 ]], executableConfig, info, extraData))
+			end
 		end
 	end
 		
@@ -2196,17 +2230,19 @@ function XcodeWorkspaceMetaTable:Write(outputPath)
 	table.insert(self.Contents, '/* Begin XCBuildConfiguration section */\n')
 
 	-- Write legacy target configurations.
-	for _, config in ipairs(Config.Configurations) do
-		table.insert(self.Contents, "\t\t" .. info.LegacyTargetConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
-		table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
-		table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
-		table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = " .. 'all' .. ";\n")
-		table.insert(self.Contents, "\t\t\t\tTARGET_NAME = " .. 'all' .. ";\n")
-		table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. Platform .. ";\n")
-		table.insert(self.Contents, "\t\t\t\tCONFIG = " .. config .. ";\n")
-		table.insert(self.Contents, "\t\t\t};\n")
-		table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
-		table.insert(self.Contents, "\t\t};\n")
+	for _, platform in ipairs(Config.Platforms) do
+		for _, config in ipairs(Config.Configurations) do
+			table.insert(self.Contents, "\t\t" .. info.LegacyTargetConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
+			table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
+			table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+			table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = " .. 'all' .. ";\n")
+			table.insert(self.Contents, "\t\t\t\tTARGET_NAME = " .. 'all' .. ";\n")
+			table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. platform .. ";\n")
+			table.insert(self.Contents, "\t\t\t\tCONFIG = " .. config .. ";\n")
+			table.insert(self.Contents, "\t\t\t};\n")
+			table.insert(self.Contents, "\t\t\tname = " .. config .. ";\n")
+			table.insert(self.Contents, "\t\t};\n")
+		end
 	end
 	
 	-- Write project configurations.
@@ -2441,11 +2477,11 @@ function BuildProjectTree(workspace)
 	local projects = {}
 	local projectsMap = {}
 	for project in ivalues(workspace.Projects) do
-		projectsMap[project:lower()] = true
+		projectsMap[project:lower()] = project
 	end
 
-	projectsMap[buildWorkspaceName:lower()] = true
-	projectsMap[updateWorkspaceName:lower()] = true
+	projectsMap[buildWorkspaceName:lower()] = buildWorkspaceName
+	projectsMap[updateWorkspaceName:lower()] = updateWorkspaceName
 
 	if workspace.ProjectGroups then
 		for projectGroupName, projectGroup in pairs(workspace.ProjectGroups) do
@@ -2453,13 +2489,13 @@ function BuildProjectTree(workspace)
 				local lowerProjectName = projectName:lower()
 				if projectsMap[lowerProjectName] then
 					FolderTree.InsertName(projects, projectGroupName, projectName)
-					projectsMap[lowerProjectName] = nil
+					projectsMap[lowerProjectName] = projectName
 				end
 			end
 		end
 	end
 
-	for projectName in pairs(projectsMap) do
+	for lowerProjectName, projectName in pairs(projectsMap) do
 		FolderTree.InsertName(projects, '', projectName)
 	end
 
