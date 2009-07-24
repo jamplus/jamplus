@@ -3,4 +3,5 @@
 *.ilk
 *.pdb
 lua/
+macosxx86/
 ntx86/
