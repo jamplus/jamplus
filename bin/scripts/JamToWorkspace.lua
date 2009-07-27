@@ -193,7 +193,7 @@ function CreateTargetInfoFiles()
 			'-d0',
 		}
 
-		print('Writing platform [' .. platform .. '] and config [' .. config .. ']...')
+		print('Reading platform [' .. platform .. '] and config [' .. config .. ']...')
 		for line in ex.lines{jamExePath, unpack(collectConfigurationArgs)} do
 			print(line)
 		end
@@ -2668,6 +2668,8 @@ include $(jamPath)Jambase.jam ;
 	-- Read the target information.
 	CreateTargetInfoFiles()
 	ReadTargetInfoFiles()
+
+	print('Writing generated projects...')
 
 	if uname == 'windows' then
 		-- Write jam.bat.
