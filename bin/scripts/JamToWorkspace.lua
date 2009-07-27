@@ -301,16 +301,28 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 	if self.Options.vs2003 then
 		table.insert(self.Contents, [[
 	<Platforms>
+]])
+		for platformName in ivalues(Config.Platforms) do
+			table.insert(self.Content, [[
 		<Platform
-			Name="Win32"/>
+			Name="]] .. platformName .. [["/>
+]])
+		end
+		table.insert(self.Contents, [[
 	</Platforms>
 ]])
 	elseif self.Options.vs2005 or self.Options.vs2008 then
 		table.insert(self.Contents, [[
 	<Platforms>
+]])
+		for platformName in ivalues(Config.Platforms) do
+			table.insert(self.Contents, [[
 		<Platform
-			Name="Win32"
+			Name="]] .. platformName .. [["
 		/>
+]])
+		end
+		table.insert(self.Contents, [[
 	</Platforms>
 ]])
 
@@ -326,53 +338,53 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 	<Configurations>
 ]])
 
-	local platformName = Platform
-	for configName in ivalues(Config.Configurations) do
-		local jamCommandLine = jamExePath .. ' ' ..
-				os.path.escape('-C' .. destinationRootPath) .. ' ' ..
-				'-sPLATFORM=' .. platformName .. ' ' ..
-				'-sCONFIG=' .. configName
+	for platformName in ivalues(Config.Platforms) do
+		for configName in ivalues(Config.Configurations) do
+			local jamCommandLine = jamExePath .. ' ' ..
+					os.path.escape('-C' .. destinationRootPath) .. ' ' ..
+					'-sPLATFORM=' .. platformName .. ' ' ..
+					'-sCONFIG=' .. configName
 
-		local configInfo =
-		{
-			Platform = platformName,
-			Config = configName,
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-			Defines = '',
-			Includes = '',
-			Output = '',
-		}
+			local configInfo =
+			{
+				Platform = platformName,
+				Config = configName,
+				VSPlatform = MapPlatformToVSPlatform[platformName],
+				VSConfig = MapConfigToVSConfig[configName],
+				Defines = '',
+				Includes = '',
+				Output = '',
+			}
 
-		if project and project.Name then
-			if project.Defines then
-				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+			if project and project.Name then
+				if project.Defines then
+					configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+				end
+				if project.IncludePaths then
+					configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
+				end
+				if project.OutputPaths then
+					configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
+				end
+				configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
+				configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
+				configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
+			elseif not commandLines then
+				configInfo.BuildCommandLine = jamCommandLine
+				configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
+				configInfo.CleanCommandLine = jamCommandLine .. ' clean'
+			else
+				configInfo.BuildCommandLine = commandLines[1] or ''
+				configInfo.RebuildCommandLine = commandLines[2] or ''
+				configInfo.CleanCommandLine = commandLines[3] or ''
 			end
-			if project.IncludePaths then
-				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
-			end
-			if project.OutputPaths then
-				configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
-			end
-			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
-			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
-			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
-		elseif not commandLines then
-			configInfo.BuildCommandLine = jamCommandLine
-			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
-			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
-		else
-			configInfo.BuildCommandLine = commandLines[1] or ''
-			configInfo.RebuildCommandLine = commandLines[2] or ''
-			configInfo.CleanCommandLine = commandLines[3] or ''
-		end
-		
-		configInfo.BuildCommandLine = configInfo.BuildCommandLine:gsub('"', '&quot;')
-		configInfo.RebuildCommandLine = configInfo.RebuildCommandLine:gsub('"', '&quot;')
-		configInfo.CleanCommandLine = configInfo.CleanCommandLine:gsub('"', '&quot;')
+			
+			configInfo.BuildCommandLine = configInfo.BuildCommandLine:gsub('"', '&quot;')
+			configInfo.RebuildCommandLine = configInfo.RebuildCommandLine:gsub('"', '&quot;')
+			configInfo.CleanCommandLine = configInfo.CleanCommandLine:gsub('"', '&quot;')
 
-		if self.Options.vs2003 then
-			table.insert(self.Contents, expand([==[
+			if self.Options.vs2003 then
+				table.insert(self.Contents, expand([==[
 		<Configuration
 			Name="$(VSConfig)|$(VSPlatform)"
 			OutputDirectory="$$(ConfigurationName)"
@@ -389,8 +401,8 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 		</Configuration>
 ]==], configInfo, info, _G))
 
-		elseif self.Options.vs2005 or self.Options.vs2008 then
-			table.insert(self.Contents, expand([==[
+			elseif self.Options.vs2005 or self.Options.vs2008 then
+				table.insert(self.Contents, expand([==[
 		<Configuration
 			Name="$(VSConfig)|$(VSPlatform)"
 			OutputDirectory="$$(ConfigurationName)"
@@ -413,6 +425,7 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 			/>
 		</Configuration>
 ]==], configInfo, info, _G))
+			end
 		end
 	end
 
@@ -569,20 +582,6 @@ EndProject
 	-- Write the folders we use.
 	local folderList = {}
 	self:_GatherSolutionFolders(workspace.ProjectTree, folderList, '')
-
-	-- !BuildWorkspace
-	local info = ProjectExportInfo[buildWorkspaceName]
-	table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
-EndProject
-]], info))
-
-	-- !UpdateWorkspace
-	local info = ProjectExportInfo[updateWorkspaceName]
-	table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
-EndProject
-]], info))
 
 	for solutionFolderName in ivalues(folderList) do
 		local info = ProjectExportInfo[solutionFolderName]
@@ -1054,20 +1053,6 @@ EndProject
 	-- Write the folders we use.
 	local folderList = {}
 	self:_GatherSolutionFolders(workspace.ProjectTree, folderList, '')
-
-	-- !BuildWorkspace
-	local info = ProjectExportInfo[buildWorkspaceName]
-	table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
-EndProject
-]], info))
-
-	-- !UpdateWorkspace
-	local info = ProjectExportInfo[updateWorkspaceName]
-	table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
-EndProject
-]], info))
 
 	for solutionFolderName in ivalues(folderList) do
 		local info = ProjectExportInfo[solutionFolderName]
@@ -2489,7 +2474,7 @@ function BuildProjectTree(workspace)
 				local lowerProjectName = projectName:lower()
 				if projectsMap[lowerProjectName] then
 					FolderTree.InsertName(projects, projectGroupName, projectName)
-					projectsMap[lowerProjectName] = projectName
+					projectsMap[lowerProjectName] = nil
 				end
 			end
 		end
