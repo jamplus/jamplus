@@ -2659,7 +2659,7 @@ include $(jamPath)Jambase.jam ;
 	if uname == 'windows' then
 		-- Write jam.bat.
 		local jamScript = os.path.combine(destinationRootPath, 'jam.bat')
-		io.writeall(os.path.escape(jamScript),
+		io.writeall(jamScript,
 			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
 		-- Write updateworkspace.bat.
@@ -2671,7 +2671,7 @@ include $(jamPath)Jambase.jam ;
 	else
 		-- Write jam shell script.
 		local jamScript = os.path.combine(destinationRootPath, 'jam')
-		io.writeall(os.path.escape(jamScript),
+		io.writeall(jamScript,
 				'#!/bin/sh\n' ..
 				jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
 		os.chmod(jamScript, 777)
