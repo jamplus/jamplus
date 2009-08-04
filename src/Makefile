@@ -50,4 +50,6 @@ none:
 macosx:
 	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions" LINKLIBS="$(LINKLIBS) -framework CoreFoundation -framework CoreServices"
 
+.PHONY: all $(PLATS)
+
 include Makefile.Common
