@@ -598,6 +598,30 @@ int main( int argc, char **argv, char **arg_environ )
 	    var_defines( symv );
 	}
 
+#if OPT_KEY_EQUALS_VALUE_DEFINES_EXT
+	{
+	    int i;
+	    int lowest = 0;
+
+        for ( i = 0; i < argc; ++i )
+        {
+            if ( strstr( argv[i], "=" ) )
+            {
+                const char *symv[2];
+                symv[0] = argv[i];
+                symv[1] = 0;
+                var_defines( symv );
+            }
+            else
+            {
+                argv[lowest++] = argv[i];
+            }
+	    }
+
+        argc = lowest;
+	}
+#endif /* OPT_KEY_EQUALS_VALUE_DEFINES_EXT */
+
 	/* Initialize built-in rules */
 
 	load_builtins();
