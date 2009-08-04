@@ -11,7 +11,7 @@ rule TestExpansion LEFT : RIGHT
 	}
 	else
 	{
-		Echo fail: $(LEFT) \!\= $(RIGHT) ;
+		Echo "fail: $(LEFT) \!\= $(RIGHT)" ;
 	}
 }
 
@@ -23,7 +23,7 @@ rule TestWildcard ACTUAL : EXPECTED
 	{
 		if ! ( $(_expected) in $(ACTUAL) )
 		{
-			Echo fail: $(ACTUAL) \!\= $(EXPECTED) ;
+			Echo "fail: $(ACTUAL) \!\= $(EXPECTED)" ;
 			return ;
 		}
 	}
@@ -159,4 +159,4 @@ TestExpansion $(FILES:X="^file1":X=\\.obj$:I=\\.h$) :
 		file1.h file2.h file3.h ;
 
 #------------------------------------------------------------------------------
-Echo Tests passed: $(numTestsPassed)/$(numTests) ;
+Echo "Tests passed: $(numTestsPassed)/$(numTests)" ;
