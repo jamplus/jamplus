@@ -2841,12 +2841,9 @@ rule ProjectGroup TARGET : FOLDERNAME : PROJECTS
 }
 
 
-rule SearchSource SOURCES
+rule SearchSource SOURCES : SEARCH_PATH
 {
-	on $(SOURCES) if ! $(SEARCH)
-	{
-		SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
-	}
+	SEARCH on $(SOURCES) ?= $(SEARCH_PATH:E=$(SEARCH_SOURCE)) ;
 }
 
 
