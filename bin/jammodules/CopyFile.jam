@@ -23,7 +23,7 @@ else
 {
 	actions CopyFile1
 	{
-		$(CP) $(2) $(1)
+		$(CP) "$(2)" "$(1)"
 	}
 }
 
