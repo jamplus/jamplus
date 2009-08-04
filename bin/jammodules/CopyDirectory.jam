@@ -3,18 +3,32 @@ IncludeModule CopyFile ;
 if ! $(TARGETINFO_LOCATE)
 {
 
-rule CopyDirectory PARENTS : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING
+rule _CopyDirectoryHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING : RECURSIVE
 {
-	SOURCE_PATH = $(SOURCE_PATH:R=) ;
-	DESTINATION_PATH = $(DESTINATION_PATH:R=) ;
-
 	local files = @($(SOURCE_PATH)/$(SEARCH_STRING:E=*):W) ;
 	local file ;
-	for file in $(files)
-	{
+	for file in $(files) {
 		local justFile = [ Match $(SOURCE_PATH)/(.+) : $(file) ] ;
-		CopyFile $(PARENTS) : $(justFile:R=$(DESTINATION_PATH)) : $(file) ;
+		CopyFile $(PARENT) : $(justFile:R=$(DESTINATION_PATH)) : $(file) ;
 	}
+
+	if $(RECURSIVE) {
+		local dirs = @($(SOURCE_PATH)/*/:W) ;
+		local dir ;
+		for dir in $(dirs) {
+			local justDir = [ Match $(SOURCE_PATH)/(.+) : $(dir) ] ;
+			_CopyDirectoryHelper $(PARENT) : $(justDir:R=$(DESTINATION_PATH)) : $(dir) : $(SEARCH_STRING) : $(RECURSIVE) ;
+		}
+	}
+}
+
+rule CopyDirectory PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING : RECURSIVE
+{
+	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
+	SOURCE_PATH = $(SOURCE_PATH:R=$(SUBDIR)) ;
+	DESTINATION_PATH = $(DESTINATION_PATH:R=$(SUBDIR)) ;
+
+	_CopyDirectoryHelper $(PARENT) : $(DESTINATION_PATH) : $(SOURCE_PATH) : $(SEARCH_STRING) : $(RECURSIVE) ;
 }
 
 }
