@@ -769,7 +769,8 @@ DoRecursion:
 			// Need more directories.
 			CatPath( combinedName, basePath, (*it).c_str() );
 			strcat( combinedName, pattern );
-			GlobHelper( combinedName );
+			FoundMatch( combinedName );
+//			GlobHelper( combinedName );
 		}
 	}
 	else // if ( !matchFiles )
