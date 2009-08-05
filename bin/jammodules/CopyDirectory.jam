@@ -8,16 +8,14 @@ rule _CopyDirectoryHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRIN
 	local files = @($(SOURCE_PATH)/$(SEARCH_STRING:E=*):W) ;
 	local file ;
 	for file in $(files) {
-		local justFile = [ Match $(SOURCE_PATH)/(.+) : $(file) ] ;
-		CopyFile $(PARENT) : $(justFile:R=$(DESTINATION_PATH)) : $(file) ;
+		CopyFile $(PARENT) : $(file:BSR=$(DESTINATION_PATH)) : $(file) ;
 	}
 
 	if $(RECURSIVE) {
 		local dirs = @($(SOURCE_PATH)/*/:W) ;
 		local dir ;
 		for dir in $(dirs) {
-			local justDir = [ Match $(SOURCE_PATH)/(.+) : $(dir) ] ;
-			_CopyDirectoryHelper $(PARENT) : $(justDir:R=$(DESTINATION_PATH)) : $(dir) : $(SEARCH_STRING) : $(RECURSIVE) ;
+			_CopyDirectoryHelper $(PARENT) : $(dir:R=$(DESTINATION_PATH)) : $(dir) : $(SEARCH_STRING) : $(RECURSIVE) ;
 		}
 	}
 }
