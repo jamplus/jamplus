@@ -431,15 +431,17 @@ int luahelper_taskadd(const char* taskscript)
     strncpy(newTaskScript, taskscript, taskscriptlen);
     newTaskScript[taskscriptlen] = 0;
     ret = luaL_loadstring(L, newTaskScript);			/* lanes gen * script */
-    free(newTaskScript);
     if (ret != 0)
     {
 	if (lua_isstring(L, -1))
 	    printf("jam: Error compiling Lua lane\n%s\n", lua_tostring(L, -1));
 	lua_pop(L, 2);
+	printf("%s\n", newTaskScript);
+	free(newTaskScript);
 	return -1;
     }
 
+    free(newTaskScript);
     ret = lua_pcall(L, 2, 1, 0);						/* lanes lane_h */
     if (ret != 0)
     {
@@ -476,6 +478,11 @@ int luahelper_taskisrunning(int taskid)
     lua_init();
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, taskid);		/* lane_h */
+    if (!lua_istable(L, -1))
+    {
+        lua_pop(L, 1);
+        return 0;
+    }
     lua_getfield(L, -1, "status");					/* lane_h status */
 
     status = lua_tostring(L, -1);
@@ -498,13 +505,20 @@ int luahelper_taskisrunning(int taskid)
 	    if (lua_isstring(L, -1))
 		printf("jam: Error in Lua lane\n%s\n");
 	    lua_pop(L, 2);
-	    return 1;
+	    return -1;
 	}
+
+    ret = 1;
+    if (lua_isstring(L, -2))
+    {
+        printf("jam: Error in Lua lane\n%s\n", lua_tostring(L, -2));
+        ret = -1;
+    }
 
 	lua_pop(L, 4);								/* */
 
 	luaL_unref(L, LUA_REGISTRYINDEX, taskid);
-	return 1;
+	return ret;
     }
 
     lua_pop(L, 2);
