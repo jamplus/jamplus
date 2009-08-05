@@ -6,11 +6,21 @@ rule UseMFC TARGET : OPTIONS
 		Defines $(TARGET) : _AFXDLL ;
 	}
 
-	IncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
-	
-	if link in $(OPTIONS) {
-		LinkDirectories $(TARGET) : "$(MSVCNT)/atlmfc/lib" ;
-	}
+	if $(COMPILER) = vc6 {
+		IncludeDirectories $(TARGET) : "$(MSVCNT)/mfc/Include" "$(MSVCNT)/atl/Include" ;
+		
+		if link in $(OPTIONS) {
+			LinkDirectories $(TARGET) : "$(MSVCNT)/mfc/Lib" ;
+		}
 
-	RcIncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
+		RcIncludeDirectories $(TARGET) : "$(MSVCNT)/mfc/Include" "$(MSVCNT)/atl/Include" ;
+	} else {
+		IncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
+		
+		if link in $(OPTIONS) {
+			LinkDirectories $(TARGET) : "$(MSVCNT)/atlmfc/lib" ;
+		}
+
+		RcIncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
+	}
 }

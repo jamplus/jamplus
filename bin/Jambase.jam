@@ -172,6 +172,10 @@ rule FindVisualStudio VERSION
 		case 6.0 :
 		    local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft DevStudio $(VERSION) Products "Microsoft Visual C++" ProductDir ;
 		    MSVCNT = [ W32_GETREG $(key) ] ;
+			MSVCNT_PATH = "$(MSVCNT)/../Common/MSDev98/Bin" ;
+			MSSDK = $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSSDK)/Include" ; # "$(MSSDK)/PlatformSDK/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/Lib" ; # "$(MSVCNT)/PlatformSDK/lib" ;
 			return vc6 ;
 	}
 }
@@ -261,13 +265,17 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 					COMPILER = [ FindVisualStudio 10.0 ] ;
 			}
 
-			DEFINES.win32.* on * += WIN32 WINDOWS _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE ;
+			local debugRtcFlags ;
+			if $(COMPILER) != vc6 {
+				DEFINES.win32.* on * += WIN32 WINDOWS _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE ;
+				debugRtcFlags += /RTC1 ;
+			}
 
 			MSVCNT		?= $(MSVCDIR) ;
 
 			MSVCBIN ?= $(MSVCNT)/bin/ ;
 
-			CCFLAGS.win32.debug on * 		?= /Od /Gm /EHsc /RTC1 /MDd /W3 /Zi ;
+			CCFLAGS.win32.debug on * 		?= /Od /Gm /EHsc $(debugRtcFlags) /MDd /W3 /Zi ;
 			CCFLAGS.win32.release on * 		?= /O2 /Oi /EHsc /Gy /MD /W3 /Zi ;
 			CCFLAGS.win32.releaseltcg on * 	?= [ on * Var CCFLAGS.win32.release ] /GL ;
 			C++FLAGS.win32.* on *			?= [ on * Var CCFLAGS.win32.* ] ;
@@ -284,7 +292,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			LIBFLAGS.win32.releaseltcg on * = /LTCG ;
 
 			LINKDIRECTORIES.*.*	on * += $(MSSDK_LINKDIRECTORIES) ;
-			LINKFLAGS.win32.debug on * = /INCREMENTAL /DEBUG /MACHINE:X86 ;
+			LINKFLAGS.win32.debug on * = /INCREMENTAL:YES /DEBUG /MACHINE:X86 ;
 			LINKFLAGS.win32.release on * = /INCREMENTAL:NO /DEBUG /MACHINE:X86 /OPT:REF /OPT:ICF ;
 			LINKFLAGS.win32.releaseltcg on * = [ on * Var LINKFLAGS.win32.release ] /LTCG ;
 
@@ -296,7 +304,11 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			MKDIR		= mkdir ;
 			MKDIR_RECURSIVE = ;
 			MT			= "$(MSSDK)/bin/mt" ;
-			RC			= "$(MSSDK)/bin/RC" ;
+			if $(COMPILER) = vc6 {
+				RC			= "$(MSVCNT)/../Common/MSDev98/Bin/rc" ;
+			} else {
+				RC			= "$(MSSDK)/bin/RC" ;
+			}
 			STDHDRS		?= "$(MSSDK_STDHDRS)" ;
 			UNDEFFLAG	?= "/u _" ;
 
@@ -1207,32 +1219,6 @@ if $(NT) && $(MSVCNT)
 		$(RM) "$(>:\\)"
 	}
 
-	actions response LinkDebug
-	{
-	set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
-	SET INCLUDE=$(STDHDRS:\\J=;)
-	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-	if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
-	if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
-	"$(RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
-	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-	}
-
-	actions response LinkNoManifest
-	{
-	set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
-	SET INCLUDE=$(STDHDRS:\\J=;)
-	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-	}
-
-	actions response Link
-	{
-	set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
-	SET INCLUDE=$(STDHDRS:\\J=;)
-	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-	"$(MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
-	}
-
 	actions RegSvr32
 	{
 	regsvr32 /s /c "$(1)"
@@ -1241,6 +1227,51 @@ if $(NT) && $(MSVCNT)
 	actions existing UnRegSvr32
 	{
 	regsvr32 /s /u "$(2)"
+	}
+
+	if $(COMPILER) = vc6
+	{
+		actions response LinkDebug
+		{
+		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+		}
+
+		actions response Link
+		{
+		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+		}
+	}
+	else
+	{
+		actions response LinkDebug
+		{
+		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+		if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
+		if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
+		"$(RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+		}
+
+		actions response LinkNoManifest
+		{
+		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+		}
+
+		actions response Link
+		{
+		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+		"$(MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
+		}
 	}
 
 }
@@ -2061,7 +2092,11 @@ rule ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 
 	local linkRule = Link ;
 
-	if $(COMPILER) in vs2005 vs2008 {
+	if $(COMPILER) in vc6 {
+		if $(CONFIG) = debug {
+			linkRule = LinkDebug ;
+		}
+	} else if $(COMPILER) in vs2003 vs2005 vs2008 vs2010 {
 		if nomanifest in $(OPTIONS) {
 			linkRule = LinkNoManifest ;
 		} else if $(CONFIG) = debug {
@@ -2202,7 +2237,7 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	if ! ( noexportlib in $(OPTIONS) ) {
 		local _tlib = @($(TARGET)$(SUFLIB):G=$(grist)) ;
 
-		if $(COMPILER) in vs2003 vs2005 vs2008 vs2010 {
+		if $(COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 {
 			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
 			Depends $(TARGET) : $(_tlib) ;
 			Depends $(_tlib) : $(_t) ;
@@ -2334,7 +2369,11 @@ rule SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	local linkRule = Link ;
 
-	if $(COMPILER) in vs2005 vs2008 vs2010 {
+	if $(COMPILER) in vc6 {
+		if $(CONFIG) = debug {
+			linkRule = LinkDebug ;
+		}
+	} else if $(COMPILER) in vs2003 vs2005 vs2008 vs2010 {
 		if nomanifest in $(OPTIONS) {
 			linkRule = LinkNoManifest ;
 		} else if $(CONFIG) = debug {
@@ -2569,7 +2608,7 @@ rule CRuntimeType TARGET : TYPE : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_PLATFORM ?= $(PLATFORM) ;
-	if $(COMPILER) in vs2003 vs2005 vs2008 vs2010
+	if $(COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010
 	{
 		if ! $(TYPE)  ||  $(TYPE) = dynamic
 		{
