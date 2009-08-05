@@ -11,7 +11,7 @@ rule Test LEFT : RIGHT
 	}
 	else
 	{
-		Echo fail: $(LEFT) \!\= $(RIGHT) ;
+		Echo "fail: $(LEFT) \!\= $(RIGHT)" ;
 	}
 }
 
@@ -50,4 +50,4 @@ rule ReturnList INPUT
 Test [ LuaString "return jam_evaluaterule('ReturnList', { 'MyStuff', 'YourStuff' })" ] : **MyStuff** **YourStuff** ;
 
 #------------------------------------------------------------------------------
-Echo Tests passed: $(numTestsPassed)/$(numTests) ;
+Echo "Tests passed: $(numTestsPassed)/$(numTests)" ;

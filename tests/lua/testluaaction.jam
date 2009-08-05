@@ -1,6 +1,6 @@
 actions lua RunLuaScript
 {
-	require 'iox'; iox.Sleep($(SLEEP)); print([[$(TEXT)]])
+	require 'ex'; os.sleep($(SLEEP)); print([[$(TEXT)]])
 }
 
 rule DoLua TARGET : SOURCES : SLEEP : TEXT
@@ -12,6 +12,6 @@ rule DoLua TARGET : SOURCES : SLEEP : TEXT
 	RunLuaScript $(TARGET) : $(SOURCES) ;
 }
 
-DoLua MyTarget.out : xUnit.h : 5000 : hello ;
-DoLua MyTarget.out2 : xUnit2.h : 2500 : hi ;
-DoLua MyTarget.out3 : xUnit3.h : 1000 : together ;
+DoLua MyTarget.out : xUnit.h : 5 : hello ;
+DoLua MyTarget.out2 : xUnit2.h : 2.5 : hi ;
+DoLua MyTarget.out3 : xUnit3.h : 1 : together ;
