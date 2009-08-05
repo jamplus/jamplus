@@ -61,14 +61,14 @@
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>		/* do the ugly deed */
 # include <io.h>
-# define USE_MYWAIT
-# if !defined( __BORLANDC__ ) 
-# define wait my_wait
-static int my_wait( int *status );
-# endif
+# else
+# include <unistd.h>
 # endif
 
+static int my_wait( int *status );
+
 #include <stdlib.h>
+#include <errno.h>
 
 #ifdef OPT_INTERRUPT_FIX
 int intr = 0;
@@ -564,7 +564,7 @@ execwait()
 
 	/* Pick up process pid and status */
     
-	while( ( w = wait( &status ) ) == -1 && errno == EINTR )
+	while( ( w = my_wait( &status ) ) == -1 && errno == EINTR )
 		;
 
 	if( w == -1 )
@@ -620,8 +620,6 @@ execwait()
 	return 1;
 }
 
-# ifdef USE_MYWAIT
-
 static int
 my_wait( int *status )
 {
@@ -629,11 +627,13 @@ my_wait( int *status )
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 	int num_lua_active = 0;
 #endif
+#ifdef USE_EXECNT
 	DWORD exitcode, waitcode;
 	static HANDLE *active_handles = 0;
 
 	if (!active_handles)
 	    active_handles = (HANDLE *)malloc(globs.jobs * sizeof(HANDLE) );
+#endif
 
 	/* first see if any non-waited-for processes are dead,
 	 * and return if so.
@@ -650,6 +650,7 @@ my_wait( int *status )
 		    continue;
 		}
 #endif /* OPT_BUILTIN_LUA_SUPPORT_EXT */
+#ifdef USE_EXECNT
 		if ( GetExitCodeProcess((HANDLE)cmdtab[i].pid, &exitcode) ) {
 		    if ( exitcode == STILL_ACTIVE )
 			active_handles[num_active++] = (HANDLE)cmdtab[i].pid;
@@ -661,7 +662,14 @@ my_wait( int *status )
 		}
 		else
 		    goto FAILED;
-	    }
+#else
+		if ( waitpid( cmdtab[i].pid, status, WNOHANG ) != 0 ) {
+			return cmdtab[i].pid;
+		} else {
+			++num_active;
+		}
+#endif
+		}
 	}
 
 	/* if a child exists, wait for it to die */
@@ -683,11 +691,16 @@ my_wait( int *status )
 			continue;
 		    }
 #endif
+#ifdef USE_EXECNT
 		    TerminateProcess( (HANDLE)cmdtab[i].pid, (UINT)-1 );
+#else
+			kill( cmdtab[i].pid, SIGKILL );
+#endif
 		}
 	    }
 	}
 
+#ifdef USE_EXECNT
 	waitcode = WAIT_TIMEOUT;
 	if ( num_active > 0 ) {
 	    waitcode = WaitForMultipleObjects( num_active,
@@ -726,13 +739,35 @@ my_wait( int *status )
 		return (int)active_handles[i];
 	    }
 	}
+#else
+	for ( i = 0; i < globs.jobs; i++ ) {
+		if ( cmdtab[i].pid ) {
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+			if ( cmdtab[i].lua ) {
+				if ( !luahelper_taskisrunning( cmdtab[i].pid ) ) {
+					*status = 0;
+					return cmdtab[i].pid;
+				}
+			} else
+#endif /* OPT_BUILTIN_LUA_SUPPORT_EXT */
+			if ( waitpid( cmdtab[i].pid, status, WNOHANG ) != 0 ) {
+				return cmdtab[i].pid;			
+			}
+		}
+	}
+		
+	usleep( 1000 );
+
+	errno = EINTR;
+	return -1;		
+#endif
 
 FAILED:
+#ifdef USE_EXECNT
 	errno = GetLastError();
+#endif
 	return -1;
     
 }
-
-# endif /* USE_MYWAIT */
 
 # endif /* USE_EXECUNIX */
