@@ -11,3 +11,6 @@ Release/*
 bin.*/*
 jbin.*/*
 LuaPlus
+jam.xcodeproj/*.mode1v3
+jam.xcodeproj/*.pbxuser
+jam0
