@@ -335,6 +335,31 @@ if $(LUA_BIN)
 				lua/table_ext.lua
 				lua/xmlize.lua
 				lua/lxp/lom.lua
+		;
+
+		if $(CONFIG) = debug
+		{
+			LUA_SRCS +=
+				lua.debug.exe
+				lua5.1.dll
+				lua51.dll
+				luaplus_1100.debug.dll
+				modules/ex.debug.dll
+				modules/glob.debug.dll
+				modules/lua51-lanes.debug.dll
+				modules/lxp.debug.dll
+				modules/md5.debug.dll
+				modules/uuid.debug.dll
+				modules/vdrive.debug.dll
+			;
+		}
+		else
+		{
+			LUA_SRCS +=
+				lua.exe
+				lua5.1.dll
+				lua51.dll
+				luaplus_1100.dll
 				modules/ex.dll
 				modules/glob.dll
 				modules/lua51-lanes.dll
@@ -342,7 +367,8 @@ if $(LUA_BIN)
 				modules/md5.dll
 				modules/uuid.dll
 				modules/vdrive.dll
-		;
+			;
+		}
 	}
 	else
 	{
