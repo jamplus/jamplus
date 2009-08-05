@@ -172,9 +172,9 @@ function ProcessCommandLine()
 	end
 	
 	nonOpts, opts, errors = getopt.getOpt (arg, options)
+	opts.gen = opts.gen or 'none'
 	if #errors > 0  or
 		(#nonOpts ~= 1  and  #nonOpts ~= 2) or
-		not opts.gen or
 		not Exporters[opts.gen]
 	then
 		Usage()
@@ -2326,9 +2326,67 @@ end
 
 
 
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+local NoneProjectMetaTable = {  __index = VisualStudio200xProjectMetaTable  }
+
+function NoneProjectMetaTable:Write(outputPath, commandLines)
+end
+
+function NoneProject(projectName, options)
+	return setmetatable(
+		{
+			Contents = {},
+			ProjectName = projectName,
+			Options = options,
+		}, { __index = NoneProjectMetaTable }
+	)
+end
+
+
+local NoneWorkspaceMetaTable = {  __index = NoneWorkspaceMetaTable  }
+
+function NoneWorkspaceMetaTable:Write(outputPath)
+end
+
+function NoneWorkspace(solutionName, options)
+	return setmetatable(
+		{
+			Contents = {},
+			Name = solutionName,
+			Options = options,
+		}, { __index = NoneWorkspaceMetaTable }
+	)
+end
+
+
+
+function NoneInitialize()
+end
+
+
+function NoneShutdown()
+end
+
+
+
+
 
 Exporters =
 {
+	none =
+	{
+		Initialize = NoneInitialize,
+		ProjectExporter = NoneProject,
+		WorkspaceExporter = NoneWorkspace,
+		Shutdown = NoneShutdown,
+		Description = 'Do not generate a workspace.',
+		Options = {},
+	},
+
 	vs2003 =
 	{
 		Initialize = VisualStudio200xInitialize,
@@ -2559,11 +2617,11 @@ end
 
 
 function BuildProject()
+	print('Creating workspace...')
+	os.mkdir(destinationRootPath)
+
 	local exporter = Exporters[opts.gen]
 	exporter.Options.compiler = opts.compiler or opts.gen
-
-	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
-	os.mkdir(outPath)
 
 	locateTargetText =
 	{
@@ -2650,12 +2708,6 @@ include $(jamPath)Jambase.jam ;
 ]], exporter.Options, _G)
 	io.writeall(destinationRootPath .. 'Jambase.jam', table.concat(jambaseText))
 
-	-- Read the target information.
-	CreateTargetInfoFiles()
-	ReadTargetInfoFiles()
-
-	print('Writing generated projects...')
-
 	if uname == 'windows' then
 		-- Write jam.bat.
 		local jamScript = os.path.combine(destinationRootPath, 'jam.bat')
@@ -2663,9 +2715,9 @@ include $(jamPath)Jambase.jam ;
 			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
 		-- Write updateworkspace.bat.
-		io.writeall(outPath .. 'updateworkspace.bat',
-				("@%s --workspace --gen=%s --config=%s %s ..\n"):format(
-				os.path.escape(jamScript), opts.gen,
+		io.writeall(os.path.combine(destinationRootPath, 'updateworkspace.bat'),
+				("@%s --workspace --config=%s %s ..\n"):format(
+				os.path.escape(jamScript),
 				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath)))
 	else
@@ -2676,63 +2728,92 @@ include $(jamPath)Jambase.jam ;
 				jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
 		os.chmod(jamScript, 777)
 
-		-- Write UpdateWorkspace.sh.
-		io.writeall(outPath .. 'updateworkspace',
-				("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s ..\n"):format(
+		-- Write updateworkspace.sh.
+		local updateworkspace = os.path.combine(destinationRootPath, 'updateworkspace')
+		io.writeall(updateworkspace,
+				("#!/bin/sh\n%s --workspace --config=%s %s ..\n"):format(
 				os.path.escape(jamScript), opts.gen,
 				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath)))
-		os.chmod(outPath .. 'updateworkspace', 777)
+		os.chmod(updateworkspace, 777)
 	end
 
 	-- Write workspace.config.
 	LuaDumpObject(destinationRootPath .. 'workspace.config', 'Config', Config)
 
-	-- Export everything.
-	exporter.Initialize()
+	if opts.gen ~= 'none' then
+		local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+		os.mkdir(outPath)
 
-	-- Iterate all the workspaces.
-	for _, workspace in pairs(Workspaces) do
-		if workspace.Export == nil  or  workspace.Export == true then
-			local index = 1
+		-- Read the target information.
+		CreateTargetInfoFiles()
+		ReadTargetInfoFiles()
 
-			-- Rid ourselves of duplicates.
-			local usedProjects = {}
-			while index <= #workspace.Projects do
-				local projectName = workspace.Projects[index]
-				if usedProjects[projectName] then
-					table.remove(workspace.Projects, index)
-				else
-					usedProjects[projectName] = true
-					index = index + 1
-				end
-			end
+		print('Writing generated projects...')
 
-			-- Add any of the listed projects' libraries.
-			for index = 1, #workspace.Projects do
-				local projectName = workspace.Projects[index]
-				local project = Projects[projectName]
-				if not project then
-					print('* Project [' .. projectName .. '] is in workspace [' .. workspace.Name .. '] but not defined.')
-					error()
-				end
-				for projectName in ivalues(project.Libraries) do
-					if not usedProjects[projectName] then
-						workspace.Projects[#workspace.Projects + 1] = projectName
+		if uname == 'windows' then
+			-- Write updateworkspace.bat.
+			io.writeall(outPath .. 'updateworkspace.bat',
+					("@%s --workspace --gen=%s --config=%s %s ..\n"):format(
+					os.path.escape(jamScript), opts.gen,
+					os.path.escape(destinationRootPath .. '/workspace.config'),
+					os.path.escape(sourceJamfilePath)))
+		else
+			-- Write updateworkspace.sh.
+			io.writeall(outPath .. 'updateworkspace',
+					("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s ..\n"):format(
+					os.path.escape(jamScript), opts.gen,
+					os.path.escape(destinationRootPath .. '/workspace.config'),
+					os.path.escape(sourceJamfilePath)))
+			os.chmod(outPath .. 'updateworkspace', 777)
+		end
+
+		-- Export everything.
+		exporter.Initialize()
+
+		-- Iterate all the workspaces.
+		for _, workspace in pairs(Workspaces) do
+			if workspace.Export == nil  or  workspace.Export == true then
+				local index = 1
+
+				-- Rid ourselves of duplicates.
+				local usedProjects = {}
+				while index <= #workspace.Projects do
+					local projectName = workspace.Projects[index]
+					if usedProjects[projectName] then
+						table.remove(workspace.Projects, index)
+					else
 						usedProjects[projectName] = true
+						index = index + 1
 					end
 				end
+
+				-- Add any of the listed projects' libraries.
+				for index = 1, #workspace.Projects do
+					local projectName = workspace.Projects[index]
+					local project = Projects[projectName]
+					if not project then
+						print('* Project [' .. projectName .. '] is in workspace [' .. workspace.Name .. '] but not defined.')
+						error()
+					end
+					for projectName in ivalues(project.Libraries) do
+						if not usedProjects[projectName] then
+							workspace.Projects[#workspace.Projects + 1] = projectName
+							usedProjects[projectName] = true
+						end
+					end
+				end
+
+				DumpWorkspace(workspace)
+
+				local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+				local workspaceExporter = exporter.WorkspaceExporter(workspace.Name, exporter.Options)
+				workspaceExporter:Write(outPath)
 			end
-
-			DumpWorkspace(workspace)
-
-			local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
-			local workspaceExporter = exporter.WorkspaceExporter(workspace.Name, exporter.Options)
-			workspaceExporter:Write(outPath)
 		end
-	end
 
-	exporter.Shutdown()
+		exporter.Shutdown()
+	end
 end
 
 
