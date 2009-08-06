@@ -2940,17 +2940,17 @@ function DumpWorkspace(workspace)
 	if uname == 'windows' then
 		updateWorkspaceCommandLines =
 		{
-			outPath .. 'updateworkspace.bat',
-			outPath .. 'updateworkspace.bat',
+			outPath .. 'updateprojects.bat',
+			outPath .. 'updateprojects.bat',
 		}
 	else
 		updateWorkspaceCommandLines =
 		{
-			outPath .. 'updateworkspace',
-			outPath .. 'updateworkspace',
+			outPath .. 'updateprojects',
+			outPath .. 'updateprojects',
 		}
 	end
-	
+
 	projectExporter:Write(outPath, updateWorkspaceCommandLines)
 
 	if not workspace.ProjectGroups then
@@ -3119,20 +3119,20 @@ include $(jamPath)Jambase.jam ;
 		print('Writing generated projects...')
 
 		if uname == 'windows' then
-			-- Write updateworkspace.bat.
-			io.writeall(outPath .. 'updateworkspace.bat',
+			-- Write updateprojects.bat.
+			io.writeall(outPath .. 'updateprojects.bat',
 					("@%s --workspace --gen=%s --config=%s %s ..\n"):format(
 					os.path.escape(jamScript), opts.gen,
 					os.path.escape(destinationRootPath .. '/workspace.config'),
 					os.path.escape(sourceJamfilePath)))
 		else
-			-- Write updateworkspace.sh.
-			io.writeall(outPath .. 'updateworkspace',
+			-- Write updateprojects.sh.
+			io.writeall(outPath .. 'updateprojects',
 					("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s ..\n"):format(
 					os.path.escape(jamScript), opts.gen,
 					os.path.escape(destinationRootPath .. '/workspace.config'),
 					os.path.escape(sourceJamfilePath)))
-			os.chmod(outPath .. 'updateworkspace', 777)
+			os.chmod(outPath .. 'updateprojects', 777)
 		end
 
 		-- Export everything.
