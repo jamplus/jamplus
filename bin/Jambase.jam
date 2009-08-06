@@ -405,14 +405,19 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 				
 				local developerRoot ;
 				local isysroot ;
+				local flags ;
 
 				switch $(PLATFORM) {
 					case macosx :
 						developerRoot = /Developer/SDKs ;
 						SUBPLATFORM ?= 10.5 ;
 						switch $(SUBPLATFORM) {
-							case 10.4u :	isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
-							case 10.5 :		isysroot = $(developerRoot)/MacOSX10.5.sdk ;
+							case 10.4u :
+								isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
+								flags += -mmacosx-version-min=10.4 ;
+							case 10.5 :
+								isysroot = $(developerRoot)/MacOSX10.5.sdk ;
+								flags += -mmacosx-version-min=10.5 ;
 							case * :		Exit "* MacOSX_SDK: Unsupported subplatform $(SUBPLATFORM) for SDK platform $(PLATFORM)." ;
 						}
 						developerRoot = $(isysroot) ;
@@ -440,11 +445,11 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 						}
 				}
 
-				CCFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
-				C++FLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
-				MFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
-				MMFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
-				LINKFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+				CCFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) $(flags) ;
+				C++FLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) $(flags) ;
+				MFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) $(flags) ;
+				MMFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) $(flags) ;
+				LINKFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) $(flags) ;
 				MACOSX_SDK_DEVELOPER_ROOT on * = $(developerRoot) ;
 		}
 
