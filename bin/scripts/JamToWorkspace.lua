@@ -47,10 +47,10 @@ else
 	local f = io.popen('uname')
 	uname = f:read('*a'):lower():gsub('\n', '')
 	f:close()
-	
+
 	if OS == "MACOSX" then
 		Platform = 'macosx'
-		
+
 		Config.Platforms = { 'macosx' } -- , 'iphone', 'iphonesimulator' }
 	end
 end
@@ -180,7 +180,7 @@ function ProcessCommandLine()
 
 		os.exit(-1)
 	end
-	
+
 	nonOpts, opts, errors = getopt.getOpt (arg, options)
 	opts.gen = opts.gen or 'none'
 	if #errors > 0  or
@@ -730,7 +730,7 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 				configInfo.RebuildCommandLine = commandLines[2] or ''
 				configInfo.CleanCommandLine = commandLines[3] or ''
 			end
-			
+
 			configInfo.BuildCommandLine = configInfo.BuildCommandLine:gsub('"', '&quot;')
 			configInfo.RebuildCommandLine = configInfo.RebuildCommandLine:gsub('"', '&quot;')
 			configInfo.CleanCommandLine = configInfo.CleanCommandLine:gsub('"', '&quot;')
@@ -1200,7 +1200,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 			configInfo.RebuildCommandLine = commandLines[2] or ''
 			configInfo.CleanCommandLine = commandLines[3] or ''
 		end
-		
+
 		configInfo.BuildCommandLine = configInfo.BuildCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
 		configInfo.RebuildCommandLine = configInfo.RebuildCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
 		configInfo.CleanCommandLine = configInfo.CleanCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
@@ -1227,7 +1227,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, [[
   </ItemGroup>
 ]])
-	
+
 	table.insert(self.Contents, [[
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 ]])
@@ -1265,7 +1265,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 
 	table.insert(self.Contents, [[
   </ItemGroup>
-]])	
+]])
 
 	-- Write Files.
 	table.insert(self.Contents, [[
@@ -1278,7 +1278,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 
 	table.insert(self.Contents, [[
   </ItemGroup>
-]])	
+]])
 
 	-- Write footer.
 	table.insert(self.Contents, [[
@@ -1911,7 +1911,7 @@ function XcodeHelper_WritePBXGroup(contents, entryUuids, uuid, name, children, f
 	table.insert(contents, '\t\t\tsourceTree = "<group>";\n')
 	table.insert(contents, '\t\t};\n')
 end
-	
+
 
 function XcodeHelper_WritePBXGroups(contents, entryUuids, folder, fullPath)
 	for entry in ivalues(folder) do
@@ -1963,7 +1963,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		info.EntryUuids = { }
 	end
 	self.EntryUuids = info.EntryUuids
-	
+
 	project.SourcesTree.folder = self.ProjectName
 	local sourcesTree = { project.SourcesTree }
 	XcodeHelper_AssignEntryUuids(info.EntryUuids, sourcesTree, '')
@@ -2049,7 +2049,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		if type(info.LegacyTargetConfigUuids) ~= 'table' then
 			info.LegacyTargetConfigUuids = {}
 		end
-		
+
 		if type(info.LegacyTargetConfigUuids[platformName]) ~= 'table' then
 			info.LegacyTargetConfigUuids[platformName] = {}
 			for _, config in ipairs(Config.Configurations) do
@@ -2070,12 +2070,12 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 			table.insert(self.Contents, '\t\t\tname = "' .. platformAndConfigText .. '";\n')
 			table.insert(self.Contents, "\t\t};\n")
 		end
-	
+
 		-- Write project configurations.
 		if type(info.ProjectConfigUuids) ~= 'table' then
 			info.ProjectConfigUuids = {}
 		end
-		
+
 		if type(info.ProjectConfigUuids[platformName]) ~= 'table' then
 			info.ProjectConfigUuids[platformName] = {}
 			for _, config in ipairs(Config.Configurations) do
@@ -2131,11 +2131,11 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, "\t\t};\n")
 
 	table.insert(self.Contents, "/* End XCConfigurationList section */\n\n")
-	
+
 	table.insert(self.Contents, "\t};\n")
 	table.insert(self.Contents, "\trootObject = " .. info.ProjectUuid .. " /* Project object */;\n")
 	table.insert(self.Contents, "}\n")
-	
+
 	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
 
 	WriteFileIfModified(filename, self.Contents)
@@ -2188,30 +2188,30 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 				configInfo.CleanCommandLine = commandLines[3] or ''
 			end
 		end
-	
+
 		if type(info.ExecutableInfo[platformName]) ~= 'table' then
 			info.ExecutableInfo[platformName] = {}
 		end
-	
+
 		for configName in ivalues(Config.Configurations) do
 			local configInfo = ConfigInfo[platformName][configName]
-		
+
 			local executableConfig = info.ExecutableInfo[platformName][configName]
 			if not executableConfig then
 				executableConfig = {}
 				info.ExecutableInfo[platformName][configName] = executableConfig
 			end
-		
+
 			if not executableConfig.Uuid then
 				executableConfig.Uuid = XcodeUuid()
 			end
-		
+
 			if not executableConfig.FileReferenceUuid then
 				executableConfig.FileReferenceUuid = XcodeUuid()
 			end
 		end
 	end
-	
+
 	local extraData = {}
 	extraData.activePlatform = Config.Platforms[1]
 	extraData.activeConfig = Config.Configurations[1]
@@ -2237,10 +2237,10 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		for configName in ivalues(Config.Configurations) do
 			local configInfo = ConfigInfo[platformName][configName]
 			local executableConfig = info.ExecutableInfo[platformName][configName]
-		
+
 			table.insert(self.Contents, '\t\t\t' .. executableConfig.Uuid .. ' /* ' .. configInfo.OutputName .. ' */,\n')
 		end
-	
+
 		table.insert(self.Contents, [[
 		);
 		userBuildSettings = {
@@ -2255,11 +2255,11 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		for configName in ivalues(Config.Configurations) do
 			local configInfo = ConfigInfo[platformName][configName]
 			local executableConfig = info.ExecutableInfo[platformName][configName]
-		
+
 			if not executableConfig.Uuid then
 				executableConfig.Uuid = XcodeUuid()
 			end
-		
+
 			if not executableConfig.FileReferenceUuid then
 				executableConfig.FileReferenceUuid = XcodeUuid()
 			end
@@ -2323,7 +2323,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 			end
 		end
 	end
-		
+
 	table.insert(self.Contents, '}\n')
 
 	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
@@ -2433,7 +2433,7 @@ function XcodeWorkspaceMetaTable:_AppendXcodeproj(folder)
 			self:_AppendXcodeproj(entry)
 		else
 			folder[index] = entry .. '.xcodeproj'
-			folder[#folder + 1] = Projects[entry].SourcesTree 
+			folder[#folder + 1] = Projects[entry].SourcesTree
 		end
 	end
 end
@@ -2485,7 +2485,7 @@ function XcodeWorkspaceMetaTable:Write(outputPath)
 		info.EntryUuids = { }
 	end
 	self.EntryUuids = info.EntryUuids
-	
+
 	self:_AppendXcodeproj(workspace.ProjectTree)
 	workspace.ProjectTree.folder = self.Name .. '.workspace'
 	local workspaceTree = { workspace.ProjectTree }
@@ -2581,7 +2581,7 @@ function XcodeWorkspaceMetaTable:Write(outputPath)
 			table.insert(self.Contents, "\t\t};\n")
 		end
 	end
-	
+
 	-- Write project configurations.
 	for _, config in ipairs(Config.Configurations) do
 		table.insert(self.Contents, "\t\t" .. info.ProjectConfigUuids[config] .. ' /* ' .. config .. ' */ = {\n')
@@ -2610,7 +2610,7 @@ function XcodeWorkspaceMetaTable:Write(outputPath)
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = release;\n")
 	table.insert(self.Contents, "\t\t};\n\n")
-	
+
 	table.insert(self.Contents, "\t\t" .. info.ProjectBuildConfigurationListUuid .. ' /* Build configuration list for PBXProject "' .. self.Name .. '" */ = {\n')
 	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
 	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
@@ -2621,14 +2621,14 @@ function XcodeWorkspaceMetaTable:Write(outputPath)
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = release;\n")
 	table.insert(self.Contents, "\t\t};\n")
-	
+
 	table.insert(self.Contents, "/* End XCConfigurationList section */\n\n")
-	
+
 	table.insert(self.Contents, "\t};\n")
 
 	table.insert(self.Contents, "\trootObject = " .. info.ProjectUuid .. " /* Project object */;\n")
 	table.insert(self.Contents, "}\n")
-	
+
 	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
 	WriteFileIfModified(filename, self.Contents)
 
@@ -2915,7 +2915,7 @@ end
 
 function DumpWorkspace(workspace)
 	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
-	
+
 	-- Write the !BuildWorkspace project
 	local exporter = Exporters[opts.gen]
 	Projects[buildWorkspaceName] = {}
@@ -3050,7 +3050,7 @@ DEPCACHE = standard ;
 		end
 		jambaseText[#jambaseText + 1] = '\n'
 	end
-	
+
 	local hasCOMPILER = false
 	for _, info in ipairs(Config.JamFlags) do
 		if info.Key == 'COMPILER' then
@@ -3058,11 +3058,11 @@ DEPCACHE = standard ;
 			break
 		end
 	end
-	
+
 	if not hasCOMPILER then
 		table.insert(Config.JamFlags, 1, { Key = 'COMPILER', Value = exporter.Options.compiler })
 	end
-	
+
 	for _, info in ipairs(Config.JamFlags) do
 		jambaseText[#jambaseText + 1] = expand(info.Key .. ' = ' .. info.Value .. ' ;\n', exporter.Options, _G)
 	end
