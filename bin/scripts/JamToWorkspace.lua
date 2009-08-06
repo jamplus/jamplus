@@ -3098,7 +3098,7 @@ include $(jamPath)Jambase.jam ;
 		local updateworkspace = os.path.combine(destinationRootPath, 'updateworkspace')
 		io.writeall(updateworkspace,
 				("#!/bin/sh\n%s --workspace --config=%s %s %s\n"):format(
-				os.path.escape(jamScript), opts.gen,
+				os.path.escape(jamScript),
 				os.path.escape(destinationRootPath .. '/workspace.config'),
 				os.path.escape(sourceJamfilePath),
 				os.path.escape(destinationRootPath)))
