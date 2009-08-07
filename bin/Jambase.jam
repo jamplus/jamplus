@@ -1519,12 +1519,18 @@ rule MultiCppCompile TARGET : SOURCES
 	local _src ;
 
 	for _src in $(sources) {
-		on $(_src) if $(EXCLUDED_FROM_BUILD) = true {
+		local excludedFromBuild ;
+		local forceFileType;
+		on $(_src) {
+			excludedFromBuild = $(EXCLUDED_FROM_BUILD) ;
+			forceFileType = $(FORCE_FILE_TYPE) ;
+		}
+		if $(excludedFromBuild) = true {
 			continue ;
 		}
 
 		local ext = $(_src:S) ;
-		local BUILD_EXT = BUILD$(ext) ;
+		local BUILD_EXT = BUILD$(forceFileType:E=$(ext)) ;
 		if ! $($(BUILD_EXT).RULE) {
 			_allobjs += $(_src) ;
 			continue ;
@@ -2673,6 +2679,14 @@ rule ExcludeFromBuild TARGET : SOURCES
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
 	EXCLUDED_FROM_BUILD on $(SOURCES:G=$(grist)) = true ;
+}
+
+
+rule ForceFileType TARGET : SOURCES : FILE_TYPE
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	FORCE_FILE_TYPE on $(SOURCES:G=$(grist)) = $(FILE_TYPE) ;
 }
 
 
