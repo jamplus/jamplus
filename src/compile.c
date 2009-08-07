@@ -87,7 +87,7 @@ extern int actionpass;
 #ifdef OPT_MINUS_EQUALS_EXT
 static const char *set_names[] = { "=", "+=", "?=", "-=" };
 #else
-static const char *set_names[] = { "=", "+=", "?=", "-=" };
+static const char *set_names[] = { "=", "+=", "?=" };
 #endif
 static void debug_compile( int which, const char *s );
 int glob( const char *s, const char *c );
