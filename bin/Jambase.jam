@@ -370,18 +370,20 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 		DEFINES.*.debug on * += _DEBUG DEBUG ;
 		DEFINES.*.release on * += NDEBUG ;
 
+		CCFLAGS.*.* on *		= -x c ;
 		CCFLAGS.*.debug on * 		= -g -O0 ;
 		CCFLAGS.*.release on * 		= -g -O2 ;
 		CCFLAGS.*.releaseltcg on * 	= -g -O3 ;
-		C++FLAGS.*.* on *			?= [ on * Var CCFLAGS.*.* ] ;
+		C++FLAGS.*.* on *		= -x c++ ;
 		C++FLAGS.*.debug on *		?= [ on * Var CCFLAGS.*.debug ] ;
 		C++FLAGS.*.release on *		?= [ on * Var CCFLAGS.*.release ] ;
 		C++FLAGS.*.releaseltcg on *	?= [ on * Var CCFLAGS.*.releaseltcg ] ;
 
+		MFLAGS.*.* on *			= -x objective-c ;
 		MFLAGS.*.debug on * 		= -g -O0 ;
 		MFLAGS.*.release on * 		= -g -O2 ;
 		MFLAGS.*.releaseltcg on * 	= -g -O2 ;
-		MMFLAGS.*.* on *			?= [ on * Var MFLAGS.*.* ] ;
+		MMFLAGS.*.* on *		= -x objective-c++ ;
 		MMFLAGS.*.debug on *		?= [ on * Var MFLAGS.*.debug ] ;
 		MMFLAGS.*.release on *		?= [ on * Var MFLAGS.*.release ] ;
 		MMFLAGS.*.releaseltcg on *	?= [ on * Var MFLAGS.*.releaseltcg ] ;
@@ -1520,7 +1522,7 @@ rule MultiCppCompile TARGET : SOURCES
 
 	for _src in $(sources) {
 		local excludedFromBuild ;
-		local forceFileType;
+		local forceFileType ;
 		on $(_src) {
 			excludedFromBuild = $(EXCLUDED_FROM_BUILD) ;
 			forceFileType = $(FORCE_FILE_TYPE) ;
@@ -1556,8 +1558,12 @@ rule MultiCppCompile TARGET : SOURCES
 	}
 
 	for _src in $(newsrcs) {
+		local forceFileType ;
+		on $(_src) {
+			forceFileType = $(FORCE_FILE_TYPE) ;
+		}
 		local ext = $(_src:S) ;
-		local BUILD_EXT = BUILD$(ext) ;
+		local BUILD_EXT = BUILD$(forceFileType:E=$(ext)) ;
 
 		local sufobj = $($(BUILD_EXT).SUFOBJ) ;
 
