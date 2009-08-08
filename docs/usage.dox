@@ -73,7 +73,7 @@ If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target;</
 
   <tr>
     <td valign=top><code> -j <i>n</I></code>
-    <td> Run up to <i>n</i> shell commands concurrently (UNIX and NT only).  The default is 1.
+    <td> Run up to <i>n</i> shell commands concurrently.  The default is the maximum number of available processors on the machine.  On Windows, the number of processors is determined from the environment variable <tt>NUMBER_OF_PROCESSORS<tt>.  On Mac OS X, the number of processors is obtained from the API <tt>MPProcessors</tt>.
 
   <tr>
     <td valign=top><code> -n</code>
