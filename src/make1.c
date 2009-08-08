@@ -646,7 +646,7 @@ make1c( TARGET *t )
 	    else
 	    {
 		fflush( stdout );
-		execcmd( buffer_ptr(&cmd->commandbuff), make1d, t, cmd->shell, 1 );
+		execcmd( buffer_ptr(&cmd->commandbuff), make1d, t, cmd->shell, (cmd->rule->flags & RULE_SCREENOUTPUT) == 0 );
 	    }
 	}
 	else

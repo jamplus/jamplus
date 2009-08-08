@@ -39,6 +39,7 @@
 %token RESPONSE_t
 %token RETURN_t
 %token RULE_t
+%token SCREENOUTPUT_t
 %token SWITCH_t
 %token TOGETHER_t
 %token UPDATED_t
@@ -351,6 +352,8 @@ eflag	: UPDATED_t
 		{ $$.number = RULE_LUA; }
 	| MAXTARGETS_t ARG
 		{ $$.number = RULE_MAXTARGETS; $$.number3 = atoi( $2.string ); }
+	| SCREENOUTPUT_t
+		{ $$.number = RULE_SCREENOUTPUT; }
 	;
 
 

@@ -38,6 +38,7 @@
 
 
 
+
 /* Tokens.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
@@ -85,16 +86,17 @@
      RESPONSE_t = 296,
      RETURN_t = 297,
      RULE_t = 298,
-     SWITCH_t = 299,
-     TOGETHER_t = 300,
-     UPDATED_t = 301,
-     WHILE_t = 302,
-     _LBRACE_t = 303,
-     _BAR_t = 304,
-     _BARBAR_t = 305,
-     _RBRACE_t = 306,
-     ARG = 307,
-     STRING = 308
+     SCREENOUTPUT_t = 299,
+     SWITCH_t = 300,
+     TOGETHER_t = 301,
+     UPDATED_t = 302,
+     WHILE_t = 303,
+     _LBRACE_t = 304,
+     _BAR_t = 305,
+     _BARBAR_t = 306,
+     _RBRACE_t = 307,
+     ARG = 308,
+     STRING = 309
    };
 #endif
 /* Tokens.  */
@@ -139,26 +141,24 @@
 #define RESPONSE_t 296
 #define RETURN_t 297
 #define RULE_t 298
-#define SWITCH_t 299
-#define TOGETHER_t 300
-#define UPDATED_t 301
-#define WHILE_t 302
-#define _LBRACE_t 303
-#define _BAR_t 304
-#define _BARBAR_t 305
-#define _RBRACE_t 306
-#define ARG 307
-#define STRING 308
+#define SCREENOUTPUT_t 299
+#define SWITCH_t 300
+#define TOGETHER_t 301
+#define UPDATED_t 302
+#define WHILE_t 303
+#define _LBRACE_t 304
+#define _BAR_t 305
+#define _BARBAR_t 306
+#define _RBRACE_t 307
+#define ARG 308
+#define STRING 309
 
 
-
-
-
-#if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef int YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 extern YYSTYPE yylval;

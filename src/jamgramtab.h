@@ -39,6 +39,7 @@
 	{ "response", RESPONSE_t },
 	{ "return", RETURN_t },
 	{ "rule", RULE_t },
+	{ "screenoutput", SCREENOUTPUT_t },
 	{ "switch", SWITCH_t },
 	{ "together", TOGETHER_t },
 	{ "updated", UPDATED_t },

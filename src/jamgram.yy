@@ -302,6 +302,8 @@ eflag	: `updated`
 		{ $$.number = RULE_LUA; }
 	| `maxtargets` ARG
 		{ $$.number = RULE_MAXTARGETS; $$.number3 = atoi( $2.string ); }
+	| `screenoutput`
+		{ $$.number = RULE_SCREENOUTPUT; }
 	;
 
 

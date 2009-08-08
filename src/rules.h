@@ -64,7 +64,7 @@ struct _rule {
 /* commented out so jamgram.y can compile #endif */
 # define	RULE_MAXLINE	0x80	/* cmd specific maxline (last) */
 /* commented out for the parser -- #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT */
-# define	RULE_LUA	0x100	/* this action is lua script */
+# define	RULE_LUA	    0x100	/* this action is lua script */
 /*#endif*/
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 # define	RULE_MAXTARGETS	0x200	/* cmd specific maxtargets */
@@ -72,6 +72,7 @@ struct _rule {
 #ifdef OPT_ACTIONS_DUMP_TEXT_EXT
 # define	RULE_WRITEFILE	0x400	/* this action writes a file and is done */
 #endif
+# define	RULE_SCREENOUTPUT   0x800	/* screen the output from the action */
 
 	int		maxline;
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
