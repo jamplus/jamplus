@@ -67,7 +67,7 @@ Jam has a interpreted, procedural language with a few select features to effect 
 
 \b Jam treats its input files as whitespace-separated tokens, with two exceptions: double quotes (") can enclose whitespace to embed it into a token, and everything between the matching curly braces ({}) in the definition of a updating actions is treated as a single string. A backslash (\) can escape a double quote, or any single whitespace character. Both a newline and a tab must be represented physically within quotes. There is no backslash escape for them.
 
-\b Jam requires whitespace (blanks, tabs, or newlines) to surround all tokens, <b>including the colon (:) and semicolon (;) tokens</b>.
+\b Jam requires whitespace (blanks, tabs, or newlines) to surround all tokens, <b>including the colon (:) and semicolon (;) tokens</b>.  If a colon or semicolon is found and is not surrounded by whitespace, an error is raised unless the colon or semicolon and surrounding content is in double quotes.
 
 \b Jam keywords (as mentioned in this document) are reserved and generally must be quoted with double quotes (") to be used as arbitrary tokens, such as variable or target names.
 

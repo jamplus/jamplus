@@ -1,12 +1,12 @@
-/*! \page jamtoworkspace Workspace Generator
+/*! \page jamtoworkspace Jam Workspace Generator
 
-\section jamtoworkspace_title JamToWorkspace
+\section jamtoworkspace_title jam --workspace
 
 \subsection jamtoworkspace_overview Overview
 
-JamToWorkspace reads a project's Jamfiles and exports an IDE workspace.  The workspace may then be loaded in the appropriate IDE and represents a read-only view of the contents of the Jamfiles.  Updates to the Jamfiles do not appear automatically in the IDE workspace, although correct Jam builds will continue to function.
+JamPlus has a built-in workspace generator that reads a project's Jamfiles and exports an IDE workspace.  The workspace may then be loaded in the appropriate IDE and represents a read-only view of the contents of the Jamfiles.  Updates to the Jamfiles do not appear automatically in the IDE workspace, although correct Jam builds will continue to function.
 
-JamToWorkspace generates a completely out-of-source build structure.  This means that all intermediate files, output files, IDE project files, and other miscellaneous Jam related files exist in a directory external to the source code itself.  Since the entire build tree is generated, merely removing the directory JamToWorkspace populated will destroy all evidence of the build.
+JamPlus generates a completely out-of-source build structure.  This means that all intermediate files, output files, IDE project files, and other miscellaneous Jam related files exist in a directory external to the source code itself.  Since the entire build tree is generated, merely removing the directory JamPlus populated will destroy all evidence of the build.
 
 Out of source build trees also contain special instructions to make the build run faster.  A dependency cache is set up.  The dependency cache is used to track 'include' dependencies, but it is also used to store MD5 command lines and MD5 contents information.
 
@@ -15,10 +15,16 @@ Out of source build trees also contain special instructions to make the build ru
 
 \subsection jamtoworkspace_usage Usage
 
-\b JamToWorkspace exists as a Lua script in bin/scripts/.  Running \b JamToWorkspace without any command line options will list the help.
+Generation of a new IDE workspace is performed by running the command line:
 
 <pre>
-JamToWorkspace
+    jam --workspace ...
+</pre>
+
+Running <b>jam --workspace</b> without any command line options will list the help.
+
+<pre>
+jam --workspace
     [ -gen=<i>GENERATOR</i> ]
     [ -compiler=<i>COMPILER</i> ]
     [ -config=<i>CONFIG</i> ]
@@ -27,7 +33,7 @@ JamToWorkspace
     [ <i>path-to-destination</i> ]
 </pre>
 
-\b JamToWorkspace may be invoked with the following options:
+<b>jam --workspace</b> may be invoked with the following options:
 
 <table width=85% align=center border=1 cellpadding=2>
   <tr>
@@ -35,9 +41,13 @@ JamToWorkspace
 	<td> Sets an IDE workspace and project generator.  <i>GENERATOR</i> may be one of the following:
 	  <ul>
 	    <li> \c codeblocks - Generates CodeBlocks workspaces and projects.
+	    <li> \c none (default) - Do not generate a workspace.
+		<li> \c vc6 - Generates Visual C++ 6.0 workspaces and projects.
 		<li> \c vs2003 - Generates Visual Studio 2003 solutions and projects.
 		<li> \c vs2005 - Generates Visual Studio 2005 solutions and projects.
 		<li> \c vs2008 - Generates Visual Studio 2008 solutions and projects.
+		<li> \c vs2010 - Generates Visual Studio 2010 solutions and projects.
+		<li> \c xcode - Generates Xcode workspaces and projects.
 	  </ul>
 
   <tr>
@@ -46,6 +56,7 @@ JamToWorkspace
 
 	  <i>COMPILER</i> may be one of the following:
 	  <ul>
+	    <li> \c vs2010 - Visual Studio 2008.
 	    <li> \c vs2008 - Visual Studio 2008.
 	    <li> \c vs2005 - Visual Studio 2005.
 	    <li> \c vs2003 - Visual Studio 2003.
@@ -56,7 +67,7 @@ JamToWorkspace
 
   <tr>
     <td valign=top width=20%><code> -config=<i>CONFIG</i> </code>
-	<td> Provides various configuration options to JamToWorkspace.  <i>CONFIG</i> is the name of the configuration file.
+	<td> Provides various configuration options to Jam's workspace generator.  <i>CONFIG</i> is the name of the configuration file.
 
   <tr>
     <td valign=top width=20%><code> -jamflags=<i>KEY=VALUE</i> </code>
@@ -70,14 +81,14 @@ JamToWorkspace
 
   <tr>
     <td valign=top width=20%><code> source-jamfile </code>
-	<td> The path to the Jamfile to start building the workspace from.  If only the directory is specified, then JamToWorkspace attempts to load a file named <tt>Jamfile.jam</tt> from the given directory.  If <i>source-jamfile</i> is a directory with filename, such as <tt>../Game/Pong.jam</tt>, then the specified Jamfile is loaded.
+	<td> The path to the Jamfile to start building the workspace from.  If only the directory is specified, then Jam attempts to load a file named <tt>Jamfile.jam</tt> from the given directory.  If <i>source-jamfile</i> is a directory with filename, such as <tt>../Game/Pong.jam</tt>, then the specified Jamfile is loaded.
 
   <tr>
     <td valign=top width=20%><code> path-to-destination </code>
 	<td> (optional) If <i>path-to-destination</i> is specified, then the build tree will be generated into <i>path-to-destination</i>.  If <i>path-to-destination</i> is not specified, the build tree is generated into the current working directory.
 </table>
 
-Minimally, JamToWorkspace requires the <tt>-gen</tt> parameter and <tt>source-jamfile</tt>.
+Minimally, Jam requires the <tt>-gen</tt> parameter and <tt>source-jamfile</tt>.
 
 Assuming a source tree of:
 
@@ -99,6 +110,8 @@ JamToWorkspace -gen=vs2008 Jamfile.jam build
 \endcode
 
 From here on out, all Jam executions should be run from within the generated build/ directory.
+
+Internally, JamPlus calls through to a Lua script by the name of <tt>bin/scripts/JamToWorkspace.lua</tt>.  
 
 
 

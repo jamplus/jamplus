@@ -4,6 +4,9 @@
 
 JamPlus comes with some simple makefiles to bootstrap the initial build of the JamPlus executable.  A good portion of the makefile contents in <tt>Makefile.Common</tt> are shared between the Visual C++ NMake-based build and the GCC-based make build.
 
+Binaries are built into a platform specific directory under the <tt>bin/</tt> directory, such as <tt>bin/ntx86/</tt> or <tt>bin/macosx/</tt>.  All associated scripts and Lua binaries are also within this platform directory.  In doing this, multiple JamPlus platform binaries can be deployed within the same directory tree, making it easy to check into your source control system.	
+
+In order to build a fully working JamPlus directory, certain LuaPlus binaries are required.  By setting the environment variable <tt>LUA_BIN</tt> to the directory containing the LuaPlus binaries, the build processes described below will automatically populate the JamPlus bin/ directory with the LuaPlus binaries.
 
 
 
@@ -18,9 +21,9 @@ In order to build JamPlus using the Visual C++ compiler, do the following:
     jmake
 \endcode
 
-When finished, the Jam executable will have been built as <tt>bin/jam.exe</tt>
+When finished, the Jam executable will have been built as <tt>bin/ntx86/jam.exe</tt>
 
-Alternatively, Visual Studio 2005 and 2008 solution and project files are maintained.  The solution names are <tt>src/jam.VS2005.sln</tt> and <tt>src/jam.VS2008.sln</tt>.  Note: When using a Visual Studio 2005/2008 Release build, the Jam executable is nowhere near as fast as the command-line generated Link Time Code Generated version.
+Alternatively, a Visual Studio 2008 solution and project file is maintained.  Open <tt>src/jam.VS2008.sln</tt> to build within the IDE.  Note: When using the standard Visual Studio 2008 Release build, the Jam executable is nowhere near as fast as the command-line generated Link Time Code Generated version.
 
 To clean the Visual C++ build, run:
 
@@ -42,7 +45,7 @@ In order to build JamPlus on Mac OS X, do the following:
     make macosx
 \endcode
 
-When finished, the Jam executable will have been built as <tt>bin/jam</tt>.
+When finished, the Jam executable will have been built as <tt>bin/macosxx86/jam</tt>.
 
-
+Alternatively, an Xcode project for debugging Jam is maintained.  Open <tt>src/jam.xcodeproj</tt> to build within Xcode.  Please note that the Release build does not currently work.  Build a Release build using the makefile instructions above.
 */

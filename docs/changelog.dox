@@ -6,11 +6,22 @@
 
 - Mac OS X build is largely functional.
 - Xcode projects can be generated from Jamfile sources.
+- Visual C++ 6 support works much better.
+- Visual Studio 2010 support has been added.  It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.
 
 
 
 <h3>Bootstrapping/Building:</h3>
 
+- The Jam binaries have been moved from the jamplus/bin/ directory to jamplus/bin/$(OS)$(OSPLAT).  On Windows, this ends up being jamplus/bin/ntx86/.  On Mac OS X, the directory is jamplus/bin/macosxx86/.  All associated scripts have been moved to this directory, as has the Lua directory structure.  This new structure will allow for multiple platform binaries to exist side by side.  See \ref building_overview "Building Overview" for more information.
+- Added a bootstrapping .xcodeproj to debug Mac OS X Jam issues in.  This project is currently only set up for Debug mode.  The Release mode does not work.
+- If the environment variable LUA_BIN is set, the appropriate Lua files are copied to the appropriate platform bin directory.  See \ref building_overview "Building Overview" for more information.
+
+Minor stuff:
+
+- Removed the Visual Studio 2005 solution and project files, src/jam.VS2005.sln and src/jam.VS2005.vcproj.
+- Properly generate the Jambase-j.c from Jambase by building mkjambase during the bootstrapping run.
+- Build intermediate files to an intermediate folder instead of littering the extra files in the src/ directory.
 
 
 
@@ -23,18 +34,26 @@
 
 <h3>Jam Executable:</h3>
 
-- Mac OS X build: Default the number of Jam jobs to the number of processors on the machine, just like the Windows build.
-- In multipass builds where the NoCare flag has been applied to a target that is missing, do not attempt to move the missing file's build to the next pass.  Properly process it in the current pass.
-- Add a PRIORITY parameter to QueueJamFile.  Queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.
 - Multipass support past 2 passes was broken.  It is fixed now.
-- If an action is empty, don't put any of the whitespace through.  It dies on Unix shells.
-- Added support for misplaced semicolon and colon detection in the parser, #ifdef'ed as OPT_FIND_BAD_SEMICOLON_USAGE_EXT.  If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace.  You may need to quote strings that didn't need to be quoted before.
-- Mac OS X has a case insensitive file system.  Turned on the DOWNSHIFT_PATHS #define to compensate for that.
-- Add a new built-in command, Shell, used for executing shell commands and retrieving their output.
-- Beginnings of bringing Lua support online for Mac OS X.
-- Minor fix to OPT_BUILTIN_NEEDS_EXT for certain conditions when Needs is used with MightNotUpdate.
-- The beginnings of support for new Jam command line options to build the workspace, convert folders to a Jamfile, and convert the contents of a .vcproj to a Jamfile.  These command line options currently mirror the bin/scripts/ equivalent Lua scripts.  I expect to rename these for greater ease of use.
+- Add a PRIORITY parameter to \ref rule_QueueJamFile "QueueJamFile".  Queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.
+- In multipass builds where the \ref rule_NoCare "NoCare" flag has been applied to a target that is missing, do not attempt to move the missing file's build to the next pass.  Properly process it in the current pass.
+- Added support for misplaced semicolon and colon detection in the parser, #ifdef'ed as \c OPT_FIND_BAD_SEMICOLON_USAGE_EXT.  If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace.  You may need to quote strings that didn't need to be quoted before.
+- Mac OS X has a case preserving, case insensitive file system.  Turned on the DOWNSHIFT_PATHS #define to compensate for that.
+- Add a new built-in rule, \ref rule_Shell "Shell", used for executing shell commands and retrieving their output.
+- Support for new Jam command line options to build the workspace, convert folders to a Jamfile, and convert the contents of a .vcproj to a Jamfile.  These command line options currently mirror the bin/scripts/ equivalent Lua scripts.
 - Fix the Mac OS X directory creation under certain instances in the function file_mkdir().
+      * Alter the OPT_UPDATED_CHILD_FIX from http://maillist.perforce.com/pipermail/jamming/2006-May/002676.html to handle the case where an child target's includes target has a fate of anything greater than T_FATE_STABLE.  This specifically guards against the case where T_FATE_MISSING is applied to one of the children, and it doesn't build in the current Jam execution.
+      * Turn off OPT_PERCENT_DONE_EXT.  It provided faulty percentages due to all of the patches that JamPlus employs.
+      * Add a new rule: ScanContents.  When ScanContents is specified for a source target (even a generated one), if the timestamp differs, the contents of the source target are compared against the last run.  If they differ, the build proceeds as normal.  If they are the same, no further building is necessary. * Tests: Add tests/simple_scancontents.
+      * Registry scanning bug fix from Philipp Teschner.  Previous to the fix, w32_getreg only worked with HKEY_LOCAL_MACHINE.  If you used anything else, it would infinitely loop.
+      * Undo the OPT_CHILD_UPDATED patch in make.c.  It does not work properly with certain combinations of assets, and in truth, I'm not sure what problem it is really trying to solve or even if another patch solves it already.
+      * Add OPT_KEY_EQUALS_VALUE_DEFINES_EXT.  This extension simplifies the -s command line flag (which is still available) by parsing KEY=VALUE pairs off the command line.  That is, 'jam -sCONFIG=debug all' and 'jam CONFIG=debug all' mean the same thing.
+      * Fixed a bug in the glob expansion directory matching: **/ now works.
+      * Enable Lua actions on Mac OS X.  This requires polling for process exits, as on Windows, instead of just calling the C runtime wait() function.
+      * Allow for the failure of an actions lua block at runtime.
+      * Add OPT_SET_JAMCOMMANDLINETARGETS_EXT.  This is a way of accessing the targets specified on the command line from within Jam.  Usually, you would do this to filter sections of the Jam script to save build time.
+- If an action is empty, don't put any of the whitespace through.  It dies on Unix shells.
+- A minor fix to \c OPT_BUILTIN_NEEDS_EXT was made for certain conditions when \ref rule_Needs "Needs" is used with \ref rule_MightNotUpdate "MightNotUpdate".
 
 
 
@@ -55,6 +74,20 @@
     * Jambase: Lump rule now accepts all CC and C++ extensions.
     * Jambase: Add new NoPrecompiledHeader rule to turn off precompiled headers for the specified files.
     * Jambase: ObjectIncludeDirectories now roots relative paths against $(SUBDIR).
+      * Jambase: The ApplicationFromObjects rule was not properly using the LinkDebug action for Visual Studio when building the debug configuration.  SharedLibraryFromObjects was using it fine.  Thanks to Tim S for finding this bug.
+      * Jambase: Add support to ForceInclude to root a relative include against the current SubDir.
+      * Jambase: Add precompiled header support for GCC.
+      * Jambase: Fix Objective C/C++ builds.
+      * Jambase: Allow specification of a precompiled header whose name and/or path is different than the containing .cpp/.c file.  The original rule format continues to work. * Tests: Updated tests/source_and_jamfiles_separate to illustrate the new precompiled header behavior.
+      * Jambase: GCC .pch name fix.
+      * Jambase: In the MakeLocate rule, root the specified directory against $(SUBDIR).
+      * Jambase: Fix the rooting against an empty $(SUBDIR) in the ForceInclude, IncludeDirectories, LinkDirectories, and ObjectIncludeDirectories rules.
+      * Jambase: Root the ObjectForceIncludes relative paths against $(SUBDIR).
+      * Jambase: The releaseltcg configuration was not set up for GCC.  It still isn't a link time code generation, but optimizations are now applied, whereas they weren't before.
+      * Jambase: On platforms supporting a recursive mkdir, only run the mkdir action once.  Do not internally handle it recursively.
+      * Jambase: Visual Studio 2010 support provided by Philipp Teschner. * Bootstrapping: Visual Studio 2010 support.
+      * Jambase: Made the SearchSource rule take an optional second parameter, the SEARCH_PATH.  If the parameter is not specified, then $(SEARCH_SOURCE) is used.
+      * Jambase and MFC/Midl modules: Visual C++ 6.0 compilation fixes.
 
 
 
@@ -71,6 +104,11 @@
 - CSharp Jam module: Fix discovery of gmcs.  Also allow CSC to be set externally and use that as an override when finding the C# compiler.
 - DotNet module: Add windows/Microsoft.NET/Framework/v2.0.50727 to the include directories.
 - wxWidgets module: Add a call to RcIncludeDirectories to allow access to the proper wxWidgets resources.
+      * CopyFile module: The CopyFile rule will use the ActiveProject if the PARENT parameter is not specified.
+      * CopyFile module: The source and destination filenames are now quoted on the copy command line.
+      * CopyDirectory module: The CopyDirectory rule now accepts an additional argument, RECURSIVE.  If RECURSIVE is specified, then a recursive directory copy is performed.  If it is not specified, then CopyDirectory merely copies the file contents of the SOURCE_PATH, and directories are ignored.
+      * Added hardsoftlink module with rules for establishing a HardLink and a SoftLink.
+      * Jambase and MFC/Midl modules: Visual C++ 6.0 compilation fixes.
 
 
 
@@ -85,6 +123,20 @@
 - JamToWorkspace now runs on Mac OS X.  Visual Studio projects can be output on Mac OS X without issue.
 - Additional command line option --jamflags added.  Any KEY=VALUE pairs specified on the command line are automatically added to the top of the generated Jambase.jam.
 - Xcode support.
+      * JamToWorkspace: Add releaseltcg configuration.
+      JamToWorkspace: Properly quote filenames to work on Windows 7 within the .vcproj Build, Rebuild, and Clean command lines.
+      * JamToWorkspace: Fix the quoting in the .vcproj generation.
+      * JamToWorkspace: Fix the Visual Studio .sln to be output to the new location.  Also output other files there, too.
+      * JamToWorkspace: ProjectGroups and SourceGroups can be specified anywhere in the file.
+      * JamToWorkspace: Remove possible grists from sources lists when generating the workspace.
+      * JamToWorkspace: Fix a crash bug when a project's information isn't available.
+      * JamToWorkspace: For the Xcode workspace, write out all dependent files into the .xcodeproj.  Sort them.
+      * JamToWorkspace: Add Visual Studio 2010 support.  Unfortunately, as of the current VS beta, it is impossible to debug a Makefile pro
+      * JamToWorkspace: Status update text changed to be more clear as to what is happening.
+      * JamToWorkspace: Multiplatform .vcproj support.
+      * JamToWorkspace: Allow --gen=none to build an out of source build directory and not populate it with projects.  Make --gen=none be the default.
+      * JamToWorkspace: Add Visual C++ 6 project generation support.
+      * JamToWorkspace: Rename the *.projects/ level updateworkspace to updateprojects.
 
 
 
@@ -106,12 +158,15 @@
 - Tests: Add tests/shell.
 
 
-
-
-
-
-<h3>VCProjToJamfile:</h3>
-
+      * Tests: Update source_and_jamfiles_separate with an additional file test case.
+      * Tests: Updated tests/includes/ to test ObjectIncludeDirectories support.
+      * Tests: Move tests/generatedheader/simple_scancontents/ to tests/scancontents/. * Tests: Add support for UseCommandLine on the generated header.
+      * Tests: Add tests/usecommandline from Arseny Kapoulkine.
+      * Samples: Add samples/macosx/glut demonstration.
+      * Rename tests/platform to tests/multiplatform.
+      * Tests: Fix expandtests.jam.  It was never updated with the new colon quoting rules.
+      * tests/lua: Fixes to the quoting and the modules used.
+* Add tests/command_line_targets/.
 
 
 

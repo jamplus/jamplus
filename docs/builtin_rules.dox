@@ -346,7 +346,7 @@ If the given generated \c TARGETS are already built and stored within the file c
 \section rule_QueueJamFile rule QueueJamFile JAMFILE_LIST [ : PRIORITY ] ;
 \addindex rule_QueueJamFile
 
-When \c QueueJamFile is called, a second pass on the Jam dependency graph is initiated after the \ref operation_updating.  Further documentation on this can be found on the \ref multiple_passes page.
+When \c QueueJamFile is called, another pass on the Jam dependency graph is initiated after the \ref operation_updating.  Further documentation on this can be found on the \ref multiple_passes page.
 
 Queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.  When a priority isn't given, the default priority is 0.  A queued Jamfile with priority of 100 will be parsed before a Jamfile with a priority of 0.  Likewise, a queued Jamfile with a priority of -50 will be parsed after a Jamfile with a priority of 0.
 
