@@ -311,8 +311,12 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 	for _src in $(newsrcs) {
 		local forceFileType ;
+		local _nopch ;
+		local _pch ;
 		on $(_src) {
 			forceFileType = $(FORCE_FILE_TYPE) ;
+			_nopch = $(NOPCH) ;
+			_pch = $(PCH) ;
 		}
 		local ext = $(_src:S) ;
 		local BUILD_EXT = BUILD$(forceFileType:E=$(ext)) ;
@@ -357,12 +361,6 @@ rule C.MultiCppCompile TARGET : SOURCES
 		_flags += $($($(BUILD_EXT).SUBDIRFLAGS)) ;
 
 		# if the source should create pch
-		local _nopch ;
-		local _pch ;
-		on $(_src) {
-			_nopch = $(NOPCH) ;
-			_pch = $(PCH) ;
-		}
 		if $(_pch) {
 			_flags += [ C.FIncludes $(LOCATE_SOURCE) ] ;
 		}
@@ -400,10 +398,14 @@ rule C.MultiCppCompile TARGET : SOURCES
 		local _pch1 ;
 		local sufobj ;
 		local addToLink ;
+		local flags ;
+		local compileRule ;
 		on $(_sources[1]) {
 			_pch1 = $(PCH) ;
+			compileRule = $(MFLAGS[1]) ;
 			sufobj = $(MFLAGS[2]) $(MFLAGS[3]) ;
 			addToLink = $(MFLAGS[4]) ;
+			flags = $(MFLAGS[5-]) ;
 		}
 
 		# start with empty lists of objects for this batch
@@ -436,13 +438,11 @@ rule C.MultiCppCompile TARGET : SOURCES
 		# mark all objects (and pch) for cleaning
 		Clean clean:$(TARGET) : $(objects) ;
 
-		local flags ;
-		on $(_sources[1]) flags = $(MFLAGS) ;
-		MFLAGS on $(objects) = $(flags[5-]) ;
+		MFLAGS on $(objects) = $(flags) ;
 
 		C._MultiCppCompile_PostCompile ;
 
-		$(flags[1]) $(objects) : $(_sources) ;
+		$(compileRule) $(objects) : $(_sources) ;
 	}
 
 	# return all produced objects
