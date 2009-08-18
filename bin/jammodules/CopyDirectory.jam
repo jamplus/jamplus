@@ -15,7 +15,8 @@ rule _CopyDirectoryHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRIN
 		local dirs = @($(SOURCE_PATH)/*/:W) ;
 		local dir ;
 		for dir in $(dirs) {
-			_CopyDirectoryHelper $(PARENT) : $(dir:R=$(DESTINATION_PATH)) : $(dir) : $(SEARCH_STRING) : $(RECURSIVE) ;
+			local parent = $(dir:P) ;
+			_CopyDirectoryHelper $(PARENT) : $(parent:BR=$(DESTINATION_PATH)) : $(dir) : $(SEARCH_STRING) : $(RECURSIVE) ;
 		}
 	}
 }
