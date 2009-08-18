@@ -176,7 +176,7 @@ local options = [ Join $(ALL_OPTIONS) ] ;
 LOCAL_DEFINES += JAM_OPTIONS=$(options) ;
 
 if $(OS) = NT {
-    Defines * : NT ;
+    C.Defines * : NT ;
 
 	# Reserve 5 megs for the stack.  The default of 1 meg is too
 	# small for the pathalogically recursive make1c()<->make1d()
