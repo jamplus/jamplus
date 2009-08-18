@@ -1,0 +1,115 @@
+UseModule c ;
+UseModule c-compilers/c-visualc-autodetect ;
+
+rule FindMinGW
+{
+	local PATHS =
+		c:/mingw
+		d:/mingw
+	;
+
+	local gcc = [ Glob $(PATHS)/bin : gcc.exe ] ;
+	if ! $(gcc)
+	{
+		return ;
+	}
+
+	MINGW_ROOT = [ Match (.+)/bin : $(gcc[1]) ] ;
+}
+
+
+rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
+{
+	THE_COMPILER ?= $(COMPILER) ;
+	THE_PLATFORM ?= $(PLATFORM) ;
+	THE_CONFIG ?= $(CONFIG) ;
+
+	if $(NT)
+	{
+		MSVCNT ?= $(MSVCDIR) ;
+		MSVCNT ?= $(MSVCDir) ;
+
+		# Do we need to attempt to detect the compiler?
+		if ! $(THE_COMPILER)
+		{
+			if ! $(MSVCNT)
+			{
+				MSVCNT_PATH = ;
+				for ver in $(VISUAL_STUDIO_FORCE_VERSION) 10.0 9.0 8.0 7.1 7.0 6.0
+				{
+					COMPILER = [ FindVisualStudio $(ver) ] ;
+					if $(COMPILER)
+					{
+						break ;
+					}
+				}
+				if ! $(COMPILER)
+				{
+					Exit ** Unable to find the specified compiler. ;
+				}
+			}
+		}
+		else
+		{
+			COMPILER = $(THE_COMPILER) ;
+		}
+
+		if $(COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010
+		{
+			MSVCNT = ;
+			switch $(COMPILER)
+			{
+				case vc6 :
+					COMPILER = [ FindVisualStudio 6.0 ] ;
+				case vs2003 :
+					COMPILER = [ FindVisualStudio 7.1 ] ;
+					COMPILER ?= [ FindVisualStudio 7.0 ] ;
+				case vs2005 :
+					COMPILER = [ FindVisualStudio 8.0 ] ;
+				case vs2008 :
+					COMPILER = [ FindVisualStudio 9.0 ] ;
+				case vs2010 :
+					COMPILER = [ FindVisualStudio 10.0 ] ;
+			}
+			
+			UseModule c-compilers/c-visualc ;
+			if $(PLATFORM) != *  &&  $(CONFIG) != * {
+				UseModule c-compilers/c-visualc-$(PLATFORM) ;
+				UseModule c-compilers/c-visualc-$(PLATFORM)-$(CONFIG) ;
+			}
+		}
+		else if $(COMPILER) = mingw
+		{
+			FindMinGW ;
+			UseModule c-compilers/c-mingw ;
+			if $(PLATFORM) != *  &&  $(CONFIG) != * {
+				UseModule c-compilers/c-mingw-$(PLATFORM) ;
+				UseModule c-compilers/c-mingw-$(PLATFORM)-$(CONFIG) ;
+			}
+		}
+		else
+		{
+			Exit No supported build platform found on this computer. ;
+		}
+	}
+	else if $(UNIX)
+	{
+		UseModule c-compilers/c-gcc ;
+		if $(PLATFORM) != *  &&  $(CONFIG) != * {
+			UseModule c-compilers/c-gcc-$(PLATFORM) ;
+			UseModule c-compilers/c-gcc-$(PLATFORM)-$(CONFIG) ;
+		}
+	}
+}
+
+ToolChain $(COMPILER) : $(PLATFORM) : $(CONFIG) ;
+
+########################################################################
+########################################################################
+
+rule ActiveProject PROJECT
+{
+	ACTIVE_PROJECT = $(PROJECT) ;
+}
+
+

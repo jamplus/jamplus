@@ -8,13 +8,13 @@ local all_clean = all clean ;
 
 if $(ACTIVE_TARGETS.$(all_clean))  ||  $(ACTIVE_TARGETS.appA) {
 	Echo Building appA... ;
-	Application appA : appA.cpp ;
+	C.Application appA : appA.cpp ;
 }
 
 
 if $(ACTIVE_TARGETS.$(all_clean))  ||  $(ACTIVE_TARGETS.appB) {
 	Echo Building appB... ;
-	Application appB : appB.cpp ;
+	C.Application appB : appB.cpp ;
 }
 
 

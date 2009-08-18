@@ -1,0 +1,4 @@
+CCFLAGS.macosx.release on * 		?= -g -O2 ;
+C++FLAGS.macosx.release on * 	?= -g -O2 ;
+MFLAGS.macosx.release on * 		?= -g -O2 ;
+MMFLAGS.macosx.release on * 		?= -g -O2 ;

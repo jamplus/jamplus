@@ -3,7 +3,7 @@ DEPCACHE = standard ;
 
 SubDir TOP ;
 
-Application test : main.c test.c ;
+C.Application test : main.c test.c ;
 
 CONTENTS on <test>generated.h = "extern void Print(const char*);
 " ;

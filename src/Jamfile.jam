@@ -5,7 +5,7 @@
 #
 # Put executables in platform-specific  subdirectory.
 
-CRuntimeType jam libjam : static ;
+C.RuntimeType jam libjam : static ;
 
 if $(VMS) 		{ LOCATE_TARGET ?= [.binvms] ; }
 else if $(MAC) 	{ LOCATE_TARGET ?= ":bin.mac" ; }
@@ -182,9 +182,9 @@ if $(OS) = NT {
 	# small for the pathalogically recursive make1c()<->make1d()
 	# relationship when coupled with targets with large numbers of
 	# actions (as can happen with piecemeal Clean targets).
-	LinkFlags jam : /STACK:5242880 ;
+	C.LinkFlags jam : /STACK:5242880 ;
 
-	LinkPrebuiltLibraries jam : advapi32 ;
+	C.LinkPrebuiltLibraries jam : advapi32 ;
 }
 else if $(UNIX)
 {
@@ -195,7 +195,7 @@ else if $(UNIX)
 #	}
 #	CCFLAGS += -Wall ;
 
-	LinkPrebuiltLibraries jam : /usr/lib/libstdc++-static ;
+	C.LinkPrebuiltLibraries jam : /usr/lib/libstdc++-static ;
 }
 else
 {
@@ -203,22 +203,22 @@ else
 }
 if $(OS) = MACOSX
 {
-	LinkFlags jam : -framework CoreFoundation -framework CoreServices ;
+	C.LinkFlags jam : -framework CoreFoundation -framework CoreServices ;
 }
 if $(CONFIG) = debug {
-    Defines * : DEBUG_J ;
+    C.Defines * : DEBUG_J ;
 }
-Defines * : $(LOCAL_DEFINES) ;
-Defines * : YYSTACKSIZE=5000 ;
+C.Defines * : $(LOCAL_DEFINES) ;
+C.Defines * : YYSTACKSIZE=5000 ;
 
 if $(UNIX) && $(PURE) {
     LOCATE_TARGET = $(LOCATE_TARGET)/pure ;
-    Defines * : PURE ;
+    C.Defines * : PURE ;
     LINK = /usr/local/bin/purify cc ;
 }
 if $(NT) && $(PURE) {
     LOCATE_TARGET = $(LOCATE_TARGET)-pure ;
-    Defines * : PURE ;
+    C.Defines * : PURE ;
 }
 #
 ### LOCAL CHANGE
@@ -279,9 +279,9 @@ actions GenFile1
 	"$(>[1])" "$(<)" "$(>[2-])"
 }
 
-OutputPostfix * : : release releaseltcg ;
+C.OutputPostfix * : : release releaseltcg ;
 
-Application mkjambase : mkjambase.c ;
+C.Application mkjambase : mkjambase.c ;
 
 if $(VMS)
 {
@@ -296,11 +296,11 @@ if $(VMS)
 
 local BIN_PATH = ../bin/$(OSFULL[1]:L) ;
 GenFile jam : jambase-j.c : mkjambase Jambase-j ;
-LinkLibraries jam : libjam ;
-OutputPath jam : $(BIN_PATH) ;
-Application jam : jam.c jambase-j.c ;
+C.LinkLibraries jam : libjam ;
+C.OutputPath jam : $(BIN_PATH) ;
+C.Application jam : jam.c jambase-j.c ;
 
-Library libjam :
+C.Library libjam :
 		    buffer.c builtins.c command.c compile.c $(code) expand.c
 		    glob.c hash.c headers.c lists.c luagsub.c luasupport.c make.c make1.c
 		    newstr.c option.c parse.c regexp.c rules.c scan.c

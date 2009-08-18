@@ -6,6 +6,6 @@ function md5file(filename)
 	return md5sum:digest(true)
 end
 
-if arg then
+if arg and arg[1] then
 	md5file(arg[1])
 end

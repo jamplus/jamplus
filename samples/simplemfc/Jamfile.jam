@@ -23,13 +23,13 @@ ActiveProject SimpleMFC ;
 
 UseMFC : link shared ;
 
-Lump : SRCS : SimpleMFCLump : stdafx : stdafx.h : cpp ;
+C.Lump : SRCS : SimpleMFCLump : stdafx : stdafx.h : cpp ;
 
 SRCS += [ ResourceCompiler : SimpleMFC.rc ] ;
 
-PrecompiledHeader : stdafx.cpp stdafx.h : $(SRCS) ;
+C.PrecompiledHeader : stdafx.cpp stdafx.h : $(SRCS) ;
 
-OutputPostfix : .debug : debug ;
-OutputPostfix : : release ;
+C.OutputPostfix : .debug : debug ;
+C.OutputPostfix : : release ;
 
-Application : $(SRCS) : windows ;
+C.Application : $(SRCS) : windows ;

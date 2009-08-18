@@ -7,4 +7,4 @@ SRCS =
 IncludeModule wxWidgets ;
 UseWxWidgets SimpleWx : base core adv aui html : linklibs ;
 
-Application SimpleWx : $(SRCS) : windows ;
+C.Application SimpleWx : $(SRCS) : windows ;

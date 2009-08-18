@@ -21,6 +21,6 @@ function md5zip(filename)
 	return md5sum:digest(true)
 end
 
-if arg then
+if arg and arg[1] then
 	md5zip(arg[1])
 end

@@ -1,0 +1,4 @@
+CCFLAGS.macosx.debug on * 	?= -g -O0 ;
+C++FLAGS.macosx.debug on *	?= -g -O0 ;
+MFLAGS.macosx.debug on * 	?= -g -O0 ;
+MMFLAGS.macosx.debug on * 	?= -g -O0 ;

@@ -4,10 +4,10 @@ rule UseDirectX TARGET : OPTIONS
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 
-	IncludeDirectories $(TARGET) : "$(DXSDK_DIR)Include" ;
+	C.IncludeDirectories $(TARGET) : "$(DXSDK_DIR)Include" ;
 
 	if link in $(OPTIONS)
 	{
-		LinkDirectories $(TARGET) : "$(DXSDK_DIR)/Lib/x86" ;
+		C.LinkDirectories $(TARGET) : "$(DXSDK_DIR)/Lib/x86" ;
 	}
 }

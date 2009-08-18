@@ -1,0 +1,9 @@
+CCFLAGS.win32.debug on * 		?= /Od /Gm /EHsc /MDd /W3 /Zi ;
+C++FLAGS.win32.debug on *		?= /Od /Gm /EHsc /MDd /W3 /Zi ;
+LIBFLAGS.win32.debug on * = ;
+LINKFLAGS.win32.debug on * = /INCREMENTAL:YES /DEBUG /MACHINE:X86 ;
+
+if $(COMPILER) != vc6 {
+	CCFLAGS.win32.debug on *	+= /RTC1 ;
+	C++FLAGS.win32.debug on *	+= /RTC1 ;
+}

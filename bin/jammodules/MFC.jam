@@ -3,22 +3,22 @@ rule UseMFC TARGET : OPTIONS
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 
 	if shared in $(OPTIONS) {
-		Defines $(TARGET) : _AFXDLL ;
+		C.Defines $(TARGET) : _AFXDLL ;
 	}
 
 	if $(COMPILER) = vc6 {
-		IncludeDirectories $(TARGET) : "$(MSVCNT)/mfc/Include" "$(MSVCNT)/atl/Include" ;
-		
+		C.IncludeDirectories $(TARGET) : "$(MSVCNT)/mfc/Include" "$(MSVCNT)/atl/Include" ;
+
 		if link in $(OPTIONS) {
-			LinkDirectories $(TARGET) : "$(MSVCNT)/mfc/Lib" ;
+			C.LinkDirectories $(TARGET) : "$(MSVCNT)/mfc/Lib" ;
 		}
 
 		RcIncludeDirectories $(TARGET) : "$(MSVCNT)/mfc/Include" "$(MSVCNT)/atl/Include" ;
 	} else {
-		IncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
-		
+		C.IncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
+
 		if link in $(OPTIONS) {
-			LinkDirectories $(TARGET) : "$(MSVCNT)/atlmfc/lib" ;
+			C.LinkDirectories $(TARGET) : "$(MSVCNT)/atlmfc/lib" ;
 		}
 
 		RcIncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;

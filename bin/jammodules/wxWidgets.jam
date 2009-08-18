@@ -96,13 +96,13 @@ rule UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 	{
 		if shared in $(OPTIONS)
 		{
-			Defines $(TARGETS) : WXUSINGDLL ;
+			C.Defines $(TARGETS) : WXUSINGDLL ;
 		}
 	}
 
-	IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) : * ;
+	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) : * ;
 	RcIncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) ;
-	IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.$(CONFIG)) : $(CONFIG) ;
+	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.$(CONFIG)) : $(CONFIG) ;
 
 	if linklibs in $(OPTIONS)
 	{
@@ -113,27 +113,27 @@ rule UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 		{
 			if $(component) = base
 			{
-				LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix) : $(CONFIG) ;
+				C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix) : $(CONFIG) ;
 			}
 			else if $(component) in $(wxWidgets_BASE_LIBRARIES)
 			{
-				LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
+				C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
 			}
 			else if $(component) in $(wxWidgets_COMMON_LIBRARIES)
 			{
-				LinkPrebuiltLibraries $(TARGETS) : wx$(component)$(postfix) : $(CONFIG) ;
+				C.LinkPrebuiltLibraries $(TARGETS) : wx$(component)$(postfix) : $(CONFIG) ;
 			}
 			else if $(component) in $(wxWidgets_PLATFORM_LIBRARIES)
 			{
-				LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
+				C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
 			}
 			else if $(component) in $(wxWidgets_CONTRIB_LIBRARIES)
 			{
-				LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
+				C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
 			}
 		}
 
-		LinkDirectories $(TARGETS) : $(wxWidgets_LIB_DIR) ;
-		LinkPrebuiltLibraries $(TARGETS) : advapi32 comdlg32 comctl32 dbghelp gdi32 ole32 oleaut32 Rpcrt4 shell32 user32 uuid wsock32 : * ;
+		C.LinkDirectories $(TARGETS) : $(wxWidgets_LIB_DIR) ;
+		C.LinkPrebuiltLibraries $(TARGETS) : advapi32 comdlg32 comctl32 dbghelp gdi32 ole32 oleaut32 Rpcrt4 shell32 user32 uuid wsock32 : * ;
 	}
 }

@@ -71,18 +71,105 @@ switch $(CSC_COMPILER)
 }
 
 
-rule CSharpAssembly TARGET : SOURCES : OPTIONS
+########################################################################
+########################################################################
+
+rule CSharp._retrieveOutputPath TARGET : THE_CONFIG
+{
+	THE_CONFIG ?= $(CONFIG) ;
+	local outputPath = [ on $(TARGET) SearchVar
+			LOCATE.$(THE_CONFIG)
+			LOCATE.* ] ;
+	if ! $(outputPath)
+	{
+		outputPath = [ on * SearchVar
+				LOCATE.$(THE_CONFIG)
+				LOCATE.* : $(LOCATE_TARGET) ] ;
+	}
+	return $(outputPath) ;
+}
+
+
+rule CSharp._retrieveOutputName TARGET : SUFFIX_NAME : THE_CONFIG
+{
+	THE_CONFIG ?= $(CONFIG) ;
+	local target = [ on $(TARGET) SearchVar
+			OUTPUTNAME.$(THE_CONFIG)
+			OUTPUTNAME.*
+			: $(TARGET) ] ;
+
+	local presuffix = [ on $(TARGET) SearchVar
+			OUTPUTPOSTFIX.$(THE_CONFIG)
+			OUTPUTPOSTFIX.* ] ;
+	presuffix ?= [ on * SearchVar
+			OUTPUTPOSTFIX.$(THE_CONFIG)
+			OUTPUTPOSTFIX.* ] ;
+	presuffix ?= .$(THE_CONFIG) ;
+	if $(presuffix) = *off*
+	{
+		presuffix = ;
+	}
+
+	local suffix = [ on $(TARGET) SearchVar
+			OUTPUTSUFFIX.$(THE_CONFIG)
+			OUTPUTSUFFIX.*
+			$(SUFFIX_NAME) ] ;
+
+	return $(target)$(presuffix:E=)$(suffix:E=) ;
+}
+
+
+rule CSharp.OutputName TARGET : NAME : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	OUTPUTNAME.$(THE_CONFIG:E=*) on $(TARGET) = $(NAME) ;
+}
+
+
+rule CSharp.OutputPath TARGET : OUTPUTPATH : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	LOCATE.$(THE_CONFIG:E=*) on $(TARGET) = $(OUTPUTPATH:R=$(SUBDIR:E="")) ;
+}
+
+
+rule CSharp.OutputPostfix TARGET : POSTFIX : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	OUTPUTPOSTFIX.$(THE_CONFIG:E=*) on $(TARGET) = $(POSTFIX:E=*off*) ;
+}
+
+
+rule CSharp.OutputPostfixClear TARGET : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	OUTPUTPOSTFIX.$(THE_CONFIG:E=*) on $(TARGET) = ;
+}
+
+
+rule CSharp.OutputSuffix TARGET : SUFFIX : THE_CONFIG
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local NO_DOT_SUFFIX = [ Match \\.?(.+) : $(SUFFIX) ] ;
+	SUFFIX = .$(NO_DOT_SUFFIX) ;
+	OUTPUTSUFFIX.$(THE_CONFIG:E=*) on $(TARGET) = $(SUFFIX) ;
+}
+
+
+
+
+rule CSharp.Assembly TARGET : SOURCES : OPTIONS
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 
-	local outputPath = [ _retrieveOutputPath $(TARGET) ] ;
+	local outputPath = [ CSharp._retrieveOutputPath $(TARGET) ] ;
 
 	local suffix = SUFEXE ;
 	if library in $(OPTIONS)
 	{
 		suffix = SUFSHAREDLIB ;
 	}
-	local _t = [ _retrieveOutputName $(TARGET) : $(suffix) ] ;
+	local _t = [ CSharp._retrieveOutputName $(TARGET) : $(suffix) ] ;
 	_t = $(_t:G=$(TARGET)) ;
 
 	local _s = $(SOURCES:I=\\.cs$:G=$(TARGET)) ;
@@ -147,35 +234,35 @@ rule CSharpAssembly TARGET : SOURCES : OPTIONS
 	MFLAGS on $(_t) = $(_flags) ;
 	UseCommandLine $(_t) : $(_flags) ;
 
-	Csc $(_t) : $(_s) ;
+	CSharp.Csc $(_t) : $(_s) ;
 }
 
 
-rule CSharpApplication TARGET : SOURCES : OPTIONS
+rule CSharp.Application TARGET : SOURCES : OPTIONS
 {
 	if ! ( windows in $(OPTIONS) )  &&  ! ( console in $(OPTIONS) )
 	{
 		OPTIONS += console ;
 	}
-	CSharpAssembly $(TARGET) : $(SOURCES) : $(OPTIONS) ;
+	CSharp.Assembly $(TARGET) : $(SOURCES) : $(OPTIONS) ;
 }
 
 
-rule CSharpLibrary TARGET : SOURCES : OPTIONS
+rule CSharp.Library TARGET : SOURCES : OPTIONS
 {
-	CSharpAssembly $(TARGET) : $(SOURCES) : library $(OPTIONS) ;
+	CSharp.Assembly $(TARGET) : $(SOURCES) : library $(OPTIONS) ;
 }
 
 if $(CSC_COMPILER) in vs2005 vs2008
 {
-	actions Csc
+	actions CSharp.Csc
 	{
 		$(CSC) $(MFLAGS) /out:$(1) $(2:\\)
 	}
 }
 else
 {
-	actions Csc
+	actions CSharp.Csc
 	{
 		$(CSC) $(MFLAGS) /out:$(1) $(2)
 	}
@@ -183,7 +270,7 @@ else
 
 } else {  # $(TARGETINFO_LOCATE)
 
-rule CSharpApplication TARGET : SOURCES : OPTIONS
+rule CSharp.Application TARGET : SOURCES : OPTIONS
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	Workspace $(TARGET) : $(TARGET) : all ;
@@ -192,7 +279,7 @@ rule CSharpApplication TARGET : SOURCES : OPTIONS
 	DumpProjectInfo $(TARGET) : $(SOURCES) : app ;
 }
 
-rule CSharpLibrary TARGET : SOURCES : OPTIONS
+rule CSharp.Library TARGET : SOURCES : OPTIONS
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	Workspace $(TARGET) : $(TARGET) : all ;
@@ -204,7 +291,7 @@ rule CSharpLibrary TARGET : SOURCES : OPTIONS
 }
 
 
-rule CscDefines TARGET : DEFINES : THE_CONFIG
+rule CSharp.CscDefines TARGET : DEFINES : THE_CONFIG
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
@@ -212,7 +299,7 @@ rule CscDefines TARGET : DEFINES : THE_CONFIG
 }
 
 
-rule CscFlags TARGET : FLAGS : THE_CONFIG
+rule CSharp.CscFlags TARGET : FLAGS : THE_CONFIG
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
@@ -220,7 +307,7 @@ rule CscFlags TARGET : FLAGS : THE_CONFIG
 }
 
 
-rule ReferenceAssemblies TARGET : ASSEMBLIES : THE_CONFIG
+rule CSharp.ReferenceAssemblies TARGET : ASSEMBLIES : THE_CONFIG
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;
@@ -230,7 +317,7 @@ rule ReferenceAssemblies TARGET : ASSEMBLIES : THE_CONFIG
 }
 
 
-rule ReferencePaths TARGET : PATHS : THE_CONFIG
+rule CSharp.ReferencePaths TARGET : PATHS : THE_CONFIG
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	THE_CONFIG ?= * ;

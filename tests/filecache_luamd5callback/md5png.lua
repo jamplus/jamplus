@@ -22,6 +22,6 @@ function md5png(filename)
 end
 
 
-if arg then
+if arg and arg[1] then
 	md5png(arg[1])
 end
