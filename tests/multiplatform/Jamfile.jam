@@ -6,4 +6,15 @@ DEPCACHE = standard ;
 Defines platform : USING_WIN32 : : win32 ;
 Defines platform : USING_MACOSX : : macosx ;
 
-Application platform : platform.c file2.c ;
+SRCS =
+		platform.c
+		file2.c
+;
+
+if $(PLATFORM) = win32 {
+	SRCS += win32.c ;
+} else if $(PLATFORM) = macosx {
+	SRCS += macosx.c ;
+}
+
+Application platform : $(SRCS) ;
