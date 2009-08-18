@@ -167,7 +167,7 @@ rule MakeLocate TARGETS : DIRECTORY
 
 	if $(DIRECTORY)
 	{
-		DIRECTORY = $(DIRECTORY:R=$(SUBDIR:E="")) ;
+#		DIRECTORY = $(DIRECTORY:R=$(SUBDIR:E="")) ;
 	    LOCATE on $(TARGETS) = $(DIRECTORY) ;
 	    Depends $(TARGETS) : $(DIRECTORY[1]:G=!dir!) ;
 	    MkDir $(DIRECTORY[1]:G=!dir!) ;
