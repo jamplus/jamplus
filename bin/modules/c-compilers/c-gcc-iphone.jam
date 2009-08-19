@@ -1,0 +1,36 @@
+AR			?= ar ru ;
+CC			?= gcc ;
+C++			?= g++ ;
+LINK		?= g++ ;
+RANLIB		?= ranlib ;
+
+SUFMODULE	= .dylib ;
+
+{
+	local developerRoot ;
+	local isysroot ;
+
+	local developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
+	SUBPLATFORM ?= 2.2 ;
+	switch $(SUBPLATFORM) {
+		case 2.0 :	isysroot = $(developerRoot)/SDKs/iPhoneOS2.0.sdk ;
+		case 2.1 :	isysroot = $(developerRoot)/SDKs/iPhoneOS2.1.sdk ;
+		case 2.2 :	isysroot = $(developerRoot)/SDKs/iPhoneOS2.2.sdk ;
+		case 3.0 :	isysroot = $(developerRoot)/SDKs/iPhoneOS3.0.sdk ;
+		case * :	Exit "* MacOSX_SDK: Unsupported subplatform $(SUBPLATFORM) for SDK platform $(PLATFORM)." ;
+	}
+
+	CCFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	C++FLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	MFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	MMFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	LINKFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	MACOSX_SDK_DEVELOPER_ROOT on * = $(developerRoot) ;
+}
+
+rule C.LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM
+{
+	C.LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+}
+
+

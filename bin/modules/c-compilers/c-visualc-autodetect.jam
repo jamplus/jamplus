@@ -1,0 +1,122 @@
+VISUAL_STUDIO_FORCE_VERSION = 9.0 ;
+
+rule FindVisualStudio VERSION
+{
+	if $(MSVCNT)
+	{
+		return ;
+	}
+
+	switch $(VERSION)
+	{
+		case 10.0 :
+			local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+			MSVCNT = [ W32_GETREG $(key) ] ;
+
+			VS100COMNTOOLS = $(VS100COMNTOOLS:J=" ") ;
+			if ! $(MSVCNT) && $(VS100COMNTOOLS) {
+				MSVCNT = $(VS100COMNTOOLS) ;
+			}
+			if $(MSVCNT)
+			{
+				MSVCNT = $(MSVCNT)..\\..\\vc ;
+				MSVCNT = $(MSVCNT:R=$(MSVCNT)) ;
+				MSVCNT_PATH = $(MSVCNT)/../Common7/IDE ;
+				VS2010 = 1 ;
+
+				local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
+				MSSDK = [ W32_GETREG $(key) ] ;
+				MSSDK ?= $(MSVCNT) ;
+				MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
+				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
+				return vs2010 ;
+			}
+
+		case 9.0 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
+			MSVCNT = [ W32_GETREG $(key) ] ;
+			VS90COMNTOOLS = $(VS90COMNTOOLS:J=" ") ;
+			if ! $(MSVCNT) && $(VS90COMNTOOLS) {
+				MSVCNT = $(VS90COMNTOOLS) ;
+			}
+			if $(MSVCNT)
+			{
+				MSVCNT = $(MSVCNT)..\\..\\vc ;
+				MSVCNT = $(MSVCNT:R=$(MSVCNT)) ;
+				MSVCNT_PATH = $(MSVCNT)/../Common7/IDE ;
+				VS2008 = 1 ;
+
+				local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
+				MSSDK = [ W32_GETREG $(key) ] ;
+				MSSDK ?= $(MSVCNT) ;
+				MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
+				switch $(PLATFORM)
+				{
+					case win32 :
+						MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
+					
+					case win64 :
+						MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
+				}
+				return vs2008 ;
+			}
+
+		case 8.0 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
+			MSVCNT = [ W32_GETREG $(key) ] ;
+			if ! $(MSVCNT) && $(VS80COMNTOOLS) {
+				MSVCNT = $(VS80COMNTOOLS) ;
+			}
+			if $(MSVCNT)
+			{
+				MSVCNT = @($(MSVCNT)..\\..\\VC:R=$(MSVCNT)) ;
+				MSVCNT_PATH = @($(MSVCNT)/../Common7/IDE:R=) ;
+				VS2005 = 1 ;
+				MSSDK = $(MSVCNT) ;
+				MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
+				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+				return vs2005 ;
+			}
+
+		case 7.1 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
+			MSVCNT = [ W32_GETREG $(key) ] ;
+			if ! $(MSVCNT) && $(VS71COMNTOOLS) {
+				MSVCNT = $(VS71COMNTOOLS) ;
+			}
+			if $(MSVCNT)
+			{
+				MSVCNT = $(MSVCNT)\\..\\..\\vc7 ;
+				MSVCNT = $(MSVCNT:R=$(MSVCNT)) ;
+				MSVCNT_PATH = $(MSVCNT)/../Common7/IDE ;
+				MSSDK = $(MSVCNT) ;
+				MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
+				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+				return vs2003 ;
+			}
+
+		case 7.0 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft
+				VisualStudio $(VERSION) InstallDir ;
+			MSVCNT = [ W32_GETREG $(key) ] ;
+			if ! $(MSVCNT) && $(VS70COMNTOOLS) {
+				MSVCNT = $(VS70COMNTOOLS) ;
+			}
+			if $(MSVCNT)
+			{
+				MSVCNT = $(MSVCNT)\\..\\..\\vc7 ;
+				return vs2002 ;
+			}
+
+		case 6.0 :
+		    local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft DevStudio $(VERSION) Products "Microsoft Visual C++" ProductDir ;
+		    MSVCNT = [ W32_GETREG $(key) ] ;
+			MSVCNT_PATH = "$(MSVCNT)/../Common/MSDev98/Bin" ;
+			MSSDK = $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSSDK)/Include" ; # "$(MSSDK)/PlatformSDK/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/Lib" ; # "$(MSVCNT)/PlatformSDK/lib" ;
+			return vc6 ;
+	}
+}
+
+

@@ -1,4 +1,4 @@
-IncludeModule CSharp ;
+IncludeModule csharp ;
 
 PROPERTIES_SRCS =
 		Properties/AssemblyInfo.cs

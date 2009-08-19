@@ -1,4 +1,0 @@
-CCFLAGS.iphone.release on * 		?= -g -O2 ;
-C++FLAGS.iphone.release on * 	?= -g -O2 ;
-MFLAGS.iphone.release on * 		?= -g -O2 ;
-MMFLAGS.iphone.release on * 		?= -g -O2 ;

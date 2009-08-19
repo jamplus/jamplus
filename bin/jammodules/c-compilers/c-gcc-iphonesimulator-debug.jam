@@ -1,4 +1,0 @@
-CCFLAGS.iphonesimulator.debug on * 	?= -g -O0 ;
-C++FLAGS.iphonesimulator.debug on *	?= -g -O0 ;
-MFLAGS.iphonesimulator.debug on * 	?= -g -O0 ;
-MMFLAGS.iphonesimulator.debug on * 	?= -g -O0 ;

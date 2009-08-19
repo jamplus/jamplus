@@ -1,4 +1,0 @@
-CCFLAGS.win64.release on * 		?= /O2 /Oi /EHsc /Gy /MD /W3 /Zi ;
-C++FLAGS.win64.release on *		?= /O2 /Oi /EHsc /Gy /MD /W3 /Zi ;
-LIBFLAGS.win64.release on *		= ;
-LINKFLAGS.win64.release on *	= /INCREMENTAL:NO /DEBUG /MACHINE:X64 /OPT:REF /OPT:ICF ;

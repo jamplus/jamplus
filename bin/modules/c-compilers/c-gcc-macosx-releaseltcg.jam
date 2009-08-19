@@ -1,0 +1,4 @@
+CCFLAGS.macosx.releaseltcg on *		= -g -O3 ;
+C++FLAGS.macosx.releaseltcg on * 	= -g -O3 ;
+MFLAGS.macosx.releaseltcg on * 		?= -g -O3 ;
+MMFLAGS.macosx.releaseltcg on * 	?= -g -O3 ;

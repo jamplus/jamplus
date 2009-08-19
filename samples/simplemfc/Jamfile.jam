@@ -17,7 +17,7 @@ SRCS =
 		stdafx.h
 ;
 
-IncludeModule MFC ;
+IncludeModule mfc ;
 
 ActiveProject SimpleMFC ;
 

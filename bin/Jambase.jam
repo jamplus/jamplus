@@ -127,7 +127,7 @@ Always allclean clean ;
 # Rules
 #
 
-JAM_MODULES_PATH ?= @($(JAM_PROCESS_PATH)/../jammodules:R=) ;
+JAM_MODULES_PATH ?= @($(JAM_PROCESS_PATH)/../modules:R=) ;
 
 rule UseModule MODULE_NAME
 {

@@ -1,0 +1,37 @@
+AR			?= ar ru ;
+CC			?= gcc ;
+C++			?= g++ ;
+LINK		?= g++ ;
+RANLIB		?= ranlib ;
+
+SUFMODULE	= .dylib ;
+
+{
+	local isysroot ;
+	local developerRoot = /Developer/SDKs ;
+	SUBPLATFORM ?= 10.5 ;
+	switch $(SUBPLATFORM) {
+		case 10.4u :
+			isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
+			flags += -mmacosx-version-min=10.4 ;
+		case 10.5 :
+			isysroot = $(developerRoot)/MacOSX10.5.sdk ;
+			flags += -mmacosx-version-min=10.5 ;
+		case * :		Exit "* MacOSX_SDK: Unsupported subplatform $(SUBPLATFORM) for SDK platform $(PLATFORM)." ;
+	}
+	developerRoot = $(isysroot) ;
+
+	CCFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	C++FLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	MFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	MMFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	LINKFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	MACOSX_SDK_DEVELOPER_ROOT on * = $(developerRoot) ;
+}
+
+rule C.LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM
+{
+	C.LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+}
+
+

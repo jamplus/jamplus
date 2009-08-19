@@ -1,4 +1,0 @@
-CCFLAGS.win32.debug on * 	?= -g -O0 ;
-C++FLAGS.win32.debug on *	?= -g -O0 ;
-MFLAGS.win32.debug on * 	?= -g -O0 ;
-MMFLAGS.win32.debug on * 	?= -g -O0 ;
