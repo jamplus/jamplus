@@ -88,7 +88,7 @@ else if $(UNIX)
 
 #		case MACOSX :
 	}
-			
+
 	CHMOD		?= chmod ;
 	CHGRP		?= chgrp ;
 	CHOWN		?= chown ;
@@ -113,7 +113,7 @@ RMDIR		?= $(RM) ;
 SLASH		?= / ;
 SUBDIRRULES ?= ;
 SUBDIRRESET ?= ASFLAGS HDRS C++FLAGS CCFLAGS ;
-	
+
 OSFULL = $(OS)$(OSVER)$(OSPLAT) $(OS)$(OSPLAT) $(OS)$(OSVER) $(OS) ;
 
 #
