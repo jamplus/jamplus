@@ -105,10 +105,6 @@ rule C._RuntimeTypeHelper
 	}
 }
 
-rule C._MultiCppCompile_PreCompile
-{
-}
-
 rule C._MultiCppCompile_PchFlags
 {
 	# if the source should create pch
@@ -150,15 +146,6 @@ rule C._MultiCppCompile_PchDeps
 	}
 }
 
-rule C._MultiCppCompile_PostCompile
-{
-}
-
-
-rule C._ApplicationFromObjects_LinkFlags
-{
-}
-
 rule C._SharedLibraryFromObjects_ExportLib
 {
 #			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
@@ -170,10 +157,6 @@ rule C._SharedLibraryFromObjects_ExportLib
 	_linkTargets += $(_tlib) ;
 
 #			LinkFlags $(TARGET) : -Wl,--out-implib,$(_tlib:T) ;
-}
-
-rule C._SharedLibraryFromObjects_UnRegServer
-{
 }
 
 rule C._SharedLibraryFromObjects_LinkFlags
@@ -196,12 +179,6 @@ rule C._SharedLibraryFromObjects_LinkFlags
 		on $(TARGET) linkFlags += -dynamiclib -install_name $(installName) ;
 	}
 }
-
-
-rule C._SharedLibraryFromObjects_RegServer
-{
-}
-
 
 BUILD_EXTENSIONS = $(SUFOBJ) .res ;
 C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;

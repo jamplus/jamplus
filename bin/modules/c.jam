@@ -657,8 +657,54 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 #	Includes $(_s) : $(_s) ;
 
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
+	
+	C._ApplicationFromObjects_PostBuild ;
 }
 
+
+rule C._MultiCppCompile_PreCompile
+{
+}
+
+rule C._MultiCppCompile_PchFlags
+{
+}
+
+rule C._MultiCppCompile_SetupFlags
+{
+}
+
+rule C._MultiCppCompile_PchDeps
+{
+}
+
+rule C._MultiCppCompile_PostCompile
+{
+}
+
+rule C._ApplicationFromObjects_LinkFlags
+{
+}
+
+rule C._ApplicationFromObjects_PostBuild
+{
+}
+
+rule C._SharedLibraryFromObjects_ExportLib
+{
+}
+
+rule C._SharedLibraryFromObjects_UnRegServer
+{
+}
+
+rule C._SharedLibraryFromObjects_LinkFlags
+{
+}
+
+rule C._SharedLibraryFromObjects_RegServer
+{
+}
 
 ########################################################################
 ########################################################################

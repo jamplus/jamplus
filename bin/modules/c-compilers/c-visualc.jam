@@ -327,10 +327,6 @@ rule C._MultiCppCompile_PreCompile
 	}
 }
 
-rule C._MultiCppCompile_PchFlags
-{
-}
-
 rule C._MultiCppCompile_SetupFlags
 {
 	_flags += $(postREFERENCEDIRECTORIES) ;
@@ -418,6 +414,7 @@ rule C._ApplicationFromObjects_LinkFlags
 		}
 	}
 }
+
 
 rule C._SharedLibraryFromObjects_ExportLib
 {
