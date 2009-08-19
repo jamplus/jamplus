@@ -138,7 +138,10 @@ rule UseModule MODULE_NAME
 	}
 	$(include_marker) = true ;
 
-	include $(JAM_MODULES_PATH)/$(MODULE_NAME).jam ;
+	local moduleName = <jam:modules>$(MODULE_NAME).jam ;
+	SEARCH on $(moduleName) = $(SUBDIR) $(CWD) $(JAM_MODULES_PATH) ;
+
+	include $(moduleName) ;
 }
 
 
