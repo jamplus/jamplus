@@ -110,7 +110,7 @@ SOURCES = \
 	variable.c
 
 all: $(EXENAME)
-	$(EXENAME) -sJAM_MODULES_PATH=../bin/jammodules -f../bin/jammodules/CopyFile.jam -f../bin/Jambase.jam -sCONFIG=releaseltcg
+	$(EXENAME) -sJAM_MODULES_PATH=../bin/modules -f../bin/modules/copyfile.jam -f../bin/Jambase.jam -sCONFIG=releaseltcg
 
 $(EXENAME):
 	$(MKDIR_OBJ)
