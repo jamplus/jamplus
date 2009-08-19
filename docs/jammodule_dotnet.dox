@@ -44,7 +44,7 @@ For the given project \c TARGET, assign the reference \c DIRECTORIES to the appr
 \section rule_StrongName rule StrongName TARGET : SNK_NAME
 \addindex rule_StrongName
 
-After the executable has been built for \c TARGET, sign the assembly with the strong name \c SNK_NAME.  This rule must be run AFTER \ref rule_Application "Application" or \ref rule_Library "Library" has been run.
+After the executable has been built for \c TARGET, sign the assembly with the strong name \c SNK_NAME.  This rule must be run AFTER \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library" has been run.
 
 \param TARGET The target representing the executable to assign the strong name to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param SNK_NAME The name of the keyfile.
