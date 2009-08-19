@@ -777,7 +777,7 @@ rule Workspace WORKSPACE_NAME : TARGETS
 {
 }
 
-IncludeModule autodetect ;
+IncludeModule c-autodetect ;
 
 #
 # Now include the user's Jamfile.

@@ -54,7 +54,7 @@ rule FindVisualStudio VERSION
 				{
 					case win32 :
 						MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
-					
+
 					case win64 :
 						MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
 				}
@@ -120,3 +120,53 @@ rule FindVisualStudio VERSION
 }
 
 
+rule C.AutoDetect
+{
+	# Do we need to attempt to detect the compiler?
+	if ! $(COMPILER)
+	{
+		if ! $(MSVCNT)
+		{
+			MSVCNT_PATH = ;
+			for ver in $(VISUAL_STUDIO_FORCE_VERSION) 10.0 9.0 8.0 7.1 7.0 6.0
+			{
+				COMPILER = [ FindVisualStudio $(ver) ] ;
+				if $(COMPILER)
+				{
+					break ;
+				}
+			}
+			if ! $(COMPILER)
+			{
+				return ;
+			}
+		}
+	}
+
+	if $(COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010
+	{
+		MSVCNT = ;
+		switch $(COMPILER)
+		{
+			case vc6 :
+				COMPILER = [ FindVisualStudio 6.0 ] ;
+			case vs2003 :
+				COMPILER = [ FindVisualStudio 7.1 ] ;
+				COMPILER ?= [ FindVisualStudio 7.0 ] ;
+			case vs2005 :
+				COMPILER = [ FindVisualStudio 8.0 ] ;
+			case vs2008 :
+				COMPILER = [ FindVisualStudio 9.0 ] ;
+			case vs2010 :
+				COMPILER = [ FindVisualStudio 10.0 ] ;
+		}
+
+		UseModule c-compilers/c-visualc ;
+		if $(PLATFORM) != *  &&  $(CONFIG) != * {
+			UseModule c-compilers/c-visualc-$(PLATFORM) ;
+			UseModule c-compilers/c-visualc-$(PLATFORM)-$(CONFIG) ;
+		}
+
+		return $(COMPILER) ;
+	}
+}

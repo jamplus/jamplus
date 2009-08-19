@@ -7,10 +7,11 @@
 	SUFLIB	?= .lib ;
 	SUFOBJ	?= .obj ;
 
-	MSVCNT		?= $(MSVCDIR) ;
-
 	NOARSCAN = true ;
 	NOARUPDATE = true ;
+
+	MSVC_SUBSYSTEM_WINDOWS ?= /SUBSYSTEM:WINDOWS ;
+	MSVC_SUBSYSTEM_CONSOLE ?= /SUBSYSTEM:CONSOLE ;
 }
 
 
@@ -308,6 +309,10 @@ rule C.DefFile TARGET : SOURCES
 
 rule C._MultiCppCompile_PreCompile
 {
+	if ! $(PLATFORM) in win32 win64 {
+		OPTIONS += nomanifest ;
+	}
+
 	_VCPDB = vc ;
 
 	local vcidb = $(_VCPDB:G=$(grist):S=.idb) ;
@@ -379,9 +384,9 @@ rule C._MultiCppCompile_PostCompile
 rule C._ApplicationFromObjects_LinkFlags
 {
 	if windows in $(OPTIONS) {
-		linkFlags += /SUBSYSTEM:WINDOWS ;
+		linkFlags += $(MSVC_SUBSYSTEM_WINDOWS) ;
 	} else {
-		linkFlags += /SUBSYSTEM:CONSOLE ;
+		linkFlags += $(MSVC_SUBSYSTEM_CONSOLE) ;
 	}
 
 	if $(COMPILER) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) )
@@ -446,7 +451,7 @@ rule C._SharedLibraryFromObjects_LinkFlags
 		}
 	}
 	linkFlags += /DLL ;
-	
+
 	# Clean the .pdb (etc) files.
 	local sufs = .pdb .map .exp .ilk ;
 	local zap = $(_t:S=$(sufs)) ;
