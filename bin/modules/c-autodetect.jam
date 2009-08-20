@@ -35,7 +35,9 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 	}
 }
 
-ToolChain $(COMPILER) : $(PLATFORM) : $(CONFIG) ;
+if $(PLATFORM) != *  &&  $(CONFIG) != * {
+	ToolChain $(COMPILER) : $(PLATFORM) : $(CONFIG) ;
+}
 
 ########################################################################
 ########################################################################
