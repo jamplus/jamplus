@@ -16,6 +16,7 @@ The following represents the list of provided Jam modules:
 - \subpage module_csharp "CSharp" - Various rules to build C# applications and assemblies.
 - \subpage module_directx "DirectX" - DirectX SDK settings.
 - \subpage module_dotnet "DotNet" - Some .NET helper rules, primarily for C++/CLI applications.
+- \subpage module_hardsoftlink "Hard/Soft Links" - Rules for generating hardlinks and softlinks between files and directories.
 - \subpage module_mfc "MFC" - MFC settings.
 - \subpage module_midl "Midl" - Support for compiling .idl files.
 - \subpage module_wxwidgets "wxWidgets" - wxWidgets settings.
