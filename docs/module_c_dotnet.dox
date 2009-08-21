@@ -1,22 +1,22 @@
-/*! \page module_dotnet C++/CLI Rules
+/*! \page module_c_dotnet c/dotnet - C++/CLI Rules
 
-\section module_dotnet_ruleslist List of Rules
+\section module_c_dotnet_ruleslist List of Rules
 
 \secreflist
-\refitem rule_ReferenceDirectories ReferenceDirectories
-\refitem rule_StrongName StrongName
-\refitem rule_UseDotNet UseDotNet
+\refitem rule_C_ReferenceDirectories C.ReferenceDirectories
+\refitem rule_C_StrongName C.StrongName
+\refitem rule_C_UseDotNet C.UseDotNet
 \endsecreflist
 
 
 
 
 
-\section module_dotnet_rules Rules
+\section module_c_dotnet_rules Rules
 
 <hr>
-\section rule_ReferenceDirectories rule ReferenceDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
-\addindex rule_ReferenceDirectories
+\section rule_C_ReferenceDirectories rule C.ReferenceDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
+\addindex rule_C_ReferenceDirectories
 
 For the given project \c TARGET, assign the reference \c DIRECTORIES to the appropriate configuration and platform.
 
@@ -28,10 +28,10 @@ For the given project \c TARGET, assign the reference \c DIRECTORIES to the appr
 \code
     # Add c:/some/directory to myproject for all configurations and
     # all platforms.
-    ReferenceDirectories myproject : c:/some/directory ;
+    C.ReferenceDirectories myproject : c:/some/directory ;
 
     # Relative path:
-    ReferenceDirectories myproject : ../lib ;
+    C.ReferenceDirectories myproject : ../lib ;
 \endcode
 
 
@@ -41,8 +41,8 @@ For the given project \c TARGET, assign the reference \c DIRECTORIES to the appr
 
 
 <hr>
-\section rule_StrongName rule StrongName TARGET : SNK_NAME
-\addindex rule_StrongName
+\section rule_C_StrongName rule C.StrongName TARGET : SNK_NAME
+\addindex rule_C_StrongName
 
 After the executable has been built for \c TARGET, sign the assembly with the strong name \c SNK_NAME.  This rule must be run AFTER \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library" has been run.
 
@@ -50,8 +50,8 @@ After the executable has been built for \c TARGET, sign the assembly with the st
 \param SNK_NAME The name of the keyfile.
 
 \code
-    Library ManagedLuaPlus : $(SRCS) : shared noexportlib ;
-    StrongName ManagedLuaPlus : $(SEARCH_SOURCE)/ManagedLuaPlus.snk ;
+    C.Library ManagedLuaPlus : $(SRCS) : shared noexportlib ;
+    C.StrongName ManagedLuaPlus : $(SEARCH_SOURCE)/ManagedLuaPlus.snk ;
 \endcode
 
 
@@ -61,8 +61,8 @@ After the executable has been built for \c TARGET, sign the assembly with the st
 
 
 <hr>
-\section rule_UseDotNet rule UseDotNet TARGET [ : OPTIONS ]
-\addindex rule_UseDotNet
+\section rule_C_UseDotNet rule C.UseDotNet TARGET [ : OPTIONS ]
+\addindex rule_C_UseDotNet
 
 Applies .NET Framework settings to the specified C++/CLI \c TARGET.
 
@@ -77,10 +77,10 @@ Applies .NET Framework settings to the specified C++/CLI \c TARGET.
 
 \code
     # Applies .NET settings to MyLibrary.
-    UseDotNet MyLibrary ;
+    C.UseDotNet MyLibrary ;
 	
     # Applies .NET settings, including the appropriate linker flags, to MyApplication.
-    UseDotNet MyApplication : link ;
+    C.UseDotNet MyApplication : link ;
 \endcode
 
 

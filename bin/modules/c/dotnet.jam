@@ -1,4 +1,4 @@
-rule UseDotNet TARGET : OPTIONS
+rule C.UseDotNet TARGET : OPTIONS
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 
@@ -21,7 +21,7 @@ rule UseDotNet TARGET : OPTIONS
 	}
 
 	C.IncludeDirectories $(TARGET) : $(includePaths) ;
-	ReferenceDirectories $(TARGET) : $(referencePaths) ;
+	C.ReferenceDirectories $(TARGET) : $(referencePaths) ;
 
 	if link in $(OPTIONS)
 	{
@@ -30,7 +30,7 @@ rule UseDotNet TARGET : OPTIONS
 }
 
 
-rule ReferenceDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
+rule C.ReferenceDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
 {
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
@@ -38,7 +38,7 @@ rule ReferenceDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
 }
 
 
-rule StrongName TARGET : SNK_NAME
+rule C.StrongName TARGET : SNK_NAME
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;

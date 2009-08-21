@@ -1,25 +1,33 @@
-/*! \page jam_modules JamPlus Modules
+/*! \page modules JamPlus Modules
 
-\section jam_modules_intro Introduction
+\section modules_intro Introduction
 
 JamPlus comes with a number of helper modules, extending the default Jambase with additional capabilities.  These modules are <tt>.jam</tt> files that exist in the <tt>bin/modules/</tt> directory.
 
 Modules are loaded using the rule \ref rule_IncludeModule "IncludeModule".  For now, the module providing C/C++ support is automatically loaded.
 
-\section jam_modules_list List of Jam Modules
+\section modules_list List of Jam Modules
 
 The following represents the list of provided Jam modules:
 
-- \subpage module_c "C/C++" - Provides full C/C++ support.
+\subsection modules_general_list General Modules
+
 - \subpage module_copydirectory "CopyDirectory" - Copies the file contents of a source directory to a destination directory.
 - \subpage module_copyfile "CopyFile" - Copies a single file.
-- \subpage module_csharp "CSharp" - Various rules to build C# applications and assemblies.
-- \subpage module_directx "DirectX" - DirectX SDK settings.
-- \subpage module_dotnet "DotNet" - Some .NET helper rules, primarily for C++/CLI applications.
 - \subpage module_hardsoftlink "Hard/Soft Links" - Rules for generating hardlinks and softlinks between files and directories.
+
+\subsection modules_c_support_list C/C++ Support Modules
+
+- \subpage module_c "C/C++" - Provides full C/C++ support.
+- \subpage module_c_directx "C/C++ DirectX" - DirectX SDK settings.
+- \subpage module_c_dotnet "DotNet" - Some .NET helper rules, primarily for C++/CLI applications.
 - \subpage module_mfc "MFC" - MFC settings.
 - \subpage module_midl "Midl" - Support for compiling .idl files.
 - \subpage module_wxwidgets "wxWidgets" - wxWidgets settings.
+
+\subsection modules_csharp_support_list C# Support Modules
+
+- \subpage module_csharp "CSharp" - Various rules to build C# applications and assemblies.
 
 */
 

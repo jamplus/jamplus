@@ -1,20 +1,20 @@
-/*! \page module_directx DirectX Rules
+/*! \page module_c_directx c/directx Rules
 
-\section module_directx_ruleslist List of Rules
+\section module_c_directx_ruleslist List of Rules
 
 \secreflist
-\refitem rule_UseDirectX UseDirectX
+\refitem rule_C_UseDirectX C.UseDirectX
 \endsecreflist
 
 
 
 
 
-\section module_directx_rules Rules
+\section module_c_directx_rules Rules
 
 <hr>
-\section rule_UseDirectX rule UseDirectX TARGET [ : OPTIONS ]
-\addindex rule_UseDirectX
+\section rule_C_UseDirectX rule C.UseDirectX TARGET [ : OPTIONS ]
+\addindex rule_C_UseDirectX
 
 Applies settings to the specified \c TARGET, allowing it to build a DirectX-capable project.
 
@@ -29,10 +29,10 @@ Applies settings to the specified \c TARGET, allowing it to build a DirectX-capa
 
 \code
     # Applies DirectX settings to MyLibrary.
-    UseDirectX MyLibrary ;
+    C.UseDirectX MyLibrary ;
 	
     # Applies DirectX settings, including the appropriate linker flags, to MyApplication.
-    UseDirectX MyApplication : link ;
+    C.UseDirectX MyApplication : link ;
 \endcode
 
 

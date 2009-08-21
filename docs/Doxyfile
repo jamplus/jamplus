@@ -33,11 +33,11 @@ INPUT             = \
 		lua_support.dox \
 		modules.dox \
 		module_c.dox \
+		module_c_directx.dox \
+		module_c_dotnet.dox \
 		module_copydirectory.dox \
 		module_copyfile.dox \
 		module_csharp.dox \
-		module_directx.dox \
-		module_dotnet.dox \
 		module_hardsoftlink.dox \
 		module_mfc.dox \
 		module_midl.dox \

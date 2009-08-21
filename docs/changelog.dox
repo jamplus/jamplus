@@ -370,7 +370,7 @@ Minor stuff:
 - Fix import library dependencies for DLLs.
 - Allow an additional optional \ref rule_SubDir "SubDir" parameter denoting a 'target' in the grist.  LOCATE_SOURCE, LOCATE_TARGET, and SOURCE_GRIST all append it.
 - \ref rule_IncludeModule "IncludeModule": Modules can only be included once.
-- Added \ref rule_ReferenceDirectories "ReferenceDirectories" for .NET references.
+- Added \ref rule_C_ReferenceDirectories "ReferenceDirectories" for .NET references.
 - Added \ref rule_C_BatchCompileGroupSize "BatchCompileGroupSize".  The default batch compilation group size is unlimited.
 - Fixed precompiled header support to allow precompiled header .cpp files with relative paths attached to the name.  Uses the \ref built_in_variables_binding_binding_search_locate "BINDING" to control the output location.
 - Assign \c LINK_TARGET variable to the \c TARGET when setting up an executable or shared library link, so later post-build steps can get access to the binary without a complex look up.
