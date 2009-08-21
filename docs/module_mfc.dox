@@ -1,6 +1,6 @@
-/*! \page jammodule_mfc MFC Rules
+/*! \page module_mfc MFC Rules
 
-\section jammodule_mfc_ruleslist List of Rules
+\section module_mfc_ruleslist List of Rules
 
 \secreflist
 \refitem rule_UseMFC UseMFC
@@ -10,7 +10,7 @@
 
 
 
-\section jammodule_mfc_rules Rules
+\section module_mfc_rules Rules
 
 <hr>
 \section rule_UseMFC rule UseMFC TARGET [ : OPTIONS ]

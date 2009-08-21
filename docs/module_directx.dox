@@ -1,6 +1,6 @@
-/*! \page jammodule_directx DirectX Rules
+/*! \page module_directx DirectX Rules
 
-\section jammodule_directx_ruleslist List of Rules
+\section module_directx_ruleslist List of Rules
 
 \secreflist
 \refitem rule_UseDirectX UseDirectX
@@ -10,7 +10,7 @@
 
 
 
-\section jammodule_directx_rules Rules
+\section module_directx_rules Rules
 
 <hr>
 \section rule_UseDirectX rule UseDirectX TARGET [ : OPTIONS ]

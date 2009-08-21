@@ -1,4 +1,4 @@
-/*! \page jammodule_csharp C# Rules
+/*! \page module_csharp C# Rules
 
 The CSharp module currently has no automatic detection of C# compilers available on the system.  For that reason, the variable \c CSC_COMPILER is provided.  \c CSC_COMPILER may be set to one of the following values before the CSharp module is loaded.  It is advised to pass \c CSC_COMPILER to Jam from the command line.
 
@@ -8,7 +8,7 @@ The CSharp module currently has no automatic detection of C# compilers available
   <li>\c vs2008 (default) - Use the .NET Framework 3.5.
 </ul>
 
-\section jammodule_csharp_ruleslist List of Rules
+\section module_csharp_ruleslist List of Rules
 
 \secreflist
 \refitem rule_CSharp_CscDefines CSharp.CscDefines
@@ -25,7 +25,7 @@ The CSharp module currently has no automatic detection of C# compilers available
 
 
 
-\section jammodule_csharp_rules Rules
+\section module_csharp_rules Rules
 
 <hr>
 \section rule_CSharp_CscDefines rule CSharp.CscDefines TARGET : DEFINES [ : THE_CONFIG ]

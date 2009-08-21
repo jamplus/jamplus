@@ -1,6 +1,6 @@
-/*! \page jammodule_dotnet C++/CLI Rules
+/*! \page module_dotnet C++/CLI Rules
 
-\section jammodule_dotnet_ruleslist List of Rules
+\section module_dotnet_ruleslist List of Rules
 
 \secreflist
 \refitem rule_ReferenceDirectories ReferenceDirectories
@@ -12,7 +12,7 @@
 
 
 
-\section jammodule_dotnet_rules Rules
+\section module_dotnet_rules Rules
 
 <hr>
 \section rule_ReferenceDirectories rule ReferenceDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM

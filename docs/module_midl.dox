@@ -1,6 +1,6 @@
-/*! \page jammodule_midl IDL Rules
+/*! \page module_midl IDL Rules
 
-\section jammodule_midl_ruleslist List of Rules
+\section module_midl_ruleslist List of Rules
 
 \secreflist
 \refitem rule_MidlCompiler MidlCompiler
@@ -13,7 +13,7 @@ rule MidlFlags PARENT : BASE_NAME : OPTIONS
 
 
 
-\section jammodule_midl_rules Rules
+\section module_midl_rules Rules
 
 <hr>
 \section rule_MidlCompiler rule MidlCompiler PARENT : SOURCE

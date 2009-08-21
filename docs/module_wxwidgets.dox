@@ -1,6 +1,6 @@
-/*! \page jammodule_wxwidgets wxWidgets Rules
+/*! \page module_wxwidgets wxWidgets Rules
 
-\section jammodule_wxwidgets_ruleslist List of Rules
+\section module_wxwidgets_ruleslist List of Rules
 
 \secreflist
 \refitem rule_UseWxWidgets UseWxWidgets
@@ -10,7 +10,7 @@
 
 
 
-\section jammodule_wxwidgets_rules Rules
+\section module_wxwidgets_rules Rules
 
 <hr>
 \section rule_UseWxWidgets rule UseWxWidgets TARGETS : COMPONENTS [ : OPTIONS ]

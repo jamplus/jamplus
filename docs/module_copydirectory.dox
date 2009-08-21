@@ -1,12 +1,12 @@
-/*! \page jammodule_copydirectory Directory Copy Rules
+/*! \page module_copydirectory Directory Copy Rules
 
-\section jammodule_copydirectory_ruleslist List of Rules
+\section module_copydirectory_ruleslist List of Rules
 
 \secreflist
 \refitem rule_CopyDirectory CopyDirectory
 \endsecreflist
 
-\section jammodule_copydirectory_rules Rules
+\section module_copydirectory_rules Rules
 
 <hr>
 \section rule_CopyDirectory rule CopyDirectory PARENTS : DESTINATION_PATH : SOURCE_PATH [ : SEARCH_STRING ]
