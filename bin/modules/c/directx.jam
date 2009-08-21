@@ -1,6 +1,6 @@
 DXSDK_DIR = $(DXSDK_DIR:J=$(SPACE)) ;
 
-rule UseDirectX TARGET : OPTIONS
+rule C.UseDirectX TARGET : OPTIONS
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 
