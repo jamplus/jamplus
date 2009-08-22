@@ -17,11 +17,11 @@ SRCS =
 		stdafx.h
 ;
 
-IncludeModule mfc ;
+IncludeModule c/mfc ;
 
 ActiveProject SimpleMFC ;
 
-UseMFC : link shared ;
+C.UseMFC : link shared ;
 
 C.Lump : SRCS : SimpleMFCLump : stdafx : stdafx.h : cpp ;
 

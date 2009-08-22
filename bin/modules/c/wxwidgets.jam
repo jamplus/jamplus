@@ -88,7 +88,7 @@ if ! $(wxWidgets_ROOT)
 
 
 
-rule UseWxWidgets TARGETS : COMPONENTS : OPTIONS
+rule C.UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 {
 	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
 

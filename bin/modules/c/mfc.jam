@@ -1,4 +1,4 @@
-rule UseMFC TARGET : OPTIONS
+rule C.UseMFC TARGET : OPTIONS
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 

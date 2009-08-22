@@ -4,7 +4,7 @@ SRCS =
 		auidemo.cpp
 ;
 
-IncludeModule wxwidgets ;
-UseWxWidgets SimpleWx : base core adv aui html : linklibs ;
+IncludeModule c/wxwidgets ;
+C.UseWxWidgets SimpleWx : base core adv aui html : linklibs ;
 
 C.Application SimpleWx : $(SRCS) : windows ;

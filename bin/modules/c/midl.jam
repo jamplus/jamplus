@@ -25,7 +25,7 @@ switch $(COMPILER)
 }
 
 # OPTIONS = proxy ;
-rule MidlFlags PARENT : BASE_NAME : OPTIONS
+rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 {
 	BASE_NAME = $(BASE_NAME:L) ;
 	BASE_NAME = $(BASE_NAME:G=<$(PARENT)>) ;
@@ -86,7 +86,7 @@ rule MidlFlags PARENT : BASE_NAME : OPTIONS
 	return $(targets) ;
 }
 
-rule MidlCompiler PARENT : SOURCE
+rule C.MidlCompiler PARENT : SOURCE
 {
 	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
 	local grist = $(PARENT) ;
@@ -94,17 +94,17 @@ rule MidlCompiler PARENT : SOURCE
 	SOURCE = $(SOURCE:G=$(grist)) ;
 	SearchSource $(SOURCE) ;
 
-	local targets = [ MidlFlags $(PARENT) : $(SOURCE) ] ;
+	local targets = [ C.MidlFlags $(PARENT) : $(SOURCE) ] ;
 
 	Depends $(targets) : $(SOURCE) ;
 
-	Midl $(targets) : $(SOURCE) ;
+	C.Midl $(targets) : $(SOURCE) ;
 
 	return $(targets) ;
 }
 
 
-actions Midl
+actions C.Midl
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_PATH);%PATH%
 	set INCLUDE=$(MSSDK_STDHDRS:J=;);%INCLUDE%
@@ -113,11 +113,11 @@ actions Midl
 
 } else {
 
-rule MidlCompiler
+rule C.MidlCompiler
 {
 }
 
-rule MidlFlags
+rule C.MidlFlags
 {
 }
 
