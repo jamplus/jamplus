@@ -14,6 +14,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
     [ -j <em>jobs</em> ]
     [ -o <em>actionsfile</em> ]
     [ -s <em>var</em>=<em>value</em> ]
+    [ <em>var</em>=<em>value</em> ]
     [ -t <em>target</em> ]
     [ <em>target</em> ... ]
 </pre><p>
@@ -83,32 +84,35 @@ If <em>target</em> is provided on the command line, <b>jam</b> builds <em>target
 <td valign="top"><code> -g </code> </td><td>Build targets with the newest sources first, rather than in the order of appearance in the Jambase/Jamfiles.<p>
 </td></tr>
 <tr>
-<td valign="top"><code> -j <em>n</em></code> </td><td>Run up to <em>n</em> shell commands concurrently. The default is the maximum number of available processors on the machine. On Windows, the number of processors is determined from the environment variable <code>NUMBER_OF_PROCESSORS<code>. On Mac OS X, the number of processors is obtained from the API <code>MPProcessors</code>.</code></code><p>
-<code><code> </code></code></td></tr>
+<td valign="top"><code> -j <em>n</em></code> </td><td>Run up to <em>n</em> shell commands concurrently. The default is the maximum number of available processors on the machine. On Windows, the number of processors is determined from the environment variable <code>NUMBER_OF_PROCESSORS</code>. On Mac OS X, the number of processors is obtained from the API <code>MPProcessors</code>.<p>
+</td></tr>
 <tr>
-<td valign="top"><code><code><code> -n</code> </code></code></td><td><code><code> Don't actually execute the updating actions, but do everything else. This changes the debug level to -dax.</code></code><p>
-<code><code> </code></code></td></tr>
+<td valign="top"><code> -n</code> </td><td>Don't actually execute the updating actions, but do everything else. This changes the debug level to -dax.<p>
+</td></tr>
 <tr>
-<td valign="top"><code><code><code> -o <em>file</em></code> </code></code></td><td><code><code> Write the updating actions to the specified file instead of running them (or outputting them, as on the Mac).</code></code><p>
-<code><code> </code></code></td></tr>
+<td valign="top"><code> -o <em>file</em></code> </td><td>Write the updating actions to the specified file instead of running them (or outputting them, as on the Mac).<p>
+</td></tr>
 <tr>
-<td valign="top"><code><code><code> -q </code> </code></code></td><td><code><code> Quit quickly (as if an interrupt was received) as soon as any target build fails.</code></code><p>
-<code><code> </code></code></td></tr>
+<td valign="top"><code> -q </code> </td><td>Quit quickly (as if an interrupt was received) as soon as any target build fails.<p>
+</td></tr>
 <tr>
-<td valign="top"><code><code><code> -s <em>var</em>=<em>value</em></code> </code></code></td><td><code><code> Set the variable <em>var</em> to <em>value</em>, overriding both internal variables and variables imported from the environment.</code></code><p>
-<code><code> </code></code></td></tr>
+<td valign="top"><code> -s <em>var</em>=<em>value</em></code> </td><td>Set the variable <em>var</em> to <em>value</em>, overriding both internal variables and variables imported from the environment.<p>
+</td></tr>
 <tr>
-<td valign="top"><code><code><code> -t <em>target</em></code> </code></code></td><td><code><code> Rebuild <em>target</em> and everything that depends on it, even if it is up-to-date.</code></code><p>
-<code><code> </code></code></td></tr>
+<td valign="top"><code><em>var</em>=<em>value</em></code> </td><td>Set the variable <em>var</em> to <em>value</em>, overriding both internal variables and variables imported from the environment. This is a simpler to use version of <code>-s</code><p>
+</td></tr>
 <tr>
-<td valign="top"><code><code><code> -T </code> </code></code></td><td><code><code> Toggle printing of the target's bound name (full path).</code></code><p>
-<code><code> </code></code></td></tr>
+<td valign="top"><code> -t <em>target</em></code> </td><td>Rebuild <em>target</em> and everything that depends on it, even if it is up-to-date.<p>
+</td></tr>
 <tr>
-<td valign="top"><code><code><code> -v</code> </code></code></td><td><code><code> Print the version of <b>jam</b> and exit.</code></code><p>
-<code><code></code></code></td></tr>
+<td valign="top"><code> -T </code> </td><td>Toggle printing of the target's bound name (full path).<p>
+</td></tr>
+<tr>
+<td valign="top"><code> -v</code> </td><td>Print the version of <b>jam</b> and exit.<p>
+</td></tr>
 </table>
 </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Thu Aug 20 19:07:50 2009 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Fri Aug 21 20:42:24 2009 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.9 </small></address>
 </body>
