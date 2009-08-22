@@ -1,20 +1,24 @@
-/*! \page module_mfc MFC Rules
+/*! \page module_c_mfc c/mfc - C++ MFC Rules
 
-\section module_mfc_ruleslist List of Rules
+\code
+    IncludeModule c/mfc ;
+\endcode
+
+\section module_c_mfc_ruleslist List of Rules
 
 \secreflist
-\refitem rule_UseMFC UseMFC
+\refitem rule_C_UseMFC C.UseMFC
 \endsecreflist
 
 
 
 
 
-\section module_mfc_rules Rules
+\section module_c_mfc_rules Rules
 
 <hr>
-\section rule_UseMFC rule UseMFC TARGET [ : OPTIONS ]
-\addindex rule_UseMFC
+\section rule_C_UseMFC rule C.UseMFC TARGET [ : OPTIONS ]
+\addindex rule_C_UseMFC
 
 Applies settings to the specified \c TARGET, allowing it to build an MFC-enabled project.
 
@@ -30,13 +34,13 @@ Applies settings to the specified \c TARGET, allowing it to build an MFC-enabled
 
 \code
     # Applies MFC settings to MyLibrary.
-    UseMFC MyLibrary ;
+    C.UseMFC MyLibrary ;
 	
     # Applies MFC settings, including the appropriate linker flags, to MyApplication.
-    UseMFC MyApplication : link ;
+    C.UseMFC MyApplication : link ;
 
     # Applies MFC settings to MyApplication.  Uses the MFC runtime DLLs.
-    UseMFC MyApplication : link shared ;	
+    C.UseMFC MyApplication : link shared ;	
 \endcode
 
 

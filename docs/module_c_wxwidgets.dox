@@ -1,24 +1,28 @@
-/*! \page module_wxwidgets wxWidgets Rules
+/*! \page module_c_wxwidgets c/wxwidgets - C++ wxWidgets Rules
 
-\section module_wxwidgets_ruleslist List of Rules
+\code
+    IncludeModule c/wxwidgets ;
+\endcode
+
+\section module_c_wxwidgets_ruleslist List of Rules
 
 \secreflist
-\refitem rule_UseWxWidgets UseWxWidgets
+\refitem rule_C_UseWxWidgets C.UseWxWidgets
 \endsecreflist
 
 
 
 
 
-\section module_wxwidgets_rules Rules
+\section module_c_wxwidgets_rules Rules
 
 <hr>
-\section rule_UseWxWidgets rule UseWxWidgets TARGETS : COMPONENTS [ : OPTIONS ]
-\addindex rule_UseWxWidgets
+\section rule_C_UseWxWidgets rule C.UseWxWidgets TARGETS : COMPONENTS [ : OPTIONS ]
+\addindex rule_C_UseWxWidgets
 
 Applies settings to the specified \c TARGET, allowing it to build a wxWidgets-enabled project.
 
-\param TARGET The target to assign the MFC settings to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to assign the wxWidgets settings to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param COMPONENTS The wxWidgets components to link in.  Example: base core adv aui html.
 \param OPTIONS (optional) The following options are available:
 
@@ -30,7 +34,7 @@ Applies settings to the specified \c TARGET, allowing it to build a wxWidgets-en
 \htmlonly </blockquote> \endhtmlonly
 
 \code
-    UseWxWidgets SimpleWx : base core adv aui html : linklibs ;
+    C.UseWxWidgets SimpleWx : base core adv aui html : linklibs ;
 \endcode
 
 

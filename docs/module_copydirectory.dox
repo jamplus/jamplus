@@ -1,5 +1,9 @@
 /*! \page module_copydirectory Directory Copy Rules
 
+\code
+    IncludeModule copydirectory ;
+\endcode
+
 \section module_copydirectory_ruleslist List of Rules
 
 \secreflist

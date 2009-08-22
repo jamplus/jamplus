@@ -1,5 +1,10 @@
 /*! \page module_c C/C++ Rules
 
+\code
+    # Automatically made available, so this isn't needed.
+    IncludeModule c ;
+\endcode
+
 The C module provides rules to build C and C++ applications, shared libraries, and static libraries.
 
 When first loaded, it attempts to detect the compiler on the machine.  On Windows, it can successfully detect and run Visual C++ 6, Visual Studio 2003, Visual Studio 2005, Visual Studio 2008, and Visual Studio 2010.  On other OSes, it attempts to detect GCC.
@@ -81,8 +86,8 @@ For the given project \c TARGET, only allow \c SIZE files to be batch compiled i
 
 \code
     # wxLua takes so long to build that we don't properly take advantage of
-	# multithreading without splitting up the build some.
-	C.BatchCompileGroupSize wxLua : 5 ;
+    # multithreading without splitting up the build some.
+    C.BatchCompileGroupSize wxLua : 5 ;
 \endcode
 
 

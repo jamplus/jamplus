@@ -21,9 +21,9 @@ The following represents the list of provided Jam modules:
 - \subpage module_c "C/C++" - Provides full C/C++ support.
 - \subpage module_c_directx "C/C++ DirectX" - DirectX SDK settings.
 - \subpage module_c_dotnet "DotNet" - Some .NET helper rules, primarily for C++/CLI applications.
-- \subpage module_mfc "MFC" - MFC settings.
-- \subpage module_midl "Midl" - Support for compiling .idl files.
-- \subpage module_wxwidgets "wxWidgets" - wxWidgets settings.
+- \subpage module_c_mfc "MFC" - MFC settings.
+- \subpage module_c_midl "Midl" - Support for compiling .idl files.
+- \subpage module_c_wxwidgets "wxWidgets" - wxWidgets settings.
 
 \subsection modules_csharp_support_list C# Support Modules
 

@@ -1,4 +1,8 @@
-/*! \page module_c_directx c/directx Rules
+/*! \page module_c_directx c/directx - C/C++ DirectX Rules
+
+\code
+    IncludeModule c/directx ;
+\endcode
 
 \section module_c_directx_ruleslist List of Rules
 

@@ -48,7 +48,7 @@ Modifying Binding</a></h2>
 The rules <a class="el" href="builtin_rules.html#rule_Always">Always</a>, <a class="el" href="builtin_rules.html#rule_Leaves">Leaves</a>, <a class="el" href="builtin_rules.html#rule_MightNotUpdate">MightNotUpdate</a>, <a class="el" href="builtin_rules.html#rule_NoCare">NoCare</a>, <a class="el" href="builtin_rules.html#rule_NotFile">NotFile</a>, <a class="el" href="builtin_rules.html#rule_NoUpdate">NoUpdate</a>, and <a class="el" href="builtin_rules.html#rule_Temporary">Temporary</a> modify the dependency graph so that <b>Jam</b> treats the targets differently during its target binding phase. See <a class="el" href="jam_language.html#operation_binding">Binding Phase</a> above. Normally, <b>Jam</b> updates a target if it is missing, if its filesystem modification time is older than any of its dependencies (recursively), or if any of its dependencies are being updated. This basic behavior can be changed by invoking the following rules:<p>
 <multicol cols=3>
 <ul>
-<li><a href="builtin_rules.html#rule_Always">Always</a> <li><a href="builtin_rules.html#rule_Leaves">Leaves</a> <li><a href="builtin_rules.html#rule_MightNotUpdate">MightNotUpdate</a> <li><a href="builtin_rules.html#rule_NoCare">NoCare</a> <li><a href="builtin_rules.html#rule_NotFile">NotFile</a> <li><a href="builtin_rules.html#rule_NoUpdate">NoUpdate</a> <li><a href="builtin_rules.html#rule_Temporary">Temporary</a> <li><a href="builtin_rules.html#rule_UseCommandLine">UseCommandLine</a> </ul>
+<li><a href="builtin_rules.html#rule_Always">Always</a> <li><a href="builtin_rules.html#rule_Leaves">Leaves</a> <li><a href="builtin_rules.html#rule_MightNotUpdate">MightNotUpdate</a> <li><a href="builtin_rules.html#rule_NoCare">NoCare</a> <li><a href="builtin_rules.html#rule_NotFile">NotFile</a> <li><a href="builtin_rules.html#rule_NoUpdate">NoUpdate</a> <li><a href="builtin_rules.html#rule_ScanContents">ScanContents</a> <li><a href="builtin_rules.html#rule_Temporary">Temporary</a> <li><a href="builtin_rules.html#rule_UseCommandLine">UseCommandLine</a> </ul>
 </multicol>
 <p>
 <hr>
@@ -66,6 +66,7 @@ Makes each of <em>targets</em> depend only on its leaf sources, and not on any i
 rule MightNotUpdate targets ;</a></h2>
 <p>
 Some targets may or may not update when their action is executed, such as export libraries for a Windows DLL. In order for <b>Jam</b> to process this behavior appropriately, the <em>targets</em> must be marked so their timestamps will be evaluated at the latest possible time during the <a class="el" href="jam_language.html#operation_updating">Updating Phase</a>.<p>
+Be aware that the <code>MightNotUpdate</code> calculation happens during the <a class="el" href="jam_language.html#operation_updating">Updating Phase</a>. This results in <b>Jam</b> possibly reporting target counts improperly.<p>
 <hr>
  <h2><a class="anchor" name="rule_NoCare">
 rule NoCare targets ;</a></h2>
@@ -75,12 +76,25 @@ Causes <b>Jam</b> to ignore <em>targets</em> that neither can be found nor have 
  <h2><a class="anchor" name="rule_NotFile">
 rule NotFile targets ;</a></h2>
 <p>
-Marks <em>targets</em> as pseudotargets and not real files. No timestamp is checked, and so the actions on such a target are only executed if the target's dependencies are updated, or if the target is also marked with Always. The default <b>jam</b> target "all" is a pseudotarget. In Jambase, NotFile is used to define several addition convenient pseudotargets.<p>
+Marks <em>targets</em> as pseudotargets and not real files. No timestamp is checked, and so the actions on such a target are only executed if the target's dependencies are updated, or if the target is also marked with Always. The default <b>Jam</b> target "all" is a pseudotarget. In Jambase, NotFile is used to define several addition convenient pseudotargets.<p>
 <hr>
  <h2><a class="anchor" name="rule_NoUpdate">
 rule NoUpdate targets ;</a></h2>
 <p>
 Causes the timestamps on <em>targets</em> to be ignored. This has two effects: first, once the target has been created it will never be updated; second, manually updating target will not cause other targets to be updated. In Jambase, for example, this rule is applied to directories by the MkDir rule, because <a class="el" href="jambase_rules.html#rule_MkDir">rule MkDir DIRECTORY</a> only cares that the target directory exists, not when it has last been updated.<p>
+<hr>
+ <h2><a class="anchor" name="rule_ScanContents">
+rule ScanContents targets ;</a></h2>
+<p>
+<dl class="note" compact><dt><b>Note:</b></dt><dd>In order to use <code>ScanContents</code>, the dependency cache must be enabled.</dd></dl>
+Causes the file's contents to be scanned for differences on timestamp change. There are times when a file's timestamp changes, but its contents do not. Normally, a timestamp change will cause all dependent targets to be rebuilt. When <code>ScanContents</code> is applied to <em>targets</em> and one of those targets has a timestamp that changes, Jam will compare the contents of the target against the last build's contents, whose md5sum is stored in the dependency cache. If they are the same, no dependent targets are built. If they differ, the dependent target build occurs as it would have on just a timestamp change.<p>
+Be aware that the <code>ScanContents</code> calculation happens during the <a class="el" href="jam_language.html#operation_updating">Updating Phase</a>. This results in Jam possibly reporting target counts improperly.<p>
+<em>Example:</em> A build action generates a C++ header. There are three scenarios to make note of here:<p>
+<ul>
+<li>Scenario #1: The build action always writes the header, even when the header does not change. Every C++ file #including that header rebuilds.</li><li>Scenario #2: The build action only writes the header file when a change will occur. The timestamp does not update, so the C++ files #including that header do not build. Unfortunately, on the next <b>Jam</b> run, the header is detected as needing to be built, as it has an older timestamp than the child that triggered the build in the first place. Every subsequent run of <b>Jam</b> will attempt to build the header.</li><li>Scenario #3: The build action always writes the header, even when the header does not change. <code>ScanContents</code> is applied to the generated header. When Jam builds the header, it checks the contents of the file against the previous build and realizes nothing has changed. <b>Jam</b> will short circuit the build of dependent targets, those that rely on the generated header, as the generated header did not change.</li></ul>
+<p>
+<div class="fragment"><pre class="fragment">    ScanContents my_generated_header.h ;
+</pre></div><p>
 <hr>
  <h2><a class="anchor" name="rule_Temporary">
 rule Temporary targets ;</a></h2>
@@ -225,12 +239,12 @@ The <code>Shell</code> rule is used to execute one or more <code>COMMANDS</code>
 <span class="preprocessor"></span>    Shell <span class="stringliteral">"copy file1.txt file2.txt"</span> ;
 
 <span class="preprocessor">    # Grab a directory listing.</span>
-<span class="preprocessor"></span>        dir_listing = [ Shell dir ] ;
+<span class="preprocessor"></span>    dir_listing = [ Shell dir ] ;
 
-<span class="preprocessor">        # Grab two directory listings.</span>
-<span class="preprocessor"></span>        dir_listings = [ Shell <span class="stringliteral">"dir *.tga"</span> <span class="stringliteral">"dir *.png"</span> ]
-        Echo dir *.tga - $(dir_listings[1]) ;
-        Echo dir *.png - $(dir_listings[2]) ;
+<span class="preprocessor">    # Grab two directory listings.</span>
+<span class="preprocessor"></span>    dir_listings = [ Shell <span class="stringliteral">"dir *.tga"</span> <span class="stringliteral">"dir *.png"</span> ]
+    Echo dir *.tga - $(dir_listings[1]) ;
+    Echo dir *.png - $(dir_listings[2]) ;
 </pre></div><p>
 <hr>
  <h2><a class="anchor" name="rule_Subst">
@@ -422,7 +436,7 @@ Returns a registry entry, given a list of <code>KEYS</code>.<p>
 </pre></div><p>
 <hr>
  </div>
-<hr size="1"><address style="text-align: right;"><small>Generated on Thu Aug 20 19:07:49 2009 for JamPlus manual by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Fri Aug 21 20:42:24 2009 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.9 </small></address>
 </body>

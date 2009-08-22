@@ -1,5 +1,9 @@
 /*! \page module_csharp C# Rules
 
+\code
+    IncludeModule csharp ;
+\endcode
+
 The CSharp module currently has no automatic detection of C# compilers available on the system.  For that reason, the variable \c CSC_COMPILER is provided.  \c CSC_COMPILER may be set to one of the following values before the CSharp module is loaded.  It is advised to pass \c CSC_COMPILER to Jam from the command line.
 
 <ul>

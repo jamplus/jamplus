@@ -35,13 +35,13 @@ INPUT             = \
 		module_c.dox \
 		module_c_directx.dox \
 		module_c_dotnet.dox \
+		module_c_mfc.dox \
+		module_c_midl.dox \
+		module_c_wxwidgets.dox \
 		module_copydirectory.dox \
 		module_copyfile.dox \
 		module_csharp.dox \
 		module_hardsoftlink.dox \
-		module_mfc.dox \
-		module_midl.dox \
-		module_wxwidgets.dox \
 		multiple_passes.dox \
 		quick_start.dox \
 		scripts.dox \

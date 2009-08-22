@@ -1,5 +1,9 @@
 /*! \page module_c_dotnet c/dotnet - C++/CLI Rules
 
+\code
+    IncludeModule c/dotnet ;
+\endcode
+
 \section module_c_dotnet_ruleslist List of Rules
 
 \secreflist
