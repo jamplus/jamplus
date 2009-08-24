@@ -66,36 +66,27 @@
 <h3>Jambase:</h3>
 
 - Add \ref rule_InstallNamePath "InstallNamePath" rule.  This is currently available only on Mac OS X to provide the -install_name flag to the linker.
-- When the list of files in a library archive changes, populate the archive again.  This solves the bug where removing a file from the list of files in an archive left the removed file in the archive.
-- Jambase: Support .m, .mm, and .s files.  This support is for GNU only compilers.
+- When the list of files in a library archive changes, the archive is populated again from the object files.  This solves the bug where removing a file from the list of files in an archive left the removed file in the archive.
+- Revamp the assignment of C/C++ extensions.  They can now be created through the public rule \ref rule_C_AddBuildExtensions "AddBuildExtensions".  As part of this change, support for Objective C/C++ files, .m and .mm, and assembly files (.s) files has been added.  This support is for GNU only compilers.
 - Add -isysroot compiler flags for Mac OS X.
-- Jambase: Fix optimization flags for GCC platforms.
-- Jambase: Add LinkFrameworks rule for linking against frameworks on Mac OS X.
-- Jambase: Add ForceInclude rule, which forces the inclusion of the listed header files before any other \#include lines.
-- Jambase: Add ObjectForceInclude rule.
-
-
-
-
-
-
-- Jambase: Revamp the assignment of C/C++ extensions.  They can now be created through the public rule AddBuildExtensions.
-- Jambase: Lump rule now accepts all CC and C++ extensions.
-- Jambase: Add new NoPrecompiledHeader rule to turn off precompiled headers for the specified files.
-- Jambase: ObjectIncludeDirectories now roots relative paths against $(SUBDIR).
-- Jambase: The ApplicationFromObjects rule was not properly using the LinkDebug action for Visual Studio when building the debug configuration.  SharedLibraryFromObjects was using it fine.  Thanks to Tim S for finding this bug.
-- Jambase: Add support to ForceInclude to root a relative include against the current SubDir.
-- Jambase: Add precompiled header support for GCC.
-- Jambase: Fix Objective C/C++ builds.
-- Jambase: Allow specification of a precompiled header whose name and/or path is different than the containing .cpp/.c file.  The original rule format continues to work. * Tests: Updated tests/source_and_jamfiles_separate to illustrate the new precompiled header behavior.
-- Jambase: GCC .pch name fix.
-- Jambase: In the MakeLocate rule, root the specified directory against $(SUBDIR).
-- Jambase: Fix the rooting against an empty $(SUBDIR) in the ForceInclude, IncludeDirectories, LinkDirectories, and ObjectIncludeDirectories rules.
-- Jambase: Root the ObjectForceIncludes relative paths against $(SUBDIR).
-- Jambase: The releaseltcg configuration was not set up for GCC.  It still isn't a link time code generation, but optimizations are now applied, whereas they weren't before.
-- Jambase: On platforms supporting a recursive mkdir, only run the mkdir action once.  Do not internally handle it recursively.
-- Jambase: Visual Studio 2010 support provided by Philipp Teschner.
-- Jambase: Made the SearchSource rule take an optional second parameter, the SEARCH_PATH.  If the parameter is not specified, then $(SEARCH_SOURCE) is used.
+- Fix optimization flags for GCC platforms.
+- Add \ref rule_C_LinkFrameworks "C.LinkFrameworks" rule for linking against frameworks on Mac OS X.
+- Add \ref rule_C_ForceInclude "C.ForceInclude" rule, which forces the inclusion of the listed header files before any other \#include lines.
+- Add \ref rule_C_ObjectForceInclude "C.ObjectForceInclude" rule.
+- The \ref rule_C_Lump "C.Lump" rule now accepts all CC and C++ extensions.
+- Add new \ref rule_C_NoPrecompiledHeader "C.NoPrecompiledHeader" rule to turn off precompiled headers for the specified files.
+- \ref rule_C_ObjectIncludeDirectories "C.ObjectIncludeDirectories" now roots relative paths against \$(SUBDIR).
+- The <tt>C.ApplicationFromObjects</tt> rule was not properly using the <tt>C.LinkDebug</tt> action for Visual Studio when building the debug configuration.  <tt>C.SharedLibraryFromObjects</tt> was using it fine, however.  Thanks to Tim S for finding this bug.
+- Add support to \ref rule_C_ForceInclude "C.ForceInclude" to root a relative include against the current \ref rule_SubDir "SubDir".
+- Add precompiled header support for GCC.
+- Allow specification of a precompiled header whose name and/or path is different than the containing .cpp/.c file.  The original rule format continues to work. * Tests: Updated tests/source_and_jamfiles_separate to illustrate the new precompiled header behavior.
+- GCC .pch name fix.
+- In the \ref rule_MakeLocate "MakeLocate" rule, root the specified directory against \$(SUBDIR).
+- Fix the rooting against an empty \$(SUBDIR) in the \ref rule_C_ForceInclude "C.ForceInclude", \ref rule_C_IncludeDirectories "C.IncludeDirectories", \ref rule_C_LinkDirectories "C.LinkDirectories", \ref rule_C_ObjectIncludeDirectories "C.ObjectIncludeDirectories", and \ref rule_C_ObjectForceInclude "C.ObjectForceInclude" rules.
+- The releaseltcg configuration was not set up for GCC.  It still isn't a link time code generation, but optimizations are now applied, whereas they weren't before.
+- On platforms supporting a recursive mkdir, only run the mkdir action once.  Do not internally handle it recursively.
+- Visual Studio 2010 support provided by Philipp Teschner.
+- Made the \ref rule_SearchSource "SearchSource" rule take an optional second parameter, the SEARCH_PATH.  If the parameter is not specified, then \$(SEARCH_SOURCE) is used.
 - Jambase and MFC/Midl modules: Visual C++ 6.0 compilation fixes.
 
 
@@ -194,7 +185,7 @@
 
 
 
-
+<hr>
 \section version0_3 Version 0.3
 
 <h3>New features for 0.3:</h3>
