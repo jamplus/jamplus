@@ -26,7 +26,7 @@ if $(UNIX) {
 
 # Search in current dir and 10 dirs up from current dir for Jambase
 SEARCH on $(JAMBASE) =
-#    $(DOT)
+    $(DOT)
 #    $(DOTDOT)
 #    $(DOTDOT)$(SLASH)$(DOTDOT)
 #    $(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)
