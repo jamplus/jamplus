@@ -15,9 +15,20 @@ rule ConvertImage SOURCE
 	ConvertImageHelper $(target) : $(SOURCE) ;
 }
 
+if $(NT) {
+
 actions ConvertImageHelper
 {
 	copy $(2) $(1)
+}
+
+} else {
+
+actions ConvertImageHelper
+{
+	cp $(2) $(1)
+}
+
 }
 
 ConvertImage file1.tga ;

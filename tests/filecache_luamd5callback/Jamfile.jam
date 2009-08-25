@@ -20,10 +20,23 @@ rule ConvertImage SOURCE
 	ConvertImageHelper $(target) : $(source) ;
 }
 
+
+if $(NT) {
+
 actions ConvertImageHelper
 {
 	copy $(2) $(1)
 }
+
+} else {
+
+actions ConvertImageHelper
+{
+	cp $(2) $(1)
+}
+
+}
+
 
 ConvertImage file1.png ;
 UseMD5Callback file1.png : md5png ;
