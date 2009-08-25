@@ -572,14 +572,12 @@ DoRecursion:
 			FoundMatch( patternBuf );
 		_findclose( handle );
 #else
-/*		DIR* dirp = opendir(basePath[0] ? basePath : ".");
-		if (!dirp)
-			return;
-
-		// Any files found?
-		struct dirent* dp;
-		while ((dp = readdir(dirp)) != NULL)
-		{*/
+		struct stat attr;
+		int ret = stat( patternBuf, &attr );
+		if ( isDir )
+		    patternBuf[ patternLen - 1 ] = '/';
+		if ( ret != -1 )
+			FoundMatch( patternBuf );
 #endif
 		return;
 	}
