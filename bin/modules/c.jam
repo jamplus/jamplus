@@ -37,6 +37,9 @@ rule C._retrieveVar VARIABLE : TARGET : THE_CONFIG : THE_PLATFORM
 }
 
 
+if ! $(TARGETINFO_LOCATE)
+{
+
 rule C.HdrRule SOURCE : HEADERS
 {
 	# HdrRule source : headers ;
@@ -525,72 +528,6 @@ actions C.MakeLump
 ########################################################################
 ########################################################################
 
-rule C._retrieveOutputPath TARGET : THE_CONFIG : THE_PLATFORM
-{
-	THE_CONFIG ?= $(CONFIG) ;
-	THE_PLATFORM ?= $(PLATFORM) ;
-	local outputPath = [ on $(TARGET) SearchVar
-			LOCATE.$(THE_PLATFORM).$(THE_CONFIG)
-			LOCATE.*.$(THE_CONFIG)
-			LOCATE.$(THE_PLATFORM).*
-			LOCATE.*.* ] ;
-	if ! $(outputPath)
-	{
-		outputPath = [ on * SearchVar
-				LOCATE.$(THE_PLATFORM).$(THE_CONFIG)
-				LOCATE.*.$(THE_CONFIG)
-				LOCATE.$(THE_PLATFORM).*
-				LOCATE.*.* : $(LOCATE_TARGET) ] ;
-	}
-	return $(outputPath) ;
-}
-
-
-rule C._retrieveOutputName TARGET : SUFFIX_NAME : THE_CONFIG : THE_PLATFORM
-{
-	THE_CONFIG ?= $(CONFIG) ;
-	THE_PLATFORM ?= $(PLATFORM) ;
-	local target = [ on $(TARGET) SearchVar
-			OUTPUTNAME.$(THE_PLATFORM).$(THE_CONFIG)
-			OUTPUTNAME.*.$(THE_CONFIG)
-			OUTPUTNAME.$(THE_PLATFORM).*
-			OUTPUTNAME.*.*
-			: $(TARGET) ] ;
-
-	local presuffix = [ on $(TARGET) SearchVar
-			OUTPUTPOSTFIX.$(THE_PLATFORM).$(THE_CONFIG)
-			OUTPUTPOSTFIX.*.$(THE_CONFIG)
-			OUTPUTPOSTFIX.$(THE_PLATFORM).*
-			OUTPUTPOSTFIX.*.* ] ;
-	presuffix ?= [ on * SearchVar
-			OUTPUTPOSTFIX.$(THE_PLATFORM).$(THE_CONFIG)
-			OUTPUTPOSTFIX.*.$(THE_CONFIG)
-			OUTPUTPOSTFIX.$(THE_PLATFORM).*
-			OUTPUTPOSTFIX.*.* ] ;
-	presuffix ?= .$(THE_CONFIG) ;
-	if $(presuffix) = *off*
-	{
-		presuffix = ;
-	}
-
-	local suffix = [ on $(TARGET) SearchVar
-			OUTPUTSUFFIX.$(THE_PLATFORM).$(THE_CONFIG)
-			OUTPUTSUFFIX.*.$(THE_CONFIG)
-			OUTPUTSUFFIX.$(THE_PLATFORM).*
-			OUTPUTSUFFIX.*.*
-			$(SUFFIX_NAME).$(THE_PLATFORM)
-			$(SUFFIX_NAME).*
-			$(SUFFIX_NAME) ] ;
-
-	return $(target)$(presuffix:E=)$(suffix:E=) ;
-}
-
-
-
-
-########################################################################
-########################################################################
-
 rule C.Application TARGET : SOURCES : OPTIONS
 {
 	local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
@@ -990,23 +927,6 @@ rule C.RemoveFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
 }
 
 
-rule C.Defines TARGET : DEFINES : THE_CONFIG : THE_PLATFORM
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	THE_CONFIG ?= * ;
-	THE_PLATFORM ?= * ;
-	DEFINES.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(DEFINES) ;
-}
-
-
-rule C.ExcludeFromBuild TARGET : SOURCES
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	local grist = $(TARGET) ;
-	EXCLUDED_FROM_BUILD on $(SOURCES:G=$(grist)) = true ;
-}
-
-
 rule C.ForceFileType TARGET : SOURCES : FILE_TYPE
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
@@ -1122,17 +1042,6 @@ rule C.ObjectC++Flags TARGET : SOURCES : FLAGS : THE_CONFIG : THE_PLATFORM
 }
 
 
-rule C.ObjectDefines TARGET : SOURCES : DEFINES : THE_CONFIG : THE_PLATFORM
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	local grist = $(TARGET) ;
-	THE_CONFIG ?= * ;
-	THE_PLATFORM ?= * ;
-	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
-	DEFINES.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(DEFINES) ;
-}
-
-
 rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
@@ -1146,6 +1055,284 @@ rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES : THE_CONFIG : THE_PLATFOR
 	} else {
 		$(variableFlags).$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += "-include $(INCLUDES:R=$(SUBDIR:E=""))" ;
 	}
+}
+
+
+rule C.RuntimeType TARGET : TYPE : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_PLATFORM ?= $(PLATFORM) ;
+	C._RuntimeTypeHelper ;
+}
+
+
+
+# TARGETINFO_LOCATE
+} else {
+
+
+rule C.SubDirCcFlags
+{
+}
+
+
+rule C.SubDirC++Flags
+{
+}
+
+
+rule C.SubDirHdrs
+{
+}
+
+
+rule C.BatchCompileGroupSize TARGET : SIZE
+{
+}
+
+
+rule C.CompileOptions OPTIONS
+{
+}
+
+
+rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO_LINK
+{
+}
+
+
+rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER :
+		PCH_HEADER_FILENAME : LUMP_EXT : EXTRA_INCLUDE_PATHS
+{
+}
+
+
+rule C.Application TARGET : SOURCES : OPTIONS
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	Workspace $(TARGET) : $(TARGET) : all ;
+
+	DumpProjectInfo $(TARGET) : $(SOURCES) : app ;
+	Depends all : $(TARGET) ;
+}
+
+
+rule C.Library TARGET : SOURCES : OPTIONS
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	if shared in $(OPTIONS)
+	{
+		DumpProjectInfo $(TARGET) : $(SOURCES) : shared ;
+	}
+	else
+	{
+		DumpProjectInfo $(TARGET) : $(SOURCES) : lib ;
+	}
+	Depends all : $(TARGET) ;
+}
+
+
+rule C.CreatePrecompiledHeader TARGET : NAME : HEADER
+{
+}
+
+
+rule C.UsePrecompiledHeader TARGET : NAME : HEADER : FILES
+{
+}
+
+
+rule C.PrecompiledHeader TARGET : NAME : FILES
+{
+}
+
+
+rule C.NoPrecompiledHeader TARGET : FILES
+{
+}
+
+
+rule C.CFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+}
+
+
+rule C.C++Flags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+}
+
+
+rule C.AddFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+}
+
+
+rule C.RemoveFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+}
+
+
+rule C.ForceFileType TARGET : SOURCES : FILE_TYPE
+{
+}
+
+
+rule C.ForceInclude TARGET : INCLUDES : THE_CONFIG : THE_PLATFORM
+{
+}
+
+
+rule C.IncludeDirectories TARGET : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
+{
+}
+
+
+rule C.InstallNamePath TARGET : INSTALL_NAME_PATH : THE_CONFIG : THE_PLATFORM
+{
+}
+
+
+rule C.LinkDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
+{
+}
+
+
+rule C.LinkFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+}
+
+
+rule C.LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	if $(PLATFORM) = *  &&  $(CONFIG) = *
+	{
+		local projectsString = "	'$(>)',$(NEWLINE)" ;
+		Contents += "Projects['$(TARGET)'].Libraries = concat(Projects['$(TARGET)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
+		Contents += "$(projectsString:J=$(EMPTY))})$(NEWLINE)" ;
+	}
+}
+
+
+rule C.LinkPrebuiltLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
+{
+}
+
+
+rule C.ObjectCFlags
+{
+}
+
+
+rule C.ObjectC++Flags
+{
+}
+
+
+rule C.ObjectForceInclude
+{
+}
+
+
+rule C.RuntimeType
+{
+}
+
+
+} # TARGETINFO_LOCATE
+
+
+########################################################################
+########################################################################
+
+rule C._retrieveOutputPath TARGET : THE_CONFIG : THE_PLATFORM
+{
+	THE_CONFIG ?= $(CONFIG) ;
+	THE_PLATFORM ?= $(PLATFORM) ;
+	local outputPath = [ on $(TARGET) SearchVar
+			LOCATE.$(THE_PLATFORM).$(THE_CONFIG)
+			LOCATE.*.$(THE_CONFIG)
+			LOCATE.$(THE_PLATFORM).*
+			LOCATE.*.* ] ;
+	if ! $(outputPath)
+	{
+		outputPath = [ on * SearchVar
+				LOCATE.$(THE_PLATFORM).$(THE_CONFIG)
+				LOCATE.*.$(THE_CONFIG)
+				LOCATE.$(THE_PLATFORM).*
+				LOCATE.*.* : $(LOCATE_TARGET) ] ;
+	}
+	return $(outputPath) ;
+}
+
+
+rule C._retrieveOutputName TARGET : SUFFIX_NAME : THE_CONFIG : THE_PLATFORM
+{
+	THE_CONFIG ?= $(CONFIG) ;
+	THE_PLATFORM ?= $(PLATFORM) ;
+	local target = [ on $(TARGET) SearchVar
+			OUTPUTNAME.$(THE_PLATFORM).$(THE_CONFIG)
+			OUTPUTNAME.*.$(THE_CONFIG)
+			OUTPUTNAME.$(THE_PLATFORM).*
+			OUTPUTNAME.*.*
+			: $(TARGET) ] ;
+
+	local presuffix = [ on $(TARGET) SearchVar
+			OUTPUTPOSTFIX.$(THE_PLATFORM).$(THE_CONFIG)
+			OUTPUTPOSTFIX.*.$(THE_CONFIG)
+			OUTPUTPOSTFIX.$(THE_PLATFORM).*
+			OUTPUTPOSTFIX.*.* ] ;
+	presuffix ?= [ on * SearchVar
+			OUTPUTPOSTFIX.$(THE_PLATFORM).$(THE_CONFIG)
+			OUTPUTPOSTFIX.*.$(THE_CONFIG)
+			OUTPUTPOSTFIX.$(THE_PLATFORM).*
+			OUTPUTPOSTFIX.*.* ] ;
+	presuffix ?= .$(THE_CONFIG) ;
+	if $(presuffix) = *off*
+	{
+		presuffix = ;
+	}
+
+	local suffix = [ on $(TARGET) SearchVar
+			OUTPUTSUFFIX.$(THE_PLATFORM).$(THE_CONFIG)
+			OUTPUTSUFFIX.*.$(THE_CONFIG)
+			OUTPUTSUFFIX.$(THE_PLATFORM).*
+			OUTPUTSUFFIX.*.*
+			$(SUFFIX_NAME).$(THE_PLATFORM)
+			$(SUFFIX_NAME).*
+			$(SUFFIX_NAME) ] ;
+
+	return $(target)$(presuffix:E=)$(suffix:E=) ;
+}
+
+
+
+
+rule C.Defines TARGET : DEFINES : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_CONFIG ?= * ;
+	THE_PLATFORM ?= * ;
+	DEFINES.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(DEFINES) ;
+}
+
+
+rule C.ExcludeFromBuild TARGET : SOURCES
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	EXCLUDED_FROM_BUILD on $(SOURCES:G=$(grist)) = true ;
+}
+
+
+rule C.ObjectDefines TARGET : SOURCES : DEFINES : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	THE_CONFIG ?= * ;
+	THE_PLATFORM ?= * ;
+	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
+	DEFINES.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(DEFINES) ;
 }
 
 
@@ -1194,14 +1381,6 @@ rule C.OutputSuffix TARGET : SUFFIX : THE_CONFIG : THE_PLATFORM
 	local NO_DOT_SUFFIX = [ Match \\.?(.+) : $(SUFFIX) ] ;
 	SUFFIX = .$(NO_DOT_SUFFIX) ;
 	OUTPUTSUFFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) = $(SUFFIX) ;
-}
-
-
-rule C.RuntimeType TARGET : TYPE : THE_PLATFORM
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	THE_PLATFORM ?= $(PLATFORM) ;
-	C._RuntimeTypeHelper ;
 }
 
 

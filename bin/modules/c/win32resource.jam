@@ -1,0 +1,130 @@
+if ! $(TARGETINFO_LOCATE) {
+
+########################################################################
+########################################################################
+
+# Originally from http://maillist.perforce.com/pipermail/jamming/2004-July.txt.gz
+# windows resource compiler.
+rule C.ResourceCompiler PARENT : SOURCES : OPTIONS
+{
+	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
+	local grist = $(PARENT) ;
+
+	SOURCES = $(SOURCES:G=$(grist)) ;
+	local TARGETS = $(SOURCES:S=.res) ;
+
+	SearchSource $(SOURCES) ;
+	MakeLocate $(TARGETS) : $(LOCATE_TARGET) ;
+
+	Depends $(TARGETS) : $(SOURCES) ;
+	Clean clean:$(PARENT) : $(TARGETS) ;
+
+	RCDEFINES on $(TARGETS) +=
+		[ on $(PARENT) Var RCDEFINES ]
+		[ on * Var RCDEFINES ]
+	;
+
+	RCFLAGS on $(TARGETS) +=
+		[ on $(PARENT) Var RCFLAGS ]
+		[ on * Var RCFLAGS ]
+	;
+
+	RCHDRS on $(TARGETS) +=
+		$(SEARCH_SOURCE)
+		[ on $(PARENT) Var RCHDRS ]
+		[ on * Var RCHDRS ]
+		$(SUBDIRHDRS)
+		$(STDHDRS)
+	;
+
+	UseCommandLine $(TARGETS) :
+			[ on $(TARGETS) Var RCDEFINES ]
+			[ on $(TARGETS) Var RCFLAGS ]
+			[ on $(TARGETS) Var RCHDRS ]
+	;
+
+	if quiet in $(OPTIONS)
+	{
+		C.ResourceCompileQuiet $(TARGETS) : $(SOURCES) ;
+	}
+	else
+	{
+		C.ResourceCompile $(TARGETS) : $(SOURCES) ;
+	}
+
+	return $(TARGETS) ;
+}
+
+actions C.ResourceCompile
+{
+	SET INCLUDE=$(RCHDRS:\\J=;)
+	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(RCDEFINES) $(2)
+}
+
+actions quietly C.ResourceCompileQuiet
+{
+	SET INCLUDE=$(RCHDRS:\\J=;)
+	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(DEFINES) $(2)
+}
+
+# Set resource compiler options
+rule C._RcOptions TARGET : VARIABLE : RESOURCE_NAME : OPTIONS
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+
+	local target ;
+	if $(OPTIONS)
+	{
+		target = $(RESOURCE_NAME:S=.res:G=$(grist)) ;
+	}
+	else
+	{
+		OPTIONS = $(RESOURCE_NAME) ;
+		target = $(TARGET) ;
+	}
+
+	$(VARIABLE) on $(target) += $(OPTIONS) ;
+}
+
+
+rule C.RcFlags TARGET : RESOURCE_NAME : FLAGS
+{
+	C._RcOptions $(TARGET) : RCFLAGS : $(RESOURCE_NAME) : $(FLAGS) ;
+}
+
+rule C.RcDefines TARGET : RESOURCE_NAME : DEFINES
+{
+	C._RcOptions $(TARGET) : RCDEFINES : $(RESOURCE_NAME) : $(DEFINES) ;
+}
+
+rule C.RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
+{
+	C._RcOptions $(TARGET) : RCHDRS : $(RESOURCE_NAME) : $(HDRS) ;
+}
+
+
+
+
+} else {  # TARGETINFO_LOCATE
+
+rule C.ResourceCompiler PARENT : SOURCES : OPTIONS
+{
+}
+
+
+rule C.RcFlags TARGET : RESOURCE_NAME : FLAGS
+{
+}
+
+
+rule C.RcDefines TARGET : RESOURCE_NAME : DEFINES
+{
+}
+
+
+rule C.RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
+{
+}
+
+}

@@ -32,6 +32,8 @@
 	}
 }
 
+if ! $(TARGETINFO_LOCATE) {
+
 #
 # General defaults; a lot like UNIX
 #
@@ -179,6 +181,8 @@ rule C._SharedLibraryFromObjects_LinkFlags
 		on $(TARGET) linkFlags += -dynamiclib -install_name $(installName) ;
 	}
 }
+
+} # TARGETINFO_LOCATE
 
 BUILD_EXTENSIONS = $(SUFOBJ) .res ;
 C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;

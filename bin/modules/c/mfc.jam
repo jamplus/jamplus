@@ -21,6 +21,6 @@ rule C.UseMFC TARGET : OPTIONS
 			C.LinkDirectories $(TARGET) : "$(MSVCNT)/atlmfc/lib" ;
 		}
 
-		RcIncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
+		C.RcIncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
 	}
 }

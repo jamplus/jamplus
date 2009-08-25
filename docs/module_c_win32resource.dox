@@ -1,0 +1,136 @@
+/*! \page module_c_win32resource Win32 Resource Support
+
+\code
+    IncludeModule c/win32resource ;
+\endcode
+
+\section module_c_ruleslist List of Rules
+
+\secreflist
+\refitem rule_C_RcDefines C.RcDefines
+\refitem rule_C_RcFlags C.RcFlags
+\refitem rule_C_RcIncludeDirectories C.RcIncludeDirectories
+\refitem rule_C_ResourceCompiler C.ResourceCompiler
+\endsecreflist
+
+\section module_c_win32resource_rules Rules
+
+<hr>
+\section rule_C_RcDefines rule C.RcDefines TARGET [ : RESOURCE_NAME ] : DEFINES
+\addindex rule_C_RcDefines
+
+For the given project \c TARGET, assign the \c DEFINES for the resource file compilation.
+
+\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param RESOURCE_NAME (optional) When present, the \c DEFINES are applied to the specified \c .rc file.
+\param DEFINES The list of defines to apply.
+
+\code
+    # Make #defines available for ABC and DEF=5 in all of someproject's
+	# .rc files.
+    C.RcDefines someproject : ABC DEF=5 ;
+
+    # Add a WIN32 define globally.
+    C.RcDefines * : WIN32 ;
+
+    # For the AddIn.rc file, add a #define called SPECIAL_BUILD:
+    C.RcDefines myproject : AddIn.rc : SPECIAL_BUILD ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_C_RcFlags rule C.RcFlags TARGET [ : RESOURCE_NAME ] : FLAGS
+\addindex rule_C_RcFlags
+
+For the given project \c TARGET, assign the \c FLAGS for the resource file compilation.
+
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param RESOURCE_NAME (optional) When present, the \c FLAGS are applied to the specified \c .rc file.
+\param FLAGS The list of flags to apply.
+
+\code
+    # Turn on verbose mode for all of someproject's .rc files.
+    C.RcFlags someproject : /v ;
+
+    # Add the /y flag to all .rc files.
+    C.RcFlags * : /y ;
+
+    # For the AddIn.rc file, turn on verbose mode.
+    C.RcFlags myproject : AddIn.rc : /v ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_C_RcIncludeDirectories rule C.RcIncludeDirectories TARGET [ : RESOURCE_NAME ] : HDRS
+\addindex rule_C_RcIncludeDirectories
+
+For the given project \c TARGET, assign the include directories specified in \c HDRS to the resource file compilation.
+
+\param TARGET The target to assign the \c HDRS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the include directories are made available globally.
+\param RESOURCE_NAME (optional) When present, the \c HDRS are applied to the specified \c .rc file.
+\param HDRS The list of include directories to apply.
+
+\code
+    # Make include directories available for all of someproject's .rc files.
+    C.RcIncludeDirectories someproject : c:/mylibrary ;
+
+    # Add $(LOCATE_SOURCE) include directory to all .rc files.
+    C.RcIncludeDirectories * : $(LOCATE_SOURCE) ;
+
+    # For the AddIn.rc file, add $(LOCATE_SOURCE) as a search path.
+    C.RcIncludeDirectories myproject : AddIn.rc : $(LOCATE_SOURCE) ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ResourceCompiler rule C.ResourceCompiler PARENT : SOURCES [ : OPTIONS ]
+\addindex rule_C_ResourceCompiler
+
+Compiles a resource <tt>.rc</tt> file into a <tt>.res</tt> file.
+
+\#defines made available by the \ref rule_C_RcDefines rule are applied in the following order: <tt>PARENT</tt> then <tt>*</tt>. 
+
+Compilation flags made available by the \ref rule_C_RcFlags rule are applied in the following order: <tt>PARENT</tt> then <tt>*</tt>. 
+
+Include directories made available by the \ref rule_C_RcIncludeDirectories are looked up in this order: <tt>$(SEARCH_SOURCE)</tt>, <tt>PARENT</tt>, <tt>*</tt>, <tt>$(SUBDIRHDRS)</tt>, then <tt>$(STDHDRS)</tt>.
+
+\param PARENT The parent target to which the resource file belongs.  This is needed to properly grist the resource filenames.
+\param SOURCES The <tt>.rc</tt> file to be compiled.
+\param OPTIONS (optional) The following options are available.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c quiet - Typically not user specified.  Used internally by the manifest generation script.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\return Returns the gristed filename of the compiled resource, suitable for passing directly to the \c Application or \c Library rules.
+
+\code
+    # Compile SimpleMFC.rc into SimpleMFC.res.
+    SRCS += [ C.ResourceCompiler SimpleMFC : SimpleMFC.rc ] ;
+\endcode
+
+
+
+<hr>
+*/
+

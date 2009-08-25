@@ -14,6 +14,9 @@
 	MSVC_SUBSYSTEM_CONSOLE ?= /SUBSYSTEM:CONSOLE ;
 }
 
+IncludeModule c/win32resource ;
+
+if ! $(TARGETINFO_LOCATE) {
 
 rule C.FDefines { return /D$(<) ; }
 rule C.FIncludes { return /I"\"$(<)\"" ; }
@@ -171,7 +174,7 @@ rule C._writeManifest TARGET : _t : MANIFEST_TYPE
 		Clean clean:$(TARGET) : $(tempEmbeddedRc) ;
 		Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
 
-		local tempEmbeddedRes = [ ResourceCompiler $(TARGET) : $(tempEmbeddedRc) : quiet ] ;
+		local tempEmbeddedRes = [ C.ResourceCompiler $(TARGET) : $(tempEmbeddedRc) : quiet ] ;
 		_s += $(tempEmbeddedRes) ;
 
 		Depends $(_t[1]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
@@ -190,110 +193,6 @@ rule C._linkManifest _t
 	MANIFEST on $(_t) = "$(LOCATE_TARGET)/$(_t[1]:G=)" ;
 }
 
-
-
-########################################################################
-########################################################################
-
-# Originally from http://maillist.perforce.com/pipermail/jamming/2004-July.txt.gz
-# windows resource compiler.
-rule ResourceCompiler PARENT : SOURCES : OPTIONS
-{
-	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
-	local grist = $(PARENT) ;
-
-	SOURCES = $(SOURCES:G=$(grist)) ;
-	local TARGETS = $(SOURCES:S=.res) ;
-
-	SearchSource $(SOURCES) ;
-	MakeLocate $(TARGETS) : $(LOCATE_TARGET) ;
-
-	Depends $(TARGETS) : $(SOURCES) ;
-	Clean clean:$(PARENT) : $(TARGETS) ;
-
-	RCDEFINES on $(TARGETS) +=
-		[ on $(PARENT) Var RCDEFINES ]
-		[ on * Var RCDEFINES ]
-	;
-
-	RCFLAGS on $(TARGETS) +=
-		[ on $(PARENT) Var RCFLAGS ]
-		[ on * Var RCFLAGS ]
-	;
-
-	RCHDRS on $(TARGETS) +=
-		$(SEARCH_SOURCE)
-		[ on $(PARENT) Var RCHDRS ]
-		[ on * Var RCHDRS ]
-		$(SUBDIRHDRS)
-		$(STDHDRS)
-	;
-
-	UseCommandLine $(TARGETS) :
-			[ on $(TARGETS) Var RCDEFINES ]
-			[ on $(TARGETS) Var RCFLAGS ]
-			[ on $(TARGETS) Var RCHDRS ]
-	;
-
-	if quiet in $(OPTIONS)
-	{
-		ResourceCompileQuiet $(TARGETS) : $(SOURCES) ;
-	}
-	else
-	{
-		ResourceCompile $(TARGETS) : $(SOURCES) ;
-	}
-
-	return $(TARGETS) ;
-}
-
-actions ResourceCompile
-{
-	SET INCLUDE=$(RCHDRS:\\J=;)
-	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(RCDEFINES) $(2)
-}
-
-actions quietly ResourceCompileQuiet
-{
-	SET INCLUDE=$(RCHDRS:\\J=;)
-	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(DEFINES) $(2)
-}
-
-# Set resource compiler options
-rule _RcOptions TARGET : VARIABLE : RESOURCE_NAME : OPTIONS
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	local grist = $(TARGET) ;
-
-	local target ;
-	if $(OPTIONS)
-	{
-		target = $(RESOURCE_NAME:S=.res:G=$(grist)) ;
-	}
-	else
-	{
-		OPTIONS = $(RESOURCE_NAME) ;
-		target = $(TARGET) ;
-	}
-
-	$(VARIABLE) on $(target) += $(OPTIONS) ;
-}
-
-
-rule RcFlags TARGET : RESOURCE_NAME : FLAGS
-{
-	_RcOptions $(TARGET) : RCFLAGS : $(RESOURCE_NAME) : $(FLAGS) ;
-}
-
-rule RcDefines TARGET : RESOURCE_NAME : DEFINES
-{
-	_RcOptions $(TARGET) : RCDEFINES : $(RESOURCE_NAME) : $(DEFINES) ;
-}
-
-rule RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
-{
-	_RcOptions $(TARGET) : RCHDRS : $(RESOURCE_NAME) : $(HDRS) ;
-}
 
 
 rule C.DefFile TARGET : SOURCES
@@ -486,10 +385,15 @@ rule C._SharedLibraryFromObjects_RegServer
 	}
 }
 
+} else {  # TARGETINFO_LOCATE
+
+rule C.DefFile TARGET : SOURCES
+{
+}
+
+} # TARGETINFO_LOCATE
 
 BUILD_EXTENSIONS = $(SUFOBJ) .res ;
 C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;
 C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
-
-
 

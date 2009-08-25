@@ -198,7 +198,7 @@ function CreateTargetInfoFiles()
 		{
 			os.path.escape('-C' .. destinationRootPath),
 			os.path.escape('-sJAMFILE=' .. destinationRootPath .. 'DumpJamTargetInfo.jam'),
-			os.path.escape('-sTARGETINFO_LOCATE=' .. destinationRootPath .. 'TargetInfo/'),
+			os.path.escape('-sTARGETINFO_LOCATE=' .. destinationRootPath .. '_TargetInfo/'),
 			'-sPLATFORM=' .. platform,
 			'-sCONFIG=' .. config,
 			'-d0',
@@ -223,9 +223,9 @@ end
 
 function ReadTargetInfoFiles()
 	function ReadTargetInfo(platform, config)
-		local targetInfoFilename = destinationRootPath .. 'TargetInfo/TargetInfo.' ..
-				(platform == '*' and '[all]' or platform) .. '.' ..
-				(config == '*' and '[all]' or config) .. '.lua'
+		local targetInfoFilename = destinationRootPath .. '_TargetInfo/TargetInfo.' ..
+				(platform == '*' and '!all!' or platform) .. '.' ..
+				(config == '*' and '!all!' or config) .. '.lua'
 		local chunk, message = loadfile(targetInfoFilename)
 		if not chunk then
 			error('* Error parsing ' .. targetInfoFilename .. '.\n\n' .. message)

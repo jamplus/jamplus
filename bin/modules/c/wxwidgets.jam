@@ -101,7 +101,7 @@ rule C.UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 	}
 
 	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) : * ;
-	RcIncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) ;
+	C.RcIncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) ;
 	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.$(CONFIG)) : $(CONFIG) ;
 
 	if linklibs in $(OPTIONS)

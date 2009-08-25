@@ -1,41 +1,14 @@
 UseModule c ;
 
 local platformName = $(PLATFORM) ;
-if $(PLATFORM) = * 	{ platformName = [all] ; }
+if $(PLATFORM) = * 	{ platformName = !all! ; }
 local configName = $(CONFIG) ;
-if $(CONFIG) = * 	{ configName = [all] ; }
+if $(CONFIG) = * 	{ configName = !all! ; }
 TargetInfoFile = TargetInfo.$(platformName).$(configName).lua ;
 
 MakeLocate $(TargetInfoFile) : $(TARGETINFO_LOCATE) ;
 
-rule C.CreatePrecompiledHeader NAME : HEADER
-{
-}
-
-
-rule C.UsePrecompiledHeader NAME : HEADER : FILES
-{
-}
-
-
 EMPTY = "" ;
-
-rule C.LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	if $(PLATFORM) = *  &&  $(CONFIG) = *
-	{
-		local projectsString = "	'$(>)',$(NEWLINE)" ;
-		Contents += "Projects['$(TARGET)'].Libraries = concat(Projects['$(TARGET)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
-		Contents += "$(projectsString:J=$(EMPTY))})$(NEWLINE)" ;
-	}
-}
-
-
-rule C.Lump
-{
-}
-
 
 rule DumpSources prefix : SOURCES
 {
@@ -144,31 +117,6 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 	}
 
 	Depends $(TARGETS) : $(TargetInfoFile) ;
-}
-
-
-rule C.Application TARGET : SOURCES
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	Workspace $(TARGET) : $(TARGET) : all ;
-
-	DumpProjectInfo $(TARGET) : $(SOURCES) : app ;
-	Depends all : $(TARGET) ;
-}
-
-
-rule C.Library TARGET : SOURCES : OPTIONS
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	if shared in $(OPTIONS)
-	{
-		DumpProjectInfo $(TARGET) : $(SOURCES) : shared ;
-	}
-	else
-	{
-		DumpProjectInfo $(TARGET) : $(SOURCES) : lib ;
-	}
-	Depends all : $(TARGET) ;
 }
 
 

@@ -12,6 +12,7 @@ When first loaded, it attempts to detect the compiler on the machine.  On Window
 \section module_c_ruleslist List of Rules
 
 \secreflist
+\refitem rule_C_AddBuildExtensions C.AddBuildExtensions
 \refitem rule_C_Application C.Application
 \refitem rule_C_BatchCompileGroupSize C.BatchCompileGroupSize
 \refitem rule_C_CFlags C.CFlags
@@ -30,6 +31,7 @@ When first loaded, it attempts to detect the compiler on the machine.  On Window
 \refitem rule_C_LinkLibraries C.LinkLibraries
 \refitem rule_C_LinkPrebuiltLibraries C.LinkPrebuiltLibraries
 \refitem rule_C_Lump C.Lump
+\refitem rule_C_NoPrecompiledHeader C.NoPrecompiledHeader
 \refitem rule_C_ObjectCFlags C.ObjectCFlags
 \refitem rule_C_ObjectCppFlags C.ObjectC++Flags
 \refitem rule_C_ObjectDefines C.ObjectDefines
@@ -40,13 +42,38 @@ When first loaded, it attempts to detect the compiler on the machine.  On Window
 \refitem rule_C_OutputPostfixClear C.OutputPostfixClear
 \refitem rule_C_OutputSuffix C.OutputSuffix
 \refitem rule_C_PrecompiledHeader C.PrecompiledHeader
-\refitem rule_RcDefines RcDefines
-\refitem rule_RcFlags RcFlags
-\refitem rule_RcIncludeDirectories RcIncludeDirectories
-\refitem rule_ResourceCompiler ResourceCompiler
 \endsecreflist
 
 \section module_c_rules Rules
+
+<hr>
+\section rule_C_AddBuildExtensions rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO_LINK
+\addindex rule_C_AddBuildExtensions
+
+Makes a new C/C++ source extensions available to the compiler.  This rule requires some additional setup, described below.
+
+\c TYPE identifies a category of files and is a short identifier, usually all caps.  It is used to access compiler flags variables during a file's compilation.  If \c TYPE were specified as <tt>CC</tt>, then the compiler flags in the variables called <tt>preCCFLAGS</tt>, <tt>CCFLAGS</tt>, <tt>SUBDIRCCFLAGS</tt>, and <tt>PCHCCFLAGS</tt> would be used.
+
+\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> (and possibly others) to link into the application.  Object and compiled Windows resource files may also be passed with this list.
+\param OPTIONS The following options are available.  All options are optional.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c windows - Forces a GUI application.  On Windows, the application must have a \c WinMain function.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
+  <li>\c console (default) - Builds a console application.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    C.Application helloworld : helloworld.cpp ;
+\endcode
+
+
+
+
+
+
 
 <hr>
 \section rule_C_Application rule C.Application TARGET : SOURCES [ : OPTIONS ]
@@ -528,6 +555,38 @@ Lumping may be turned off globally by setting the global variable <tt>LUMP</tt> 
 
 
 <hr>
+\section rule_C_NoPrecompiledHeader rule C.NoPrecompiledHeader TARGET : FILES
+\addindex rule_C_NoPrecompiledHeader
+
+Creates a precompiled header and uses it on the specified \c FILES.
+
+\param TARGET The target to which the precompiled header belongs.  This is needed to properly grist the precompiled header filenames.  If not specified, \c TARGET defaults to the active target set via \ref rule_ActiveProject "ActiveProject".
+\param FILES The list of files to turn off precompiled header support for.
+
+\code
+    PCH_SRCS =
+        # Some files...
+        file_no_pch.c
+        # More files...
+    ;
+
+    # For all sources in PCH_SRCS in the Misc project, the precompiled header
+    # will be set to Misc_InternalPch.h.  The precompiled header file is created
+    # from Misc_InternalPch.cpp.
+    C.PrecompiledHeader Misc : Misc_InternalPch : $(PCH_SRCS) ;
+
+    # Turn off the precompiled header for one of the files that had PCH support
+    # added.
+    C.NoPrecompiledHeader Misc : file_no_pch.c ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_C_ObjectCFlags rule C.ObjectCFlags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_C_ObjectCFlags
 
@@ -797,122 +856,6 @@ Creates a precompiled header and uses it on the specified \c FILES.
 
 
 
-
-
-
-<hr>
-\section rule_RcDefines rule RcDefines TARGET [ : RESOURCE_NAME ] : DEFINES
-\addindex rule_RcDefines
-
-For the given project \c TARGET, assign the \c DEFINES for the resource file compilation.
-
-\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
-\param RESOURCE_NAME (optional) When present, the \c DEFINES are applied to the specified \c .rc file.
-\param DEFINES The list of defines to apply.
-
-\code
-    # Make #defines available for ABC and DEF=5 in all of someproject's
-	# .rc files.
-    RcDefines someproject : ABC DEF=5 ;
-
-    # Add a WIN32 define globally.
-    RcDefines * : WIN32 ;
-
-    # For the AddIn.rc file, add a #define called SPECIAL_BUILD:
-    RcDefines myproject : AddIn.rc : SPECIAL_BUILD ;
-\endcode
-
-
-
-
-
-
-
-
-<hr>
-\section rule_RcFlags rule RcFlags TARGET [ : RESOURCE_NAME ] : FLAGS
-\addindex rule_RcFlags
-
-For the given project \c TARGET, assign the \c FLAGS for the resource file compilation.
-
-\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
-\param RESOURCE_NAME (optional) When present, the \c FLAGS are applied to the specified \c .rc file.
-\param FLAGS The list of flags to apply.
-
-\code
-    # Turn on verbose mode for all of someproject's .rc files.
-    RcFlags someproject : /v ;
-
-    # Add the /y flag to all .rc files.
-    RcFlags * : /y ;
-
-    # For the AddIn.rc file, turn on verbose mode.
-    RcFlags myproject : AddIn.rc : /v ;
-\endcode
-
-
-
-
-
-
-
-
-<hr>
-\section rule_RcIncludeDirectories rule RcIncludeDirectories TARGET [ : RESOURCE_NAME ] : HDRS
-\addindex rule_RcIncludeDirectories
-
-For the given project \c TARGET, assign the include directories specified in \c HDRS to the resource file compilation.
-
-\param TARGET The target to assign the \c HDRS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the include directories are made available globally.
-\param RESOURCE_NAME (optional) When present, the \c HDRS are applied to the specified \c .rc file.
-\param HDRS The list of include directories to apply.
-
-\code
-    # Make include directories available for all of someproject's .rc files.
-    RcIncludeDirectories someproject : c:/mylibrary ;
-
-    # Add $(LOCATE_SOURCE) include directory to all .rc files.
-    RcIncludeDirectories * : $(LOCATE_SOURCE) ;
-
-    # For the AddIn.rc file, add $(LOCATE_SOURCE) as a search path.
-    RcIncludeDirectories myproject : AddIn.rc : $(LOCATE_SOURCE) ;
-\endcode
-
-
-
-
-
-
-
-
-<hr>
-\section rule_ResourceCompiler rule ResourceCompiler PARENT : SOURCES [ : OPTIONS ]
-\addindex rule_ResourceCompiler
-
-Compiles a resource <tt>.rc</tt> file into a <tt>.res</tt> file.
-
-\#defines made available by the \ref rule_RcDefines rule are applied in the following order: <tt>PARENT</tt> then <tt>*</tt>. 
-
-Compilation flags made available by the \ref rule_RcFlags rule are applied in the following order: <tt>PARENT</tt> then <tt>*</tt>. 
-
-Include directories made available by the \ref rule_RcIncludeDirectories are looked up in this order: <tt>$(SEARCH_SOURCE)</tt>, <tt>PARENT</tt>, <tt>*</tt>, <tt>$(SUBDIRHDRS)</tt>, then <tt>$(STDHDRS)</tt>.
-
-\param PARENT The parent target to which the resource file belongs.  This is needed to properly grist the resource filenames.
-\param SOURCES The <tt>.rc</tt> file to be compiled.
-\param OPTIONS (optional) The following options are available.
-
-\htmlonly <blockquote> \endhtmlonly
-<ul>
-  <li>\c quiet - Typically not user specified.  Used internally by the manifest generation script.</li>
-</ul>
-\htmlonly </blockquote> \endhtmlonly
-
-\return Returns the gristed filename of the compiled resource, suitable for passing directly to the \c Application or \c Library rules.
-
-\code
-    # Compile SimpleMFC.rc into SimpleMFC.res.
-    SRCS += [ ResourceCompiler SimpleMFC : SimpleMFC.rc ] ;
-\endcode
 
 
 

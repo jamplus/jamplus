@@ -244,9 +244,9 @@
 - After checking the \ref rule_C_OutputPostfix "OutputPostfix" for the current target, check the <tt>*</tt> target for a global override.
 - Handle relative paths specified for the \ref rule_C_LinkDirectories "LinkDirectories" rule.
 - New rule \ref rule_C_DefFile "DefFile".  Adds support for using .def files for DLL exports.
-- When compiling resources with \ref rule_ResourceCompiler, pick up defines, flags, and include directories from the .rc file, the pseudotarget parent, and the * global target.
+- When compiling resources with \ref rule_C_ResourceCompiler "C.ResourceCompiler", pick up defines, flags, and include directories from the .rc file, the pseudotarget parent, and the * global target.
 - Resource Compiler: If any of the defines, flags, or include directories change from the last Jam run, rebuild the resource.
-- Rules \ref rule_RcDefines "RcDefines", \ref rule_RcFlags "RcFlags", and \ref rule_RcIncludeDirectories "RcIncludeDirectories" accept either 2 or 3 parameters.  If 2 parameters are specified, the options are applied to <tt>TARGET</tt>.  If 3 parameters are specified, the options are applied to <tt>RESOURCE_NAME</tt>.
+- Rules \ref rule_C_RcDefines "C.RcDefines", \ref rule_C_RcFlags "C.RcFlags", and \ref rule_C_RcIncludeDirectories "C.RcIncludeDirectories" accept either 2 or 3 parameters.  If 2 parameters are specified, the options are applied to <tt>TARGET</tt>.  If 3 parameters are specified, the options are applied to <tt>RESOURCE_NAME</tt>.
 - \ref rule_SourceGroup "SourceGroup" can accept an optional <tt>TARGET</tt>, using the active target if <tt>TARGET</tt> isn't specified.
 - ** Possibly breaking change... let me know if it is an issue. ***  \ref jamtoworkspace "JamToWorkspace" was architected to work when the \ref rule_SubDir "SubDir" root was preloaded with an absolute path.  With the Jambase rework within JamPlus, it expected the same thing.  This blows up when JamToWorkspace is not used and when a build is run from the root Jamfile.  This change makes a generated \ref rule_SubDir "SubDir" root an absolute path.  It works in all cases I've tried.
 - Make \ref rule_C_Application "Application" and \ref rule_C_Library "Library" pay attention to changes in the link flags, libraries, or objects.  When a change is made from the last build, the executable or library is relinked (or rearchived).

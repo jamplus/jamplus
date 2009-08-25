@@ -13,12 +13,20 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 
 	if $(NT)
 	{
-		IncludeModule c-compilers/c-visualc-autodetect-$(THE_PLATFORM) ;
+		if $(THE_PLATFORM) = * {
+			IncludeModule c-compilers/c-visualc-autodetect ;
+		} else {
+			IncludeModule c-compilers/c-visualc-autodetect-$(THE_PLATFORM) ;
+		}
 		if [ C.AutoDetect ] {
 			return ;
 		}
 
-		IncludeModule c-compilers/c-mingw-autodetect-$(THE_PLATFORM) ;
+		if $(THE_PLATFORM) = * {
+			IncludeModule c-compilers/c-mingw-autodetect ;
+		} else {
+			IncludeModule c-compilers/c-mingw-autodetect-$(THE_PLATFORM) ;
+		}
 		if [ C.AutoDetect ] {
 			return ;
 		} else {
@@ -35,9 +43,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 	}
 }
 
-if $(PLATFORM) != *  &&  $(CONFIG) != * {
-	ToolChain $(COMPILER) : $(PLATFORM) : $(CONFIG) ;
-}
+ToolChain $(COMPILER) : $(PLATFORM) : $(CONFIG) ;
 
 ########################################################################
 ########################################################################

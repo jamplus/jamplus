@@ -25,7 +25,7 @@ C.UseMFC : link shared ;
 
 C.Lump : SRCS : SimpleMFCLump : stdafx : stdafx.h : cpp ;
 
-SRCS += [ ResourceCompiler : SimpleMFC.rc ] ;
+SRCS += [ C.ResourceCompiler : SimpleMFC.rc ] ;
 
 C.PrecompiledHeader : stdafx.cpp stdafx.h : $(SRCS) ;
 

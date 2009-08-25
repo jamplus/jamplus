@@ -23,6 +23,7 @@ The following represents the list of provided Jam modules:
 - \subpage module_c_dotnet "DotNet" - Some .NET helper rules, primarily for C++/CLI applications.
 - \subpage module_c_mfc "MFC" - MFC settings.
 - \subpage module_c_midl "Midl" - Support for compiling .idl files.
+- \subpage module_c_win32resource "Win32 Resource Support" - Support for building .res files.
 - \subpage module_c_wxwidgets "wxWidgets" - wxWidgets settings.
 
 \subsection modules_csharp_support_list C# Support Modules
