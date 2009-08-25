@@ -7,7 +7,7 @@ SRCS =
 		../src/precomp.h
 ;
 
-PrecompiledHeader helloworld : ../src/createprecomp.c precomp.h ../src/precomp.h : $(SRCS) ;
+C.PrecompiledHeader helloworld : ../src/createprecomp.c precomp.h ../src/precomp.h : $(SRCS) ;
 
-Application helloworld : $(SRCS) ;
+C.Application helloworld : $(SRCS) ;
 

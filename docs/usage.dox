@@ -8,6 +8,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
     [ -j <i>jobs</i> ]
     [ -o <i>actionsfile</i> ]
     [ -s <i>var</i>=<i>value</i> ]
+    [ <i>var</i>=<i>value</i> ]
     [ -t <i>target</i> ]
     [ <i>target</i> ... ]
 </pre>
@@ -73,7 +74,7 @@ If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target;</
 
   <tr>
     <td valign=top><code> -j <i>n</I></code>
-    <td> Run up to <i>n</i> shell commands concurrently.  The default is the maximum number of available processors on the machine.  On Windows, the number of processors is determined from the environment variable <tt>NUMBER_OF_PROCESSORS<tt>.  On Mac OS X, the number of processors is obtained from the API <tt>MPProcessors</tt>.
+    <td> Run up to <i>n</i> shell commands concurrently.  The default is the maximum number of available processors on the machine.  On Windows, the number of processors is determined from the environment variable <tt>NUMBER_OF_PROCESSORS</tt>.  On Mac OS X, the number of processors is obtained from the API <tt>MPProcessors</tt>.
 
   <tr>
     <td valign=top><code> -n</code>
@@ -90,6 +91,10 @@ If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target;</
   <tr>
     <td valign=top><code> -s <i>var</I>=<I>value</I></code>
 	<td> Set the variable <i>var</i> to <i>value</I>, overriding both internal variables and variables imported from the environment.
+
+  <tr>
+    <td valign=top><code><i>var</I>=<I>value</I></code>
+	<td> Set the variable <i>var</i> to <i>value</I>, overriding both internal variables and variables imported from the environment.  This is a simpler to use version of <tt>-s</tt>
 
   <tr>
     <td valign=top><code> -t <i>target</I></code>

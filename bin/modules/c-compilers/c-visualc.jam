@@ -1,0 +1,399 @@
+{
+	SUFEXE	?= .exe ;
+	SUFMODULE ?= .dll ;
+	SUFSHAREDLIB ?= .dll ;
+	SUFRES	?= .res ;
+
+	SUFLIB	?= .lib ;
+	SUFOBJ	?= .obj ;
+
+	NOARSCAN = true ;
+	NOARUPDATE = true ;
+
+	MSVC_SUBSYSTEM_WINDOWS ?= /SUBSYSTEM:WINDOWS ;
+	MSVC_SUBSYSTEM_CONSOLE ?= /SUBSYSTEM:CONSOLE ;
+}
+
+IncludeModule c/win32resource ;
+
+if ! $(TARGETINFO_LOCATE) {
+
+rule C.FDefines { return /D$(<) ; }
+rule C.FIncludes { return /I"\"$(<)\"" ; }
+rule C.FLibraryPaths { return \"/LIBPATH:$(<)\" ; }
+
+
+rule C._RuntimeTypeHelper
+{
+	if ! $(TYPE)  ||  $(TYPE) = dynamic
+	{
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).debug on $(TARGET) -= /MDd ;
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).release on $(TARGET) -= /MD ;
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MD ;
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).debug on $(TARGET) += /MTd ;
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).release on $(TARGET) += /MT ;
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MT ;
+
+		FLAGS_TO_ADD.$(THE_PLATFORM).debug on $(TARGET) += /MDd ;
+		FLAGS_TO_ADD.$(THE_PLATFORM).release on $(TARGET) += /MD ;
+		FLAGS_TO_ADD.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MD ;
+	}
+	else if $(TYPE) = static
+	{
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).debug on $(TARGET) -= /MTd ;
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).release on $(TARGET) -= /MT ;
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).releaseltcg on $(TARGET) -= /MT ;
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).debug on $(TARGET) += /MDd ;
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).release on $(TARGET) += /MD ;
+		FLAGS_TO_REMOVE.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MD ;
+
+		FLAGS_TO_ADD.$(THE_PLATFORM).debug on $(TARGET) += /MTd ;
+		FLAGS_TO_ADD.$(THE_PLATFORM).release on $(TARGET) += /MT ;
+		FLAGS_TO_ADD.$(THE_PLATFORM).releaseltcg on $(TARGET) += /MT ;
+	}
+}
+
+
+rule C._ForceIncludeHelper
+{
+	C.AddFlags $(TARGET) : "/FI$(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+}
+
+
+if $(COMPILER) = vc6
+{
+	actions response C.LinkDebug
+	{
+		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	}
+
+	actions response C.Link
+	{
+		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	}
+}
+
+if $(COMPILER) != vc6
+{
+	actions response C.LinkDebug
+	{
+		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+		if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
+		if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
+		"$(RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	}
+
+	actions response C.LinkNoManifest
+	{
+		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	}
+
+	actions response C.Link
+	{
+		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
+		SET INCLUDE=$(STDHDRS:\\J=;)
+		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+		"$(MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
+	}
+}
+
+
+actions updated response C.CC
+{
+	PATH=$(MSVCNT_PATH);%PATH%
+	SET INCLUDE=$(STDHDRS:\\J=;)
+	"$(CC:\\)" /nologo @@($(MFLAGS) "$(>)")
+}
+
+
+actions updated response C.C++
+{
+	PATH=$(MSVCNT_PATH);%PATH%
+	SET INCLUDE=$(STDHDRS:\\J=;)
+	"$(C++:\\)" /nologo @@($(MFLAGS) "$(>)")
+}
+
+
+actions together response C.Archive
+{
+	PATH=%PATH%;$(MSVCNT_PATH)
+	"$(AR)" /nologo $(LIBFLAGS) /out:"$(<)" @@("$(>:\\)")
+}
+
+
+actions RegSvr32
+{
+	regsvr32 /s /c "$(1)"
+}
+
+
+actions existing UnRegSvr32
+{
+	regsvr32 /s /u "$(2)"
+}
+
+########################################################################
+########################################################################
+
+rule C._writeManifest TARGET : _t : MANIFEST_TYPE
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+
+	local tempIntermediateManifest = @($(_t[1]).intermediate.manifest:G=$(grist)) ;
+	MakeLocate $(tempIntermediateManifest) : $(LOCATE_TARGET) ;
+	Clean clean:$(TARGET) : $(tempIntermediateManifest) ;
+
+	if $(CONFIG) = debug
+	{
+		local tempEmbeddedManifest = @($(_t[1]).embed.manifest:G=$(grist)) ;
+		MakeLocate $(tempEmbeddedManifest) : $(LOCATE_TARGET) ;
+		CONTENTS on $(tempEmbeddedManifest) =
+"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<assembly xmlns='urn:schemas-microsoft-com:asm.v1' manifestVersion='1.0'>
+</assembly>
+" ;
+		WriteFile $(tempEmbeddedManifest) ;
+		Clean clean:$(TARGET) : $(tempEmbeddedManifest) ;
+
+		local tempEmbeddedRc = @($(_t[1]).embed.rc:G=$(grist)) ;
+		Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
+		MakeLocate $(tempEmbeddedRc) : $(LOCATE_TARGET) ;
+		CONTENTS on $(tempEmbeddedRc) =
+			"$(MANIFEST_TYPE) /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ \"$(LOCATE_TARGET)/$(_t[1]:G=).embed.manifest\"" ;
+		WriteFile $(tempEmbeddedRc) ;
+		Clean clean:$(TARGET) : $(tempEmbeddedRc) ;
+		Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
+
+		local tempEmbeddedRes = [ C.ResourceCompiler $(TARGET) : $(tempEmbeddedRc) : quiet ] ;
+		_s += $(tempEmbeddedRes) ;
+
+		Depends $(_t[1]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
+		if $(_t[2])
+		{
+			Includes $(_t[2]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
+		}
+	}
+
+	MANIFEST_TYPE on $(_t) = $(MANIFEST_TYPE) ;
+}
+
+
+rule C._linkManifest _t
+{
+	MANIFEST on $(_t) = "$(LOCATE_TARGET)/$(_t[1]:G=)" ;
+}
+
+
+
+rule C.DefFile TARGET : SOURCES
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	SOURCES = $(SOURCES:G=$(grist)) ;
+	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
+	Depends $(TARGET) : $(SOURCES) ;
+	C.LinkFlags $(TARGET) : /DEF:"$(SOURCES:T)" ;
+}
+
+
+rule C._MultiCppCompile_PreCompile
+{
+	if ! $(PLATFORM) in win32 win64 {
+		OPTIONS += nomanifest ;
+	}
+
+	_VCPDB = vc ;
+
+	local vcidb = $(_VCPDB:G=$(grist):S=.idb) ;
+	_VCPDB = $(_VCPDB:G=$(grist):S=.pdb) ;
+	MakeLocate $(vcidb) $(_VCPDB) : $(LOCATE_TARGET) ;
+
+	Clean clean:$(TARGET) : $(_VCPDB) $(vcidb) ;
+
+	if $(__MultiCppCompile_OutputAsTree) = 0 {
+		local combinedLocateTarget = [ FDirName $(LOCATE_TARGET) ] ;
+		_postmflags = "/c \"/Fo$(combinedLocateTarget:\\)\\\\\" \"/Fd$(_VCPDB:T)\"" ;
+	}
+}
+
+rule C._MultiCppCompile_SetupFlags
+{
+	_flags += $(postREFERENCEDIRECTORIES) ;
+
+	if $(_pch[4]) {
+		# add extra flags to enable pch creation
+		local _pchFilename = $(_pch[3]:LBS).pch ;
+		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
+		_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
+		_flags += /Yc$(_pch[2]) ;  # h file
+		# mark that it will be created by compilation through srcref
+		_pchFilename = $(_pchFilename:G=$(grist)) ;
+		BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
+		MakeLocate $(_pchFilename) : $(LOCATE_TARGET) ;
+		Depends $(_pchFilename) : $(_src) ;
+		Clean clean:$(TARGET) : $(_pchFilename) ;
+
+	# if the source should use pch
+	} else if $(_pch[2]) && ! $(_nopch) {
+		# add extra flags to enable pch loading
+		local _pchFilename = $(_pch[3]:LBS).pch ;
+		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
+		_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
+		_flags += /Yu$(_pch[2]) ;  # h file
+		# mark that compilation will depend on it
+		_pchFilename = $(_pchFilename:G=$(grist)) ;
+		Includes $(_src) : $(_pchFilename) ;
+	}
+
+	# bind flags, defines and includes to the target
+	_flags += $(_postmflags) ;
+}
+
+rule C._MultiCppCompile_PchDeps
+{
+	if $(_pch1[4]) {
+		local _pchFilename = $(_pch1[3]:LBS).pch ;
+		_pchFilename = $(_pchFilename:G=$(grist)) ;
+		Depends $(objects) : $(_pchFilename) ;
+		# add that pch as output
+		objects += $(_pchFilename) ;
+	}
+}
+
+rule C._MultiCppCompile_PostCompile
+{
+	SEMAPHORE on $(objects) = $(_VCPDB) ;
+}
+
+
+rule C._ApplicationFromObjects_LinkFlags
+{
+	if windows in $(OPTIONS) {
+		linkFlags += $(MSVC_SUBSYSTEM_WINDOWS) ;
+	} else {
+		linkFlags += $(MSVC_SUBSYSTEM_CONSOLE) ;
+	}
+
+	if $(COMPILER) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) )
+	{
+		C._writeManifest $(TARGET) : $(_t) : 1 ;
+		C._linkManifest $(_t) ;
+		linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
+	}
+
+	{
+	    # Clean the .pdb (etc) files.
+		local sufs = .pdb .map .lib .exp .ilk ;
+	    local zap = $(_t:S=$(sufs)) ;
+	    MakeLocate $(zap) : $(outputPath) ;
+	    Clean clean:$(TARGET) : $(zap) ;
+
+	    Depends $(zap) : $(_linkTargets) ;
+	}
+
+	if $(COMPILER) = vc6 {
+		if $(CONFIG) = debug {
+			linkRule = C.LinkDebug ;
+		}
+	} else {
+		if nomanifest in $(OPTIONS) {
+			linkRule = C.LinkNoManifest ;
+		} else if $(CONFIG) = debug {
+			linkRule = C.LinkDebug ;
+		}
+	}
+}
+
+
+rule C._SharedLibraryFromObjects_ExportLib
+{
+	BINDING on $(_tlib) = [ C._retrieveOutputName $(TARGET) : SUFLIB ] ;
+	Depends $(TARGET) : $(_tlib) ;
+	Depends $(_tlib) : $(_t) ;
+	MightNotUpdate $(_tlib) ;
+	_linkTargets += $(_tlib) ;
+}
+
+rule C._SharedLibraryFromObjects_UnRegServer
+{
+	if regserver in $(OPTIONS) {
+		regserver = true ;
+
+		local unregserver = clean:$(TARGET):unregserver ;
+		Depends clean:$(TARGET) : $(unregserver) ;
+		NotFile $(unregserver) ;
+		Always $(unregserver) ;
+		UnRegSvr32 clean:$(TARGET):unregserver : $(_linkTargets[1]) ;
+	}
+}
+
+rule C._SharedLibraryFromObjects_LinkFlags
+{
+	if ! ( nodefaults in $(OPTIONS) ) {
+		if windows in $(OPTIONS) {
+			linkFlags += /SUBSYSTEM:WINDOWS ;
+		} else {
+			linkFlags += /SUBSYSTEM:CONSOLE ;
+		}
+	}
+	linkFlags += /DLL ;
+
+	# Clean the .pdb (etc) files.
+	local sufs = .pdb .map .exp .ilk ;
+	local zap = $(_t:S=$(sufs)) ;
+	MakeLocate $(zap) : $(outputPath) ;
+	Clean clean:$(TARGET) : $(zap) ;
+
+	Depends $(zap) : $(_linkTargets) ;
+
+	if ( nomanifest in $(OPTIONS) ) {
+		linkFlags -= /INCREMENTAL ;
+	} else if $(COMPILER) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) ) {
+		C._writeManifest $(TARGET) : $(_linkTargets) : 2 ;
+		C._linkManifest $(_linkTargets) ;
+		linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
+	}
+
+	if $(COMPILER) = vc6 {
+		if $(CONFIG) = debug {
+			linkRule = C.LinkDebug ;
+		}
+	} else {
+		if nomanifest in $(OPTIONS) {
+			linkRule = C.LinkNoManifest ;
+		} else if $(CONFIG) = debug {
+			linkRule = C.LinkDebug ;
+		}
+	}
+}
+
+
+rule C._SharedLibraryFromObjects_RegServer
+{
+	if $(regserver) {
+		RegSvr32 $(_linkTargets[1]) ;
+	}
+}
+
+} else {  # TARGETINFO_LOCATE
+
+rule C.DefFile TARGET : SOURCES
+{
+}
+
+} # TARGETINFO_LOCATE
+
+BUILD_EXTENSIONS = $(SUFOBJ) .res ;
+C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;
+C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
+

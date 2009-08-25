@@ -1,0 +1,4 @@
+CCFLAGS.iphone.releaseltcg on *		= -g -O3 ;
+C++FLAGS.iphone.releaseltcg on * 	= -g -O3 ;
+MFLAGS.iphone.releaseltcg on * 		?= -g -O3 ;
+MMFLAGS.iphone.releaseltcg on * 	?= -g -O3 ;

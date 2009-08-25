@@ -1,0 +1,185 @@
+{
+	SUFEXE	?= .exe ;
+	SUFLIB	?= .a ;
+	SUFMODULE ?= .dll ;
+	SUFOBJ	?= .o ;
+	SUFRES	?= .res ;
+	SUFSHAREDLIB ?= .dll ;
+
+	CCFLAGS.*.* on *		= -x c ;
+	C++FLAGS.*.* on *		= -x c++ ;
+	MFLAGS.*.* on *			= -x objective-c ;
+	MMFLAGS.*.* on *		= -x objective-c++ ;
+	DEFINES.*.* on * += MINGW ;
+
+	PCHCCFLAGS = -x c-header ;
+	PCHC++FLAGS = -x c++-header ;
+	PCHMFLAGS = -x objective-c-header ;
+	PCHMMFLAGS = -x objective-c++-header ;
+
+	NOARSCAN = true ;
+	NOARUPDATE = true ;
+}
+
+if ! $(TARGETINFO_LOCATE) {
+
+rule C.FDefines { return -D$(<) ; }
+rule C.FIncludes { return -I$(<) ; }
+rule C.FLibraryPaths { return -L$(<) ; }
+
+
+rule C._ForceIncludeHelper
+{
+	C.AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+}
+
+
+rule C._RuntimeTypeHelper
+{
+	if ! $(TYPE)  ||  $(TYPE) = dynamic
+	{
+	}
+	else if $(TYPE) = static
+	{
+	}
+}
+
+actions updated together piecemeal C.Archive
+{
+	$(AR) $(LIBFLAGS) $(<) $(>)
+}
+
+actions C.Link
+{
+	"$(LINK)" $(LINKFLAGS) -o $(<[1]) $(UNDEFS) $(>) $(NEEDLIBS:T) $(LINKLIBS)
+}
+
+actions together C.Ranlib
+{
+	$(RANLIB) $(<)
+}
+
+#
+# NOARUPDATE - can't update an archive
+#
+
+if $(NOARUPDATE)
+{
+	actions C.Archive
+	{
+	$(AR) $(LIBFLAGS) $(<) $(>)
+	}
+}
+
+actions updated response C.CC
+{
+	"$(CC)" -c $(MFLAGS) $(>)
+}
+
+actions updated response C.C++
+{
+	"$(C++)" -c $(MFLAGS) $(>)
+}
+
+actions updated response C.PCH
+{
+	"$(C++)" -c $(MFLAGS) $(>)
+}
+
+
+rule C._ForceIncludeHelper
+{
+	C.AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+}
+
+
+rule C._MultiCppCompile_PreCompile
+{
+}
+
+rule C._MultiCppCompile_PchFlags
+{
+	# if the source should create pch
+	local _pch ;
+	on $(_src) _pch = $(PCH) ;
+	if $(_pch[4]) {
+		local _pchName = @($(_pch[3]:LBS):G=$(grist)) ;
+		newsrcs += $(_pchName) ;
+
+		local _pchFilename = $(_pchName).gch ;
+		PCHFLAGS.$(PLATFORM).$(CONFIG) on $(_pchFilename) += $($($(BUILD_EXT).PCHFLAGS)) ;
+
+#				Depends $(_pchFilename) : $(_src) ;
+	}
+}
+
+rule C._MultiCppCompile_SetupFlags
+{
+	if $(_pch)  &&  ! $(_nopch) {
+		local _pchName = @($(_pch[3]:LBS):G=$(grist)) ;
+		local _pchFilename = $(_pchName).gch ;
+
+		# if the source should use pch
+		if $(_pch[2]) {
+			# mark that compilation will depend on it
+			Includes $(_src) : $(_pchFilename) ;
+		}
+	}
+
+	_flags += "-c -o \"$(_obj:T)\"" ;
+}
+
+rule C._MultiCppCompile_PchDeps
+{
+	if $(_pch1[3]) {
+		local _pchName = @($(_pch[3]:LBS):G=$(grist)) ;
+		local _pchFilename = $(_pchName).gch ;
+		Depends $(objects) : $(_pchFilename) ;
+	}
+}
+
+rule C._SharedLibraryFromObjects_ExportLib
+{
+#			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
+	BINDING on $(_tlib) = $(_t) ;
+	MakeLocate $(_tlib) : $(outputPath) ;
+	Depends $(TARGET) : $(_tlib) ;
+	Depends $(_tlib) : $(_t) ;
+	NotFile $(_tlib) ;		# Turn this off for export libraries.
+	_linkTargets += $(_tlib) ;
+
+#			LinkFlags $(TARGET) : -Wl,--out-implib,$(_tlib:T) ;
+}
+
+rule C._SharedLibraryFromObjects_LinkFlags
+{
+	if module in $(OPTIONS) {
+		linkFlags += -bundle -undefined dynamic_lookup ;
+	} else {
+		local installName =
+			[ _retrieveVar INSTALL_NAME_PATH : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+			[ _retrieveVar INSTALL_NAME_PATH : * : $(CONFIG) : $(PLATFORM) ] ;
+		if ! $(installName)
+		{
+			installName = $(_t:TD) ;
+		}
+		else
+		{
+			installName = $(installName[1]) ;
+		}
+		installName = $(_t:BSR=$(installName)) ;
+		on $(TARGET) linkFlags += -dynamiclib -install_name $(installName) ;
+	}
+}
+
+} # TARGETINFO_LOCATE
+
+BUILD_EXTENSIONS = $(SUFOBJ) .res ;
+C.AddBuildExtensions CC : .c .s : CC : $(SUFOBJ) "" : 1 : 1 ;
+C.AddBuildExtensions C++ : .cc .cpp .cxx : C++ : $(SUFOBJ) "" : 1 : 1 ;
+C.AddBuildExtensions PCH : .h : PCH : "" .gch : 0 : 0 ;
+C.AddBuildExtensions M : .m : CC : $(SUFOBJ) "" : 1 : 1 ;
+C.AddBuildExtensions MM : .mm : C++ : $(SUFOBJ) "" : 1 : 1 ;
+
+
+

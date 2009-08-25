@@ -1,6 +1,6 @@
 SubDir TOP ;
 
-OutputPath * : @($(ALL_LOCATE_TARGET)/../image:R=) ;
+C.OutputPath * : @($(ALL_LOCATE_TARGET)/../image:R=) ;
 
 SubInclude TOP app : app ;
 SubInclude TOP lib-c : lib-c ;

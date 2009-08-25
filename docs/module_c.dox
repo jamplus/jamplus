@@ -1,0 +1,864 @@
+/*! \page module_c C/C++ Rules
+
+\code
+    # Automatically made available, so this isn't needed.
+    IncludeModule c ;
+\endcode
+
+The C module provides rules to build C and C++ applications, shared libraries, and static libraries.
+
+When first loaded, it attempts to detect the compiler on the machine.  On Windows, it can successfully detect and run Visual C++ 6, Visual Studio 2003, Visual Studio 2005, Visual Studio 2008, and Visual Studio 2010.  On other OSes, it attempts to detect GCC.
+
+\section module_c_ruleslist List of Rules
+
+\secreflist
+\refitem rule_C_AddBuildExtensions C.AddBuildExtensions
+\refitem rule_C_Application C.Application
+\refitem rule_C_BatchCompileGroupSize C.BatchCompileGroupSize
+\refitem rule_C_CFlags C.CFlags
+\refitem rule_C_CppFlags C.C++Flags
+\refitem rule_C_CompileOptions C.CompileOptions
+\refitem rule_C_RuntimeType C.RuntimeType
+\refitem rule_C_DefFile C.DefFile
+\refitem rule_C_Defines C.Defines
+\refitem rule_C_ExcludeFromBuild C.ExcludeFromBuild
+\refitem rule_C_ForceInclude C.ForceInclude
+\refitem rule_C_IncludeDirectories C.IncludeDirectories
+\refitem rule_C_Library C.Library
+\refitem rule_C_LinkDirectories C.LinkDirectories
+\refitem rule_C_LinkFlags C.LinkFlags
+\refitem rule_C_LinkFrameworks C.LinkFrameworks
+\refitem rule_C_LinkLibraries C.LinkLibraries
+\refitem rule_C_LinkPrebuiltLibraries C.LinkPrebuiltLibraries
+\refitem rule_C_Lump C.Lump
+\refitem rule_C_NoPrecompiledHeader C.NoPrecompiledHeader
+\refitem rule_C_ObjectCFlags C.ObjectCFlags
+\refitem rule_C_ObjectCppFlags C.ObjectC++Flags
+\refitem rule_C_ObjectDefines C.ObjectDefines
+\refitem rule_C_ObjectForceInclude C.ObjectForceInclude
+\refitem rule_C_OutputName C.OutputName
+\refitem rule_C_OutputPath C.OutputPath
+\refitem rule_C_OutputPostfix C.OutputPostfix
+\refitem rule_C_OutputPostfixClear C.OutputPostfixClear
+\refitem rule_C_OutputSuffix C.OutputSuffix
+\refitem rule_C_PrecompiledHeader C.PrecompiledHeader
+\endsecreflist
+
+\section module_c_rules Rules
+
+<hr>
+\section rule_C_AddBuildExtensions rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO_LINK
+\addindex rule_C_AddBuildExtensions
+
+Makes a new C/C++ source extensions available to the compiler.  This rule requires some additional setup, described below.
+
+\c TYPE identifies a category of files and is a short identifier, usually all caps.  It is used to access compiler flags variables during a file's compilation.  If \c TYPE were specified as <tt>CC</tt>, then the compiler flags in the variables called <tt>preCCFLAGS</tt>, <tt>CCFLAGS</tt>, <tt>SUBDIRCCFLAGS</tt>, and <tt>PCHCCFLAGS</tt> would be used.
+
+\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> (and possibly others) to link into the application.  Object and compiled Windows resource files may also be passed with this list.
+\param OPTIONS The following options are available.  All options are optional.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c windows - Forces a GUI application.  On Windows, the application must have a \c WinMain function.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
+  <li>\c console (default) - Builds a console application.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    C.Application helloworld : helloworld.cpp ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_Application rule C.Application TARGET : SOURCES [ : OPTIONS ]
+\addindex rule_C_Application
+
+Compiles \c SOURCES and links them into \c TARGET.  Platform specific <tt>.o</tt> files or, on Visual C++ compilers, <tt>.res</tt> files are passed straight through to the linker.  Any file excluded from the build via \ref rule_C_ExcludeFromBuild is ignored.
+
+\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> (and possibly others) to link into the application.  Object and compiled Windows resource files may also be passed with this list.
+\param OPTIONS The following options are available.  All options are optional.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c windows - Forces a GUI application.  On Windows, the application must have a \c WinMain function.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
+  <li>\c console (default) - Builds a console application.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    C.Application helloworld : helloworld.cpp ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_BatchCompileGroupSize rule C.BatchCompileGroupSize TARGET [ : SIZE ]
+\addindex rule_C_BatchCompileGroupSize
+
+For the given project \c TARGET, only allow \c SIZE files to be batch compiled in a given compiler execution.
+
+\param TARGET The target to assign the \c SIZE information to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SIZE (optional) The maximum number of files to allow to compile on a given compiler execution.  If not specified, there is no limit to the number of batch compiled files.
+
+\code
+    # wxLua takes so long to build that we don't properly take advantage of
+    # multithreading without splitting up the build some.
+    C.BatchCompileGroupSize wxLua : 5 ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_C_CFlags rule C.CFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_CFlags
+
+For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.
+
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Assign /clr:oldsyntax to all C files in managedapp across all
+    # configurations and platforms.
+    C.CFlags managedapp : /clr:oldsyntax ;
+
+    # Assign /clr:oldsyntax to all C files in managedapp for the debug
+    # configuration and all platforms.
+    C.CFlags managedapp : /clr:oldsyntax : debug ;
+
+    # Assign /clr:oldsyntax to all C files in managedapp for the debug
+    # configuration and win32 platform.
+    C.CFlags managedapp : /clr:oldsyntax : debug : win32 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_CppFlags rule C.C++Flags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_CppFlags
+
+For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.
+
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Assign /clr:oldsyntax to all C++ files in managedapp across all
+    # configurations and platforms.
+    C.C++Flags managedapp : /clr:oldsyntax ;
+
+    # Assign /clr:oldsyntax to all C++ files in managedapp for the debug
+    # configuration and all platforms.
+    C.C++Flags managedapp : /clr:oldsyntax : debug ;
+
+    # Assign /clr:oldsyntax to all C++ files in managedapp for the debug
+    # configuration and win32 platform.
+    C.C++Flags managedapp : /clr:oldsyntax : debug : win32 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_CompileOptions rule C.CompileOptions OPTIONS
+\addindex rule_C_CompileOptions
+
+Sets options that affect how the compiler builds.
+
+\param OPTIONS The following options are available.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c outputastree - Set this if you want object files to be put in subdirectories matching the directory hierarchy of the source files.  <tt>..</tt> directory entries are changed to <tt>__</tt> so the object files stay within the build hierarchy.  The default is to put all object files in one flat directory per project.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    C.CompileOptions outputastree ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_C_RuntimeType rule C.RuntimeType TARGET : TYPE [ : THE_PLATFORM ]
+\addindex rule_C_RuntimeType
+
+For the given project \c TARGET, alter the build to use either a statically linked C runtime or a dynamically linked C runtime.
+
+\note At this time, the C runtime type only affects Visual C++ applications.
+
+\param TARGET The target to assign the new C runtime to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the C runtime is changed globally.
+\param TYPE May be set to either \c static or \c dynamic.  Use \c static to select a statically linked C runtime.  Use \c dynamic to dynamically link against the C runtime.
+\param THE_PLATFORM (optional) If not specified, the default is the current platform.
+
+\code
+    # Use the statically linked C runtime for all targets.
+    C.RuntimeType * : static ;
+
+    # Use the dynamically linked C runtime for the helloworld target.
+    C.RuntimeType helloworld : dynamic ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_DefFile rule C.DefFile TARGET : SOURCES
+\addindex rule_C_DefFile
+
+When linking the given \c TARGET, link the .def file(s) specified in \c SOURCES.
+
+\note At this time, the def file only affects Visual C++ applications.
+
+\param TARGET The target to link the def file to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES One or more \c .def files.  \c .def files are searched for in <tt>$(SEARCH_SOURCE)</tt>.
+
+\code
+    # Link the WorkspaceWhiz target against WorkspaceWhiz.def.
+    C.DefFile WorkspaceWhiz : WorkspaceWhiz.def ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_Defines rule C.Defines TARGET : DEFINES [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_Defines
+
+For the given project \c TARGET, assign the \c DEFINES to the appropriate configuration and platform.
+
+\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param DEFINES The list of defines to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Make #defines available for ABC and DEF=5 in someproject for all
+    # configurations and all platforms.
+    C.Defines someproject : ABC DEF=5 ;
+
+    # For the win32 platform, add a WIN32 define globally.
+    C.Defines * : WIN32 : : win32 ;
+
+    # Quote a #define, keeping the quotes for compilation:
+    C.Defines luacom : LUA5 "LUACOM_DLL=\\\"luacom.dll\\\"" ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ExcludeFromBuild rule C.ExcludeFromBuild TARGET : SOURCES
+\addindex rule_C_ExcludeFromBuild
+
+For the given project \c TARGET, exclude the \c SOURCES from the build.  If using <b>JamToWorkspace</b> for project generation, sources must be excluded and not simply removed from the list.  Otherwise, they don't all show in the generated projects.
+
+\param TARGET The target to exclude the \c SOURCES from.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of defines to exclude.
+
+\code
+    if $(PLATFORM) != xbox
+    {
+        C.ExcludeFromBuild myproject : $(XBOX_SRCS) ;
+    }
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ForceInclude rule C.ForceInclude TARGET : INCLUDES [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_ForceInclude
+
+For the given project \c TARGET, assign the \c INCLUDES to the appropriate configuration and platform, causing that project's compilation to force the inclusion of the header before anything else.
+
+\param TARGET The target to assign the \c INCLUDES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param INCLUDES The list of header files to force include.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Automatically #include myheader.h for all source files listed in myproject.
+    C.ForceInclude myproject : myheader.h ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_IncludeDirectories rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_IncludeDirectories
+
+For the given project \c TARGET, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
+
+\param TARGET The target to assign the \c INCLUDEPATHS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param INCLUDEPATHS The list of include paths to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Add $(Code)/Shared to myproject for all configurations and all platforms.
+    C.IncludeDirectories myproject : $(Code)/Shared ;
+
+    # For the win32 platform, add the MFC include path.
+    C.IncludeDirectories myproject : "$(MSVCNT)/atlmfc/include" : : win32 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_Library rule C.Library TARGET : SOURCES [ : OPTIONS ]
+\addindex rule_C_Library
+
+Compiles \c SOURCES and archives them into a library called \c TARGET.  Filenames with an <tt>.obj</tt> or <tt>.res</tt> are passed straight through to the linker.  Any file excluded from the build via \ref rule_C_ExcludeFromBuild is ignored.
+
+\param TARGET The targets to archive \c SOURCES into.  The target name is given without extension; a platform specific extension will be generated.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> to link into the application.  Object and compiled Windows resource files may also be passed with this list.
+\param OPTIONS (optional) The following options are available.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c shared - Instead of building a static library (the default), a shared library (DLL) is built.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\htmlonly <blockquote> \endhtmlonly
+If \c shared is specified for \c OPTIONS, the following additional options are available:
+
+<ul>
+  <li>\c console (default) - Builds a console application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.</li>
+  <li>\c nodefaults - Avoid adding /SUBSYSTEM to the link flags.</li>
+  <li>\c noexportlib - Don't write out an export library.</li>
+  <li>\c nomanifest - Don't embed a manifest.</li>
+  <li>\c regserver - On Windows, <b>regsvr32</b> is run during the build to automatically register the DLL with the system.  When cleaning, <b>regsvr32 /u </b>is run.
+  <li>\c windows - Forces a GUI application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    # Build a static library called mystaticlibrary from the sources
+    # file1.c and file2.cpp.
+    C.Library mystaticlibrary : file1.c file2.cpp ;
+
+    # Build a shared library called mystaticlibrary from the sources
+    # file3.c and file4.cpp.
+    C.Library mysharedlibrary : file3.c file4.cpp : shared ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_LinkDirectories rule C.LinkDirectories TARGET : DIRECTORIES [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_LinkDirectories
+
+For the given project \c TARGET, assign the link \c DIRECTORIES to the appropriate configuration and platform.
+
+\param TARGET The target to assign the link \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param DIRECTORIES The list of link directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Add c:/some/directory to myproject for all configurations and
+    # all platforms.
+    C.LinkDirectories myproject : c:/some/directory ;
+
+    # For the win32 platform, add the MFC link directory.
+    C.LinkDirectories myproject : "$(MSVCNT)/atlmfc/lib" : : win32 ;
+
+    # Relative path:
+    C.LinkDirectories myproject : ../lib ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_LinkFlags rule C.LinkFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_LinkFlags
+
+For the given project \c TARGET, assign the link \c FLAGS to the appropriate configuration and platform.
+
+\param TARGET The target to assign the link \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of link flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    C.LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.debug.dll : debug ;
+    C.LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.dll : release ;
+    C.LinkFlags ManagedLuaPlus : /KEYFILE:\"$(SEARCH_SOURCE)/ManagedLuaPlus.snk\" ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_LinkFrameworks rule C.LinkFrameworks TARGET : FRAMEWORKS [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_LinkFrameworks
+
+\note This rule is only valid on Mac OS X.
+
+Links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are set, so changes to the framework will not be relinked.
+
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param FRAMEWORKS The list of frameworks to link.  The frameworks are specified without an extension.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    C.LinkFrameworks MyApp : CoreFoundation ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_LinkLibraries rule C.LinkLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_LinkLibraries
+
+Makes \c TARGET depend on Jam generated \c LIBRARIES and includes them during linking.
+
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param LIBRARIES The list of libraries to apply.  These libraries are those generated from the \ref rule_C_Library rule.  They do not include prebuilt libraries.  To link prebuilt libraries, use the \ref rule_C_LinkPrebuiltLibraries rule.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+	C.LinkLibraries MiniApp : Application LuaPlusStatic Misc ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_LinkPrebuiltLibraries rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_LinkPrebuiltLibraries
+
+Makes \c TARGET depend on \c LIBRARIES and includes them during linking.
+
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param LIBRARIES The list of libraries to apply.  These libraries are prebuilt libraries, such as kernel32.lib, and are specified without an extension.  For those libraries generated from the \ref rule_C_Library rule, use the \ref rule_C_LinkLibraries rule.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    C.LinkPrebuiltLibraries MiniApp : advapi32 gdi32 ole32 shell32 user32 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_Lump rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME [ : PCH_HEADER : PCH_HEADER_FILENAME : LUMP_EXT : EXTRA_INCLUDE_PATHS ]
+\addindex rule_C_Lump
+
+Generates a <tt>.c</tt> or <tt>.cpp</tt> file containing an <tt>\#include</tt> amalgamation of files passed into the rule.
+
+The name of the generated lump file is <tt>\$(LOCATE_SOURCE)/!\$(LUMP_NAME)!.\$(LUMP_EXT)</tt>.  The lump file has the following contents:
+
+<ol>
+<li>If a precompiled header is specified through \c PCH_HEADER and \c PCH_HEADER_FILENAME, a <tt>\#include "$(PCH_HEADER_FILENAME)"</tt> line is added to the lump file.</li>
+<li>For each C-style source specified in \c SOURCES_VARIABLE_NAME that is not excluded from the build via \ref rule_C_ExcludeFromBuild, a <tt>\#include "filename"</tt> is added to the lump file.</li>
+</ol>
+
+Lumping may be turned off globally by setting the global variable <tt>LUMP</tt> to be <tt>0</tt>.
+
+\param PARENT The parent target to which the lump file belongs.  \c PARENT is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES_VARIABLE_NAME The variable name listing the source files to be added to the lump.  This is not an expanded version through <tt>$(SRCS)</tt> but rather, it is the actual name of the variable, <tt>SRCS</tt>.  On return from the \c Lump rule, \c SOURCES_VARIABLE_NAME will be populated with the gristed name of the lump file.  It will not contain the original file list anymore.
+\param PCH_HEADER (optional) If \c PCH_HEADER is specified, \c PCH_HEADER_FILENAME must also be specified.  \c PCH_HEADER should be the title of the file that is the precompiled header.  That is, if the precompiled header is <tt>StdAfx.cpp</tt>, \c PCH_HEADER must be <tt>StdAfx</tt>.
+\param PCH_HEADER_FILENAME (optional, but required if \c PCH_HEADER is passed in) \c PCH_HEADER_FILENAME is used when building the lump file, as seen above in #1 of the lump file contents.
+\param LUMP_EXT (optional) If a different lump file extension than the default <tt>.cpp</tt> is required, pass it here.  It should not contain the opening period.
+\param EXTRA_INCLUDE_PATHS If additional include paths are needed for this lump file, specify them here.
+
+\code
+    # For the Misc target, use the contents of SRCS to build a lump called
+    # MiscLump.  In addition, this lump should use the precompiled header file
+    # Misc_InternalPch.h.
+    C.Lump Misc : SRCS : MiscLump : Misc_InternalPch : Misc_InternalPch.h : cpp ;
+
+    # A separate lump in the Misc target is made for PNG_SRCS.  It doesn't have
+    # a precompiled header, but it should be generated as a C file.
+    C.Lump Misc : PNG_SRCS : PNGLump : : : c ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_NoPrecompiledHeader rule C.NoPrecompiledHeader TARGET : FILES
+\addindex rule_C_NoPrecompiledHeader
+
+Creates a precompiled header and uses it on the specified \c FILES.
+
+\param TARGET The target to which the precompiled header belongs.  This is needed to properly grist the precompiled header filenames.  If not specified, \c TARGET defaults to the active target set via \ref rule_ActiveProject "ActiveProject".
+\param FILES The list of files to turn off precompiled header support for.
+
+\code
+    PCH_SRCS =
+        # Some files...
+        file_no_pch.c
+        # More files...
+    ;
+
+    # For all sources in PCH_SRCS in the Misc project, the precompiled header
+    # will be set to Misc_InternalPch.h.  The precompiled header file is created
+    # from Misc_InternalPch.cpp.
+    C.PrecompiledHeader Misc : Misc_InternalPch : $(PCH_SRCS) ;
+
+    # Turn off the precompiled header for one of the files that had PCH support
+    # added.
+    C.NoPrecompiledHeader Misc : file_no_pch.c ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ObjectCFlags rule C.ObjectCFlags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_ObjectCFlags
+
+For the given \c SOURCES matching <tt>*.c</tt>, assign the \c FLAGS to the appropriate configuration and platform.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of sources to assign the \c FLAGS to.
+\param FLAGS The list of flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Assign /clr:oldsyntax to all C files in managedapp across all
+    # configurations and platforms.
+    C.ObjectCFlags managedapp : somefile.c : /clr:oldsyntax ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ObjectCppFlags rule C.ObjectC++Flags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_ObjectCppFlags
+
+For the given \c SOURCES matching *.cpp or *.cxx, assign the \c FLAGS to the appropriate configuration and platform.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of sources to assign the \c FLAGS to.
+\param FLAGS The list of flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Assign /clr:oldsyntax to all C files in managedapp across all
+    # configurations and platforms.
+    C.ObjectC++Flags managedapp : somefile.cpp : /clr:oldsyntax ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ObjectDefines rule C.ObjectDefines TARGET : SOURCES : DEFINES [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_ObjectDefines
+
+For the given \c SOURCES, assign the \c DEFINES to the appropriate configuration and platform.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of sources to assign the \c DEFINES to.
+\param DEFINES The list of defines to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Make #defines available for ABC and DEF=5 in someproject's justafile.cpp
+	# for all configurations and all platforms.
+    C.ObjectDefines someproject : justafile.cpp : ABC DEF=5 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ObjectForceInclude rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_ObjectForceInclude
+
+For the given \c SOURCES, assign the \c INCLUDES to the appropriate configuration and platform, causing that project's compilation to force the inclusion of the header before anything else.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of sources to assign the force include flag to.
+\param INCLUDES The list of header files to force include.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Automatically #include ../common/print.h in libA.cpp.
+    C.ObjectForceInclude libA : libA.cpp : ../common/print.h ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ObjectIncludeDirectories rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_ObjectIncludeDirectories
+
+For the given \c SOURCES, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of sources to assign the include paths to.
+\param INCLUDEPATHS The list of include paths to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Add $(Code)/Shared to myproject's somefile.cpp for all configurations
+    # and all platforms.
+    C.ObjectIncludeDirectories myproject : somefile.cpp : $(Code)/Shared ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_OutputName rule C.OutputName TARGET : NAME [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_OutputName
+
+By default, the name of a generated executable or library is determined by the name of the \c TARGET.  \c OutputName is used to override the name of the executable or library.
+
+\param TARGET The target to affect the output name change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param NAME The new name of the output target.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Change the name of the LuaPlusShared target to LuaPlus_1100.  When
+    # the shared library is created, the name on disk will be LuaPlus_1100.dll.
+    C.OutputName LuaPlusShared : LuaPlus_1100 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_OutputPath rule C.OutputPath TARGET : OUTPUTPATH [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_OutputPath
+
+By default, the output location of a generated executable or library is at \c LOCATE_TARGET.  \c OutputPath is used to override the output location of the executable or library.
+
+\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param OUTPUTPATH The new output location of the generated target.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Change the name of the LuaPlusShared target to LuaPlus_1100.  When
+	# the shared library is created, the name on disk will be LuaPlus_1100.dll.
+    #
+    # Also change the output location of the generated DLL.
+    C.OutputName LuaPlusShared : LuaPlus_1100 ;
+    C.OutputPath LuaPlusShared : "c:/Program Files/LuaPlus" ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_OutputPostfix rule C.OutputPostfix TARGET : POSTFIX [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_OutputPostfix
+
+The output postfix is appended to the end of the generated target name.  By default, the output postfix is .\$(CONFIG).  This means the resultant filename is \$(OUTPUTNAME).\$(CONFIG).\$(EXT).
+
+If there is no assigned output postfix for \c TARGET, then the global target \c * is checked for a postfix.
+
+\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param POSTFIX The new output postfix of the generated target.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Change the name of the LuaPlusShared target to LuaPlus_1100.  When
+    # the shared library is created, the name on disk will be LuaPlus_1100.dll.
+    #
+    # Also change the output location of the generated DLL.
+    #
+    # Generate the postfix as follows:
+    #
+    #   * For debug:   LuaPlus_1100.debug.dll
+    #   * For release: LuaPlus_1100.dll
+    C.OutputName LuaPlusShared : LuaPlus_1100 ;
+    C.OutputPath LuaPlusShared : "c:/Program Files/LuaPlus" ;
+    C.OutputPostfix LuaPlusShared : .debug : debug ;
+    C.OutputPostfix LuaPlusShared : : release ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_OutputPostfixClear rule C.OutputPostfixClear TARGET : THE_CONFIG : THE_PLATFORM
+\addindex rule_C_OutputPostfixClear
+
+Clear the output postfix.
+
+\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    C.OutputPostfix LuaPlusShared : .debug : debug ;
+	C.OutputPostfixClear LuaPlusShared : debug ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_OutputSuffix rule C.OutputSuffix TARGET : SUFFIX [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_OutputSuffix
+
+The output suffix is the file extension of the generated target.  By default, the output suffix is appropriate for an executable or library.
+
+\param TARGET The target to affect the output suffix change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SUFFIX The new output suffix of the generated target.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # The final name will be SomePlugin.appplugin.
+    C.OutputSuffix SomePlugin : .appplugin ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_PrecompiledHeader rule C.PrecompiledHeader TARGET : NAME : FILES
+\addindex rule_C_PrecompiledHeader
+
+Creates a precompiled header and uses it on the specified \c FILES.
+
+\param TARGET The target to which the precompiled header belongs.  This is needed to properly grist the precompiled header filenames.
+\param NAME This parameter is made up of either one or two filenames.  The first filename is the <tt>.cpp</tt> file used to create the precompiled header.  If it does not contain an extension, <tt>.cpp</tt> is added.  If the second filename is not specified, the default is to use the first filename with its suffix modified to <tt>.h</tt>.  If the second filename is specified, it will represent the header file used for the precompilation.
+\param FILES The list of files to apply the precompiled header to.
+
+\code
+    # For all sources in PCH_SRCS in the Misc project, the precompiled header
+    # will be set to Misc_InternalPch.h.  The precompiled header file is created
+    # from Misc_InternalPch.cpp.
+    C.PrecompiledHeader Misc : Misc_InternalPch : $(PCH_SRCS) ;
+
+    # The precompiled header stdafx.h is applied to SRCS.  stdafx.cpp is used
+    # to create the precompiled header.
+    C.PrecompiledHeader SimpleMFC : stdafx.cpp stdafx.h : $(SRCS) ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+*/
+

@@ -6,12 +6,12 @@ rule SleepThenTouch
 
 actions lua SleepThenTouch
 {
-    require 'iox'
-    iox.Sleep(5000)
+    require 'ex'
+    os.sleep(5)
     io.writeall([[$(<)]], '')
     -- sleep 5
     -- touch $(<)
 }
 
 SleepThenTouch <foo>generated.h ;
-Library foo : sourceA.c sourceB.c ;
+C.Library foo : sourceA.c sourceB.c ;

@@ -1,24 +1,28 @@
-/*! \page jamtoworkspace Workspace Generator
+/*! \page jamtoworkspace Jam Workspace Generator
 
-\section jamtoworkspace_title JamToWorkspace
+\section jamtoworkspace_overview Overview
 
-\subsection jamtoworkspace_overview Overview
+JamPlus has a built-in workspace generator that reads a project's Jamfiles and exports an IDE workspace.  The workspace may then be loaded in the appropriate IDE and represents a read-only view of the contents of the Jamfiles.  Updates to the Jamfiles do not appear automatically in the IDE workspace, although correct Jam builds will continue to function.  JamPlus provides a facility to manually regenerate the workspace when Jamfiles change.
 
-JamToWorkspace reads a project's Jamfiles and exports an IDE workspace.  The workspace may then be loaded in the appropriate IDE and represents a read-only view of the contents of the Jamfiles.  Updates to the Jamfiles do not appear automatically in the IDE workspace, although correct Jam builds will continue to function.
+JamPlus generates a completely out-of-source build structure.  This means that all intermediate files, output files, IDE project files, and other miscellaneous Jam related files exist in a directory external to the source code itself.  Since the entire build tree is generated, merely removing the out-of-source build directory will destroy all evidence of the build.
 
-JamToWorkspace generates a completely out-of-source build structure.  This means that all intermediate files, output files, IDE project files, and other miscellaneous Jam related files exist in a directory external to the source code itself.  Since the entire build tree is generated, merely removing the directory JamToWorkspace populated will destroy all evidence of the build.
-
-Out of source build trees also contain special instructions to make the build run faster.  A dependency cache is set up.  The dependency cache is used to track 'include' dependencies, but it is also used to store MD5 command lines and MD5 contents information.
+Out of source build trees also contain special instructions to make the build run faster.  Among other things, the dependency cache is set up.  The dependency cache is used to track 'include' dependencies, but it is also used to store MD5 command lines and MD5 contents information.
 
 
 
 
-\subsection jamtoworkspace_usage Usage
+\section jamtoworkspace_usage Usage
 
-\b JamToWorkspace exists as a Lua script in bin/scripts/.  Running \b JamToWorkspace without any command line options will list the help.
+Generation of a new IDE workspace is performed by running the command line:
 
 <pre>
-JamToWorkspace
+    jam --workspace ...
+</pre>
+
+Running <b>jam --workspace</b> without any command line options will list the help.
+
+<pre>
+jam --workspace
     [ -gen=<i>GENERATOR</i> ]
     [ -compiler=<i>COMPILER</i> ]
     [ -config=<i>CONFIG</i> ]
@@ -27,7 +31,7 @@ JamToWorkspace
     [ <i>path-to-destination</i> ]
 </pre>
 
-\b JamToWorkspace may be invoked with the following options:
+<b>jam --workspace</b> may be invoked with the following options:
 
 <table width=85% align=center border=1 cellpadding=2>
   <tr>
@@ -35,9 +39,13 @@ JamToWorkspace
 	<td> Sets an IDE workspace and project generator.  <i>GENERATOR</i> may be one of the following:
 	  <ul>
 	    <li> \c codeblocks - Generates CodeBlocks workspaces and projects.
+	    <li> \c none (default) - Do not generate a workspace.
+		<li> \c vc6 - Generates Visual C++ 6.0 workspaces and projects.
 		<li> \c vs2003 - Generates Visual Studio 2003 solutions and projects.
 		<li> \c vs2005 - Generates Visual Studio 2005 solutions and projects.
 		<li> \c vs2008 - Generates Visual Studio 2008 solutions and projects.
+		<li> \c vs2010 - Generates Visual Studio 2010 solutions and projects.
+		<li> \c xcode - Generates Xcode workspaces and projects.
 	  </ul>
 
   <tr>
@@ -46,6 +54,7 @@ JamToWorkspace
 
 	  <i>COMPILER</i> may be one of the following:
 	  <ul>
+	    <li> \c vs2010 - Visual Studio 2010.
 	    <li> \c vs2008 - Visual Studio 2008.
 	    <li> \c vs2005 - Visual Studio 2005.
 	    <li> \c vs2003 - Visual Studio 2003.
@@ -56,7 +65,7 @@ JamToWorkspace
 
   <tr>
     <td valign=top width=20%><code> -config=<i>CONFIG</i> </code>
-	<td> Provides various configuration options to JamToWorkspace.  <i>CONFIG</i> is the name of the configuration file.
+	<td> Provides various configuration options to Jam's workspace generator.  <i>CONFIG</i> is the name of the configuration file.
 
   <tr>
     <td valign=top width=20%><code> -jamflags=<i>KEY=VALUE</i> </code>
@@ -70,14 +79,14 @@ JamToWorkspace
 
   <tr>
     <td valign=top width=20%><code> source-jamfile </code>
-	<td> The path to the Jamfile to start building the workspace from.  If only the directory is specified, then JamToWorkspace attempts to load a file named <tt>Jamfile.jam</tt> from the given directory.  If <i>source-jamfile</i> is a directory with filename, such as <tt>../Game/Pong.jam</tt>, then the specified Jamfile is loaded.
+	<td> The path to the Jamfile to start building the workspace from.  If only the directory is specified, then Jam attempts to load a file named <tt>Jamfile.jam</tt> from the given directory.  If <i>source-jamfile</i> is a directory with filename, such as <tt>../Game/Pong.jam</tt>, then the specified Jamfile is loaded.
 
   <tr>
     <td valign=top width=20%><code> path-to-destination </code>
 	<td> (optional) If <i>path-to-destination</i> is specified, then the build tree will be generated into <i>path-to-destination</i>.  If <i>path-to-destination</i> is not specified, the build tree is generated into the current working directory.
 </table>
 
-Minimally, JamToWorkspace requires the <tt>-gen</tt> parameter and <tt>source-jamfile</tt>.
+Minimally, Jam requires the <tt>-gen</tt> parameter and <tt>source-jamfile</tt>.
 
 Assuming a source tree of:
 
@@ -95,7 +104,7 @@ Assuming a source tree of:
 Running JamToWorkspace from the <tt>helloworld/</tt> root with the following command line creates an out of source build directory in <tt>helloworld/build/</tt>.
 
 \code
-JamToWorkspace -gen=vs2008 Jamfile.jam build
+jam --workspace -gen=vs2008 Jamfile.jam build
 \endcode
 
 From here on out, all Jam executions should be run from within the generated build/ directory.
@@ -104,30 +113,32 @@ From here on out, all Jam executions should be run from within the generated bui
 
 
 
-\subsection jamtoworkspace_generatedfiles Generated Files Detail
+\section jamtoworkspace_generatedfiles Generated Files Detail
 
 Depending on the type of workspace generated, the generated files may be somewhat different.  For our purposes, we'll assume a Visual Studio 2008 workspace was created using the helloworld directory structure above.
 
 - <tt>build/</tt>
-  - <tt>helperlib/</tt>
-    - <tt>helperlib.vcproj</tt> - The generated makefile .vcproj file for the helperlib library.  Contains 'makefile' commands to run Jam with 'helperlib' as the target.
-	- <tt>helperlib.vcproj.cache</tt> - Internally used by JamToWorkspace to determine if the .vcproj needs to be updated.
-  - <tt>main/</tt>
-    - <tt>main.vcproj</tt> - The generated makefile .vcproj file for the main application.  Contains 'makefile' commands to run Jam with 'main' as the target.
-	- <tt>main.vcproj.cache</tt> - Internally used by JamToWorkspace to determine if the .vcproj needs to be updated.
-  - <tt>TargetInfo/</tt> - Information files dumped by Jam and used to construct the workspace.
+  - <tt>vs2008.projects/</tt>
+    - <tt>helperlib/</tt>
+      - <tt>helperlib.vcproj</tt> - The generated makefile .vcproj file for the helperlib library.  Contains 'makefile' commands to run Jam with 'helperlib' as the target.
+      - <tt>helperlib.vcproj.cache</tt> - Internally used by 'jam --workspace' to determine if the .vcproj needs to be updated.
+    - <tt>main/</tt>
+      - <tt>main.vcproj</tt> - The generated makefile .vcproj file for the main application.  Contains 'makefile' commands to run Jam with 'main' as the target.
+      - <tt>main.vcproj.cache</tt> - Internally used by 'jam --workspace' to determine if the .vcproj needs to be updated.
+    - <tt>!BuildWorkspace.vcproj</tt> - A generated makefile .vcproj containing 'makefile' commands to run Jam with 'all' as the target.
+    - <tt>!UpdateWorkspace.vcproj</tt> - A generated makefile .vcproj containing 'makefile' commands to run <tt>vs2008.projects/updateprojects.bat</tt> and regenerate .sln/.vcproj files as necessary.
+    - <tt>helloworld.sln</tt> - The generated .sln file containing references to helperlib.vcproj and main.vcproj.
+    - <tt>helloworld.sln.cache</tt> - Internally used by 'jam --workspace' to determine if the .sln needs to be updated.
+    - <tt>updateprojects.bat</tt> - Used to update any .sln/.vcproj files based on changes to the Jamfiles.
+	- <tt>VSProjectExportInfo.lua</tt> - Internally used to track .vcproj GUIDs session to session.
+  - <tt>_TargetInfo/</tt> - Information files dumped by Jam and used to construct the workspace.
   - <tt>temp-PLATFORM-CONFIG/</tt> - All intermediate and output files are built into this directory.  Files generated by the Jamfiles likely go into here, too.  The directory structure mirrors the source structure.
-  - <tt>!BuildWorkspace.vcproj</tt> - A generated makefile .vcproj containing 'makefile' commands to run Jam with 'all' as the target.
-  - <tt>!UpdateWorkspace.vcproj</tt> - A generated makefile .vcproj containing 'makefile' commands to run UpdateWorkspace.bat and regenerate .sln/.vcproj files as necessary.
-  - <tt>DumpJamTargetInfo.jam</tt> - A helper redirect script used by UpdateWorkspace.bat.
-  - <tt>helloworld.sln</tt> - The generated .sln file containing references to helperlib.vcproj and main.vcproj.
-  - <tt>helloworld.sln.cache</tt> - Internally used by JamToWorkspace to determine if the .sln needs to be updated.
+  - <tt>DumpJamTargetInfo.jam</tt> - A helper redirect script used by <tt>updateworkspace.bat</tt> and <tt>updateprojects.bat</tt>.
   - <tt>jam.bat</tt> - A helper batch file containing the absolute path to the Jam executable that should be used for builds.
-  - <tt>Jambase.jam</tt> - The Jam executable searches for a Jambase.jam, and when run from within the build/ directory, this Jambase.jam acts as a redirect to the real Jambase.jam sitting side by side with the \b Jam executable.  Also contains the default COMPILER setting, as specified on the \b JamToWorkspace command line.
-  - <tt>Jamfile.jam</tt> - The first Jamfile built by the Jam executable.  Contains necessary instructions for setting the intermediate/output location via \c ALL_LOCATE_TARGET, turning on the dependency cache through \c DEPCACHE to speed builds, and SubInclude statements based on where the <i>source-jamfile</i> was specified and any additional SubIncludes from the <tt>.config</tt> file.
-  - <tt>UpdateWorkspace.bat</tt> - Used to update any .sln/.vcproj files based on changes to the Jamfiles.
-  - <tt>UpdateWorkspace.config</tt> - A copy of the configuration passed in through <tt>-config</tt>.
-  - <tt>VSProjectExportInfo.lua</tt> - Internally used to store .vcproj GUIDs.
+  - <tt>Jambase.jam</tt> - The Jam executable searches for a Jambase.jam, and when run from within the build/ directory, this Jambase.jam acts as a redirect to the real Jambase.jam sitting side by side with the \b Jam executable.  Before it redirects, it changes any necessary global settings, such as the default COMPILER, according to the <b>jam --workspace</b> command line.
+  - <tt>Jamfile.jam</tt> - The first Jamfile read by Jam.  Contains necessary instructions for setting the intermediate/output location via \c ALL_LOCATE_TARGET, turning on of the dependency cache through \c DEPCACHE to speed builds, and SubInclude statements based on where the <i>source-jamfile</i> was specified and any additional SubIncludes from the <tt>.config</tt> file.
+  - <tt>updateworkspace.bat</tt> - Regenerates the out of source build root workspace according to settings stored within <tt>workspace.config</tt>.  IDE projects are not updated through this script.  Use <tt>vs2008.projects/updateprojects.bat</tt> instead.
+  - <tt>workspace.config</tt> - A copy of the configuration passed in through <tt>-config</tt>.
 
 */
 

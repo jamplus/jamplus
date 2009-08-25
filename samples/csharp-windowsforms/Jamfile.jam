@@ -1,4 +1,4 @@
-IncludeModule CSharp ;
+IncludeModule csharp ;
 
 PROPERTIES_SRCS =
 		Properties/AssemblyInfo.cs
@@ -18,10 +18,10 @@ SRCS =
 SourceGroup WindowsFormsApplication : Properties : $(PROPERTIES_SRCS) ;
 
 
-CscDefines WindowsFormsApplication : OUCH ;
+CSharp.CscDefines WindowsFormsApplication : OUCH ;
 
 
-ReferenceAssemblies WindowsFormsApplication :
+CSharp.ReferenceAssemblies WindowsFormsApplication :
 		System.Core.dll
 		System.Data.DataSetExtensions.dll
 		System.Data.dll
@@ -33,4 +33,4 @@ ReferenceAssemblies WindowsFormsApplication :
 ;
 
 
-CSharpApplication WindowsFormsApplication : $(SRCS) : windows ;
+CSharp.Application WindowsFormsApplication : $(SRCS) : windows ;

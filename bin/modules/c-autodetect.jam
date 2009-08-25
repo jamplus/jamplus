@@ -1,0 +1,56 @@
+IncludeModule c ;
+
+rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
+{
+	THE_COMPILER ?= $(COMPILER) ;
+	THE_PLATFORM ?= $(PLATFORM) ;
+	THE_CONFIG ?= $(CONFIG) ;
+
+	if $(THE_COMPILER)
+	{
+		COMPILER = $(THE_COMPILER) ;
+	}
+
+	if $(NT)
+	{
+		if $(THE_PLATFORM) = * {
+			IncludeModule c-compilers/c-visualc-autodetect ;
+		} else {
+			IncludeModule c-compilers/c-visualc-autodetect-$(THE_PLATFORM) ;
+		}
+		if [ C.AutoDetect ] {
+			return ;
+		}
+
+		if $(THE_PLATFORM) = * {
+			IncludeModule c-compilers/c-mingw-autodetect ;
+		} else {
+			IncludeModule c-compilers/c-mingw-autodetect-$(THE_PLATFORM) ;
+		}
+		if [ C.AutoDetect ] {
+			return ;
+		} else {
+			Exit No supported build platform found on this computer. ;
+		}
+	}
+	else if $(UNIX)
+	{
+		IncludeModule c-compilers/c-gcc ;
+		if $(PLATFORM) != *  &&  $(CONFIG) != * {
+			IncludeModule c-compilers/c-gcc-$(PLATFORM) ;
+			IncludeModule c-compilers/c-gcc-$(PLATFORM)-$(CONFIG) ;
+		}
+	}
+}
+
+ToolChain $(COMPILER) : $(PLATFORM) : $(CONFIG) ;
+
+########################################################################
+########################################################################
+
+rule ActiveProject PROJECT
+{
+	ACTIVE_PROJECT = $(PROJECT) ;
+}
+
+

@@ -1,6 +1,6 @@
 SubDir TOP ;
 
-IncludeDirectories * : common ;
+C.IncludeDirectories * : common ;
 
 SubInclude TOP project1 : project1 ;
 SubInclude TOP common : common ;

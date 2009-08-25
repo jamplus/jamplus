@@ -1,0 +1,4 @@
+CCFLAGS.iphonesimulator.release on * 		?= -g -O2 ;
+C++FLAGS.iphonesimulator.release on * 	?= -g -O2 ;
+MFLAGS.iphonesimulator.release on * 		?= -g -O2 ;
+MMFLAGS.iphonesimulator.release on * 		?= -g -O2 ;

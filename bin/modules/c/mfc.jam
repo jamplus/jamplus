@@ -1,0 +1,26 @@
+rule C.UseMFC TARGET : OPTIONS
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+
+	if shared in $(OPTIONS) {
+		C.Defines $(TARGET) : _AFXDLL ;
+	}
+
+	if $(COMPILER) = vc6 {
+		C.IncludeDirectories $(TARGET) : "$(MSVCNT)/mfc/Include" "$(MSVCNT)/atl/Include" ;
+
+		if link in $(OPTIONS) {
+			C.LinkDirectories $(TARGET) : "$(MSVCNT)/mfc/Lib" ;
+		}
+
+		RcIncludeDirectories $(TARGET) : "$(MSVCNT)/mfc/Include" "$(MSVCNT)/atl/Include" ;
+	} else {
+		C.IncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
+
+		if link in $(OPTIONS) {
+			C.LinkDirectories $(TARGET) : "$(MSVCNT)/atlmfc/lib" ;
+		}
+
+		C.RcIncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
+	}
+}

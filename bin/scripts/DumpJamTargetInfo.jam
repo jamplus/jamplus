@@ -1,39 +1,14 @@
+UseModule c ;
+
 local platformName = $(PLATFORM) ;
-if $(PLATFORM) = * 	{ platformName = [all] ; }
+if $(PLATFORM) = * 	{ platformName = !all! ; }
 local configName = $(CONFIG) ;
-if $(CONFIG) = * 	{ configName = [all] ; }
+if $(CONFIG) = * 	{ configName = !all! ; }
 TargetInfoFile = TargetInfo.$(platformName).$(configName).lua ;
 
 MakeLocate $(TargetInfoFile) : $(TARGETINFO_LOCATE) ;
 
-rule CreatePrecompiledHeader NAME : HEADER
-{
-}
-
-
-rule UsePrecompiledHeader NAME : HEADER : FILES
-{
-}
-
-
 EMPTY = "" ;
-
-rule LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	if $(PLATFORM) = *  &&  $(CONFIG) = *
-	{
-		local projectsString = "	'$(>)',$(NEWLINE)" ;
-		Contents += "Projects['$(TARGET)'].Libraries = concat(Projects['$(TARGET)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
-		Contents += "$(projectsString:J=$(EMPTY))})$(NEWLINE)" ;
-	}
-}
-
-
-rule Lump
-{
-}
-
 
 rule DumpSources prefix : SOURCES
 {
@@ -108,17 +83,17 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 			ext = SUFSHAREDLIB ;
 		}
 
-		local outputName = [ _retrieveOutputName $(TARGETS) : $(ext) : $(CONFIG) : $(PLATFORM) ] ;
+		local outputName = [ C._retrieveOutputName $(TARGETS) : $(ext) : $(CONFIG) : $(PLATFORM) ] ;
 		Contents += "$(project).OutputNames['$(PLATFORM)']['$(CONFIG)'] = [[$(outputName)]]$(NEWLINE)" ;
 
-		local outputPath = [ _retrieveOutputPath $(TARGETS) : $(CONFIG) : $(PLATFORM) ] ;
+		local outputPath = [ C._retrieveOutputPath $(TARGETS) : $(CONFIG) : $(PLATFORM) ] ;
 		Contents += "$(project).OutputPaths['$(PLATFORM)']['$(CONFIG)'] = [[$(outputPath[1])/]]$(NEWLINE)" ;
 	}
 
 	local defines =
-			[ _retrieveVar DEFINES : * : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar DEFINES : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar DEFINES : $(_obj) : $(CONFIG) : $(PLATFORM) ]
+			[ C._retrieveVar DEFINES : * : $(CONFIG) : $(PLATFORM) ]
+			[ C._retrieveVar DEFINES : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+			[ C._retrieveVar DEFINES : $(_obj) : $(CONFIG) : $(PLATFORM) ]
 	;
 	local definesString = "'$(defines)'," ;
 	definesString ?= "" ;
@@ -126,9 +101,9 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 
 	local hdrs =
 			$(SEARCH_SOURCE)
-			[ _retrieveVar HDRS : $(_obj) : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar HDRS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar HDRS : * : $(CONFIG) : $(PLATFORM) ]
+			[ C._retrieveVar HDRS : $(_obj) : $(CONFIG) : $(PLATFORM) ]
+			[ C._retrieveVar HDRS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+			[ C._retrieveVar HDRS : * : $(CONFIG) : $(PLATFORM) ]
 			$(SUBDIRHDRS)
 			$(STDHDRS)
 	;
@@ -142,31 +117,6 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 	}
 
 	Depends $(TARGETS) : $(TargetInfoFile) ;
-}
-
-
-rule Application TARGET : SOURCES
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	Workspace $(TARGET) : $(TARGET) : all ;
-
-	DumpProjectInfo $(TARGET) : $(SOURCES) : app ;
-	Depends all : $(TARGET) ;
-}
-
-
-rule Library TARGET : SOURCES : OPTIONS
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	if shared in $(OPTIONS)
-	{
-		DumpProjectInfo $(TARGET) : $(SOURCES) : shared ;
-	}
-	else
-	{
-		DumpProjectInfo $(TARGET) : $(SOURCES) : lib ;
-	}
-	Depends all : $(TARGET) ;
 }
 
 

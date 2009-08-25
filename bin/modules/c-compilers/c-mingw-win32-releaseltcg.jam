@@ -1,0 +1,4 @@
+CCFLAGS.win32.releaseltcg on *	= -g -O3 ;
+C++FLAGS.win32.releaseltcg on * = -g -O3 ;
+MFLAGS.win32.releaseltcg on * 	?= -g -O3 ;
+MMFLAGS.win32.releaseltcg on * 	?= -g -O3 ;

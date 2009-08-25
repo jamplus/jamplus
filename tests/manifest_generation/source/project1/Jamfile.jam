@@ -4,10 +4,10 @@ SRCS =
 	$(SUBDIR)/project1.cpp
 ;
 
-CppCompileOptions outputastree ;
+C.CompileOptions outputastree ;
 
 LOCATE_TARGET = $(SUBDIR)/obj/$(PLATFORM)/$(CONFIG) ;
-OutputPath $(PROJECT_NAME) : $(SUBDIR)/lib/$(PLATFORM)/$(CONFIG) ;
-OutputPostfix $(PROJECT_NAME) : ;
+C.OutputPath $(PROJECT_NAME) : $(SUBDIR)/lib/$(PLATFORM)/$(CONFIG) ;
+C.OutputPostfix $(PROJECT_NAME) : ;
 
-Application project1 : $(SRCS) ;
+C.Application project1 : $(SRCS) ;

@@ -1,0 +1,3 @@
+SubDir TOP lib-a ;
+
+C.Library lib-a : add.c add.h ;

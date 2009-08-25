@@ -1,6 +1,6 @@
 SubDir TOP ;
 
-Application test : main.c test.c ;
+C.Application test : main.c test.c ;
 
 CONTENTS on <test>test.h = "extern void Print(const char*);" ;
 

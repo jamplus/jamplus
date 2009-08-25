@@ -4,37 +4,59 @@
 
 <h3>New features for 0.4:</h3>
 
-- Mac OS X build is largely functional.
-- Xcode projects can be generated from Jamfile sources.
+- C/C++ build rules have been separated into their own \ref module_c "Jam module called 'c'".  This module is currently automatically loaded on any Jam invocation.  Most rules are now namespaced like so: \ref rule_C_Application "C.Application" instead of <tt>Application</tt>.  To use the old names, \ref rule_IncludeModule "IncludeModule" <tt>c-deprecated</tt>.
+- The Jam binaries have been moved from the jamplus/bin/ directory to jamplus/bin/\$(OS)\$(OSPLAT).  On Windows, this ends up being jamplus/bin/ntx86/.  On Mac OS X, the directory is jamplus/bin/macosxx86/.  All associated scripts have been moved to this directory, as has the Lua directory structure.  This new structure will allow for multiple platform binaries to exist side by side.  See \ref building_overview "Building Overview" for more information.
+- The Mac OS X build is largely functional, including all support for Xcode workspace generation, Lua scripts, and otherwise.  Additionally, iPhone and iPhone Simulator platforms can be built, but they can not be debugged (yet).
+- Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files are generated.
+- Visual Studio 2010 support has been added by Philipp Teschner.  It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.
 
 
 
 <h3>Bootstrapping/Building:</h3>
 
+- Added a bootstrapping .xcodeproj to debug Mac OS X Jam issues in.  This project is currently only set up for Debug mode.  The Release mode does not work.
+- If the environment variable LUA_BIN is set, the appropriate Lua files are copied to the appropriate platform bin directory.  See \ref building_overview "Building Overview" for more information.
+
+<h4>Minor stuff:</h4>
+
+- Removed the Visual Studio 2005 solution and project files, src/jam.VS2005.sln and src/jam.VS2005.vcproj.
+- Properly generate the <tt>Jambase-j.c</tt> from <tt>Jambase-j</tt> by building \b mkjambase during the bootstrapping run.
+- Build intermediate files to an intermediate folder instead of littering the extra files in the src/ directory.
 
 
 
 <h3>Documentation:</h3>
 
-- Large number of documentation updates, including the documenting of the Jam modules.
+- Large number of documentation updates, including the further documenting of the Jam modules.
 
 
 
 
 <h3>Jam Executable:</h3>
 
-- Mac OS X build: Default the number of Jam jobs to the number of processors on the machine, just like the Windows build.
-- In multipass builds where the NoCare flag has been applied to a target that is missing, do not attempt to move the missing file's build to the next pass.  Properly process it in the current pass.
-- Add a PRIORITY parameter to QueueJamFile.  Queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.
 - Multipass support past 2 passes was broken.  It is fixed now.
+- Add a PRIORITY parameter to \ref rule_QueueJamFile "QueueJamFile".  By default, queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.
+- Add a new rule: \ref rule_ScanContents "ScanContents".  When \ref rule_ScanContents "ScanContents" is specified for a source target (even a generated one) and if the timestamp differs, the contents of the source target are compared against the last run.  If they differ, the build proceeds as normal.  If they are the same, no further building is necessary.
+- Added support for misplaced semicolon and colon detection in the parser, \#ifdef'ed as \c OPT_FIND_BAD_SEMICOLON_USAGE_EXT.  If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace, and a parser error is reported.  You may need to quote strings that didn't need to be quoted before.
+- Add a new built-in rule, \ref rule_Shell "Shell", used for executing shell commands and retrieving their output.
+- Support for new \ref jamtoworkspace_usage "Jam command line options" to build the workspace, convert folders to a Jamfile, and convert the contents of a .vcproj to a Jamfile.  These command line options replace the old calls to \b JamToWorkspace and other helper scripts.
+- Simplify the -s command line flag (which is still available) by parsing KEY=VALUE pairs off the command line.  That is, 'jam -sCONFIG=debug all' and 'jam CONFIG=debug all' mean the same thing.  See \ref usage for more information.  (Made available through <tt>\#define OPT_KEY_EQUALS_VALUE_DEFINES_EXT</tt>.)
+- Allow for the failure of an <tt>actions lua</tt> block at runtime.
+- Added a way of accessing the targets specified on the command line from within Jam through the global variable \c JAM_COMMAND_LINE_TARGETS.  One method of using this variable is to filter sections of the Jam script to save build time.  (Made available through <tt>\#define OPT_SET_JAMCOMMANDLINETARGETS_EXT</tt>.)
 - If an action is empty, don't put any of the whitespace through.  It dies on Unix shells.
-- Added support for misplaced semicolon and colon detection in the parser, #ifdef'ed as OPT_FIND_BAD_SEMICOLON_USAGE_EXT.  If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace.  You may need to quote strings that didn't need to be quoted before.
-- Mac OS X has a case insensitive file system.  Turned on the DOWNSHIFT_PATHS #define to compensate for that.
-- Add a new built-in command, Shell, used for executing shell commands and retrieving their output.
-- Beginnings of bringing Lua support online for Mac OS X.
-- Minor fix to OPT_BUILTIN_NEEDS_EXT for certain conditions when Needs is used with MightNotUpdate.
-- The beginnings of support for new Jam command line options to build the workspace, convert folders to a Jamfile, and convert the contents of a .vcproj to a Jamfile.  These command line options currently mirror the bin/scripts/ equivalent Lua scripts.  I expect to rename these for greater ease of use.
-- Fix the Mac OS X directory creation under certain instances in the function file_mkdir().
+
+<h4>Technical Details:</h4>
+
+- In multipass builds where the \ref rule_NoCare "NoCare" flag has been applied to a target that is missing, do not attempt to move the missing file's build to the next pass.  Properly process it in the current pass.
+- Mac OS X has a case preserving, case insensitive file system.  Turned on <tt>\#define DOWNSHIFT_PATHS</tt> to compensate for that.
+- Fix the Mac OS X directory creation under certain instances in the function <tt>file_mkdir()</tt>.
+- Alter the <tt>OPT_UPDATED_CHILD_FIX</tt> from http://maillist.perforce.com/pipermail/jamming/2006-May/002676.html to handle the case where an child target's includes target has a fate of anything greater than <tt>T_FATE_STABLE</tt>.  This specifically guards against the case where <tt>T_FATE_MISSING</tt> is applied to one of the children, and it doesn't build in the current Jam execution.
+- Turn off <tt>OPT_PERCENT_DONE_EXT</tt> for now.  It provided faulty percentages due to all of the patches that JamPlus employs.
+- Registry scanning bug fix from Philipp Teschner.  Previous to the fix, \ref rule_W32_GETREG "W32_GETREG" only worked with <tt>HKEY_LOCAL_MACHINE</tt>.  If you used anything else, it would infinitely loop.
+- Undo the <tt>OPT_CHILD_UPDATED</tt> patch in make.c.  It does not work properly with certain combinations of assets, and in truth, I'm not sure what problem it is really trying to solve or even if another patch solves it already.
+- Fixed a bug in the glob expansion directory matching: **@{@}/ now works.
+- Enable Lua actions on Mac OS X.  This requires polling for process exits, as on Windows, instead of just calling the C runtime wait() function.
+- A minor fix to \c OPT_BUILTIN_NEEDS_EXT was made for certain conditions when \ref rule_Needs "Needs" is used with \ref rule_MightNotUpdate "MightNotUpdate".
 
 
 
@@ -43,18 +65,29 @@
 
 <h3>Jambase:</h3>
 
-- Add InstallNamePath rule.  This is currently available only on Mac OS X to provide the -install_name flag to the linker.
-- When the list of files in an archive changes, populate the archive again.  This solves the bug where removing a file from the list of files in an archive left the removed file in the archive.
-- Jambase: Support .m, .mm, and .s files.  This support is for GNU only compilers.
+- Add \ref rule_InstallNamePath "InstallNamePath" rule.  This is currently available only on Mac OS X to provide the -install_name flag to the linker.
+- When the list of files in a library archive changes, the archive is populated again from the object files.  This solves the bug where removing a file from the list of files in an archive left the removed file in the archive.
+- Revamp the assignment of C/C++ extensions.  They can now be created through the public rule \ref rule_C_AddBuildExtensions "AddBuildExtensions".  As part of this change, support for Objective C/C++ files, .m and .mm, and assembly files (.s) files has been added.  This support is for GNU only compilers.
 - Add -isysroot compiler flags for Mac OS X.
-- Jambase: Fix optimization flags for GCC platforms.
-- Jambase: Add LinkFrameworks rule for linking against frameworks on Mac OS X.
-- Jambase: Add ForceInclude rule, which forces the inclusion of the listed header files before any other #include lines.
-- Jambase: Add ObjectForceInclude rule.
-    * Jambase: Revamp the assignment of C/C++ extensions.  They can now be created through the public rule AddBuildExtensions.
-    * Jambase: Lump rule now accepts all CC and C++ extensions.
-    * Jambase: Add new NoPrecompiledHeader rule to turn off precompiled headers for the specified files.
-    * Jambase: ObjectIncludeDirectories now roots relative paths against $(SUBDIR).
+- Fix optimization flags for GCC platforms.
+- Add \ref rule_C_LinkFrameworks "C.LinkFrameworks" rule for linking against frameworks on Mac OS X.
+- Add \ref rule_C_ForceInclude "C.ForceInclude" rule, which forces the inclusion of the listed header files before any other \#include lines.
+- Add \ref rule_C_ObjectForceInclude "C.ObjectForceInclude" rule.
+- The \ref rule_C_Lump "C.Lump" rule now accepts all CC and C++ extensions.
+- Add new \ref rule_C_NoPrecompiledHeader "C.NoPrecompiledHeader" rule to turn off precompiled headers for the specified files.
+- \ref rule_C_ObjectIncludeDirectories "C.ObjectIncludeDirectories" now roots relative paths against \$(SUBDIR).
+- The <tt>C.ApplicationFromObjects</tt> rule was not properly using the <tt>C.LinkDebug</tt> action for Visual Studio when building the debug configuration.  <tt>C.SharedLibraryFromObjects</tt> was using it fine, however.  Thanks to Tim S for finding this bug.
+- Add support to \ref rule_C_ForceInclude "C.ForceInclude" to root a relative include against the current \ref rule_SubDir "SubDir".
+- Add precompiled header support for GCC.
+- Allow specification of a precompiled header whose name and/or path is different than the containing .cpp/.c file.  The original rule format continues to work. * Tests: Updated tests/source_and_jamfiles_separate to illustrate the new precompiled header behavior.
+- GCC .pch name fix.
+- In the \ref rule_MakeLocate "MakeLocate" rule, root the specified directory against \$(SUBDIR).
+- Fix the rooting against an empty \$(SUBDIR) in the \ref rule_C_ForceInclude "C.ForceInclude", \ref rule_C_IncludeDirectories "C.IncludeDirectories", \ref rule_C_LinkDirectories "C.LinkDirectories", \ref rule_C_ObjectIncludeDirectories "C.ObjectIncludeDirectories", and \ref rule_C_ObjectForceInclude "C.ObjectForceInclude" rules.
+- The releaseltcg configuration was not set up for GCC.  It still isn't a link time code generation, but optimizations are now applied, whereas they weren't before.
+- On platforms supporting a recursive mkdir, only run the mkdir action once.  Do not internally handle it recursively.
+- Visual Studio 2010 support provided by Philipp Teschner.
+- Made the \ref rule_SearchSource "SearchSource" rule take an optional second parameter, the SEARCH_PATH.  If the parameter is not specified, then \$(SEARCH_SOURCE) is used.
+- Jambase and MFC/Midl modules: Visual C++ 6.0 compilation fixes.
 
 
 
@@ -75,6 +108,15 @@
 
 
 
+- CopyFile module: The CopyFile rule will use the ActiveProject if the PARENT parameter is not specified.
+- CopyFile module: The source and destination filenames are now quoted on the copy command line.
+- CopyDirectory module: The CopyDirectory rule now accepts an additional argument, RECURSIVE.  If RECURSIVE is specified, then a recursive directory copy is performed.  If it is not specified, then CopyDirectory merely copies the file contents of the SOURCE_PATH, and directories are ignored.
+- Added hardsoftlink module with rules for establishing a HardLink and a SoftLink.
+- Jambase and MFC/Midl modules: Visual C++ 6.0 compilation fixes.
+
+
+
+
 
 
 
@@ -85,6 +127,24 @@
 - JamToWorkspace now runs on Mac OS X.  Visual Studio projects can be output on Mac OS X without issue.
 - Additional command line option --jamflags added.  Any KEY=VALUE pairs specified on the command line are automatically added to the top of the generated Jambase.jam.
 - Xcode support.
+ 
+
+ 
+ 
+- JamToWorkspace: Add releaseltcg configuration.
+- JamToWorkspace: Properly quote filenames to work on Windows 7 within the .vcproj Build, Rebuild, and Clean command lines.
+- JamToWorkspace: Fix the quoting in the .vcproj generation.
+- JamToWorkspace: Fix the Visual Studio .sln to be output to the new location.  Also output other files there, too.
+- JamToWorkspace: ProjectGroups and SourceGroups can be specified anywhere in the file.
+- JamToWorkspace: Remove possible grists from sources lists when generating the workspace.
+- JamToWorkspace: Fix a crash bug when a project's information isn't available.
+- JamToWorkspace: For the Xcode workspace, write out all dependent files into the .xcodeproj.  Sort them.
+- JamToWorkspace: Add Visual Studio 2010 support.  Unfortunately, as of the current VS beta, it is impossible to debug a Makefile pro
+- JamToWorkspace: Status update text changed to be more clear as to what is happening.
+- JamToWorkspace: Multiplatform .vcproj support.
+- JamToWorkspace: Allow --gen=none to build an out of source build directory and not populate it with projects.  Make --gen=none be the default.
+- JamToWorkspace: Add Visual C++ 6 project generation support.
+- JamToWorkspace: Rename the *.projects/ level updateworkspace to updateprojects.
 
 
 
@@ -101,7 +161,7 @@
 - Tests: Add tests/forceinclude.
 - Tests: Add tests/multipass_convert, an example of using the QueueJamFile PRIORITY parameter.
 - Tests: Add tests/multipass_nocare, provided by Chris Munn, to illustrate the NoCare Jam executable fix.
-- Tests: Add tests/multiplatform, a test involving multiplatform #defines.
+- Tests: Add tests/multiplatform, a test involving multiplatform \#defines.
 - Tests: Add tests/semicolon/ to test OPT_FIND_BAD_SEMICOLON_USAGE_EXT.
 - Tests: Add tests/shell.
 
@@ -109,15 +169,23 @@
 
 
 
+- Tests: Update source_and_jamfiles_separate with an additional file test case.
+- Tests: Updated tests/includes/ to test ObjectIncludeDirectories support.
+- Tests: Move tests/generatedheader/simple_scancontents/ to tests/scancontents/.
+- Tests: Add support for UseCommandLine on the generated header.
+- Tests: Add tests/usecommandline from Arseny Kapoulkine.
+- Samples: Add samples/macosx/glut demonstration.
+- Rename tests/platform to tests/multiplatform.
+- Tests: Fix expandtests.jam.  It was never updated with the new colon quoting rules.
+- tests/lua: Fixes to the quoting and the modules used.
+- Add tests/command_line_targets/.
+- Tests: Add tests/simple_scancontents.
 
-<h3>VCProjToJamfile:</h3>
 
 
 
 
-
-
-
+<hr>
 \section version0_3 Version 0.3
 
 <h3>New features for 0.3:</h3>
@@ -163,36 +231,36 @@
 
 - Defaulted the build configuration to release instead of debug.
 - Fix to change the colon following a drive letter to a -- for the output directory in MultiCppCompile when outputastree is turned on.  This happens when absolute paths are passed into MultiCppCompile.
-- Fixed SharedLibraryFromObjects (called from \ref rule_Library "Library" with the <tt>shared</tt> option) from causing a circular dependency: targetname -> targetname.lib -> targetname.
-- The \ref rule_Library "Library" rule has a new <tt>nodefaults</tt> option.  Currently, its only use is to avoid adding /SUBSYSTEM to the link flags in Visual C++ builds.
-- The \ref rule_Library "Library" rule has a new nomanifest option to turn off the embedding of a manifest in Visual C++ 8.0 and 9.0 builds.
-- The \ref rule_Library "Library" rule has a new noexportlib option that turns off the insertion of the writing of the export (import) library.
+- Fixed SharedLibraryFromObjects (called from \ref rule_C_Library "Library" with the <tt>shared</tt> option) from causing a circular dependency: targetname -> targetname.lib -> targetname.
+- The \ref rule_C_Library "Library" rule has a new <tt>nodefaults</tt> option.  Currently, its only use is to avoid adding /SUBSYSTEM to the link flags in Visual C++ builds.
+- The \ref rule_C_Library "Library" rule has a new nomanifest option to turn off the embedding of a manifest in Visual C++ 8.0 and 9.0 builds.
+- The \ref rule_C_Library "Library" rule has a new noexportlib option that turns off the insertion of the writing of the export (import) library.
 - For a library, append the SUFLIB instead of using the :S modifier.  This fixes library names that have periods in them.
-- \ref rule_ObjectCFlags "ObjectCFlags" and \ref rule_ObjectCppFlags "ObjectC++Flags" now only apply their flags to files of the appropriate types.
-- Fix a bug in \ref rule_CFlags "CFlags" and \ref rule_ObjectCFlags "ObjectCFlags" where flags weren't being applied properly.
+- \ref rule_C_ObjectCFlags "ObjectCFlags" and \ref rule_C_ObjectCppFlags "ObjectC++Flags" now only apply their flags to files of the appropriate types.
+- Fix a bug in \ref rule_C_CFlags "CFlags" and \ref rule_C_ObjectCFlags "ObjectCFlags" where flags weren't being applied properly.
 - Add \ref rule_NoWorkspace "NoWorkspace" rule.
 - For Visual Studio 2005 and 2008, use an incremental manifest embedding technique for Debug builds.  For Release builds, use the simple <tt>mt.exe -outputresource</tt> technique.
 - Handle proper manifest embedding in DLLs by applying the <tt>;2</tt> modifier to the tool.
-- After checking the \ref rule_OutputPostfix "OutputPostfix" for the current target, check the <tt>*</tt> target for a global override.
-- Handle relative paths specified for the \ref rule_LinkDirectories "LinkDirectories" rule.
-- New rule \ref rule_DefFile "DefFile".  Adds support for using .def files for DLL exports.
-- When compiling resources with \ref rule_ResourceCompiler, pick up defines, flags, and include directories from the .rc file, the pseudotarget parent, and the * global target.
+- After checking the \ref rule_C_OutputPostfix "OutputPostfix" for the current target, check the <tt>*</tt> target for a global override.
+- Handle relative paths specified for the \ref rule_C_LinkDirectories "LinkDirectories" rule.
+- New rule \ref rule_C_DefFile "DefFile".  Adds support for using .def files for DLL exports.
+- When compiling resources with \ref rule_C_ResourceCompiler "C.ResourceCompiler", pick up defines, flags, and include directories from the .rc file, the pseudotarget parent, and the * global target.
 - Resource Compiler: If any of the defines, flags, or include directories change from the last Jam run, rebuild the resource.
-- Rules \ref rule_RcDefines "RcDefines", \ref rule_RcFlags "RcFlags", and \ref rule_RcIncludeDirectories "RcIncludeDirectories" accept either 2 or 3 parameters.  If 2 parameters are specified, the options are applied to <tt>TARGET</tt>.  If 3 parameters are specified, the options are applied to <tt>RESOURCE_NAME</tt>.
+- Rules \ref rule_C_RcDefines "C.RcDefines", \ref rule_C_RcFlags "C.RcFlags", and \ref rule_C_RcIncludeDirectories "C.RcIncludeDirectories" accept either 2 or 3 parameters.  If 2 parameters are specified, the options are applied to <tt>TARGET</tt>.  If 3 parameters are specified, the options are applied to <tt>RESOURCE_NAME</tt>.
 - \ref rule_SourceGroup "SourceGroup" can accept an optional <tt>TARGET</tt>, using the active target if <tt>TARGET</tt> isn't specified.
 - ** Possibly breaking change... let me know if it is an issue. ***  \ref jamtoworkspace "JamToWorkspace" was architected to work when the \ref rule_SubDir "SubDir" root was preloaded with an absolute path.  With the Jambase rework within JamPlus, it expected the same thing.  This blows up when JamToWorkspace is not used and when a build is run from the root Jamfile.  This change makes a generated \ref rule_SubDir "SubDir" root an absolute path.  It works in all cases I've tried.
-- Make \ref rule_Application "Application" and \ref rule_Library "Library" pay attention to changes in the link flags, libraries, or objects.  When a change is made from the last build, the executable or library is relinked (or rearchived).
+- Make \ref rule_C_Application "Application" and \ref rule_C_Library "Library" pay attention to changes in the link flags, libraries, or objects.  When a change is made from the last build, the executable or library is relinked (or rearchived).
 - When detecting MSVC versions, Jambase.jam now tries envvars, not just the registry.  Seems that some installations don't have appropriate keys in the registry, and some don't have the envvars, so this should work for both.
 - In cases where \c LOCATE_TARGET isn't set, the \c vcx0.pdb files didn't get cleaned up.  This is now fixed and prettier than before.
-- When calculating the absolute path from the relative path in \ref rule_OutputPath "OutputPath", handle the case where SUBDIR hasn't been set.
-- \ref rule_Library "Library" accepts an option '<tt>module</tt>'.  When specified on OS X, a bundle is created.  For other platforms, a module is created just like a normal shared library.
+- When calculating the absolute path from the relative path in \ref rule_C_OutputPath "OutputPath", handle the case where SUBDIR hasn't been set.
+- \ref rule_C_Library "Library" accepts an option '<tt>module</tt>'.  When specified on OS X, a bundle is created.  For other platforms, a module is created just like a normal shared library.
 - New configuration 'releaseltcg', a Release build with Link Time Code Generation support.  Access it with the Jam command line option <tt>-sCONFIG=releaseltcg</tt>.
 - Added .idl support.  Tested with both Workspace Whiz and LuaPlus.
-- Add <tt>regserver</tt> option to \ref rule_Library "Library" for shared libraries.  On Windows, <b>regsvr32</b> is run during the build to automatically register the DLL with the system.  When cleaning, <b>regsvr32 /u </b>is run.
+- Add <tt>regserver</tt> option to \ref rule_C_Library "Library" for shared libraries.  On Windows, <b>regsvr32</b> is run during the build to automatically register the DLL with the system.  When cleaning, <b>regsvr32 /u </b>is run.
 - Remove the .intermediate.manifest file on Clean for all configurations (not just Debug).
 - CRuntimeType only worked for the * target.  Now it works for project targets, too.
-- Add support to \ref rule_BatchCompileGroupSize "BatchCompileGroupSize" to handle the \ref rule_ActiveProject "ActiveProject" rule.
-- In the \ref rule_Library "Library" rule, the dependency chain was broken for the <tt>noexportlib</tt> option.
+- Add support to \ref rule_C_BatchCompileGroupSize "BatchCompileGroupSize" to handle the \ref rule_ActiveProject "ActiveProject" rule.
+- In the \ref rule_C_Library "Library" rule, the dependency chain was broken for the <tt>noexportlib</tt> option.
 
 
 
@@ -212,7 +280,7 @@
 - Handle more than one workspace containing the same project.
 - Because libraries and executables were getting added to the 'all' target, sometimes unintended builds would happen when generating a workspace.  This dependency has been removed.
 - Remove duplicate projects from the same workspace.
-- Fix from Lucas Meijer for handling \ref rule_ActiveProject "ActiveProject" specified targets with \ref rule_LinkLibraries "LinkLibraries".
+- Fix from Lucas Meijer for handling \ref rule_ActiveProject "ActiveProject" specified targets with \ref rule_C_LinkLibraries "LinkLibraries".
 
 
 
@@ -281,26 +349,26 @@
 - Re-added basic MinGW support, accessible by setting the \c COMPILER variable to \c mingw.
 - \ref rule_SubInclude "SubIncluding" a given Jamfile only happens once.
 - Exits when an incorrect platform or configuration is specified.
-- Added \ref rule_OutputPostfix "OutputPostfix", \ref rule_OutputPostfixClear "OutputPostfixClear", and \ref rule_OutputSuffix "OutputSuffix".
+- Added \ref rule_C_OutputPostfix "OutputPostfix", \ref rule_C_OutputPostfixClear "OutputPostfixClear", and \ref rule_C_OutputSuffix "OutputSuffix".
 - For Visual Studio 2005, made the Microsoft .NET SDK include and library paths available.
 - WINDOWS was not a side-by-side \#define with WIN32.  Fixed.
 - Attempt to load a Jamrules-style file called $(_top).jamrules.
 - Fix import library dependencies for DLLs.
 - Allow an additional optional \ref rule_SubDir "SubDir" parameter denoting a 'target' in the grist.  LOCATE_SOURCE, LOCATE_TARGET, and SOURCE_GRIST all append it.
 - \ref rule_IncludeModule "IncludeModule": Modules can only be included once.
-- Added \ref rule_ReferenceDirectories "ReferenceDirectories" for .NET references.
-- Added \ref rule_BatchCompileGroupSize "BatchCompileGroupSize".  The default batch compilation group size is unlimited.
+- Added \ref rule_C_ReferenceDirectories "ReferenceDirectories" for .NET references.
+- Added \ref rule_C_BatchCompileGroupSize "BatchCompileGroupSize".  The default batch compilation group size is unlimited.
 - Fixed precompiled header support to allow precompiled header .cpp files with relative paths attached to the name.  Uses the \ref built_in_variables_binding_binding_search_locate "BINDING" to control the output location.
 - Assign \c LINK_TARGET variable to the \c TARGET when setting up an executable or shared library link, so later post-build steps can get access to the binary without a complex look up.
-- \ref rule_Library "Library's" \c OPTIONS now accepts <tt>noexportlib</tt>.
-- Re-added \ref rule_ObjectCFlags "ObjectCFlags" and \ref rule_ObjectCppFlags "ObjectC++Flags".
+- \ref rule_C_Library "Library's" \c OPTIONS now accepts <tt>noexportlib</tt>.
+- Re-added \ref rule_C_ObjectCFlags "ObjectCFlags" and \ref rule_C_ObjectCppFlags "ObjectC++Flags".
 - Added \c rule_FGristDirectories "FGristDirectories" rule.
-- \ref rule_Lump "Lump" rule handles .cxx.
-- \ref rule_PrecompiledHeader "PrecompiledHeader" rule accepts a shortened version where the .cpp and .h are determined by a single parameter.
+- \ref rule_C_Lump "Lump" rule handles .cxx.
+- \ref rule_C_PrecompiledHeader "PrecompiledHeader" rule accepts a shortened version where the .cpp and .h are determined by a single parameter.
 - Optimization - Don't scan inside .lib files, since the .obj files are present by default.
 - Major C/C++ compilation optimizations.
 - Fix support for .c precompiled headers.
-- Add \ref rule_CRuntimeType "CRuntimeType" to change between statically linked and dynamically linked C runtimes for Visual C++.
+- Add \ref rule_C_RuntimeType "CRuntimeType" to change between statically linked and dynamically linked C runtimes for Visual C++.
 - Remove VC5 support, since I have no way of testing it.
 - Change grists to be project level and not subdirectory level.
 - LINKDIRECTORIES was set up wrong and put in the global variable list.  This is corrected now, and the initial LINKDIRECTORIES is assigned to *.

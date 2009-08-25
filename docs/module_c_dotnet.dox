@@ -1,0 +1,99 @@
+/*! \page module_c_dotnet c/dotnet - C++/CLI Rules
+
+\code
+    IncludeModule c/dotnet ;
+\endcode
+
+\section module_c_dotnet_ruleslist List of Rules
+
+\secreflist
+\refitem rule_C_ReferenceDirectories C.ReferenceDirectories
+\refitem rule_C_StrongName C.StrongName
+\refitem rule_C_UseDotNet C.UseDotNet
+\endsecreflist
+
+
+
+
+
+\section module_c_dotnet_rules Rules
+
+<hr>
+\section rule_C_ReferenceDirectories rule C.ReferenceDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
+\addindex rule_C_ReferenceDirectories
+
+For the given project \c TARGET, assign the reference \c DIRECTORIES to the appropriate configuration and platform.
+
+\param TARGET The target to assign the reference \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param DIRECTORIES The list of reference directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    # Add c:/some/directory to myproject for all configurations and
+    # all platforms.
+    C.ReferenceDirectories myproject : c:/some/directory ;
+
+    # Relative path:
+    C.ReferenceDirectories myproject : ../lib ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_StrongName rule C.StrongName TARGET : SNK_NAME
+\addindex rule_C_StrongName
+
+After the executable has been built for \c TARGET, sign the assembly with the strong name \c SNK_NAME.  This rule must be run AFTER \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library" has been run.
+
+\param TARGET The target representing the executable to assign the strong name to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SNK_NAME The name of the keyfile.
+
+\code
+    C.Library ManagedLuaPlus : $(SRCS) : shared noexportlib ;
+    C.StrongName ManagedLuaPlus : $(SEARCH_SOURCE)/ManagedLuaPlus.snk ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_UseDotNet rule C.UseDotNet TARGET [ : OPTIONS ]
+\addindex rule_C_UseDotNet
+
+Applies .NET Framework settings to the specified C++/CLI \c TARGET.
+
+\param TARGET The target to assign the settings to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param OPTIONS (optional) The following options are available:
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c link - When linking the assembly, this option sets up the .NET link settings.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    # Applies .NET settings to MyLibrary.
+    C.UseDotNet MyLibrary ;
+	
+    # Applies .NET settings, including the appropriate linker flags, to MyApplication.
+    C.UseDotNet MyApplication : link ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+*/
+

@@ -1,0 +1,51 @@
+/*! \page module_c_directx c/directx - C/C++ DirectX Rules
+
+\code
+    IncludeModule c/directx ;
+\endcode
+
+\section module_c_directx_ruleslist List of Rules
+
+\secreflist
+\refitem rule_C_UseDirectX C.UseDirectX
+\endsecreflist
+
+
+
+
+
+\section module_c_directx_rules Rules
+
+<hr>
+\section rule_C_UseDirectX rule C.UseDirectX TARGET [ : OPTIONS ]
+\addindex rule_C_UseDirectX
+
+Applies settings to the specified \c TARGET, allowing it to build a DirectX-capable project.
+
+\param TARGET The target to assign the DirectX settings to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param OPTIONS (optional) The following options are available:
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c link - When linking the final executable or DLL, this option sets up the DirectX link libraries.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    # Applies DirectX settings to MyLibrary.
+    C.UseDirectX MyLibrary ;
+	
+    # Applies DirectX settings, including the appropriate linker flags, to MyApplication.
+    C.UseDirectX MyApplication : link ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+*/
+

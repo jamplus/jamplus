@@ -1,0 +1,32 @@
+/*! \page module_copyfile File Copy Rules
+
+\code
+    IncludeModule copyfile ;
+\endcode
+
+\section module_copyfile_ruleslist List of Rules
+
+\secreflist
+\refitem rule_CopyFile CopyFile
+\endsecreflist
+
+\section module_copyfile_rules Rules
+
+<hr>
+\section rule_CopyFile rule CopyFile PARENTS : TARGET : SOURCE
+\addindex rule_CopyFile
+
+Copies the file \c SOURCE to \c TARGET.
+
+\param PARENTS The parent target to link the file copy dependency to.
+\param TARGET The destination path for the file copy.
+\param SOURCE The source path for the file copy.
+
+\code
+    # For the lua-ex target, copy $(SUBDIR)/w32api/reg.lua to $(LUA_LDIR)/windows/reg.lua.
+    CopyFile lua-ex : $(LUA_LDIR)/windows/reg.lua : $(SUBDIR)/w32api/reg.lua ;
+\endcode
+
+<hr>
+*/
+

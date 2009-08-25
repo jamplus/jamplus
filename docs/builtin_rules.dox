@@ -64,6 +64,7 @@ The rules \ref rule_Always "Always", \ref rule_Leaves "Leaves", \ref rule_MightN
 \refitem rule_NoCare NoCare
 \refitem rule_NotFile NotFile
 \refitem rule_NoUpdate NoUpdate
+\refitem rule_ScanContents ScanContents
 \refitem rule_Temporary Temporary
 \refitem rule_UseCommandLine UseCommandLine
 \endsecreflist
@@ -98,6 +99,8 @@ Makes each of <i>targets</i> depend only on its leaf sources, and not on any int
 
 Some targets may or may not update when their action is executed, such as export libraries for a Windows DLL.  In order for \b Jam to process this behavior appropriately, the <i>targets</i> must be marked so their timestamps will be evaluated at the latest possible time during the \ref operation_updating.
 
+Be aware that the \c MightNotUpdate calculation happens during the \ref operation_updating.  This results in \b Jam possibly reporting target counts improperly.
+
 
 
 
@@ -120,7 +123,7 @@ Causes \b Jam to ignore <i>targets</i> that neither can be found nor have updati
 \section rule_NotFile rule NotFile targets ;
 \addindex rule_NotFile
 
-Marks <i>targets</i> as pseudotargets and not real files. No timestamp is checked, and so the actions on such a target are only executed if the target's dependencies are updated, or if the target is also marked with Always.  The default <b>jam</b> target "all" is a pseudotarget. In Jambase, NotFile is used to define several addition convenient pseudotargets.
+Marks <i>targets</i> as pseudotargets and not real files. No timestamp is checked, and so the actions on such a target are only executed if the target's dependencies are updated, or if the target is also marked with Always.  The default \b Jam target "all" is a pseudotarget. In Jambase, NotFile is used to define several addition convenient pseudotargets.
 
 
 
@@ -135,6 +138,30 @@ Marks <i>targets</i> as pseudotargets and not real files. No timestamp is checke
 Causes the timestamps on <i>targets</i> to be ignored. This has two effects:  first,  once the target has been created it will never be updated; second, manually updating target will not cause other targets to be updated.  In Jambase, for example, this rule is applied to directories by the MkDir rule, because \ref rule_MkDir only cares that the target directory exists, not when it has last been updated.
 
 
+
+
+
+
+
+<hr>
+\section rule_ScanContents rule ScanContents targets ;
+\addindex rule_ScanContents
+
+\note In order to use \c ScanContents, the dependency cache must be enabled.
+
+Causes the file's contents to be scanned for differences on timestamp change.  There are times when a file's timestamp changes, but its contents do not.  Normally, a timestamp change will cause all dependent targets to be rebuilt.  When \c ScanContents is applied to <i>targets</i> and one of those targets has a timestamp that changes, Jam will compare the contents of the target against the last build's contents, whose md5sum is stored in the dependency cache.  If they are the same, no dependent targets are built.  If they differ, the dependent target build occurs as it would have on just a timestamp change.
+
+Be aware that the \c ScanContents calculation happens during the \ref operation_updating.  This results in Jam possibly reporting target counts improperly.
+
+<i>Example:</i> A build action generates a C++ header.  There are three scenarios to make note of here:
+
+- Scenario #1: The build action always writes the header, even when the header does not change.  Every C++ file \#including that header rebuilds.
+- Scenario #2: The build action only writes the header file when a change will occur.  The timestamp does not update, so the C++ files \#including that header do not build.  Unfortunately, on the next \b Jam run, the header is detected as needing to be built, as it has an older timestamp than the child that triggered the build in the first place.  Every subsequent run of \b Jam will attempt to build the header.
+- Scenario #3: The build action always writes the header, even when the header does not change.  \c ScanContents is applied to the generated header.  When Jam builds the header, it checks the contents of the file against the previous build and realizes nothing has changed.  \b Jam will short circuit the build of dependent targets, those that rely on the generated header, as the generated header did not change.
+
+\code
+    ScanContents my_generated_header.h ;
+\endcode
 
 
 
@@ -346,7 +373,7 @@ If the given generated \c TARGETS are already built and stored within the file c
 \section rule_QueueJamFile rule QueueJamFile JAMFILE_LIST [ : PRIORITY ] ;
 \addindex rule_QueueJamFile
 
-When \c QueueJamFile is called, a second pass on the Jam dependency graph is initiated after the \ref operation_updating.  Further documentation on this can be found on the \ref multiple_passes page.
+When \c QueueJamFile is called, another pass on the Jam dependency graph is initiated after the \ref operation_updating.  Further documentation on this can be found on the \ref multiple_passes page.
 
 Queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.  When a priority isn't given, the default priority is 0.  A queued Jamfile with priority of 100 will be parsed before a Jamfile with a priority of 0.  Likewise, a queued Jamfile with a priority of -50 will be parsed after a Jamfile with a priority of 0.
 
@@ -380,12 +407,12 @@ The \c Shell rule is used to execute one or more \c COMMANDS and return the outp
     Shell "copy file1.txt file2.txt" ;
 
     # Grab a directory listing.
-	dir_listing = [ Shell dir ] ;
+    dir_listing = [ Shell dir ] ;
 
-	# Grab two directory listings.
-	dir_listings = [ Shell "dir *.tga" "dir *.png" ]
-	Echo dir *.tga - $(dir_listings[1]) ;
-	Echo dir *.png - $(dir_listings[2]) ;
+    # Grab two directory listings.
+    dir_listings = [ Shell "dir *.tga" "dir *.png" ]
+    Echo dir *.tga - $(dir_listings[1]) ;
+    Echo dir *.png - $(dir_listings[2]) ;
 \endcode
 
 

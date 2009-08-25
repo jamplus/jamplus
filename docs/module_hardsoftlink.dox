@@ -1,0 +1,62 @@
+/*! \page module_hardsoftlink C++/CLI Rules
+
+\code
+    IncludeModule hardsoftlink ;
+\endcode
+
+\section module_hardsoftlink_ruleslist List of Rules
+
+\secreflist
+\refitem rule_HardLink HardLink
+\refitem rule_SoftLink SoftLink
+\endsecreflist
+
+
+
+
+
+\section module_hardsoftlink_rules Rules
+
+<hr>
+\section rule_HardLink rule HardLink PARENT : TARGET : SOURCE
+\addindex rule_HardLink
+
+Whenever \c PARENTS is built, link \c TARGET to \c SOURCE.
+
+\param PARENTS The parent target to attach the file link dependency to.  When a clean pass is run on any of the PARENTS, the link will be removed.
+\param TARGET The name of the link.
+\param SOURCE The file or directory being linked to.
+
+\code
+	HardLink myproject : appdata : /the/app/data/directory ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_SoftLink rule SoftLink PARENT : TARGET : SOURCE
+\addindex rule_SoftLink
+
+Whenever \c PARENTS is built, link \c TARGET to \c SOURCE.
+
+\param PARENTS The parent target to attach the file link dependency to.  When a clean pass is run on any of the PARENTS, the link will be removed.
+\param TARGET The name of the link.
+\param SOURCE The file or directory being linked to.
+
+\code
+	SoftLink myproject : appdata : /the/app/data/directory ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+*/
+

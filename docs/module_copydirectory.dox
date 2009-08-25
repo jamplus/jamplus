@@ -1,0 +1,33 @@
+/*! \page module_copydirectory Directory Copy Rules
+
+\code
+    IncludeModule copydirectory ;
+\endcode
+
+\section module_copydirectory_ruleslist List of Rules
+
+\secreflist
+\refitem rule_CopyDirectory CopyDirectory
+\endsecreflist
+
+\section module_copydirectory_rules Rules
+
+<hr>
+\section rule_CopyDirectory rule CopyDirectory PARENTS : DESTINATION_PATH : SOURCE_PATH [ : SEARCH_STRING ]
+\addindex rule_CopyDirectory
+
+Copies the file contents from \c SOURCE_PATH to \c DESTINATION_PATH using \c SEARCH_STRING as the wildcard.
+
+\param PARENTS The parent target to link the CopyDirectory dependencies to.
+\param DESTINATION_PATH An absolute or relative path describing the resultant location of the files to be copied.  Any non-absolute paths are relative to the current working directory.
+\param SOURCE_PATH An absolute or relative path describing the source location where files are to be copied from.  Any non-absolute paths are relative to the current working directory.
+\param SEARCH_STRING (optional) The search string to be used for matching files from \c SOURCE_PATH.  If not specified, the default is <tt>*</tt>.  A full description of possible values can be found in the section \ref patterns_and_wildcards "Patterns and Wildcards".
+
+\code
+    # Copies all files recursively from source/ to destination/.  Does not copy the ignore/ directory.
+    CopyDirectory all : destination : source : **@-ignore/ ;
+\endcode
+
+<hr>
+*/
+

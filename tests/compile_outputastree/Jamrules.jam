@@ -1,9 +1,9 @@
-CppCompileOptions outputastree ;
+C.CompileOptions outputastree ;
 
 rule ProjectSubDir PROJECT_NAME
 {
 	LOCATE_TARGET = $(SUBDIR)/obj/$(PLATFORM)/$(CONFIG) ;
-	OutputPath $(PROJECT_NAME) : $(SUBDIR)/lib/$(PLATFORM)/$(CONFIG) ;
-	OutputPostfix $(PROJECT_NAME) : ;
+	C.OutputPath $(PROJECT_NAME) : $(SUBDIR)/lib/$(PLATFORM)/$(CONFIG) ;
+	C.OutputPostfix $(PROJECT_NAME) : ;
 }
 

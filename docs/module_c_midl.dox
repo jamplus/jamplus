@@ -1,0 +1,59 @@
+/*! \page module_c_midl c/midl - IDL Rules
+
+\code
+    IncludeModule c/midl ;
+\endcode
+
+\section module_c_midl_ruleslist List of Rules
+
+\secreflist
+\refitem rule_C_MidlCompiler C.MidlCompiler
+\refitem rule_C_MidlFlags C.MidlFlags
+\endsecreflist
+
+
+\section module_c_midl_rules Rules
+
+<hr>
+\section rule_C_MidlCompiler rule C.MidlCompiler PARENT : SOURCE
+\addindex rule_C_MidlCompiler
+
+Compile the \c SOURCE .idl file into the appropriate source files.  Usage of this rule is not as clean as it ought to be.
+
+\param PARENT The parent target to set the .idl build as a dependency of.  \c PARENT is optional if \ref rule_ActiveProject has been specified.
+\param SOURCE An .idl file.
+\return Returns the list of generated sources.
+
+\code
+    local MIDL_SRCS = [ C.MidlCompiler LuaPlusDebuggerAddin : AddIn.idl ] ;
+    Includes <LuaPlusDebuggerAddin>AddIn.cpp <LuaPlusDebuggerAddin>AddIn.rc : $(MIDL_SRCS) ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_C_MidlFlags rule C.MidlFlags PARENT : BASE_NAME [ : OPTIONS ]
+\addindex rule_C_MidlFlags
+
+Returns a list of flags to add to a Visual C++ command line.
+
+\todo Document me.
+
+\code
+    local midltargets = [ C.MidlFlags LuaPlusDebuggerControls : _LuaPlusDebuggerControls : postmidl proxy ] ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+*/
+

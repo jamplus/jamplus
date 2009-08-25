@@ -14,7 +14,7 @@ SRCS =
 		../outerb/outer.cpp
 ;
 
-Library libb : $(SRCS) ;
+C.Library libb : $(SRCS) ;
 
 SubInclude TOP liba ;
 SubInclude TOP libc ;
