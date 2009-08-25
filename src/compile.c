@@ -586,7 +586,7 @@ evaluate_rule(
 	/* Check traditional targets $(<) and sources $(>) */
 
 #ifdef OPT_IMPROVED_WARNINGS_EXT
-	if( !rule->actions && !rule->procedure )
+	if( !rule->actions && !rule->procedure && !globs.silence )
 	    printf( "warning: unknown rule %s %s\n", rule->name,
 		   file_and_line());
 #else

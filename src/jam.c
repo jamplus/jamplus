@@ -182,7 +182,8 @@ struct globs globs = {
 # else
 	{ 0, 1 }, 		/* display actions  */
 # endif
-	0			/* output commands, not run them */
+	0,			/* output commands, not run them */
+	0,                      /* silence */
 } ;
 
 /* Symbols to be defined as true for use in Jambase */
@@ -342,7 +343,7 @@ int main( int argc, char **argv, char **arg_environ )
 #endif
 
 #ifdef OPT_SETCWD_SETTING_EXT
-	if( ( n = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qv", optv ) ) < 0 )
+	if( ( n = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qvS", optv ) ) < 0 )
 #else
 	if( ( n = getoptions( argc, argv, "d:j:f:gs:t:ano:qv", optv ) ) < 0 )
 #endif
@@ -364,6 +365,7 @@ int main( int argc, char **argv, char **arg_environ )
             printf( "-n      Don't actually execute the updating actions.\n" );
             printf( "-ox     Write the updating actions to file x.\n" );
             printf( "-q      Quit quickly as soon as a target fails.\n" );
+            printf( "-S      Silence on missing rules.\n" );
 	    printf( "-sx=y   Set variable x=y, overriding environment.\n" );
             printf( "-tx     Rebuild x, even if it is up-to-date.\n" );
 #ifdef OPT_DEBUG_MAKE_PRINT_TARGET_NAME
@@ -427,6 +429,9 @@ int main( int argc, char **argv, char **arg_environ )
 
 	if( ( s = getoptval( optv, 'a', 0 ) ) )
 	    anyhow++;
+
+	if( ( s = getoptval( optv, 'S', 0 ) ) )
+	    globs.silence = 1;
 
 #ifdef OPT_SETCWD_SETTING_EXT
 	if( ( s = getoptval( optv, 'C', 0 ) ) )

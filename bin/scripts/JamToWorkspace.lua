@@ -202,6 +202,7 @@ function CreateTargetInfoFiles()
 			'-sPLATFORM=' .. platform,
 			'-sCONFIG=' .. config,
 			'-d0',
+			'-S'
 		}
 
 		print('Reading platform [' .. platform .. '] and config [' .. config .. ']...')

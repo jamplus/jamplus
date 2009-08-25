@@ -530,6 +530,7 @@ struct globs {
 	char	debug_make1;
 #endif
 	FILE	*cmdout;		/* print cmds, not run them */
+	int     silence;
 } ;
 
 extern struct globs globs;
