@@ -167,8 +167,8 @@ rule C._SharedLibraryFromObjects_LinkFlags
 		linkFlags += -bundle -undefined dynamic_lookup ;
 	} else {
 		local installName =
-			[ _retrieveVar INSTALL_NAME_PATH : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar INSTALL_NAME_PATH : * : $(CONFIG) : $(PLATFORM) ] ;
+			[ C._retrieveVar INSTALL_NAME_PATH : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+			[ C._retrieveVar INSTALL_NAME_PATH : * : $(CONFIG) : $(PLATFORM) ] ;
 		if ! $(installName)
 		{
 			installName = $(_t:TD) ;

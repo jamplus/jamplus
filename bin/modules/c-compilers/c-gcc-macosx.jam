@@ -29,9 +29,17 @@ SUFMODULE	= .dylib ;
 	MACOSX_SDK_DEVELOPER_ROOT on * = $(developerRoot) ;
 }
 
+if ! $(TARGETINFO_LOCATE) {
+
 rule C.LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM
 {
 	C.LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 }
 
+} else {
 
+rule C.LinkFrameworks
+{
+}
+
+}
