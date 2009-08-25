@@ -120,8 +120,9 @@ OSFULL = $(OS)$(OSVER)$(OSPLAT) $(OS)$(OSPLAT) $(OS)$(OSVER) $(OS) ;
 # Base dependencies - first for "bootstrap" kinds of rules
 #
 
-NotFile all allclean clean ;
-Always allclean clean ;
+NotFile all allclean clean clean:all ;
+Always allclean clean clean:all ;
+Depends clean : clean:all ;
 
 #
 # Rules
