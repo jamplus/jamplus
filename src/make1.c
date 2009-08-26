@@ -339,6 +339,8 @@ make1b( TARGET *t )
 							childupdated = 1;
 					} else
 						childupdated = 1;
+				} else {
+					childscancontents = 1;
 				}
 		    }
 		}
