@@ -1,20 +1,25 @@
 SubDir TOP ;
 
-DEPCACHE.standard = .jamcache ;
-DEPCACHE = standard ;
+DEPCACHE.standard ?= .jamcache ;
+DEPCACHE ?= standard ;
 
 C.Defines platform : USING_WIN32 : : win32 ;
 C.Defines platform : USING_MACOSX : : macosx ;
 
 SRCS =
 		platform.c
-		file2.c
 ;
 
 if $(PLATFORM) = win32 {
 	SRCS += win32.c ;
 } else if $(PLATFORM) = macosx {
 	SRCS += macosx.c ;
+}
+
+if $(CONFIG) = debug {
+	SRCS += filedebug.c ;
+} else if $(CONFIG) = release {
+	SRCS += filerelease.c ;
 }
 
 C.Application platform : $(SRCS) ;

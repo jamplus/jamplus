@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+extern void Func();
+
 #ifdef USING_WIN32
 extern void Win32();
 #elif defined(USING_MACOSX)
@@ -15,4 +17,5 @@ main()
 	printf("Using macosx\n");
 	MacOSX();
 #endif
+	Func();
 }

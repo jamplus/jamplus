@@ -192,13 +192,13 @@ function ProcessCommandLine()
 	end
 end
 
-function CreateTargetInfoFiles()
+function CreateTargetInfoFiles(outPath)
 	function DumpConfig(platform, config)
 		local collectConfigurationArgs =
 		{
 			os.path.escape('-C' .. destinationRootPath),
 			os.path.escape('-sJAMFILE=' .. destinationRootPath .. 'DumpJamTargetInfo.jam'),
-			os.path.escape('-sTARGETINFO_LOCATE=' .. destinationRootPath .. '_TargetInfo/'),
+			os.path.escape('-sTARGETINFO_LOCATE=' .. outPath .. '_targetinfo_/'),
 			'-sPLATFORM=' .. platform,
 			'-sCONFIG=' .. config,
 			'-d0',
@@ -213,18 +213,34 @@ function CreateTargetInfoFiles()
 --		print(p, i, o)
 	end
 
+	local workspacePlatforms = {}
+	for _, platform in ipairs(list.concat(Config.Platforms, Config.WorkspacePlatforms)) do
+		if not workspacePlatforms[platform] then
+			workspacePlatforms[platform] = true
+			workspacePlatforms[#workspacePlatforms + 1] = platform
+		end
+	end
+
+	local workspaceConfigurations = {}
+	for _, config in ipairs(list.concat(Config.Configurations, Config.WorkspaceConfigurations)) do
+		if not workspaceConfigurations[config] then
+			workspaceConfigurations[config] = true
+			workspaceConfigurations[#workspaceConfigurations + 1] = config
+		end
+	end
+
 	DumpConfig('*', '*')
-	for platformName in ivalues(Config.Platforms) do
+	for platformName in ivalues(workspacePlatforms) do
 		DumpConfig(platformName, '*')
-		for configName in ivalues(Config.Configurations) do
+		for configName in ivalues(workspaceConfigurations) do
 			DumpConfig(platformName, configName)
 		end
 	end
 end
 
-function ReadTargetInfoFiles()
+function ReadTargetInfoFiles(outPath)
 	function ReadTargetInfo(platform, config)
-		local targetInfoFilename = destinationRootPath .. '_TargetInfo/TargetInfo.' ..
+		local targetInfoFilename = outPath .. '_targetinfo_/targetinfo.' ..
 				(platform == '*' and '!all!' or platform) .. '.' ..
 				(config == '*' and '!all!' or config) .. '.lua'
 		local chunk, message = loadfile(targetInfoFilename)
@@ -366,9 +382,15 @@ function BuildSourceTree(project)
 	-- Filter files.
 	local files = {}
 	local sourcesMap = {}
+	local newSources = {}
 	for _, source in ipairs(project.Sources) do
-		sourcesMap[source:lower()] = source
+		local lowerSource = source:lower()
+		if not sourcesMap[lowerSource] then
+			newSources[#newSources + 1] = source
+			sourcesMap[lowerSource] = source
+		end
 	end
+	project.Sources = newSources
 
 	-- Add Jamfile.jam.
 	sourcesMap[project.Jamfile:lower()] = project.Jamfile
@@ -397,7 +419,7 @@ end
 
 
 function DumpProject(project)
-	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects', project.RelativePath) .. '/'
+	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_', project.RelativePath) .. '/'
 	os.mkdir(outPath)
 
 	BuildSourceTree(project)
@@ -443,7 +465,7 @@ end
 
 
 function DumpWorkspace(workspace)
-	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 
 	-- Write the !BuildWorkspace project
 	local exporter = Exporters[opts.gen]
@@ -469,14 +491,14 @@ function DumpWorkspace(workspace)
 	if uname == 'windows' then
 		updateWorkspaceCommandLines =
 		{
-			outPath .. 'updateprojects.bat',
-			outPath .. 'updateprojects.bat',
+			outPath .. 'updateworkspace.bat',
+			outPath .. 'updateworkspace.bat',
 		}
 	else
 		updateWorkspaceCommandLines =
 		{
-			outPath .. 'updateprojects',
-			outPath .. 'updateprojects',
+			outPath .. 'updateworkspace',
+			outPath .. 'updateworkspace',
 		}
 	end
 
@@ -510,7 +532,7 @@ end
 
 
 function BuildProject()
-	print('Creating workspace...')
+	print('Creating build environment...')
 	os.mkdir(destinationRootPath)
 
 	local exporter = Exporters[opts.gen]
@@ -519,7 +541,7 @@ function BuildProject()
 	locateTargetText =
 	{
 		locateTargetText = [[
-ALL_LOCATE_TARGET = $(destinationRootPath:gsub('\\', '/'))temp-$$(PLATFORM)-$$(CONFIG) ;
+ALL_LOCATE_TARGET = $(destinationRootPath:gsub('\\', '/'))$$(PLATFORM)-$$(CONFIG) ;
 ]]
 	}
 
@@ -608,11 +630,11 @@ include $(jamPath)Jambase.jam ;
 		io.writeall(jamScript,
 			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
-		-- Write updateworkspace.bat.
-		io.writeall(os.path.combine(destinationRootPath, 'updateworkspace.bat'),
+		-- Write updatebuildenvironment.bat.
+		io.writeall(os.path.combine(destinationRootPath, 'updatebuildenvironment.bat'),
 				("@%s --workspace --config=%s %s %s\n"):format(
 				os.path.escape(jamScript),
-				os.path.escape(destinationRootPath .. '/workspace.config'),
+				os.path.escape(destinationRootPath .. '/buildenvironment.config'),
 				os.path.escape(sourceJamfilePath),
 				os.path.escape(destinationRootPath)))
 	else
@@ -623,45 +645,45 @@ include $(jamPath)Jambase.jam ;
 				jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
 		os.chmod(jamScript, 777)
 
-		-- Write updateworkspace.sh.
-		local updateworkspace = os.path.combine(destinationRootPath, 'updateworkspace')
-		io.writeall(updateworkspace,
+		-- Write updatebuildenvironment.sh.
+		local updatebuildenvironment = os.path.combine(destinationRootPath, 'updatebuildenvironment')
+		io.writeall(updatebuildenvironment,
 				("#!/bin/sh\n%s --workspace --config=%s %s %s\n"):format(
 				os.path.escape(jamScript),
-				os.path.escape(destinationRootPath .. '/workspace.config'),
+				os.path.escape(destinationRootPath .. '/buildenvironment.config'),
 				os.path.escape(sourceJamfilePath),
 				os.path.escape(destinationRootPath)))
-		os.chmod(updateworkspace, 777)
+		os.chmod(updatebuildenvironment, 777)
 	end
 
-	-- Write workspace.config.
-	LuaDumpObject(destinationRootPath .. 'workspace.config', 'Config', Config)
+	-- Write buildenvironment.config.
+	LuaDumpObject(destinationRootPath .. 'buildenvironment.config', 'Config', Config)
 
 	if opts.gen ~= 'none' then
-		local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+		local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 		os.mkdir(outPath)
 
 		-- Read the target information.
-		CreateTargetInfoFiles()
-		ReadTargetInfoFiles()
+		CreateTargetInfoFiles(outPath)
+		ReadTargetInfoFiles(outPath)
 
 		print('Writing generated projects...')
 
 		if uname == 'windows' then
-			-- Write updateprojects.bat.
-			io.writeall(outPath .. 'updateprojects.bat',
+			-- Write updateworkspace.bat.
+			io.writeall(outPath .. 'updateworkspace.bat',
 					("@%s --workspace --gen=%s --config=%s %s ..\n"):format(
 					os.path.escape(jamScript), opts.gen,
-					os.path.escape(destinationRootPath .. '/workspace.config'),
+					os.path.escape(destinationRootPath .. '/buildenvironment.config'),
 					os.path.escape(sourceJamfilePath)))
 		else
-			-- Write updateprojects.sh.
-			io.writeall(outPath .. 'updateprojects',
+			-- Write updateworkspace.sh.
+			io.writeall(outPath .. 'updateworkspace',
 					("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s ..\n"):format(
 					os.path.escape(jamScript), opts.gen,
-					os.path.escape(destinationRootPath .. '/workspace.config'),
+					os.path.escape(destinationRootPath .. '/buildenvironment.config'),
 					os.path.escape(sourceJamfilePath)))
-			os.chmod(outPath .. 'updateprojects', 777)
+			os.chmod(outPath .. 'updateworkspace', 777)
 		end
 
 		-- Export everything.
@@ -702,7 +724,7 @@ include $(jamPath)Jambase.jam ;
 
 				DumpWorkspace(workspace)
 
-				local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+				local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 				local workspaceExporter = exporter.WorkspaceExporter(workspace.Name, exporter.Options)
 				workspaceExporter:Write(outPath)
 			end

@@ -4,7 +4,7 @@ local platformName = $(PLATFORM) ;
 if $(PLATFORM) = * 	{ platformName = !all! ; }
 local configName = $(CONFIG) ;
 if $(CONFIG) = * 	{ configName = !all! ; }
-TargetInfoFile = TargetInfo.$(platformName).$(configName).lua ;
+TargetInfoFile = targetinfo.$(platformName).$(configName).lua ;
 
 MakeLocate $(TargetInfoFile) : $(TARGETINFO_LOCATE) ;
 
@@ -13,7 +13,7 @@ EMPTY = "" ;
 rule DumpSources prefix : SOURCES
 {
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
-	Contents += "$(prefix).Sources = {$(NEWLINE)" ;
+	Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
 	for source in $(SOURCES:TR=$(subdir))
 	{
 		if ! $(source:S) in $(SUFOBJ) $(SUFRES)
@@ -21,7 +21,7 @@ rule DumpSources prefix : SOURCES
 			Contents += "	[[$(source)]],$(NEWLINE)" ;
 		}
 	}
-	Contents += "}$(NEWLINE)" ;
+	Contents += "})$(NEWLINE)" ;
 }
 
 
@@ -46,7 +46,7 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES
 	if $(PLATFORM) != *  ||  $(CONFIG) != *  {  return ;  }
 	if ! $(FOLDERNAME)  ||  ! $(SOURCES)  {  return ;  }
 
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;	
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 
 	local project ;
@@ -111,10 +111,7 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 	hdrsString ?= "" ;
 	Contents += "$(project).IncludePaths['$(PLATFORM)']['$(CONFIG)'] = { $(hdrsString:J= ) }$(NEWLINE)" ;
 
-	if $(PLATFORM) = *  &&  $(CONFIG) = *
-	{
-		DumpSources $(project) : $(SOURCES) ;
-	}
+	DumpSources $(project) : $(SOURCES) ;
 
 	Depends $(TARGETS) : $(TargetInfoFile) ;
 }
@@ -153,7 +150,7 @@ $(solutionInfo).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'
 " ;
 		first on $(WORKSPACE_NAME) = false ;
 	}
-	
+
 	local projectLines = "$(TAB)'$(TARGETS)',$(NEWLINE)" ;
 	Contents += "$(solutionInfo).Projects = concat($(solutionInfo).Projects, $(NEWLINE){$(NEWLINE)$(projectLines)})$(NEWLINE)" ;
 }
