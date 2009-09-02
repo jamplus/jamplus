@@ -1,11 +1,10 @@
 {
-	SUFEXE	?= .exe ;
-	SUFMODULE ?= .dll ;
-	SUFSHAREDLIB ?= .dll ;
-	SUFRES	?= .res ;
-
-	SUFLIB	?= .lib ;
-	SUFOBJ	?= .obj ;
+	SUFEXE			= .exe ;
+	SUFLIB			= .lib ;
+	SUFMODULE		= .dll ;
+	SUFOBJ			= .obj ;
+	SUFSHAREDLIB	= .dll ;
+	SUFRES			= .res ;
 
 	NOARSCAN = true ;
 	NOARUPDATE = true ;
@@ -21,6 +20,12 @@ if ! $(TARGETINFO_LOCATE) {
 rule C.FDefines { return /D$(<) ; }
 rule C.FIncludes { return /I"\"$(<)\"" ; }
 rule C.FLibraryPaths { return \"/LIBPATH:$(<)\" ; }
+
+
+rule C._ForceIncludeHelper
+{
+	C.AddFlags $(TARGET) : "/FI$(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+}
 
 
 rule C._RuntimeTypeHelper
@@ -54,62 +59,58 @@ rule C._RuntimeTypeHelper
 }
 
 
-rule C._ForceIncludeHelper
-{
-	C.AddFlags $(TARGET) : "/FI$(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
-}
-
-
 if $(COMPILER) = vc6
 {
-	actions response C.LinkDebug
-	{
-		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
-		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-	}
+actions response C.LinkDebug
+{
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
+	SET INCLUDE=$(STDHDRS:\\J=;)
+	"$(LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+}
 
-	actions response C.Link
-	{
-		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
-		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-	}
+actions response C.Link
+{
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
+	SET INCLUDE=$(STDHDRS:\\J=;)
+	"$(LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+}
 }
 
 if $(COMPILER) != vc6
 {
-	actions response C.LinkDebug
-	{
-		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
-		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-		if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
-		if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
-		"$(RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
-		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-	}
 
-	actions response C.LinkNoManifest
-	{
-		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
-		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-	}
+actions response C.LinkDebug
+{
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
+	SET INCLUDE=$(STDHDRS:\\J=;)
+	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
+	if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
+	"$(RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
+	"$(LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+}
 
-	actions response C.Link
-	{
-		set PATH=%PATH%;$(MSVCBIN);$(MSVCNT_PATH);$(LINK_PATHS:E)
-		SET INCLUDE=$(STDHDRS:\\J=;)
-		"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-		"$(MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
-	}
+actions response C.LinkNoManifest
+{
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
+	SET INCLUDE=$(STDHDRS:\\J=;)
+	"$(LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+}
+
+actions response C.Link
+{
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
+	SET INCLUDE=$(STDHDRS:\\J=;)
+	"$(LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	"$(MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
+}
+
 }
 
 
 actions updated response C.CC
 {
-	PATH=$(MSVCNT_PATH);%PATH%
+	PATH=$(MSVCNT_BIN_PATH);%PATH%
 	SET INCLUDE=$(STDHDRS:\\J=;)
 	"$(CC:\\)" /nologo @@($(MFLAGS) "$(>)")
 }
@@ -117,7 +118,7 @@ actions updated response C.CC
 
 actions updated response C.C++
 {
-	PATH=$(MSVCNT_PATH);%PATH%
+	PATH=$(MSVCNT_BIN_PATH);%PATH%
 	SET INCLUDE=$(STDHDRS:\\J=;)
 	"$(C++:\\)" /nologo @@($(MFLAGS) "$(>)")
 }
@@ -125,7 +126,7 @@ actions updated response C.C++
 
 actions together response C.Archive
 {
-	PATH=%PATH%;$(MSVCNT_PATH)
+	PATH=$(MSVCNT_BIN_PATH);%PATH%
 	"$(AR)" /nologo $(LIBFLAGS) /out:"$(<)" @@("$(>:\\)")
 }
 
@@ -226,6 +227,10 @@ rule C._MultiCppCompile_PreCompile
 	}
 }
 
+rule C._MultiCppCompile_PchFlags
+{
+}
+
 rule C._MultiCppCompile_SetupFlags
 {
 	_flags += $(postREFERENCEDIRECTORIES) ;
@@ -276,6 +281,18 @@ rule C._MultiCppCompile_PostCompile
 }
 
 
+rule C._ApplicationFromObjects_CleanIntermediates
+{
+	# Clean the .pdb (etc) files.
+	local sufs = .pdb .map .lib .exp .ilk ;
+	local zap = $(_t:S=$(sufs)) ;
+	MakeLocate $(zap) : $(outputPath) ;
+	Clean clean:$(TARGET) : $(zap) ;
+
+	Depends $(zap) : $(_linkTargets) ;
+}
+
+
 rule C._ApplicationFromObjects_LinkFlags
 {
 	if windows in $(OPTIONS) {
@@ -291,19 +308,13 @@ rule C._ApplicationFromObjects_LinkFlags
 		linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 	}
 
-	{
-	    # Clean the .pdb (etc) files.
-		local sufs = .pdb .map .lib .exp .ilk ;
-	    local zap = $(_t:S=$(sufs)) ;
-	    MakeLocate $(zap) : $(outputPath) ;
-	    Clean clean:$(TARGET) : $(zap) ;
-
-	    Depends $(zap) : $(_linkTargets) ;
-	}
+	C._ApplicationFromObjects_CleanIntermediates ;
 
 	if $(COMPILER) = vc6 {
 		if $(CONFIG) = debug {
 			linkRule = C.LinkDebug ;
+		} else {
+			linkRule = C.Link ;
 		}
 	} else {
 		if nomanifest in $(OPTIONS) {
@@ -312,6 +323,11 @@ rule C._ApplicationFromObjects_LinkFlags
 			linkRule = C.LinkDebug ;
 		}
 	}
+}
+
+
+rule C._ApplicationFromObjects_PostBuild
+{
 }
 
 
@@ -367,6 +383,8 @@ rule C._SharedLibraryFromObjects_LinkFlags
 	if $(COMPILER) = vc6 {
 		if $(CONFIG) = debug {
 			linkRule = C.LinkDebug ;
+		} else {
+			linkRule = C.Link ;
 		}
 	} else {
 		if nomanifest in $(OPTIONS) {
@@ -396,4 +414,3 @@ rule C.DefFile TARGET : SOURCES
 BUILD_EXTENSIONS = $(SUFOBJ) .res ;
 C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;
 C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
-

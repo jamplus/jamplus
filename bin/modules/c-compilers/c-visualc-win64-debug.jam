@@ -1,9 +1,9 @@
-CCFLAGS.win64.debug on * 		?= /Od /Gm /EHsc /MDd /W3 /Zi ;
-C++FLAGS.win64.debug on *		?= /Od /Gm /EHsc /MDd /W3 /Zi ;
-LIBFLAGS.win64.debug on * = ;
-LINKFLAGS.win64.debug on * = /INCREMENTAL:YES /DEBUG /MACHINE:X64 ;
+C.CFlags * : /Od /Gm /EHsc /MDd /W3 /Zi : debug : win64 ;
+C.C++Flags * : /Od /Gm /EHsc /MDd /W3 /Zi : debug : win64 ;
+C.LibFlags * : : debug : win64 ;
+C.LinkFlags * : /INCREMENTAL:YES /DEBUG /MACHINE:X86 : debug : win64 ;
 
 if $(COMPILER) != vc6 {
-	CCFLAGS.win64.debug on *	+= /RTC1 ;
-	C++FLAGS.win64.debug on *	+= /RTC1 ;
+	C.CFlags * : /RTC1 : debug : win64 ;
+	C.C++Flags * : /RTC1 : debug : win64 ;
 }

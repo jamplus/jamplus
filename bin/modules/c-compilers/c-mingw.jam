@@ -87,12 +87,6 @@ actions updated response C.PCH
 }
 
 
-rule C._ForceIncludeHelper
-{
-	C.AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
-}
-
-
 rule C._MultiCppCompile_PreCompile
 {
 }
@@ -175,11 +169,11 @@ rule C._SharedLibraryFromObjects_LinkFlags
 } # TARGETINFO_LOCATE
 
 BUILD_EXTENSIONS = $(SUFOBJ) .res ;
-C.AddBuildExtensions CC : .c .s : CC : $(SUFOBJ) "" : 1 : 1 ;
-C.AddBuildExtensions C++ : .cc .cpp .cxx : C++ : $(SUFOBJ) "" : 1 : 1 ;
-C.AddBuildExtensions PCH : .h : PCH : "" .gch : 0 : 0 ;
-C.AddBuildExtensions M : .m : CC : $(SUFOBJ) "" : 1 : 1 ;
-C.AddBuildExtensions MM : .mm : C++ : $(SUFOBJ) "" : 1 : 1 ;
+C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;
+C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
+C.AddBuildExtensions PCH : .h : C.PCH : "" .gch : 0 : 0 ;
+C.AddBuildExtensions M : .m : C.CC : $(SUFOBJ) "" : 1 : 1 ;
+C.AddBuildExtensions MM : .mm : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
 
 
 

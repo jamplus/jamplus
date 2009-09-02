@@ -1,15 +1,11 @@
-DEFINES.*.debug on * += _DEBUG DEBUG ;
-DEFINES.*.release on * += NDEBUG ;
-DEFINES.*.releaseltcg on * += NDEBUG ;
-
 SUBDIRRESET += ASFLAGS HDRS C++FLAGS CCFLAGS ;
 
-HDRPATTERN =
+C.HDRPATTERN =
 		"^[ 	]*#[ 	]*include[ 	]*[<\"]([^\">]*)[\">].*$" ;
 
 
-		
-GENERATED_HEADERS = ;
+
+C.GENERATED_HEADERS = ;
 
 rule C._retrieveVar VARIABLE : TARGET : THE_CONFIG : THE_PLATFORM
 {
@@ -72,10 +68,10 @@ rule C.HdrRule SOURCE : HEADERS
 ## LOCAL CHANGE
 	SEARCH on $(s) = $(HDRSEARCH) ;
 
-	if $(GENERATED_HEADERS) {
+	if $(C.GENERATED_HEADERS) {
 		local header ;
 		for header in $(s) {
-			if ! $(header) in $(GENERATED_HEADERS) {
+			if ! $(header) in $(C.GENERATED_HEADERS) {
 				NoCare $(header) ;
 			}
 		}
@@ -281,7 +277,7 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 	# source needs to be scanned for header dependencies
 	HDRRULE on $(sources) = C.HdrRule ;
-	HDRSCAN on $(sources) = $(HDRPATTERN) ;
+	HDRSCAN on $(sources) = $(C.HDRPATTERN) ;
 	HDRGRIST on $(sources) = $(grist) ;
 
 	SEARCH on $(sources) = $(SEARCH_SOURCE) ;
@@ -567,12 +563,14 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
 		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : * : $(CONFIG) : $(PLATFORM) ] ]
 		[ C._retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-		[ C._retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
+		[ C._retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ]
+		[ C.FLibraryPaths $(STDLINKDIRECTORIES) ]
+	;
 
 	local linkRule = C.Link ;
 
 	C._ApplicationFromObjects_LinkFlags ;
-		
+
 	local linkLibs =
 		[ C._retrieveVar LINKLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ C._retrieveVar LINKLIBS : * : $(CONFIG) : $(PLATFORM) ] ;
@@ -594,7 +592,7 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 #	Includes $(_s) : $(_s) ;
 
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
-	
+
 	C._ApplicationFromObjects_PostBuild ;
 }
 
@@ -795,7 +793,9 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
 		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : * : $(CONFIG) : $(PLATFORM) ] ]
 		[ C._retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-		[ C._retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ] ;
+		[ C._retrieveVar LINKFLAGS : * : $(CONFIG) : $(PLATFORM) ]
+		[ C.FLibraryPaths $(STDLINKDIRECTORIES) ]
+	;
 
 	local linkRule = C.Link ;
 
@@ -959,6 +959,15 @@ rule C.InstallNamePath TARGET : INSTALL_NAME_PATH : THE_CONFIG : THE_PLATFORM
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
 	INSTALL_NAME_PATH.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(INSTALL_NAME_PATH) ;
+}
+
+
+rule C.LibFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_CONFIG ?= * ;
+	THE_PLATFORM ?= * ;
+	LIBFLAGS.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
 }
 
 
@@ -1382,5 +1391,10 @@ rule C.OutputSuffix TARGET : SUFFIX : THE_CONFIG : THE_PLATFORM
 	SUFFIX = .$(NO_DOT_SUFFIX) ;
 	OUTPUTSUFFIX.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) = $(SUFFIX) ;
 }
+
+
+C.Defines * : _DEBUG DEBUG : debug ;
+C.Defines * : NDEBUG : release ;
+C.Defines * : NDEBUG : releaseltcg ;
 
 
