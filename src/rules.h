@@ -102,7 +102,8 @@ struct _action {
 	char		status;		/* see TARGET status */
 #ifdef OPT_MULTIPASS_EXT
 	int		pass;
-#endif	
+#endif
+	TARGETS		*autosettings;
 } ;
 
 /* SETTINGS - variables to set when executing a TARGET's ACTIONS */
@@ -241,6 +242,7 @@ void 	touchtarget( const char *t );
 #ifdef OPT_BUILTIN_NEEDS_EXT
 TARGETS *targetlist( TARGETS *chain, LIST  *targets, char needs );
 TARGETS *targetentry( TARGETS *chain, TARGET *target, char needs );
+TARGETS *targetentryhead( TARGETS *chain, TARGET *target, char needs );
 #else
 TARGETS *targetlist( TARGETS *chain, LIST  *targets );
 TARGETS *targetentry( TARGETS *chain, TARGET *target );

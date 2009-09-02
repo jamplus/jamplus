@@ -515,14 +515,16 @@ make1b( TARGET *t )
 		}
 #endif
 
-		pushsettings( t->settings );
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
+		pushsettings( t->settings );
 		filecache_fillvalues( t );
+		popsettings( t->settings );
 		t->cmds = (char *)make1cmds( t, t->actions );
 #else
+		pushsettings( t->settings );
 		t->cmds = (char *)make1cmds( t->actions );
-#endif
 		popsettings( t->settings );
+#endif
 
 		t->progress = T_MAKE_RUNNING;
 	    }
@@ -960,6 +962,8 @@ make1cmds( ACTIONS *a0 )
 	    LIST    *nt, *ns;
 	    ACTIONS *a1;
 	    int	    start, chunk, length, maxline;
+		TARGETS *autosettingsreverse = 0;
+		TARGETS *autot;
 
 #ifdef OPT_MULTIPASS_EXT
 	    if ( a0->action->pass != actionpass )
@@ -980,6 +984,12 @@ make1cmds( ACTIONS *a0 )
 	    if( !rule->actions || a0->action->running )
 		continue;
 
+		for ( autot = a0->action->autosettings; autot; autot = autot->next ) {
+			if ( autot->target != t )
+				pushsettings( autot->target->settings );
+			autosettingsreverse = targetentryhead( autosettingsreverse, autot->target, 0 );
+		}
+		pushsettings( t->settings );
 	    a0->action->running = 1;
 #ifdef OPT_ACTIONS_WAIT_FIX
 	    a0->action->run_tgt = t;
@@ -1214,6 +1224,11 @@ make1cmds( ACTIONS *a0 )
 		if (nt==NULL) { // || ns==NULL) {
 		    /* skip this action */
 		    list_free(ns);
+			popsettings( t->settings );
+			for ( autot = autosettingsreverse; autot; autot = autot->next ) {
+				if ( autot->target != t )
+					pushsettings( autot->target->settings );
+			}
 		    continue;
 		}
 	    }
@@ -1263,6 +1278,11 @@ make1cmds( ACTIONS *a0 )
 			    rule->name, desc );
 		}
 #endif /* OPT_DEBUG_MAKE1_LOG_EXT */
+			popsettings( t->settings );
+			for ( autot = autosettingsreverse; autot; autot = autot->next ) {
+				if ( autot->target != t )
+					pushsettings( autot->target->settings );
+			}
 		continue;
 	    }
 
@@ -1369,6 +1389,12 @@ make1cmds( ACTIONS *a0 )
 
 	    popsettings( boundvars );
 	    freesettings( boundvars );
+
+		popsettings( t->settings );
+		for ( autot = autosettingsreverse; autot; autot = autot->next ) {
+			if ( autot->target != t )
+				pushsettings( autot->target->settings );
+		}
 	}
 
 	return cmds;

@@ -611,6 +611,7 @@ evaluate_rule(
 #ifdef OPT_BUILTIN_NEEDS_EXT
 	    action->targets = targetlist( (TARGETS *)0, lol_get( args, 0 ), 0 );
 	    action->sources = targetlist( (TARGETS *)0, lol_get( args, 1 ), 0 );
+	    action->autosettings = targetlist( (TARGETS *)0, lol_get( args, 2 ), 0 );
 #else
 	    action->targets = targetlist( (TARGETS *)0, lol_get( args, 0 ) );
 	    action->sources = targetlist( (TARGETS *)0, lol_get( args, 1 ) );

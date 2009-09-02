@@ -237,6 +237,50 @@ targetentry(
 }
 
 /*
+ * targetentry() - add a TARGET to a chain of TARGETS
+ *
+ * Inputs:
+ *	chain	exisitng TARGETS to append to
+ *	target	new target to append
+ */
+
+TARGETS *
+targetentryhead(
+	TARGETS	*chain,
+	TARGET *target,
+	char    needs)      /* marks the new TARGETS with the "needs" flag */
+{
+	TARGETS *c;
+
+#ifdef OPT_IMPROVED_MEMUSE_EXT
+	if (!targets_pool) {
+	    targets_pool = mempool_create("TARGETS", sizeof(TARGETS));
+	}
+	c = (TARGETS *)mempool_alloc(targets_pool);
+#else
+	c = (TARGETS *)malloc( sizeof( TARGETS ) );
+#endif
+	c->target = target;
+#ifdef OPT_BUILTIN_NEEDS_EXT
+	c->needs = needs;
+#endif
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
+	c->parentcommandlineoutofdate = 0;
+#endif
+
+	if( !chain ) {
+		chain = c;
+		chain->tail = NULL;
+		c->next = NULL;
+	} else {
+		c->next = chain;
+		c->tail = chain->tail;
+	}
+
+	return c;
+}
+
+/*
  * targetchain() - append two TARGET chains
  *
  * Inputs:
