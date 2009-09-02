@@ -32,36 +32,6 @@ NEWLINE = "
 
 JAMBASE_VERSION = "JamPlus 0.3 (2009.03.20)" ;
 
-# Initialize variables
-#
-
-CONFIG ?= release ;
-
-VALID_CONFIGS ?= debug release releaseltcg ;
-
-switch $(OS)
-{
-	case NT :
-		VALID_PLATFORMS ?= win32 win64 ;
-
-		PLATFORM ?= win32 ;
-
-	case MACOSX :
-		VALID_PLATFORMS ?= macosx iphone iphonesimulator ;
-
-		PLATFORM ?= macosx ;
-}
-
-if ! $(CONFIG) in * $(VALID_CONFIGS)
-{
-	Exit "* jam: CONFIG must be one of the following:" $(VALID_CONFIGS:J=$(SPACE)) ;
-}
-
-if ! $(PLATFORM) in * $(VALID_PLATFORMS)
-{
-	Exit "* jam: PLATFORM must be one of the following:" $(VALID_PLATFORMS:J=$(SPACE)) ;
-}
-
 #
 # OS specific variable settings
 #
