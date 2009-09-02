@@ -1,0 +1,6 @@
+SubDir TOP ;
+
+C.OutputPath * : @($(ALL_LOCATE_TARGET)/../image:R=) ;
+
+SubInclude TOP app : app ;
+SubInclude TOP slib-a : slib-a ;

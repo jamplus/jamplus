@@ -1,0 +1,3 @@
+SubDir TOP slib-a ;
+
+C.Library slib-a : slib-a.c : shared ;
