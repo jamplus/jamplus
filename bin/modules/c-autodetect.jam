@@ -1,6 +1,6 @@
 IncludeModule c ;
 
-rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
+rule C.ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 {
 	THE_COMPILER ?= $(COMPILER) ;
 	THE_PLATFORM ?= $(PLATFORM) ;
@@ -43,7 +43,7 @@ rule ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 	}
 }
 
-ToolChain $(COMPILER) : $(PLATFORM) : $(CONFIG) ;
+C.ToolChain $(COMPILER) : $(PLATFORM) : $(CONFIG) ;
 
 ########################################################################
 ########################################################################
