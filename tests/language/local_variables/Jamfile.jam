@@ -1,0 +1,8 @@
+Echo SOME_DIR (should be empty) \= $(SOME_DIR) ;
+
+{
+	local SOME_DIR = c:/some/dir ;
+	Echo SOME_DIR (should equal c:/some/dir) \= $(SOME_DIR) ;
+}
+
+Echo SOME_DIR (should be empty) \= $(SOME_DIR) ;
