@@ -1,0 +1,9 @@
+jam (full) - 9:58.00
+jam (no-op) 0:01.44
+
+jamplus (full) - 2:17.00
+jamplus (no-op - individual .obj - no dep cache) - 0:02.65
+jamplus (no-op - individual .obj - dep cache) - 0:01.62
+
+jamplus-lump (full) - 0:26.90
+jamplus-lump (no-op) - 0:01.22
