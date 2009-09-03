@@ -1,0 +1,16 @@
+the_echo on myshell = echo ;
+
+actions DoEcho
+{
+	echo $(the_echo) $(the_string) hello everyone
+}
+
+DoEcho all : : myshell ;
+
+Depends all : all2 ;
+the_string on all2 = *********** ;
+DoEcho all2 : : myshell ;
+
+Depends all : all3 ;
+the_echo on all3 = "=====" ;
+DoEcho all3 : : myshell ;
