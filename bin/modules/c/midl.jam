@@ -55,7 +55,7 @@ rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 
 		local flags ;
 		on $(PARENT) flags += $(MIDLFLAGS.$(CONFIG)) $(MIDLFLAGS.*) ;
-		on * flags += $(MIDLFLAGS.$(CONFIG)) $(MIDLFLAGS.*) ;
+		on C.* flags += $(MIDLFLAGS.$(CONFIG)) $(MIDLFLAGS.*) ;
 
 		if $(COMPILER) = vc6 {
 			flags += /tlb $(tlbFile:T) /h $(hFile:T) ;

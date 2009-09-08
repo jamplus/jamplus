@@ -694,9 +694,10 @@ if $(WIN98)
 ########################################################################
 ########################################################################
 
-rule _retrieveActiveTargetName TARGETS
+rule _retrieveActiveTargetName TARGET
 {
-	return $(TARGETS:E=$(ACTIVE_PROJECT:E="")) ;
+	if $(TARGET) = * {  return C.* ;  }
+	return $(TARGET:E=$(ACTIVE_PROJECT:E="")) ;
 }
 
 ########################################################################

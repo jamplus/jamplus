@@ -59,50 +59,48 @@ rule C._RuntimeTypeHelper
 }
 
 
-if $(COMPILER) = vc6
+if $(COMPILER) in vc6 vs2002 vs2003
 {
 actions response C.LinkDebug
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
-	SET INCLUDE=$(STDHDRS:\\J=;)
-	"$(LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	SET INCLUDE=$(C.STDHDRS:\\J=;)
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 }
 
 actions response C.Link
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
-	SET INCLUDE=$(STDHDRS:\\J=;)
-	"$(LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-}
+	SET INCLUDE=$(C.STDHDRS:\\J=;)
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 }
 
-if $(COMPILER) != vc6
-{
+} else {
 
 actions response C.LinkDebug
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
-	SET INCLUDE=$(STDHDRS:\\J=;)
-	"$(LINK:\\)" /nologo /out:$(<[1]) $(UNDEFS) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-	if exist $(MANIFEST).intermediate.manifest "$(MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
+	SET INCLUDE=$(C.STDHDRS:\\J=;)
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	if exist $(MANIFEST).intermediate.manifest "$(C.MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
 	if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
-	"$(RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
-	"$(LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	"$(C.RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 }
 
 actions response C.LinkNoManifest
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
-	SET INCLUDE=$(STDHDRS:\\J=;)
-	"$(LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	SET INCLUDE=$(C.STDHDRS:\\J=;)
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 }
 
 actions response C.Link
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
-	SET INCLUDE=$(STDHDRS:\\J=;)
-	"$(LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-	"$(MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
+	SET INCLUDE=$(C.STDHDRS:\\J=;)
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+	"$(C.MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
 }
 
 }
@@ -111,23 +109,23 @@ actions response C.Link
 actions updated response C.CC
 {
 	PATH=$(MSVCNT_BIN_PATH);%PATH%
-	SET INCLUDE=$(STDHDRS:\\J=;)
-	"$(CC:\\)" /nologo @@($(MFLAGS) "$(>)")
+	SET INCLUDE=$(C.STDHDRS:\\J=;)
+	"$(C.CC:\\)" /nologo @@($(MFLAGS) "$(>)")
 }
 
 
 actions updated response C.C++
 {
 	PATH=$(MSVCNT_BIN_PATH);%PATH%
-	SET INCLUDE=$(STDHDRS:\\J=;)
-	"$(C++:\\)" /nologo @@($(MFLAGS) "$(>)")
+	SET INCLUDE=$(C.STDHDRS:\\J=;)
+	"$(C.C++:\\)" /nologo @@($(MFLAGS) "$(>)")
 }
 
 
 actions together response C.Archive
 {
 	PATH=$(MSVCNT_BIN_PATH);%PATH%
-	"$(AR)" /nologo $(LIBFLAGS) /out:"$(<)" @@("$(>:\\)")
+	"$(C.AR)" /nologo $(LIBFLAGS) /out:"$(<)" @@("$(>:\\)")
 }
 
 
@@ -357,9 +355,9 @@ rule C._SharedLibraryFromObjects_LinkFlags
 {
 	if ! ( nodefaults in $(OPTIONS) ) {
 		if windows in $(OPTIONS) {
-			linkFlags += /SUBSYSTEM:WINDOWS ;
+			linkFlags += $(MSVC_SUBSYSTEM_WINDOWS) ;
 		} else {
-			linkFlags += /SUBSYSTEM:CONSOLE ;
+			linkFlags += $(MSVC_SUBSYSTEM_CONSOLE) ;
 		}
 	}
 	linkFlags += /DLL ;

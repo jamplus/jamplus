@@ -13,7 +13,7 @@ rule C.UseMFC TARGET : OPTIONS
 			C.LinkDirectories $(TARGET) : "$(MSVCNT)/mfc/Lib" ;
 		}
 
-		RcIncludeDirectories $(TARGET) : "$(MSVCNT)/mfc/Include" "$(MSVCNT)/atl/Include" ;
+		C.RcIncludeDirectories $(TARGET) : "$(MSVCNT)/mfc/Include" "$(MSVCNT)/atl/Include" ;
 	} else {
 		C.IncludeDirectories $(TARGET) : "$(MSVCNT)/atlmfc/include" ;
 

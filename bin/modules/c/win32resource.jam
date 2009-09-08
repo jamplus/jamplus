@@ -21,20 +21,20 @@ rule C.ResourceCompiler PARENT : SOURCES : OPTIONS
 
 	RCDEFINES on $(TARGETS) +=
 		[ on $(PARENT) Var RCDEFINES ]
-		[ on * Var RCDEFINES ]
+		[ on C.* Var RCDEFINES ]
 	;
 
 	RCFLAGS on $(TARGETS) +=
 		[ on $(PARENT) Var RCFLAGS ]
-		[ on * Var RCFLAGS ]
+		[ on C.* Var RCFLAGS ]
 	;
 
 	RCHDRS on $(TARGETS) +=
 		$(SEARCH_SOURCE)
 		[ on $(PARENT) Var RCHDRS ]
-		[ on * Var RCHDRS ]
+		[ on C.* Var RCHDRS ]
 		$(SUBDIRHDRS)
-		$(STDHDRS)
+		$(C.STDHDRS)
 	;
 
 	UseCommandLine $(TARGETS) :
@@ -58,13 +58,13 @@ rule C.ResourceCompiler PARENT : SOURCES : OPTIONS
 actions C.ResourceCompile
 {
 	SET INCLUDE=$(RCHDRS:\\J=;)
-	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(RCDEFINES) $(2)
+	"$(C.RC:\\)" /fo $(1) $(RCFLAGS) /d$(RCDEFINES) $(2)
 }
 
 actions quietly C.ResourceCompileQuiet
 {
 	SET INCLUDE=$(RCHDRS:\\J=;)
-	"$(RC:\\)" /fo $(1) $(RCFLAGS) /d$(DEFINES) $(2)
+	"$(C.RC:\\)" /fo $(1) $(RCFLAGS) /d$(DEFINES) $(2)
 }
 
 # Set resource compiler options

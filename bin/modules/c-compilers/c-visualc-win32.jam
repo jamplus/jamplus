@@ -1,16 +1,52 @@
-MSVCBIN		?= "$(MSVCNT)/bin/" ;
-AR			= "$(MSVCBIN)lib" ;
-CC			= "$(MSVCBIN)cl" ;
-C++			= "$(CC)" ;
-LINK		= "$(MSVCBIN)link" ;
-MT			= "$(MSSDK)/bin/mt" ;
-if $(COMPILER) = vc6 {
-	RC			= "$(MSVCNT)/../Common/MSDev98/Bin/rc" ;
-} else {
-	RC			= "$(MSSDK)/bin/RC" ;
+switch $(COMPILER) {
+	case vs2010 :
+		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
+		MSSDK = [ W32_GETREG $(key) ] ;
+		MSSDK ?= $(MSVCNT) ;
+		MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
+		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
+
+	case vs2008 :
+		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
+		MSSDK = [ W32_GETREG $(key) ] ;
+		MSSDK ?= $(MSVCNT) ;
+		MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
+		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
+
+	case vs2005 :
+		MSSDK = $(MSVCNT) ;
+		MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
+		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+
+	case vs2003 :
+		MSSDK = $(MSVCNT) ;
+		MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
+		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+
+	case vs2002 :
+		MSSDK = $(MSVCNT) ;
+		MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
+		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+
+	case vc6 :
+		MSSDK = $(MSVCNT) ;
+		MSSDK_STDHDRS = "$(MSSDK)/Include" ; # "$(MSSDK)/PlatformSDK/Include" ;
+		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/Lib" ; # "$(MSVCNT)/PlatformSDK/lib" ;
 }
-STDHDRS		?= "$(MSSDK_STDHDRS)" ;
-STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
+
+MSVCBIN		?= "$(MSVCNT)/bin/" ;
+C.AR			= "$(MSVCBIN)lib" ;
+C.CC			= "$(MSVCBIN)cl" ;
+C.C++			= "$(MSVCBIN)cl" ;
+C.LINK			= "$(MSVCBIN)link" ;
+C.MT			= "$(MSSDK)/bin/mt" ;
+if $(COMPILER) = vc6 {
+	C.RC			= "$(MSVCNT)/../Common/MSDev98/Bin/rc" ;
+} else {
+	C.RC			= "$(MSSDK)/bin/RC" ;
+}
+C.STDHDRS		?= "$(MSSDK_STDHDRS)" ;
+C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
 
 C.Defines * : WIN32 WINDOWS : * : win32 ;
 

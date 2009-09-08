@@ -8,7 +8,6 @@ vs_versions.7.0 = vs2002 ;
 vs_versions.6.0 = vc6 ;
 
 rule FindVisualStudioHelper VERSION {
-
 	local compiler ;
 
 	switch $(VERSION) {
@@ -23,12 +22,6 @@ rule FindVisualStudioHelper VERSION {
 			if $(MSVCNT) {
 				MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
 				MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
-
-				local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
-				MSSDK = [ W32_GETREG $(key) ] ;
-				MSSDK ?= $(MSVCNT) ;
-				MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
-				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
 				compiler = vs2010 ;
 			}
 
@@ -42,18 +35,6 @@ rule FindVisualStudioHelper VERSION {
 			if $(MSVCNT) {
 				MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
 				MSVCNT_BIN_PATH = $(MSVCNT)/../Common7/IDE ;
-
-				local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
-				MSSDK = [ W32_GETREG $(key) ] ;
-				MSSDK ?= $(MSVCNT) ;
-				MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
-				switch $(PLATFORM) {
-					case win32 :
-						MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
-
-					case win64 :
-						MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
-				}
 				compiler = vs2008 ;
 			}
 
@@ -66,9 +47,6 @@ rule FindVisualStudioHelper VERSION {
 			if $(MSVCNT) {
 				MSVCNT = @(..\\..\\VC:R=$(MSVCNT)) ;
 				MSVCNT_BIN_PATH = @($(MSVCNT)/../Common7/IDE:R=) ;
-				MSSDK = $(MSVCNT) ;
-				MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
-				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
 				compiler = vs2005 ;
 			}
 
@@ -81,9 +59,6 @@ rule FindVisualStudioHelper VERSION {
 			if $(MSVCNT) {
 				MSVCNT = @(..\\..\\vc7:R=$(MSVCNT)) ;
 				MSVCNT_BIN_PATH = $(MSVCNT)/../Common7/IDE ;
-				MSSDK = $(MSVCNT) ;
-				MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
-				MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
 				compiler = vs2003 ;
 			}
 
@@ -104,9 +79,6 @@ rule FindVisualStudioHelper VERSION {
 		    local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft DevStudio $(VERSION) Products "Microsoft Visual C++" ProductDir ;
 		    MSVCNT ?= [ W32_GETREG $(key) ] ;
 			MSVCNT_BIN_PATH = "$(MSVCNT)/../Common/MSDev98/Bin" ;
-			MSSDK = $(MSVCNT) ;
-			MSSDK_STDHDRS = "$(MSSDK)/Include" ; # "$(MSSDK)/PlatformSDK/Include" ;
-			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/Lib" ; # "$(MSVCNT)/PlatformSDK/lib" ;
 			compiler = vc6 ;
 	}
 
