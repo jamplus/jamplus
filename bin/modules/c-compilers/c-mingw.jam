@@ -6,11 +6,12 @@
 	SUFRES	?= .res ;
 	SUFSHAREDLIB ?= .dll ;
 
-	CCFLAGS.*.* on *		= -x c ;
-	C++FLAGS.*.* on *		= -x c++ ;
-	MFLAGS.*.* on *			= -x objective-c ;
-	MMFLAGS.*.* on *		= -x objective-c++ ;
-	DEFINES.*.* on * += MINGW ;
+	C.CFlags * : -x c ;
+	C.C++Flags * : -x c++ ;
+	MFLAGS.*.* on C.*		= -x objective-c ;
+	MMFLAGS.*.* on C.*		= -x objective-c++ ;
+
+	C.Defines * : MINGW ;
 
 	PCHCCFLAGS = -x c-header ;
 	PCHC++FLAGS = -x c++-header ;
@@ -30,7 +31,7 @@ rule C.FLibraryPaths { return -L$(<) ; }
 
 rule C._ForceIncludeHelper
 {
-	C.AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG:E=*) : $(THE_PLATFORM:E=*) ;
 }
 
 
@@ -46,17 +47,17 @@ rule C._RuntimeTypeHelper
 
 actions updated together piecemeal C.Archive
 {
-	$(AR) $(LIBFLAGS) $(<) $(>)
+	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
 }
 
 actions C.Link
 {
-	"$(LINK)" $(LINKFLAGS) -o $(<[1]) $(UNDEFS) $(>) $(NEEDLIBS:T) $(LINKLIBS)
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]) $(>) $(NEEDLIBS:T) $(LINKLIBS)
 }
 
 actions together C.Ranlib
 {
-	$(RANLIB) $(<)
+	"$(C.RANLIB)" $(<)
 }
 
 #
@@ -67,23 +68,23 @@ if $(NOARUPDATE)
 {
 	actions C.Archive
 	{
-	$(AR) $(LIBFLAGS) $(<) $(>)
+	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
 	}
 }
 
 actions updated response C.CC
 {
-	"$(CC)" -c $(MFLAGS) $(>)
+	"$(C.CC)" -c $(MFLAGS) $(>)
 }
 
 actions updated response C.C++
 {
-	"$(C++)" -c $(MFLAGS) $(>)
+	"$(C.C++)" -c $(MFLAGS) $(>)
 }
 
 actions updated response C.PCH
 {
-	"$(C++)" -c $(MFLAGS) $(>)
+	"$(C.C++)" -c $(MFLAGS) $(>)
 }
 
 
@@ -168,12 +169,25 @@ rule C._SharedLibraryFromObjects_LinkFlags
 
 } # TARGETINFO_LOCATE
 
+rule C.MFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	MFLAGS.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) += $(FLAGS) ;
+}
+
+
+rule C.MMFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	MMFLAGS.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) += $(FLAGS) ;
+}
+
+
+
+
 BUILD_EXTENSIONS = $(SUFOBJ) .res ;
 C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;
 C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
 C.AddBuildExtensions PCH : .h : C.PCH : "" .gch : 0 : 0 ;
 C.AddBuildExtensions M : .m : C.CC : $(SUFOBJ) "" : 1 : 1 ;
 C.AddBuildExtensions MM : .mm : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
-
-
-

@@ -1,4 +1,4 @@
-CCFLAGS.win32.release on * 		?= -g -O2 ;
-C++FLAGS.win32.release on * 	?= -g -O2 ;
-MFLAGS.win32.release on * 		?= -g -O2 ;
-MMFLAGS.win32.release on * 		?= -g -O2 ;
+C.CFlags *		: -g -O2 : release : win32 ;
+C.C++Flags *	: -g -O2 : release : win32 ;
+C.MFlags *		: -g -O2 : release : win32 ;
+C.MMFlags *		: -g -O2 : release : win32 ;
