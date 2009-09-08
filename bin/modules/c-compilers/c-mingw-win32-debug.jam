@@ -1,4 +1,4 @@
-C.CFlags *		: -g -O0 : debug : win32 ;
-C.C++Flags *	: -g -O0 : debug : win32 ;
-C.MFlags *		: -g -O0 : debug : win32 ;
-C.MMFlags *		: -g -O0 : debug : win32 ;
+C.Flags CC	: * : -g -O0 : debug : win32 ;
+C.Flags C++	: *	: -g -O0 : debug : win32 ;
+C.Flags M	: *	: -g -O0 : debug : win32 ;
+C.Flags MM	: *	: -g -O0 : debug : win32 ;

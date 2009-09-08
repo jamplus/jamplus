@@ -6,10 +6,10 @@
 	SUFRES	?= .res ;
 	SUFSHAREDLIB ?= .dll ;
 
-	C.CFlags * : -x c ;
-	C.C++Flags * : -x c++ ;
-	MFLAGS.*.* on C.*		= -x objective-c ;
-	MMFLAGS.*.* on C.*		= -x objective-c++ ;
+	C.Flags CC	: * : -x c ;
+	C.Flags C++	: * : -x c++ ;
+	C.Flags M	: * : -x objective-c ;
+	C.Flags MM	: * : -x objective-c++ ;
 
 	C.Defines * : MINGW ;
 
@@ -168,22 +168,6 @@ rule C._SharedLibraryFromObjects_LinkFlags
 }
 
 } # TARGETINFO_LOCATE
-
-rule C.MFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	MFLAGS.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) += $(FLAGS) ;
-}
-
-
-rule C.MMFlags TARGET : FLAGS : THE_CONFIG : THE_PLATFORM
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	MMFLAGS.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) += $(FLAGS) ;
-}
-
-
-
 
 BUILD_EXTENSIONS = $(SUFOBJ) .res ;
 C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;

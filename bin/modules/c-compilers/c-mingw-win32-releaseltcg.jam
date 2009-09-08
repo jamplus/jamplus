@@ -1,4 +1,4 @@
-C.CFlags *		: -g -O3 : releaseltcg : win32 ;
-C.C++Flags *	: -g -O3 : releaseltcg : win32 ;
-C.MFlags *		: -g -O3 : releaseltcg : win32 ;
-C.MMFlags *		: -g -O3 : releaseltcg : win32 ;
+C.Flags CC	: * : -g -O3 : releaseltcg : win32 ;
+C.Flags C++	: *	: -g -O3 : releaseltcg : win32 ;
+C.Flags M	: *	: -g -O3 : releaseltcg : win32 ;
+C.Flags MM	: *	: -g -O3 : releaseltcg : win32 ;
