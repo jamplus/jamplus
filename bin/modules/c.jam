@@ -465,7 +465,7 @@ rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER :
 
 	LUMP_EXT ?= cpp ;
 
-	local contents = "// This lump file is a generated file.  Do not modify.$(NEWLINE)" ;
+	local contents = "/* This lump file is a generated file.  Do not modify. */$(NEWLINE)" ;
 	local line ;
 	local PCH_SOURCE_FILENAME ;
 	if $(PCH_HEADER)
