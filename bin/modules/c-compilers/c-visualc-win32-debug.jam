@@ -1,7 +1,7 @@
 C.CFlags * : /Od /Gm /EHsc /MDd /W3 /Zi : debug : win32 ;
 C.C++Flags * : /Od /Gm /EHsc /MDd /W3 /Zi : debug : win32 ;
 C.LibFlags * : : debug : win32 ;
-C.LinkFlags * : /INCREMENTAL:YES /DEBUG /MACHINE:X64 : debug : win32 ;
+C.LinkFlags * : /INCREMENTAL:YES /DEBUG /MACHINE:X86 : debug : win32 ;
 
 if $(COMPILER) != vc6 {
 	C.CFlags * : /RTC1 : debug : win32 ;
