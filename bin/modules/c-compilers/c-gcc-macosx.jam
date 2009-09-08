@@ -1,8 +1,8 @@
-AR			?= ar ru ;
-CC			?= gcc ;
-C++			?= g++ ;
-LINK		?= g++ ;
-RANLIB		?= ranlib ;
+C.AR			?= ar ru ;
+C.CC			?= gcc ;
+C.C++			?= g++ ;
+C.LINK		?= g++ ;
+C.RANLIB		?= ranlib ;
 
 SUFMODULE	= .dylib ;
 
@@ -21,11 +21,11 @@ SUFMODULE	= .dylib ;
 	}
 	developerRoot = $(isysroot) ;
 
-	CCFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
-	C++FLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
-	MFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
-	MMFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
-	LINKFLAGS.$(PLATFORM).* on * = -isysroot $(isysroot) ;
+	C.Flags CC	: * : -isysroot $(isysroot) : : $(PLATFORM) ;
+	C.Flags C++	: * : -isysroot $(isysroot) : : $(PLATFORM) ;
+	C.Flags M	: * : -isysroot $(isysroot) : : $(PLATFORM) ;
+	C.Flags MM	: * : -isysroot $(isysroot) : : $(PLATFORM) ;
+	C.LinkFlags * : -isysroot $(isysroot) : : $(PLATFORM) ;
 	MACOSX_SDK_DEVELOPER_ROOT on * = $(developerRoot) ;
 }
 

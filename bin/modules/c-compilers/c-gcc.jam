@@ -7,10 +7,10 @@
 	SUFOBJ	?= .o ;
 	SUFSHAREDLIB ?= .so ;
 
-	CCFLAGS.*.* on *		= -x c ;
-	C++FLAGS.*.* on *		= -x c++ ;
-	MFLAGS.*.* on *			= -x objective-c ;
-	MMFLAGS.*.* on *		= -x objective-c++ ;
+	C.Flags CC	: * : -x c ;
+	C.Flags C++	: * : -x c++ ;
+	C.Flags M	: * : -x objective-c ;
+	C.Flags MM	: * : -x objective-c++ ;
 
 	PCHCCFLAGS = -x c-header ;
 	PCHC++FLAGS = -x c++-header ;
@@ -23,11 +23,11 @@
 	switch $(OS)
 	{
 		case CYGWIN :
-			DEFINES.*.* on * += __cygwin__ ;
-			CC			?= gcc ;
-			C++			?= g++ ;
+			Defines * : __cygwin__ ;
+			C.CC		?= gcc ;
+			C.C++		?= g++ ;
 			JAMSHELL	?= sh -c ;
-			RANLIB		?= "" ;
+			C.RANLIB	?= "" ;
 			SUFEXE		= .exe ;
 	}
 }
@@ -50,17 +50,17 @@ rule C.FLibraryPaths { return -L$(<) ; }
 
 actions updated together piecemeal C.Archive
 {
-	$(AR) $(LIBFLAGS) $(<) $(>)
+	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
 }
 
 actions C.Link
 {
-	"$(LINK)" $(LINKFLAGS) -o $(<[1]) $(UNDEFS) $(>) $(NEEDLIBS:T) $(LINKLIBS)
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]) $(UNDEFS) $(>) $(NEEDLIBS:T) $(LINKLIBS)
 }
 
 actions together C.Ranlib
 {
-	$(RANLIB) $(<)
+	"$(C.RANLIB)" $(<)
 }
 
 #
@@ -71,29 +71,29 @@ if $(NOARUPDATE)
 {
 	actions C.Archive
 	{
-	$(AR) $(LIBFLAGS) $(<) $(>)
+	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
 	}
 }
 
 actions updated response C.CC
 {
-	"$(CC)" -c $(MFLAGS) $(>)
+	"$(C.CC)" -c $(MFLAGS) $(>)
 }
 
 actions updated response C.C++
 {
-	"$(C++)" -c $(MFLAGS) $(>)
+	"$(C.C++)" -c $(MFLAGS) $(>)
 }
 
 actions updated response C.PCH
 {
-	"$(C++)" -c $(MFLAGS) $(>)
+	"$(C.C++)" -c $(MFLAGS) $(>)
 }
 
 
 rule C._ForceIncludeHelper
 {
-	C.AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG:E=*) : $(THE_PLATFORM:E=*) ;
 }
 
 

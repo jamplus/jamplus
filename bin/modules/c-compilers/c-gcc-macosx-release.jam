@@ -1,4 +1,4 @@
-CCFLAGS.macosx.release on * 		?= -g -O2 ;
-C++FLAGS.macosx.release on * 	?= -g -O2 ;
-MFLAGS.macosx.release on * 		?= -g -O2 ;
-MMFLAGS.macosx.release on * 		?= -g -O2 ;
+C.Flags CC	: * : -g -O2 : release : macosx ;
+C.Flags C++	: *	: -g -O2 : release : macosx ;
+C.Flags M	: *	: -g -O2 : release : macosx ;
+C.Flags MM	: *	: -g -O2 : release : macosx ;

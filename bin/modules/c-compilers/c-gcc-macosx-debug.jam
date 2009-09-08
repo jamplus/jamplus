@@ -1,4 +1,4 @@
-CCFLAGS.macosx.debug on * 	?= -g -O0 ;
-C++FLAGS.macosx.debug on *	?= -g -O0 ;
-MFLAGS.macosx.debug on * 	?= -g -O0 ;
-MMFLAGS.macosx.debug on * 	?= -g -O0 ;
+C.Flags CC	: * : -g -O0 : debug : macosx ;
+C.Flags C++	: *	: -g -O0 : debug : macosx ;
+C.Flags M	: *	: -g -O0 : debug : macosx ;
+C.Flags MM	: *	: -g -O0 : debug : macosx ;

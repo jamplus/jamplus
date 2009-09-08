@@ -1,4 +1,4 @@
-CCFLAGS.iphone.debug on * 	?= -g -O0 ;
-C++FLAGS.iphone.debug on *	?= -g -O0 ;
-MFLAGS.iphone.debug on * 	?= -g -O0 ;
-MMFLAGS.iphone.debug on * 	?= -g -O0 ;
+C.Flags CC	: * : -g -O0 : debug : iphone ;
+C.Flags C++	: *	: -g -O0 : debug : iphone ;
+C.Flags M	: *	: -g -O0 : debug : iphone ;
+C.Flags MM	: *	: -g -O0 : debug : iphone ;

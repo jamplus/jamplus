@@ -1,4 +1,4 @@
-CCFLAGS.iphonesimulator.releaseltcg on *		= -g -O3 ;
-C++FLAGS.iphonesimulator.releaseltcg on * 	= -g -O3 ;
-MFLAGS.iphonesimulator.releaseltcg on * 		?= -g -O3 ;
-MMFLAGS.iphonesimulator.releaseltcg on * 	?= -g -O3 ;
+C.Flags CC	: * : -g -O3 : releaseltcg : iphonesimulator ;
+C.Flags C++	: *	: -g -O3 : releaseltcg : iphonesimulator ;
+C.Flags M	: *	: -g -O3 : releaseltcg : iphonesimulator ;
+C.Flags MM	: *	: -g -O3 : releaseltcg : iphonesimulator ;
