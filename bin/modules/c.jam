@@ -234,9 +234,10 @@ rule C.MultiCppCompile TARGET : SOURCES
 	local flagsToRemove ;
 	local flagsToAdd ;
 
+	postHDRS += $(SUBDIRHDRS) ;
+
 	on C.* {
 		postHDRS += $(HDRS.$(ALL_TYPES)) ;
-		postHDRS += $(SUBDIRHDRS) ;
 		if $(MSVCNT) {
 			local flags = /I /AI ;
 			postREFERENCEDIRECTORIES += $(flags)\"$(REFERENCEDIRECTORIES.$(ALL_TYPES))\" ;
