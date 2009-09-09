@@ -12,6 +12,6 @@ rule DoLua TARGET : SOURCES : SLEEP : TEXT
 	RunLuaScript $(TARGET) : $(SOURCES) ;
 }
 
-DoLua MyTarget.out : xUnit.h : 5 : hello ;
-DoLua MyTarget.out2 : xUnit2.h : 2.5 : hi ;
-DoLua MyTarget.out3 : xUnit3.h : 1 : together ;
+DoLua MyTarget.out : xit.h : 5 : hello ;
+DoLua MyTarget.out2 : xit2.h : 2.5 : hi ;
+DoLua MyTarget.out3 : xit3.h : 1 : together ;
