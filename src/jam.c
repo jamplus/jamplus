@@ -342,6 +342,30 @@ int main( int argc, char **argv, char **arg_environ )
     }
 #endif
 
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+#ifndef OS_NT
+    if ( !getenv( "JAM_DYLD_FALLBACK_LIBRARY_PATH_SET" ) )
+    {
+	char fileName[4096];
+		char exeName[4096];
+	getprocesspath(fileName, 4096);
+	strcat(fileName, "/lua");
+	
+	setenv("DYLD_FALLBACK_LIBRARY_PATH", fileName, 1);
+	setenv("JAM_DYLD_FALLBACK_LIBRARY_PATH_SET", "true", 1);
+	
+	getexecutablepath(exeName, 4096);
+
+	argc++, argv--;
+	argv[0] = exeName;
+	execve(exeName, argv, environ);
+	perror("execve");
+
+	return 0;
+    }
+#endif
+#endif
+
 #ifdef OPT_SETCWD_SETTING_EXT
 	if( ( n = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qvS", optv ) ) < 0 )
 #else

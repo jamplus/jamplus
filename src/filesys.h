@@ -42,6 +42,7 @@ void md5file(const char *filename, MD5SUM sum);
 #endif
 
 #ifdef OPT_SET_JAMPROCESSPATH_EXT
+void getexecutablepath(char* buffer, size_t bufferLen);
 void getprocesspath(char* buffer, size_t bufferLen);
 #endif
 

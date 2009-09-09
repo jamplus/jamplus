@@ -915,6 +915,22 @@ void getprocesspath(char* buffer, size_t bufferLen)
 #endif
 }
 
+void getexecutablepath(char* buffer, size_t bufferLen)
+{
+#if defined( OS_MACOSX )
+	CFBundleRef mainBundle = CFBundleGetMainBundle();
+	CFURLRef executableUrl = CFBundleCopyExecutableURL(mainBundle);
+	CFStringRef executableString = CFURLCopyFileSystemPath(executableUrl, kCFURLPOSIXPathStyle);
+	CFMutableStringRef normalizedString = CFStringCreateMutableCopy(NULL, 0, executableString);
+	CFStringGetCString(normalizedString, buffer, bufferLen - 1, kCFStringEncodingUTF8);
+	CFRelease(executableUrl);
+	CFRelease(executableString);
+	CFRelease(normalizedString);
+#else
+	*buffer = 0;
+#endif	
+}
+
 #endif
 
 #ifdef OPT_PRINT_TOTAL_TIME_EXT
