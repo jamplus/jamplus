@@ -1,2 +1,6 @@
-text = [ Shell dir "dir /b" ] ;
+if $(NT) {
+	text = [ Shell dir "dir /b" ] ;
+} else {
+	text = [ Shell "ls -l" ls ] ;
+}
 Echo **$(text)** ;
