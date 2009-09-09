@@ -1,5 +1,7 @@
 Echo Pass 1 ;
 
+if $(NT) {
+
 actions Copy
 {
 	copy $(2) $(1)
@@ -8,6 +10,20 @@ actions Copy
 actions piecemeal together existing Clean
 {
 	del "$(>:\\)"
+}
+
+} else {
+
+actions Copy
+{
+	cp $(2) $(1)
+}
+
+actions piecemeal together existing Clean
+{
+	rm "$(>)"
+}
+
 }
 
 # Set up the pseudotargets properly.
