@@ -3,7 +3,11 @@ tempString = $ ;
 Echo $(tempString) \= $(tempString) ;
 Echo $(tempString) ;
 
-tempString = $(tempString)(TEMP) ;
+if $(NT) {
+	tempString = $(tempString)(TEMP) ;
+} else {
+	tempString = $(tempString)(TMPDIR) ;
+}
 Echo $(tempString) - @($(tempString):A) ;
 
 local var1 = Uf@(filename.txt:B) ;
