@@ -110,7 +110,7 @@ rule UseModule MODULE_NAME
 	$(include_marker) = true ;
 
 	local moduleName = <jam:modules>$(MODULE_NAME).jam ;
-	SEARCH on $(moduleName) = $(SUBDIR) $(CWD) $(JAM_MODULES_PATH) ;
+	SEARCH on $(moduleName) = $(SUBDIR) $(CWD) $(JAM_MODULES_USER_PATH) $(JAM_MODULES_PATH) ;
 
 	include $(moduleName) ;
 }
