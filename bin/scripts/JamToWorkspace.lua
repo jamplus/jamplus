@@ -144,6 +144,7 @@ function ProcessCommandLine()
 
 	local options = Options {
 		Option {{"gen"}, "Set a project generator", "Req", 'GENERATOR'},
+		Option {{"gui"}, "Pop up a GUI to set options"},
 		Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
 		Option {{"postfix"}, "Extra text for the IDE project name"},
 		Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
@@ -731,6 +732,12 @@ include $(jamPath)Jambase.jam ;
 		end
 
 		exporter.Shutdown()
+
+		if opts.gui then
+			if OS == "NT" then
+				os.execute('explorer "' .. os.path.make_backslash(outWorkspacePath) .. '"')
+			end
+		end
 	end
 end
 
