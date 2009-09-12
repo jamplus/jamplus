@@ -749,7 +749,9 @@ rule Workspace WORKSPACE_NAME : TARGETS
 {
 }
 
-IncludeModule c-autodetect ;
+if ! $(TARGETINFO_LOCATE) {
+	IncludeModule c-autodetect ;
+}
 
 #
 # Now include the user's Jamfile.
