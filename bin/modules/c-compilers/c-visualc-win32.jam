@@ -34,7 +34,7 @@ switch $(COMPILER.$(PLATFORM)) {
 		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/Lib" ; # "$(MSVCNT)/PlatformSDK/lib" ;
 }
 
-MSVCBIN		?= "$(MSVCNT)/bin/" ;
+MSVCBIN			?= "$(MSVCNT)/bin/" ;
 C.AR			= "$(MSVCBIN)lib" ;
 C.CC			= "$(MSVCBIN)cl" ;
 C.C++			= "$(MSVCBIN)cl" ;

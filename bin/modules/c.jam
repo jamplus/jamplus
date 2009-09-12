@@ -568,7 +568,7 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 		[ C._retrieveVar LINKFLAGS : C.* : $(CONFIG) : $(PLATFORM) ]
 		[ C.FLibraryPaths $(C.STDLINKDIRECTORIES) ]
 	;
-	
+
 	local linkRule = C.Link ;
 
 	C._ApplicationFromObjects_LinkFlags ;
