@@ -1,4 +1,4 @@
-switch $(COMPILER) {
+switch $(COMPILER.$(PLATFORM)) {
 	case vs2010 :
 		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
 		MSSDK = [ W32_GETREG $(key) ] ;

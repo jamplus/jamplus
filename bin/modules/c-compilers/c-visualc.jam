@@ -59,7 +59,7 @@ rule C._RuntimeTypeHelper
 }
 
 
-if $(COMPILER) in vc6 vs2002 vs2003
+if $(COMPILER.$(PLATFORM)) in vc6 vs2002 vs2003
 {
 actions response C.LinkDebug
 {
@@ -299,7 +299,7 @@ rule C._ApplicationFromObjects_LinkFlags
 		linkFlags += $(MSVC_SUBSYSTEM_CONSOLE) ;
 	}
 
-	if $(COMPILER) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) )
+	if $(COMPILER.$(PLATFORM)) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) )
 	{
 		C._writeManifest $(TARGET) : $(_t) : 1 ;
 		C._linkManifest $(_t) ;
@@ -308,7 +308,7 @@ rule C._ApplicationFromObjects_LinkFlags
 
 	C._ApplicationFromObjects_CleanIntermediates ;
 
-	if $(COMPILER) = vc6 {
+	if $(COMPILER.$(PLATFORM)) = vc6 {
 		if $(CONFIG) = debug {
 			linkRule = C.LinkDebug ;
 		} else {
@@ -372,13 +372,13 @@ rule C._SharedLibraryFromObjects_LinkFlags
 
 	if ( nomanifest in $(OPTIONS) ) {
 		linkFlags -= /INCREMENTAL ;
-	} else if $(COMPILER) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) ) {
+	} else if $(COMPILER.$(PLATFORM)) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) ) {
 		C._writeManifest $(TARGET) : $(_linkTargets) : 2 ;
 		C._linkManifest $(_linkTargets) ;
 		linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 	}
 
-	if $(COMPILER) = vc6 {
+	if $(COMPILER.$(PLATFORM)) = vc6 {
 		if $(CONFIG) = debug {
 			linkRule = C.LinkDebug ;
 		} else {

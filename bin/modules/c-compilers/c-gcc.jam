@@ -1,5 +1,5 @@
 {
-	COMPILER = gcc ;
+	COMPILER.$(PLATFORM) = gcc ;
 
 	SUFEXE	?= "" ;
 	SUFLIB	?= .a ;

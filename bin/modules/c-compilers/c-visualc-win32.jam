@@ -1,4 +1,4 @@
-switch $(COMPILER) {
+switch $(COMPILER.$(PLATFORM)) {
 	case vs2010 :
 		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
 		MSSDK = [ W32_GETREG $(key) ] ;
@@ -40,7 +40,7 @@ C.CC			= "$(MSVCBIN)cl" ;
 C.C++			= "$(MSVCBIN)cl" ;
 C.LINK			= "$(MSVCBIN)link" ;
 C.MT			= "$(MSSDK)/bin/mt" ;
-if $(COMPILER) = vc6 {
+if $(COMPILER.$(PLATFORM)) = vc6 {
 	C.RC			= "$(MSVCNT)/../Common/MSDev98/Bin/rc" ;
 } else {
 	C.RC			= "$(MSSDK)/bin/RC" ;
@@ -50,6 +50,6 @@ C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
 
 C.Defines * : WIN32 WINDOWS : * : win32 ;
 
-if $(COMPILER) != vc6 {
+if $(COMPILER.$(PLATFORM)) != vc6 {
 	C.Defines * : _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE : * : win32 ;
 }

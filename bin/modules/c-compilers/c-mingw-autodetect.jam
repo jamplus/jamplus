@@ -16,18 +16,18 @@ rule FindMinGW
 
 rule C.AutoDetect {
 	FindMinGW ;
-	
+
 	if ! $(MINGW_ROOT) {
 		return ;
 	}
-	
-	COMPILER = mingw ;
+
+	COMPILER.$(PLATFORM) = mingw ;
 
 	UseModule c-compilers/c-mingw ;
 	if $(PLATFORM) != *  &&  $(CONFIG) != * {
 		UseModule c-compilers/c-mingw-$(PLATFORM) ;
 		UseModule c-compilers/c-mingw-$(PLATFORM)-$(CONFIG) ;
 	}
-	
-	return $(COMPILER) ;
+
+	return $(COMPILER.$(PLATFORM)) ;
 }

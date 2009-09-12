@@ -3,7 +3,7 @@ C.C++Flags * : /Od /Gm /EHsc /MDd /W3 /Zi : debug : win64 ;
 C.LibFlags * : : debug : win64 ;
 C.LinkFlags * : /INCREMENTAL:YES /DEBUG /MACHINE:X86 : debug : win64 ;
 
-if $(COMPILER) != vc6 {
+if $(COMPILER.$(PLATFORM)) != vc6 {
 	C.CFlags * : /RTC1 : debug : win64 ;
 	C.C++Flags * : /RTC1 : debug : win64 ;
 }
