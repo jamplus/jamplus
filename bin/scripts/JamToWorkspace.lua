@@ -24,11 +24,6 @@ jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
 jamExePathNoQuotes = os.path.combine(jamPath, OS:lower() .. OSPLAT:lower(), 'jam')
 jamExePath = os.path.escape(jamExePathNoQuotes)
 
-Config =
-{
-	Configurations = { 'debug', 'release', 'releaseltcg' }
-}
-
 Compilers =
 {
 	{ 'vs2010', 'Visual Studio 2010' },
@@ -40,20 +35,14 @@ Compilers =
 	{ 'gcc',	'gcc' },
 }
 
+Config = {}
+
 if OS == "NT" then
-	Platform = 'win32'
 	uname = 'windows'
-	Config.Platforms = { 'win32' }
 else
 	local f = io.popen('uname')
 	uname = f:read('*a'):lower():gsub('\n', '')
 	f:close()
-
-	if OS == "MACOSX" then
-		Platform = 'macosx'
-
-		Config.Platforms = { 'macosx' } -- , 'iphone', 'iphonesimulator' }
-	end
 end
 
 buildWorkspaceName = '!BuildWorkspace'
@@ -193,11 +182,23 @@ function ProcessCommandLine()
 	end
 end
 
+function ReadTargetInfo(outPath, platform, config)
+	local targetInfoFilename = outPath .. '_targetinfo_/targetinfo.' ..
+			(platform == '*' and '!all!' or platform) .. '.' ..
+			(config == '*' and '!all!' or config) .. '.lua'
+	local chunk, message = loadfile(targetInfoFilename)
+	if not chunk then
+		error('* Error parsing ' .. targetInfoFilename .. '.\n\n' .. message)
+	end
+	chunk()
+end
+
 function CreateTargetInfoFiles(outPath)
 	function DumpConfig(platform, config)
 		local collectConfigurationArgs =
 		{
 			os.path.escape('-C' .. destinationRootPath),
+			os.path.escape('-sJAMFILE_ROOT=' .. sourceRootPath),
 			os.path.escape('-sJAMFILE=' .. destinationRootPath .. 'DumpJamTargetInfo.jam'),
 			os.path.escape('-sTARGETINFO_LOCATE=' .. outPath .. '_targetinfo_/'),
 			'-sPLATFORM=' .. platform,
@@ -207,11 +208,18 @@ function CreateTargetInfoFiles(outPath)
 		}
 
 		print('Reading platform [' .. platform .. '] and config [' .. config .. ']...')
+--		print(jamExePath .. ' ' .. table.concat(collectConfigurationArgs, ' '))
 		for line in ex.lines{jamExePath, unpack(collectConfigurationArgs)} do
 			print(line)
 		end
---		print(jamExePath .. ' ' .. table.concat(collectConfigurationArgs, ' '))
 --		print(p, i, o)
+	end
+
+	DumpConfig('*', '*')
+	ReadTargetInfo(outPath, '*', '*')
+
+	if not Config.Platforms then
+		Config.Platforms = VALID_PLATFORMS
 	end
 
 	local workspacePlatforms = {}
@@ -222,6 +230,10 @@ function CreateTargetInfoFiles(outPath)
 		end
 	end
 
+	if not Config.Configurations then
+		Config.Configurations = VALID_CONFIGS
+	end
+
 	local workspaceConfigurations = {}
 	for _, config in ipairs(list.concat(Config.Configurations, Config.WorkspaceConfigurations)) do
 		if not workspaceConfigurations[config] then
@@ -230,7 +242,6 @@ function CreateTargetInfoFiles(outPath)
 		end
 	end
 
-	DumpConfig('*', '*')
 	for platformName in ivalues(workspacePlatforms) do
 		DumpConfig(platformName, '*')
 		for configName in ivalues(workspaceConfigurations) do
@@ -240,22 +251,10 @@ function CreateTargetInfoFiles(outPath)
 end
 
 function ReadTargetInfoFiles(outPath)
-	function ReadTargetInfo(platform, config)
-		local targetInfoFilename = outPath .. '_targetinfo_/targetinfo.' ..
-				(platform == '*' and '!all!' or platform) .. '.' ..
-				(config == '*' and '!all!' or config) .. '.lua'
-		local chunk, message = loadfile(targetInfoFilename)
-		if not chunk then
-			error('* Error parsing ' .. targetInfoFilename .. '.\n\n' .. message)
-		end
-		chunk()
-	end
-
-	ReadTargetInfo('*', '*')
 	for platformName in ivalues(Config.Platforms) do
-		ReadTargetInfo(platformName, '*')
+		ReadTargetInfo(outPath, platformName, '*')
 		for configName in ivalues(Config.Configurations) do
-			ReadTargetInfo(platformName, configName)
+			ReadTargetInfo(outPath, platformName, configName)
 		end
 	end
 
@@ -593,36 +592,46 @@ DEPCACHE = standard ;
 	---------------------------------------------------------------------------
 	-- Write the generated Jambase.jam.
 	---------------------------------------------------------------------------
-	local jambaseText = { '# Generated file\n' }
+	function WriteJambase()
+		local jambaseText = { '# Generated file\n' }
 
-	-- Write the Jambase variables out.
-	if Config.JambaseVariables then
-		for _, variable in ipairs(Config.JambaseVariables) do
-			jambaseText[#jambaseText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2])) .. '" ;\n'
+		if VALID_PLATFORMS then
+			jambaseText[#jambaseText + 1] = "VALID_PLATFORMS ="
+			for platform in ivalues(VALID_PLATFORMS) do
+				jambaseText[#jambaseText + 1] = ' "' .. platform .. '"'
+			end
+			jambaseText[#jambaseText + 1] = ' ;\n'
 		end
-		jambaseText[#jambaseText + 1] = '\n'
-	end
 
-	local hasCOMPILER = false
-	for _, info in ipairs(Config.JamFlags) do
-		if info.Key == 'COMPILER' then
-			hasCOMPILER = true
-			break
+		if VALID_CONFIGS then
+			jambaseText[#jambaseText + 1] = "VALID_CONFIGS ="
+			for config in ivalues(VALID_CONFIGS) do
+				jambaseText[#jambaseText + 1] = ' "' .. config .. '"'
+			end
+			jambaseText[#jambaseText + 1] = ' ;\n'
 		end
-	end
 
-	if not hasCOMPILER then
-		table.insert(Config.JamFlags, 1, { Key = 'COMPILER', Value = exporter.Options.compiler })
-	end
+		jambaseText[#jambaseText + 1] = "JAM_MODULES_USER_PATH += \"" .. sourceRootPath .. "\" ;\n"
 
-	for _, info in ipairs(Config.JamFlags) do
-		jambaseText[#jambaseText + 1] = expand(info.Key .. ' = ' .. info.Value .. ' ;\n', exporter.Options, _G)
-	end
-	jambaseText[#jambaseText + 1] = expand([[
+		-- Write the Jambase variables out.
+		if Config.JambaseVariables then
+			for _, variable in ipairs(Config.JambaseVariables) do
+				jambaseText[#jambaseText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2])) .. '" ;\n'
+			end
+			jambaseText[#jambaseText + 1] = '\n'
+		end
+
+		for _, info in ipairs(Config.JamFlags) do
+			jambaseText[#jambaseText + 1] = expand(info.Key .. ' = ' .. info.Value .. ' ;\n', exporter.Options, _G)
+		end
+		jambaseText[#jambaseText + 1] = expand([[
 
 include $(jamPath)Jambase.jam ;
 ]], exporter.Options, _G)
-	io.writeall(destinationRootPath .. 'Jambase.jam', table.concat(jambaseText))
+		io.writeall(destinationRootPath .. 'Jambase.jam', table.concat(jambaseText))
+	end
+
+	WriteJambase()
 
 	local jamScript
 	if uname == 'windows' then
@@ -666,6 +675,9 @@ include $(jamPath)Jambase.jam ;
 
 		-- Read the target information.
 		CreateTargetInfoFiles(outPath)
+		VALID_PLATFORMS = Config.Platforms
+		VALID_CONFIGS = Config.Configurations
+		WriteJambase()			-- Write it out with the new VALID_PLATFORMS and VALID_CONFIGS variables.
 		ReadTargetInfoFiles(outPath)
 
 		print('Writing generated projects...')
@@ -673,17 +685,19 @@ include $(jamPath)Jambase.jam ;
 		if uname == 'windows' then
 			-- Write updateworkspace.bat.
 			io.writeall(outPath .. 'updateworkspace.bat',
-					("@%s --workspace --gen=%s --config=%s %s ..\n"):format(
+					("@%s --workspace --gen=%s --config=%s %s %s\n"):format(
 					os.path.escape(jamScript), opts.gen,
 					os.path.escape(destinationRootPath .. '/buildenvironment.config'),
-					os.path.escape(sourceJamfilePath)))
+					os.path.escape(sourceJamfilePath),
+					os.path.escape(destinationRootPath)))
 		else
 			-- Write updateworkspace.sh.
 			io.writeall(outPath .. 'updateworkspace',
-					("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s ..\n"):format(
+					("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s %s\n"):format(
 					os.path.escape(jamScript), opts.gen,
 					os.path.escape(destinationRootPath .. '/buildenvironment.config'),
-					os.path.escape(sourceJamfilePath)))
+					os.path.escape(sourceJamfilePath),
+					os.path.escape(destinationRootPath)))
 			os.chmod(outPath .. 'updateworkspace', 777)
 		end
 
@@ -691,6 +705,7 @@ include $(jamPath)Jambase.jam ;
 		exporter.Initialize()
 
 		-- Iterate all the workspaces.
+		local outWorkspacePath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 		for _, workspace in pairs(Workspaces) do
 			if workspace.Export == nil  or  workspace.Export == true then
 				local index = 1
@@ -725,9 +740,8 @@ include $(jamPath)Jambase.jam ;
 
 				DumpWorkspace(workspace)
 
-				local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 				local workspaceExporter = exporter.WorkspaceExporter(workspace.Name, exporter.Options)
-				workspaceExporter:Write(outPath)
+				workspaceExporter:Write(outWorkspacePath)
 			end
 		end
 

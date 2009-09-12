@@ -1,4 +1,6 @@
-UseModule c ;
+JAM_MODULES_PATH += $(JAMFILE_ROOT) ;
+
+IncludeModule c-autodetect ;
 
 local platformName = $(PLATFORM) ;
 if $(PLATFORM) = * 	{ platformName = !all! ; }
