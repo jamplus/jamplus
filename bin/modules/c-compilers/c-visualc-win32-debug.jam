@@ -7,3 +7,5 @@ if $(COMPILER.$(PLATFORM)) != vc6 {
 	C.CFlags * : /RTC1 : debug : win32 ;
 	C.C++Flags * : /RTC1 : debug : win32 ;
 }
+
+VSCONFIGMAP.debug = Debug ;

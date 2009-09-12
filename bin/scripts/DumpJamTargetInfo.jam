@@ -134,6 +134,21 @@ rule Workspace WORKSPACE_NAME : TARGETS : OPTIONS
 #	Depends all : $(TARGETS) ;
 	Depends $(TARGETS) : $(TargetInfoFile) ;
 
+	if $(PLATFORM) = *  &&  $(CONFIG) = * {
+		Contents += "VALID_PLATFORMS = {$(NEWLINE)" ;
+		Contents += "$(TAB)$(TAB)[[$(VALID_PLATFORMS)]],$(NEWLINE)" ;
+		Contents += "}$(NEWLINE)$(NEWLINE)" ;
+
+		Contents += "VALID_CONFIGS = {$(NEWLINE)" ;
+		Contents += "$(TAB)$(TAB)[[$(VALID_CONFIGS)]],$(NEWLINE)" ;
+		Contents += "}$(NEWLINE)$(NEWLINE)" ;
+	}
+
+	if $(CONFIG) != * {
+		Contents += [ CompilerPlatformInfo ] ;
+		Contents += [ CompilerConfigInfo ] ;
+	}
+
 	if $(PLATFORM) != *
 	{
 		return ;

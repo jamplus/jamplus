@@ -3,19 +3,6 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
-MapPlatformToVSPlatform =
-{
-	['win32'] = 'Win32',
-	['macosx'] = 'Mac OS X',
-}
-
-MapConfigToVSConfig =
-{
-	['debug'] = 'Debug',
-	['release'] = 'Release',
-	['releaseltcg'] = 'Release LTCG'
-}
-
 local VisualStudio200xProjectMetaTable = {  __index = VisualStudio200xProjectMetaTable  }
 
 function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
@@ -62,31 +49,25 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 	end
 
 	-- Write Platforms section.
-	if self.Options.vs2003 then
-		table.insert(self.Contents, [[
+	table.insert(self.Contents, [[
 	<Platforms>
 ]])
+	if self.Options.vs2003 then
 		for platformName in ivalues(Config.Platforms) do
 			table.insert(self.Content, [[
 		<Platform
-			Name="]] .. platformName .. [["/>
+			Name="]] .. MapPlatformToVSPlatform[platformName] .. [["/>
 ]])
 		end
-		table.insert(self.Contents, [[
-	</Platforms>
-]])
 	elseif self.Options.vs2005 or self.Options.vs2008 then
-		table.insert(self.Contents, [[
-	<Platforms>
-]])
 		for platformName in ivalues(Config.Platforms) do
 			table.insert(self.Contents, [[
 		<Platform
-			Name="]] .. platformName .. [["
+			Name="]] .. MapPlatformToVSPlatform[platformName] .. [["
 		/>
 ]])
-		end
-		table.insert(self.Contents, [[
+	end
+	table.insert(self.Contents, [[
 	</Platforms>
 ]])
 

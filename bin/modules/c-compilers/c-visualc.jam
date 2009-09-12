@@ -407,6 +407,22 @@ rule C.DefFile TARGET : SOURCES
 {
 }
 
+rule CompilerPlatformInfo
+{
+	local vsplatform = $(VSPLATFORMMAP.$(PLATFORM)) ;
+	return "if not MapPlatformToVSPlatform then MapPlatformToVSPlatform = {} end
+MapPlatformToVSPlatform[ [[$(PLATFORM)]] ] = [[$(vsplatform)]]
+" ;
+}
+
+rule CompilerConfigInfo
+{
+	local vsconfig = $(VSCONFIGMAP.$(CONFIG)) ;
+	return "if not MapConfigToVSConfig then MapConfigToVSConfig = {} end
+MapConfigToVSConfig[ [[$(CONFIG)]] ] = [[$(vsconfig)]]
+" ;
+}
+
 } # TARGETINFO_LOCATE
 
 BUILD_EXTENSIONS = $(SUFOBJ) .res ;
