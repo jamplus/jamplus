@@ -1,0 +1,6 @@
+C.Flags CC	: * : -g -O0 : debug : groovyplatform ;
+C.Flags C++	: *	: -g -O0 : debug : groovyplatform ;
+C.Flags M	: *	: -g -O0 : debug : groovyplatform ;
+C.Flags MM	: *	: -g -O0 : debug : groovyplatform ;
+
+VSCONFIGMAP.debug = "Groovy Debug" ;

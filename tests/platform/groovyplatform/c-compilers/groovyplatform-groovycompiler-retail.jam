@@ -1,0 +1,6 @@
+C.Flags CC	: * : -g -O2 : retail : groovyplatform ;
+C.Flags C++	: *	: -g -O2 : retail : groovyplatform ;
+C.Flags M	: *	: -g -O2 : retail : groovyplatform ;
+C.Flags MM	: *	: -g -O2 : retail : groovyplatform ;
+
+VSCONFIGMAP.retail = "Groovy Retail" ;

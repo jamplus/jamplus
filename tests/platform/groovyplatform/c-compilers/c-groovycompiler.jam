@@ -1,0 +1,98 @@
+{
+	SUFEXE	?= .exe ;
+	SUFLIB	?= .a ;
+	SUFMODULE ?= .dll ;
+	SUFOBJ	?= .o ;
+	SUFRES	?= .res ;
+	SUFSHAREDLIB ?= .dll ;
+
+	C.Flags CC	: * : -x c ;
+	C.Flags C++	: * : -x c++ ;
+
+	C.Defines * : GROOVY ;
+
+	NOARSCAN = true ;
+	NOARUPDATE = true ;
+
+	C.AR		?= "$(GROOVY_ROOT)/bin/ar" ru ;
+	C.CC		?= "$(GROOVY_ROOT)/bin/gcc" ;
+	C.C++		?= "$(GROOVY_ROOT)/bin/g++" ;
+	C.LINK		?= "$(GROOVY_ROOT)/bin/gcc" ;
+	C.RANLIB	?= "$(GROOVY_ROOT)/bin/ranlib" ;
+}
+
+if ! $(TARGETINFO_LOCATE) {
+
+rule C.FDefines { return -D$(<) ; }
+rule C.FIncludes { return -I$(<) ; }
+rule C.FLibraryPaths { return -L$(<) ; }
+
+rule C._ForceIncludeHelper
+{
+	C.AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG:E=*) : $(THE_PLATFORM:E=*) ;
+}
+
+
+rule C._RuntimeTypeHelper
+{
+	if ! $(TYPE)  ||  $(TYPE) = dynamic
+	{
+	}
+	else if $(TYPE) = static
+	{
+	}
+}
+
+actions updated together piecemeal C.Archive
+{
+	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
+}
+
+actions C.Link
+{
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]) $(>) $(NEEDLIBS:T) $(LINKLIBS)
+}
+
+actions together C.Ranlib
+{
+	"$(C.RANLIB)" $(<)
+}
+
+#
+# NOARUPDATE - can't update an archive
+#
+
+if $(NOARUPDATE)
+{
+	actions C.Archive
+	{
+	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
+	}
+}
+
+actions updated response C.CC
+{
+	"$(C.CC)" -c $(MFLAGS) $(>)
+}
+
+actions updated response C.C++
+{
+	"$(C.C++)" -c $(MFLAGS) $(>)
+}
+
+actions updated response C.PCH
+{
+	"$(C.C++)" -c $(MFLAGS) $(>)
+}
+
+
+rule C._MultiCppCompile_SetupFlags
+{
+	_flags += "-c -o \"$(_obj:T)\"" ;
+}
+
+} # TARGETINFO_LOCATE
+
+BUILD_EXTENSIONS = $(SUFOBJ) .res ;
+C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;
+C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
