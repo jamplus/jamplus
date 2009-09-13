@@ -25,8 +25,8 @@ rule C.AutoDetect {
 
 	UseModule c-compilers/c-mingw ;
 	if $(PLATFORM) != *  &&  $(CONFIG) != * {
-		UseModule c-compilers/c-mingw-$(PLATFORM) ;
-		UseModule c-compilers/c-mingw-$(PLATFORM)-$(CONFIG) ;
+		UseModule c-compilers/$(PLATFORM)-mingw ;
+		UseModule c-compilers/$(PLATFORM)-mingw-$(CONFIG) ;
 	}
 
 	return $(COMPILER.$(PLATFORM)) ;

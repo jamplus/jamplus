@@ -5,6 +5,23 @@
 -------------------------------------------------------------------------------
 local VisualStudio200xProjectMetaTable = {  __index = VisualStudio200xProjectMetaTable  }
 
+local function RealVSPlatform(platform)
+	if VSNativePlatforms  and  VSNativePlatforms[platform] then
+		return MapPlatformToVSPlatform[platform]
+	end
+
+	return "Win32"
+end
+
+local function RealVSConfig(platform, config)
+	local realConfig = MapConfigToVSConfig[config]
+	if VSNativePlatforms  and  VSNativePlatforms[platform] then
+		return realConfig
+	end
+
+	return RealVSPlatform(platform) .. ' ' .. realConfig
+end
+
 function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 	local filename = outputPath .. self.ProjectName .. '.vcproj'
 
@@ -52,20 +69,30 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 	table.insert(self.Contents, [[
 	<Platforms>
 ]])
+
+	local processedPlatform = {}
 	if self.Options.vs2003 then
 		for platformName in ivalues(Config.Platforms) do
-			table.insert(self.Content, [[
+			local realPlatform = RealVSPlatform(platformName)
+			if not processedPlatform[realPlatform] then
+				processedPlatform[realPlatform] = true
+				table.insert(self.Contents, [[
 		<Platform
-			Name="]] .. MapPlatformToVSPlatform[platformName] .. [["/>
+			Name="]] .. realPlatform .. [["/>
 ]])
+			end
 		end
 	elseif self.Options.vs2005 or self.Options.vs2008 then
 		for platformName in ivalues(Config.Platforms) do
-			table.insert(self.Contents, [[
+			local realPlatform = RealVSPlatform(platformName)
+			if not processedPlatform[realPlatform] then
+				processedPlatform[realPlatform] = true
+				table.insert(self.Contents, [[
 		<Platform
-			Name="]] .. MapPlatformToVSPlatform[platformName] .. [["
+			Name="]] .. realPlatform .. [["
 		/>
 ]])
+		end
 	end
 	table.insert(self.Contents, [[
 	</Platforms>
@@ -94,8 +121,8 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 			{
 				Platform = platformName,
 				Config = configName,
-				VSPlatform = MapPlatformToVSPlatform[platformName],
-				VSConfig = MapConfigToVSConfig[configName],
+				VSPlatform = RealVSPlatform(platformName),
+				VSConfig = RealVSConfig(platformName, configName),
 				Defines = '',
 				Includes = '',
 				Output = '',
@@ -384,13 +411,15 @@ Global
 			{
 				VSPlatform = MapPlatformToVSPlatform[platformName],
 				VSConfig = MapConfigToVSConfig[configName],
+				RealVSPlatform = RealVSPlatform(platformName),
+				RealVSConfig = RealVSConfig(platformName, configName),
 			}
 			table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
 ]], configInfo, info))
 
 			table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).Build.0 = $(VSConfig)|$(VSPlatform)
+		$(Uuid).$(VSConfig)|$(VSPlatform).Build.0 = $(RealVSConfig)|$(RealVSPlatform)
 ]], configInfo, info))
 		end
 	end
@@ -402,9 +431,11 @@ Global
 			{
 				VSPlatform = MapPlatformToVSPlatform[platformName],
 				VSConfig = MapConfigToVSConfig[configName],
+				RealVSPlatform = RealVSPlatform(platformName),
+				RealVSConfig = RealVSConfig(platformName, configName),
 			}
 			table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
 ]], configInfo, info))
 		end
 	end
@@ -416,11 +447,13 @@ Global
 				for configName in ivalues(Config.Configurations) do
 					local configInfo =
 					{
-						VSPlatform = MapPlatformToVSPlatform[platformName],
-						VSConfig = MapConfigToVSConfig[configName],
+				VSPlatform = MapPlatformToVSPlatform[platformName],
+				VSConfig = MapConfigToVSConfig[configName],
+				RealVSPlatform = RealVSPlatform(platformName),
+				RealVSConfig = RealVSConfig(platformName, configName),
 					}
 					table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
 ]], configInfo, info))
 				end
 			end

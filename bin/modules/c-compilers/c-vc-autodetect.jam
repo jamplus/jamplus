@@ -131,10 +131,10 @@ rule C.AutoDetect {
 				COMPILER.$(PLATFORM) = [ FindVisualStudio 10.0 ] ;
 		}
 
-		UseModule c-compilers/c-visualc ;
+		IncludeModule c-compilers/c-vc ;
 		if $(PLATFORM) != *  &&  $(CONFIG) != * {
-			UseModule c-compilers/c-visualc-$(PLATFORM) ;
-			UseModule c-compilers/c-visualc-$(PLATFORM)-$(CONFIG) ;
+			IncludeModule c-compilers/$(PLATFORM)-vc ;
+			IncludeModule c-compilers/$(PLATFORM)-vc-$(CONFIG) ;
 		}
 
 		return $(COMPILER.$(PLATFORM)) ;

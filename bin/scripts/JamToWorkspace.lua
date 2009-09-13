@@ -197,9 +197,10 @@ function CreateTargetInfoFiles(outPath)
 	function DumpConfig(platform, config)
 		local collectConfigurationArgs =
 		{
+			jamExePath,
 			os.path.escape('-C' .. destinationRootPath),
 			os.path.escape('-sJAMFILE_ROOT=' .. sourceRootPath),
-			os.path.escape('-sJAMFILE=' .. destinationRootPath .. 'DumpJamTargetInfo.jam'),
+			os.path.escape('-sJAMFILE=' .. outPath .. 'DumpJamTargetInfo.jam'),
 			os.path.escape('-sTARGETINFO_LOCATE=' .. outPath .. '_targetinfo_/'),
 			'-sPLATFORM=' .. platform,
 			'-sCONFIG=' .. config,
@@ -208,8 +209,8 @@ function CreateTargetInfoFiles(outPath)
 		}
 
 		print('Reading platform [' .. platform .. '] and config [' .. config .. ']...')
---		print(jamExePath .. ' ' .. table.concat(collectConfigurationArgs, ' '))
-		for line in ex.lines{jamExePath, unpack(collectConfigurationArgs)} do
+--		print(table.concat(collectConfigurationArgs, ' '))
+		for line in ex.lines(collectConfigurationArgs) do
 			print(line)
 		end
 --		print(p, i, o)
@@ -546,14 +547,6 @@ ALL_LOCATE_TARGET = $(destinationRootPath:gsub('\\', '/'))$$(PLATFORM)-$$(CONFIG
 	}
 
 	---------------------------------------------------------------------------
-	-- Write the generated DumpJamTargetInfo.jam.
-	---------------------------------------------------------------------------
-	io.writeall(destinationRootPath .. 'DumpJamTargetInfo.jam', expand([[
-$(locateTargetText)
-include $(scriptPath)DumpJamTargetInfo.jam ;
-]], locateTargetText, _G))
-
-	---------------------------------------------------------------------------
 	-- Write the generated Jamfile.jam.
 	---------------------------------------------------------------------------
 	local jamfileText = { expand([[
@@ -601,11 +594,23 @@ DEPCACHE = standard ;
 				jambaseText[#jambaseText + 1] = ' "' .. platform .. '"'
 			end
 			jambaseText[#jambaseText + 1] = ' ;\n'
+		elseif Config.Platforms then
+			jambaseText[#jambaseText + 1] = "VALID_PLATFORMS ="
+			for platform in ivalues(Config.Platforms) do
+				jambaseText[#jambaseText + 1] = ' "' .. platform .. '"'
+			end
+			jambaseText[#jambaseText + 1] = ' ;\n'
 		end
 
 		if VALID_CONFIGS then
 			jambaseText[#jambaseText + 1] = "VALID_CONFIGS ="
 			for config in ivalues(VALID_CONFIGS) do
+				jambaseText[#jambaseText + 1] = ' "' .. config .. '"'
+			end
+			jambaseText[#jambaseText + 1] = ' ;\n'
+		elseif Config.Configurations then
+			jambaseText[#jambaseText + 1] = "VALID_CONFIGS ="
+			for config in ivalues(Config.Configurations) do
 				jambaseText[#jambaseText + 1] = ' "' .. config .. '"'
 			end
 			jambaseText[#jambaseText + 1] = ' ;\n'
@@ -672,6 +677,16 @@ include $(jamPath)Jambase.jam ;
 	if opts.gen ~= 'none' then
 		local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 		os.mkdir(outPath)
+
+		---------------------------------------------------------------------------
+		-- Write the generated DumpJamTargetInfo.jam.
+		---------------------------------------------------------------------------
+		io.writeall(outPath .. 'DumpJamTargetInfo.jam', expand([[
+$(locateTargetText)
+__JAM_SCRIPTS_PATH = "$(scriptPath)" ;
+include $(scriptPath)ide/$(gen).jam ;
+include $(scriptPath)DumpJamTargetInfo.jam ;
+]], locateTargetText, opts, _G))
 
 		-- Read the target information.
 		CreateTargetInfoFiles(outPath)

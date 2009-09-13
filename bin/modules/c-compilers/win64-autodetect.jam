@@ -1,0 +1,4 @@
+IncludeModule c-compilers/c-vc-autodetect ;
+if [ C.AutoDetect ] {
+	return ;
+}
