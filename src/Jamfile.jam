@@ -165,7 +165,7 @@ Option OPT_SETCWD_SETTING_EXT ;
 Option OPT_SET_JAMCOMMANDLINETARGETS_EXT ;
 Option OPT_SET_JAMPROCESSPATH_EXT ;
 Option OPT_SLASH_MODIFIERS_EXT ;
-Option OPT_TIMESTAMP_IMMEDIATE_PARENT_CHECK_EXT2 ;
+Option OPT_TIMESTAMP_IMMEDIATE_PARENT_CHECK_EXT ;
 Option OPT_TIMESTAMP_EXTENDED_PARENT_CHECK_EXT2 ;
 Option OPT_UPDATED_CHILD_FIX ;
 Option OPT_VAR_CWD_EXT : yes ;
@@ -416,13 +416,13 @@ if $(LUA_BIN)
 			;
 		}
 	}
-	
+
 	local file ;
 	for file in $(LUA_SRCS)
 	{
 		CopyFile all : $(BIN_PATH)/lua/$(file) : $(LUA_BIN)/$(file) ;
-	}			
-}	
+	}
+}
 
 #if $(BINDIR) 	{ InstallBin $(BINDIR) : jam ; }
 
