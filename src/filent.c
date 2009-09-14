@@ -135,7 +135,8 @@ file_dirscan(
 #ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
 	    if ( finfo->attrib & _A_SUBDIR )
 	    {
-		if ( finfo->name[0] != '.'  &&  ( finfo->name[1] != 0  ||  ( finfo->name[1] != '.'  &&  finfo->name[2] != 0 ) ) )
+		if ( ! ( ( finfo->name[0] == '.'  &&  finfo->name[1] == 0 )  ||
+					( finfo->name[0] == '.'  &&  finfo->name[1] == '.'  &&  finfo->name[2] == 0 ) ) )
 		{
 		    f.f_base.ptr = finfo->name;
 		    f.f_base.len = strlen( finfo->name ) + 1;
