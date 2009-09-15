@@ -618,6 +618,11 @@ DEPCACHE = standard ;
 
 		jambaseText[#jambaseText + 1] = "JAM_MODULES_USER_PATH += \"" .. sourceRootPath .. "\" ;\n"
 
+		if opts.compiler or Config.Compiler then
+			Config.Compiler = Config.Compiler or opts.compiler
+			jambaseText[#jambaseText + 1] = "COMPILER = \"" .. Config.Compiler .. "\" ;\n"
+		end
+
 		-- Write the Jambase variables out.
 		if Config.JambaseVariables then
 			for _, variable in ipairs(Config.JambaseVariables) do
@@ -670,9 +675,6 @@ include $(jamPath)Jambase.jam ;
 				os.path.escape(destinationRootPath)))
 		os.chmod(updatebuildenvironment, 777)
 	end
-
-	-- Write buildenvironment.config.
-	LuaDumpObject(destinationRootPath .. 'buildenvironment.config', 'Config', Config)
 
 	if opts.gen ~= 'none' then
 		local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
@@ -768,6 +770,9 @@ include $(scriptPath)DumpJamTargetInfo.jam ;
 			end
 		end
 	end
+
+	-- Write buildenvironment.config.
+	LuaDumpObject(destinationRootPath .. 'buildenvironment.config', 'Config', Config)
 end
 
 
