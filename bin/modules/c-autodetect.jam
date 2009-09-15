@@ -29,7 +29,7 @@ PLATFORM ?= $(VALID_PLATFORMS[1]) ;
 
 rule C.ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 {
-	THE_COMPILER ?= $(COMPILER) ;
+	THE_COMPILER ?= $(COMPILER.$(PLATFORM)) ;
 	THE_PLATFORM ?= $(PLATFORM) ;
 	THE_CONFIG ?= $(CONFIG) ;
 
@@ -62,7 +62,7 @@ rule C.ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 	}
 }
 
-C.ToolChain $(COMPILER) : $(PLATFORM) : $(CONFIG) ;
+C.ToolChain $(COMPILER.$(PLATFORM)) : $(PLATFORM) : $(CONFIG) ;
 
 ########################################################################
 ########################################################################

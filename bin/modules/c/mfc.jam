@@ -6,7 +6,7 @@ rule C.UseMFC TARGET : OPTIONS
 		C.Defines $(TARGET) : _AFXDLL ;
 	}
 
-	if $(COMPILER) = vc6 {
+	if $(COMPILER.$(PLATFORM)) = vc6 {
 		C.IncludeDirectories $(TARGET) : "$(MSVCNT)/mfc/Include" "$(MSVCNT)/atl/Include" ;
 
 		if link in $(OPTIONS) {
