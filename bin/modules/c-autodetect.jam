@@ -48,6 +48,10 @@ rule C.ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 	}
 }
 
+if ! $(COMPILER.$(PLATFORM))  &&  $(COMPILER) {
+	COMPILER.$(PLATFORM) = $(COMPILER) ;
+}
+
 C.ToolChain $(COMPILER.$(PLATFORM)) : $(PLATFORM) : $(CONFIG) ;
 
 ########################################################################
