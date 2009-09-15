@@ -158,17 +158,19 @@ file_dirscan(
 	    f.f_base.ptr = dirent->d_name;
 	    f.f_base.len = strlen(dirent->d_name);
 	    path_build( &f, filename, 0 );
-	    stat(filename, &attr);
-	    if ( attr.st_mode & S_IFDIR )
+//	    stat(filename, &attr);
+//	    if ( attr.st_mode & S_IFDIR )
+		if ( dirent->d_type & DT_DIR )
 	    {
-		if ( dirent->d_name[0] != '.'  &&  ( dirent->d_name[1] != 0  ||  ( dirent->d_name[1] != '.'  &&  dirent->d_name[2] != 0 ) ) )
-		{
-		    (*func)( closure, filename, 1 /* stat()'ed */, attr.st_mtime, 1 );
-		}
+			if ( ! ( ( dirent->d_name[0] == '.'  &&  dirent->d_name[1] == 0 )  ||
+					( dirent->d_name[0] == '.'  &&  dirent->d_name[1] == '.'  &&  dirent->d_name[2] == 0 ) ) )
+			{
+				(*func)( closure, filename, 0 /* stat()'ed */, 0, 1 ); //attr.st_mtime, 1 );
+			}
 	    }
 	    else
 	    {
-		(*func)( closure, filename, 1 /* stat()'ed */, attr.st_mtime, 0 );
+			(*func)( closure, filename, 0 /* stat()'ed */, (time_t)0, 0 ); //attr.st_mtime, 0 );
 	    }
 #else
 # ifdef old_sinix
