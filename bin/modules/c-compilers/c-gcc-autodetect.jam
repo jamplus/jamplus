@@ -1,0 +1,32 @@
+rule FindGCC
+{
+	local PATHS =
+		$(PATH)
+	;
+
+	local gcc = [ Glob $(PATHS) : gcc ] ;
+	if ! $(gcc)
+	{
+		return ;
+	}
+
+	GCC_ROOT = [ Match (.+)/ : $(gcc[1]) ] ;
+}
+
+rule C.AutoDetect {
+	FindGCC ;
+
+	if ! $(GCC_ROOT) {
+		return ;
+	}
+
+	COMPILER.$(PLATFORM) = gcc ;
+
+	UseModule c-compilers/c-gcc ;
+	if $(PLATFORM) != *  &&  $(CONFIG) != * {
+		UseModule c-compilers/$(PLATFORM)-gcc ;
+		UseModule c-compilers/$(PLATFORM)-gcc-$(CONFIG) ;
+	}
+
+	return $(COMPILER.$(PLATFORM)) ;
+}

@@ -38,27 +38,13 @@ rule C.ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 		COMPILER.$(THE_PLATFORM) = $(THE_COMPILER) ;
 	}
 
-	if $(NT)
-	{
-		if $(THE_PLATFORM) != * {
-			IncludeModule c-compilers/$(THE_PLATFORM)-autodetect ;
-			if [ C.AutoDetect ] {
-				return ;
-			}
-
-			Exit * No supported build platform found on this computer. ;
+	if $(THE_PLATFORM) != * {
+		IncludeModule c-compilers/$(THE_PLATFORM)-autodetect ;
+		if [ C.AutoDetect ] {
+			return ;
 		}
-	}
-	else if $(UNIX)
-	{
-		if $(THE_PLATFORM) != * {
-			IncludeModule c-compilers/$(THE_PLATFORM)-autodetect ;
-			if [ C.AutoDetect ] {
-				return ;
-			}
 
-			Exit * No supported build platform found on this computer. ;
-		}
+		Exit * No supported build platform found on this computer. ;
 	}
 }
 
