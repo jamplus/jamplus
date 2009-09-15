@@ -286,8 +286,6 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 			{
 				Platform = platformName,
 				Config = configName,
-				VSPlatform = MapPlatformToVSPlatform[platformName],
-				VSConfig = MapConfigToVSConfig[configName],
 				Defines = '',
 				Includes = '',
 				OutputPath = '',
