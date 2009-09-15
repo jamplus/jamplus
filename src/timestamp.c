@@ -154,12 +154,12 @@ timestamp(
 					( ( ( buf[0] >= 'a'  &&  buf[0] <= 'z' )  ||  ( buf[0] >= 'A'  &&  buf[0] <= 'Z' ) )  &&
 					buf[1] == ':' )  ||  ( buf[0] == '/'  ||  buf[0] == '\\' );
 #else
-				absolute = buf[0] != '/';
+				absolute = buf[0] == '/';
 #endif
 
 				if( ( buf2[0]  ||  !absolute )  &&  hashcheck( bindhash, (HASHDATA **)&b2 ) )
 				{
-					if ( !( b2->flags & BIND_SCANNED )  ||  b->progress == BIND_FOUND )
+					if ( !( b2->flags & BIND_SCANNED )  ||  b->progress == BIND_FOUND  ||  b->progress == BIND_SPOTTED )
 					{
 						file_dirscan( buf, time_enter, bindhash );
 					}
