@@ -451,6 +451,26 @@ rule C.MultiCppCompile TARGET : SOURCES
 }
 
 
+rule C._MultiCppCompile_PreCompile
+{
+}
+
+rule C._MultiCppCompile_PchFlags
+{
+}
+
+rule C._MultiCppCompile_SetupFlags
+{
+}
+
+rule C._MultiCppCompile_PchDeps
+{
+}
+
+rule C._MultiCppCompile_PostCompile
+{
+}
+
 ########################################################################
 ########################################################################
 
@@ -536,6 +556,8 @@ rule C.Application TARGET : SOURCES : OPTIONS
 
 rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 {
+	C._ApplicationFromObjects_Setup ;
+
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
 	local _s = $(OBJECTS:G=$(grist)) ;
@@ -571,6 +593,7 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 
 	local linkRule = C.Link ;
 
+	C._ApplicationFromObjects_CleanIntermediates ;
 	C._ApplicationFromObjects_LinkFlags ;
 
 	local linkLibs =
@@ -599,23 +622,11 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 }
 
 
-rule C._MultiCppCompile_PreCompile
+rule C._ApplicationFromObjects_Setup
 {
 }
 
-rule C._MultiCppCompile_PchFlags
-{
-}
-
-rule C._MultiCppCompile_SetupFlags
-{
-}
-
-rule C._MultiCppCompile_PchDeps
-{
-}
-
-rule C._MultiCppCompile_PostCompile
+rule C._ApplicationFromObjects_CleanIntermediates
 {
 }
 
@@ -624,22 +635,6 @@ rule C._ApplicationFromObjects_LinkFlags
 }
 
 rule C._ApplicationFromObjects_PostBuild
-{
-}
-
-rule C._SharedLibraryFromObjects_ExportLib
-{
-}
-
-rule C._SharedLibraryFromObjects_UnRegServer
-{
-}
-
-rule C._SharedLibraryFromObjects_LinkFlags
-{
-}
-
-rule C._SharedLibraryFromObjects_RegServer
 {
 }
 
@@ -749,6 +744,8 @@ rule C.LibraryFromObjects TARGET : OBJECTS
 
 rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 {
+	C._SharedLibraryFromObjects_Setup ;
+
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
 	local _s = $(OBJECTS:G=$(grist)) ;
@@ -827,6 +824,26 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
 }
 
+
+rule C._SharedLibraryFromObjects_Setup
+{
+}
+
+rule C._SharedLibraryFromObjects_ExportLib
+{
+}
+
+rule C._SharedLibraryFromObjects_UnRegServer
+{
+}
+
+rule C._SharedLibraryFromObjects_LinkFlags
+{
+}
+
+rule C._SharedLibraryFromObjects_RegServer
+{
+}
 
 ########################################################################
 ########################################################################

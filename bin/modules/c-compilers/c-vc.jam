@@ -61,12 +61,6 @@ rule C._RuntimeTypeHelper
 
 if $(COMPILER.$(PLATFORM)) in vc6 vs2002 vs2003
 {
-actions response C.LinkDebug
-{
-	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
-	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-}
 
 actions response C.Link
 {
@@ -77,7 +71,14 @@ actions response C.Link
 
 } else {
 
-actions response C.LinkDebug
+actions response C.Link
+{
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
+	SET INCLUDE=$(C.STDHDRS:\\J=;)
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
+}
+
+actions response C.DebugLinkWithManifest
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
@@ -88,14 +89,7 @@ actions response C.LinkDebug
 	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
 }
 
-actions response C.LinkNoManifest
-{
-	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
-	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) "$(LINKLIBS)")
-}
-
-actions response C.Link
+actions response C.LinkWithManifest
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
@@ -279,11 +273,22 @@ rule C._MultiCppCompile_PostCompile
 }
 
 
+rule C._ApplicationFromObjects_Setup
+{
+	if $(COMPILER.$(PLATFORM)) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) ) {
+		OPTIONS += manifest ;
+	}
+
+	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010  &&  ! ( windows in $(OPTIONS) ) {
+		OPTIONS += console ;
+	}
+}
+
 rule C._ApplicationFromObjects_CleanIntermediates
 {
 	# Clean the .pdb (etc) files.
 	local sufs = .pdb .map .lib .exp .ilk ;
-	local zap = $(_t:S=$(sufs)) ;
+	local zap = $(_t:S=$(sufs)) $(_t).manifest ;
 	MakeLocate $(zap) : $(outputPath) ;
 	Clean clean:$(TARGET) : $(zap) ;
 
@@ -295,30 +300,23 @@ rule C._ApplicationFromObjects_LinkFlags
 {
 	if windows in $(OPTIONS) {
 		linkFlags += $(MSVC_SUBSYSTEM_WINDOWS) ;
-	} else {
+	} else if console in $(OPTIONS) {
 		linkFlags += $(MSVC_SUBSYSTEM_CONSOLE) ;
 	}
 
-	if $(COMPILER.$(PLATFORM)) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) )
-	{
+	if manifest in $(OPTIONS) {
 		C._writeManifest $(TARGET) : $(_t) : 1 ;
 		C._linkManifest $(_t) ;
 		linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 	}
 
-	C._ApplicationFromObjects_CleanIntermediates ;
-
-	if $(COMPILER.$(PLATFORM)) = vc6 {
-		if $(CONFIG) = debug {
-			linkRule = C.LinkDebug ;
-		} else {
-			linkRule = C.Link ;
-		}
-	} else {
-		if nomanifest in $(OPTIONS) {
-			linkRule = C.LinkNoManifest ;
-		} else if $(CONFIG) = debug {
-			linkRule = C.LinkDebug ;
+	if $(COMPILER.$(PLATFORM)) != vc6 {
+		if manifest in $(OPTIONS) {
+			if $(CONFIG) = debug {
+				linkRule = C.DebugLinkWithManifest ;
+			} else {
+				linkRule = C.LinkWithManifest ;
+			}
 		}
 	}
 }
@@ -328,6 +326,13 @@ rule C._ApplicationFromObjects_PostBuild
 {
 }
 
+
+rule C._SharedLibraryFromObjects_Setup
+{
+	if $(COMPILER.$(PLATFORM)) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) ) {
+		OPTIONS += manifest ;
+	}
+}
 
 rule C._SharedLibraryFromObjects_ExportLib
 {
@@ -351,6 +356,17 @@ rule C._SharedLibraryFromObjects_UnRegServer
 	}
 }
 
+rule C._SharedLibraryFromObjects_CleanIntermediates
+{
+	# Clean the .pdb (etc) files.
+	local sufs = .pdb .map .lib .exp .ilk ;
+	local zap = $(_t:S=$(sufs)) $(_t).manifest ;
+	MakeLocate $(zap) : $(outputPath) ;
+	Clean clean:$(TARGET) : $(zap) ;
+
+	Depends $(zap) : $(_linkTargets) ;
+}
+
 rule C._SharedLibraryFromObjects_LinkFlags
 {
 	if ! ( nodefaults in $(OPTIONS) ) {
@@ -362,33 +378,21 @@ rule C._SharedLibraryFromObjects_LinkFlags
 	}
 	linkFlags += /DLL ;
 
-	# Clean the .pdb (etc) files.
-	local sufs = .pdb .map .exp .ilk ;
-	local zap = $(_t:S=$(sufs)) ;
-	MakeLocate $(zap) : $(outputPath) ;
-	Clean clean:$(TARGET) : $(zap) ;
-
-	Depends $(zap) : $(_linkTargets) ;
-
 	if ( nomanifest in $(OPTIONS) ) {
 		linkFlags -= /INCREMENTAL ;
-	} else if $(COMPILER.$(PLATFORM)) in vs2005 vs2008 vs2010  &&  ! ( nomanifest in $(OPTIONS) ) {
+	} else if manifest in $(OPTIONS) {
 		C._writeManifest $(TARGET) : $(_linkTargets) : 2 ;
 		C._linkManifest $(_linkTargets) ;
 		linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 	}
 
-	if $(COMPILER.$(PLATFORM)) = vc6 {
-		if $(CONFIG) = debug {
-			linkRule = C.LinkDebug ;
-		} else {
-			linkRule = C.Link ;
-		}
-	} else {
-		if nomanifest in $(OPTIONS) {
-			linkRule = C.LinkNoManifest ;
-		} else if $(CONFIG) = debug {
-			linkRule = C.LinkDebug ;
+	if $(COMPILER.$(PLATFORM)) != vc6 {
+		if manifest in $(OPTIONS) {
+			if $(CONFIG) = debug {
+				linkRule = C.DebugLinkWithManifest ;
+			} else {
+				linkRule = C.LinkWithManifest ;
+			}
 		}
 	}
 }
