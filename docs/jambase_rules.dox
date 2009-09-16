@@ -69,8 +69,9 @@ Loads a Jam module.  It searches in the following manner:
 
 <ul>
   <li>The current <tt>$(SUBDIR)</tt></li>
-  <li>The current working directory</li>
-  <li>The <tt>bin/modules/ directory</tt></li>
+  <li>The current working directory <tt>$(CWD)</tt></li>
+  <li><tt>$(JAM_MODULES_USER_PATH)</tt></li>
+  <li><tt>$(JAM_MODULES_PATH)</tt> which includes the <tt>bin/modules/</tt> directory</li>
 </ul>
 
 When \c IncludeModule is specified more than once for the same \c MODULE_NAME, the module is only loaded once.
@@ -78,8 +79,8 @@ When \c IncludeModule is specified more than once for the same \c MODULE_NAME, t
 \param MODULE_NAME The name of the module, which is the filename without path and extension.
 
 \code
-    # Make the UseDirectX rule available.
-    IncludeModule DirectX ;
+    # Make the C.UseDirectX rule available.
+    IncludeModule c/directx ;
 \endcode
 
 

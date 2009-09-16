@@ -65,17 +65,22 @@ Jam has a interpreted, procedural language with a few select features to effect 
 
 \subsection language_lexical_features Lexical Features
 
-\b Jam treats its input files as whitespace-separated tokens, with two exceptions: double quotes (") can enclose whitespace to embed it into a token, and everything between the matching curly braces ({}) in the definition of a updating actions is treated as a single string. A backslash (\) can escape a double quote, or any single whitespace character. Both a newline and a tab must be represented physically within quotes. There is no backslash escape for them.
+\b Jam treats its input files as whitespace-separated tokens, with two exceptions: double quotes (\") can enclose whitespace to embed it into a token, and everything between the matching curly braces ({}) in the definition of a updating actions is treated as a single string. A backslash (\) can escape a double quote, or any single whitespace character. Both a newline and a tab must be represented physically within quotes. There is no backslash escape for them.
 
 \b Jam requires whitespace (blanks, tabs, or newlines) to surround all tokens, <b>including the colon (:) and semicolon (;) tokens</b>.  If a colon or semicolon is found and is not surrounded by whitespace, an error is raised unless the colon or semicolon and surrounding content is in double quotes.
 
-\b Jam keywords (as mentioned in this document) are reserved and generally must be quoted with double quotes (") to be used as arbitrary tokens, such as variable or target names.
+\b Jam keywords (as mentioned in this document) are reserved and generally must be quoted with double quotes (\") to be used as arbitrary tokens, such as variable or target names.
 
 
 
 \subsection language_datatype Datatype
 
 <b>Jam</b>'s only data type is a one-dimensional list of arbitrary strings. They arise as literal (whitespace-separated) tokens in the Jambase or included files, as the result of variable expansion of those tokens, or as the return value from a rule invocation.
+
+\code
+variableName = hello ;
+listOfStrings = hello hi bonjour hola! "how are you?" "i am fine." ;
+\endcode
 
 
 
@@ -113,6 +118,8 @@ When a rule with updating actions is invoked, those actions are added to those a
 
 
 \subsection language_statements Statements
+\anchor actions_screenoutput
+\anchor actions_autosettings
 
 <tt>Jam</tt>'s language has the following statements:
 
@@ -134,6 +141,43 @@ Invoke a rule. A rule is invoked with values in \em field1 through \em fieldN (9
 \htmlonly <blockquote> \endhtmlonly
 
 Define a rule's updating actions, replacing any previous definition. The first two arguments may be referenced in the action's \em commands as $(1) and $(2) or $(<) and $(>).
+
+Normally, the settings from $(1) are made active during the run of the action.  Sometimes, it is useful to make additional settings available.  If a third optional argument is provided, the settings assigned to the third target are activated during the action.  $(1)'s settings take precedence over the third argument.
+
+Example:
+
+\code
+# tests/autosettings
+the_echo on myshell = echo ;
+
+actions DoEcho
+{
+	echo $(the_echo) $(the_string) hello everyone
+}
+
+# the_echo on myshell = echo
+# the_string =
+#
+# Prints: echo  hello everyone
+DoEcho all : : myshell ;
+
+# the_echo on myshell = echo
+# the_string = ***********
+#
+# Prints: echo *********** hello everyone
+Depends all : all2 ;
+the_string on all2 = *********** ;
+DoEcho all2 : : myshell ;
+
+# the_echo on myshell = echo
+# the_echo on all3 = =====
+# the_string =
+#
+# Prints: =====  hello everyone
+Depends all : all3 ;
+the_echo on all3 = "=====" ;
+DoEcho all3 : : myshell ;
+\endcode
 
 The following action \em modifiers are understood:
 
@@ -187,6 +231,11 @@ actions response C++
 }
 \endcode
     </td>
+  </tr>
+  <tr>
+    <td><tt>actions screenoutput</tt></td>
+	<td>Normally, actions collect all output before displaying it to the user in order to avoid interleaving the output from
+different processes.  'screenoutput' may be used to display the output as it happens.  It will be more difficult to follow multiprocess output, but during some long running actions, the user may need faster visual response.</td>
   </tr>
   <tr>
     <td><tt>actions together</tt></td>
