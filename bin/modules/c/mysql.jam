@@ -1,0 +1,68 @@
+if $(MYSQL_INCLUDE_DIRECTORIES)  &&  $(MYSQL_LIBRARIES) {
+	MYSQL_FOUND = 1 ;
+
+} else {
+	local INCLUDE_PATHS ;
+	local LIBRARY_PATHS ;
+
+	if $(NT) {
+		INCLUDE_PATHS =
+			$(ProgramFiles(x86):J=$(SPACE))/MySQL/*/include
+			$(ProgramFiles:J=$(SPACE))/MySQL/*/include
+			$(SystemDrive)/MySQL/*/include
+		;
+
+		LIBRARY_PATHS =
+			$(Path)
+			$(ProgramFiles(x86):J=$(SPACE))/MySQL/*/lib/opt
+			$(ProgramFiles:J=$(SPACE))/MySQL/*/lib/opt
+			$(SystemDrive)/MySQL/*/lib/opt
+		;
+
+	} else {
+		INCLUDE_PATHS =
+			/usr/include/mysql
+			/usr/local/include/mysql
+		;
+
+		LIBRARY_PATHS =
+			$(Path)
+			/usr/lib/mysql
+			/usr/local/lib/mysql
+		;
+
+	}
+
+	local path ;
+	local mysql.h ;
+	for path in $(INCLUDE_PATHS) {
+		mysql.h = @($(path)/mysql.h:W) ;
+		if $(mysql.h) { break ; }
+	}
+
+	MYSQL_INCLUDE_DIRECTORIES = $(mysql.h:D) ;
+
+	local mysql.lib ;
+	for path in $(LIBRARY_PATHS) {
+		mysql.lib = @($(path)/libmysql.lib:W) ;
+		if $(mysql.lib) { break ; }
+	}
+
+	MYSQL_LIBRARIES = $(mysql.lib) ;
+
+	if $(MYSQL_INCLUDE_DIRECTORIES)  &&  $(MYSQL_LIBRARIES) {
+		MYSQL_FOUND = 1 ;
+	}
+}
+
+rule C.UseMySQL TARGETS
+{
+	if ! $(MYSQL_FOUND) {
+		Exit * $(TARGETS) requires the use of MySQL, but it wasn't found. ;
+	}
+
+	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
+
+	C.IncludeDirectories $(TARGETS) : $(MYSQL_INCLUDE_DIRECTORIES) ;
+	C.LinkPrebuiltLibraries $(TARGETS) : $(MYSQL_LIBRARIES) ;
+}
