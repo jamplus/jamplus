@@ -104,17 +104,22 @@ end
 
 
 function WriteFileIfModified(filename, contents)
+	local md5Contents = md5.digest(contents)
 	local writeFile = not os.path.exists(filename)
 	if not writeFile then
-		local md5Contents = md5.digest(contents)
-		local md5File = md5.new()
-		md5File:updatefile(filename .. '.cache')
-		writeFile = md5Contents ~= md5File:digest()
+		local md5File = io.open(filename .. '.md5', 'rb')
+		if md5File then
+			local md5FileDigest = md5File:read(32)
+			md5File:close()
+			writeFile = md5Contents ~= md5FileDigest
+		else
+			writeFile = true
+		end
 	end
 	if writeFile then
 		os.mkdir(filename)
 		io.writeall(filename, contents)
-		io.writeall(filename .. '.cache', contents)
+		io.writeall(filename .. '.md5', md5Contents)
 	end
 end
 
