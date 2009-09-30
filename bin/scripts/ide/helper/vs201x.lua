@@ -443,7 +443,7 @@ end
 
 
 function VisualStudio201xInitialize()
-	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 	local chunk = loadfile(outPath .. 'VSProjectExportInfo.lua')
 	if chunk then chunk() end
 	if not ProjectExportInfo then
@@ -453,7 +453,7 @@ end
 
 
 function VisualStudio201xShutdown()
-	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 	LuaDumpObject(outPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
 end
 
