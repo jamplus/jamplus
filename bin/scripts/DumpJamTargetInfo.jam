@@ -16,13 +16,7 @@ rule DumpSources prefix : SOURCES
 {
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 	Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
-	for source in $(SOURCES:TR=$(subdir))
-	{
-		if ! $(source:S) in $(SUFOBJ) $(SUFRES)
-		{
-			Contents += "	[[$(source)]],$(NEWLINE)" ;
-		}
-	}
+			Contents += "$(TAB)[[$(SOURCES:TR=$(subdir))]],$(NEWLINE)" ;
 	Contents += "})$(NEWLINE)" ;
 }
 
