@@ -112,7 +112,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 		table.insert(self.Contents, expand([==[
   <PropertyGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
-    <BuildLogFile>$(destinationRootPath:gsub('/', '\\'))temp-$(Platform)-$(Config)/$$(MSBuildProjectName).log</BuildLogFile>
+    <BuildLogFile>$(destinationRootPath:gsub('/', '\\'))$(Platform)-$(Config)/$$(MSBuildProjectName).log</BuildLogFile>
     <NMakeBuildCommandLine>$(BuildCommandLine)</NMakeBuildCommandLine>
     <NMakeOutput>$(Output)</NMakeOutput>
     <NMakeCleanCommandLine>$(CleanCommandLine)</NMakeCleanCommandLine>

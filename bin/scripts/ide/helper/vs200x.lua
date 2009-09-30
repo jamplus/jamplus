@@ -162,7 +162,7 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 			OutputDirectory="$$(ConfigurationName)"
 			IntermediateDirectory="$$(ConfigurationName)"
 			ConfigurationType="0"
-			BuildLogFile="$(destinationRootPath:gsub('\\', '/'))temp-$(Platform)-$(Config)/BuildLog.htm">
+			BuildLogFile="$(destinationRootPath:gsub('\\', '/'))$(Platform)-$(Config)/BuildLog.htm">
 			<Tool
 				Name="VCNMakeTool"
 				BuildCommandLine="$(BuildCommandLine)"
@@ -180,7 +180,7 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 			OutputDirectory="$$(ConfigurationName)"
 			IntermediateDirectory="$$(ConfigurationName)"
 			ConfigurationType="0"
-			BuildLogFile="$(destinationRootPath:gsub('\\', '/'))temp-$(Platform)-$(Config)/BuildLog.htm"
+			BuildLogFile="$(destinationRootPath:gsub('\\', '/'))$(Platform)-$(Config)/BuildLog.htm"
 			>
 			<Tool
 				Name="VCNMakeTool"
