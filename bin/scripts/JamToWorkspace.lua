@@ -140,7 +140,7 @@ function ProcessCommandLine()
 		Option {{"postfix"}, "Extra text for the IDE project name"},
 		Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
 		Option {{"jamflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
-		Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
+		Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMEXEPATH' },
 	}
 
 	function Usage()
