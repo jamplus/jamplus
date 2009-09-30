@@ -4,7 +4,7 @@
 
 <h3>New features for 0.4:</h3>
 
-- C/C++ build rules have been separated into their own \ref module_c "Jam module called 'c'".  This module is currently automatically loaded on any Jam invocation.  Most rules are now namespaced like so: \ref rule_C_Application "C.Application" instead of <tt>Application</tt>.  To use the old names, \ref rule_IncludeModule "IncludeModule" <tt>c-deprecated</tt>.
+- C/C++ build rules have been separated into their own \ref module_c "Jam module called 'c'".  This module is currently automatically loaded on any Jam invocation.  Most rules are now namespaced like so: \ref rule_C_Application "C.Application" instead of <tt>Application</tt>.  To use the old names, \ref rule_IncludeModule "IncludeModule" <tt>c-deprecated</tt>.  If you do this, please upgrade to the new method, as the deprecated module will go away in the next release of JamPlus.
 	- With the new C module, it is easy to add additional platforms, configurations, and compilers.  See the tests/platform/groovyplatform/ example to see this in action.
 	- Renamed the following Jam modules:
 		- DirectX: Renamed to c/directx.
@@ -13,10 +13,10 @@
 		- Midl: Renamed to c/midl.  Access it as C.Midl*.
 		- wxWidgets: Renamed to c/wxwidgets.  Access it as C.UseWxWidgets.
 	- Created a c/win32resource module with the ResourceCompiler rules.
-- The Jam binaries have been moved from the jamplus/bin/ directory to jamplus/bin/\$(OS)\$(OSPLAT).  On Windows, this ends up being jamplus/bin/ntx86/.  On Mac OS X, the directory is jamplus/bin/macosxx86/.  All associated scripts have been moved to this directory, as has the Lua directory structure.  This new structure will allow for multiple platform binaries to exist side by side.  See \ref building_overview "Building Overview" for more information.
+- The Jam binaries have been moved from the <tt>jamplus/bin/</tt> directory to <tt>jamplus/bin/\$(OS)\$(OSPLAT)</tt>.  On Windows, this ends up being <tt>jamplus/bin/ntx86/</tt>.  On Mac OS X, the directory is <tt>jamplus/bin/macosxx86/</tt>.  All associated scripts have been moved to this directory, as has the Lua directory structure.  This new structure will allow for multiple platform binaries to exist side by side.  See \ref building_overview "Building Overview" for more information.
 - The Mac OS X build is largely functional, including all support for Xcode workspace generation, Lua scripts, and otherwise.  Additionally, iPhone and iPhone Simulator platforms can be built, but they can not be debugged (yet).
-- Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files are generated.
-- Visual Studio 2010 support has been added by Philipp Teschner.  It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.
+- Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.
+- Visual Studio 2010 support has been added by Philipp Teschner.  It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.  There are also problems with the Visual Studio 2010 Beta when debugging a Makefile project.
 
 
 
@@ -25,13 +25,14 @@
 <h3>Bootstrapping/Building:</h3>
 
 - Added a bootstrapping .xcodeproj to debug Mac OS X Jam issues in.  This project is currently only set up for Debug mode; the Release configuration does not work.  Use <b>make macosx</b> to build a Release build.
-- If the environment variable <tt>LUA_BIN</tt> is set, the appropriate Lua files are copied to the appropriate platform binary directory.  See \ref building_overview "Building Overview" for more information.
+- If the environment variable <tt>LUA_BIN</tt> is set, the appropriate Lua files are copied to the appropriate platform binary directory during the Jam executable build.  See \ref building_overview "Building Overview" for more information.
 
 <h4>Minor stuff:</h4>
 
-- Removed the Visual Studio 2005 solution and project files, src/jam.VS2005.sln and src/jam.VS2005.vcproj.
-- Properly generate the <tt>Jambase-j.c</tt> from <tt>Jambase-j</tt> by building \b mkjambase during the bootstrapping run.
-- Build intermediate files to an intermediate folder instead of littering the extra files in the src/ directory.
+- The Visual Studio 2005 solution and project files, src/jam.VS2005.sln and src/jam.VS2005.vcproj, have been removed.  Only a Visual Studio 2008 version is included for this release.  In any case, the Visual Studio solution is only for debug purposes.  The link time code generated Visual C++ Release LTCG build is far faster than the Release build provided by the jam.VS2008.vcproj file.
+- <tt>Jambase-j.c</tt> is properly generated from <tt>Jambase-j</tt> during the bootstrapping run.
+- Intermediate files are built to an intermediate folder instead of littering the extra files in the src/ directory.
+
 
 
 
@@ -45,17 +46,17 @@
 <h3>Jam Executable:</h3>
 
 - Multipass support past 2 passes was broken.  It is fixed now.
-- Add a PRIORITY parameter to \ref rule_QueueJamFile "QueueJamFile".  By default, queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.
-- Add a new rule: \ref rule_ScanContents "ScanContents".  When \ref rule_ScanContents "ScanContents" is specified for a source target (even a generated one) and if the timestamp differs, the contents of the source target are compared against the last run.  If they differ, the build proceeds as normal.  If they are the same, no further building is necessary.
-- Added support for misplaced semicolon and colon detection in the parser, \#ifdef'ed as \c OPT_FIND_BAD_SEMICOLON_USAGE_EXT.  If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace, and a parser error is reported.  You may need to quote strings that didn't need to be quoted before.
-- Add a new built-in rule, \ref rule_Shell "Shell", used for executing shell commands and retrieving their output.
+- Added a PRIORITY parameter to \ref rule_QueueJamFile "QueueJamFile".  By default, queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, \c PRIORITY may be applied.
+- Added rule \ref rule_ScanContents "ScanContents".  When \ref rule_ScanContents "ScanContents" is specified for a source target (even a generated one) and if the timestamp differs, the contents of the source target are compared against the last run.  If they differ, the build proceeds as normal.  If they are the same, no further building is necessary.
+- Added support for misplaced semicolon and colon detection in the parser.  If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace, and a parser error is reported.  You may need to quote strings that didn't need to be quoted before.  \#ifdef'ed as \c OPT_FIND_BAD_SEMICOLON_USAGE_EXT.
+- Added rule \ref rule_Shell "Shell", used for executing shell commands and retrieving their output.
 - Support for new \ref jamtoworkspace_usage "Jam command line options" to build the workspace, convert folders to a Jamfile, and convert the contents of a .vcproj to a Jamfile.  These command line options replace the old calls to \b JamToWorkspace and other helper scripts.
 - Simplify the -s command line flag (which is still available) by parsing KEY=VALUE pairs off the command line.  That is, 'jam -sCONFIG=debug all' and 'jam CONFIG=debug all' mean the same thing.  See \ref usage for more information.  (Made available through <tt>\#define OPT_KEY_EQUALS_VALUE_DEFINES_EXT</tt>.)
 - Allow for the failure of an <tt>actions lua</tt> block at runtime.
 - Added a way of accessing the targets specified on the command line from within Jam through the global variable \c JAM_COMMAND_LINE_TARGETS.  One method of using this variable is to filter sections of the Jam script to save build time.  (Made available through <tt>\#define OPT_SET_JAMCOMMANDLINETARGETS_EXT</tt>.)
 - If an action is empty, don't put any of the whitespace through.  It dies on Unix shells.
 - Added a new action modifier, \ref actions_screenoutput "screenoutput".  Normally, actions collect all output before displaying it to the user in order to avoid interleaving the output from different processes.  'screenoutput' may be used to display the output as it happens.
-- Add a new missing rule "silence" comand line option: -S
+- Added a new missing rule "silence" command line option: -S
 - Support a third parameter to an action for \ref actions_autosettings "autosettings".  This takes any settings assigned to the autosettings target and makes them active during the course of the action.
 
 
@@ -147,7 +148,7 @@
 - hardsoftlink module:
       - Added rules for establishing a HardLink and a SoftLink (symbolic link).
 - wxWidgets module:
-      - Add a call to RcIncludeDirectories to allow access to the proper wxWidgets resources.
+      - Add a call to \ref rule_C_RcIncludeDirectories "C.RcIncludeDirectories" to allow access to the proper wxWidgets resources.
 
 
 

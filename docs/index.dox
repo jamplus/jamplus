@@ -1,7 +1,7 @@
 /*! \page index JamPlus
 
 <h2>Introduction</h2>
-JamPlus is a generic code and data build system built on the code base of the original Perforce version of Jam.
+JamPlus is a powerful code and data build system built on the code base of the original Perforce version of Jam.
 
 JamPlus adds new features to Jam and integrates a number of patches from the Jamming mailing list and the Perforce Public Depot.
 
