@@ -86,23 +86,40 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 		Contents += "$(project).OutputPaths['$(PLATFORM)']['$(CONFIG)'] = [[$(outputPath[1])/]]$(NEWLINE)" ;
 	}
 
-	local defines =
-			[ C._retrieveVar DEFINES : * : $(CONFIG) : $(PLATFORM) ]
-			[ C._retrieveVar DEFINES : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-			[ C._retrieveVar DEFINES : $(_obj) : $(CONFIG) : $(PLATFORM) ]
-	;
+	local defines ;
+	local ALL_TYPES ;
+	if $(PLATFORM) = * {
+		if $(CONFIG) = * {
+			ALL_TYPES = *.* ;
+		} else {
+			ALL_TYPES =
+					*.$(CONFIG)
+					*.*
+			;
+		}
+	} else {
+		ALL_TYPES =
+				$(PLATFORM).$(CONFIG)
+				*.$(CONFIG)
+				$(PLATFORM).*
+				*.*
+		;
+	}
+
+	on C.* 			defines += $(DEFINES.$(ALL_TYPES)) ;
+	on $(TARGET)	defines += $(DEFINES.$(ALL_TYPES)) ;
+	on $(_obj)		defines += $(DEFINES.$(ALL_TYPES)) ;
+
 	local definesString = "'$(defines)'," ;
 	definesString ?= "" ;
 	Contents += "$(project).Defines['$(PLATFORM)']['$(CONFIG)'] = { $(definesString:J= ) }$(NEWLINE)" ;
 
-	local hdrs =
-			$(SEARCH_SOURCE)
-			[ C._retrieveVar HDRS : $(_obj) : $(CONFIG) : $(PLATFORM) ]
-			[ C._retrieveVar HDRS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-			[ C._retrieveVar HDRS : * : $(CONFIG) : $(PLATFORM) ]
-			$(SUBDIRHDRS)
-			$(STDHDRS)
-	;
+	local hdrs = $(SEARCH_SOURCE) ;
+	on $(_obj)		hdrs += $(HDRS.$(ALL_TYPES)) ;
+	on $(TARGET)	hdrs += $(HDRS.$(ALL_TYPES)) ;
+	on C.* 			hdrs += $(HDRS.$(ALL_TYPES)) ;
+	hdrs += $(SUBDIRHDRS) $(STDHDRS) ;
+
 	local hdrsString = "[[$(hdrs)]]," ;
 	hdrsString ?= "" ;
 	Contents += "$(project).IncludePaths['$(PLATFORM)']['$(CONFIG)'] = { $(hdrsString:J= ) }$(NEWLINE)" ;
