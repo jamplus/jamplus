@@ -86,7 +86,7 @@ function VisualC6ProjectMetaTable:Write(outputPath, commandLines)
 	local first = true
 	for platformName in irvalues(Config.Platforms) do
 		for configName in irvalues(Config.Configurations) do
-			local jamCommandLine = os.path.make_backslash(jamExePathNoQuotes) .. ' ' ..
+			local jamCommandLine = os.path.make_backslash(jamScript) .. ' ' ..
 					os.path.escape('-C' .. destinationRootPath) .. ' ' ..
 					'-sPLATFORM=' .. platformName .. ' ' ..
 					'-sCONFIG=' .. configName

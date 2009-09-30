@@ -66,7 +66,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	-- Write Configurations.
 	local platformName = Platform
 	for configName in ivalues(Config.Configurations) do
-		local jamCommandLine = jamExePath .. ' ' ..
+		local jamCommandLine = os.path.escape(jamScript) .. ' ' ..
 				os.path.escape('-C' .. destinationRootPath) .. ' ' ..
 				'-sPLATFORM=' .. platformName .. ' ' ..
 				'-sCONFIG=' .. configName

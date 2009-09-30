@@ -21,9 +21,6 @@ require 'FolderTree'
 
 jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
 
-jamExePathNoQuotes = os.path.combine(jamPath, OS:lower() .. OSPLAT:lower(), 'jam')
-jamExePath = os.path.escape(jamExePathNoQuotes)
-
 Compilers =
 {
 	{ 'vs2010', 'Visual Studio 2010' },
@@ -143,6 +140,7 @@ function ProcessCommandLine()
 		Option {{"postfix"}, "Extra text for the IDE project name"},
 		Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
 		Option {{"jamflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
+		Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
 	}
 
 	function Usage()
@@ -648,12 +646,11 @@ include $(jamPath)Jambase.jam ;
 
 	WriteJambase()
 
-	local jamScript
 	if uname == 'windows' then
 		-- Write jam.bat.
 		jamScript = os.path.combine(destinationRootPath, 'jam.bat')
 		io.writeall(jamScript,
-			'@' .. jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
+			'@' .. (opts.jamexepath or jamExePath) .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
 		-- Write updatebuildenvironment.bat.
 		io.writeall(os.path.combine(destinationRootPath, 'updatebuildenvironment.bat'),
@@ -667,7 +664,7 @@ include $(jamPath)Jambase.jam ;
 		jamScript = os.path.combine(destinationRootPath, 'jam')
 		io.writeall(jamScript,
 				'#!/bin/sh\n' ..
-				jamExePath .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
+				(opts.jamexepath or jamExePath) .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
 		os.chmod(jamScript, 777)
 
 		-- Write updatebuildenvironment.sh.
@@ -782,6 +779,13 @@ end
 
 
 ProcessCommandLine()
+
+if opts.jamexepath then
+	jamExePathNoQuotes = os.path.combine(opts.jamexepath)
+else
+	jamExePathNoQuotes = os.path.combine(jamPath, OS:lower() .. OSPLAT:lower(), 'jam')
+end
+jamExePath = os.path.escape(jamExePathNoQuotes)
 
 -- Turn the source code root into an absolute path based on the current working directory.
 sourceJamfilePath = os.path.simplify(os.path.make_absolute(nonOpts[1]))

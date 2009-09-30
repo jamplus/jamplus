@@ -112,7 +112,7 @@ function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
 
 	for platformName in ivalues(Config.Platforms) do
 		for configName in ivalues(Config.Configurations) do
-			local jamCommandLine = jamExePath .. ' ' ..
+			local jamCommandLine = os.path.escape(jamScript) .. ' ' ..
 					os.path.escape('-C' .. destinationRootPath) .. ' ' ..
 					'-sPLATFORM=' .. platformName .. ' ' ..
 					'-sCONFIG=' .. configName

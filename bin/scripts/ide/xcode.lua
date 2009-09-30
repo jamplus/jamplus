@@ -64,7 +64,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 	local filename = outputPath .. self.ProjectName .. '.xcodeproj/project.pbxproj'
 	os.mkdir(filename)
 
-	local jamCommandLine = jamExePath .. ' ' ..
+	local jamCommandLine = jamScript .. ' ' ..
 			os.path.escape('-C' .. destinationRootPath)
 
 	local info = ProjectExportInfo[self.ProjectName:lower()]
