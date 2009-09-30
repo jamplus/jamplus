@@ -246,6 +246,10 @@ function CreateTargetInfoFiles(outPath)
 		end
 	end
 
+	for configName in ivalues(workspaceConfigurations) do
+		DumpConfig('*', configName)
+	end
+
 	for platformName in ivalues(workspacePlatforms) do
 		DumpConfig(platformName, '*')
 		for configName in ivalues(workspaceConfigurations) do
