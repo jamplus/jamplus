@@ -138,12 +138,22 @@ rule Project PROJECT_NAME : SOURCES
 
 rule NoWorkspace WORKSPACE_NAME
 {
+	NO_EXPORT_WORKSPACES.$(WORKSPACE_NAME) = true ;
 	Contents += "Workspaces['$(WORKSPACE_NAME)'].Export = false$(NEWLINE)" ;
 }
 
 
 rule Workspace WORKSPACE_NAME : TARGETS : OPTIONS
 {
+	if $(NO_EXPORT_WORKSPACES.$(WORKSPACE_NAME)) {
+		return ;
+	}
+	if $(EXPORTED_WORKSPACES.$(WORKSPACE_NAME:L):E=$(WORKSPACE_NAME)) != $(WORKSPACE_NAME) {
+		Exit "** Already exported '$(WORKSPACE_NAME)' as '$(EXPORTED_WORKSPACES.$(WORKSPACE_NAME:L))'.
+Assign NoWorkspace to one of the two to prevent the conflict." ;
+	}
+	EXPORTED_WORKSPACES.$(WORKSPACE_NAME:L) = $(WORKSPACE_NAME) ;
+
 #	Depends all : $(TARGETS) ;
 	Depends $(TARGETS) : $(TargetInfoFile) ;
 
