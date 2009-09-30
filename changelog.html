@@ -15,7 +15,7 @@
 Version 0.4</a></h2>
 <h3>New features for 0.4:</h3>
 <ul>
-<li>C/C++ build rules have been separated into their own <a class="el" href="module_c.html">Jam module called 'c'</a>. This module is currently automatically loaded on any Jam invocation. Most rules are now namespaced like so: <a class="el" href="module_c.html#rule_C_Application">C.Application</a> instead of <code>Application</code>. To use the old names, <a class="el" href="jambase_rules.html#rule_IncludeModule">IncludeModule</a> <code>c-deprecated</code>.<ul>
+<li>C/C++ build rules have been separated into their own <a class="el" href="module_c.html">Jam module called 'c'</a>. This module is currently automatically loaded on any Jam invocation. Most rules are now namespaced like so: <a class="el" href="module_c.html#rule_C_Application">C.Application</a> instead of <code>Application</code>. To use the old names, <a class="el" href="jambase_rules.html#rule_IncludeModule">IncludeModule</a> <code>c-deprecated</code>. If you do this, please upgrade to the new method, as the deprecated module will go away in the next release of JamPlus.<ul>
 <li>With the new C module, it is easy to add additional platforms, configurations, and compilers. See the tests/platform/groovyplatform/ example to see this in action.</li>
 <li>Renamed the following Jam modules:<ul>
 <li>DirectX: Renamed to c/directx.</li>
@@ -28,21 +28,21 @@ Version 0.4</a></h2>
 <li>Created a c/win32resource module with the ResourceCompiler rules.</li>
 </ul>
 </li>
-<li>The Jam binaries have been moved from the jamplus/bin/ directory to jamplus/bin/$(OS)$(OSPLAT). On Windows, this ends up being jamplus/bin/ntx86/. On Mac OS X, the directory is jamplus/bin/macosxx86/. All associated scripts have been moved to this directory, as has the Lua directory structure. This new structure will allow for multiple platform binaries to exist side by side. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
+<li>The Jam binaries have been moved from the <code>jamplus/bin/</code> directory to <code>jamplus/bin/$(OS)$(OSPLAT)</code>. On Windows, this ends up being <code>jamplus/bin/ntx86/</code>. On Mac OS X, the directory is <code>jamplus/bin/macosxx86/</code>. All associated scripts have been moved to this directory, as has the Lua directory structure. This new structure will allow for multiple platform binaries to exist side by side. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
 <li>The Mac OS X build is largely functional, including all support for Xcode workspace generation, Lua scripts, and otherwise. Additionally, iPhone and iPhone Simulator platforms can be built, but they can not be debugged (yet).</li>
-<li>Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files are generated.</li>
-<li>Visual Studio 2010 support has been added by Philipp Teschner. It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.</li>
+<li>Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.</li>
+<li>Visual Studio 2010 support has been added by Philipp Teschner. It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet. There are also problems with the Visual Studio 2010 Beta when debugging a Makefile project.</li>
 </ul>
 <h3>Bootstrapping/Building:</h3>
 <ul>
 <li>Added a bootstrapping .xcodeproj to debug Mac OS X Jam issues in. This project is currently only set up for Debug mode; the Release configuration does not work. Use <b>make macosx</b> to build a Release build.</li>
-<li>If the environment variable <code>LUA_BIN</code> is set, the appropriate Lua files are copied to the appropriate platform binary directory. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
+<li>If the environment variable <code>LUA_BIN</code> is set, the appropriate Lua files are copied to the appropriate platform binary directory during the Jam executable build. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
 </ul>
 <h4>Minor stuff:</h4>
 <ul>
-<li>Removed the Visual Studio 2005 solution and project files, src/jam.VS2005.sln and src/jam.VS2005.vcproj.</li>
-<li>Properly generate the <code>Jambase-j.c</code> from <code>Jambase-j</code> by building <b>mkjambase</b> during the bootstrapping run.</li>
-<li>Build intermediate files to an intermediate folder instead of littering the extra files in the src/ directory.</li>
+<li>The Visual Studio 2005 solution and project files, src/jam.VS2005.sln and src/jam.VS2005.vcproj, have been removed. Only a Visual Studio 2008 version is included for this release. In any case, the Visual Studio solution is only for debug purposes. The link time code generated Visual C++ Release LTCG build is far faster than the Release build provided by the jam.VS2008.vcproj file.</li>
+<li><code>Jambase-j.c</code> is properly generated from <code>Jambase-j</code> during the bootstrapping run.</li>
+<li>Intermediate files are built to an intermediate folder instead of littering the extra files in the src/ directory.</li>
 </ul>
 <h3>Documentation:</h3>
 <ul>
@@ -51,17 +51,17 @@ Version 0.4</a></h2>
 <h3>Jam Executable:</h3>
 <ul>
 <li>Multipass support past 2 passes was broken. It is fixed now.</li>
-<li>Add a PRIORITY parameter to <a class="el" href="builtin_rules.html#rule_QueueJamFile">QueueJamFile</a>. By default, queued Jamfiles are processed in the order they are queued. There may be cases where the queued order does not allow for proper processing of the Jamfiles. In the event the Jamfile order matters for the upcoming pass, <code>PRIORITY</code> may be applied.</li>
-<li>Add a new rule: <a class="el" href="builtin_rules.html#rule_ScanContents">ScanContents</a>. When <a class="el" href="builtin_rules.html#rule_ScanContents">ScanContents</a> is specified for a source target (even a generated one) and if the timestamp differs, the contents of the source target are compared against the last run. If they differ, the build proceeds as normal. If they are the same, no further building is necessary.</li>
-<li>Added support for misplaced semicolon and colon detection in the parser, #ifdef'ed as <code>OPT_FIND_BAD_SEMICOLON_USAGE_EXT</code>. If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace, and a parser error is reported. You may need to quote strings that didn't need to be quoted before.</li>
-<li>Add a new built-in rule, <a class="el" href="builtin_rules.html#rule_Shell">Shell</a>, used for executing shell commands and retrieving their output.</li>
+<li>Added a PRIORITY parameter to <a class="el" href="builtin_rules.html#rule_QueueJamFile">QueueJamFile</a>. By default, queued Jamfiles are processed in the order they are queued. There may be cases where the queued order does not allow for proper processing of the Jamfiles. In the event the Jamfile order matters for the upcoming pass, <code>PRIORITY</code> may be applied.</li>
+<li>Added rule <a class="el" href="builtin_rules.html#rule_ScanContents">ScanContents</a>. When <a class="el" href="builtin_rules.html#rule_ScanContents">ScanContents</a> is specified for a source target (even a generated one) and if the timestamp differs, the contents of the source target are compared against the last run. If they differ, the build proceeds as normal. If they are the same, no further building is necessary.</li>
+<li>Added support for misplaced semicolon and colon detection in the parser. If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace, and a parser error is reported. You may need to quote strings that didn't need to be quoted before. #ifdef'ed as <code>OPT_FIND_BAD_SEMICOLON_USAGE_EXT</code>.</li>
+<li>Added rule <a class="el" href="builtin_rules.html#rule_Shell">Shell</a>, used for executing shell commands and retrieving their output.</li>
 <li>Support for new <a class="el" href="jamtoworkspace.html#jamtoworkspace_usage">Jam command line options</a> to build the workspace, convert folders to a Jamfile, and convert the contents of a .vcproj to a Jamfile. These command line options replace the old calls to <b>JamToWorkspace</b> and other helper scripts.</li>
 <li>Simplify the -s command line flag (which is still available) by parsing KEY=VALUE pairs off the command line. That is, 'jam -sCONFIG=debug all' and 'jam CONFIG=debug all' mean the same thing. See <a class="el" href="usage.html">Usage</a> for more information. (Made available through <code>#define OPT_KEY_EQUALS_VALUE_DEFINES_EXT</code>.)</li>
 <li>Allow for the failure of an <code>actions lua</code> block at runtime.</li>
 <li>Added a way of accessing the targets specified on the command line from within Jam through the global variable <code>JAM_COMMAND_LINE_TARGETS</code>. One method of using this variable is to filter sections of the Jam script to save build time. (Made available through <code>#define OPT_SET_JAMCOMMANDLINETARGETS_EXT</code>.)</li>
 <li>If an action is empty, don't put any of the whitespace through. It dies on Unix shells.</li>
 <li>Added a new action modifier, <a class="el" href="jam_language.html#actions_screenoutput">screenoutput</a>. Normally, actions collect all output before displaying it to the user in order to avoid interleaving the output from different processes. 'screenoutput' may be used to display the output as it happens.</li>
-<li>Add a new missing rule "silence" comand line option: -S</li>
+<li>Added a new missing rule "silence" command line option: -S</li>
 <li>Support a third parameter to an action for <a class="el" href="jam_language.html#actions_autosettings">autosettings</a>. This takes any settings assigned to the autosettings target and makes them active during the course of the action.</li>
 </ul>
 <h4>Technical Details:</h4>
@@ -153,7 +153,7 @@ Version 0.4</a></h2>
 </ul>
 </li>
 <li>wxWidgets module:<ul>
-<li>Add a call to RcIncludeDirectories to allow access to the proper wxWidgets resources.</li>
+<li>Add a call to <a class="el" href="module_c_win32resource.html#rule_C_RcIncludeDirectories">C.RcIncludeDirectories</a> to allow access to the proper wxWidgets resources.</li>
 </ul>
 </li>
 </ul>
@@ -418,7 +418,7 @@ Version 0.1</a></h2>
 <li>Initial release. </li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Sep 15 22:06:17 2009 for JamPlus manual by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Wed Sep 30 06:52:12 2009 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
