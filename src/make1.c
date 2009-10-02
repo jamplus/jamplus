@@ -361,7 +361,7 @@ make1b( TARGET *t )
 	    failed = c->target->name;
 	    t->status = c->target->status;
 #ifdef OPT_MULTIPASS_EXT
-	    if ( ( c->target->fate == T_FATE_MISSING  &&  ! ( c->target->flags & T_FLAG_NOCARE ) ) || t->status == EXEC_CMD_NEXTPASS )
+	    if ( ( c->target->fate == T_FATE_MISSING  &&  ! ( c->target->flags & T_FLAG_NOCARE )  &&  !c->target->actions ) || t->status == EXEC_CMD_NEXTPASS )
 	    {
 		missing = 1;
 		if ( queuedjamfiles )
@@ -666,21 +666,37 @@ make1c( TARGET *t )
 #endif
 	    /* Collect status from actions, and distribute it as well */
 
-	    for( actions = t->actions; actions; actions = actions->next )
 #ifdef OPT_MULTIPASS_EXT
-		if( actions->action->pass == actionpass  &&  actions->action->status > t->status )
+		{
+			int previousPassStatus = -1;
+			int currentPassStatus = -1;
+			for( actions = t->actions; actions; actions = actions->next )
+				if( actions->action->pass < actionpass  &&  actions->action->status > previousPassStatus )
+					previousPassStatus = actions->action->status;
+
+			for( actions = t->actions; actions; actions = actions->next )
+				if( actions->action->pass == actionpass  &&  actions->action->status > currentPassStatus )
+					currentPassStatus = actions->action->status;
+
+			if (currentPassStatus == -1  &&  previousPassStatus != -1)
+				t->status = previousPassStatus;
+			else if (currentPassStatus != -1  &&  currentPassStatus > t->status)
+				t->status = currentPassStatus;
+
+		    for( actions = t->actions; actions; actions = actions->next )
+				if( actions->action->pass == actionpass  &&  t->status > actions->action->status )
+				    actions->action->status = t->status;
+		}
 #else
+	    for( actions = t->actions; actions; actions = actions->next )
 		if( actions->action->status > t->status )
-#endif
 		    t->status = actions->action->status;
 
 	    for( actions = t->actions; actions; actions = actions->next )
-#ifdef OPT_MULTIPASS_EXT
-		if( actions->action->pass == actionpass  &&  t->status > actions->action->status )
-#else
 		if( t->status > actions->action->status )
-#endif
 		    actions->action->status = t->status;
+
+#endif
 
 #ifdef OPT_MULTIPASS_EXT
 		if ( t->fate == T_FATE_MISSING  &&  !( t->flags & T_FLAG_NOCARE )  &&  !t->actions  &&  queuedjamfiles )

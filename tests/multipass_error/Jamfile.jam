@@ -1,0 +1,14 @@
+Depends all : file.dat ;
+Depends file.dat : file.txt ;
+
+actions Copy
+{
+	exit 1
+}
+
+Copy file.dat : file.txt ;
+
+QueueJamfile Pass2.jam ;
+
+
+
