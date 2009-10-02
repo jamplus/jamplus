@@ -393,6 +393,53 @@ rule C.MultiCppCompile TARGET : SOURCES
 	}
 
 	# for each batch, grouped by final flags
+	if $(__MultiCppCompile_OutputAsTree) != 0 {
+		for _sources in $(newsrcs) {
+			local _pch1 ;
+			local sufobj ;
+			local addToLink ;
+			local flags ;
+			local compileRule ;
+			on $(_sources[1]) {
+				_pch1 = $(PCH) ;
+				compileRule = $(MFLAGS[1]) ;
+				sufobj = $(MFLAGS[2]) $(MFLAGS[3]) ;
+				addToLink = $(MFLAGS[4]) ;
+				flags = $(MFLAGS[5-]) ;
+			}
+
+			# start with empty lists of objects for this batch
+			local objects ;
+			if $(sufobj[1]) {
+				objects = $(_sources:S=$(sufobj[1]))$(sufobj[2]) ;
+			} else {
+				objects = $(_sources)$(sufobj[2]) ;
+			}
+			objects = [ Subst $(objects) : %.%. : __ ] ;
+			objects = [ Subst $(objects) : \: : -- ] ;
+
+			if $(addToLink) = 1 {
+				# collect produced objects (note that this is before adding the pch,
+				# because we don't want to use it in linking)
+				_allobjs += $(objects) ;
+			}
+
+			# if this batch will also create a pch
+			C._MultiCppCompile_PchDeps ;
+
+			# mark all objects (and pch) for cleaning
+			Clean clean:$(TARGET) : $(objects) ;
+
+			MFLAGS on $(objects) = $(flags) ;
+
+			C._MultiCppCompile_PostCompile ;
+
+			$(compileRule) $(objects) : $(_sources) ;
+		}
+
+		return $(_allobjs) ;
+	}
+
 	while $(newsrcs) {
 		_sources = [ GroupByVar1 newsrcs : MFLAGS : $(batchCompileGroupSize) ] ;
 
@@ -411,20 +458,10 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 		# start with empty lists of objects for this batch
 		local objects ;
-		if $(__MultiCppCompile_OutputAsTree) != 0 {
-			if $(sufobj[1]) {
-				objects = $(_sources:S=$(sufobj[1]))$(sufobj[2]) ;
-			} else {
-				objects = $(_sources)$(sufobj[2]) ;
-			}
-			objects = [ Subst $(objects) : %.%. : __ ] ;
-			objects = [ Subst $(objects) : \: : -- ] ;
+		if $(sufobj[1]) {
+			objects = $(_sources:S=$(sufobj[1]):D=)$(sufobj[2]) ;
 		} else {
-			if $(sufobj[1]) {
-				objects = $(_sources:S=$(sufobj[1]):D=)$(sufobj[2]) ;
-			} else {
-				objects = $(_sources)$(sufobj[2]) ;
-			}
+			objects = $(_sources)$(sufobj[2]) ;
 		}
 
 		if $(addToLink) = 1 {
