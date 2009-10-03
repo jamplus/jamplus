@@ -143,6 +143,10 @@ $(Z) -&gt; <br/>
 </td><td><p>Expand the bound name of the target. Just as when expanding within an action, the BINDING is applied first. If LOCATE is set, it is used for the path. If not, SEARCH is used to look up the file.  </p>
 </td></tr>
 <tr>
+<td><p><code> :C </code> </p>
+</td><td><p>EsCapes the string as if it were a file path. On Windows, if the path has spaces, it is quoted. On other platforms, spaces, parentheses, and a few other special characters are escaped with a backslash.s  </p>
+</td></tr>
+<tr>
 <td><p><code> :B </code> </p>
 </td><td><p>Select filename base.  </p>
 </td></tr>
@@ -516,7 +520,7 @@ Variable Expansion Examples</a></h2>
 <span class="comment">    Echo $(FILES:X=&quot;^file1&quot;:X=\\.obj$:I=\\.h$) ;</span>
 <span class="comment">                                    # file1.h file2.h file3.h</span>
 </pre></div> </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Sep 15 22:06:18 2009 for JamPlus manual by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Sat Oct 3 12:35:44 2009 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
