@@ -71,6 +71,9 @@ typedef struct {
 #ifdef OPT_EXPAND_BINDING_EXT
 	char		expandbinding;
 #endif
+#ifdef OPT_EXPAND_ESCAPE_PATH_EXT
+	char		escapepath;
+#endif
 
 } VAR_EDITS ;
 
@@ -531,6 +534,54 @@ var_expand(
 #ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT
 		list_free( edits.includes_excludes );
 #endif
+
+#ifdef OPT_EXPAND_ESCAPE_PATH_EXT
+		if ( edits.escapepath )
+		{
+		    LIST *newl = L0;
+		    LIST *origl = l;
+
+		    for ( ; l; l = list_next( l ) )
+		    {
+				const char* ptr = l->string;
+				const char* endptr = l->string + strlen( l->string );
+				BUFFER escapebuff;
+				buffer_init( &escapebuff );
+
+#ifdef NT
+				while ( ptr != endptr  &&  *ptr != ' '  &&  *ptr != '/' )
+					++ptr;
+				if (*ptr == ' '  ||  *ptr == '/' ) {
+					ptr = l->string;
+					buffer_addchar( &escapebuff, '"' );
+					buffer_addstring( &escapebuff, l->string, endptr - l->string );
+					buffer_addchar( &escapebuff, '"' );
+				} else {
+					buffer_addstring( &escapebuff, l->string, endptr - l->string );
+				}
+				buffer_addchar( &escapebuff, 0 );
+				newl = list_new( newl, buffer_ptr( &escapebuff ), 0 );
+
+#else
+				while ( ptr != endptr ) {
+					if ( *ptr == ' '  ||  *ptr == '\\'  ||  *ptr == '('  ||  *ptr == ')'  ||  *ptr == '"' ) {
+						buffer_addchar( &escapebuff, '\\' );
+					}
+					buffer_addchar( &escapebuff, *ptr );
+					++ptr;
+				}
+				buffer_addchar( &escapebuff, 0 );
+				newl = list_new( newl, buffer_ptr( &escapebuff ), 0 );
+#endif
+
+				buffer_free( &escapebuff );
+			}
+
+			list_free( origl );
+			l = newl;
+		}
+#endif
+
 	    }
 
 	    /* variables & remainder were gifts from var_expand */
@@ -634,6 +685,9 @@ var_edit_parse(
 #endif
 #ifdef OPT_EXPAND_BINDING_EXT
 	    case 'T': edits->expandbinding = 1; continue;
+#endif
+#ifdef OPT_EXPAND_ESCAPE_PATH_EXT
+	    case 'C': edits->escapepath = 1; continue;
 #endif
 	    case MAGIC_COLON: continue;
 	    default: return; /* should complain, but so what... */

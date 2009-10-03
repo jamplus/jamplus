@@ -1,3 +1,5 @@
+NotFile all ;
+
 numTests = 0 ;
 numTestsPassed = 0 ;
 
@@ -157,6 +159,28 @@ TestExpansion $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$) :
 
 TestExpansion $(FILES:X="^file1":X=\\.obj$:I=\\.h$) :
 		file1.h file2.h file3.h ;
+
+#------------------------------------------------------------------------------
+if $(NT) {
+	local filename = this/will/have/quotes ;
+	TestExpansion $(filename:C) : \"this/will/have/quotes\" ;
+
+	TestExpansion @(HelloWorld.txt:C) : HelloWorld.txt ;
+	TestExpansion @(Hello\ World.txt:C) : "\"Hello World.txt\"" ;
+} else {
+	local filename = this/will/not/have/quotes ;
+	TestExpansion $(filename:C) : this/will/not/have/quotes ;
+
+	filename = this\\will\\have\\backslashes ;
+	TestExpansion $(filename:C) : this\\\\will\\\\have\\\\backslashes ;
+
+	TestExpansion @(HelloWorld.txt:C) : HelloWorld.txt ;
+	TestExpansion "@(Hello World.txt:C)" : "Hello\\ World.txt" ;
+
+	filename = "this filename has (parentheses)" ;
+	TestExpansion $(filename:C) : "this\\ filename\\ has\\ \\(parentheses\\)" ;
+}
+
 
 #------------------------------------------------------------------------------
 Echo "Tests passed: $(numTestsPassed)/$(numTests)" ;
