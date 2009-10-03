@@ -995,13 +995,12 @@ builtin_shell(
 SETTINGS* quicklookup( TARGET* t, const char* symbol )
 {
 	SETTINGS *vars;
+	if ( !t  ||  !symbol )
+		return NULL;
+
 	for ( vars = t->settings; vars; vars = vars->next )
-	{
 	    if ( vars->symbol[0] == symbol[0]  &&  strcmp( vars->symbol, symbol ) == 0 )
-	    {
 			return vars;
-		}
-	}
 
 	return NULL;
 }
@@ -1013,46 +1012,67 @@ builtin_groupbyvar(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST* _group1 = L0;
-	LIST* _rest = L0;
-	LIST* _f = L0;
+	LIST* group1 = L0;
+	LIST* rest = L0;
+	LIST* f = L0;
 
+	LIST* filelist;
+	LIST* varname;
+	LIST* maxPerGroupList;
+	int numInGroup = 0;
+	int maxPerGroup = INT_MAX;
 
-	LIST* _filelist = lol_get( args, 0 );
-    LIST* _varname = lol_get( args, 1 );
-    LIST* maxPerGroup = lol_get( args, 2 );
+	LIST* all;
+	SETTINGS* vars;
+	LIST* var1;
+
+	filelist = lol_get( args, 0 );
+	if ( !filelist )
+		return L0;
+    varname = lol_get( args, 1 );
+	if ( !varname )
+		return L0;
+    maxPerGroupList = lol_get( args, 2 );
+	if ( maxPerGroupList ) {
+		maxPerGroup = atoi( maxPerGroupList->string );
+		if ( maxPerGroup == 0 )
+			maxPerGroup = INT_MAX;
+	}
 
 	/* get the actual filelist */
-	LIST* _all = list_copy( L0, var_get( _filelist->string ) );
+	all = var_get( filelist->string );
 
 	/* */
-	SETTINGS* vars;
-	LIST* _var1;
-	vars = quicklookup( bindtarget( _all->string ), _varname->string );
-	_var1 = vars->value;
+	vars = quicklookup( bindtarget( all->string ), varname->string );
+	if ( !vars )
+		return L0;
+	var1 = vars->value;
 
-	for ( _f = _all; _f; _f = list_next( _f ) ) {
-		LIST* _it;
-		LIST* _it1;
-		LIST* _var;
-		vars = quicklookup( bindtarget( _f->string ), _varname->string );
-		_var = vars->value;
+	for ( f = all; f; f = list_next( f ) ) {
+		LIST* it;
+		LIST* it1;
+		LIST* var;
+		vars = quicklookup( bindtarget( f->string ), varname->string );
+		if ( !vars )
+			continue;
+		var = vars->value;
 
-		for ( _it = _var, _it1 = _var1; _it  &&  _it1;  _it = list_next( _it ), _it1 = list_next( _it1 ) )
+		for ( it = var, it1 = var1; it  &&  it1;  it = list_next( it ), it1 = list_next( it1 ) )
 		{
-			if ( _it->string != _it1->string )
+			if ( it->string != it1->string )
 				break;
 		}
 
-		if ( !_it  &&  !_it1 )
-			_group1 = list_new( _group1, _f->string, 1 );
-		else
-			_rest = list_new( _rest, _f->string, 1 );
+		if ( numInGroup < maxPerGroup  &&  !it  &&  !it1 ) {
+			group1 = list_new( group1, f->string, 1 );
+			++numInGroup;
+		} else
+			rest = list_new( rest, f->string, 1 );
 	}
 
-	var_set( _filelist->string, _rest, VAR_SET );
+	var_set( filelist->string, rest, VAR_SET );
 
-    return _group1;
+    return group1;
 }
 
 #endif
