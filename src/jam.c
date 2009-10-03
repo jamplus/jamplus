@@ -145,6 +145,10 @@
 #include "execcmd.h"
 #endif
 
+#ifdef NT
+#include <io.h>
+#endif
+
 /* Macintosh is "special" */
 
 # ifdef OS_MAC
@@ -773,7 +777,7 @@ int main( int argc, char **argv, char **arg_environ )
 	    const char* elapsed_logfile_name;
 
 	    now = getmilliseconds();
-	    elapsed = now - start;
+	    elapsed = (long)(now - start);
 //	    time( &now );
 //	    elapsed = (long)difftime(now, start);
 
