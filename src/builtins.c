@@ -102,6 +102,8 @@ LIST *builtin_usemd5callback( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_shell( PARSE *parse, LOL *args, int *jmp );
 #endif
 
+LIST *builtin_groupbyvar( PARSE *parse, LOL *args, int *jmp );
+
 int glob( const char *s, const char *c );
 
 void
@@ -232,6 +234,9 @@ load_builtins()
     bindrule( "Shell" )->procedure =
 	parse_make( builtin_shell, P0, P0, P0, C0, C0, 0 );
 #endif
+
+    bindrule( "GroupByVar" )->procedure =
+		parse_make( builtin_groupbyvar, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -979,3 +984,68 @@ builtin_shell(
 }
 
 #endif
+
+
+SETTINGS* quicklookup( TARGET* t, const char* symbol )
+{
+	SETTINGS *vars;
+	for ( vars = t->settings; vars; vars = vars->next )
+	{
+	    if ( vars->symbol[0] == symbol[0]  &&  strcmp( vars->symbol, symbol ) == 0 )
+	    {
+			return vars;
+		}
+	}
+
+	return NULL;
+}
+
+
+LIST *
+builtin_groupbyvar(
+	PARSE	*parse,
+	LOL	*args,
+	int	*jmp )
+{
+	LIST* _group1 = L0;
+	LIST* _rest = L0;
+	LIST* _f = L0;
+
+
+	LIST* _filelist = lol_get( args, 0 );
+    LIST* _varname = lol_get( args, 1 );
+    LIST* maxPerGroup = lol_get( args, 2 );
+
+	/* get the actual filelist */
+	LIST* _all = list_copy( L0, var_get( _filelist->string ) );
+
+	/* */
+	SETTINGS* vars;
+	LIST* _var1;
+	vars = quicklookup( bindtarget( _all->string ), _varname->string );
+	_var1 = vars->value;
+
+	for ( _f = _all; _f; _f = list_next( _f ) ) {
+		LIST* _it;
+		LIST* _it1;
+		LIST* _var;
+		vars = quicklookup( bindtarget( _f->string ), _varname->string );
+		_var = vars->value;
+
+		for ( _it = _var, _it1 = _var1; _it  &&  _it1;  _it = list_next( _it ), _it1 = list_next( _it1 ) )
+		{
+			if ( _it->string != _it1->string )
+				break;
+		}
+
+		if ( !_it  &&  !_it1 )
+			_group1 = list_new( _group1, _f->string, 1 );
+		else
+			_rest = list_new( _rest, _f->string, 1 );
+	}
+
+	var_set( _filelist->string, _rest, VAR_SET );
+
+    return _group1;
+}
+
