@@ -59,7 +59,7 @@ end
 local XcodeProjectMetaTable = {  __index = XcodeProjectMetaTable  }
 
 function XcodeProjectMetaTable:Write(outputPath, commandLines)
-	local projectsPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local projectsPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 
 	local filename = outputPath .. self.ProjectName .. '.xcodeproj/project.pbxproj'
 	os.mkdir(filename)
@@ -569,7 +569,7 @@ end
 
 
 function XcodeWorkspaceMetaTable:Write(outputPath)
-	local projectsPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local projectsPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 
 	local filename = outputPath .. self.Name .. '.workspace.xcodeproj/project.pbxproj'
 	os.mkdir(filename)
@@ -776,7 +776,7 @@ end
 
 
 function XcodeInitialize()
-	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 	local chunk = loadfile(outPath .. 'XcodeProjectExportInfo.lua')
 	if chunk then chunk() end
 	if not ProjectExportInfo then
@@ -800,7 +800,7 @@ end
 
 
 function XcodeShutdown()
-	local outPath = os.path.combine(destinationRootPath, opts.gen .. '.projects') .. '/'
+	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 	LuaDumpObject(outPath .. 'XcodeProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
 end
 
