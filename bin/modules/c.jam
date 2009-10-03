@@ -734,7 +734,7 @@ rule C.LibraryFromObjects TARGET : OBJECTS
 
 	C.Archive $(_l) : $(_s) ;
 
-	if $(RANLIB) { C.Ranlib $(_l) ; }
+	if $(C.RANLIB) { C.Ranlib $(_l) ; }
 
 	# If we can't scan the library, we have to leave the .o's around.
 
