@@ -1,12 +1,20 @@
-files = targeta targetb targetc targetd targete ;
+files = targeta targetb targetc targetd targete targetf ;
 FLAGS on targeta = a b c ;
 FLAGS on targetb = a b c d ;
 FLAGS on targetc = a b c ;
 FLAGS on targetd = a b c e ;
 FLAGS on targete = a b c ;
+FLAGS on targetf = a b c ;
 
 while $(files) {
 	local together = [ GroupByVar files : FLAGS ] ;
 	Echo Together - $(together) ;
+}
+
+
+files = targeta targetb targetc targetd targete targetf ;
+while $(files) {
+	local together = [ GroupByVar files : FLAGS : 2 ] ;
+	Echo (2 max) - $(together) ;
 }
 
