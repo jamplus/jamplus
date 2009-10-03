@@ -7,6 +7,10 @@
 
 C.RuntimeType jam libjam : static ;
 
+if $(PLATFORM) = macosx {
+	C.MacOSX_SDK * : macosx : 10.4u ;
+}
+
 if $(VMS) 		{ LOCATE_TARGET ?= [.binvms] ; }
 else if $(MAC) 	{ LOCATE_TARGET ?= ":bin.mac" ; }
 else 			{ LOCATE_TARGET ?= bin.$(OSFULL[1]:L)/$(CONFIG) ; }
