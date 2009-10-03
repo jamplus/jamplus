@@ -102,7 +102,9 @@ LIST *builtin_usemd5callback( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_shell( PARSE *parse, LOL *args, int *jmp );
 #endif
 
+#ifdef OPT_BUILTIN_GROUPBYVAR_EXT
 LIST *builtin_groupbyvar( PARSE *parse, LOL *args, int *jmp );
+#endif
 
 int glob( const char *s, const char *c );
 
@@ -235,8 +237,10 @@ load_builtins()
 	parse_make( builtin_shell, P0, P0, P0, C0, C0, 0 );
 #endif
 
-    bindrule( "GroupByVar" )->procedure =
+#ifdef OPT_BUILTIN_GROUPBYVAR_EXT
+	bindrule( "GroupByVar" )->procedure =
 		parse_make( builtin_groupbyvar, P0, P0, P0, C0, C0, 0 );
+#endif
 }
 
 /*
@@ -986,6 +990,8 @@ builtin_shell(
 #endif
 
 
+#ifdef OPT_BUILTIN_GROUPBYVAR_EXT
+
 SETTINGS* quicklookup( TARGET* t, const char* symbol )
 {
 	SETTINGS *vars;
@@ -1049,3 +1055,4 @@ builtin_groupbyvar(
     return _group1;
 }
 
+#endif
