@@ -633,27 +633,27 @@ rule FDirName
 
 actions piecemeal together existing Clean
 {
-	$(RM) $(>)
+	$(RM) $(>:C)
 }
 
 if $(NT)
 {
 	actions piecemeal together existing Clean
 	{
-	$(RM) "$(>:\\)"
+	$(RM) $(>:C)
 	}
 }
 
 actions quietly MkDir1
 {
-	$(MKDIR) "$(<)"
+	$(MKDIR) $(<:C)
 }
 
 if $(NT)
 {
 	actions quietly MkDir1
 	{
-		if not exist "$(<:\\)" $(MKDIR) "$(<:\\)"
+		if not exist $(<:C) $(MKDIR) $(<:C)
 	}
 }
 
@@ -666,7 +666,7 @@ if $(NT)
 {
 	actions quietly updated piecemeal together RmTemps
 	{
-	$(RM) "$(>:\\)"
+	$(RM) $(>:C)
 	}
 }
 
@@ -678,7 +678,7 @@ if $(NT) && $(MSVCNT)
 {
 	actions piecemeal together existing Clean
 	{
-		$(RM) "$(>:\\)"
+		$(RM) $(>:C)
 	}
 }
 
@@ -686,7 +686,7 @@ if $(WIN98)
 {
     actions existing Clean
     {
-	del $(>)
+	del $(>:C)
     }
 }
 
