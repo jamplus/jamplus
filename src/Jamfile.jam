@@ -335,7 +335,6 @@ if $(LUA_BIN)
 				lua/getopt.lua
 				lua/io_ext.lua
 				lua/lanes.lua
-				lua/list.lua
 				lua/object.lua
 				lua/string_ext.lua
 				lua/table_ext.lua
@@ -385,7 +384,6 @@ if $(LUA_BIN)
 				share/lua/5.1/getopt.lua
 				share/lua/5.1/io_ext.lua
 				share/lua/5.1/lanes.lua
-				share/lua/5.1/list.lua
 				share/lua/5.1/object.lua
 				share/lua/5.1/string_ext.lua
 				share/lua/5.1/table_ext.lua

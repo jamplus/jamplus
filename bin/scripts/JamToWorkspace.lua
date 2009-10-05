@@ -63,6 +63,16 @@ function irvalues(t)
 	end
 end
 
+function list_concat (...)
+	local r = {}
+	for _, l in ipairs ({...}) do
+		for _, v in ipairs (l) do
+			table.insert (r, v)
+		end
+	end
+	return r
+end
+
 function list_find(searchList, value)
 	for index = 1, #searchList do
 		if searchList[index] == value then
@@ -227,7 +237,7 @@ function CreateTargetInfoFiles(outPath)
 	end
 
 	local workspacePlatforms = {}
-	for _, platform in ipairs(list.concat(Config.Platforms, Config.WorkspacePlatforms)) do
+	for _, platform in ipairs(list_concat(Config.Platforms, Config.WorkspacePlatforms)) do
 		if not workspacePlatforms[platform] then
 			workspacePlatforms[platform] = true
 			workspacePlatforms[#workspacePlatforms + 1] = platform
@@ -239,7 +249,7 @@ function CreateTargetInfoFiles(outPath)
 	end
 
 	local workspaceConfigurations = {}
-	for _, config in ipairs(list.concat(Config.Configurations, Config.WorkspaceConfigurations)) do
+	for _, config in ipairs(list_concat(Config.Configurations, Config.WorkspaceConfigurations)) do
 		if not workspaceConfigurations[config] then
 			workspaceConfigurations[config] = true
 			workspaceConfigurations[#workspaceConfigurations + 1] = config
