@@ -640,7 +640,7 @@ if $(NT)
 {
 	actions piecemeal together existing Clean
 	{
-	$(RM) $(>:C)
+	$(RM) $(>:\\C)
 	}
 }
 
@@ -653,7 +653,7 @@ if $(NT)
 {
 	actions quietly MkDir1
 	{
-		if not exist $(<:C) $(MKDIR) $(<:C)
+		if not exist $(<:\\C) $(MKDIR) $(<:\\C)
 	}
 }
 
@@ -666,7 +666,7 @@ if $(NT)
 {
 	actions quietly updated piecemeal together RmTemps
 	{
-	$(RM) $(>:C)
+	$(RM) $(>:\\C)
 	}
 }
 
@@ -678,7 +678,7 @@ if $(NT) && $(MSVCNT)
 {
 	actions piecemeal together existing Clean
 	{
-		$(RM) $(>:C)
+		$(RM) $(>:\\C)
 	}
 }
 
@@ -686,7 +686,7 @@ if $(WIN98)
 {
     actions existing Clean
     {
-	del $(>:C)
+	del $(>:\\C)
     }
 }
 
