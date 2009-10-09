@@ -1056,9 +1056,9 @@ rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES : THE_CONFIG : THE_PLATFOR
 	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
 	local variableFlags = CCFLAGS C++FLAGS ;
 	if $(COMPILER.$(PLATFORM)) in vc6 vs2002 vs2003 vs2005 vs2008 vs2010 {
-		$(variableFlags).$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) += "/FI$(INCLUDES:R=$(SUBDIR:E=""))" ;
+		$(variableFlags).$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) += "/FI$(INCLUDES)" ;
 	} else {
-		$(variableFlags).$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) += "-include $(INCLUDES:R=$(SUBDIR:E=""))" ;
+		$(variableFlags).$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) += "-include $(INCLUDES)" ;
 	}
 }
 

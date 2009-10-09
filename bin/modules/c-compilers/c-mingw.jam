@@ -31,7 +31,7 @@ rule C.FLibraryPaths { return -L$(<) ; }
 
 rule C._ForceIncludeHelper
 {
-	C.AddFlags $(TARGET) : "-include $(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG:E=*) : $(THE_PLATFORM:E=*) ;
+	C.AddFlags $(TARGET) : "-include $(INCLUDES)" : $(THE_CONFIG:E=*) : $(THE_PLATFORM:E=*) ;
 }
 
 

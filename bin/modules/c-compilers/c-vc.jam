@@ -24,7 +24,7 @@ rule C.FLibraryPaths { return \"/LIBPATH:$(<)\" ; }
 
 rule C._ForceIncludeHelper
 {
-	C.AddFlags $(TARGET) : "/FI$(INCLUDES:R=$(SUBDIR:E=""))" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.AddFlags $(TARGET) : "/FI$(INCLUDES)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 }
 
 
