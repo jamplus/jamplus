@@ -5,7 +5,7 @@ OS = os.getenv("OS")
 OSPLAT = os.getenv("OSPLAT")
 if not OS  or  not OSPLAT then
 	print('*** JamToWorkspace must be called directly from Jam.')
-	print('\njam --jamtoworkspace ...')
+	print('\nUsage: jam --workspace ...')
 	os.exit(-1)
 end
 
