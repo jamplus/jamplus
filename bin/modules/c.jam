@@ -137,20 +137,27 @@ __MultiCppCompile_OutputAsTree = 0 ;
 
 rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO_LINK
 {
-	if $(ADD_TO_EXTENSIONS) = 1 {
-		BUILD_EXTENSIONS += $(EXTS) ;
+	if $(ADD_TO_EXTENSIONS[1]) = 1 {
+		C.BUILD_EXTENSIONS += $(EXTS) ;
 	}
-	BUILD_EXTENSIONS.$(TYPE) += $(EXTS) ;
-	BUILD$(EXTS).RULE = $(RULE) ;
-	BUILD$(EXTS).TYPE = $(TYPE) ;
-	BUILD$(EXTS).COMPILER = $(TYPE) ;
-	BUILD$(EXTS).PREFLAGS = pre$(TYPE)FLAGS ;
-	BUILD$(EXTS).FLAGS = $(TYPE)FLAGS ;
-	BUILD$(EXTS).SUBDIRFLAGS = SUBDIR$(TYPE)FLAGS ;
-	BUILD$(EXTS).SUFOBJ = $(SUFOBJ) ;
-	BUILD$(EXTS).ADD_TO_LINK = $(ADD_TO_LINK) ;
-	BUILD$(EXTS).PCHFLAGS = PCH$(TYPE)FLAGS ;
+	if $(ADD_TO_EXTENSIONS[2]) = 1 {
+		C.C_STYLE_BUILD_EXTENSIONS += $(EXTS) ;
+	}
+	if $(ADD_TO_EXTENSIONS[3]) = 1 {
+		C.CPP_STYLE_BUILD_EXTENSIONS += $(EXTS) ;
+	}
+	C.BUILD_EXTENSIONS.$(TYPE) += $(EXTS) ;
+	C.BUILD$(EXTS).RULE = $(RULE) ;
+	C.BUILD$(EXTS).TYPE = $(TYPE) ;
+	C.BUILD$(EXTS).COMPILER = $(TYPE) ;
+	C.BUILD$(EXTS).PREFLAGS = pre$(TYPE)FLAGS ;
+	C.BUILD$(EXTS).FLAGS = $(TYPE)FLAGS ;
+	C.BUILD$(EXTS).SUBDIRFLAGS = SUBDIR$(TYPE)FLAGS ;
+	C.BUILD$(EXTS).SUFOBJ = $(SUFOBJ) ;
+	C.BUILD$(EXTS).ADD_TO_LINK = $(ADD_TO_LINK:E=0) ;
+	C.BUILD$(EXTS).PCHFLAGS = PCH$(TYPE)FLAGS ;
 }
+
 
 rule C.MultiCppCompile TARGET : SOURCES
 {
@@ -221,7 +228,7 @@ rule C.MultiCppCompile TARGET : SOURCES
 	# for each file
 	local dollar = $ ;
 	local colon = ":" ;
-	local listIncludes = @(I=\\$(BUILD_EXTENSIONS)$:J=$(colon)) ;
+	local listIncludes = @(I=\\$(C.BUILD_EXTENSIONS)$:J=$(colon)) ;
 	local sources = @($(dollar)(SOURCES$(colon)$(listIncludes)):A:G=$(grist)) ;
 
 	# source needs to be scanned for header dependencies
@@ -235,39 +242,27 @@ rule C.MultiCppCompile TARGET : SOURCES
 	local _src ;
 
 	for _src in $(sources) {
-		local excludedFromBuild ;
-		local forceFileType ;
-		on $(_src) {
-			excludedFromBuild = $(EXCLUDED_FROM_BUILD) ;
-			forceFileType = $(FORCE_FILE_TYPE) ;
-		}
-		if $(excludedFromBuild) = true {
-			continue ;
-		}
-
-		local ext = $(_src:S) ;
-		local BUILD_EXT = BUILD$(forceFileType:E=$(ext)) ;
-		if ! $($(BUILD_EXT).RULE) {
-			_allobjs += $(_src) ;
-			continue ;
-		}
-
-		C._MultiCppCompile_PchFlags ;
-
-		newsrcs += $(_src) ;
-	}
-
-	for _src in $(newsrcs) {
 		local forceFileType ;
 		local _nopch ;
 		local _pch ;
+		local _flags ;
+
 		on $(_src) {
+			if $(EXCLUDED_FROM_BUILD) = true {
+				continue ;
+			}
 			forceFileType = $(FORCE_FILE_TYPE) ;
 			_nopch = $(NOPCH) ;
 			_pch = $(PCH) ;
 		}
 		local ext = $(_src:S) ;
-		local BUILD_EXT = BUILD$(forceFileType:E=$(ext)) ;
+		local BUILD_EXT = C.BUILD$(forceFileType:E=$(ext)) ;
+		if ! $($(BUILD_EXT).RULE) {
+			_allobjs += $(_src) ;
+			continue ;
+		}
+		
+		newsrcs += $(_src) ;
 
 		local sufobj = $($(BUILD_EXT).SUFOBJ) ;
 
@@ -302,14 +297,15 @@ rule C.MultiCppCompile TARGET : SOURCES
 		# Rest
 		Depends $(_obj) : $(_src) ;
 
-		$($(BUILD_EXT).COMPILER) on $(_obj) = $($($(BUILD_EXT).COMPILER)) ;
+	#		$($(BUILD_EXT).COMPILER) on $(_obj) = $($(BUILD_EXT).COMPILER) ;
 
-		local _flags = $($($(BUILD_EXT).PREFLAGS)) ;
+		local _flags = $($(BUILD_EXT).RULE) $(sufobj) $($(BUILD_EXT).ADD_TO_LINK) ;
+		_flags += $($($(BUILD_EXT).PREFLAGS)) ;
 		on $(_obj) _flags += $($($(BUILD_EXT).FLAGS).$(ALL_TYPES)) ;
 		_flags += $($($(BUILD_EXT).SUBDIRFLAGS)) ;
 
 		# if the source should create pch
-		if $(_pch) {
+		if $(_pch[1]) {
 			_flags += [ C.FIncludes $(LOCATE_SOURCE) ] ;
 		}
 
@@ -320,12 +316,12 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 		# now that general flags on the file are determined
 
-		C._MultiCppCompile_SetupFlags ;
-
 		_flags -= $(flagsToRemove) ;
 		_flags += $(flagsToAdd) ;
-		MFLAGS on $(_src) = $(BUILD$(ext).RULE) $(sufobj) $(BUILD$(ext).ADD_TO_LINK) $(_flags) ;
-		UseCommandLine $(_obj) : $(_flags) ;
+
+		C._MultiCppCompile_SetupFlags ;
+
+		MFLAGS on $(_src) = $(_flags) ;
 	}
 
 	#
@@ -387,6 +383,7 @@ rule C.MultiCppCompile TARGET : SOURCES
 		Clean clean:$(TARGET) : $(objects) ;
 
 		MFLAGS on $(objects) = $(flags) ;
+		UseCommandLine $(objects) : $(flags) ;
 
 		C._MultiCppCompile_PostCompile ;
 
@@ -451,7 +448,7 @@ rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER :
 		if [ on $(file:G=$(grist)) Var EXCLUDED_FROM_BUILD ] = true {
 			continue ;
 		}
-		if $(file:S) in $(BUILD_EXTENSIONS.CC) $(BUILD_EXTENSIONS.C++)  &&  $(file) != $(PCH_SOURCE_FILENAME)
+		if $(file:S) in $(C.C_STYLE_BUILD_EXTENSIONS) $(C.CPP_STYLE_BUILD_EXTENSIONS)  &&  $(file) != $(PCH_SOURCE_FILENAME)
 		{
 			line = "#include \"$(file)\"$(NEWLINE)" ;
 			contents = $(contents)$(line) ;
@@ -823,7 +820,7 @@ rule C.UsePrecompiledHeader TARGET : NAME : HEADER : FILES
 	local file ;
 	for file in $(FILES:G=$(grist))
 	{
-		if $(file:S) in .cpp .c  &&  $(file) != $(cppPchFilename)
+		if $(file:S) in $(C.C_STYLE_BUILD_EXTENSIONS) $(C.CPP_STYLE_BUILD_EXTENSIONS)  &&  $(file) != $(cppPchFilename)
 		{
 			PCH on $(file) = $(SOURCE) $(HEADER) ;
 		}
@@ -980,7 +977,8 @@ rule C.ObjectCFlags TARGET : SOURCES : FLAGS : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
-	local sources = $(SOURCES:I=\\.c$) ;
+	local list = @(I=\\$(C.C_STYLE_BUILD_EXTENSIONS)$:J=$(colon)) ;
+	local sources = $(SOURCES:$(list)) ;
 	local objTargets = $(sources:S=$(SUFOBJ):G=$(grist)) ;
 	CCFLAGS.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) += $(FLAGS) ;
 }
@@ -990,7 +988,8 @@ rule C.ObjectC++Flags TARGET : SOURCES : FLAGS : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
-	local sources = $(SOURCES:I=\\.cpp$) ;
+	local list = @(I=\\$(C.CPP_STYLE_BUILD_EXTENSIONS)$:J=$(colon)) ;
+	local sources = $(SOURCES:$(list)) ;
 	local objTargets = $(sources:S=$(SUFOBJ):G=$(grist)) ;
 	C++FLAGS.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) += $(FLAGS) ;
 }
