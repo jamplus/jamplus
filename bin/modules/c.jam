@@ -109,59 +109,6 @@ rule C.SubDirHdrs
 # The original MultiCppCompile rule was provided by Alen Ladavac.
 ########################################################################
 
-# Used to group files from a list by some bound variable.
-# Files with first value of the variable are returned as results, and removed from the input list.
-# NOTE: _filelist and _varname are passed by reference!
-# [ GroupByVar1 _filelist : _varname [: maxPerGroup] ]
-rule GroupByVar1
-{
-	# get the actual filelist
-	local _all = $($(1)) ;
-
-	# get value of the variable on the first file
-	local _var1 ;
-	on $(_all[1]) _var1 = $($(2)) ;
-
-	local _group1 = ;
-	local _rest = ;
-	local _f ;
-
-	if $(3)
-	{
-		local _count = 0 ;
-		local _done ;
-		for _f in $(_all) {
-			local _var ;
-			on $(_f) _var = $($(2)) ;
-			if ! $(_done) && ( $(_var) in $(_var1) ) && ( $(_var1) in $(_var) )  {
-				_group1 += $(_f) ;
-				_count = [ Math $(_count) + 1 ] ;
-				if $(_count) = $(3)
-				{
-					_done = true ;
-				}
-			} else {
-				_rest += $(_f) ;
-			}
-		}
-		$(1) = $(_rest) ;
-		return $(_group1) ;
-	}
-
-	for _f in $(_all) {
-		local _var ;
-		on $(_f) _var = $($(2)) ;
-		if ( $(_var) in $(_var1) ) && ( $(_var1) in $(_var) )  {
-			_group1 += $(_f) ;
-		} else {
-			_rest += $(_f) ;
-		}
-	}
-	$(1) = $(_rest) ;
-	return $(_group1) ;
-}
-
-
 rule C.BatchCompileGroupSize TARGET : SIZE
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
