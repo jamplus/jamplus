@@ -50,17 +50,17 @@ rule C.FLibraryPaths { return -L$(<) ; }
 
 actions updated together piecemeal C.Archive
 {
-	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
+	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
 }
 
 actions C.Link
 {
-	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]) $(UNDEFS) $(>) $(NEEDLIBS:T) $(LINKLIBS)
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(UNDEFS) $(>:C) $(NEEDLIBS:T) $(LINKLIBS)
 }
 
 actions together C.Ranlib
 {
-	"$(C.RANLIB)" $(<)
+	"$(C.RANLIB)" $(<:C)
 }
 
 #
@@ -71,23 +71,23 @@ if $(NOARUPDATE)
 {
 	actions C.Archive
 	{
-	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
+	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
 	}
 }
 
 actions updated response C.CC
 {
-	"$(C.CC)" -c $(MFLAGS) $(>)
+	"$(C.CC)" -c $(MFLAGS) $(>:C)
 }
 
 actions updated response C.C++
 {
-	"$(C.C++)" -c $(MFLAGS) $(>)
+	"$(C.C++)" -c $(MFLAGS) $(>:C)
 }
 
 actions updated response C.PCH
 {
-	"$(C.C++)" -c $(MFLAGS) $(>)
+	"$(C.C++)" -c $(MFLAGS) $(>:C)
 }
 
 
