@@ -219,13 +219,12 @@ rule C._MultiCppCompile_PreCompile
 	}
 }
 
-rule C._MultiCppCompile_PchFlags
-{
-}
-
 rule C._MultiCppCompile_SetupFlags
 {
 	_flags += $(postREFERENCEDIRECTORIES) ;
+
+	local forceIncludeHeader = $(_pch[2]:G=$(grist)|force) ;
+	SEARCH on $(forceIncludeHeader) = $(_hdrs) ;
 
 	if $(_pch[4]) {
 		# add extra flags to enable pch creation
@@ -233,12 +232,14 @@ rule C._MultiCppCompile_SetupFlags
 		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
 		_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
 		_flags += /Yc$(_pch[2]) ;  # h file
+		_flags += \"/FI$(_pch[2])\" ;  # h file
 		# mark that it will be created by compilation through srcref
 		_pchFilename = $(_pchFilename:G=$(grist)) ;
 		BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
 		MakeLocate $(_pchFilename) : $(LOCATE_TARGET) ;
 		Depends $(_pchFilename) : $(_src) ;
 		Clean clean:$(TARGET) : $(_pchFilename) ;
+		Includes $(_src) : $(forceIncludeHeader) ;
 
 	# if the source should use pch
 	} else if $(_pch[2]) && ! $(_nopch) {
@@ -247,9 +248,11 @@ rule C._MultiCppCompile_SetupFlags
 		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
 		_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
 		_flags += /Yu$(_pch[2]) ;  # h file
+		_flags += \"/FI$(_pch[2])\" ;  # h file
 		# mark that compilation will depend on it
 		_pchFilename = $(_pchFilename:G=$(grist)) ;
 		Includes $(_src) : $(_pchFilename) ;
+		Includes $(_src) : $(forceIncludeHeader) ;
 	}
 
 	# bind flags, defines and includes to the target
@@ -413,6 +416,6 @@ rule C.DefFile TARGET : SOURCES
 
 } # TARGETINFO_LOCATE
 
-BUILD_EXTENSIONS = $(SUFOBJ) .res ;
-C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;
-C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
+C.BUILD_EXTENSIONS = $(SUFOBJ) .res ;
+C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
