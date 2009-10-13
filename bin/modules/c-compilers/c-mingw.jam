@@ -29,6 +29,49 @@ rule C.FIncludes { return -I$(<) ; }
 rule C.FLibraryPaths { return -L$(<) ; }
 
 
+actions updated together piecemeal C.Archive
+{
+	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
+}
+
+actions C.Link
+{
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:T) $(LINKLIBS)
+}
+
+actions together C.Ranlib
+{
+	"$(C.RANLIB)" $(<:C)
+}
+
+#
+# NOARUPDATE - can't update an archive
+#
+
+if $(NOARUPDATE)
+{
+	actions C.Archive
+	{
+	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
+	}
+}
+
+actions updated response C.CC
+{
+	"$(C.CC)" -c $(MFLAGS) $(>:C)
+}
+
+actions updated response C.C++
+{
+	"$(C.C++)" -c $(MFLAGS) $(>:C)
+}
+
+actions updated response C.PCH
+{
+	"$(C.C++)" -c $(MFLAGS) $(>:C)
+}
+
+
 rule C._ForceIncludeHelper
 {
 	C.AddFlags $(TARGET) : "-include $(INCLUDES)" : $(THE_CONFIG:E=*) : $(THE_PLATFORM:E=*) ;
@@ -45,92 +88,46 @@ rule C._RuntimeTypeHelper
 	}
 }
 
-actions updated together piecemeal C.Archive
-{
-	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
-}
-
-actions C.Link
-{
-	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]) $(>) $(NEEDLIBS:T) $(LINKLIBS)
-}
-
-actions together C.Ranlib
-{
-	"$(C.RANLIB)" $(<)
-}
-
-#
-# NOARUPDATE - can't update an archive
-#
-
-if $(NOARUPDATE)
-{
-	actions C.Archive
-	{
-	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
-	}
-}
-
-actions updated response C.CC
-{
-	"$(C.CC)" -c $(MFLAGS) $(>)
-}
-
-actions updated response C.C++
-{
-	"$(C.C++)" -c $(MFLAGS) $(>)
-}
-
-actions updated response C.PCH
-{
-	"$(C.C++)" -c $(MFLAGS) $(>)
-}
-
-
-rule C._MultiCppCompile_PreCompile
-{
-}
-
-rule C._MultiCppCompile_PchFlags
-{
-	# if the source should create pch
-	local _pch ;
-	on $(_src) _pch = $(PCH) ;
-	if $(_pch[4]) {
-		local _pchName = @($(_pch[3]:LBS):G=$(grist)) ;
-		newsrcs += $(_pchName) ;
-
-		local _pchFilename = $(_pchName).gch ;
-		PCHFLAGS.$(PLATFORM).$(CONFIG) on $(_pchFilename) += $($($(BUILD_EXT).PCHFLAGS)) ;
-
-#				Depends $(_pchFilename) : $(_src) ;
-	}
-}
-
 rule C._MultiCppCompile_SetupFlags
 {
-	if $(_pch)  &&  ! $(_nopch) {
-		local _pchName = @($(_pch[3]:LBS):G=$(grist)) ;
+	if $(_pch[1])  &&  ! $(_nopch) {
+		_flags += -Winvalid-pch ;
+
+		local md5 = [ MD5 $(_flags) ] ;
+		local _pchName = @($(_pch[3]:LDBS):G=$(grist)-$(md5)) ;
 		local _pchFilename = $(_pchName).gch ;
+
+		if ! $(built-$(_pchName)) {
+			built-$(_pchName) = 1 ;
+
+			local pchext = $(_pchName:S) ;
+			local pchBUILD_EXT = C.BUILD$(pchext) ;
+
+			MakeLocate $(_pchFilename) : $(LOCATE_TARGET)/$(_pchName:S=:G=)-$(md5) ;
+
+			newsrcs += $(_pchName) ;
+
+			PCHFLAGS.$(PLATFORM).$(CONFIG) on $(_pchFilename) += $($($(pchBUILD_EXT).PCHFLAGS)) ;
+			MFLAGS on $(_pchName) = $($(pchBUILD_EXT).RULE) $($(pchBUILD_EXT).SUFOBJ) $($(pchBUILD_EXT).ADD_TO_LINK) $(_flags[5-]) $($($(BUILD_EXT).PCHFLAGS)) -o \"$(_pchFilename:T)\" ;
+
+			Depends $(_pchFilename) : $(_pchName) ;
+			SEARCH on $(_pchName) = $(_hdrs) ;
+		}
+
+		_flags += -include $(_pchFilename:T:S=:C) ;
 
 		# if the source should use pch
 		if $(_pch[2]) {
 			# mark that compilation will depend on it
 			Includes $(_src) : $(_pchFilename) ;
 		}
+
+		if $(_pch[3]) {
+			Depends $(_obj) : $(_pchFilename) ;
+		}
 	}
 
-	_flags += "-c -o \"$(_obj:T)\"" ;
-}
-
-rule C._MultiCppCompile_PchDeps
-{
-	if $(_pch1[3]) {
-		local _pchName = @($(_pch[3]:LBS):G=$(grist)) ;
-		local _pchFilename = $(_pchName).gch ;
-		Depends $(objects) : $(_pchFilename) ;
-	}
+	_flags += "-o \"$(_obj:T)\"" ;
 }
 
 rule C._SharedLibraryFromObjects_ExportLib
@@ -152,8 +149,8 @@ rule C._SharedLibraryFromObjects_LinkFlags
 		linkFlags += -bundle -undefined dynamic_lookup ;
 	} else {
 		local installName =
-			[ _retrieveVar INSTALL_NAME_PATH : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-			[ _retrieveVar INSTALL_NAME_PATH : * : $(CONFIG) : $(PLATFORM) ] ;
+			[ C._retrieveVar INSTALL_NAME_PATH : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+			[ C._retrieveVar INSTALL_NAME_PATH : * : $(CONFIG) : $(PLATFORM) ] ;
 		if ! $(installName)
 		{
 			installName = $(_t:TD) ;
@@ -169,9 +166,12 @@ rule C._SharedLibraryFromObjects_LinkFlags
 
 } # TARGETINFO_LOCATE
 
-BUILD_EXTENSIONS = $(SUFOBJ) .res ;
-C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 : 1 ;
-C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
-C.AddBuildExtensions PCH : .h : C.PCH : "" .gch : 0 : 0 ;
-C.AddBuildExtensions M : .m : C.CC : $(SUFOBJ) "" : 1 : 1 ;
-C.AddBuildExtensions MM : .mm : C.C++ : $(SUFOBJ) "" : 1 : 1 ;
+C.BUILD_EXTENSIONS = $(SUFOBJ) .res ;
+C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+C.AddBuildExtensions M : .m : C.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+C.AddBuildExtensions MM : .mm : C.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+C.AddBuildExtensions PCH : .h : C.PCH : "" .gch ;
+
+
+
