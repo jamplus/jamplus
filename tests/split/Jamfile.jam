@@ -1,0 +1,4 @@
+local list = [ Split I like peas. : " " ] ;
+Echo **$(list)** ;
+
+Echo [ Split No splits here : "|" ] ;
