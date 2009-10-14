@@ -1,5 +1,5 @@
 # tests/autosettings
-the_echo on myshell = echo ;
+the_echo on myshell = "echo" ;
 
 actions DoEcho
 {
