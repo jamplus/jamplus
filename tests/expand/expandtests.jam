@@ -167,6 +167,9 @@ if $(NT) {
 
 	TestExpansion @(HelloWorld.txt:C) : HelloWorld.txt ;
 	TestExpansion @(Hello\ World.txt:C) : "\"Hello World.txt\"" ;
+
+	local flags = "/FIHello world" ;
+	TestExpansion "-include $(flags:C)" : "-include \"/FIHello world\"" ;
 } else {
 	local filename = this/will/not/have/quotes ;
 	TestExpansion $(filename:C) : this/will/not/have/quotes ;
@@ -179,6 +182,9 @@ if $(NT) {
 
 	filename = "this filename has (parentheses)" ;
 	TestExpansion $(filename:C) : "this\\ filename\\ has\\ \\(parentheses\\)" ;
+
+	local flags = "/FIHello world" ;
+	TestExpansion "-include $(flags:C)" : "-include /FIHello\\ world" ;
 }
 
 
