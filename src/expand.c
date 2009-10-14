@@ -431,6 +431,41 @@ var_expand(
 			var_edit_slash( buffer_posptr( &buff ), &edits );
 #endif
 
+#ifdef OPT_EXPAND_ESCAPE_PATH_EXT
+			if ( colon && edits.escapepath )
+			{
+				const char* ptr = buffer_posptr( &buff );
+				const char* endptr = ptr + strlen( ptr );
+				BUFFER escapebuff;
+				buffer_init( &escapebuff );
+
+#ifdef NT
+				while ( ptr != endptr  &&  *ptr != ' '  &&  *ptr != '/' )
+					++ptr;
+				if (*ptr == ' '  ||  *ptr == '/' ) {
+					buffer_addchar( &escapebuff, '"' );
+					buffer_addstring( &escapebuff, buffer_posptr( &buff ), endptr - buffer_posptr( &buff ) );
+					buffer_addchar( &escapebuff, '"' );
+					buffer_addchar( &escapebuff, 0 );
+					buffer_addstring( &buff, buffer_ptr( &escapebuff ), buffer_pos( &escapebuff ) );
+				}
+
+#else
+				while ( ptr != endptr ) {
+					if ( *ptr == ' '  ||  *ptr == '\\'  ||  *ptr == '('  ||  *ptr == ')'  ||  *ptr == '"' ) {
+						buffer_addchar( &escapebuff, '\\' );
+					}
+					buffer_addchar( &escapebuff, *ptr );
+					++ptr;
+				}
+				buffer_reset( &buff );
+				buffer_addstring( &buff, buffer_ptr( &escapebuff ), buffer_pos( &escapebuff ) );
+#endif
+
+				buffer_free( &escapebuff );
+			}
+#endif
+
 		    /* Handle :J=joinval */
 		    /* If we have more values for this var, just */
 		    /* keep appending them (with the join value) */
@@ -533,53 +568,6 @@ var_expand(
 #endif
 #ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT
 		list_free( edits.includes_excludes );
-#endif
-
-#ifdef OPT_EXPAND_ESCAPE_PATH_EXT
-		if ( edits.escapepath )
-		{
-		    LIST *newl = L0;
-		    LIST *origl = l;
-
-		    for ( ; l; l = list_next( l ) )
-		    {
-				const char* ptr = l->string;
-				const char* endptr = l->string + strlen( l->string );
-				BUFFER escapebuff;
-				buffer_init( &escapebuff );
-
-#ifdef NT
-				while ( ptr != endptr  &&  *ptr != ' '  &&  *ptr != '/' )
-					++ptr;
-				if (*ptr == ' '  ||  *ptr == '/' ) {
-					ptr = l->string;
-					buffer_addchar( &escapebuff, '"' );
-					buffer_addstring( &escapebuff, l->string, endptr - l->string );
-					buffer_addchar( &escapebuff, '"' );
-				} else {
-					buffer_addstring( &escapebuff, l->string, endptr - l->string );
-				}
-				buffer_addchar( &escapebuff, 0 );
-				newl = list_new( newl, buffer_ptr( &escapebuff ), 0 );
-
-#else
-				while ( ptr != endptr ) {
-					if ( *ptr == ' '  ||  *ptr == '\\'  ||  *ptr == '('  ||  *ptr == ')'  ||  *ptr == '"' ) {
-						buffer_addchar( &escapebuff, '\\' );
-					}
-					buffer_addchar( &escapebuff, *ptr );
-					++ptr;
-				}
-				buffer_addchar( &escapebuff, 0 );
-				newl = list_new( newl, buffer_ptr( &escapebuff ), 0 );
-#endif
-
-				buffer_free( &escapebuff );
-			}
-
-			list_free( origl );
-			l = newl;
-		}
 #endif
 
 	    }
