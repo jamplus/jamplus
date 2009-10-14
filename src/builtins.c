@@ -106,6 +106,10 @@ LIST *builtin_shell( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_groupbyvar( PARSE *parse, LOL *args, int *jmp );
 #endif
 
+#ifdef OPT_BUILTIN_SPLIT_EXT
+LIST *builtin_split( PARSE *parse, LOL *args, int *jmp );
+#endif
+
 int glob( const char *s, const char *c );
 
 void
@@ -240,6 +244,11 @@ load_builtins()
 #ifdef OPT_BUILTIN_GROUPBYVAR_EXT
 	bindrule( "GroupByVar" )->procedure =
 		parse_make( builtin_groupbyvar, P0, P0, P0, C0, C0, 0 );
+#endif
+
+#ifdef OPT_BUILTIN_SPLIT_EXT
+	bindrule( "Split" )->procedure =
+		parse_make( builtin_split, P0, P0, P0, C0, C0, 0 );
 #endif
 }
 
@@ -1075,4 +1084,57 @@ builtin_groupbyvar(
     return group1;
 }
 
+#endif
+
+
+#ifdef OPT_BUILTIN_SPLIT_EXT
+/* Based on code from ftjam by David Turner */
+LIST *
+builtin_split(
+	PARSE	*parse,
+	LOL	*args,
+	int	*jmp )
+{
+    LIST*	input  = lol_get( args, 0 );
+    LIST*	tokens = lol_get( args, 1 );
+    LIST*	result = L0;
+	char	token[256];
+	BUFFER  buff;
+
+	buffer_init( &buff );
+
+    /* build token array */
+    memset( token, 0, sizeof( token ) );
+    for ( ; tokens; tokens = tokens->next ) {
+        const char* s = tokens->string;
+        for ( ; *s; s++ )
+            token[(unsigned char)*s] = 1;
+    }
+
+    /* now parse the input and split it */
+    for ( ; input; input = input->next ) {
+		const char* ptr = input->string;
+		const char* lastPtr = input->string;
+
+		while ( *ptr ) {
+            if ( token[(unsigned char) *ptr] ) {
+                int  count = ptr - lastPtr;
+                if ( count > 0 ) {
+					buffer_reset( &buff );
+					buffer_addstring( &buff, lastPtr, count );
+					buffer_addchar( &buff, 0 );
+
+                    result = list_new( result, buffer_ptr( &buff ), 0 );
+                }
+				lastPtr = ptr + 1;
+            }
+			++ptr;
+        }
+        if ( ptr > lastPtr )
+            result = list_new( result, lastPtr, 0 );
+    }
+
+	buffer_free( &buff );
+    return  result;
+}
 #endif
