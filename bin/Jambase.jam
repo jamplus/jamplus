@@ -631,14 +631,14 @@ rule FDirName
 # First the defaults
 #
 
-actions piecemeal together existing Clean
+actions piecemeal together existing removeemptydirs Clean
 {
 	$(RM) $(>:C)
 }
 
 if $(NT)
 {
-	actions piecemeal together existing Clean
+	actions piecemeal together existing removeemptydirs Clean
 	{
 	$(RM) $(>:\\C)
 	}
@@ -657,14 +657,14 @@ if $(NT)
 	}
 }
 
-actions quietly updated piecemeal together RmTemps
+actions quietly updated piecemeal together removeemptydirs RmTemps
 {
 	$(RM) $(>)
 }
 
 if $(NT)
 {
-	actions quietly updated piecemeal together RmTemps
+	actions quietly updated piecemeal together removeemptydirs RmTemps
 	{
 	$(RM) $(>:\\C)
 	}
@@ -676,7 +676,7 @@ if $(NT)
 
 if $(NT) && $(MSVCNT)
 {
-	actions piecemeal together existing Clean
+	actions piecemeal together existing removeemptydirs Clean
 	{
 		$(RM) $(>:\\C)
 	}
@@ -684,7 +684,7 @@ if $(NT) && $(MSVCNT)
 
 if $(WIN98)
 {
-    actions existing Clean
+    actions existing removeemptydirs Clean
     {
 	del $(>:\\C)
     }
