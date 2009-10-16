@@ -54,7 +54,9 @@
 # include "jam.h"
 
 #ifdef OPT_REMOVE_EMPTY_DIRS_EXT
+#ifdef NT
 #include <direct.h>
+#endif
 #include <errno.h>
 #endif
 
