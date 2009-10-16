@@ -6,84 +6,112 @@ if ! $(wxWidgets_ROOT)
 	if $(NT)
 	{
 		registryRootPath = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Microsoft Windows CurrentVersion Uninstall wxWidgets_is1 "Inno Setup: App Path" ] ;
-	}
 
-	local PATHS =
-		"$(wxWidgets_ROOT_DIR:J=$(SPACE))/"
-		"$(WXWIN:/J=$(SPACE))/"
-		$(registryRootPath:/J=$(SPACE))
-		c:/
-		d:/
-		"$(ProgramFiles:/J=$(SPACE))/"
-	;
-	local PATH_SUFFIXES =
-		wxWidgets-2.8.7
-		wxWidgets-2.8.6
-		wxWidgets-2.8.5
-		wxWidgets-2.8.4
-		wxWidgets-2.8.3
-		wxWidgets-2.8.2
-		wxWidgets-2.8.1
-		wxWidgets-2.8.0
-		wxWidgets-2.7.4
-		wxWidgets-2.7.3
-		wxWidgets-2.7.2
-		wxWidgets-2.7.1
-		wxWidgets-2.7.0
-		wxWidgets-2.7.0-1
-		wxWidgets-2.6.3
-		wxWidgets-2.6.2
-		wxWidgets-2.6.1
-		wxWidgets-2.5.4
-		wxWidgets-2.5.3
-		wxWidgets-2.5.2
-		wxWidgets-2.5.1
-		wxWidgets
-	;
+		local PATHS =
+			"$(wxWidgets_ROOT_DIR:J=$(SPACE))/"
+			"$(WXWIN:/J=$(SPACE))/"
+			$(registryRootPath:/J=$(SPACE))
+			c:/
+			d:/
+			"$(ProgramFiles:/J=$(SPACE))/"
+		;
+		local PATH_SUFFIXES =
+			wxWidgets-2.9.4
+			wxWidgets-2.9.3
+			wxWidgets-2.9.2
+			wxWidgets-2.9.1
+			wxWidgets-2.9.0
+			wxWidgets-2.8.10
+			wxWidgets-2.8.9
+			wxWidgets-2.8.8
+			wxWidgets-2.8.7
+			wxWidgets-2.8.6
+			wxWidgets-2.8.5
+			wxWidgets-2.8.4
+			wxWidgets-2.8.3
+			wxWidgets-2.8.2
+			wxWidgets-2.8.1
+			wxWidgets-2.8.0
+			wxWidgets-2.7.4
+			wxWidgets-2.7.3
+			wxWidgets-2.7.2
+			wxWidgets-2.7.1
+			wxWidgets-2.7.0
+			wxWidgets-2.7.0-1
+			wxWidgets-2.6.3
+			wxWidgets-2.6.2
+			wxWidgets-2.6.1
+			wxWidgets-2.5.4
+			wxWidgets-2.5.3
+			wxWidgets-2.5.2
+			wxWidgets-2.5.1
+			wxWidgets
+		;
 
-	local wx.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include/wx : wx.h ] ;
-	if ! $(wx.h)
-	{
-		Exit wxWidgets not found. ;
-	}
-
-	wxWidgets_ROOT = [ Match (.+)/include/wx/wx.h : $(wx.h[1]) ] ;
-
-	wxWidgets_HDRS.* = $(wxWidgets_ROOT)/include ;
-
-	wxWidgets_COMMON_LIBRARIES = png tiff jpeg zlib regex expat ;
-	wxWidgets_BASE_LIBRARIES = net odbc xml ;
-	wxWidgets_PLATFORM_LIBRARIES = adv aui core dbgrid html media qa richtext xrc ;
-	wxWidgets_PLATFORM_PREFIX = msw ;
-	wxWidgets_CONTRIB_LIBRARIES = stc ;
-
-	wxWidgets_LIB_DIR = $(wxWidgets_ROOT)/lib ;
-
-	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008
-	{
-		if shared in $(OPTIONS)
+		local wx.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include/wx : wx.h ] ;
+		if ! $(wx.h)
 		{
-			wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/vc_dll ;
-		}
-		else
-		{
-			wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/vc_lib ;
+			Exit wxWidgets not found. ;
 		}
 
-		local wxbase.lib = [ Glob $(wxWidgets_LIB_DIR) : wxbase*.lib ] ;
-		if $(wxbase.lib)
+		wxWidgets_ROOT = [ Match (.+)/include/wx/wx.h : $(wx.h[1]) ] ;
+
+		wxWidgets_HDRS.* = $(wxWidgets_ROOT)/include ;
+
+		wxWidgets_COMMON_LIBRARIES = png tiff jpeg zlib regex expat ;
+		wxWidgets_BASE_LIBRARIES = net odbc xml ;
+		wxWidgets_PLATFORM_LIBRARIES = adv aui core dbgrid html media qa richtext xrc ;
+		wxWidgets_PLATFORM_PREFIX = msw ;
+		wxWidgets_CONTRIB_LIBRARIES = stc ;
+
+		wxWidgets_LIB_DIR = $(wxWidgets_ROOT)/lib ;
+
+		if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010
 		{
-			wxWidgets_VERSION = [ Match $(wxWidgets_LIB_DIR)/wxbase([0-9][0-9]) : $(wxbase.lib[1]) ] ;
+			if shared in $(OPTIONS)
+			{
+				wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/vc_dll ;
+			}
+			else
+			{
+				wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/vc_lib ;
+			}
+
+			local wxbase.lib = [ Glob $(wxWidgets_LIB_DIR) : wxbase*.lib ] ;
+			if $(wxbase.lib)
+			{
+				wxWidgets_VERSION = [ Match $(wxWidgets_LIB_DIR)/wxbase([0-9][0-9]) : $(wxbase.lib[1]) ] ;
+			}
+
+			wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswd ;
+			wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/msw ;
 		}
 
-		wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswd ;
-		wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/msw ;
+		wxWidgets_POSTFIX.debug = d ;
+		wxWidgets_POSTFIX.release = "" ;
+
+		wxComponents_ROOT_DIR ?= @(../wxComponents:R=$(wxWidgets_ROOT)) ;
+	} else {
+		local wx-config = [ Glob $(PATH) : wx-config ] ;
+		if ! $(wx-config) {
+			Exit wxWidgets not found. ;
+		}
+
+		wx-config--debug = --debug= ;
+		if $(CONFIG) = debug {
+			wx-config--debug += yes ;
+		} else {
+			wx-config--debug += no ;
+		}
+		wx-config--debug = $(wx-config--debug:J) ;
+		local cxxflags = [ Split [ Shell "wx-config --cxxflags $(wx-config--debug)" ] : $(SPACE) ] ;
+		wxWidgets_DEFINES.debug = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
+		wxWidgets_HDRS.debug = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
+
+		cxxflags = [ Split [ Shell "wx-config --cxxflags --debug=no" ] : $(SPACE) ] ;
+		wxWidgets_DEFINES.release = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
+		wxWidgets_HDRS.release = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
 	}
-
-	wxWidgets_POSTFIX.debug = d ;
-	wxWidgets_POSTFIX.release = "" ;
-
-	wxComponents_ROOT_DIR ?= @(../wxComponents:R=$(wxWidgets_ROOT)) ;
 }
 
 
@@ -92,7 +120,7 @@ rule C.UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 {
 	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
 
-	if $(COMPILER.$(PLATFORM)) in vc5 vc6 vs2003 vs2005 vs2008
+	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010
 	{
 		if shared in $(OPTIONS)
 		{
@@ -100,40 +128,49 @@ rule C.UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 		}
 	}
 
+	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.*) : * ;
+	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.$(CONFIG)) : $(CONFIG) ;
 	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) : * ;
-	C.RcIncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) ;
+	if $(MSVCNT) {
+		C.RcIncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) ;
+	}
 	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.$(CONFIG)) : $(CONFIG) ;
 
 	if linklibs in $(OPTIONS)
 	{
-		local postfix = $(wxWidgets_POSTFIX.$(CONFIG)) ;
+		if $(NT) {
+			local postfix = $(wxWidgets_POSTFIX.$(CONFIG)) ;
 
-		local component ;
-		for component in $(COMPONENTS) $(wxWidgets_COMMON_LIBRARIES)
-		{
-			if $(component) = base
+			local component ;
+			for component in $(COMPONENTS) $(wxWidgets_COMMON_LIBRARIES)
 			{
-				C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix) : $(CONFIG) ;
+				if $(component) = base
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix) : $(CONFIG) ;
+				}
+				else if $(component) in $(wxWidgets_BASE_LIBRARIES)
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
+				}
+				else if $(component) in $(wxWidgets_COMMON_LIBRARIES)
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(component)$(postfix) : $(CONFIG) ;
+				}
+				else if $(component) in $(wxWidgets_PLATFORM_LIBRARIES)
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
+				}
+				else if $(component) in $(wxWidgets_CONTRIB_LIBRARIES)
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
+				}
 			}
-			else if $(component) in $(wxWidgets_BASE_LIBRARIES)
-			{
-				C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
-			}
-			else if $(component) in $(wxWidgets_COMMON_LIBRARIES)
-			{
-				C.LinkPrebuiltLibraries $(TARGETS) : wx$(component)$(postfix) : $(CONFIG) ;
-			}
-			else if $(component) in $(wxWidgets_PLATFORM_LIBRARIES)
-			{
-				C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
-			}
-			else if $(component) in $(wxWidgets_CONTRIB_LIBRARIES)
-			{
-				C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
-			}
+
+			C.LinkDirectories $(TARGETS) : $(wxWidgets_LIB_DIR) ;
+			C.LinkPrebuiltLibraries $(TARGETS) : advapi32 comdlg32 comctl32 dbghelp gdi32 ole32 oleaut32 Rpcrt4 shell32 user32 uuid wsock32 : * ;
+		} else {
+			local linkFlags = [ Split [ Subst [ Shell "wx-config $(wx-config--debug) --libs $(COMPONENTS:J=$(SPACE))" ] : $(NEWLINE) : ] : $(SPACE) ] ;
+			C.LinkFlags $(TARGETS) : $(linkFlags) ;
 		}
-
-		C.LinkDirectories $(TARGETS) : $(wxWidgets_LIB_DIR) ;
-		C.LinkPrebuiltLibraries $(TARGETS) : advapi32 comdlg32 comctl32 dbghelp gdi32 ole32 oleaut32 Rpcrt4 shell32 user32 uuid wsock32 : * ;
 	}
 }
