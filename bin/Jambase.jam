@@ -404,10 +404,15 @@ rule SubDir
 
 	local target = /$(>) ;
 
+	local _optionalRoot ;
+	if $(ALL_LOCATE_TARGET) {
+		_optionalRoot = $(_top) ;
+	}
+
 	SEARCH_SOURCE = $(SUBDIR) ;
-	LOCATE_SOURCE = [ FDirName $(ALL_LOCATE_TARGET) $(SUBDIR_DOWN) ] ;
+	LOCATE_SOURCE = [ FDirName $(ALL_LOCATE_TARGET) $(_optionalRoot) $(SUBDIR_DOWN) ] ;
 	LOCATE_SOURCE = $(LOCATE_SOURCE)$(target:E=) ;
-	LOCATE_TARGET = [ FDirName $(ALL_LOCATE_TARGET) $(SUBDIR_DOWN) ] ;
+	LOCATE_TARGET = [ FDirName $(ALL_LOCATE_TARGET) $(_optionalRoot) $(SUBDIR_DOWN) ] ;
 	LOCATE_TARGET = $(LOCATE_TARGET)$(target:E=) ;
 	SOURCE_GRIST = [ FGrist $(ALL_SUBDIR_TOKENS) ] ;
 	SOURCE_GRIST = $(SOURCE_GRIST)$(target:E=) ;
