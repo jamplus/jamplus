@@ -8,6 +8,14 @@ function RunJam(commandLine)
 	return ex.collectlines(commandLine)
 end
 
+function TestExpression(result, failMessage)
+	testNumber = testNumber + 1
+
+	if not result then
+		error(failMessage)
+	end
+end
+
 function TestPattern(pattern, lines)
 	testNumber = testNumber + 1
 
@@ -39,6 +47,47 @@ function TestPattern(pattern, lines)
 end
 
 
+function TestDirectories(expectedDirs)
+	testNumber = testNumber + 1
+
+	local expectedDirsMap = {}
+	for _, dirName in ipairs(expectedDirs) do
+		if dirName:sub(1, 1) == '?' then
+			expectedDirsMap[dirName:sub(2)] = '?'
+		else
+			expectedDirsMap[dirName] = true
+		end
+	end
+
+	local foundDirsMap = {}
+	for _, dirName in ipairs(glob.match('**/')) do
+		foundDirsMap[dirName] = true
+	end
+
+	local extraDirs = {}
+	for foundDir in pairs(foundDirsMap) do
+		if not expectedDirsMap[foundDir] then
+			extraDirs[#extraDirs + 1] = foundDir
+		end
+		expectedDirsMap[foundDir] = nil
+	end
+	if #extraDirs > 0 then
+		table.sort(extraDirs)
+		error('These directories should not exist:\n\t\t' .. table.concat(extraDirs, '\n\t\t'))
+	end
+
+	local missingDirs = {}
+	for expectedFile, value in pairs(expectedDirsMap) do
+		if value ~= '?' then
+			missingDirs[#missingDirs + 1] = expectedFile
+		end
+	end
+	if #missingDirs > 0 then
+		error('These directories are missing:\n\t\t' .. table.concat(missingDirs, '\n\t\t'))
+	end
+end
+
+
 function TestFiles(expectedFiles)
 	testNumber = testNumber + 1
 
@@ -67,7 +116,7 @@ function TestFiles(expectedFiles)
 	end
 	if #extraFiles > 0 then
 		table.sort(extraFiles)
-		error('These files should not exist:\n\t\t' .. table.concat(missingFiles, '\n\t\t'))
+		error('These files should not exist:\n\t\t' .. table.concat(extraFiles, '\n\t\t'))
 	end
 
 	local missingFiles = {}
@@ -82,7 +131,13 @@ function TestFiles(expectedFiles)
 end
 
 
-local dirs = glob.match('*/')
+local dirs
+
+if arg and arg[1] then
+	dirs = arg
+else
+	dirs = glob.match('*/')
+end
 table.sort(dirs)
 
 function ErrorHandler(inMessage)
@@ -112,6 +167,11 @@ for _, dir in ipairs(dirs) do
 			io.write('\t' .. err .. '\n')
 		else
 			io.write('OK\n')
+		end
+
+		if PostErrorMessage then
+			io.write('\t' .. PostErrorMessage .. '\n')
+			PostErrorMessage = nil
 		end
 	end
 	os.chdir('..')
