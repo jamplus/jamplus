@@ -53,6 +53,11 @@
 
 # include "jam.h"
 
+#ifdef OPT_REMOVE_EMPTY_DIRS_EXT
+#include <direct.h>
+#include <errno.h>
+#endif
+
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 #include "md5.h"
 #endif
@@ -239,6 +244,112 @@ int compare_queuedfileinfo( const void *_left, const void *_right ) {
 
 #endif
 
+#ifdef OPT_REMOVE_EMPTY_DIRS_EXT
+
+LIST* emptydirtargets = L0;
+
+typedef struct _sortedtargets SORTEDTARGETS;
+
+struct _sortedtargets {
+	const char *filename;
+	size_t filenamelen;
+} ;
+
+int compare_sortedtargets( const void *_left, const void *_right ) {
+	SORTEDTARGETS *left = (SORTEDTARGETS*)_left;
+	SORTEDTARGETS *right = (SORTEDTARGETS*)_right;
+	if ( right->filenamelen > left->filenamelen )
+		return 1;
+	if ( right->filenamelen < left->filenamelen )
+		return -1;
+	return strcmp( right->filename, left->filename );
+}
+
+static void remove_empty_dirs()
+{
+	BUFFER lastdirbuff;
+	LIST *l;
+	LIST *origl;
+	int i;
+	int count;
+	SORTEDTARGETS* sortedfiles;
+
+	if ( !emptydirtargets )
+		return;
+
+	l = emptydirtargets;
+	origl = l;
+	i = 0;
+	count = 0;
+
+	for( ; l; l = list_next( l ) ) {
+		++count;
+	}
+	
+	sortedfiles = malloc( sizeof( SORTEDTARGETS ) * count );
+	i = 0;
+	for( l = origl; l; l = list_next( l ) ) {
+		TARGET *t;
+		t = bindtarget( l->string );
+		pushsettings( t->settings );
+		t->boundname = search( t->name, &t->time );
+		popsettings( t->settings );
+		sortedfiles[ i ].filename = t->boundname;
+		sortedfiles[ i ].filenamelen = strlen( t->boundname );
+		++i;
+	}
+
+	qsort( sortedfiles,	count, sizeof( SORTEDTARGETS ), compare_sortedtargets );
+
+	buffer_init( &lastdirbuff );
+	buffer_addchar( &lastdirbuff, 0 );
+	for ( i = 0; i < count; ++i ) {
+		char* slashptr = strrchr( sortedfiles[ i ].filename, '/' );
+		if ( slashptr )
+			*slashptr = 0;
+		if ( strcmp( buffer_ptr( &lastdirbuff ), sortedfiles[ i ].filename ) != 0 ) {
+			buffer_reset( &lastdirbuff );
+			buffer_addstring( &lastdirbuff, sortedfiles[ i ].filename, strlen( sortedfiles[ i ].filename ) );
+			buffer_addchar( &lastdirbuff, 0 );
+			buffer_addchar( &lastdirbuff, 0 );
+
+			buffer_deltapos( &lastdirbuff, -2 );
+
+			{
+				char* lastdirptr = buffer_ptr( &lastdirbuff );
+				char* dirslashptr = buffer_posptr( &lastdirbuff );
+				while ( 1 ) {
+					char* olddirslashptr = dirslashptr;
+
+					/* walk up directories removing any empty ones */
+					if ( rmdir( lastdirptr ) == -1 ) {
+						if ( errno != ENOENT ) {
+							*olddirslashptr = '/';
+							break;
+						}
+					}
+					dirslashptr = strrchr( lastdirptr, '/' );
+					*olddirslashptr = '/';
+					if ( !dirslashptr )
+						break;
+					*dirslashptr = 0;
+				}
+
+				buffer_addchar( &lastdirbuff, 0 );
+			}
+		}
+		if ( slashptr )
+			*slashptr = '/';
+	}
+	buffer_free( &lastdirbuff );
+
+	free( sortedfiles );
+
+	list_free( origl );
+}
+
+#endif /* OPT_REMOVE_EMPTY_DIRS_EXT */
+
 int
 make(
 	int		n_targets,
@@ -361,6 +472,11 @@ pass:
 	if ( globs.noexec == 0 )
 		hcache_done();
 #endif
+
+#ifdef OPT_REMOVE_EMPTY_DIRS_EXT
+	remove_empty_dirs();
+#endif
+
 	return status;
 }
 

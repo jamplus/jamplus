@@ -72,7 +72,10 @@ struct _rule {
 #ifdef OPT_ACTIONS_DUMP_TEXT_EXT
 # define	RULE_WRITEFILE	0x400	/* this action writes a file and is done */
 #endif
+/* commented out so jamgram.y can compile #ifdef OPT_REMOVE_EMPTY_DIRS_EXT */
 # define	RULE_SCREENOUTPUT   0x800	/* screen the output from the action */
+/* commented out so jamgram.y can compile #ifdef OPT_REMOVE_EMPTY_DIRS_EXT */
+# define	RULE_REMOVEEMPTYDIRS 0x1000	/* screen the output from the action */
 
 	int		maxline;
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */

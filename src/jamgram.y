@@ -36,6 +36,7 @@
 %token ON_t
 %token PIECEMEAL_t
 %token QUIETLY_t
+%token REMOVEEMPTYDIRS_t
 %token RESPONSE_t
 %token RETURN_t
 %token RULE_t
@@ -354,6 +355,8 @@ eflag	: UPDATED_t
 		{ $$.number = RULE_MAXTARGETS; $$.number3 = atoi( $2.string ); }
 	| SCREENOUTPUT_t
 		{ $$.number = RULE_SCREENOUTPUT; }
+	| REMOVEEMPTYDIRS_t
+		{ $$.number = RULE_REMOVEEMPTYDIRS; }
 	;
 
 

@@ -36,6 +36,7 @@
 	{ "on", ON_t },
 	{ "piecemeal", PIECEMEAL_t },
 	{ "quietly", QUIETLY_t },
+	{ "removeemptydirs", REMOVEEMPTYDIRS_t },
 	{ "response", RESPONSE_t },
 	{ "return", RETURN_t },
 	{ "rule", RULE_t },

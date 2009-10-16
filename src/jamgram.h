@@ -83,20 +83,21 @@
      ON_t = 293,
      PIECEMEAL_t = 294,
      QUIETLY_t = 295,
-     RESPONSE_t = 296,
-     RETURN_t = 297,
-     RULE_t = 298,
-     SCREENOUTPUT_t = 299,
-     SWITCH_t = 300,
-     TOGETHER_t = 301,
-     UPDATED_t = 302,
-     WHILE_t = 303,
-     _LBRACE_t = 304,
-     _BAR_t = 305,
-     _BARBAR_t = 306,
-     _RBRACE_t = 307,
-     ARG = 308,
-     STRING = 309
+     REMOVEEMPTYDIRS_t = 296,
+     RESPONSE_t = 297,
+     RETURN_t = 298,
+     RULE_t = 299,
+     SCREENOUTPUT_t = 300,
+     SWITCH_t = 301,
+     TOGETHER_t = 302,
+     UPDATED_t = 303,
+     WHILE_t = 304,
+     _LBRACE_t = 305,
+     _BAR_t = 306,
+     _BARBAR_t = 307,
+     _RBRACE_t = 308,
+     ARG = 309,
+     STRING = 310
    };
 #endif
 /* Tokens.  */
@@ -138,20 +139,21 @@
 #define ON_t 293
 #define PIECEMEAL_t 294
 #define QUIETLY_t 295
-#define RESPONSE_t 296
-#define RETURN_t 297
-#define RULE_t 298
-#define SCREENOUTPUT_t 299
-#define SWITCH_t 300
-#define TOGETHER_t 301
-#define UPDATED_t 302
-#define WHILE_t 303
-#define _LBRACE_t 304
-#define _BAR_t 305
-#define _BARBAR_t 306
-#define _RBRACE_t 307
-#define ARG 308
-#define STRING 309
+#define REMOVEEMPTYDIRS_t 296
+#define RESPONSE_t 297
+#define RETURN_t 298
+#define RULE_t 299
+#define SCREENOUTPUT_t 300
+#define SWITCH_t 301
+#define TOGETHER_t 302
+#define UPDATED_t 303
+#define WHILE_t 304
+#define _LBRACE_t 305
+#define _BAR_t 306
+#define _BARBAR_t 307
+#define _RBRACE_t 308
+#define ARG 309
+#define STRING 310
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -162,6 +164,3 @@ typedef int YYSTYPE;
 #endif
 
 extern YYSTYPE yylval;
-
-
-

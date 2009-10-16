@@ -956,6 +956,11 @@ void make0calcmd5sum( TARGET *t, int source );
 #endif
 
 
+#ifdef OPT_REMOVE_EMPTY_DIRS_EXT
+extern LIST* emptydirtargets;
+#endif
+
+
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 static CMD *
 make1cmds( TARGET *t, ACTIONS *a0 )
@@ -999,6 +1004,17 @@ make1cmds( ACTIONS *a0 )
 #endif
 	    if( !rule->actions || a0->action->running )
 		continue;
+
+#ifdef OPT_REMOVE_EMPTY_DIRS_EXT
+		if ( rule->flags & RULE_REMOVEEMPTYDIRS ) {
+			for( a1 = a0; a1; a1 = a1->next ) {
+				TARGETS* sources;
+				for ( sources = a1->action->sources; sources; sources = sources->next ) {
+					emptydirtargets = list_new( emptydirtargets, sources->target->name, 1 );
+				}
+			}
+		}
+#endif
 
 		for ( autot = a0->action->autosettings; autot; autot = autot->next ) {
 			if ( autot->target != t )
