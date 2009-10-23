@@ -323,14 +323,13 @@ for file in [ Glob $(OS) : *.* : 0 ]
 
 if $(LUA_BIN)
 {
+	Depends all : "lua" ;
+	NotFile "lua" ;
+
 	local LUA_SRCS ;
 	if $(OS) = NT
 	{
 		LUA_SRCS =
-				lua.exe
-				lua5.1.dll
-				lua51.dll
-				luaplus_1100.dll
 				lua/base.lua
 				lua/ex.lua
 				lua/expand.lua
@@ -426,7 +425,7 @@ if $(LUA_BIN)
 	local file ;
 	for file in $(LUA_SRCS)
 	{
-		CopyFile all : $(BIN_PATH)/lua/$(file) : $(LUA_BIN)/$(file) ;
+		CopyFile "lua" : $(BIN_PATH)/lua/$(file) : $(LUA_BIN)/$(file) ;
 	}
 }
 
