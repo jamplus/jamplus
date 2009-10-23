@@ -32,11 +32,22 @@ function TestPattern(pattern, lines)
 
 	local lineIndex = 1
 	local patternIndex = 1
-	while lineIndex <= #lines  and  patternIndex <= #pattern do
+	local linesToFind = {}
+	while lineIndex <= #lines  and  patternIndex <= #pattern  and #linesToFind > 0 do
 		local line = lines[lineIndex]:gsub('^%s+', ''):gsub('%s+$', '')
 		local pattern = pattern[patternIndex]:gsub('^%s+', ''):gsub('%s+$', '')
 		if line ~= pattern then
-			error(line .. ' != ' .. pattern)
+			if line:sub(1, 1) == '%' then
+				linesToFind[#linesToFind + 1] = line:sub(2)
+			end
+			if line ~= linesToFind[1] then
+				print()
+				print("Full output:")
+				print(table.concat(lines, '\n'))
+				error(line .. ' != ' .. pattern)
+			else
+				table.remove(linesToFind, 1)
+			end
 		end
 
 		lineIndex = lineIndex + 1
@@ -107,7 +118,7 @@ function TestFiles(expectedFiles)
 
 	local extraFiles = {}
 	for foundFile in pairs(foundFilesMap) do
-		if foundFile ~= 'test.lua' then
+		if foundFile ~= 'test.lua'  and  foundFile ~= 'test.out' then
 			if not expectedFilesMap[foundFile] then
 				extraFiles[#extraFiles + 1] = foundFile
 			end
