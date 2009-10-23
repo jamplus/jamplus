@@ -5,6 +5,8 @@
 #
 # Put executables in platform-specific  subdirectory.
 
+IncludeModule copyfile ;
+
 C.RuntimeType jam libjam : static ;
 
 if $(PLATFORM) = macosx {
