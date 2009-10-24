@@ -1,6 +1,13 @@
 require 'ex'
 require 'glob'
 
+rotatingCharacters = { '|', '/', '-', '\\' }
+
+function TestNumberUpdate()
+	testNumber = testNumber + 1
+	io.write( rotatingCharacters[testNumber % 4 + 1] .. '\b' )
+end
+
 function RunJam(commandLine)
 	if not commandLine then commandLine = {} end
 	table.insert(commandLine, 1, 'jam')
@@ -9,7 +16,7 @@ function RunJam(commandLine)
 end
 
 function TestExpression(result, failMessage)
-	testNumber = testNumber + 1
+	TestNumberUpdate()
 
 	if not result then
 		error(failMessage)
@@ -17,7 +24,7 @@ function TestExpression(result, failMessage)
 end
 
 function TestPattern(pattern, lines)
-	testNumber = testNumber + 1
+	TestNumberUpdate()
 
 	if type(pattern) == 'string' then
 		local splitLines = {}
@@ -36,7 +43,7 @@ function TestPattern(pattern, lines)
 	while lineIndex <= #lines  and  patternIndex <= #pattern  and #linesToFind > 0 do
 		local line = lines[lineIndex]:gsub('^%s+', ''):gsub('%s+$', '')
 		local pattern = pattern[patternIndex]:gsub('^%s+', ''):gsub('%s+$', '')
-		if line ~= pattern then
+		if line ~= pattern  and  line:sub(1, 1) ~= '^' then
 			if line:sub(1, 1) == '%' then
 				linesToFind[#linesToFind + 1] = line:sub(2)
 			end
@@ -59,7 +66,7 @@ end
 
 
 function TestDirectories(expectedDirs)
-	testNumber = testNumber + 1
+	TestNumberUpdate()
 
 	local expectedDirsMap = {}
 	for _, dirName in ipairs(expectedDirs) do
@@ -100,7 +107,7 @@ end
 
 
 function TestFiles(expectedFiles)
-	testNumber = testNumber + 1
+	TestNumberUpdate()
 
 	local expectedFilesMap = {}
 	for _, fileName in ipairs(expectedFiles) do
@@ -142,12 +149,28 @@ function TestFiles(expectedFiles)
 end
 
 
+-- Detect OS
+if os.getenv("OS") == "Windows_NT" then
+ 	Platform = 'win32'
+elseif os.getenv("OSTYPE") == "darwin9.0" then
+	Platform = 'macosx'
+else
+	local f = io.popen('uname')
+	uname = f:read('*a'):lower():gsub('\n', '')
+	f:close()
+	
+	if uname == 'darwin' then
+		Platform = 'macosx'
+	end
+end
+
+
 local dirs
 
 if arg and arg[1] then
 	dirs = arg
 else
-	dirs = glob.match('*/')
+	dirs = glob.match('**/')
 end
 table.sort(dirs)
 
@@ -161,13 +184,14 @@ function ErrorHandler(inMessage)
 	return table.concat(message)
 end
 
+local cwd = os.getcwd()
 for _, dir in ipairs(dirs) do
 	os.chdir(dir)
 	local chunk = loadfile('test.lua')
 	if chunk then
 		testNumber = 0
 
-		local text = 'Running tests for ' .. dir .. '...'
+		local text = 'Running tests for ' .. dir:gsub('/$', '') .. '...'
 		io.write(('%-60s'):format(text))
 		io.flush()
 
@@ -185,5 +209,5 @@ for _, dir in ipairs(dirs) do
 			PostErrorMessage = nil
 		end
 	end
-	os.chdir('..')
+	os.chdir(cwd)
 end
