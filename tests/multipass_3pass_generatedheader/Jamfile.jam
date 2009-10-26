@@ -1,0 +1,69 @@
+SubDir TOP ;
+
+rule CopyRule TARGET : SOURCE
+{
+    Depends all : $(TARGET) : $(SOURCE) ;
+	Clean clean : $(TARGET) ;
+    CopyAction $(TARGET) : $(SOURCE) ;
+}
+
+actions CopyAction
+{
+    $(CP) $(2) $(1)
+}
+
+PASS_NUM ?= 1 ;
+
+if $(PASS_NUM) = 1
+{
+    Echo Pass 1 ;
+
+    CONTENTS on <test>main.cpp = "#include \"foo.h\"
+
+int main()
+{
+    foo();
+    return 0;
+}
+" ;
+    WriteFile <test>main.cpp ;
+    MakeLocate <test>main.cpp : $(LOCATE_TARGET) ;
+    Clean clean:test : <test>main.cpp ;
+
+    CONTENTS on <test>foo.cpp = "#include <stdio.h>
+
+void foo()
+{
+    printf(\"Hello, everyone!\n\");
+}
+" ;
+    WriteFile <test>foo.cpp ;
+    MakeLocate <test>foo.cpp : $(LOCATE_TARGET) ;
+    Clean clean:test : <test>foo.cpp ;
+    Depends <test>main.cpp : <test>foo.h ;
+
+    C.Application test : main.cpp foo.cpp ;
+
+    QueueJamfile $(JAMFILE) ;
+    PASS_NUM = 2 ;
+}
+else if $(PASS_NUM) = 2
+{
+    Echo Pass 2 ;
+
+    CONTENTS on <test>foo.h = "extern void foo();" ;
+    WriteFile <test>foo.h ;
+    Clean clean:test : <test>foo.h ;
+
+    QueueJamfile $(JAMFILE) ;
+    PASS_NUM = 3 ;
+}
+else
+{
+    Echo Pass 3 ;
+	Clean clean : Foo.cpp Foo.h ;
+
+#    Depends Foo.cpp : Foo.h ;
+
+#    CopyRule Foo.o : Foo.cpp ;
+}

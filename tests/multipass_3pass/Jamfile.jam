@@ -2,6 +2,7 @@
 rule CopyRule TARGET : SOURCE
 {
     Depends all : $(TARGET) : $(SOURCE) ;
+	Clean clean : $(TARGET) ;
     CopyAction $(TARGET) : $(SOURCE) ;
 }
 
@@ -33,4 +34,5 @@ else
     Depends Foo.cpp : Foo.h ;
 
     CopyRule Foo.o : Foo.cpp ;
+	Clean clean : Foo.cpp Foo.h ;
 }

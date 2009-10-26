@@ -3,8 +3,13 @@ require 'glob'
 
 rotatingCharacters = { '|', '/', '-', '\\' }
 
+testsSucceeded = 0
+totalTests = 0
+
 function TestNumberUpdate()
 	testNumber = testNumber + 1
+	testsSucceeded = testsSucceeded + 1
+	totalTests = totalTests + 1
 	io.write( rotatingCharacters[testNumber % 4 + 1] .. '\b' )
 end
 
@@ -12,6 +17,11 @@ function RunJam(commandLine)
 	if not commandLine then commandLine = {} end
 	table.insert(commandLine, 1, 'jam')
 	table.insert(commandLine, 2, '-j1')
+	
+	if Platform == 'win32' then
+		commandLine[#commandLine + 1] = '2>&1'
+	end
+	
 	return ex.collectlines(commandLine)
 end
 
@@ -180,34 +190,51 @@ function ErrorHandler(inMessage)
 		table.insert(message, inMessage)
 		table.insert(message, ':\n')
 	end
-	table.insert(message, debug.traceback())
+	ErrorTraceback = debug.traceback()
 	return table.concat(message)
 end
 
 local cwd = os.getcwd()
 for _, dir in ipairs(dirs) do
 	os.chdir(dir)
-	local chunk = loadfile('test.lua')
-	if chunk then
-		testNumber = 0
+	if os.path.exists('test.lua') then
+		local chunk, err = loadfile('test.lua')
+		if chunk then
+			testNumber = 0
 
-		local text = 'Running tests for ' .. dir:gsub('/$', '') .. '...'
-		io.write(('%-60s'):format(text))
-		io.flush()
+			local text = 'Running tests for ' .. dir:gsub('[\\/]$', '') .. '...'
+			io.write(('%-60s'):format(text))
+			io.flush()
 
-		chunk()
-		local ret, err = xpcall(Test, ErrorHandler)
-		if not ret then
-			io.write('FAILED test #' .. testNumber .. '!\n')
-			io.write('\t' .. err .. '\n')
+			chunk()
+			local ret, err = xpcall(Test, ErrorHandler)
+			if not ret then
+				io.write('FAILED!\n')
+				io.write('\tFailed test #' .. testNumber)
+
+				local lineNumber = ErrorTraceback:match('test.lua:(%d-):')
+				if lineNumber then
+					io.write(' at line number ' .. lineNumber)
+				end
+				io.write('.\n\n')
+				
+				err = err:gsub('^runtests.lua:%d-: ', '')
+				io.write('\t' .. err .. '\n')
+			else
+				io.write('OK\n')
+			end
+
+			if PostErrorMessage then
+				io.write('\t' .. PostErrorMessage .. '\n')
+				PostErrorMessage = nil
+			end
 		else
-			io.write('OK\n')
-		end
-
-		if PostErrorMessage then
-			io.write('\t' .. PostErrorMessage .. '\n')
-			PostErrorMessage = nil
+			io.write('Error compiling test.lua!\n')
+			io.write('\t' .. err .. '\n')
 		end
 	end
 	os.chdir(cwd)
 end
+
+print()
+print(('-> %d out of %d tests succeeded.'):format(testsSucceeded, totalTests))

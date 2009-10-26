@@ -1,15 +1,15 @@
 actions Anyway
 {
-	zip test.zip file.dat file.txt
+	copy /b file.dat+file.txt test.zip
 }
 
 Depends all : test.zip ;
 Depends test.zip : file.dat ;
 
-actions Copy2
-{
-copy file.txt file.dat
-}
+#actions Copy2
+#{
+#copy file.txt file.dat
+#}
 
 #Copy2 file.dat : file.txt ;
 Clean clean : test.zip file.dat ;

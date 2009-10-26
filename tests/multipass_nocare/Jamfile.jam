@@ -2,6 +2,7 @@
 rule CopyRule TARGET : SOURCE
 {
     Depends all : $(TARGET) : $(SOURCE) ;
+	Clean clean : $(TARGET) ;
     CopyAction $(TARGET) : $(SOURCE) ;
 }
 
@@ -40,4 +41,5 @@ else if $(PASS_NUM) = 2
 else
 {
     Echo Pass 3 ;
+	Clean clean : Care.cpp Care.h NoCare.cpp ;
 }

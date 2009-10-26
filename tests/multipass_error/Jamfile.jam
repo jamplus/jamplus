@@ -1,14 +1,32 @@
 Depends all : file.dat ;
 Depends file.dat : file.txt ;
 
-actions Copy
-{
-	exit 1
+if $(FORCE_ERROR) {
+
+	actions Copy
+	{
+		exit 1
+	}
+
+} else {
+
+	if $(NT) {
+
+		actions Copy
+		{
+			copy $(2) $(1)
+		}
+
+	} else {
+
+		actions Copy
+		{
+			cp $(2) $(1)
+		}
+
+	}
 }
 
 Copy file.dat : file.txt ;
 
 QueueJamfile Pass2.jam ;
-
-
-
