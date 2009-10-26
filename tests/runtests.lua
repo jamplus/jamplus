@@ -198,13 +198,13 @@ local cwd = os.getcwd()
 for _, dir in ipairs(dirs) do
 	os.chdir(dir)
 	if os.path.exists('test.lua') then
+		local text = 'Running tests for ' .. dir:gsub('[\\/]$', '') .. '...'
+		io.write(('%-60s'):format(text))
+		io.flush()
+
 		local chunk, err = loadfile('test.lua')
 		if chunk then
 			testNumber = 0
-
-			local text = 'Running tests for ' .. dir:gsub('[\\/]$', '') .. '...'
-			io.write(('%-60s'):format(text))
-			io.flush()
 
 			chunk()
 			local ret, err = xpcall(Test, ErrorHandler)
@@ -229,7 +229,8 @@ for _, dir in ipairs(dirs) do
 				PostErrorMessage = nil
 			end
 		else
-			io.write('Error compiling test.lua!\n')
+			io.write('FAILED!\n')
+			io.write('\tError compiling test.lua!\n')
 			io.write('\t' .. err .. '\n')
 		end
 	end

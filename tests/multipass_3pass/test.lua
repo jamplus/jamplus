@@ -93,5 +93,3 @@ Pass 3
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
 end
-
-s

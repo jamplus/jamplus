@@ -120,12 +120,12 @@ Pass 3
 *** found 12 target(s)...
 *** updating 2 target(s)...
 ]]
-	TestPattern(pattern2, RunJam{ '-s', 'PASS_NUM=2' })
+	TestPattern(pattern3, RunJam{ '-s', 'PASS_NUM=2' })
 	TestFiles(pass1Files)
 	TestDirectories(originalDirs)
 	
 	---------------------------------------------------------------------------
-	local cleanpattern_test2 = [[
+	local cleanpattern_test3 = [[
 Pass 2
 *** found 2 target(s)...
 *** updating 1 target(s)...
@@ -137,7 +137,7 @@ Pass 3
 @ Clean clean
 *** updated 1 target(s)...
 ]]
-	TestPattern(cleanpattern_test2, RunJam{ '-sPASS_NUM=2', 'clean' })
+	TestPattern(cleanpattern_test3, RunJam{ '-sPASS_NUM=2', 'clean' })
 	
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
