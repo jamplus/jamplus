@@ -365,7 +365,7 @@ rule C._SharedLibraryFromObjects_UnRegServer
 rule C._SharedLibraryFromObjects_CleanIntermediates
 {
 	# Clean the .pdb (etc) files.
-	local sufs = .pdb .map .lib .exp .ilk ;
+	local sufs = .pdb .map .exp .ilk ;
 	local zap = $(_t:S=$(sufs)) $(_t).manifest ;
 	MakeLocate $(zap) : $(outputPath) ;
 	Clean clean:$(TARGET) : $(zap) ;
