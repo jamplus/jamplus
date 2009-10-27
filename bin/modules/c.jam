@@ -744,6 +744,7 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	local linkRule = C.Link ;
 
+	C._SharedLibraryFromObjects_CleanIntermediates ;
 	C._SharedLibraryFromObjects_LinkFlags ;
 
 	local linkLibs =
@@ -784,6 +785,10 @@ rule C._SharedLibraryFromObjects_UnRegServer
 }
 
 rule C._SharedLibraryFromObjects_LinkFlags
+{
+}
+
+rule C._SharedLibraryFromObjects_CleanIntermediates
 {
 }
 
