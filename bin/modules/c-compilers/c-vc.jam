@@ -272,7 +272,9 @@ rule C._MultiCppCompile_PchDeps
 
 rule C._MultiCppCompile_PostCompile
 {
-	SEMAPHORE on $(objects) = $(_VCPDB) ;
+	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 {
+		SEMAPHORE on $(objects) = $(_VCPDB) ;
+	}
 }
 
 
