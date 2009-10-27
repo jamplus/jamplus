@@ -7,7 +7,7 @@ actions TestAction {
 }
 
 rule TestVersion {
-	return "2" ;
+	return $(COMMAND_LINE_VERSION:E=2) ;
 }
 
 rule Test TARGET {
