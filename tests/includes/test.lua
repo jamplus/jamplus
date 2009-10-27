@@ -70,7 +70,7 @@ adefine.cpp
 	TestPattern(pattern2, RunJam())
 	
 	os.sleep(1.0)
-	os.touch('print.h')
+	os.touch('common/print.h')
 
 	local pattern3 = [[
 *** found 17 target(s)...
@@ -83,6 +83,9 @@ project1.cpp
 	TestPattern(pattern3, RunJam())
 	TestFiles(pass1Files)
 	TestDirectories(originalDirs)
+
+	os.sleep(1.0)
+	os.touch('shared/adefine.h')
 
 	local pattern4 = [[
 *** found 17 target(s)...

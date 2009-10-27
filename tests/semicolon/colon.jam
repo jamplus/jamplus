@@ -1,6 +1,6 @@
-#rule Defines
-#{
-#}
+rule Defines
+{
+}
 
 Defines someapp :
 	YEAH

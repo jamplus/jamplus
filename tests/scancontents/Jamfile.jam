@@ -1,7 +1,11 @@
-DEPCACHE.standard = .jamcache ;
-DEPCACHE = standard ;
+if ! $(NO_DEP_CACHE) {
+	DEPCACHE.standard = .jamcache ;
+	DEPCACHE = standard ;
+}
 
 SubDir TOP ;
+
+GENERATED_VERSION ?= v2 ;
 
 C.Application test : main.c test.c ;
 
@@ -10,7 +14,7 @@ CONTENTS on <test>generated.h = "extern void Print(const char*);
 WriteFile <test>generated.h ;
 Always <test>generated.h ;
 MakeLocate <test>generated.h : . ;
-UseCommandLine <test>generated.h : v2 ;
+UseCommandLine <test>generated.h : $(GENERATED_VERSION) ;
 ScanContents <test>generated.h ;
 
 Depends <test>main.c : <test>generated.h ;

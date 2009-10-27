@@ -67,7 +67,7 @@ project1.cpp
 	TestPattern(pattern2, RunJam())
 	
 	os.sleep(1.0)
-	os.touch('project1.cpp')
+	os.touch('source/project1/project1.cpp')
 
 	local pattern3 = [[
 *** found 19 target(s)...
@@ -77,6 +77,7 @@ project1.cpp
 @ C.LinkWithManifest <project1>project1.release.exe
 *** updated 2 target(s)...
 ]]
+
 	TestPattern(pattern3, RunJam())
 	TestFiles(pass1Files)
 	TestDirectories(pass1Directories)

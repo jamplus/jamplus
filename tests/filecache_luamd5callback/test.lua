@@ -27,21 +27,16 @@ function Test()
 	local pattern = [[
 *** found 11 target(s)...
 *** updating 5 target(s)...
-%md5png: Calculating file1.png...
+!OOO!md5png: Calculating file1.png...
 @ ConvertImageHelper file1.image
-        1 file(s) copied.
-Caching file1.image
+!NEXT!Caching file1.image
 @ ConvertImageHelper file2.image
-        1 file(s) copied.
-@ ConvertImageHelper file3.image
-        1 file(s) copied.
-%md5zip: Calculating file4.zip...
-@ ConvertImageHelper file4.image
-        1 file(s) copied.
-Caching file4.image
+!NEXT!@ ConvertImageHelper file3.image
+!OOO!md5zip: Calculating file4.zip...
+!NEXT!@ ConvertImageHelper file4.image
+!NEXT!Caching file4.image
 @ ConvertImageHelper file5.image
-        1 file(s) copied.
-*** updated 5 target(s)...
+!NEXT!*** updated 5 target(s)...
 ]]
 
 	TestPattern(pattern, RunJam())

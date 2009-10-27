@@ -8,13 +8,13 @@ function Test()
 *** found 4 target(s)...
 *** updating 3 target(s)...
 warning: using independent target xit.h
-hello
+!OOO!hello
 @ RunLuaScript MyTarget.out
 warning: using independent target xit2.h
-hi
+!OOO!hi
 @ RunLuaScript MyTarget.out2
 warning: using independent target xit3.h
-together
+!OOO!together
 @ RunLuaScript MyTarget.out3
 *** updated 3 target(s)...
 ]]

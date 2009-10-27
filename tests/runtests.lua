@@ -49,21 +49,47 @@ function TestPattern(pattern, lines)
 
 	local lineIndex = 1
 	local patternIndex = 1
-	local linesToFind = {}
-	while lineIndex <= #lines  and  patternIndex <= #pattern  and #linesToFind > 0 do
+	local patternsToFind = {}
+	while lineIndex <= #lines  and  (patternIndex - #patternsToFind) <= #pattern do
 		local line = lines[lineIndex]:gsub('^%s+', ''):gsub('%s+$', '')
-		local pattern = pattern[patternIndex]:gsub('^%s+', ''):gsub('%s+$', '')
-		if line ~= pattern  and  line:sub(1, 1) ~= '^' then
-			if line:sub(1, 1) == '%' then
-				linesToFind[#linesToFind + 1] = line:sub(2)
-			end
-			if line ~= linesToFind[1] then
-				print()
-				print("Full output:")
-				print(table.concat(lines, '\n'))
-				error(line .. ' != ' .. pattern)
+		local pattern = pattern[patternIndex]
+		local ooo
+		local next
+		if pattern then
+			pattern = pattern:gsub('^%s+', ''):gsub('%s+$', '')
+			next = pattern:sub(1, 6) == '!NEXT!'
+			if next then
+				pattern = pattern:sub(7)
 			else
-				table.remove(linesToFind, 1)
+				ooo = pattern:sub(1, 5) == '!OOO!'
+				if ooo then
+					pattern = pattern:sub(6)
+				end
+			end
+		else
+			hi = 5
+		end
+		if line ~= pattern then
+			if not next  or  not pattern then
+				if ooo then
+					patternsToFind[#patternsToFind + 1] = pattern
+				end
+				if line ~= patternsToFind[1] then
+					if not ooo  and  pattern then
+						error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or patternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
+					else
+						if pattern then
+							lineIndex = lineIndex - 1
+						else
+							patternIndex = patternIndex - 1
+						end
+					end
+				else
+					table.remove(patternsToFind, 1)
+					patternIndex = patternIndex - 1
+				end
+			else
+				patternIndex = patternIndex - 1
 			end
 		end
 
@@ -71,6 +97,9 @@ function TestPattern(pattern, lines)
 		patternIndex = patternIndex + 1
 	end
 
+	if #patternsToFind > 0 then
+		error('\nExpecting the following output:\n' .. table.concat(patternsToFind, '\n'))
+	end
 	return true
 end
 
@@ -220,6 +249,7 @@ for _, dir in ipairs(dirs) do
 				
 				err = err:gsub('^runtests.lua:%d-: ', '')
 				io.write('\t' .. err .. '\n')
+				print(ErrorTraceback)
 			else
 				io.write('OK\n')
 			end

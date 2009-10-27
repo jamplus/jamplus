@@ -3,11 +3,14 @@ function Test()
 	local originalFiles =
 	{
 		'Jamfile.jam',
-		'Pass2.jam',
+		'main.cpp',
+		'mypch.cpp',
+		'includes/mypch.h',
 	}
 
 	local originalDirs =
 	{
+		'includes/',
 	}
 
 	RunJam{ 'clean' }
@@ -16,24 +19,32 @@ function Test()
 
 	---------------------------------------------------------------------------
 	local pattern = [[
-Pass 1
-*** found 3 target(s)...
-Pass 2
-*** found 6 target(s)...
-*** updating 2 target(s)...
-@ WriteFile originalfile.txt
-@ Copy copiedfile.txt
-!NEXT!*** updated 2 target(s)...
+*** found 11 target(s)...
+*** updating 4 target(s)...
+@ C.C++ <main>mypch.obj
+mypch.cpp
+@ C.C++ <main>main.obj
+main.cpp
+@ C.LinkWithManifest <main>main.release.exe
+*** updated 4 target(s)...
 ]]
 
-	TestPattern(pattern, RunJam())
+	TestPattern(pattern, RunJam{})
 
 	local pass1Files =
 	{
 		'Jamfile.jam',
-		'Pass2.jam',
-		'copiedfile.txt',
-		'originalfile.txt',
+		'main.cpp',
+		'main.obj',
+		'main.release.exe',
+		'main.release.exe.intermediate.manifest',
+		'main.release.pdb',
+		'mypch.cpp',
+		'mypch.h.pch',
+		'mypch.obj',
+		'test.lua',
+		'vc.pdb',
+		'includes/mypch.h',
 	}
 
 	TestDirectories(originalDirs)
@@ -41,30 +52,14 @@ Pass 2
 
 	---------------------------------------------------------------------------
 	local pattern2 = [[
-Pass 1
-*** found 3 target(s)...
-Pass 2
-*** found 6 target(s)...
+*** found 11 target(s)...
 ]]
-
-	TestPattern(pattern2, RunJam())
+	TestPattern(pattern2, RunJam{})
 	TestDirectories(originalDirs)
 	TestFiles(pass1Files)
-
+	
 	---------------------------------------------------------------------------
-	local cleanpattern = [[
-Pass 1
-*** found 2 target(s)...
-*** updating 1 target(s)...
-@ Clean clean
-*** updated 1 target(s)...
-Pass 2
-*** found 3 target(s)...
-*** updating 2 target(s)...
-@ Clean clean
-*** updated 1 target(s)...
-]]
-	TestPattern(cleanpattern, RunJam{ 'clean' })
+	RunJam{ 'clean' }
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
 end
