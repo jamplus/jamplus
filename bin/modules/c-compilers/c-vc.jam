@@ -224,6 +224,7 @@ rule C._MultiCppCompile_SetupFlags
 	_flags += $(postREFERENCEDIRECTORIES) ;
 
 	local forceIncludeHeader = $(_pch[2]:G=$(grist)|force) ;
+	BINDING on $(forceIncludeHeader) = $(_pch[3]) ;
 	SEARCH on $(forceIncludeHeader) = $(_hdrs) ;
 
 	if $(_pch[4]) {
