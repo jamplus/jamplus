@@ -447,10 +447,10 @@ Global
 				for configName in ivalues(Config.Configurations) do
 					local configInfo =
 					{
-				VSPlatform = MapPlatformToVSPlatform[platformName],
-				VSConfig = MapConfigToVSConfig[configName],
-				RealVSPlatform = RealVSPlatform(platformName),
-				RealVSConfig = RealVSConfig(platformName, configName),
+						VSPlatform = MapPlatformToVSPlatform[platformName],
+						VSConfig = MapConfigToVSConfig[configName],
+						RealVSPlatform = RealVSPlatform(platformName),
+						RealVSConfig = RealVSConfig(platformName, configName),
 					}
 					table.insert(self.Contents, expand([[
 		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
