@@ -55,3 +55,4 @@ if $(COMPILER.$(PLATFORM)) != vc6 {
 }
 
 VSPLATFORMMAP.win32 = Win32 ;
+VSNATIVEPLATFORM.win32 = 1 ;
