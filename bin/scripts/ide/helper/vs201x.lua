@@ -5,6 +5,23 @@
 -------------------------------------------------------------------------------
 local VisualStudio201xProjectMetaTable = {  __index = VisualStudio201xProjectMetaTable  }
 
+local function RealVSPlatform(platform)
+	if VSNativePlatforms  and  VSNativePlatforms[platform] then
+		return MapPlatformToVSPlatform[platform]
+	end
+
+	return "Win32"
+end
+
+local function RealVSConfig(platform, config)
+	local realConfig = MapConfigToVSConfig[config]
+	if VSNativePlatforms  and  VSNativePlatforms[platform] then
+		return realConfig
+	end
+
+	return RealVSPlatform(platform) .. ' ' .. realConfig
+end
+
 function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	local filename = outputPath .. self.ProjectName .. '.vcxproj'
 
@@ -18,6 +35,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 
 	-- Write header.
 	table.insert(self.Contents, expand([[
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 ]]))
 
@@ -26,19 +44,20 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
   <ItemGroup Label="ProjectConfigurations">
 ]])
 
-	local platformName = Platform
-	for configName in ivalues(Config.Configurations) do
-		local configInfo =
-		{
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-		}
-		table.insert(self.Contents, expand([==[
+	for platformName in ivalues(Config.Platforms) do
+		for configName in ivalues(Config.Configurations) do
+			local configInfo =
+			{
+				VSPlatform = RealVSPlatform(platformName),
+				VSConfig = RealVSConfig(platformName, configName),
+			}
+			table.insert(self.Contents, expand([==[
     <ProjectConfiguration Include="$(VSConfig)|$(VSPlatform)">
       <Configuration>$(VSConfig)</Configuration>
       <Platform>$(VSPlatform)</Platform>
     </ProjectConfiguration>
 ]==], configInfo, info, _G))
+		end
 	end
 
 	table.insert(self.Contents, [[
@@ -64,52 +83,52 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 ]])
 
 	-- Write Configurations.
-	local platformName = Platform
-	for configName in ivalues(Config.Configurations) do
-		local jamCommandLine = os.path.escape(jamScript) .. ' ' ..
-				os.path.escape('-C' .. destinationRootPath) .. ' ' ..
-				'-sPLATFORM=' .. platformName .. ' ' ..
-				'-sCONFIG=' .. configName
+	for platformName in ivalues(Config.Platforms) do
+		for configName in ivalues(Config.Configurations) do
+			local jamCommandLine = os.path.escape(jamScript) .. ' ' ..
+					os.path.escape('-C' .. destinationRootPath) .. ' ' ..
+					'-sPLATFORM=' .. platformName .. ' ' ..
+					'-sCONFIG=' .. configName
 
-		local configInfo =
-		{
-			Platform = platformName,
-			Config = configName,
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-			Defines = '',
-			Includes = '',
-			Output = '',
-		}
+			local configInfo =
+			{
+				Platform = platformName,
+				Config = configName,
+				VSPlatform = RealVSPlatform(platformName),
+				VSConfig = RealVSConfig(platformName, configName),
+				Defines = '',
+				Includes = '',
+				Output = '',
+			}
 
-		if project and project.Name then
-			if project.Defines then
-				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+			if project and project.Name then
+				if project.Defines then
+					configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
+				end
+				if project.IncludePaths then
+					configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
+				end
+				if project.OutputPaths then
+					configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
+				end
+				configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
+				configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
+				configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
+			elseif not commandLines then
+				configInfo.BuildCommandLine = jamCommandLine
+				configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
+				configInfo.CleanCommandLine = jamCommandLine .. ' clean'
+			else
+				configInfo.BuildCommandLine = commandLines[1] or ''
+				configInfo.RebuildCommandLine = commandLines[2] or ''
+				configInfo.CleanCommandLine = commandLines[3] or ''
 			end
-			if project.IncludePaths then
-				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
-			end
-			if project.OutputPaths then
-				configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
-			end
-			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
-			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
-			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
-		elseif not commandLines then
-			configInfo.BuildCommandLine = jamCommandLine
-			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
-			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
-		else
-			configInfo.BuildCommandLine = commandLines[1] or ''
-			configInfo.RebuildCommandLine = commandLines[2] or ''
-			configInfo.CleanCommandLine = commandLines[3] or ''
-		end
 
-		configInfo.BuildCommandLine = configInfo.BuildCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
-		configInfo.RebuildCommandLine = configInfo.RebuildCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
-		configInfo.CleanCommandLine = configInfo.CleanCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
+			configInfo.BuildCommandLine = configInfo.BuildCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
+			configInfo.RebuildCommandLine = configInfo.RebuildCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
+			configInfo.CleanCommandLine = configInfo.CleanCommandLine:gsub('<', '&lt;'):gsub('>', '&gt;')
 
-		table.insert(self.Contents, expand([==[
+			table.insert(self.Contents, expand([==[
   <PropertyGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <BuildLogFile>$(destinationRootPath:gsub('/', '\\'))$(Platform)-$(Config)/$$(MSBuildProjectName).log</BuildLogFile>
@@ -121,6 +140,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
     <NMakeIncludeSearchPath>$(Includes)</NMakeIncludeSearchPath>
   </PropertyGroup>
 ]==], configInfo, info, _G))
+		end
 	end
 
 	-- Write Files.
@@ -294,7 +314,7 @@ function VisualStudio201xSolutionMetaTable:Write(outputPath)
 
 	table.insert(self.Contents, [[
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 10
+# Visual Studio 2010
 ]])
 
 	-- Write projects.
@@ -337,16 +357,17 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 ]])
 
-	local platformName = Platform
-	for configName in ivalues(Config.Configurations) do
-		local configInfo =
-		{
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-		}
-		table.insert(self.Contents, expand([[
+	for platformName in ivalues(Config.Platforms) do
+		for configName in ivalues(Config.Configurations) do
+			local configInfo =
+			{
+				VSPlatform = MapPlatformToVSPlatform[platformName],
+				VSConfig = MapConfigToVSConfig[configName],
+			}
+			table.insert(self.Contents, expand([[
 		$(VSConfig)|$(VSPlatform) = $(VSConfig)|$(VSPlatform)
 ]], configInfo))
+		end
 	end
 
 	table.insert(self.Contents, [[
@@ -358,45 +379,59 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 ]])
 
-	for configName in ivalues(Config.Configurations) do
-		local info = ProjectExportInfo[buildWorkspaceName]
-		local configInfo =
-		{
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-		}
-		table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
-]], configInfo, info))
-
-		table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).Build.0 = $(VSConfig)|$(VSPlatform)
-]], configInfo, info))
-	end
-
-	for configName in ivalues(Config.Configurations) do
-		local info = ProjectExportInfo[updateWorkspaceName]
-		local configInfo =
-		{
-			VSPlatform = MapPlatformToVSPlatform[platformName],
-			VSConfig = MapConfigToVSConfig[configName],
-		}
-		table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
-]], configInfo, info))
-	end
-
-	for projectName in ivalues(workspace.Projects) do
-		local info = ProjectExportInfo[projectName]
+	for platformName in ivalues(Config.Platforms) do
 		for configName in ivalues(Config.Configurations) do
+			local info = ProjectExportInfo[buildWorkspaceName]
 			local configInfo =
 			{
 				VSPlatform = MapPlatformToVSPlatform[platformName],
 				VSConfig = MapConfigToVSConfig[configName],
+				RealVSPlatform = RealVSPlatform(platformName),
+				RealVSConfig = RealVSConfig(platformName, configName),
 			}
 			table.insert(self.Contents, expand([[
-		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(VSConfig)|$(VSPlatform)
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
 ]], configInfo, info))
+
+			table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).Build.0 = $(RealVSConfig)|$(RealVSPlatform)
+]], configInfo, info))
+		end
+	end
+
+	for platformName in ivalues(Config.Platforms) do
+		for configName in ivalues(Config.Configurations) do
+			local info = ProjectExportInfo[updateWorkspaceName]
+			local configInfo =
+			{
+				VSPlatform = MapPlatformToVSPlatform[platformName],
+				VSConfig = MapConfigToVSConfig[configName],
+				RealVSPlatform = RealVSPlatform(platformName),
+				RealVSConfig = RealVSConfig(platformName, configName),
+			}
+			table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
+]], configInfo, info))
+		end
+	end
+
+	for projectName in ivalues(workspace.Projects) do
+		local info = ProjectExportInfo[projectName]
+		if info then
+			for platformName in ivalues(Config.Platforms) do
+				for configName in ivalues(Config.Configurations) do
+					local configInfo =
+					{
+						VSPlatform = MapPlatformToVSPlatform[platformName],
+						VSConfig = MapConfigToVSConfig[configName],
+						RealVSPlatform = RealVSPlatform(platformName),
+						RealVSConfig = RealVSConfig(platformName, configName),
+					}
+					table.insert(self.Contents, expand([[
+		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
+]], configInfo, info))
+				end
+			end
 		end
 	end
 
