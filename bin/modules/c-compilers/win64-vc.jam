@@ -13,20 +13,11 @@ switch $(COMPILER.$(PLATFORM)) {
 		MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
 		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
 
-	case vs2005 :
-		Exit ** Win64 support has not been implemented in Jam for vs2005. ;
-
-	case vs2003 :
-		Exit ** Win64 support has not been implemented in Jam for vs2003. ;
-
-	case vs2002 :
-		Exit ** Win64 support has not been implemented in Jam for vs2002. ;
-
-	case vc6 :
-		Exit ** Win64 support has not been implemented in Jam for vc6. ;
+	case * :
+		Exit ** Win64 support has not been implemented in Jam for $(COMPILER.$(PLATFORM)). ;
 }
 
-MSVCBIN		?= "$(MSVCNT)/bin/amd64/" ;
+MSVCBIN			?= "$(MSVCNT)/bin/x86_amd64/" ;
 C.AR			= "$(MSVCBIN)lib" ;
 C.CC			= "$(MSVCBIN)cl" ;
 C.C++			= "$(MSVCBIN)cl" ;
@@ -38,6 +29,7 @@ C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
 
 C.Defines * : WIN32 _WIN64 _AMD64_ WINDOWS : * : win64 ;
 
-C.Defines * _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE : * : win64 ;
+C.Defines * : _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE : * : win64 ;
 
-VSPLATFORMMAP.win64 = Win64 ;
+VSPLATFORMMAP.win64 = x64 ;
+VSNATIVEPLATFORM.win64 = 1 ;
