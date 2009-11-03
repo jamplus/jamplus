@@ -207,8 +207,7 @@ actions WriteTargetInfoFileHelper
 
 Contents = "-- This file is generated.  Do not modify.$(NEWLINE)$(NEWLINE)" ;
 
-if $(PLATFORM) = *
-{
+if $(PLATFORM) = *  &&  $(CONFIG) = * {
 	Contents += "function concat(l, r)
 	local out = {}
 	if l then
