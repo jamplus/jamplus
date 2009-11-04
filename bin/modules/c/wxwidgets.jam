@@ -49,68 +49,68 @@ if ! $(wxWidgets_ROOT)
 		;
 
 		local wx.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include/wx : wx.h ] ;
-		if ! $(wx.h)
+		if $(wx.h)
 		{
-			Exit wxWidgets not found. ;
-		}
+			wxWidgets_ROOT = [ Match (.+)/include/wx/wx.h : $(wx.h[1]) ] ;
 
-		wxWidgets_ROOT = [ Match (.+)/include/wx/wx.h : $(wx.h[1]) ] ;
+			wxWidgets_HDRS.* = $(wxWidgets_ROOT)/include ;
 
-		wxWidgets_HDRS.* = $(wxWidgets_ROOT)/include ;
+			wxWidgets_COMMON_LIBRARIES = png tiff jpeg zlib regex expat ;
+			wxWidgets_BASE_LIBRARIES = net odbc xml ;
+			wxWidgets_PLATFORM_LIBRARIES = adv aui core dbgrid html media qa richtext xrc ;
+			wxWidgets_PLATFORM_PREFIX = msw ;
+			wxWidgets_CONTRIB_LIBRARIES = stc ;
 
-		wxWidgets_COMMON_LIBRARIES = png tiff jpeg zlib regex expat ;
-		wxWidgets_BASE_LIBRARIES = net odbc xml ;
-		wxWidgets_PLATFORM_LIBRARIES = adv aui core dbgrid html media qa richtext xrc ;
-		wxWidgets_PLATFORM_PREFIX = msw ;
-		wxWidgets_CONTRIB_LIBRARIES = stc ;
+			wxWidgets_LIB_DIR = $(wxWidgets_ROOT)/lib ;
 
-		wxWidgets_LIB_DIR = $(wxWidgets_ROOT)/lib ;
-
-		if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010
-		{
-			if shared in $(OPTIONS)
+			if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010
 			{
-				wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/vc_dll ;
+				if shared in $(OPTIONS)
+				{
+					wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/vc_dll ;
+				}
+				else
+				{
+					wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/vc_lib ;
+				}
+
+				local wxbase.lib = [ Glob $(wxWidgets_LIB_DIR) : wxbase*.lib ] ;
+				if $(wxbase.lib)
+				{
+					wxWidgets_VERSION = [ Match $(wxWidgets_LIB_DIR)/wxbase([0-9][0-9]) : $(wxbase.lib[1]) ] ;
+				}
+
+				wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswd ;
+				wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/msw ;
 			}
-			else
-			{
-				wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/vc_lib ;
-			}
 
-			local wxbase.lib = [ Glob $(wxWidgets_LIB_DIR) : wxbase*.lib ] ;
-			if $(wxbase.lib)
-			{
-				wxWidgets_VERSION = [ Match $(wxWidgets_LIB_DIR)/wxbase([0-9][0-9]) : $(wxbase.lib[1]) ] ;
-			}
+			wxWidgets_POSTFIX.debug = d ;
+			wxWidgets_POSTFIX.release = "" ;
 
-			wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswd ;
-			wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/msw ;
-		}
+			wxComponents_ROOT_DIR ?= @(../wxComponents:R=$(wxWidgets_ROOT)) ;
 
-		wxWidgets_POSTFIX.debug = d ;
-		wxWidgets_POSTFIX.release = "" ;
-
-		wxComponents_ROOT_DIR ?= @(../wxComponents:R=$(wxWidgets_ROOT)) ;
-	} else {
-		local wx-config = [ Glob $(PATH) : wx-config ] ;
-		if ! $(wx-config) {
-			Exit wxWidgets not found. ;
-		}
-
-		wx-config--debug = --debug= ;
-		if $(CONFIG) = debug {
-			wx-config--debug += yes ;
+			wxWidgets_FOUND = 1 ;
 		} else {
-			wx-config--debug += no ;
-		}
-		wx-config--debug = $(wx-config--debug:J) ;
-		local cxxflags = [ Split [ Shell "wx-config --cxxflags $(wx-config--debug)" ] : $(SPACE) ] ;
-		wxWidgets_DEFINES.debug = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
-		wxWidgets_HDRS.debug = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
+			local wx-config = [ Glob $(PATH) : wx-config ] ;
+			if $(wx-config) {
+				wx-config--debug = --debug= ;
+				if $(CONFIG) = debug {
+					wx-config--debug += yes ;
+				} else {
+					wx-config--debug += no ;
+				}
+				wx-config--debug = $(wx-config--debug:J) ;
+				local cxxflags = [ Split [ Shell "wx-config --cxxflags $(wx-config--debug)" ] : $(SPACE) ] ;
+				wxWidgets_DEFINES.debug = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
+				wxWidgets_HDRS.debug = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
 
-		cxxflags = [ Split [ Shell "wx-config --cxxflags --debug=no" ] : $(SPACE) ] ;
-		wxWidgets_DEFINES.release = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
-		wxWidgets_HDRS.release = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
+				cxxflags = [ Split [ Shell "wx-config --cxxflags --debug=no" ] : $(SPACE) ] ;
+				wxWidgets_DEFINES.release = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
+				wxWidgets_HDRS.release = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
+
+				wxWidgets_FOUND = 1 ;
+			}
+		}
 	}
 }
 
@@ -118,6 +118,10 @@ if ! $(wxWidgets_ROOT)
 
 rule C.UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 {
+	if ! $(wxWidgets_FOUND) {
+		Exit wxWidgets not found. ;
+	}
+
 	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
 
 	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010
