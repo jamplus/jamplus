@@ -697,6 +697,8 @@ int main( int argc, char **argv, char **arg_environ )
 	}
 #endif
 
+    var_set( "DEPCACHE", list_new( L0, "standard", 0 ), VAR_SET );
+
 #ifdef OPT_SET_JAMCOMMANDLINETARGETS_EXT
 	{
 		/* Go through the list of targets specified on the command line, */
