@@ -6,7 +6,7 @@ function Test()
 	{
 		'Building appA...',
 		'Building appB...',
-		'*** found 12 target(s)...',
+		'*** found 24 target(s)...',
 		'*** updating 4 target(s)...',
 		'@ C.C++ <appA>appA.obj',
 		'appA.cpp',
@@ -28,7 +28,7 @@ function Test()
 
 	local appAPattern = [[
 Building appA...
-*** found 6 target(s)...
+*** found 12 target(s)...
 *** updating 2 target(s)...
 @ C.C++ <appA>appA.obj
 appA.cpp
@@ -49,7 +49,7 @@ appA.cpp
 
 	appBPattern = [[
 Building appB...
-*** found 6 target(s)...
+*** found 12 target(s)...
 *** updating 2 target(s)...
 @ C.C++ <appB>appB.obj
 appB.cpp

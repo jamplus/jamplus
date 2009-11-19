@@ -176,7 +176,7 @@ deepfile.cpp
 @ C.C++ <liba>__/outer/outer.obj
 outer.cpp
 @ C.Archive <liba>liba.lib
-@ C.C++ <libb>filec.obj
+@ C.C++ <libb>filea.obj
 filea.cpp
 fileb.cpp
 filec.cpp
@@ -188,22 +188,22 @@ outer.cpp
 @ C.Archive <libb>libb.lib
 @ C.C++ <libc>src/Loading/Loading.obj
 Loading.cpp
-@ C.C++ <libc>src/Saving/SavingB.obj
+@ C.C++ <libc>src/Saving/Saving1.obj
 Saving1.cpp
 Saving3.cpp
 SavingB.cpp
 Generating Code...
-@ C.C++ <libc>src/memory/memoryb.obj
+@ C.C++ <libc>src/memory/memorya.obj
 memorya.cpp
 memoryb.cpp
 Generating Code...
-@ C.C++ <libc>src/integral/integral2.obj
+@ C.C++ <libc>src/integral/integral1.obj
 integral1.cpp
 integral2.cpp
 Generating Code...
 @ C.C++ <libc>src/win32/Loading/Loading.obj
 Loading.cpp
-@ C.C++ <libc>src/win32/Saving/SavingB.obj
+@ C.C++ <libc>src/win32/Saving/Saving1.obj
 Saving1.cpp
 Saving3.cpp
 SavingB.cpp

@@ -1,5 +1,12 @@
 SubDir TOP ;
 
+#C.BatchCompileGroupSize * : 1 ;
+
+actions WriteFile
+{
+	^^($(1)|$(CONTENTS))
+}
+
 rule CopyRule TARGET : SOURCE
 {
     Depends all : $(TARGET) : $(SOURCE) ;

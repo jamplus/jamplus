@@ -19,9 +19,9 @@ function Test()
 
 	---------------------------------------------------------------------------
 	local pattern = [[
-*** found 11 target(s)...
+*** found 17 target(s)...
 *** updating 4 target(s)...
-@ C.C++ <main>mypch.obj
+@ C.C++ <main>mypch.h.pch
 mypch.cpp
 @ C.C++ <main>main.obj
 main.cpp
@@ -52,7 +52,7 @@ main.cpp
 
 	---------------------------------------------------------------------------
 	local pattern2 = [[
-*** found 11 target(s)...
+*** found 17 target(s)...
 ]]
 	TestPattern(pattern2, RunJam{})
 	TestDirectories(originalDirs)

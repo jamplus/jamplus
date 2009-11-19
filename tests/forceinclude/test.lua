@@ -25,7 +25,7 @@ function Test()
 
 	-- First build
 	local pattern = [[
-*** found 17 target(s)...
+*** found 23 target(s)...
 *** updating 6 target(s)...
 @ C.C++ <common>print.obj
 print.cpp
@@ -68,7 +68,7 @@ project1.cpp
 	TestDirectories(originalDirs)
 
 	local pattern2 = [[
-*** found 17 target(s)...
+*** found 23 target(s)...
 ]]
 	TestPattern(pattern2, RunJam())
 	
@@ -80,7 +80,7 @@ project1.cpp
 	os.touch('common/print.h')
 
 	local pattern3 = [[
-*** found 17 target(s)...
+*** found 23 target(s)...
 *** updating 6 target(s)...
 @ C.C++ <common>print.obj
 print.cpp

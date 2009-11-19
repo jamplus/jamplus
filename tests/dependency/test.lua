@@ -5,7 +5,7 @@ function Test()
 		'*** updating 3 target(s)...',
 		'@ Update b_tmp',
 		'Updating b_tmp : b_src',
-		'@ Update b',
+		'@ Update a',
 		'Updating a b : a_src b_tmp',
 		'*** updated 3 target(s)...',
 	}

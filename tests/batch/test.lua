@@ -5,11 +5,11 @@ function Test()
 	{
 		'*** found 17 target(s)...',
 		'*** updating 8 target(s)...',
-		'@ BatchIt rainbow.out',
+		'@ BatchIt hello.out',
 		'hello hi more',
-		'@ BatchIt rainbow.out',
+		'@ BatchIt hello.out',
 		'less somewhere over',
-		'@ BatchIt rainbow.out',
+		'@ BatchIt hello.out',
 		'the rainbow',
 		'*** updated 8 target(s)...',
 	}

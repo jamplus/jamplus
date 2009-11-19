@@ -84,7 +84,7 @@ function Test()
 
 	do
 		local pattern = [[
-*** found 34 target(s)...
+*** found 46 target(s)...
 *** updating 17 target(s)...
 @ C.CC <lib-c>add.obj
 add.c
@@ -109,7 +109,7 @@ main.c
 	---------------------------------------------------------------------------
 	do
 		local pattern = [[
-*** found 34 target(s)...
+*** found 46 target(s)...
 ]]
 		TestPattern(pattern, RunJam{})
 		TestDirectories(dirs)
@@ -122,7 +122,7 @@ main.c
 		os.touch('lib-c/add.h')
 
 		local pattern = [[
-*** found 34 target(s)...
+*** found 46 target(s)...
 *** updating 4 target(s)...
 @ C.CC <slib-a>slib-a.obj
 slib-a.c
@@ -141,7 +141,7 @@ slib-b.c
 	---------------------------------------------------------------------------
 	do
 		local pattern = [[
-*** found 34 target(s)...
+*** found 46 target(s)...
 ]]
 		TestPattern(pattern, RunJam{})
 		TestDirectories(dirs)
@@ -154,7 +154,7 @@ slib-b.c
 		os.touch('lib-c/add.c')
 
 		local pattern = [[
-*** found 34 target(s)...
+*** found 46 target(s)...
 *** updating 4 target(s)...
 @ C.CC <lib-c>add.obj
 add.c
@@ -172,7 +172,7 @@ add.c
 	---------------------------------------------------------------------------
 	do
 		local pattern = [[
-*** found 34 target(s)...
+*** found 46 target(s)...
 ]]
 		TestPattern(pattern, RunJam{})
 		TestDirectories(dirs)
@@ -185,7 +185,7 @@ add.c
 		os.touch('slib-a/slib-a.c')
 
 		local pattern = [[
-*** found 34 target(s)...
+*** found 46 target(s)...
 *** updating 2 target(s)...
 @ C.CC <slib-a>slib-a.obj
 slib-a.c
@@ -201,7 +201,7 @@ slib-a.c
 	---------------------------------------------------------------------------
 	do
 		local pattern = [[
-*** found 34 target(s)...
+*** found 46 target(s)...
 ]]
 		TestPattern(pattern, RunJam{})
 		TestDirectories(dirs)

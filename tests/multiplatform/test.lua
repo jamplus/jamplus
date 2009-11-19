@@ -22,9 +22,9 @@ function Test()
 
 	---------------------------------------------------------------------------
 	local pattern = [[
-*** found 11 target(s)...
+*** found 17 target(s)...
 *** updating 4 target(s)...
-@ C.CC <platform>filerelease.obj
+@ C.CC <platform>platform.obj
 platform.c
 win32.c
 filerelease.c
@@ -68,7 +68,7 @@ RELEASE: What's up?!
 	
 	---------------------------------------------------------------------------
 	local pattern3 = [[
-*** found 11 target(s)...
+*** found 17 target(s)...
 ]]
 
 	TestPattern(pattern3, RunJam())

@@ -233,17 +233,21 @@ make1a(
 	    ACTIONS *actions;
 	    for( actions = t->actions; actions; actions = actions->next )
 	    {
-		TARGETS *targets;
+			TARGETS *targets;
 
 #ifdef OPT_MULTIPASS_EXT
-		if ( actions->action->pass != actionpass )
-		    continue;
+			if ( actions->action->pass != actionpass )
+				continue;
 #endif
-		for( targets = actions->action->targets; targets; targets = targets->next )
-		{
-			if (targets->target != t && targets->target->progress<T_MAKE_ONSTACK)
-				make1a( targets->target, t );
-		}
+			for( targets = actions->action->targets; targets; targets = targets->next )
+			{
+				if (targets->target != t)// && targets->target->progress<T_MAKE_ONSTACK)
+				{
+//					make1a( targets->target, t );
+					for( c = targets->target->depends; c && !intr; c = c->next )
+						make1a( c->target, t );
+				}
+			}
 	    }
 	}
 #endif

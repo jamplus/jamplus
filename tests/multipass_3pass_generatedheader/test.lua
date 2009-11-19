@@ -11,23 +11,29 @@ function Test()
 
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
-	TestFiles(originalFiles)
+		TestFiles(originalFiles)
 
 	---------------------------------------------------------------------------
 	local pattern = [[
 Pass 1
 *** found 9 target(s)...
 *** updating 5 target(s)...
-@ C.C++ <test>foo.obj
-foo.cpp
+@ WriteFile <test>foo.cpp
 *** updated 2 target(s)...
 Pass 2
-*** found 19 target(s)...
+*** found 25 target(s)...
 *** updating 10 target(s)...
-*** updated 1 target(s)...
+@ WriteFile <test>foo.h
+@ WriteFile <test>main.cpp
+@ C.C++ <test>main.obj
+main.cpp
+foo.cpp
+Generating Code...
+@ C.LinkWithManifest <test>test.release.exe
+*** updated 5 target(s)...
 Pass 3
-*** found 28 target(s)...
-*** updating 13 target(s)...
+*** found 33 target(s)...
+*** updating 10 target(s)...
 ]]
 
 	TestPattern(pattern, RunJam())
@@ -38,6 +44,11 @@ Pass 3
 		'foo.cpp',
 		'foo.h',
 		'foo.obj',
+		'main.cpp',
+		'main.obj',
+		'test.release.exe',
+		'test.release.exe.intermediate.manifest',
+		'test.release.pdb',
 		'vc.pdb',
 	}
 
