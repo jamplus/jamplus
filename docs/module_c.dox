@@ -516,36 +516,38 @@ Makes \c TARGET depend on \c LIBRARIES and includes them during linking.
 
 
 <hr>
-\section rule_C_Lump rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME [ : PCH_HEADER : PCH_HEADER_FILENAME : LUMP_EXT : EXTRA_INCLUDE_PATHS ]
+\section rule_C_Lump rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME [ : PCH_FILENAMES : EXTRA_INCLUDE_PATHS ]
 \addindex rule_C_Lump
 
-Generates a <tt>.c</tt> or <tt>.cpp</tt> file containing an <tt>\#include</tt> amalgamation of files passed into the rule.
+Generates a small file containing an <tt>\#include</tt> amalgamation of files passed into the rule.
 
-The name of the generated lump file is <tt>\$(LOCATE_SOURCE)/!\$(LUMP_NAME)!.\$(LUMP_EXT)</tt>.  The lump file has the following contents:
+The name of the generated lump file is <tt>\$(LOCATE_SOURCE)/!\$(LUMP_NAME)!.\$(LUMP_NAME:S)</tt>.  If \c LUMP_NAME does not have an extension, then the extension from $(PCH_FILENAMES[1]:S) is used.  If that doesn't exist, then the default is <tt>.cpp</tt>.
+
+The lump file has the following contents:
 
 <ol>
-<li>If a precompiled header is specified through \c PCH_HEADER and \c PCH_HEADER_FILENAME, a <tt>\#include "$(PCH_HEADER_FILENAME)"</tt> line is added to the lump file.</li>
+<li>If a precompiled header is specified through \c PCH_FILENAMES, a <tt>\#include "\$(PCH_FILENAMES[1])"</tt> line is added to the lump file.</li>
 <li>For each C-style source specified in \c SOURCES_VARIABLE_NAME that is not excluded from the build via \ref rule_C_ExcludeFromBuild, a <tt>\#include "filename"</tt> is added to the lump file.</li>
 </ol>
 
 Lumping may be turned off globally by setting the global variable <tt>LUMP</tt> to be <tt>0</tt>.
 
 \param PARENT The parent target to which the lump file belongs.  \c PARENT is optional if \ref rule_ActiveProject has been specified.
-\param SOURCES_VARIABLE_NAME The variable name listing the source files to be added to the lump.  This is not an expanded version through <tt>$(SRCS)</tt> but rather, it is the actual name of the variable, <tt>SRCS</tt>.  On return from the \c Lump rule, \c SOURCES_VARIABLE_NAME will be populated with the gristed name of the lump file.  It will not contain the original file list anymore.
-\param PCH_HEADER (optional) If \c PCH_HEADER is specified, \c PCH_HEADER_FILENAME must also be specified.  \c PCH_HEADER should be the title of the file that is the precompiled header.  That is, if the precompiled header is <tt>StdAfx.cpp</tt>, \c PCH_HEADER must be <tt>StdAfx</tt>.
-\param PCH_HEADER_FILENAME (optional, but required if \c PCH_HEADER is passed in) \c PCH_HEADER_FILENAME is used when building the lump file, as seen above in #1 of the lump file contents.
-\param LUMP_EXT (optional) If a different lump file extension than the default <tt>.cpp</tt> is required, pass it here.  It should not contain the opening period.
+\param SOURCES_VARIABLE_NAME The variable name listing the source files to be added to the lump.  This is not an expanded version through <tt>$(SRCS)</tt> but rather, it is the actual name of the variable, <tt>SRCS</tt>.  On return from the \c Lump rule, \c SOURCES_VARIABLE_NAME will be populated with the gristed name of the lump file.  It will not contain the original file list anymore.  It may include the precompiled header source filename \$(PCH_FILENAMES[1]) if \$(PCH_FILENAMES[3]) is set.
+\param PCH_FILENAMES (optional) \c PCH_FILENAMES[1] is the filename of the precompiled header source file (generally, the .cpp).  \c PCH_FILENAMES[2] is the filename of the precompiled header's header file.  If \c PCH_FILENAMES[2] is not specified, then <tt>\$(PCH_FILENAMES[1]:S=.h)</tt> is used.  Finally, if \c PCH_FILENAMES[3] is set to <tt>1</tt>, the precompiled header's source file (set through \c PCH_FILENAMES[1]) is added to the \c SOURCES_VARIABLE_NAME list.
 \param EXTRA_INCLUDE_PATHS If additional include paths are needed for this lump file, specify them here.
 
 \code
     # For the Misc target, use the contents of SRCS to build a lump called
-    # MiscLump.  In addition, this lump should use the precompiled header file
-    # Misc_InternalPch.h.
-    C.Lump Misc : SRCS : MiscLump : Misc_InternalPch : Misc_InternalPch.h : cpp ;
+    # MiscLump.cpp.  In addition, this lump should use the precompiled header file
+    # Misc_InternalPch.h, filtering any references to Misc_InternalPch.cpp out of
+	# its file lists.  Since 1 is specified as the third string item of the
+	# PCH_FILENAMES parameter, Misc_InternalPch.cpp is added to the SRCS list.
+    C.Lump Misc : SRCS : MiscLump.cpp : Misc_InternalPch.cpp Misc_InternalPch.h 1 ;
 
     # A separate lump in the Misc target is made for PNG_SRCS.  It doesn't have
-    # a precompiled header, but it should be generated as a C file.
-    C.Lump Misc : PNG_SRCS : PNGLump : : : c ;
+    # a precompiled header, and it will be generated as a .c file.
+    C.Lump Misc : PNG_SRCS : PNGLump.c ;
 \endcode
 
 

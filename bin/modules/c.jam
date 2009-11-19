@@ -411,60 +411,62 @@ rule C._MultiCppCompile_PostCompile
 ########################################################################
 ########################################################################
 
-rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_HEADER :
-		PCH_HEADER_FILENAME : LUMP_EXT : EXTRA_INCLUDE_PATHS
+rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_FILENAMES : EXTRA_INCLUDE_PATHS
 {
-	if $(LUMP) = 0
-	{
+	if $(LUMP) = 0 {
 		return ;
 	}
 
 	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
 	local grist = $(PARENT) ;
 
-	LUMP_EXT ?= cpp ;
+	local PCH_SOURCE_FILENAME = $(PCH_FILENAMES[1]) ;
+	local PCH_HEADER_FILENAME = $(PCH_FILENAMES[2]) ;
 
+	local LUMP_EXT ;
+	LUMP_EXT ?= $(LUMP_NAME:S) ;
+	LUMP_EXT ?= $(PCH_SOURCE_FILENAME:S) ;
+	LUMP_EXT ?= .cpp ;
+	
 	local contents = "/* This lump file is a generated file.  Do not modify. */$(NEWLINE)" ;
-	local line ;
-	local PCH_SOURCE_FILENAME ;
-	if $(PCH_HEADER)
-	{
-		PCH_SOURCE_FILENAME = $(PCH_HEADER).$(LUMP_EXT) ;
-		PCH_HEADER_FILENAME ?= $(PCH_HEADER).h ;
-		line = "#include \"$(PCH_HEADER_FILENAME)\"$(NEWLINE)" ;
-		contents = $(contents)$(line) ;
+	if $(PCH_SOURCE_FILENAME) {
+		PCH_HEADER_FILENAME ?= $(PCH_SOURCE_FILENAME:S=.h) ;
+		contents += "#include \"$(PCH_HEADER_FILENAME)\"$(NEWLINE)" ;
 	}
 
 	local file ;
-	for file in $($(SOURCES_VARIABLE_NAME))
-	{
-		if [ on $(file:G=$(grist)) Var EXCLUDED_FROM_BUILD ] = true {
+	for file in $($(SOURCES_VARIABLE_NAME)) {
+		local excludedFromBuild ;
+		on $(file:G=$(grist)) excludedFromBuild = $(EXCLUDED_FROM_BUILD) ;
+		if $(excludedFromBuild) = true {
 			continue ;
 		}
-		if $(file:S) in $(C.C_STYLE_BUILD_EXTENSIONS) $(C.CPP_STYLE_BUILD_EXTENSIONS)  &&  $(file) != $(PCH_SOURCE_FILENAME)
-		{
-			line = "#include \"$(file)\"$(NEWLINE)" ;
-			contents = $(contents)$(line) ;
+		if $(file:S) in $(C.C_STYLE_BUILD_EXTENSIONS) $(C.CPP_STYLE_BUILD_EXTENSIONS)  &&  $(file) != $(PCH_SOURCE_FILENAME) {
+			contents += "#include \"$(file)\"$(NEWLINE)" ;
 		}
 	}
 
-	contents = $(contents)$(NEWLINE) ;
+	contents += $(NEWLINE) ;
+	contents = $(contents:J=) ;
 
-	local gristedFileName = @(!$(LUMP_NAME)!.$(LUMP_EXT):G=$(grist)) ;
+	local gristedFileName = @(!$(LUMP_NAME:B)!$(LUMP_EXT):G=$(grist)) ;
 	MakeLocate $(gristedFileName) : $(LOCATE_SOURCE) ;
 	Clean clean:$(PARENT) : $(gristedFileName) ;
+	
+	Includes $(gristedFileName) : $($(SOURCES_VARIABLE_NAME):G=$(grist)) ;
+	NoCare $($(SOURCES_VARIABLE_NAME):G=$(grist)) ;
+	SEARCH on $($(SOURCES_VARIABLE_NAME):G=$(grist)) = $(SEARCH_SOURCE) ;
 
-	$(SOURCES_VARIABLE_NAME) = $(PCH_SOURCE_FILENAME) $(gristedFileName) ;
+	$(SOURCES_VARIABLE_NAME) = ;
+	if $(PCH_FILENAMES[3]) {
+		$(SOURCES_VARIABLE_NAME) += $(PCH_SOURCE_FILENAME) ;
+	}
+	$(SOURCES_VARIABLE_NAME) += $(gristedFileName) ;
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
-	C.ObjectIncludeDirectories $(gristedFileName) : $(subdir) ;
-	if $(EXTRA_INCLUDE_PATHS)
-	{
-		C.ObjectIncludeDirectories $(gristedFileName) : $(EXTRA_INCLUDE_PATHS) ;
-	}
+	C.ObjectIncludeDirectories $(gristedFileName) : $(subdir) $(EXTRA_INCLUDE_PATHS) ;
 
-	if [ MD5 $(contents) ] != [ MD5File $(gristedFileName) ]
-	{
+	if [ MD5 $(contents) ] != [ MD5File $(gristedFileName) ] {
 		CONTENTS on $(gristedFileName) = $(contents) ;
 		Always $(gristedFileName) ;
 		C.MakeLump $(gristedFileName) ;

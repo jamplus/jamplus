@@ -23,7 +23,7 @@ ActiveProject SimpleMFC ;
 
 C.UseMFC : link shared ;
 
-C.Lump : SRCS : SimpleMFCLump : stdafx : stdafx.h : cpp ;
+C.Lump : SRCS : SimpleMFCLump : stdafx.cpp : stdafx.h : .cpp ;
 
 SRCS += [ C.ResourceCompiler : SimpleMFC.rc ] ;
 
