@@ -139,7 +139,7 @@ struct _target {
 	ACTIONS		*actions;	/* rules to execute, if any */
 	SETTINGS 	*settings;	/* variables to define */
 
-	short		flags;		/* status info */
+	unsigned int flags;		/* status info */
 
 # define 	T_FLAG_TEMP 	0x01	/* TEMPORARY applied */
 # define 	T_FLAG_NOCARE 	0x02	/* NOCARE applied */
@@ -166,6 +166,7 @@ struct _target {
 #ifdef OPT_BUILTIN_NEEDS_EXT
 # define 	T_FLAG_MIGHTNOTUPDATE    0x4000	/* MightNotUpdate applied */
 #endif
+# define 	T_FLAG_FORCECARE 	0x8000	/* ForceCare applied */
 
 	char		binding;	/* how target relates to real file */
 

@@ -68,16 +68,7 @@ rule C.HdrRule SOURCE : HEADERS
 ## LOCAL CHANGE
 	SEARCH on $(s) = $(HDRSEARCH) ;
 
-	if $(C.GENERATED_HEADERS) {
-		local header ;
-		for header in $(s) {
-			if ! $(header) in $(C.GENERATED_HEADERS) {
-				NoCare $(header) ;
-			}
-		}
-	} else {
-		NoCare $(s) ;
-	}
+	NoCare $(s) ;
 
 	# Propagate on $(SOURCE) to $(HEADERS)
 

@@ -65,6 +65,8 @@ LIST *builtin_depends( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_echo( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_exit( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_flags( PARSE *parse, LOL *args, int *jmp );
+LIST *builtin_flags_forcecare( PARSE *parse, LOL *args, int *jmp );
+LIST *builtin_flags_nocare( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_glob( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_match( PARSE *parse, LOL *args, int *jmp );
 #ifdef OPT_BUILTIN_SUBST_EXT
@@ -149,9 +151,12 @@ load_builtins()
     bindrule( "MATCH" )->procedure =
 	parse_make( builtin_match, P0, P0, P0, C0, C0, 0 );
 
+    bindrule( "ForceCare" )->procedure =
+	parse_make( builtin_flags_forcecare, P0, P0, P0, C0, C0, T_FLAG_FORCECARE );
+
     bindrule( "NoCare" )->procedure =
     bindrule( "NOCARE" )->procedure =
-	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_NOCARE );
+	parse_make( builtin_flags_nocare, P0, P0, P0, C0, C0, T_FLAG_NOCARE );
 
     bindrule( "NOTIME" )->procedure =
     bindrule( "NotFile" )->procedure =
@@ -362,6 +367,48 @@ builtin_flags(
 
 	for( ; l; l = list_next( l ) )
 	    bindtarget( l->string )->flags |= parse->num;
+
+	return L0;
+}
+
+/*
+ * builtin_flags_forcecare() - ForceCare rule
+ */
+
+LIST *
+builtin_flags_forcecare(
+	PARSE	*parse,
+	LOL	*args,
+	int	*jmp )
+{
+	LIST *l = lol_get( args, 0 );
+
+	for( ; l; l = list_next( l ) ) {
+		TARGET* t = bindtarget( l->string );
+		t->flags |= T_FLAG_FORCECARE;
+		t->flags &= ~T_FLAG_NOCARE;
+	}
+
+	return L0;
+}
+
+/*
+ * builtin_flags_nocare() - NOCARE rule
+ */
+
+LIST *
+builtin_flags_nocare(
+	PARSE	*parse,
+	LOL	*args,
+	int	*jmp )
+{
+	LIST *l = lol_get( args, 0 );
+
+	for( ; l; l = list_next( l ) ) {
+		TARGET* t = bindtarget( l->string );
+		if ( ! ( t->flags & T_FLAG_FORCECARE ) )
+			t->flags |= T_FLAG_NOCARE;
+	}
 
 	return L0;
 }

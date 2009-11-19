@@ -1436,6 +1436,7 @@ dependGraphOutput( TARGET *t, int depth )
 	printf( "  %s       : ", spaces(depth) );
 	if( t->flags & T_FLAG_TEMP ) printf ("TEMPORARY ");
 	if( t->flags & T_FLAG_NOCARE ) printf ("NOCARE ");
+	if( t->flags & T_FLAG_FORCECARE ) printf ("FORCECARE ");
 	if( t->flags & T_FLAG_NOTFILE ) printf ("NOTFILE ");
 	if( t->flags & T_FLAG_TOUCHED ) printf ("TOUCHED ");
 	if( t->flags & T_FLAG_LEAVES ) printf ("LEAVES ");
