@@ -269,14 +269,14 @@ static void
 make1b( TARGET *t )
 {
 	TARGETS	*c;
-	const char *failed = "dependents";
+	const char *failed;
 #ifdef OPT_MULTIPASS_EXT
-	int missing = 0;
+	int missing;
 #endif
 #ifdef OPT_BUILTIN_NEEDS_EXT
-	int childmightnotupdate = 0;
-	int childscancontents = 0;
-	int childupdated = 0;
+	int childmightnotupdate;
+	int childscancontents;
+	int childupdated;
 #endif
 
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
@@ -295,6 +295,17 @@ make1b( TARGET *t )
 	if( intr )
 	    return;
 #endif
+
+	failed = "dependents";
+#ifdef OPT_MULTIPASS_EXT
+	missing = 0;
+#endif
+#ifdef OPT_BUILTIN_NEEDS_EXT
+	childmightnotupdate = 0;
+	childscancontents = 0;
+	childupdated = 0;
+#endif
+
 #ifdef OPT_SEMAPHORE
 	if( t->semaphore && t->semaphore->asynccnt )
 	{
