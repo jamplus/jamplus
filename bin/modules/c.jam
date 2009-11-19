@@ -553,8 +553,6 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 
 	$(linkRule) $(_linkTargets) : $(_s) ;
 
-#	Includes $(_s) : $(_s) ;
-
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
 
 	C._ApplicationFromObjects_PostBuild ;
@@ -757,7 +755,6 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
 	$(linkRule) $(_linkTargets) : $(_s) ;
-#	Includes $(_s) : $(_s) ;
 
 	C._SharedLibraryFromObjects_RegServer ;
 
