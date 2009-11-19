@@ -5,16 +5,24 @@
 -------------------------------------------------------------------------------
 local VisualStudio201xProjectMetaTable = {  __index = VisualStudio201xProjectMetaTable  }
 
+local function GetMapPlatformToVSPlatform(platformName)
+	return MapPlatformToVSPlatform and MapPlatformToVSPlatform[platformName] or platformName
+end
+
+local function GetMapConfigToVSConfig(configName)
+	return MapConfigToVSConfig and MapConfigToVSConfig[configName] or configName
+end
+
 local function RealVSPlatform(platform)
 	if VSNativePlatforms  and  VSNativePlatforms[platform] then
 		return MapPlatformToVSPlatform[platform]
 	end
 
-	return "Win32"
+	return platform
 end
 
 local function RealVSConfig(platform, config)
-	local realConfig = MapConfigToVSConfig[config]
+	local realConfig = GetMapConfigToVSConfig(config)
 	if VSNativePlatforms  and  VSNativePlatforms[platform] then
 		return realConfig
 	end
@@ -361,8 +369,8 @@ Global
 		for configName in ivalues(Config.Configurations) do
 			local configInfo =
 			{
-				VSPlatform = MapPlatformToVSPlatform[platformName],
-				VSConfig = MapConfigToVSConfig[configName],
+				VSPlatform = GetMapPlatformToVSPlatform(platformName),
+				VSConfig = GetMapConfigToVSConfig(configName),
 			}
 			table.insert(self.Contents, expand([[
 		$(VSConfig)|$(VSPlatform) = $(VSConfig)|$(VSPlatform)
@@ -384,8 +392,8 @@ Global
 			local info = ProjectExportInfo[buildWorkspaceName]
 			local configInfo =
 			{
-				VSPlatform = MapPlatformToVSPlatform[platformName],
-				VSConfig = MapConfigToVSConfig[configName],
+				VSPlatform = GetMapPlatformToVSPlatform(platformName),
+				VSConfig = GetMapConfigToVSConfig(configName),
 				RealVSPlatform = RealVSPlatform(platformName),
 				RealVSConfig = RealVSConfig(platformName, configName),
 			}
@@ -404,8 +412,8 @@ Global
 			local info = ProjectExportInfo[updateWorkspaceName]
 			local configInfo =
 			{
-				VSPlatform = MapPlatformToVSPlatform[platformName],
-				VSConfig = MapConfigToVSConfig[configName],
+				VSPlatform = GetMapPlatformToVSPlatform(platformName),
+				VSConfig = GetMapConfigToVSConfig(configName),
 				RealVSPlatform = RealVSPlatform(platformName),
 				RealVSConfig = RealVSConfig(platformName, configName),
 			}
@@ -422,8 +430,8 @@ Global
 				for configName in ivalues(Config.Configurations) do
 					local configInfo =
 					{
-						VSPlatform = MapPlatformToVSPlatform[platformName],
-						VSConfig = MapConfigToVSConfig[configName],
+						VSPlatform = GetMapPlatformToVSPlatform(platformName),
+						VSConfig = GetMapConfigToVSConfig(configName),
 						RealVSPlatform = RealVSPlatform(platformName),
 						RealVSConfig = RealVSConfig(platformName, configName),
 					}

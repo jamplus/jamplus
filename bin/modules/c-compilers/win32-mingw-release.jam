@@ -2,5 +2,3 @@ C.Flags CC	: * : -g -O2 : release : win32 ;
 C.Flags C++	: *	: -g -O2 : release : win32 ;
 C.Flags M	: *	: -g -O2 : release : win32 ;
 C.Flags MM	: *	: -g -O2 : release : win32 ;
-
-VSCONFIGMAP.release = Release ;
