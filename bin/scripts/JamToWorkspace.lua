@@ -779,16 +779,21 @@ include "$(scriptPath)DumpJamTargetInfo.jam" ;
 		end
 
 		exporter.Shutdown()
+	end
 
+	-- Write buildenvironment.config.
+	LuaDumpObject(destinationRootPath .. 'buildenvironment.config', 'Config', Config)
+
+	if opts.gen ~= 'none' then
+		-- This can fail on Windows 7 with TCC 10.00.76.  Put it at the end, so the rest of
+		-- the process finishes.
 		if opts.gui then
+			local outWorkspacePath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 			if OS == "NT" then
 				os.execute('explorer "' .. os.path.make_backslash(outWorkspacePath) .. '"')
 			end
 		end
 	end
-
-	-- Write buildenvironment.config.
-	LuaDumpObject(destinationRootPath .. 'buildenvironment.config', 'Config', Config)
 end
 
 
