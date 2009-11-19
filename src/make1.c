@@ -1038,25 +1038,6 @@ make1cmds( ACTIONS *a0 )
 	    a0->action->run_tgt = t;
 #endif
 
-#ifdef OPT_BUILTIN_MD5CACHE_EXT
-#if 0            /* if this action is batched (an ugly way to mark this, until we can change the parser properly) */
-            if (strncmp(rule->name, "batched_", 8)==0) {
-              /* build lists with only those targets that need updating and their sources */
-              nt = L0;
-              ns = L0;
-       make1list_batched(&md5forcmd, &nt, &ns, a0->action->targets, a0->action->sources, rule->flags );
-
-              /* if no targets survived (all were retreived from the cache)
-                 or no sources survived (all are up to date) */
-              if (nt==NULL || ns==NULL) {
-                /* skip this action */
-                continue;
-              }
-
-            /* if the action is normal (not batched) */
-            } else {
-#endif
-#endif
 	    /* Make LISTS of targets and sources */
 	    /* If `execute together` has been specified for this rule, tack */
 	    /* on sources from each instance of this rule for this target. */
@@ -1277,9 +1258,63 @@ make1cmds( ACTIONS *a0 )
 	    }
 	    else
 	    {
-		nt = make1list( L0, a0->action->targets, 0 );
-		ns = make1list( L0, a0->action->sources, rule->flags );
+#if 0
+		if ( strncmp( rule->name, "batched_", 8 ) == 0 )
+		{
+			TARGETS* targets = a0->action->targets;
+			TARGETS* sources = a0->action->sources;
+		    int anycacheable = 0;
+
+			nt = L0;
+			ns = L0;
+
+			/* walk sources and targets simultaneously */
+			for( ; targets; targets = targets->next, sources = (sources==NULL?sources:sources->next) )
+			{
+				TARGET *t = targets->target;
+				TARGET *s = sources!=NULL ? sources->target : NULL;
+
+				/* Sources to 'actions existing' are never in the dependency */
+				/* graph (if they were, they'd get built and 'existing' would */
+				/* be superfluous, so throttle warning message about independent */
+				/* targets. */
+
+				if( t->binding == T_BIND_UNBOUND )
+					make1bind( t, 0 );
+				if( s!=NULL) {
+					if ( s->binding == T_BIND_UNBOUND )
+						make1bind( s, !( rule->flags & RULE_EXISTING ) );
+					if ( s->binding == T_BIND_UNBOUND )
+						printf("Warning using unbound source %s for batched action.\n", s->name);
+				}
+
+
+				if( ( rule->flags & RULE_EXISTING ) && s!=NULL && s->binding != T_BIND_EXISTS )
+					continue;
+
+				if( t->fate < T_FATE_BUILD )
+					continue;
+
+				/* Build new lists */
+
+				nt = list_new( nt, t->boundname, 1 );
+				if (s!=NULL) {
+					ns = list_new( ns, s->boundname, 1 );
+				}
+			}
+
+			if (sources!=NULL) {
+				printf("warning: more sources than targets in a batched action!\n");
+			}
+
+		} else {
+#endif
+			nt = make1list( L0, a0->action->targets, 0 );
+			ns = make1list( L0, a0->action->sources, rule->flags );
+#if 0
 	    }
+#endif
+		}
 #else
 	    nt = make1list( L0, a0->action->targets, 0 );
 	    ns = make1list( L0, a0->action->sources, rule->flags );
@@ -1548,6 +1583,63 @@ make1list_unbound(
 
     return l;
 }
+
+
+#if 0
+/*
+ * make1list_batched() - turn a list of targets and sources into two LISTs, for $(<) and $(>)
+ * Takes only targets that need updating and their respective sources, matching one-to-one by list indices.
+ * Extra targets are appended if count(targets) > count(sources).
+ */
+
+static void
+make1list_batched(
+				  LIST**plt,
+				  LIST**pls,
+				  TARGETS *targets,
+				  TARGETS *sources,
+				  int     flags )
+{
+	/* walk sources and targets simultaneously */
+	for( ; targets; targets = targets->next, sources = (sources==NULL?sources:sources->next) )
+	{
+		TARGET *t = targets->target;
+		TARGET *s = sources!=NULL ? sources->target : NULL;
+
+		/* Sources to 'actions existing' are never in the dependency */
+		/* graph (if they were, they'd get built and 'existing' would */
+		/* be superfluous, so throttle warning message about independent */
+		/* targets. */
+
+		if( t->binding == T_BIND_UNBOUND )
+			make1bind( t, 0 );
+		if( s!=NULL) {
+			if ( s->binding == T_BIND_UNBOUND )
+				make1bind( s, !( flags & RULE_EXISTING ) );
+			if ( s->binding == T_BIND_UNBOUND )
+				printf("Warning using unbound source %s for batched action.\n", s->name);
+		}
+
+
+		if( ( flags & RULE_EXISTING ) && s!=NULL && s->binding != T_BIND_EXISTS )
+			continue;
+
+		if( t->fate < T_FATE_BUILD )
+			continue;
+
+		/* Build new lists */
+
+		*plt = list_new( *plt, t->boundname, 1 );
+		if (s!=NULL) {
+			*pls = list_new( *pls, s->boundname, 1 );
+		}
+	}
+
+	if (sources!=NULL) {
+		printf("warning: more sources than targets in a batched action!\n");
+	}
+}
+#endif
 
 #if 0
 
