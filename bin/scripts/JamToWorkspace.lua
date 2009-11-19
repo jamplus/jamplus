@@ -559,7 +559,7 @@ function BuildProject()
 	locateTargetText =
 	{
 		locateTargetText = [[
-ALL_LOCATE_TARGET = $(destinationRootPath:gsub('\\', '/'))$$(PLATFORM)-$$(CONFIG) ;
+ALL_LOCATE_TARGET = "$(destinationRootPath:gsub('\\', '/'))$$(PLATFORM)-$$(CONFIG)" ;
 ]]
 	}
 
@@ -569,7 +569,7 @@ ALL_LOCATE_TARGET = $(destinationRootPath:gsub('\\', '/'))$$(PLATFORM)-$$(CONFIG
 	local jamfileText = { expand([[
 # Generated file
 $(locateTargetText)
-DEPCACHE.standard = $$(ALL_LOCATE_TARGET)/.depcache ;
+DEPCACHE.standard = "$$(ALL_LOCATE_TARGET)/.depcache" ;
 DEPCACHE = standard ;
 
 ]], locateTargetText, _G) }
@@ -702,8 +702,8 @@ include $(jamPath)Jambase.jam ;
 		io.writeall(outPath .. 'DumpJamTargetInfo.jam', expand([[
 $(locateTargetText)
 __JAM_SCRIPTS_PATH = "$(scriptPath)" ;
-include $(scriptPath)ide/$(gen).jam ;
-include $(scriptPath)DumpJamTargetInfo.jam ;
+include "$(scriptPath)ide/$(gen).jam" ;
+include "$(scriptPath)DumpJamTargetInfo.jam" ;
 ]], locateTargetText, opts, _G))
 
 		-- Read the target information.
