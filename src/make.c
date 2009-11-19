@@ -993,6 +993,7 @@ make0(
 	{
 	    fate = T_FATE_ISTMP;
 	}
+	// See http://maillist.perforce.com/pipermail/jamming/2003-January/001853.html.
 	else if( t->binding == T_BIND_EXISTS && p &&
 		 p->binding != T_BIND_UNBOUND && t->time > p->time )
 	{
