@@ -283,7 +283,7 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 		local _hdrs = $(SEARCH_SOURCE) ;
 		on $(_obj) _hdrs += $(HDRS.$(ALL_TYPES)) ;
-		_hdrs += $(postHDRS) ;
+		_hdrs += $(postHDRS) $(C.STDHDRS) ;
 
 		HDRSEARCH on $(_src) = $(_hdrs) ;
 
