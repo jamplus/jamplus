@@ -97,6 +97,21 @@ rule C._ForceIncludeHelper
 }
 
 
+rule C._C++Exceptions
+{
+	FLAGS_TO_REMOVE.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += -fno-exceptions ;
+
+	if ! $(TYPE)  ||  $(TYPE) = false
+	{
+		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) -= -fno-exceptions ;
+	}
+	else if $(TYPE) = true
+	{
+		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += -fno-exceptions ;
+	}
+}
+
+
 rule C._RuntimeTypeHelper
 {
 	if ! $(TYPE)  ||  $(TYPE) = dynamic

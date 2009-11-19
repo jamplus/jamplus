@@ -1,5 +1,5 @@
-C.CFlags * : /Od /MDd /W3 /Zi : debug : win64 ;
-C.C++Flags * : /Od /MDd /W3 /Zi : debug : win64 ;
+C.CFlags * : /Od /EHsc /MDd /W3 /Zi : debug : win64 ;
+C.C++Flags * : /Od /EHsc /MDd /W3 /Zi : debug : win64 ;
 C.LibFlags * : : debug : win64 ;
 C.LinkFlags * : /INCREMENTAL:YES /DEBUG /MACHINE:X64 : debug : win64 ;
 

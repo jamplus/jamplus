@@ -28,6 +28,21 @@ rule C._ForceIncludeHelper
 }
 
 
+rule C._C++Exceptions
+{
+	FLAGS_TO_REMOVE.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += /EHa /EHsc ;
+
+	if ! $(TYPE)  ||  $(TYPE) = false
+	{
+		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) -= /EHa /EHsc ;
+	}
+	else if $(TYPE) = true
+	{
+		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += /EHsc ;
+	}
+}
+
+
 rule C._RuntimeTypeHelper
 {
 	if ! $(TYPE)  ||  $(TYPE) = dynamic
@@ -215,7 +230,7 @@ rule C._MultiCppCompile_PreCompile
 
 	if $(__MultiCppCompile_OutputAsTree) = 0 {
 		local combinedLocateTarget = [ FDirName $(LOCATE_TARGET) ] ;
-		_postmflags = "/c \"/Fo$(combinedLocateTarget:\\)\\\\\" \"/Fd$(_VCPDB:T)\"" ;
+		_postmflags = "/c /Fo\"$(combinedLocateTarget:\\)\\\\\" /Fd\"$(_VCPDB:T)\"" ;
 	}
 }
 
@@ -231,9 +246,7 @@ rule C._MultiCppCompile_SetupFlags
 		# add extra flags to enable pch creation
 		local _pchFilename = $(_pch[3]:LBS).pch ;
 		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
-		_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
-		_flags += /Yc$(_pch[2]) ;  # h file
-		_flags += \"/FI$(_pch[2])\" ;  # h file
+		_flags += /Fp\"$(_pchDiskFilename:\\)\" /Yc\"$(_pch[2])\" /FI\"$(_pch[2])\" ;
 		# mark that it will be created by compilation through srcref
 		_pchFilename = $(_pchFilename:G=$(grist)) ;
 		BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
@@ -247,9 +260,7 @@ rule C._MultiCppCompile_SetupFlags
 		# add extra flags to enable pch loading
 		local _pchFilename = $(_pch[3]:LBS).pch ;
 		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
-		_flags += /Fp$(_pchDiskFilename:\\) ;  # pch file
-		_flags += /Yu$(_pch[2]) ;  # h file
-		_flags += \"/FI$(_pch[2])\" ;  # h file
+		_flags += /Fp\"$(_pchDiskFilename:\\)\" /Yu\"$(_pch[2])\" /FI\"$(_pch[2])\" ;
 		# mark that compilation will depend on it
 		_pchFilename = $(_pchFilename:G=$(grist)) ;
 		Includes $(_src) : $(_pchFilename) ;
@@ -273,7 +284,7 @@ rule C._MultiCppCompile_PchDeps
 
 rule C._MultiCppCompile_PostCompile
 {
-	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 {
+	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010 {
 		SEMAPHORE on $(objects) = $(_VCPDB) ;
 	}
 }
