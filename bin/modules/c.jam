@@ -100,7 +100,7 @@ rule C.SubDirHdrs
 # The original MultiCppCompile rule was provided by Alen Ladavac.
 ########################################################################
 
-BATCH_COMPILE_GROUP_SIZE on C.* = 5 ;
+#BATCH_COMPILE_GROUP_SIZE on C.* = 5 ;
 
 rule C.BatchCompileGroupSize TARGET : SIZE
 {
