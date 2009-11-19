@@ -376,12 +376,21 @@ make1b( TARGET *t )
 	    failed = c->target->name;
 	    t->status = c->target->status;
 #ifdef OPT_MULTIPASS_EXT
-	    if ( ( c->target->fate == T_FATE_MISSING  &&  ! ( c->target->flags & T_FLAG_NOCARE )  &&  !c->target->actions ) || t->status == EXEC_CMD_NEXTPASS )
-	    {
-		missing = 1;
-		if ( queuedjamfiles )
-		    t->status = EXEC_CMD_NEXTPASS;
-	    }
+		if ( ( c->target->fate == T_FATE_MISSING  &&  ! ( c->target->flags & T_FLAG_NOCARE )  &&  !c->target->actions ) || t->status == EXEC_CMD_NEXTPASS )
+		{
+			missing = 1;
+			if ( queuedjamfiles )
+			{
+				ACTIONS *actions;
+
+				t->status = EXEC_CMD_NEXTPASS;
+
+				for( actions = t->actions; actions; actions = actions->next )
+				{
+					actions->action->pass++;
+				}
+			}
+		}
 #endif
 	}
 
@@ -425,7 +434,7 @@ make1b( TARGET *t )
 		} else if ( t->fate == T_FATE_STABLE )
 			t->fate = T_FATE_UPDATE;
 	}
-	if ( t->fate == T_FATE_UPDATE  &&  !childupdated )
+	if ( t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
 		if ( md5matchescommandline( t ) )
 		    t->fate = T_FATE_STABLE;
 	if ( t->flags & ( T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS )  &&  t->actions ) {
