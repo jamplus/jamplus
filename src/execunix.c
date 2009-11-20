@@ -80,7 +80,7 @@ static void (*istat)( int );
 
 static struct
 {
-	int	pid; /* on win32, a real process handle */
+	intptr_t pid; /* on win32, a real process handle */
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 	int lua;
 #endif
@@ -267,7 +267,7 @@ execcmd(
 #endif
     )
 {
-	int pid;
+	intptr_t pid;
 	int slot;
 	const char *argv[ MAXARGC + 1 ];	/* +1 for NULL */
 	int quote = 0;

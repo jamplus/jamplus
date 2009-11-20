@@ -565,7 +565,7 @@ builtin_match(
 		for( i = 1; i <= top; i++ )
 		{
 		    BUFFER buff;
-		    int l;
+		    size_t l;
 		    buffer_init( &buff );
 		    l = re->endp[i] - re->startp[i];
 		    buffer_addstring( &buff, re->startp[i], l );
@@ -788,13 +788,13 @@ builtin_md5(
 	    }
 	    l = lol_get(args, i);
 	    if (l) {
-		MD5Update(&context, (unsigned char*)l->string, strlen(l->string));
+		MD5Update(&context, (unsigned char*)l->string, (unsigned int)strlen(l->string));
 		for (l = list_next(l); l; l = list_next(l)) {
 		    /* separate list items with 1 NUL character.  This
 		     * guarantees that [ MD5 a b ] is different from [
 		     * MD5 ab ] */
 		    MD5Update(&context, item_sep, sizeof(item_sep));
-		    MD5Update(&context, (unsigned char*)l->string, strlen(l->string));
+		    MD5Update(&context, (unsigned char*)l->string, (unsigned int)strlen(l->string));
 		}
 	    }
 	}
@@ -828,7 +828,7 @@ builtin_md5file(
 	LIST *l;
 	LIST *result;
 
-	const int BUFFER_SIZE = 100 * 1024;
+	const size_t BUFFER_SIZE = 100 * 1024;
 	unsigned char* buffer = (unsigned char*)malloc(BUFFER_SIZE);
 
 	MD5Init(&context);
@@ -845,7 +845,7 @@ builtin_md5file(
 			popsettings( t->settings );
 		    file = fopen(t->boundname, "rb");
 		    if (file) {
-			int readSize;
+			size_t readSize;
 
 			do
 			{
@@ -1165,7 +1165,7 @@ builtin_split(
 
 		while ( *ptr ) {
             if ( token[(unsigned char) *ptr] ) {
-                int  count = ptr - lastPtr;
+                size_t count = ptr - lastPtr;
                 if ( count > 0 ) {
 					buffer_reset( &buff );
 					buffer_addstring( &buff, lastPtr, count );

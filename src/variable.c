@@ -193,7 +193,7 @@ var_string(
 
 		while( l )
 		{
-		    int so = strlen( l->string );
+		    int so = (int)strlen( l->string );
 
 		    if ( (int)buffer_pos(buff) + so >= outsize)
 			return -1;
@@ -215,7 +215,7 @@ var_string(
 
 	buffer_addchar( buff, 0 );
 
-	return buffer_pos( buff );
+	return (int)buffer_pos( buff );
 }
 
 /*

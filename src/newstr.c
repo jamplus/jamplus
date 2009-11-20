@@ -33,7 +33,7 @@
 typedef const char *STRING;
 
 static struct hash *strhash = 0;
-static int strtotal = 0;
+static size_t strtotal = 0;
 #ifdef OPT_DEBUG_MEM_TOTALS_EXT
 static long str_allocs = 0;
 #endif
@@ -59,7 +59,7 @@ newstr( const char *string )
 
 	if( hashenter( strhash, (HASHDATA **)&s ) )
 	{
-	    int l = strlen( string );
+	    size_t l = strlen( string );
 #ifdef OPT_IMPROVED_MEMUSE_EXT
 	    char *m;
 

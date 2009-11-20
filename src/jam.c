@@ -838,7 +838,7 @@ int check_leaks(void)
 void*
 track_malloc(size_t mem)
 {
-    malloc_bytes += mem;
+    malloc_bytes += (int)mem;
 #undef malloc
     return malloc(mem);
 #define malloc(x) do_not_call_malloc_after_this(x)
@@ -847,7 +847,7 @@ track_malloc(size_t mem)
 void*
 track_realloc(void *ptr, size_t size)
 {
-    realloc_bytes += size;
+    realloc_bytes += (int)size;
 #undef realloc
     return realloc(ptr, size);
 #define realloc(a,b) do_not_call_realloc_after_this(a,b)

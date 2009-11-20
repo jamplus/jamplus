@@ -61,7 +61,7 @@ path_parse(
 	if( file[0] == '<' && ( p = strchr( file, '>' ) ) )
 	{
 	    f->f_grist.ptr = file;
-	    f->f_grist.len = p - file;
+	    f->f_grist.len = (int)(p - file);
 	    file = p + 1;
 	}
 
@@ -80,7 +80,7 @@ path_parse(
 	if( p )
 	{
 	    f->f_dir.ptr = file;
-	    f->f_dir.len = p - file;
+	    f->f_dir.len = (int)(p - file);
 
 	    /* Special case for / - dirname is /, not "" */
 
@@ -104,7 +104,7 @@ path_parse(
 	if( ( p = strchr( file, '(' ) ) && end[-1] == ')' )
 	{
 	    f->f_member.ptr = p + 1;
-	    f->f_member.len = end - p - 2;
+	    f->f_member.len = (int)(end - p - 2);
 	    end = p;
 	}
 
@@ -120,14 +120,14 @@ path_parse(
 	if( p )
 	{
 	    f->f_suffix.ptr = p;
-	    f->f_suffix.len = end - p;
+	    f->f_suffix.len = (int)(end - p);
 	    end = p;
 	}
 
 	/* Leaves base */
 
 	f->f_base.ptr = file;
-	f->f_base.len = end - file;
+	f->f_base.len = (int)(end - file);
 }
 
 /*

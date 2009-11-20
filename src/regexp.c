@@ -281,7 +281,7 @@ jam_regcomp( const char *exp )
 			for (; scan != NULL; scan = regnext(scan))
 				if (OP(scan) == EXACTLY && strlen(OPERAND(scan)) >= len) {
 					longest = OPERAND(scan);
-					len = strlen(OPERAND(scan));
+					len = (unsigned)strlen(OPERAND(scan));
 				}
 			r->regmust = longest;
 			r->regmlen = len;
@@ -740,9 +740,9 @@ regtail(
 	}
 
 	if (OP(scan) == BACK)
-		offset = scan - val;
+		offset = (int)(scan - val);
 	else
-		offset = val - scan;
+		offset = (int)(val - scan);
 	*(scan+1) = (offset>>8)&0377;
 	*(scan+2) = offset&0377;
 }
@@ -943,7 +943,7 @@ regmatch( char *prog )
 				/* Inline the first character, for speed. */
 				if (*opnd != *reginput)
 					return(0);
-				len = strlen(opnd);
+				len = (int)strlen(opnd);
 				if (len > 1 && strncmp(opnd, reginput, len) != 0)
 					return(0);
 				reginput += len;
@@ -1100,7 +1100,7 @@ regrepeat( char *p )
 	opnd = OPERAND(p);
 	switch (OP(p)) {
 	case ANY:
-		count = strlen(scan);
+		count = (int)strlen(scan);
 		scan += count;
 		break;
 	case EXACTLY:

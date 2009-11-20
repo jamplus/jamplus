@@ -49,7 +49,7 @@ search(
 	if( varlist = var_get( "LOCATE" ) )
 	{
 	    f->f_root.ptr = varlist->string;
-	    f->f_root.len = strlen( varlist->string );
+	    f->f_root.len = (int)(strlen( varlist->string ));
 
 	    path_build( f, buf, 1 );
 
@@ -65,7 +65,7 @@ search(
 	    while( varlist )
 	    {
 		f->f_root.ptr = varlist->string;
-		f->f_root.len = strlen( varlist->string );
+		f->f_root.len = (int)(strlen( varlist->string ));
 
 		path_build( f, buf, 1 );
 

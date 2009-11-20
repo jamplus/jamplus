@@ -719,13 +719,13 @@ var_edit_parse(
 	    {
 		*p = 0;
 		fp->ptr = ++mods;
-		fp->len = p - mods;
+		fp->len = (int)(p - mods);
 		mods = p + 1;
 	    }
 	    else
 	    {
 		fp->ptr = ++mods;
-		fp->len = strlen( mods );
+		fp->len = (int)(strlen( mods ));
 		mods += fp->len;
 	    }
 #ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT

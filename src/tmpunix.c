@@ -12,7 +12,7 @@ static int do_newtmp(char** name, const char* ext)
     int h = 0;
     int i;
     int flags;
-    int extlen = 0;
+    size_t extlen = 0;
 
     if (ext) extlen = strlen(ext);
 

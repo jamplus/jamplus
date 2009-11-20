@@ -31,11 +31,11 @@ mempool_alloc_chunk(MEMPOOL* pool)
     size_t item_size;
 
     item_size = pool->item_size;
-    num_items = MEMPOOL_CHUNKSIZE / item_size;
+    num_items = (long)(MEMPOOL_CHUNKSIZE / item_size);
     chunk_size = num_items * item_size;
 
     chunk = malloc(chunk_size);
-    pool->malloc_bytes += chunk_size;
+    pool->malloc_bytes += (long)chunk_size;
     p = chunk;
     end = (MEMPOOL_FREE_BLOCK*)((char*)chunk + chunk_size);
     while (1) {

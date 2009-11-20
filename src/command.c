@@ -209,7 +209,7 @@ cmd_string(
 		const char *ine;
 		int depth;
 		TMPLIST *r;
-		int tlen;
+		size_t tlen;
 
 		r = malloc(sizeof(*r));
 		r->next = *response_files;
@@ -372,7 +372,7 @@ cmd_string(
 
 	    while (l)
 	    {
-		int so = strlen(l->string);
+		size_t so = strlen(l->string);
 
 		if ((int)buffer_pos(buff) + so >= outsize)
 		    return -1;
@@ -392,6 +392,6 @@ cmd_string(
     if ((int)buffer_pos(buff) >= outsize)
 	return -1;
     buffer_addchar(buff, 0);
-    return buffer_pos(buff);
+    return (int)buffer_pos(buff);
 }
 #endif

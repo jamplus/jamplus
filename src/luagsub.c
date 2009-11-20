@@ -388,7 +388,7 @@ int str_gsub (BUFFER *buff, const char *src, const char *p, const char *repl, in
   MatchState ms;
   size_t srcl = strlen(src);
   if (max_s == -1)
-	max_s = srcl + 1;
+	max_s = (int)(srcl + 1);
   anchor = (*p == '^') ? (p++, 1) : 0;
   n = 0;
   ms.buff = buff;

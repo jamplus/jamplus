@@ -57,11 +57,7 @@
  * file_dirscan() - scan a directory for files
  */
 
-# ifdef _M_IA64
-# define FINDTYPE long long
-# else
-# define FINDTYPE long
-# endif
+# define FINDTYPE intptr_t
 
 void
 file_dirscan( 
@@ -81,7 +77,7 @@ file_dirscan(
 	memset( (char *)&f, '\0', sizeof( f ) );
 
 	f.f_dir.ptr = dir;
-	f.f_dir.len = strlen(dir);
+	f.f_dir.len = (int)strlen(dir);
 
 	dir = *dir ? dir : ".";
 
@@ -139,7 +135,7 @@ file_dirscan(
 					( finfo->name[0] == '.'  &&  finfo->name[1] == '.'  &&  finfo->name[2] == 0 ) ) )
 		{
 		    f.f_base.ptr = finfo->name;
-		    f.f_base.len = strlen( finfo->name ) + 1;
+		    f.f_base.len = (int)(strlen( finfo->name ) + 1);
 
 		    path_build( &f, filename, 0 );
 
@@ -149,7 +145,7 @@ file_dirscan(
 	    else
 	    {
 		f.f_base.ptr = finfo->name;
-		f.f_base.len = strlen( finfo->name );
+		f.f_base.len = (int)(strlen( finfo->name ));
 
 		path_build( &f, filename, 0 );
 
@@ -590,7 +586,7 @@ int copyfile(const char *dst, const char *src, MD5SUM* md5sum)
 	}
 
 	if (md5sum) {
-	    MD5Update(&context, block, size);
+	    MD5Update(&context, block, (unsigned int)size);
 	}
 
 	sizeout = fwrite(block, 1, size, fdst);
@@ -685,7 +681,7 @@ void md5file(const char *filename, MD5SUM sum)
 	unsigned char block[BLOCK_SIZE];
 	size_t readsize = fread(block, 1, BLOCK_SIZE, f);
 	/* process the block - adding its values to the hash */
-	MD5Update( &context, block, readsize );
+	MD5Update( &context, block, (unsigned int)readsize );
     }
     /* finish input processing - write the hash key to the destination buffer */
     MD5Final( sum, &context );
@@ -700,7 +696,7 @@ void md5file(const char *filename, MD5SUM sum)
 void getprocesspath(char* buffer, size_t bufferLen)
 {
     char *ptr;
-    GetModuleFileName(NULL, buffer, bufferLen);
+    GetModuleFileName(NULL, buffer, (DWORD)bufferLen);
     ptr = strrchr(buffer, '\\');
     if (!ptr)
 	ptr = strrchr(buffer, '/');

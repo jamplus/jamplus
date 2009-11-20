@@ -167,7 +167,7 @@ static LIST *headers1helper(
 		/* Copy and terminate extracted string. */
 
 		char buf2[ MAXSYM ];
-		int l = re[i]->endp[1] - re[i]->startp[1];
+		int l = (int)(re[i]->endp[1] - re[i]->startp[1]);
 # ifdef DOWNSHIFT_PATHS
 		if ( dodownshift )
 		{

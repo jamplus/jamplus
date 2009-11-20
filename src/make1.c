@@ -874,14 +874,14 @@ make1d(
 	/* Print the output now, if there was any */
 	if( outputname )
 	{
-	    FILE 		*fp;
-	    int		n;
-	    char		buf[4096];
+		FILE		*fp;
+		size_t		n;
+		char		buf[4096];
 
-	    fp = fopen( outputname, "r" );
-	    if (fp)
-	    {
-		n = fread(buf, sizeof(char), sizeof buf, fp);
+		fp = fopen( outputname, "r" );
+		if (fp)
+		{
+			n = fread(buf, sizeof(char), sizeof buf, fp);
 //			if (verifyIsRealOutput (buf, n))
 			{
 				fwrite(buf, sizeof(char), n, stdout);
@@ -889,12 +889,11 @@ make1d(
 				while (n > 0)
 				{
 					fwrite(buf, sizeof(char), n, stdout);
-			n = fread(buf, sizeof(char), sizeof buf,
-				  fp);
+					n = fread(buf, sizeof(char), sizeof buf, fp);
 				}
 			}
 			fclose(fp);
-	    }
+		}
 	}
 
 	if( status == EXEC_CMD_FAIL && DEBUG_MAKE )
@@ -1179,7 +1178,7 @@ make1cmds( ACTIONS *a0 )
 			    MD5Init( &context );
 
 			    /* add the path of the file to the sum - it is significant because one command can create more than one file */
-			    MD5Update( &context, (unsigned char*)t->name, strlen( t->name ) );
+			    MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
 
 			    /* add in the COMMANDLINE */
 			    if ( t->flags & T_FLAG_USECOMMANDLINE )
@@ -1192,7 +1191,7 @@ make1cmds( ACTIONS *a0 )
 					LIST *list;
 					for ( list = vars->value; list; list = list->next )
 					{
-					    MD5Update( &context, (unsigned char*)list->string, strlen( list->string ) );
+					    MD5Update( &context, (unsigned char*)list->string, (unsigned int)strlen( list->string ) );
 					    if( DEBUG_MD5HASH )
 						printf( "\t\tCOMMANDLINE: %s\n", list->string );
 					}
@@ -1215,7 +1214,7 @@ make1cmds( ACTIONS *a0 )
 				make0calcmd5sum( c->target, 1 );
 				if ( c->target->buildmd5sum_calculated )
 				{
-				    MD5Update( &context, (unsigned char*)c->target->name, strlen( c->target->name ) );
+				    MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
 				    MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
 				}
 			    }

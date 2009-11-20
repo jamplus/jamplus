@@ -417,14 +417,22 @@
 # define OSPLAT "OSPLAT=AXP"
 # endif
 
+# if defined( __x86_64__ ) || \
+     defined( _M_X64 )
+# define OSPLAT "OSPLAT=X64"
+#else
+
 # if defined( _i386_ ) || \
      defined( __i386__ ) || \
      defined( _M_IX86 )
+
 # if !defined( OS_FREEBSD ) && \
      !defined( OS_OS2 ) && \
      !defined( OS_AS400 )
 # define OSPLAT "OSPLAT=X86"
 # endif
+# endif 
+
 # endif 
 
 # ifdef __sparc__

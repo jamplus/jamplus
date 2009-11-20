@@ -948,7 +948,7 @@ const char *filecache_getpath(TARGET *t)
 const char *filecache_getfilename(TARGET *t, MD5SUM sum, const char* extension)
 {
     BUFFER buff;
-    int pos;
+    size_t pos;
     const char *cachedir;
     const char* result;
 
