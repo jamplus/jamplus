@@ -90,26 +90,27 @@ if ! $(wxWidgets_ROOT)
 			wxComponents_ROOT_DIR ?= @(../wxComponents:R=$(wxWidgets_ROOT)) ;
 
 			wxWidgets_FOUND = 1 ;
-		} else {
-			local wx-config = [ Glob $(PATH) : wx-config ] ;
-			if $(wx-config) {
-				wx-config--debug = --debug= ;
-				if $(CONFIG) = debug {
-					wx-config--debug += yes ;
-				} else {
-					wx-config--debug += no ;
-				}
-				wx-config--debug = $(wx-config--debug:J) ;
-				local cxxflags = [ Split [ Shell "wx-config --cxxflags $(wx-config--debug)" ] : $(SPACE) ] ;
-				wxWidgets_DEFINES.debug = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
-				wxWidgets_HDRS.debug = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
-
-				cxxflags = [ Split [ Shell "wx-config --cxxflags --debug=no" ] : $(SPACE) ] ;
-				wxWidgets_DEFINES.release = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
-				wxWidgets_HDRS.release = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
-
-				wxWidgets_FOUND = 1 ;
+		}
+	} else {
+		local wx-config = [ Glob $(PATH) : wx-config ] ;
+		if $(wx-config) {
+			wx-config--debug = --debug= ;
+			if $(CONFIG) = debug {
+				wx-config--debug += yes ;
+			} else {
+				wx-config--debug += no ;
 			}
+			wx-config--debug = $(wx-config--debug:J) ;
+			local cxxflags = [ Split [ Shell "wx-config --cxxflags $(wx-config--debug)" ] : $(SPACE) ] ;
+			Echo $(cxxflags) ;
+			wxWidgets_DEFINES.debug = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
+			wxWidgets_HDRS.debug = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
+
+			cxxflags = [ Split [ Shell "wx-config --cxxflags --debug=no" ] : $(SPACE) ] ;
+			wxWidgets_DEFINES.release = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
+			wxWidgets_HDRS.release = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
+
+			wxWidgets_FOUND = 1 ;
 		}
 	}
 }
