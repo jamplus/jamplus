@@ -1,0 +1,5 @@
+C.Flags CC	: * : -g -O2 -arch x86_64 : release : macosx64 ;
+C.Flags C++	: *	: -g -O2 -arch x86_64 : release : macosx64 ;
+C.Flags M	: *	: -g -O2 -arch x86_64 : release : macosx64 ;
+C.Flags MM	: *	: -g -O2 -arch x86_64 : release : macosx64 ;
+C.LinkFlags * : -arch x86_64 : release : macosx64 ;

@@ -1,4 +1,0 @@
-C.Flags CC	: * : -g -O3 -fomit-frame-pointer -fstrength-reduce : releaseltcg : macosx ;
-C.Flags C++	: *	: -g -O3 -fomit-frame-pointer -fstrength-reduce : releaseltcg : macosx ;
-C.Flags M	: *	: -g -O3 -fomit-frame-pointer -fstrength-reduce : releaseltcg : macosx ;
-C.Flags MM	: *	: -g -O3 -fomit-frame-pointer -fstrength-reduce : releaseltcg : macosx ;

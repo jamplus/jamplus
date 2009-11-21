@@ -1,0 +1,5 @@
+C.Flags CC	: * : -g -O0 -arch i386 : debug : macosx32 ;
+C.Flags C++	: *	: -g -O0 -arch i386 : debug : macosx32 ;
+C.Flags M	: *	: -g -O0 -arch i386 : debug : macosx32 ;
+C.Flags MM	: *	: -g -O0 -arch i386 : debug : macosx32 ;
+C.LinkFlags * : -arch i386 : debug : macosx32 ;

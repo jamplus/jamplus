@@ -219,6 +219,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 			table.insert(self.Contents, "\t\t" .. info.ProjectConfigUuids[platformName][config] .. ' /* ' .. platformAndConfigText .. ' */ = {\n')
 			table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
 			table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+			table.insert(self.Contents, "\t\t\t\tARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\";\n");
 			table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
 			table.insert(self.Contents, "\t\t\t\tSDKROOT = macosx10.5;\n")
 			table.insert(self.Contents, "\t\t\t};\n")
@@ -354,33 +355,34 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 {
 ]])
 
-	for _, platformName in ipairs(Config.Platforms) do
-		table.insert(self.Contents, expand([[
+	table.insert(self.Contents, expand([[
 	$(ProjectUuid) /* Project object */ = {
-		activeBuildConfigurationName = $(activeConfig);
+		activeBuildConfigurationName = "$(activePlatform) - $(activeConfig)";
 		activeExecutable = $(activeExecutable) /* $(Name) */;
 		activeTarget = $(LegacyTargetUuid) /* $(Name) */;
 		executables = (
 ]], extraData, info))
 
+	for _, platformName in ipairs(Config.Platforms) do
 		for configName in ivalues(Config.Configurations) do
 			local configInfo = ConfigInfo[platformName][configName]
 			local executableConfig = info.ExecutableInfo[platformName][configName]
 
-			table.insert(self.Contents, '\t\t\t' .. executableConfig.Uuid .. ' /* ' .. configInfo.OutputName .. ' */,\n')
+			table.insert(self.Contents, '\t\t\t' .. executableConfig.Uuid .. ' /* ' .. platformName .. ' - ' .. configInfo.OutputName .. ' */,\n')
 		end
-
-		table.insert(self.Contents, [[
-		);
-		userBuildSettings = {
+	end
+	table.insert(self.Contents, [[
+			);
+			userBuildSettings = {
+			};
 		};
-	};
-]])
+	]])
 
-		table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, self.ProjectName))
-		table.insert(self.Contents, '\t\tactiveExec = 0;\n')
-		table.insert(self.Contents, '\t};\n')
+	table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(info.LegacyTargetUuid, self.ProjectName))
+	table.insert(self.Contents, '\t\tactiveExec = 0;\n')
+	table.insert(self.Contents, '\t};\n')
 
+	for _, platformName in ipairs(Config.Platforms) do
 		for configName in ivalues(Config.Configurations) do
 			local configInfo = ConfigInfo[platformName][configName]
 			local executableConfig = info.ExecutableInfo[platformName][configName]
@@ -393,21 +395,25 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 				executableConfig.FileReferenceUuid = XcodeUuid()
 			end
 			extraData.OutputName = configInfo.OutputName
+			extraData.OutputPath = configInfo.OutputPath
+
+			local platformOutputName = platformName .. ' - ' .. configInfo.OutputName
+			extraData.PlatformOutputName = platformOutputName			
 
 			if configInfo.OutputName ~= '' then
-				table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.FileReferenceUuid, configInfo.OutputName))
+				table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.FileReferenceUuid, platformOutputName))
 				table.insert(self.Contents, [[
 		isa = PBXFileReference;
 		lastKnownFileType = text;
 ]])
-				table.insert(self.Contents, '\t\tname = ' .. configInfo.OutputName .. ';\n')
+				table.insert(self.Contents, '\t\tname = "' .. platformOutputName .. '";\n')
 				table.insert(self.Contents, '\t\tpath = "' .. configInfo.OutputPath .. configInfo.OutputName .. '";\n')
 				table.insert(self.Contents, [[
 		sourceTree = "<absolute>";
 	};
 ]])
 
-				table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.Uuid, configInfo.OutputName))
+				table.insert(self.Contents, ("\t%s /* %s */ = {\n"):format(executableConfig.Uuid, platformOutputName))
 				table.insert(self.Contents, expand([[
 		isa = PBXExecutable;
 		activeArgIndices = (
@@ -442,11 +448,12 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 		);
 		executableSystemSymbolLevel = 0;
 		executableUserSymbolLevel = 0;
-		launchableReference = $(FileReferenceUuid) /* $(OutputName) */;
+		launchableReference = $(FileReferenceUuid) /* $(PlatformOutputName) */;
 		libgmallocEnabled = 0;
-		name = $(OutputName);
+		name = "$(PlatformOutputName)";
 		sourceDirectories = (
 		);
+		startupPath = "$(OutputPath)";
 	};
 ]], executableConfig, info, extraData))
 			end
