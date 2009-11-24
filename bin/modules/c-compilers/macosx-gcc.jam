@@ -35,6 +35,40 @@ if $(DONTUSEMERIGHTNOW)
 
 if ! $(TARGETINFO_LOCATE) {
 
+rule C._BundleInfoString KEY {
+	INFO_PLIST on $(TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<string>$(VALUE)</string>$(NEWLINE)" ;
+}
+
+rule C.BundleInfo TARGET : TYPE : VALUE {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	INFO_PLIST on $(TARGET) ?= "<?xml version="1.0" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CSResourcesFileMapped</key>
+	<true/>
+	<key>LSRequiresCarbon</key>
+	<true/>
+" ;
+	switch $(TYPE:L) {
+		case info :				C._BundleInfoString CFBundleGetInfoString ;
+		case iconfile :			C._BundleInfoString CFBundleIconFile ;
+		case longversion :		C._BundleInfoString CFBundleLongVersionString ;
+		case bundlename :		C._BundleInfoString CFBundleName ;
+		case shortversion :		C._BundleInfoString CFShortVersionString ;
+		case bundleversion :	C._BundleInfoString CFBundleVersion ;
+		case copyright :		C._BundleInfoString NSHumanReadableCopyright ;
+	}
+}
+
 rule C.LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM
 {
 	C.LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
@@ -98,10 +132,60 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
 	C.LinkFlags * : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
 }
 
+
+rule C._ApplicationFromObjects_LinkFlags
+{
+	if bundle in $(OPTIONS) {
+		local outputName = [ C._retrieveOutputName $(TARGET) ] ;
+		MakeLocate $(_linkTargets) : $(outputPath)/$(outputName).app/Contents/MacOS ;
+	}
+}
+
+
+rule C._ApplicationFromObjects_PostBuild
+{
+	if bundle in $(OPTIONS) {
+		local outputName = [ C._retrieveOutputName $(TARGET) ] ;
+		local bundlePath = $(outputPath)/$(outputName).app ;
+		BUNDLE_PATH on $(TARGET) = $(bundlePath) ;
+
+		local pkginfo = @(PkgInfo:G=$(grist)) ;
+		MakeLocate $(pkginfo) : $(bundlePath)/Contents ;
+		local contents = APPL???? ;
+		CONTENTS on $(pkginfo) = $(contents) ;
+		WriteFile $(pkginfo) ;
+		UseCommandLine $(pkginfo) : $(contents) ;
+		Depends $(TARGET) : $(pkginfo) ;
+		Clean clean:$(TARGET) : $(pkginfo) ;
+		
+		local infoplistcontents ;
+		on $(TARGET) infoplistcontents = $(INFO_PLIST) ;
+		if $(infoplistcontents) {
+			infoplistcontents += "</dict>
+</plist>
+" ;
+			infoplistcontents = $(infoplistcontents:J="") ;
+
+			local infoplist = @(Info.plist:G=$(grist)) ;
+			MakeLocate $(infoplist) : $(bundlePath)/Contents ;
+			CONTENTS on $(infoplist) = $(infoplistcontents) ;
+			WriteFile $(infoplist) ;
+			
+			UseCommandLine $(infoplist) : $(infoplistcontents) ;
+			Depends $(TARGET) : $(infoplist) ;
+			Clean clean:$(TARGET) : $(infoplist) ;
+		}
+		
+	}
+}
+
+
 } else {
 
-rule C.LinkFrameworks
-{
+rule C.BundleInfo TARGET : TYPE : VALUE {
+}
+
+rule C.LinkFrameworks {
 }
 
 }
