@@ -7,4 +7,14 @@ SRCS =
 IncludeModule c/wxwidgets ;
 C.UseWxWidgets SimpleWx : base core adv aui html : linklibs ;
 
-C.Application SimpleWx : $(SRCS) : windows ;
+if $(PLATFORM) in macosx32 macosx64 {
+	C.BundleInfo SimpleWx : info : "1.1 Build 1000, Copyright 2010 wxWidgets" ;
+	C.BundleInfo SimpleWx : iconfile : "SimpleWx" ;
+	C.BundleInfo SimpleWx : longversion : "1.1 Build 1000" ;
+	C.BundleInfo SimpleWx : bundlename : "SimpleWx" ;
+	C.BundleInfo SimpleWx : shortversion : 1.1 ;
+	C.BundleInfo SimpleWx : bundleversion : 1.0 ;
+	C.BundleInfo SimpleWx : copyright : "Copyright 2010 wxWidgets" ;
+}
+
+C.Application SimpleWx : $(SRCS) : windows bundle ;
