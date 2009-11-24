@@ -10,7 +10,7 @@ IncludeModule copyfile ;
 C.RuntimeType jam libjam : static ;
 
 if $(PLATFORM) = macosx {
-	C.MacOSX_SDK * : macosx : 10.4u ;
+	C.MacOSX_SDK * : macosx : 10.5 ;
 }
 
 if $(VMS) 		{ LOCATE_TARGET ?= [.binvms] ; }
