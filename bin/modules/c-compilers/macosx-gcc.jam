@@ -75,7 +75,7 @@ rule C.LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM
 }
 
 rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
-	if $(PLATFORM) != macosx { return ; }
+	if ! ( $(PLATFORM) in macosx32 macosx64 ) { return ; }
 
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local developerRoot ;
@@ -87,15 +87,27 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
 			SDK_VERSION ?= 10.5 ;
 			switch $(SDK_VERSION) {
 				case 10.4 :
+					C.CC	= gcc-4.0 ;
+					C.C++	= g++-4.0 ;
+					C.LINK	= g++-4.0 ;
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
 					flags += -mmacosx-version-min=10.4 ;
 				case 10.4u :
+					C.CC	= gcc-4.0 ;
+					C.C++	= g++-4.0 ;
+					C.LINK	= g++-4.0 ;
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
 					flags += -mmacosx-version-min=10.4 ;
 				case 10.5 :
+					C.CC	= gcc ;
+					C.C++	= g++ ;
+					C.LINK	= g++ ;
 					isysroot = $(developerRoot)/MacOSX10.5.sdk ;
 					flags += -mmacosx-version-min=10.5 ;
 				case 10.6 :
+					C.CC	= gcc ;
+					C.C++	= g++ ;
+					C.LINK	= g++ ;
 					isysroot = $(developerRoot)/MacOSX10.6.sdk ;
 					flags += -mmacosx-version-min=10.6 ;
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
