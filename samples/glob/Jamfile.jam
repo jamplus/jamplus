@@ -1,0 +1,7 @@
+SubDir TOP ;
+
+C.IncludeDirectories glob : ../../src ;
+C.OutputPostfix glob : ;
+C.RuntimeType glob : static ;
+
+C.Application glob : glob.cpp ../../src/FileGlobBase.cpp ../../src/FileGlobBase.h FileGlobList.h ;
