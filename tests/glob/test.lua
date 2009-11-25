@@ -15,16 +15,13 @@ function Test()
 
 	-- First build
 	local pattern = [[
-All - ../../bin/.gitignore ../../bin/Jambase.jam ../../bin/modules/ ../../bin/ntx86/ ../../bin/scripts/
-Dirs Only - ../../bin/modules/ ../../bin/ntx86/ ../../bin/scripts/
-Files Only - ../../bin/.gitignore ../../bin/Jambase.jam
------------------------ No prepend
-All - .gitignore Jambase.jam modules/ ntx86/ scripts/
-Dirs Only - modules/ ntx86/ scripts/
-Files Only - .gitignore Jambase.jam
-don't know how to make all
-*** found 1 target(s)...
-*** can't find 1 target(s)...
+All - ../copydirectory/Jamfile.jam ../copydirectory/source/ ../copydirectory/test.lua 
+Dirs Only - ../copydirectory/source/ 
+Files Only - ../copydirectory/Jamfile.jam ../copydirectory/test.lua 
+----------------------- No prepend 
+All - Jamfile.jam source/ test.lua 
+Dirs Only - source/ 
+Files Only - Jamfile.jam test.lua 
 ]]
 
 	TestPattern(pattern, RunJam{'-f', 'glob.jam'})

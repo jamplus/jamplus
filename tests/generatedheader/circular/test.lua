@@ -19,8 +19,9 @@ function Test()
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
 
-	-- First build
-	local pattern = [[
+	if Platform == 'win32' then
+		-- First build
+		local pattern = [[
 *** found 11 target(s)...
 *** updating 4 target(s)...
 @ SleepThenTouch <foo>generated.h
@@ -32,36 +33,36 @@ Generating Code...
 *** updated 4 target(s)...
 ]]
 
-	TestPattern(pattern, RunJam())
+		TestPattern(pattern, RunJam())
 
-	local pass1Files =
-	{
-		'Jamfile.jam',
-		'README',
-		'circularA.h',
-		'circularB.h',
-		'foo.release.lib',
-		'generated.h',
-		'sourceA.c',
-		'sourceA.obj',
-		'sourceB.c',
-		'sourceB.h',
-		'sourceB.obj',
-		'vc.pdb',
-	}
+		local pass1Files =
+		{
+			'Jamfile.jam',
+			'README',
+			'circularA.h',
+			'circularB.h',
+			'foo.release.lib',
+			'generated.h',
+			'sourceA.c',
+			'sourceA.obj',
+			'sourceB.c',
+			'sourceB.h',
+			'sourceB.obj',
+			'vc.pdb',
+		}
 
-	TestFiles(pass1Files)
-	TestDirectories(originalDirs)
+		TestFiles(pass1Files)
+		TestDirectories(originalDirs)
 
-	local pattern2 = [[
+		local pattern2 = [[
 *** found 11 target(s)...
 ]]
-	TestPattern(pattern2, RunJam())
+		TestPattern(pattern2, RunJam())
 	
-	os.sleep(1.0)
-	os.touch('generated.h')
+		os.sleep(1.0)
+		os.touch('generated.h')
 
-	local pattern3 = [[
+		local pattern3 = [[
 *** found 11 target(s)...
 *** updating 3 target(s)...
 @ C.CC <foo>sourceA.obj
@@ -71,7 +72,61 @@ Generating Code...
 @ C.Archive <foo>foo.lib
 *** updated 3 target(s)...
 ]]
-	TestPattern(pattern3, RunJam())
+		TestPattern(pattern3, RunJam())
+	
+	else
+		-- First build
+		local pattern = [[
+*** found 11 target(s)...
+*** updating 4 target(s)...
+@ SleepThenTouch <foo>generated.h 
+@ C.CC <foo>sourceA.o 
+@ C.CC <foo>sourceB.o 
+@ C.Archive <foo>foo.a 
+!NEXT!@ C.Ranlib <foo>foo.a 
+!NEXT!*** updated 4 target(s)...
+]]
+
+		TestPattern(pattern, RunJam())
+
+		local pass1Files =
+		{
+			'Jamfile.jam',
+			'README',
+			'circularA.h',
+			'circularB.h',
+			'foo.release.a',
+			'generated.h',
+			'sourceA.c',
+			'sourceA.o',
+			'sourceB.c',
+			'sourceB.h',
+			'sourceB.o',
+		}
+
+		TestFiles(pass1Files)
+		TestDirectories(originalDirs)
+
+		local pattern2 = [[
+*** found 11 target(s)...
+]]
+		TestPattern(pattern2, RunJam())
+
+		os.sleep(1.0)
+		os.touch('generated.h')
+
+		local pattern3 = [[
+*** found 11 target(s)...
+*** updating 3 target(s)...
+@ C.CC <foo>sourceA.o 
+@ C.CC <foo>sourceB.o 
+@ C.Archive <foo>foo.a 
+@ C.Ranlib <foo>foo.a 
+!NEXT!*** updated 3 target(s)...
+]]
+		TestPattern(pattern3, RunJam())
+
+	end
 
 	RunJam{ 'clean' }
 
