@@ -22,9 +22,9 @@ void Usage()
 	printf( "    Extensions and C++ interface by Joshua Jensen (jjensen@workspacewhiz.com)\n" );
 	printf( "\nUsage: Glob -i pattern patterns\n" );
 	printf( "   -e pattern = Exclusive pattern.  All ignore patterns are not used.  Only\n" );
-	printf( "                files matching the exclusive pattern are counted." );
+	printf( "                files matching the exclusive pattern are counted.\n" );
 	printf( "   -i pattern = Ignore patterns of the name [pattern].  Close with a\n" );
-	printf( "                forward slash to ignore a directory." );
+	printf( "                forward slash to ignore a directory.\n\n" );
 	exit( -1 );
 }
 
