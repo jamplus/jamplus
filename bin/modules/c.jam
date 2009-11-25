@@ -198,6 +198,7 @@ rule C.MultiCppCompile TARGET : SOURCES
 		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
 	}
 
+	local forceIncludes ;
 	on $(TARGET) {
 		postHDRS = $(HDRS.$(ALL_TYPES)) $(postHDRS) ;
 		if $(MSVCNT) {
@@ -211,6 +212,7 @@ rule C.MultiCppCompile TARGET : SOURCES
 		preMMFLAGS += $(MMFLAGS.$(ALL_TYPES)) ;
 		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
 		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+		forceIncludes = $(FORCE_INCLUDES) ;
 	}
 
 	preDEFINES = [ C.FDefines $(preDEFINES) ] ;
@@ -282,7 +284,12 @@ rule C.MultiCppCompile TARGET : SOURCES
 		}
 
 		local _hdrs = $(SEARCH_SOURCE) ;
-		on $(_obj) _hdrs += $(HDRS.$(ALL_TYPES)) ;
+		local objectForceIncludes = $(forceIncludes) ;
+
+		on $(_obj) {
+			_hdrs += $(HDRS.$(ALL_TYPES)) ;
+			objectForceIncludes += $(FORCE_INCLUDES) ;
+		}
 		_hdrs += $(postHDRS) $(C.STDHDRS) ;
 
 		HDRSEARCH on $(_src) = $(_hdrs) ;
@@ -311,7 +318,7 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 		_flags -= $(flagsToRemove) ;
 		_flags += $(flagsToAdd) ;
-
+		
 		C._MultiCppCompile_SetupFlags ;
 
 		MFLAGS on $(_src) = $(_flags) ;
@@ -897,7 +904,8 @@ rule C.ForceFileType TARGET : SOURCES : FILE_TYPE
 rule C.ForceInclude TARGET : INCLUDES : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	C._ForceIncludeHelper ;
+	local grist = $(TARGET) ;
+	FORCE_INCLUDES on $(TARGET) = $(INCLUDES:G=$(grist)) ;
 }
 
 
@@ -1000,12 +1008,7 @@ rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES : THE_CONFIG : THE_PLATFOR
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
 	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
-	local variableFlags = CCFLAGS C++FLAGS ;
-	if $(COMPILER.$(PLATFORM)) in vc6 vs2002 vs2003 vs2005 vs2008 vs2010 {
-		$(variableFlags).$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) += "/FI$(INCLUDES)" ;
-	} else {
-		$(variableFlags).$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) += "-include $(INCLUDES)" ;
-	}
+	FORCE_INCLUDES on $(objTargets) = $(INCLUDES:G=$(grist)) ;
 }
 
 

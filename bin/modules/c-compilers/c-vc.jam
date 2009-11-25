@@ -22,12 +22,6 @@ rule C.FIncludes { return /I"\"$(<)\"" ; }
 rule C.FLibraryPaths { return \"/LIBPATH:$(<)\" ; }
 
 
-rule C._ForceIncludeHelper
-{
-	C.AddFlags $(TARGET) : "/FI$(INCLUDES)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
-}
-
-
 rule C._C++Exceptions
 {
 	FLAGS_TO_REMOVE.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += /EHa /EHsc ;
@@ -266,6 +260,10 @@ rule C._MultiCppCompile_SetupFlags
 		Includes $(_src) : $(_pchFilename) ;
 		Includes $(_src) : $(forceIncludeHeader) ;
 	}
+
+	Includes $(_src) : $(objectForceIncludes) ;
+	SEARCH on $(objectForceIncludes) = $(_hdrs) ;
+	_flags += "/FI\"$(objectForceIncludes:G=)\"" ;
 
 	# bind flags, defines and includes to the target
 	_flags += $(_postmflags) ;

@@ -91,12 +91,6 @@ actions updated response C.PCH
 }
 
 
-rule C._ForceIncludeHelper
-{
-	C.AddFlags $(TARGET) : "-include $(INCLUDES)" : $(THE_CONFIG:E=*) : $(THE_PLATFORM:E=*) ;
-}
-
-
 rule C._C++Exceptions
 {
 	FLAGS_TO_REMOVE.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += -fno-exceptions ;
@@ -160,6 +154,10 @@ rule C._MultiCppCompile_SetupFlags
 			Depends $(_obj) : $(_pchFilename) ;
 		}
 	}
+
+	Includes $(_src) : $(objectForceIncludes) ;
+	SEARCH on $(objectForceIncludes) = $(_hdrs) ;
+	_flags += "-include $(objectForceIncludes:G=)" ;
 
 	_flags += "-o \"$(_obj:T)\"" ;
 }
