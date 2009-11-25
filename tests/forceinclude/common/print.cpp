@@ -2,5 +2,5 @@
 
 void Print(const char* str)
 {
-	printf(str);
+	puts(str);
 }

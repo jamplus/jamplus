@@ -69,7 +69,14 @@ function TestPattern(pattern, lines)
 		else
 			hi = 5
 		end
-		if line ~= pattern then
+		local patternMatches = false
+		if pattern:sub(1, 1) == '&' then
+		  	patternMatches = not not line:match(pattern:sub(2))
+		else
+			patternMatches = line == pattern
+		end
+		
+		if not patternMatches then
 			if not next  or  not pattern then
 				if ooo then
 					patternsToFind[#patternsToFind + 1] = pattern

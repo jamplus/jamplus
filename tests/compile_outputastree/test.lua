@@ -57,116 +57,117 @@ function Test()
 		TestFiles(originalFiles)
 	end
 
-	local dirs =
-	{
-		'liba/',
-		'libb/',
-		'libc/',
-		'outer/',
-		'outerb/',
-		'liba/lib/',
-		'liba/obj/',
-		'liba/treea/',
-		'liba/lib/win32/',
-		'liba/lib/win32/release/',
-		'liba/obj/win32/',
-		'liba/obj/win32/release/',
-		'liba/obj/win32/release/__/',
-		'liba/obj/win32/release/treea/',
-		'liba/obj/win32/release/__/outer/',
-		'liba/obj/win32/release/treea/treeb/',
-		'liba/treea/treeb/',
-		'libb/lib/',
-		'libb/obj/',
-		'libb/onelevel/',
-		'libb/lib/win32/',
-		'libb/lib/win32/release/',
-		'libb/obj/win32/',
-		'libb/obj/win32/release/',
-		'libb/obj/win32/release/__/',
-		'libb/obj/win32/release/onelevel/',
-		'libb/obj/win32/release/__/outerb/',
-		'libc/lib/',
-		'libc/obj/',
-		'libc/src/',
-		'libc/lib/win32/',
-		'libc/lib/win32/release/',
-		'libc/obj/win32/',
-		'libc/obj/win32/release/',
-		'libc/obj/win32/release/src/',
-		'libc/obj/win32/release/src/Loading/',
-		'libc/obj/win32/release/src/Saving/',
-		'libc/obj/win32/release/src/integral/',
-		'libc/obj/win32/release/src/memory/',
-		'libc/obj/win32/release/src/win32/',
-		'libc/obj/win32/release/src/win32/Loading/',
-		'libc/obj/win32/release/src/win32/Saving/',
-		'libc/src/Loading/',
-		'libc/src/Saving/',
-		'libc/src/integral/',
-		'libc/src/memory/',
-		'libc/src/win32/',
-		'libc/src/win32/Loading/',
-		'libc/src/win32/Saving/',
-	}
+	if Platform == 'win32' then
+		local dirs =
+		{
+			'liba/',
+			'libb/',
+			'libc/',
+			'outer/',
+			'outerb/',
+			'liba/lib/',
+			'liba/obj/',
+			'liba/treea/',
+			'liba/lib/win32/',
+			'liba/lib/win32/release/',
+			'liba/obj/win32/',
+			'liba/obj/win32/release/',
+			'liba/obj/win32/release/__/',
+			'liba/obj/win32/release/treea/',
+			'liba/obj/win32/release/__/outer/',
+			'liba/obj/win32/release/treea/treeb/',
+			'liba/treea/treeb/',
+			'libb/lib/',
+			'libb/obj/',
+			'libb/onelevel/',
+			'libb/lib/win32/',
+			'libb/lib/win32/release/',
+			'libb/obj/win32/',
+			'libb/obj/win32/release/',
+			'libb/obj/win32/release/__/',
+			'libb/obj/win32/release/onelevel/',
+			'libb/obj/win32/release/__/outerb/',
+			'libc/lib/',
+			'libc/obj/',
+			'libc/src/',
+			'libc/lib/win32/',
+			'libc/lib/win32/release/',
+			'libc/obj/win32/',
+			'libc/obj/win32/release/',
+			'libc/obj/win32/release/src/',
+			'libc/obj/win32/release/src/Loading/',
+			'libc/obj/win32/release/src/Saving/',
+			'libc/obj/win32/release/src/integral/',
+			'libc/obj/win32/release/src/memory/',
+			'libc/obj/win32/release/src/win32/',
+			'libc/obj/win32/release/src/win32/Loading/',
+			'libc/obj/win32/release/src/win32/Saving/',
+			'libc/src/Loading/',
+			'libc/src/Saving/',
+			'libc/src/integral/',
+			'libc/src/memory/',
+			'libc/src/win32/',
+			'libc/src/win32/Loading/',
+			'libc/src/win32/Saving/',
+		}
 	
-	local files =
-	{
-		'Jamfile.jam',
-		'Jamrules.jam',
-		'liba/Jamfile.jam',
-		'liba/rootfile.cpp',
-		'liba/lib/win32/release/liba.lib',
-		'liba/obj/win32/release/rootfile.obj',
-		'liba/obj/win32/release/vc.pdb',
-		'liba/obj/win32/release/__/outer/outer.obj',
-		'liba/obj/win32/release/treea/treeb/deepfile.obj',
-		'liba/treea/treeb/deepfile.cpp',
-		'libb/Jamfile.jam',
-		'libb/filea.cpp',
-		'libb/fileb.cpp',
-		'libb/filec.cpp',
-		'libb/lib/win32/release/libb.lib',
-		'libb/obj/win32/release/filea.obj',
-		'libb/obj/win32/release/fileb.obj',
-		'libb/obj/win32/release/filec.obj',
-		'libb/obj/win32/release/vc.pdb',
-		'libb/obj/win32/release/__/outerb/outer.obj',
-		'libb/obj/win32/release/onelevel/oneleveldeeper.obj',
-		'libb/onelevel/oneleveldeeper.cpp',
-		'libc/Jamfile.jam',
-		'libc/lib/win32/release/libc.lib',
-		'libc/obj/win32/release/vc.pdb',
-		'libc/obj/win32/release/src/Loading/Loading.obj',
-		'libc/obj/win32/release/src/Saving/Saving1.obj',
-		'libc/obj/win32/release/src/Saving/Saving3.obj',
-		'libc/obj/win32/release/src/Saving/SavingB.obj',
-		'libc/obj/win32/release/src/integral/integral1.obj',
-		'libc/obj/win32/release/src/integral/integral2.obj',
-		'libc/obj/win32/release/src/memory/memorya.obj',
-		'libc/obj/win32/release/src/memory/memoryb.obj',
-		'libc/obj/win32/release/src/win32/Loading/Loading.obj',
-		'libc/obj/win32/release/src/win32/Saving/Saving1.obj',
-		'libc/obj/win32/release/src/win32/Saving/Saving3.obj',
-		'libc/obj/win32/release/src/win32/Saving/SavingB.obj',
-		'libc/src/Loading/Loading.cpp',
-		'libc/src/Saving/Saving1.cpp',
-		'libc/src/Saving/Saving3.cpp',
-		'libc/src/Saving/SavingB.cpp',
-		'libc/src/integral/integral1.cpp',
-		'libc/src/integral/integral2.cpp',
-		'libc/src/memory/memorya.cpp',
-		'libc/src/memory/memoryb.cpp',
-		'libc/src/win32/Loading/Loading.cpp',
-		'libc/src/win32/Saving/Saving1.cpp',
-		'libc/src/win32/Saving/Saving3.cpp',
-		'libc/src/win32/Saving/SavingB.cpp',
-		'outer/outer.cpp',
-		'outerb/outer.cpp',
-	}
+		local files =
+		{
+			'Jamfile.jam',
+			'Jamrules.jam',
+			'liba/Jamfile.jam',
+			'liba/rootfile.cpp',
+			'liba/lib/win32/release/liba.lib',
+			'liba/obj/win32/release/rootfile.obj',
+			'liba/obj/win32/release/vc.pdb',
+			'liba/obj/win32/release/__/outer/outer.obj',
+			'liba/obj/win32/release/treea/treeb/deepfile.obj',
+			'liba/treea/treeb/deepfile.cpp',
+			'libb/Jamfile.jam',
+			'libb/filea.cpp',
+			'libb/fileb.cpp',
+			'libb/filec.cpp',
+			'libb/lib/win32/release/libb.lib',
+			'libb/obj/win32/release/filea.obj',
+			'libb/obj/win32/release/fileb.obj',
+			'libb/obj/win32/release/filec.obj',
+			'libb/obj/win32/release/vc.pdb',
+			'libb/obj/win32/release/__/outerb/outer.obj',
+			'libb/obj/win32/release/onelevel/oneleveldeeper.obj',
+			'libb/onelevel/oneleveldeeper.cpp',
+			'libc/Jamfile.jam',
+			'libc/lib/win32/release/libc.lib',
+			'libc/obj/win32/release/vc.pdb',
+			'libc/obj/win32/release/src/Loading/Loading.obj',
+			'libc/obj/win32/release/src/Saving/Saving1.obj',
+			'libc/obj/win32/release/src/Saving/Saving3.obj',
+			'libc/obj/win32/release/src/Saving/SavingB.obj',
+			'libc/obj/win32/release/src/integral/integral1.obj',
+			'libc/obj/win32/release/src/integral/integral2.obj',
+			'libc/obj/win32/release/src/memory/memorya.obj',
+			'libc/obj/win32/release/src/memory/memoryb.obj',
+			'libc/obj/win32/release/src/win32/Loading/Loading.obj',
+			'libc/obj/win32/release/src/win32/Saving/Saving1.obj',
+			'libc/obj/win32/release/src/win32/Saving/Saving3.obj',
+			'libc/obj/win32/release/src/win32/Saving/SavingB.obj',
+			'libc/src/Loading/Loading.cpp',
+			'libc/src/Saving/Saving1.cpp',
+			'libc/src/Saving/Saving3.cpp',
+			'libc/src/Saving/SavingB.cpp',
+			'libc/src/integral/integral1.cpp',
+			'libc/src/integral/integral2.cpp',
+			'libc/src/memory/memorya.cpp',
+			'libc/src/memory/memoryb.cpp',
+			'libc/src/win32/Loading/Loading.cpp',
+			'libc/src/win32/Saving/Saving1.cpp',
+			'libc/src/win32/Saving/Saving3.cpp',
+			'libc/src/win32/Saving/SavingB.cpp',
+			'outer/outer.cpp',
+			'outerb/outer.cpp',
+		}
 
-	do
-		local pattern = [[
+		do
+			local pattern = [[
 *** found 86 target(s)...
 *** updating 56 target(s)...
 @ C.C++ <liba>rootfile.obj
@@ -212,27 +213,182 @@ Generating Code...
 *** updated 56 target(s)...
 ]]
 
-		TestPattern(pattern, RunJam{})
-		TestDirectories(dirs)
-		TestFiles(files)
-	end
+			TestPattern(pattern, RunJam{})
+			TestDirectories(dirs)
+			TestFiles(files)
+		end
 
-	---------------------------------------------------------------------------
-	do
-		local pattern = [[
+		---------------------------------------------------------------------------
+		do
+			local pattern = [[
 *** found 86 target(s)...
 ]]
 
-		TestPattern(pattern, RunJam{})
-		TestDirectories(dirs)
-		TestFiles(files)
-	end
+			TestPattern(pattern, RunJam{})
+			TestDirectories(dirs)
+			TestFiles(files)
+		end
 
-	---------------------------------------------------------------------------
-	do
-		RunJam{ 'clean' }
-		TestDirectories(originalDirs)
-		TestFiles(originalFiles)
+		---------------------------------------------------------------------------
+		do
+			RunJam{ 'clean' }
+			TestDirectories(originalDirs)
+			TestFiles(originalFiles)
+		end
+	else
+		local dirs =
+		{
+			'liba/',
+			'libb/',
+			'libc/',
+			'outer/',
+			'outerb/',
+			'liba/lib/',
+			'liba/obj/',
+			'liba/treea/',
+			'liba/lib/macosx32/',
+			'liba/lib/macosx32/release/',
+			'liba/obj/macosx32/',
+			'liba/obj/macosx32/release/',
+			'liba/obj/macosx32/release/__/',
+			'liba/obj/macosx32/release/treea/',
+			'liba/obj/macosx32/release/__/outer/',
+			'liba/obj/macosx32/release/treea/treeb/',
+			'liba/treea/treeb/',
+			'libb/lib/',
+			'libb/obj/',
+			'libb/onelevel/',
+			'libb/lib/macosx32/',
+			'libb/lib/macosx32/release/',
+			'libb/obj/macosx32/',
+			'libb/obj/macosx32/release/',
+			'libb/obj/macosx32/release/__/',
+			'libb/obj/macosx32/release/onelevel/',
+			'libb/obj/macosx32/release/__/outerb/',
+			'libc/lib/',
+			'libc/obj/',
+			'libc/src/',
+			'libc/lib/macosx32/',
+			'libc/lib/macosx32/release/',
+			'libc/obj/macosx32/',
+			'libc/obj/macosx32/release/',
+			'libc/obj/macosx32/release/src/',
+			'libc/obj/macosx32/release/src/Loading/',
+			'libc/obj/macosx32/release/src/Saving/',
+			'libc/obj/macosx32/release/src/integral/',
+			'libc/obj/macosx32/release/src/memory/',
+			'libc/src/Loading/',
+			'libc/src/Saving/',
+			'libc/src/integral/',
+			'libc/src/memory/',
+			'libc/src/win32/',
+			'libc/src/win32/Loading/',
+			'libc/src/win32/Saving/',
+		}
+	
+		local files =
+		{
+			'Jamfile.jam',
+			'Jamrules.jam',
+			'test.lua',
+			'liba/Jamfile.jam',
+			'liba/rootfile.cpp',
+			'liba/lib/macosx32/release/liba.a',
+			'liba/obj/macosx32/release/rootfile.o',
+			'liba/obj/macosx32/release/__/outer/outer.o',
+			'liba/obj/macosx32/release/treea/treeb/deepfile.o',
+			'liba/treea/treeb/deepfile.cpp',
+			'libb/Jamfile.jam',
+			'libb/filea.cpp',
+			'libb/fileb.cpp',
+			'libb/filec.cpp',
+			'libb/lib/macosx32/release/libb.a',
+			'libb/obj/macosx32/release/filea.o',
+			'libb/obj/macosx32/release/fileb.o',
+			'libb/obj/macosx32/release/filec.o',
+			'libb/obj/macosx32/release/__/outerb/outer.o',
+			'libb/obj/macosx32/release/onelevel/oneleveldeeper.o',
+			'libb/onelevel/oneleveldeeper.cpp',
+			'libc/Jamfile.jam',
+			'libc/lib/macosx32/release/libc.a',
+			'libc/obj/macosx32/release/src/Loading/Loading.o',
+			'libc/obj/macosx32/release/src/Saving/Saving1.o',
+			'libc/obj/macosx32/release/src/Saving/Saving3.o',
+			'libc/obj/macosx32/release/src/Saving/SavingB.o',
+			'libc/obj/macosx32/release/src/integral/integral1.o',
+			'libc/obj/macosx32/release/src/integral/integral2.o',
+			'libc/obj/macosx32/release/src/memory/memorya.o',
+			'libc/obj/macosx32/release/src/memory/memoryb.o',
+			'libc/src/Loading/Loading.cpp',
+			'libc/src/Saving/Saving1.cpp',
+			'libc/src/Saving/Saving3.cpp',
+			'libc/src/Saving/SavingB.cpp',
+			'libc/src/integral/integral1.cpp',
+			'libc/src/integral/integral2.cpp',
+			'libc/src/memory/memorya.cpp',
+			'libc/src/memory/memoryb.cpp',
+			'libc/src/win32/Loading/Loading.cpp',
+			'libc/src/win32/Saving/Saving1.cpp',
+			'libc/src/win32/Saving/Saving3.cpp',
+			'libc/src/win32/Saving/SavingB.cpp',
+			'outer/outer.cpp',
+			'outerb/outer.cpp',
+		}
+
+		do
+			local pattern = [[
+*** found 52 target(s)...
+*** updating 32 target(s)...
+@ C.C++ <liba>rootfile.o 
+@ C.C++ <liba>treea/treeb/deepfile.o 
+@ C.C++ <liba>__/outer/outer.o 
+@ C.Archive <liba>liba.a 
+ar: creating archive /Users/joshua/src/jamplus/tests/compile_outputastree/liba/lib/macosx32/release/liba.a
+@ C.Ranlib <liba>liba.a 
+@ C.C++ <libb>filea.o 
+@ C.C++ <libb>fileb.o 
+@ C.C++ <libb>filec.o 
+@ C.C++ <libb>onelevel/oneleveldeeper.o 
+@ C.C++ <libb>__/outerb/outer.o 
+@ C.Archive <libb>libb.a 
+ar: creating archive /Users/joshua/src/jamplus/tests/compile_outputastree/libb/lib/macosx32/release/libb.a
+@ C.Ranlib <libb>libb.a 
+@ C.C++ <libc>src/Loading/Loading.o 
+@ C.C++ <libc>src/Saving/Saving1.o 
+@ C.C++ <libc>src/Saving/Saving3.o 
+@ C.C++ <libc>src/Saving/SavingB.o 
+@ C.C++ <libc>src/memory/memorya.o 
+@ C.C++ <libc>src/memory/memoryb.o 
+@ C.C++ <libc>src/integral/integral1.o 
+@ C.C++ <libc>src/integral/integral2.o 
+@ C.Archive <libc>libc.a 
+ar: creating archive /Users/joshua/src/jamplus/tests/compile_outputastree/libc/lib/macosx32/release/libc.a
+@ C.Ranlib <libc>libc.a 
+*** updated 32 target(s)...
+]]
+
+			TestPattern(pattern, RunJam{})
+			TestDirectories(dirs)
+			TestFiles(files)
+		end
+
+		---------------------------------------------------------------------------
+		do
+			local pattern = [[
+*** found 52 target(s)...
+]]
+
+			TestPattern(pattern, RunJam{})
+			TestDirectories(dirs)
+			TestFiles(files)
+		end
+
+		---------------------------------------------------------------------------
+		do
+			RunJam{ 'clean' }
+			TestDirectories(originalDirs)
+			TestFiles(originalFiles)
+		end
 	end
 end
 

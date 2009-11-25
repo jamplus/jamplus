@@ -13,11 +13,11 @@ actions DoEcho
 DoEcho all : : myshell ;
 
 # the_echo on myshell = echo
-# the_string = ***********
+# the_string = @@@@@@@@@@@
 #
-# Prints: echo *********** hello everyone
+# Prints: echo @@@@@@@@@@@ hello everyone
 Depends all : all2 ;
-the_string on all2 = *********** ;
+the_string on all2 = @@@@@@@@@@@ ;
 DoEcho all2 : : myshell ;
 
 # the_echo on myshell = echo

@@ -20,11 +20,9 @@ function Test()
 *** found 5 target(s)...
 *** updating 2 target(s)...
 @ ConvertImageHelper file1.image
-        1 file(s) copied.
-Caching file1.image
+!NEXT!Caching file1.image
 @ ConvertImageHelper file2.image
-        1 file(s) copied.
-Caching file2.image
+!NEXT!Caching file2.image
 *** updated 2 target(s)...
 ]]
 
