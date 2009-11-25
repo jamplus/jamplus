@@ -26,7 +26,7 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 23 target(s)...
+*** found 25 target(s)...
 *** updating 6 target(s)...
 @ C.C++ <common>print.obj
 print.cpp
@@ -69,7 +69,7 @@ project1.cpp
 		TestDirectories(originalDirs)
 
 		local pattern2 = [[
-*** found 23 target(s)...
+*** found 25 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	else
@@ -125,18 +125,15 @@ ar: creating archive libA/libA.release.a
 
 	if Platform == 'win32' then
 		local pattern3 = [[
-*** found 23 target(s)...
-*** updating 6 target(s)...
-@ C.C++ <common>print.obj
-print.cpp
-@ C.Archive <common>common.lib
+*** found 25 target(s)...
+*** updating 4 target(s)...
 @ C.C++ <libA>libA.obj
 libA.cpp
 @ C.Archive <libA>libA.lib
 @ C.C++ <project1>project1.obj
 project1.cpp
 @ C.LinkWithManifest <project1>project1.release.exe
-*** updated 6 target(s)...
+*** updated 4 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
 	else

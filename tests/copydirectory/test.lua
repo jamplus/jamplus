@@ -33,7 +33,7 @@ function Test()
 		'!NEXT!@ CopyFile1 destination/dirb/abc.txt',
 		'!NEXT!@ CopyFile1 destination/dirb/copyme/copyme.txt',
 		'!NEXT!@ CopyFile1 destination/dirb/ignore/dontcopy.txt',
-		'*** updated 11 target(s)...',
+		'!NEXT!*** updated 11 target(s)...',
 	}
 	
 	TestPattern(run1pattern, RunJam())

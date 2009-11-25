@@ -70,7 +70,7 @@ function TestPattern(pattern, lines)
 			hi = 5
 		end
 		local patternMatches = false
-		if pattern:sub(1, 1) == '&' then
+		if pattern and pattern:sub(1, 1) == '&' then
 		  	patternMatches = not not line:match(pattern:sub(2))
 		else
 			patternMatches = line == pattern
