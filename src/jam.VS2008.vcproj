@@ -218,11 +218,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\fileglob.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileGlobBase.cpp"
+				RelativePath=".\fileglob.c"
 				>
 			</File>
 			<File
@@ -401,10 +397,6 @@
 			</File>
 			<File
 				RelativePath=".\fileglob.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FileGlobBase.h"
 				>
 			</File>
 			<File

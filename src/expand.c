@@ -366,13 +366,19 @@ var_expand(
 		if ( edits.wildcard ) {
 		    LIST *newl = L0;
 		    for( ; value; value = list_next( value ) ) {
-			LIST *foundfiles;
+			LIST *foundfiles = L0;
+			fileglob* glob;
 
 			/* Handle end subscript (length actually) */
 			if( sub2 >= 0 && --sub2 < 0 )
 			    break;
 
-			foundfiles = fileglob( value->string );
+			glob = fileglob_Create( value->string );
+			while ( fileglob_Next( glob ) ) {
+				foundfiles = list_new( foundfiles, fileglob_FileName( glob ), 0 );
+			}
+			fileglob_Destroy( glob );
+
 			newl = list_copy( newl, foundfiles );
 			list_free( foundfiles );
 		    }

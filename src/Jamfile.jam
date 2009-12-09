@@ -249,7 +249,7 @@ if $(YACC) && $(SUFEXE) = ""
 # These files contain locally developed improvements.
 #
 code += w32_getreg.c w32_shortname.c ;
-code += fileglob.cpp FileGlobBase.cpp ;
+code += fileglob.c ;
 if OPT_BUILTIN_MD5_EXT in $(LOCAL_DEFINES) {
 code += md5c.c ;
 }
