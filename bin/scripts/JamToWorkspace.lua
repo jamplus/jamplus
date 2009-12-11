@@ -761,12 +761,12 @@ include "$(scriptPath)DumpJamTargetInfo.jam" ;
 					local project = Projects[projectName]
 					if not project then
 						print('* Project [' .. projectName .. '] is in workspace [' .. workspace.Name .. '] but not defined.')
-						error()
-					end
-					for projectName in ivalues(project.Libraries) do
-						if not usedProjects[projectName] then
-							workspace.Projects[#workspace.Projects + 1] = projectName
-							usedProjects[projectName] = true
+					else
+						for projectName in ivalues(project.Libraries) do
+							if not usedProjects[projectName] then
+								workspace.Projects[#workspace.Projects + 1] = projectName
+								usedProjects[projectName] = true
+							end
 						end
 					end
 				end
