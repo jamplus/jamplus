@@ -3,7 +3,7 @@ function Test()
 	local numTestsPassed, totalTests = lines[1]:match('Tests passed: (%d+)/(%d+)')
 	TestExpression(numTestsPassed == totalTests, "One of the Lua parser tests failed")
 	
-	local start = os.clock()
+	local start = os.time()
 	local pattern = [[
 *** found 4 target(s)...
 *** updating 3 target(s)...
@@ -19,6 +19,6 @@ warning: using independent target xit3.h
 *** updated 3 target(s)...
 ]]
 	TestPattern(pattern, RunJam{ '-ftestluaaction.jam' })
-	TestExpression(os.clock() - start >= 8, "testluaaction.jam did not take 8 seconds")
+	TestExpression(os.time() - start >= 8, "testluaaction.jam did not take 8 seconds")
 end
 
