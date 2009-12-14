@@ -66,7 +66,9 @@
 #include "progress.h"
 #endif
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
+#ifndef NT
 #include <unistd.h>
+#endif
 # include "md5.h"
 # include "hcache.h"
 # include "buffer.h"

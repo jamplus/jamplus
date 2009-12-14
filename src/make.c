@@ -56,9 +56,10 @@
 #ifdef OPT_REMOVE_EMPTY_DIRS_EXT
 #ifdef NT
 #include <direct.h>
+#else
+#include <unistd.h>
 #endif
 #include <errno.h>
-#include <unistd.h>
 #endif
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
@@ -288,7 +289,7 @@ static void remove_empty_dirs()
 	for( ; l; l = list_next( l ) ) {
 		++count;
 	}
-	
+
 	sortedfiles = malloc( sizeof( SORTEDTARGETS ) * count );
 	i = 0;
 	for( l = origl; l; l = list_next( l ) ) {
@@ -440,7 +441,7 @@ pass:
 		for( ; l; l = list_next( l ) ) {
 			++count;
 		}
-		
+
 		sortedfiles = malloc( sizeof( QUEUEDFILEINFO ) * count );
 		i = 0;
 		for( l = origl; l; l = list_next( l ) ) {
