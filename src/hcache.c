@@ -801,7 +801,7 @@ int getcachedmd5sum( TARGET *t, int source )
 	}
 	else {
 	    if( DEBUG_MD5HASH )
-		printf( "md5 cache out of date for %s (time %d, md5time %d)\n", t->boundname , t->time, c->mtime );
+		printf( "md5 cache out of date for %s (time %u, md5time %u)\n", t->boundname , t->time, c->mtime );
 	}
     } else {
 	if( hashenter( file->hcachehash, (HASHDATA **)&c ) ) {

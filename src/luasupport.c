@@ -503,7 +503,7 @@ int luahelper_taskisrunning(int taskid)
 	if (ret != 0)
 	{
 	    if (lua_isstring(L, -1))
-		printf("jam: Error in Lua lane\n%s\n");
+		printf("jam: Error in Lua lane\n%s\n", lua_tostring(L, -1));
 	    lua_pop(L, 2);
 	    return -1;
 	}

@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #if defined(OS_NT)
-#include "io.h"
+#include <io.h>
+#else
+#include <unistd.h>
 #endif
 
 static int do_newtmp(char** name, const char* ext)

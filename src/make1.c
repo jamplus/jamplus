@@ -66,6 +66,7 @@
 #include "progress.h"
 #endif
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
+#include <unistd.h>
 # include "md5.h"
 # include "hcache.h"
 # include "buffer.h"
@@ -265,7 +266,6 @@ make1a(
  */
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-static char filecache_buffer[ 1024 ];
 int  md5matchescommandline( TARGET *t );
 #endif
 

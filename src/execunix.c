@@ -270,8 +270,10 @@ execcmd(
 	intptr_t pid;
 	int slot;
 	const char *argv[ MAXARGC + 1 ];	/* +1 for NULL */
+# ifdef USE_EXECNT
 	int quote = 0;
-
+#endif
+	
 # ifdef USE_EXECNT
 	char *p;
 # endif

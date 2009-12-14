@@ -165,7 +165,7 @@ timestamp(
 					}
 					else
 					{
-						int hi = 5;
+						int hi = 5;  (void)hi;
 					}
 				}
 				else

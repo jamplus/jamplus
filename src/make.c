@@ -58,6 +58,7 @@
 #include <direct.h>
 #endif
 #include <errno.h>
+#include <unistd.h>
 #endif
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
@@ -1357,7 +1358,7 @@ void make0calcmd5sum( TARGET *t, int source )
 static void
 dependGraphOutputTimes( time_t time )
 {
-    printf( "(time:%d)\n", time );
+    printf( "(time:%u)\n", time );
 }
 
 static void

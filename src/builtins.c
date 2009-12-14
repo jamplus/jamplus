@@ -817,9 +817,6 @@ builtin_md5file(
 	LOL	*args,
 	int	*jmp )
 {
-	static const unsigned char list_sep[] = { 0, 0 };
-	static const unsigned char item_sep[] = { 0 };
-
 	MD5_CTX context;
 	unsigned char digest[16];
 	unsigned char digest_string[33];

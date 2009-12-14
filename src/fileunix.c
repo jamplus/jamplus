@@ -154,12 +154,12 @@ file_dirscan(
 	while( dirent = readdir( d ) )
 	{
 #ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
-	    struct stat attr;
+/*	    struct stat attr;*/
 	    f.f_base.ptr = dirent->d_name;
 	    f.f_base.len = strlen(dirent->d_name);
 	    path_build( &f, filename, 0 );
-//	    stat(filename, &attr);
-//	    if ( attr.st_mode & S_IFDIR )
+/*	    stat(filename, &attr);*/
+/*	    if ( attr.st_mode & S_IFDIR )*/
 		if ( dirent->d_type & DT_DIR )
 	    {
 			if ( ! ( ( dirent->d_name[0] == '.'  &&  dirent->d_name[1] == 0 )  ||
@@ -465,7 +465,7 @@ int file_mkdir(const char *inPath)
 			*pathPtr = 0;
 			if (mkdir(path, 0777)  &&  errno != EEXIST)
 			{
-				int err = errno;
+				int err = errno;  (void)err;
 				return -1;
 			}
 			*pathPtr++ = '/';
