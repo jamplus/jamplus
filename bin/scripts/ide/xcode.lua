@@ -397,7 +397,7 @@ function XcodeProjectMetaTable:Write(outputPath, commandLines)
 			extraData.OutputName = configInfo.OutputName
 			extraData.OutputPath = configInfo.OutputPath
 
-			local platformOutputName = platformName .. ' - ' .. configInfo.OutputName
+			local platformOutputName = platformName .. ' - ' .. configName .. ' - ' .. configInfo.OutputName
 			extraData.PlatformOutputName = platformOutputName			
 
 			if configInfo.OutputName ~= '' then
