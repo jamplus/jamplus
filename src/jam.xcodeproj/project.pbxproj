@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4227A00910D20DA400D2BF65 /* fileglob.c in Sources */ = {isa = PBXBuildFile; fileRef = 4227A00710D20DA400D2BF65 /* fileglob.c */; };
 		425244180F284A44007BC650 /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 425243F10F284A44007BC650 /* buffer.c */; };
 		425244190F284A44007BC650 /* builtins.c in Sources */ = {isa = PBXBuildFile; fileRef = 425243F30F284A44007BC650 /* builtins.c */; };
 		4252441A0F284A44007BC650 /* command.c in Sources */ = {isa = PBXBuildFile; fileRef = 425243F50F284A44007BC650 /* command.c */; };
@@ -15,8 +16,6 @@
 		4252441D0F284A44007BC650 /* execunix.c in Sources */ = {isa = PBXBuildFile; fileRef = 425243FC0F284A44007BC650 /* execunix.c */; };
 		4252441E0F284A44007BC650 /* execvms.c in Sources */ = {isa = PBXBuildFile; fileRef = 425243FD0F284A44007BC650 /* execvms.c */; };
 		4252441F0F284A44007BC650 /* expand.c in Sources */ = {isa = PBXBuildFile; fileRef = 425243FE0F284A44007BC650 /* expand.c */; };
-		425244200F284A44007BC650 /* fileglob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 425244000F284A44007BC650 /* fileglob.cpp */; };
-		425244210F284A44007BC650 /* FileGlobBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 425244020F284A44007BC650 /* FileGlobBase.cpp */; };
 		425244220F284A44007BC650 /* filemac.c in Sources */ = {isa = PBXBuildFile; fileRef = 425244040F284A44007BC650 /* filemac.c */; };
 		425244230F284A44007BC650 /* filent.c in Sources */ = {isa = PBXBuildFile; fileRef = 425244050F284A44007BC650 /* filent.c */; };
 		425244240F284A44007BC650 /* fileos2.c in Sources */ = {isa = PBXBuildFile; fileRef = 425244060F284A44007BC650 /* fileos2.c */; };
@@ -69,6 +68,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4227A00710D20DA400D2BF65 /* fileglob.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fileglob.c; sourceTree = "<group>"; };
+		4227A00810D20DA400D2BF65 /* fileglob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fileglob.h; sourceTree = "<group>"; };
 		425243F10F284A44007BC650 /* buffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = buffer.c; sourceTree = "<group>"; };
 		425243F20F284A44007BC650 /* buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffer.h; sourceTree = "<group>"; };
 		425243F30F284A44007BC650 /* builtins.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = builtins.c; sourceTree = "<group>"; };
@@ -84,10 +85,6 @@
 		425243FD0F284A44007BC650 /* execvms.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = execvms.c; sourceTree = "<group>"; };
 		425243FE0F284A44007BC650 /* expand.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = expand.c; sourceTree = "<group>"; };
 		425243FF0F284A44007BC650 /* expand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = expand.h; sourceTree = "<group>"; };
-		425244000F284A44007BC650 /* fileglob.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fileglob.cpp; sourceTree = "<group>"; };
-		425244010F284A44007BC650 /* fileglob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fileglob.h; sourceTree = "<group>"; };
-		425244020F284A44007BC650 /* FileGlobBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileGlobBase.cpp; sourceTree = "<group>"; };
-		425244030F284A44007BC650 /* FileGlobBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileGlobBase.h; sourceTree = "<group>"; };
 		425244040F284A44007BC650 /* filemac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = filemac.c; sourceTree = "<group>"; };
 		425244050F284A44007BC650 /* filent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = filent.c; sourceTree = "<group>"; };
 		425244060F284A44007BC650 /* fileos2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fileos2.c; sourceTree = "<group>"; };
@@ -185,6 +182,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4227A00710D20DA400D2BF65 /* fileglob.c */,
+				4227A00810D20DA400D2BF65 /* fileglob.h */,
 				4252442E0F284A96007BC650 /* jamgramtab.h */,
 				4252442F0F284A96007BC650 /* lists.c */,
 				425244300F284A96007BC650 /* lists.h */,
@@ -244,10 +243,6 @@
 				425243FD0F284A44007BC650 /* execvms.c */,
 				425243FE0F284A44007BC650 /* expand.c */,
 				425243FF0F284A44007BC650 /* expand.h */,
-				425244000F284A44007BC650 /* fileglob.cpp */,
-				425244010F284A44007BC650 /* fileglob.h */,
-				425244020F284A44007BC650 /* FileGlobBase.cpp */,
-				425244030F284A44007BC650 /* FileGlobBase.h */,
 				425244040F284A44007BC650 /* filemac.c */,
 				425244050F284A44007BC650 /* filent.c */,
 				425244060F284A44007BC650 /* fileos2.c */,
@@ -338,8 +333,6 @@
 				4252441D0F284A44007BC650 /* execunix.c in Sources */,
 				4252441E0F284A44007BC650 /* execvms.c in Sources */,
 				4252441F0F284A44007BC650 /* expand.c in Sources */,
-				425244200F284A44007BC650 /* fileglob.cpp in Sources */,
-				425244210F284A44007BC650 /* FileGlobBase.cpp in Sources */,
 				425244220F284A44007BC650 /* filemac.c in Sources */,
 				425244230F284A44007BC650 /* filent.c in Sources */,
 				425244240F284A44007BC650 /* fileos2.c in Sources */,
@@ -375,6 +368,7 @@
 				4252446E0F284A96007BC650 /* variable.c in Sources */,
 				4252446F0F284A96007BC650 /* w32_getreg.c in Sources */,
 				425244700F284A96007BC650 /* w32_shortname.c in Sources */,
+				4227A00910D20DA400D2BF65 /* fileglob.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
