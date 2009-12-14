@@ -1,7 +1,9 @@
-#include "fileglob.h"
 #if defined(WIN32)
 #include <windows.h>
 #else
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #define MAX_PATH 256
@@ -9,11 +11,79 @@
 #include <assert.h>
 #include <time.h>
 
+#define FILEGLOB_BUILD_IMPLEMENTATION
+
+typedef struct fileglob_StringNode {
+	struct fileglob_StringNode* next;
+	char* buffer;
+} fileglob_StringNode;
+
+
+typedef struct fileglob_Context {
+	struct fileglob_Context* prev;
+	
+	char patternBuf[MAX_PATH * 2];
+	char* pattern;
+	
+	char basePath[MAX_PATH];
+	size_t basePathLen;
+	char* basePathLastSlashPtr;
+	char* basePathEndPtr;
+	char* recurseAtPtr;
+	
+	int matchFiles;
+	char matchPattern[MAX_PATH];
+	
+#if defined(WIN32)
+	WIN32_FIND_DATA fd;
+	HANDLE handle;
+#else
+	DIR* dirp;
+	struct dirent* dp;
+	struct stat attr;
+	int hasattr;
+	int statted;
+#endif
+	
+	fileglob_StringNode* directoryListHead;
+	fileglob_StringNode* directoryListTail;
+	
+	fileglob_StringNode* iterNode;
+} fileglob_Context;
+
+
+typedef struct _fileglob
+{
+	fileglob_Context* context;
+	fileglob_Context* previousContext;
+	
+	fileglob_StringNode* exclusiveDirectoryPatternsHead;
+	fileglob_StringNode* exclusiveDirectoryPatternsTail;
+	
+	fileglob_StringNode* exclusiveFilePatternsHead;
+	fileglob_StringNode* exclusiveFilePatternsTail;
+	
+	fileglob_StringNode* ignoreDirectoryPatternsHead;
+	fileglob_StringNode* ignoreDirectoryPatternsTail;
+	
+	fileglob_StringNode* ignoreFilePatternsHead;
+	fileglob_StringNode* ignoreFilePatternsTail;
+	
+	char combinedName[MAX_PATH * 2];
+	
+	int filesAndFolders;
+} fileglob;
+
+#include "fileglob.h"
+
+
 #define MODIFIER_CHARACTER '@'
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4996)
 #endif
+
+#define FILEGLOB_BUILD_IMPLEMENTATION
 
 #if defined(WIN32)
 
@@ -46,60 +116,6 @@ static time_t glob_ConvertToTime_t(const FILETIME* fileTime)
 }
 
 #endif
-
-typedef struct fileglob_StringNode {
-	struct fileglob_StringNode* next;
-	char* buffer;
-} fileglob_StringNode;
-
-
-typedef struct fileglob_Context {
-	struct fileglob_Context* prev;
-
-	char patternBuf[MAX_PATH * 2];
-	char* pattern;
-
-	char basePath[MAX_PATH];
-	size_t basePathLen;
-	char* basePathLastSlashPtr;
-	char* basePathEndPtr;
-	char* recurseAtPtr;
-
-	int matchFiles;
-	char matchPattern[MAX_PATH];
-
-	WIN32_FIND_DATA fd;
-	HANDLE handle;
-
-	fileglob_StringNode* directoryListHead;
-	fileglob_StringNode* directoryListTail;
-
-	fileglob_StringNode* iterNode;
-} fileglob_Context;
-
-
-typedef struct fileglob
-{
-	fileglob_Context* context;
-	fileglob_Context* previousContext;
-
-	fileglob_StringNode* exclusiveDirectoryPatternsHead;
-	fileglob_StringNode* exclusiveDirectoryPatternsTail;
-
-	fileglob_StringNode* exclusiveFilePatternsHead;
-	fileglob_StringNode* exclusiveFilePatternsTail;
-
-	fileglob_StringNode* ignoreDirectoryPatternsHead;
-	fileglob_StringNode* ignoreDirectoryPatternsTail;
-
-	fileglob_StringNode* ignoreFilePatternsHead;
-	fileglob_StringNode* ignoreFilePatternsTail;
-
-	char combinedName[MAX_PATH * 2];
-
-	int filesAndFolders;
-} fileglob;
-
 
 static void _fileglob_list_clear(fileglob_StringNode** head, fileglob_StringNode** tail) {
 	fileglob_StringNode* node;
@@ -222,9 +238,15 @@ static void _fileglob_FreeContextLevel(fileglob* self) {
 		fileglob_Context* oldContext = self->context;
 		_fileglob_list_clear(&oldContext->directoryListHead, &oldContext->directoryListTail);
 		self->context = oldContext->prev;
+#if defined(WIN32)
 		if (oldContext->handle != INVALID_HANDLE_VALUE) {
 			FindClose(oldContext->handle);
 		}
+#else
+		if (oldContext->dirp) {
+			closedir(oldContext->dirp);
+		}
+#endif
 		free(oldContext);
 	}
 }
@@ -628,7 +650,7 @@ static void SplicePath(char * dest, const char * p1, const char * p2)
 	if (l == 0) {
 		strcpy(dest, p2);
 	} else {
-		if (l + strlen(p2) > _MAX_PATH-2) {
+		if (l + strlen(p2) > MAX_PATH-2) {
 			// Path too long.
 			assert(0);
 		}
@@ -647,94 +669,178 @@ int fileglob_Next(fileglob* self) {
 
 
 const char* fileglob_FileName(fileglob* self) {
+#if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
 		SplicePath(self->combinedName, self->context->basePath, self->context->fd.cFileName);
 		return self->combinedName;
 	}
+#else
+	if (self->context->dirp) {
+		SplicePath(self->combinedName, self->context->basePath, self->context->dp->d_name);
+		return self->combinedName;
+	} else {
+		return self->context->patternBuf;
+	}
+#endif
 
 	return NULL;
 }
 
 
-unsigned __int64 fileglob_CreationTime(fileglob* self) {
+fileglob_uint64 fileglob_CreationTime(fileglob* self) {
+#if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
 		return glob_ConvertToTime_t(&self->context->fd.ftCreationTime);
 	}
+#else
+	if (self->context->dirp) {
+		if (!self->context->hasattr) {
+			stat(fileglob_FileName(self), &self->context->attr);
+			self->context->hasattr = 1;
+		}
+		return self->context->attr.st_ctime;
+	}
+#endif
 
 	return 0;
 }
 
 
-unsigned __int64 fileglob_AccessTime(fileglob* self) {
+fileglob_uint64 fileglob_AccessTime(fileglob* self) {
+#if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
 		return glob_ConvertToTime_t(&self->context->fd.ftLastAccessTime);
 	}
+#else
+	if (self->context->dirp) {
+		if (!self->context->hasattr) {
+			stat(fileglob_FileName(self), &self->context->attr);
+			self->context->hasattr = 1;
+		}
+		return self->context->attr.st_atime;
+	}
+#endif
 
 	return 0;
 }
 
 
-unsigned __int64 fileglob_WriteTime(fileglob* self) {
+fileglob_uint64 fileglob_WriteTime(fileglob* self) {
+#if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
 		return glob_ConvertToTime_t(&self->context->fd.ftLastWriteTime);
 	}
+#else
+	if (self->context->dirp) {
+		if (!self->context->hasattr) {
+			stat(fileglob_FileName(self), &self->context->attr);
+			self->context->hasattr = 1;
+		}
+		return self->context->attr.st_mtime;
+	}
+#endif
 
 	return 0;
 }
 
 
-unsigned __int64 fileglob_CreationFILETIME(fileglob* self) {
+fileglob_uint64 fileglob_CreationFILETIME(fileglob* self) {
+#if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
-		return ((unsigned __int64)self->context->fd.ftCreationTime.dwHighDateTime << 32) |
-				(unsigned __int64)self->context->fd.ftCreationTime.dwLowDateTime;
+		return ((fileglob_uint64)self->context->fd.ftCreationTime.dwHighDateTime << 32) |
+				(fileglob_uint64)self->context->fd.ftCreationTime.dwLowDateTime;
 	}
+#else
+	if (self->context->dirp) {
+	}
+#endif
 
 	return 0;
 }
 
 
-unsigned __int64 fileglob_AccessFILETIME(fileglob* self) {
+fileglob_uint64 fileglob_AccessFILETIME(fileglob* self) {
+#if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
-		return ((unsigned __int64)self->context->fd.ftLastAccessTime.dwHighDateTime << 32) |
-				(unsigned __int64)self->context->fd.ftLastAccessTime.dwLowDateTime;
+		return ((fileglob_uint64)self->context->fd.ftLastAccessTime.dwHighDateTime << 32) |
+				(fileglob_uint64)self->context->fd.ftLastAccessTime.dwLowDateTime;
 	}
+#else
+	if (self->context->dirp) {
+	}
+#endif
 
 	return 0;
 }
 
 
-unsigned __int64 fileglob_WriteFILETIME(fileglob* self) {
+fileglob_uint64 fileglob_WriteFILETIME(fileglob* self) {
+#if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
-		return ((unsigned __int64)self->context->fd.ftLastWriteTime.dwHighDateTime << 32) |
-				(unsigned __int64)self->context->fd.ftLastWriteTime.dwLowDateTime;
+		return ((fileglob_uint64)self->context->fd.ftLastWriteTime.dwHighDateTime << 32) |
+				(fileglob_uint64)self->context->fd.ftLastWriteTime.dwLowDateTime;
 	}
+#else
+	if (self->context->dirp) {
+	}
+#endif
 
 	return 0;
 }
 
 
-unsigned __int64 fileglob_FileSize(fileglob* self) {
+fileglob_uint64 fileglob_FileSize(fileglob* self) {
+#if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
-		return ((unsigned __int64)self->context->fd.nFileSizeLow + ((unsigned __int64)self->context->fd.nFileSizeHigh << 32));
+		return ((fileglob_uint64)self->context->fd.nFileSizeLow + ((fileglob_uint64)self->context->fd.nFileSizeHigh << 32));
 	}
+#else
+	if (self->context->dirp) {
+		if (!self->context->hasattr) {
+			stat(fileglob_FileName(self), &self->context->attr);
+			self->context->hasattr = 1;
+		}
+		return self->context->attr.st_size;
+	}
+#endif
 
 	return 0;
 }
 
 
 int fileglob_IsDirectory(fileglob* self) {
+#if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
 		return (self->context->fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 	}
+#else
+	if (self->context->dirp) {
+		if (!self->context->hasattr) {
+			stat(fileglob_FileName(self), &self->context->attr);
+			self->context->hasattr = 1;
+		}
+		return (self->context->attr.st_mode & S_IFDIR) != 0;
+	}
+#endif
 
 	return 0;
 }
 
 
 int fileglob_IsReadOnly(fileglob* self) {
+#if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
 		return (self->context->fd.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0;
 	}
+#else
+	if (self->context->dirp) {
+		if (!self->context->hasattr) {
+			stat(fileglob_FileName(self), &self->context->attr);
+			self->context->hasattr = 1;
+		}
+		return (self->context->attr.st_mode & S_IWUSR) != 0;
+	}
+#endif
 
 	return 0;
 }
@@ -773,7 +879,13 @@ Setup:
 	if (!context) {
 		context = (fileglob_Context*)malloc(sizeof(fileglob_Context));
 		context->prev = self->context;
+#if defined(WIN32)
 		context->handle = INVALID_HANDLE_VALUE;
+#else
+		context->dirp = NULL;
+		context->hasattr = 0;
+		context->statted = 0;
+#endif
 		context->pattern = NULL;
 		context->iterNode = NULL;
 		context->directoryListHead = context->directoryListTail = 0;
@@ -845,16 +957,18 @@ DoRecursion:
 		context->basePath[context->basePathLen] = 0;
 	}
 
+#if defined(WIN32)
 	if (context->handle == INVALID_HANDLE_VALUE) {
+#else
+	if (!context->dirp  &&  !context->statted) {
+#endif
 		size_t matchLen;
 
 		// If there is no wildcard this time, then just add the current file and
 		// get out of here.
 		if (!hasWildcard)
 		{
-#if defined(WIN32)
-#else
-			DIR* dirp;
+#if !defined(WIN32)
 #endif
 			int isDir = 0;
 			size_t patternLen = strlen(context->patternBuf);
@@ -874,12 +988,18 @@ DoRecursion:
 			if (context->handle != INVALID_HANDLE_VALUE)
 				return 1;
 #else
-			struct stat attr;
-			int ret = stat(patternBuf, &attr);
-			if (isDir)
-			    patternBuf[patternLen - 1] = '/';
+			context->hasattr = 1;
+			int ret = stat(context->patternBuf, &context->attr);
+			if (isDir) {
+//				size_t len = strlen(context->fd.cFileName);
+//				context->fd.cFileName[len] = '/';
+//				context->fd.cFileName[len + 1] = '\0';
+			    context->patternBuf[patternLen - 1] = '/';
+			}
+			context->statted = 1;
+			*context->basePathLastSlashPtr = 0;
 			if (ret != -1)
-				FoundMatch(patternBuf);
+				return 1;
 #endif
 			goto NewContext;
 		}
@@ -894,13 +1014,13 @@ DoRecursion:
 		if (context->matchPattern[matchLen] == '/')
 			context->matchPattern[matchLen + 1] = 0;
 
-#if defined(WIN32)
 		if (!hasWildcard) {
 			// This is probably a single file lookup.
 			strcpy(context->basePathEndPtr, context->matchPattern);
 			if (context->basePathEndPtr[strlen(context->basePathEndPtr) - 1] == '/')
 				context->basePathEndPtr[strlen(context->basePathEndPtr) - 1] = 0;
 		}
+#if defined(WIN32)
 		else {
 			// Do the file search with *.* in the directory specified in basePattern.
 			strcpy(context->basePathEndPtr, "*.*");
@@ -911,32 +1031,55 @@ DoRecursion:
 		if (context->handle == INVALID_HANDLE_VALUE) {
 			found = 0;
 		}
+#else		
+		// Start the find.
+		context->dirp = opendir(context->basePath[0] ? context->basePath : ".");
+		if (!context->dirp) {
+			found = 0;
+		} else {
+			context->dp = readdir(context->dirp);
+			found = context->dp != NULL;
+		}
+#endif
 
 		// Clear out the *.* so we can use the original basePattern string.
 		*context->basePathEndPtr = 0;
 	} else {
 		goto NextFile;
 	}
-
+		
 	// Any files found?
-	if (context->handle != INVALID_HANDLE_VALUE)
-	{
-		for (;;)
-		{
+#if defined(WIN32)
+	if (context->handle != INVALID_HANDLE_VALUE) {
+#else
+	if (context->dirp) {
+#endif
+		for (;;) {
+#if defined(WIN32)
+			char* filename = context->fd.cFileName;
+#else
+			char* filename = context->dp->d_name;
+			context->hasattr = 0;
+#endif
+
 			// Is the file a directory?
+#if defined(WIN32)
 			if (context->fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+#else
+			if (context->dp->d_type == DT_DIR) {
+#endif
 				// Knock out "." or ".."
-				int ignore = context->fd.cFileName[0] == '.'  &&
-						(context->fd.cFileName[1] == 0  ||
-							(context->fd.cFileName[1] == '.'  &&  context->fd.cFileName[2] == 0));
+				int ignore = filename[0] == '.'  &&
+						(filename[1] == 0  ||
+							(filename[1] == '.'  &&  filename[2] == 0));
 
 				// Should this file be ignored?
 				int matches = 0;
 				if (!ignore) {
-					size_t len = strlen(context->fd.cFileName);
-					context->fd.cFileName[len] = '/';
-					context->fd.cFileName[len + 1] = '\0';
-					matches = WildMatch(context->matchPattern, context->fd.cFileName, 0);
+					size_t len = strlen(filename);
+					filename[len] = '/';
+					filename[len + 1] = '\0';
+					matches = WildMatch(context->matchPattern, filename, 0);
 				}
 
 				// Do a wildcard match.
@@ -944,11 +1087,11 @@ DoRecursion:
 					// It matched.  Let's see if the file should be ignored.
 					
 					// See if this is a directory to ignore.
-					ignore = _fileglob_MatchIgnoreDirectoryPattern(self, context->fd.cFileName);
+					ignore = _fileglob_MatchIgnoreDirectoryPattern(self, filename);
 					
 					// Is this pattern exclusive?
 					if (self->exclusiveDirectoryPatternsHead) {
-						int exclusive = _fileglob_MatchExclusiveDirectoryPattern(self, context->fd.cFileName);
+						int exclusive = _fileglob_MatchExclusiveDirectoryPattern(self, filename);
 						ignore = !exclusive;
 //						if (exclusive)
 //							break;
@@ -958,20 +1101,20 @@ DoRecursion:
 //					if (!ignore  &&  !context->matchFiles  &&  *context->pattern == 0)
 //						break;
 					if (!ignore) {
-						_fileglob_list_append(&context->directoryListHead, &context->directoryListTail, context->fd.cFileName);
+						_fileglob_list_append(&context->directoryListHead, &context->directoryListTail, filename);
 						if ((!context->matchFiles  ||  self->filesAndFolders)  &&  *context->pattern == 0)
 							break;
 					}
 				}
 			} else {
 				// Do a wildcard match.
-				if (WildMatch(context->matchPattern, context->fd.cFileName, 0)) {
+				if (WildMatch(context->matchPattern, filename, 0)) {
 					// It matched.  Let's see if the file should be ignored.
-					int ignore = _fileglob_MatchIgnoreFilePattern(self, context->fd.cFileName);
+					int ignore = _fileglob_MatchIgnoreFilePattern(self, filename);
 					
 					// Is this pattern exclusive?
 					if (!ignore  &&  self->exclusiveFilePatternsHead) {
-						ignore = !_fileglob_MatchExclusiveFilePattern(self, context->fd.cFileName);
+						ignore = !_fileglob_MatchExclusiveFilePattern(self, filename);
 					}
 					
 					// Should this file be ignored?
@@ -984,21 +1127,37 @@ DoRecursion:
 
 NextFile:
 			// Look up the next file.
+#if defined(WIN32)
 			found = FindNextFile(context->handle, &context->fd) == TRUE;
+#else
+			if (context->dirp) {
+				context->dp = readdir(context->dirp);
+				found = context->dp != NULL;
+			} else {
+				found = 0;
+			}
+#endif
 			if (!found)
 				break;
 		}
 
 		if (!found) {
 			// Close down the file find handle.
+#if defined(WIN32)
 			FindClose(context->handle);
 			context->handle = INVALID_HANDLE_VALUE;
+#else
+			if (context->dirp) {
+				closedir(context->dirp);
+				context->dirp = NULL;
+			}
+#endif
 
 			context->iterNode = context->directoryListHead;
 		}
 	}
 	
-#else
+#if 0
 	// Start the find.
 	DIR* dirp = opendir(basePath[0] ? basePath : ".");
 	if (!dirp)
