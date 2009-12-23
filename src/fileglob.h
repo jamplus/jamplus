@@ -18,7 +18,10 @@ extern "C" {
 typedef struct _fileglob fileglob;
 #endif
 
+typedef void* (*fileglob_Alloc)(void* userData, void* ptr, unsigned int size);
+
 fileglob* fileglob_Create(const char* inPattern);
+fileglob* fileglob_CreateWithAlloc(const char* inPattern, fileglob_Alloc alloc, void* userData);
 void fileglob_Destroy(fileglob* self);
 void fileglob_AddExclusivePattern(fileglob* self, const char* name);
 void fileglob_AddIgnorePattern(fileglob* self, const char* name);

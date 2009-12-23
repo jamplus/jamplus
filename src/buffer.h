@@ -3,14 +3,21 @@
 
 #include <stdio.h>
 
+#define BUFFER_STATIC_SIZE 1024
+
+typedef void* (*buffer_Alloc)(void* userData, void* ptr, unsigned int size);
+
 typedef struct _buffer {
-  char *buffer;
-  char static_buffer[1024];
-  size_t pos;
-  size_t buffsize;
+	char *buffer;
+	char static_buffer[BUFFER_STATIC_SIZE];
+	size_t pos;
+	size_t buffsize;
+	buffer_Alloc alloc_function;
+	void* user_data;
 } BUFFER;
 
-#define buffer_init(buff) ((buff)->buffer = (char*)&(buff)->static_buffer, (buff)->pos = 0, (buff)->buffsize = 1024)
+void buffer_init(BUFFER* buff);
+void buffer_initwithalloc(BUFFER* buff, buffer_Alloc alloc, void* userData);
 
 #define buffer_ptr(buff)	((buff)->buffer)
 #define buffer_size(buff)	((buff)->buffsize)
@@ -23,16 +30,16 @@ typedef struct _buffer {
 void buffer_openspacehelper(BUFFER *buff, size_t amount);
 void buffer_resize(BUFFER* buff, size_t size);
 
-#define buffer_free(buff)	buffer_resize(buff, 0)
+#define buffer_free(buff)	buffer_resize((buff), 0)
 
 #define buffer_openspace(buff, amount) \
   if (((size_t)(amount) + (buff)->pos) > (buff)->buffsize) \
     buffer_openspacehelper((buff), (amount));
 
-#define buffer_addchar(buff, c) { buffer_openspace(buff, 1); (buff)->buffer[(buff)->pos] = (c); (buff)->pos++; }
-#define buffer_addstring(buff, str, len) { buffer_openspace((buff), (len)); memcpy((buff)->buffer + (buff)->pos, str, (len)); (buff)->pos += (size_t)(len); }
+#define buffer_addchar(buff, c) { buffer_openspace((buff), 1); (buff)->buffer[(buff)->pos] = (c); (buff)->pos++; }
+#define buffer_addstring(buff, str, len) { size_t _len = (len); buffer_openspace((buff), _len); memcpy((buff)->buffer + (buff)->pos, str, _len); (buff)->pos += _len; }
 #define buffer_putchar(buff, c) (buff)->buffer[(buff)->pos] = (c)
-#define buffer_putstring(buff, str, len) { buffer_openspace((buff), (len)); memcpy((buff)->buffer + (buff)->pos, str, (len)); }
+#define buffer_putstring(buff, str, len) { size_t _len = (len); buffer_openspace((buff), _len); memcpy((buff)->buffer + (buff)->pos, str, _len); }
 #define buffer_setpos(buff, newpos) (buff)->pos = newpos;
 #define buffer_deltapos(buff, delta) (buff)->pos += delta
 #define buffer_isempty(buff) ((buff)->pos == 0)

@@ -6,34 +6,48 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#define MAX_PATH 256
 #endif
 #include <assert.h>
 #include <time.h>
+#include "buffer.h"
+
+static void* fileglob_DefaultAllocFunction(void* userData, void* ptr, unsigned int size)
+{
+	(void)userData;
+
+	if (size == 0) {
+		free(ptr);
+		return NULL;
+	} else {
+		return realloc(ptr, size);
+	}
+}
+
+
 
 #define FILEGLOB_BUILD_IMPLEMENTATION
 
 typedef struct fileglob_StringNode {
 	struct fileglob_StringNode* next;
-	char* buffer;
+	char buffer[1];
 } fileglob_StringNode;
 
 
 typedef struct fileglob_Context {
 	struct fileglob_Context* prev;
-	
-	char patternBuf[MAX_PATH * 2];
+
+	BUFFER patternBuf;
 	char* pattern;
-	
-	char basePath[MAX_PATH];
+
+	BUFFER basePath;
 	size_t basePathLen;
-	char* basePathLastSlashPtr;
-	char* basePathEndPtr;
-	char* recurseAtPtr;
-	
+	size_t basePathLastSlashPos;
+	size_t basePathEndPos;
+	size_t recurseAtPos;
+
 	int matchFiles;
-	char matchPattern[MAX_PATH];
-	
+	BUFFER matchPattern;
+
 #if defined(WIN32)
 	WIN32_FIND_DATA fd;
 	HANDLE handle;
@@ -44,39 +58,49 @@ typedef struct fileglob_Context {
 	int hasattr;
 	int statted;
 #endif
-	
+
 	fileglob_StringNode* directoryListHead;
 	fileglob_StringNode* directoryListTail;
-	
+
 	fileglob_StringNode* iterNode;
 } fileglob_Context;
 
+
+typedef void* (*fileglob_Alloc)(void* userData, void* ptr, unsigned int size);
 
 typedef struct _fileglob
 {
 	fileglob_Context* context;
 	fileglob_Context* previousContext;
-	
+
 	fileglob_StringNode* exclusiveDirectoryPatternsHead;
 	fileglob_StringNode* exclusiveDirectoryPatternsTail;
-	
+
 	fileglob_StringNode* exclusiveFilePatternsHead;
 	fileglob_StringNode* exclusiveFilePatternsTail;
-	
+
 	fileglob_StringNode* ignoreDirectoryPatternsHead;
 	fileglob_StringNode* ignoreDirectoryPatternsTail;
-	
+
 	fileglob_StringNode* ignoreFilePatternsHead;
 	fileglob_StringNode* ignoreFilePatternsTail;
-	
-	char combinedName[MAX_PATH * 2];
-	
+
+	fileglob_Alloc allocFunction;
+	void* userData;
+
+	BUFFER combinedName;
+
 	int filesAndFolders;
 } fileglob;
 
 #include "fileglob.h"
 
+void fileglob_MatchPattern(fileglob* self, const char* inPattern);
 
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 #define MODIFIER_CHARACTER '@'
 
 #if defined(_MSC_VER)
@@ -104,7 +128,7 @@ static time_t glob_ConvertToTime_t(const FILETIME* fileTime)
 	}
 
 	dst = GetTimeZoneInformation(&timeZone) == TIME_ZONE_ID_STANDARD;
-	
+
 	atm.tm_sec = sysTime.wSecond;
 	atm.tm_min = sysTime.wMinute;
 	atm.tm_hour = sysTime.wHour;
@@ -117,13 +141,12 @@ static time_t glob_ConvertToTime_t(const FILETIME* fileTime)
 
 #endif
 
-static void _fileglob_list_clear(fileglob_StringNode** head, fileglob_StringNode** tail) {
+static void _fileglob_list_clear(fileglob* self, fileglob_StringNode** head, fileglob_StringNode** tail) {
 	fileglob_StringNode* node;
 	for (node = *head; node;) {
 		fileglob_StringNode* oldNode = node;
 		node = node->next;
-		free(oldNode->buffer);
-		free(oldNode);
+		self->allocFunction(self->userData, oldNode, 0);
 	}
 
 	*head = 0;
@@ -131,17 +154,15 @@ static void _fileglob_list_clear(fileglob_StringNode** head, fileglob_StringNode
 }
 
 
-static void _fileglob_list_append(fileglob_StringNode** head, fileglob_StringNode** tail, const char* theString) {
-	size_t patternLen;
-	fileglob_StringNode* newNode = (fileglob_StringNode*)malloc(sizeof(fileglob_StringNode));
+static void _fileglob_list_append(fileglob* self, fileglob_StringNode** head, fileglob_StringNode** tail, const char* theString) {
+	size_t patternLen = strlen(theString);
+	fileglob_StringNode* newNode = (fileglob_StringNode*)self->allocFunction(self->userData, NULL, sizeof(fileglob_StringNode) + patternLen);
 	if (!*head)
 		*head = newNode;
 	if (*tail)
 		(*tail)->next = newNode;
 	*tail = newNode;
 	newNode->next = NULL;
-	patternLen = strlen(theString);
-	newNode->buffer = (char*)malloc(patternLen + 1);
 	memcpy(newNode->buffer, theString, patternLen + 1);
 }
 
@@ -236,7 +257,10 @@ int _fileglob_GlobHelper(fileglob* self, const char* inPattern);
 static void _fileglob_FreeContextLevel(fileglob* self) {
 	if (self->context) {
 		fileglob_Context* oldContext = self->context;
-		_fileglob_list_clear(&oldContext->directoryListHead, &oldContext->directoryListTail);
+		_fileglob_list_clear(self, &oldContext->directoryListHead, &oldContext->directoryListTail);
+		buffer_free(&oldContext->basePath);
+		buffer_free(&oldContext->matchPattern);
+		buffer_free(&oldContext->patternBuf);
 		self->context = oldContext->prev;
 #if defined(WIN32)
 		if (oldContext->handle != INVALID_HANDLE_VALUE) {
@@ -247,7 +271,7 @@ static void _fileglob_FreeContextLevel(fileglob* self) {
 			closedir(oldContext->dirp);
 		}
 #endif
-		free(oldContext);
+		self->allocFunction(self->userData, oldContext, 0);
 	}
 }
 
@@ -255,10 +279,10 @@ static void _fileglob_FreeContextLevel(fileglob* self) {
 /**
 **/
 void _fileglob_Reset(fileglob* self) {
-	_fileglob_list_clear(&self->exclusiveDirectoryPatternsHead, &self->exclusiveDirectoryPatternsTail);
-	_fileglob_list_clear(&self->exclusiveFilePatternsHead, &self->exclusiveFilePatternsTail);
-	_fileglob_list_clear(&self->ignoreDirectoryPatternsHead, &self->ignoreDirectoryPatternsTail);
-	_fileglob_list_clear(&self->ignoreFilePatternsHead, &self->ignoreFilePatternsTail);
+	_fileglob_list_clear(self, &self->exclusiveDirectoryPatternsHead, &self->exclusiveDirectoryPatternsTail);
+	_fileglob_list_clear(self, &self->exclusiveFilePatternsHead, &self->exclusiveFilePatternsTail);
+	_fileglob_list_clear(self, &self->ignoreDirectoryPatternsHead, &self->ignoreDirectoryPatternsTail);
+	_fileglob_list_clear(self, &self->ignoreFilePatternsHead, &self->ignoreFilePatternsTail);
 
 	while (self->context) {
 		_fileglob_FreeContextLevel(self);
@@ -268,11 +292,21 @@ void _fileglob_Reset(fileglob* self) {
 
 /**
 **/
-void fileglob_MatchPattern(fileglob* self, const char* inPattern);
-
 fileglob* fileglob_Create(const char* inPattern) {
-	fileglob* self = (fileglob*)malloc(sizeof(fileglob));
+	return fileglob_CreateWithAlloc( inPattern, NULL, NULL );
+}
+
+
+/**
+**/
+fileglob* fileglob_CreateWithAlloc(const char* inPattern, fileglob_Alloc allocFunction, void* userData) {
+	fileglob* self;
+	allocFunction = allocFunction ? allocFunction : fileglob_DefaultAllocFunction;
+	self = (fileglob*)allocFunction(userData, NULL, sizeof(fileglob));
 	memset(self, 0, sizeof(fileglob));
+	self->allocFunction = allocFunction;
+	self->userData = userData;
+	buffer_initwithalloc(&self->combinedName, self->allocFunction, self->userData);
 	fileglob_MatchPattern(self, inPattern);
 	return self;
 }
@@ -284,7 +318,8 @@ void fileglob_Destroy(fileglob* self) {
 	if (!self)
 		return;
 	_fileglob_Reset(self);
-	free(self);
+	buffer_free(&self->combinedName);
+	self->allocFunction(self->userData, self, 0);
 }
 
 
@@ -335,15 +370,16 @@ void fileglob_Destroy(fileglob* self) {
 	Expands to:
 
 	../../../../StartSearchHere\**
-		
+
 	\param inPattern The pattern to use for matching.
 **/
 void fileglob_MatchPattern(fileglob* self, const char* inPattern) {
-	char pattern[MAX_PATH];
+	BUFFER destBuff;
 	const char* srcPtr;
-	char* destPtr;
 	const char* lastSlashPtr;
 	int numPeriods;
+
+	buffer_initwithalloc(&destBuff, self->allocFunction, self->userData);
 
 	if (inPattern == 0)
 		inPattern = "*";
@@ -351,24 +387,23 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern) {
 	// Give ourselves a local copy of the inPattern with all \ characters
 	// changed to / characters and more than two periods expanded.
 	srcPtr = inPattern;
-	destPtr = pattern;
 
 	// Is it a Windows network path?   If so, don't convert the opening \\.
 	if (srcPtr[0] == '\\'   &&   srcPtr[1] == '\\')
 	{
-		*destPtr++ = *srcPtr++;
-		*destPtr++ = *srcPtr++;
+		buffer_addchar(&destBuff, *srcPtr++);
+		buffer_addchar(&destBuff, *srcPtr++);
 	}
 
 	lastSlashPtr = srcPtr - 1;
 	numPeriods = 0;
 	while (*srcPtr != '\0') {
 		char ch = *srcPtr;
-		
+
 		///////////////////////////////////////////////////////////////////////
 		// Check for slashes or backslashes.
 		if (ch == '\\'  ||  ch == '/') {
-			*destPtr++ = '/';
+			buffer_addchar(&destBuff, '/');
 
 			lastSlashPtr = srcPtr;
 			numPeriods = 0;
@@ -380,14 +415,14 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern) {
 			if (srcPtr - numPeriods - 1 == lastSlashPtr) {
 				numPeriods++;
 				if (numPeriods > 2) {
-					*destPtr++ = '/';
-					*destPtr++ = '.';
-					*destPtr++ = '.';
+					buffer_addchar(&destBuff, '/');
+					buffer_addchar(&destBuff, '.');
+					buffer_addchar(&destBuff, '.');
 				} else {
-					*destPtr++ = '.';
+					buffer_addchar(&destBuff, '.');
 				}
 			} else {
-				*destPtr++ = '.';
+				buffer_addchar(&destBuff, '.');
 			}
 		}
 
@@ -402,14 +437,14 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern) {
 				// needs to be translated to:
 				//
 				// /Dir*/**/
-				*destPtr++ = '*';
-				*destPtr++ = '/';
+				buffer_addchar(&destBuff, '*');
+				buffer_addchar(&destBuff, '/');
 			}
 
 			srcPtr += 2;
 
-			*destPtr++ = '*';
-			*destPtr++ = '*';
+			buffer_addchar(&destBuff, '*');
+			buffer_addchar(&destBuff, '*');
 
 			// Did we get a double star this round?
 			if (srcPtr[0] != '/'  &&  srcPtr[0] != '\\') {
@@ -420,15 +455,15 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern) {
 				// Translate to:
 				//
 				// /**/*Text
-				*destPtr++ = '/';
-				*destPtr++ = '*';
+				buffer_addchar(&destBuff, '/');
+				buffer_addchar(&destBuff, '*');
 			}
 			else if (srcPtr[1] == '\0'  ||  srcPtr[1] == MODIFIER_CHARACTER) {
 				srcPtr++;
 
-				*destPtr++ = '/';
-				*destPtr++ = '*';
-				*destPtr++ = '/';
+				buffer_addchar(&destBuff, '/');
+				buffer_addchar(&destBuff, '*');
+				buffer_addchar(&destBuff, '/');
 			}
 
 			// We added one too many in here... the compiler will optimize.
@@ -447,17 +482,17 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern) {
 		else if (ch == '+') {
 			self->filesAndFolders = 1;
 		}
-			
+
 		///////////////////////////////////////////////////////////////////////
 		// Everything else.
 		else {
-			*destPtr++ = *srcPtr;
+			buffer_addchar(&destBuff, *srcPtr);
 		}
 
 		srcPtr++;
 	}
 
-	*destPtr = 0;
+	buffer_addchar(&destBuff, 0);
 
 	// Check for the @.
 	if (*srcPtr == MODIFIER_CHARACTER) {
@@ -471,24 +506,26 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern) {
 
 		ch = *srcPtr++;
 		if (ch == '-'  ||  ch == '=') {
-			char buffer[1000];
-			char* ptr = buffer;
+			BUFFER buff;
+			buffer_initwithalloc(&buff, self->allocFunction, self->userData);
 			while (*srcPtr != MODIFIER_CHARACTER  &&  *srcPtr != '\0') {
-				*ptr++ = *srcPtr++;
+				buffer_addchar(&buff, *srcPtr++);
 			}
 
-			*ptr = 0;
+			buffer_addchar(&buff, 0);
 
 			if (ch == '-')
-				fileglob_AddIgnorePattern(self, buffer);
+				fileglob_AddIgnorePattern(self, buffer_ptr(&buff));
 			else if (ch == '=')
-				fileglob_AddExclusivePattern(self, buffer);
+				fileglob_AddExclusivePattern(self, buffer_ptr(&buff));
+			buffer_free(&buff);
 		} else
 			break;		// Don't know what it is.
 	}
 
 	// Start globbing!
-	_fileglob_GlobHelper(self, pattern);
+	_fileglob_GlobHelper(self, buffer_ptr(&destBuff));
+	buffer_free(&destBuff);
 }
 
 
@@ -514,7 +551,7 @@ void fileglob_AddExclusivePattern(fileglob* self, const char* pattern)
 				return;
 		}
 
-		_fileglob_list_append(&self->exclusiveDirectoryPatternsHead, &self->exclusiveDirectoryPatternsTail, pattern);
+		_fileglob_list_append(self, &self->exclusiveDirectoryPatternsHead, &self->exclusiveDirectoryPatternsTail, pattern);
 	} else {
 		for (node = self->exclusiveFilePatternsHead; node; node = node->next) {
 #if defined(WIN32)
@@ -525,7 +562,7 @@ void fileglob_AddExclusivePattern(fileglob* self, const char* pattern)
 				return;
 		}
 
-		_fileglob_list_append(&self->exclusiveFilePatternsHead, &self->exclusiveFilePatternsTail, pattern);
+		_fileglob_list_append(self, &self->exclusiveFilePatternsHead, &self->exclusiveFilePatternsTail, pattern);
 	}
 }
 
@@ -552,7 +589,7 @@ void fileglob_AddIgnorePattern(fileglob* self, const char* pattern)
 				return;
 		}
 
-		_fileglob_list_append(&self->ignoreDirectoryPatternsHead, &self->ignoreDirectoryPatternsTail, pattern);
+		_fileglob_list_append(self, &self->ignoreDirectoryPatternsHead, &self->ignoreDirectoryPatternsTail, pattern);
 	} else {
 		for (node = self->ignoreFilePatternsHead; node; node = node->next) {
 #if defined(WIN32)
@@ -563,7 +600,7 @@ void fileglob_AddIgnorePattern(fileglob* self, const char* pattern)
 				return;
 		}
 
-		_fileglob_list_append(&self->ignoreFilePatternsHead, &self->ignoreFilePatternsTail, pattern);
+		_fileglob_list_append(self, &self->ignoreFilePatternsHead, &self->ignoreFilePatternsTail, pattern);
 	}
 }
 
@@ -644,21 +681,21 @@ static int _fileglob_MatchIgnoreFilePattern(fileglob* self, const char* text) {
 	\internal Simple path splicing (assumes no '/' in either part)
 	\author Matthias Wandel (MWandel@rim.net) http://www.sentex.net/~mwandel/
 **/
-static void SplicePath(char * dest, const char * p1, const char * p2)
+static void SplicePath(BUFFER* dest, const char * p1, const char * p2)
 {
-	size_t l = strlen(p1);
+	size_t l;
+	buffer_reset(dest);
+	l = strlen(p1);
 	if (l == 0) {
-		strcpy(dest, p2);
+		buffer_addstring(dest, p2, strlen(p2) + 1);
 	} else {
-		if (l + strlen(p2) > MAX_PATH-2) {
-			// Path too long.
-			assert(0);
+		buffer_addstring(dest, p1, l + 1);
+		if (buffer_ptr(dest)[l-1] != '/'  &&  buffer_ptr(dest)[l-1] != ':') {
+			buffer_ptr(dest)[l] = '/';
+			buffer_deltapos(dest, 1);
 		}
-		memcpy(dest, p1, l + 1);
-		if (dest[l-1] != '/'  &&  dest[l-1] != ':') {
-			dest[l++] = '/';
-		}
-		strcpy(dest+l, p2);
+		buffer_deltapos(dest, -1);
+		buffer_addstring(dest, p2, strlen(p2) + 1);
 	}
 }
 
@@ -671,15 +708,15 @@ int fileglob_Next(fileglob* self) {
 const char* fileglob_FileName(fileglob* self) {
 #if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
-		SplicePath(self->combinedName, self->context->basePath, self->context->fd.cFileName);
-		return self->combinedName;
+		SplicePath(&self->combinedName, buffer_ptr(&self->context->basePath), self->context->fd.cFileName);
+		return buffer_ptr(&self->combinedName);
 	}
 #else
 	if (self->context->dirp) {
-		SplicePath(self->combinedName, self->context->basePath, self->context->dp->d_name);
-		return self->combinedName;
+		SplicePath(&self->combinedName, buffer_ptr(&self->context->basePath), self->context->dp->d_name);
+		return buffer_ptr(&self->combinedName);
 	} else {
-		return self->context->patternBuf;
+		return buffer_ptr(&self->context->patternBuf);
 	}
 #endif
 
@@ -863,7 +900,6 @@ int fileglob_IsReadOnly(fileglob* self) {
 	-	Automatic conversion from **Stuff to **\*Stuff.  Allows lookup of
 		files by extension, too: '**.h' translates to '**\*.h'.
 	-	Ability to handle forward slashes and backslashes.
-	-	A minimal C++ class design.
 	-	Wildcard matching not based on FindFirstFile().  Should allow greater
 		control in the future and patching in of the POSIX fnmatch() function
 		on systems that support it.
@@ -877,7 +913,7 @@ int _fileglob_GlobHelper(fileglob* self, const char* inPattern)
 
 Setup:
 	if (!context) {
-		context = (fileglob_Context*)malloc(sizeof(fileglob_Context));
+		context = (fileglob_Context*)self->allocFunction(self->userData, NULL, sizeof(fileglob_Context));
 		context->prev = self->context;
 #if defined(WIN32)
 		context->handle = INVALID_HANDLE_VALUE;
@@ -889,8 +925,11 @@ Setup:
 		context->pattern = NULL;
 		context->iterNode = NULL;
 		context->directoryListHead = context->directoryListTail = 0;
-		context->basePathLastSlashPtr = 0;
-		strcpy(context->patternBuf, inPattern);
+		context->basePathLastSlashPos = 0;
+		buffer_initwithalloc(&context->patternBuf, self->allocFunction, self->userData);
+		buffer_addstring(&context->patternBuf, inPattern, strlen(inPattern) + 1);
+		buffer_initwithalloc(&context->basePath, self->allocFunction, self->userData);
+		buffer_initwithalloc(&context->matchPattern, self->allocFunction, self->userData);
 		self->context = context;
 		if (context->prev == NULL)
 			return 1;
@@ -902,13 +941,13 @@ DoRecursion:
 	if (!context->pattern) {
 		char* pattern;
 
-		context->basePathEndPtr = context->basePathLastSlashPtr = context->basePath;
-		context->recurseAtPtr = NULL;
+		context->basePathEndPos = context->basePathLastSlashPos = 0;
+		context->recurseAtPos = (size_t)-1;
 
 		// Split the path into base path and pattern to match against.
 		hasWildcard = 0;
 
-		for (pattern = context->patternBuf; *pattern != '\0'; ++pattern) {
+		for (pattern = buffer_ptr(&context->patternBuf); *pattern != '\0'; ++pattern) {
 			char ch = *pattern;
 
 			// Is it a '?' ?
@@ -924,13 +963,14 @@ DoRecursion:
 					// If we're just starting the pattern or the characters immediately
 					// preceding the pattern are a drive letter ':' or a directory path
 					// '/', then set up the internals for later recursion.
-					if (pattern == context->patternBuf  ||  pattern[-1] == '/'  ||  pattern[-1] == ':') {
+					if (pattern == buffer_ptr(&context->patternBuf)  ||  pattern[-1] == '/'  ||  pattern[-1] == ':') {
 						char ch2 = pattern[2];
 						if (ch2 == '/') {
-							context->recurseAtPtr = pattern;
+							context->recurseAtPos = pattern - buffer_ptr(&context->patternBuf);
 							memcpy(pattern, pattern + 3, strlen(pattern) - 2);
+							buffer_deltapos(&context->patternBuf, -3);
 						} else if (ch2 == '\0') {
-							context->recurseAtPtr = pattern;
+							context->recurseAtPos = pattern - buffer_ptr(&context->patternBuf);
 							*pattern = '\0';
 						}
 					}
@@ -943,8 +983,8 @@ DoRecursion:
 					break;
 				else {
 					if (pattern[1])
-						context->basePathLastSlashPtr = &context->basePath[pattern - context->patternBuf + 1];
-					context->basePathEndPtr = &context->basePath[pattern - context->patternBuf + 1];
+						context->basePathLastSlashPos = pattern - buffer_ptr(&context->patternBuf) + 1;
+					context->basePathEndPos = pattern - buffer_ptr(&context->patternBuf) + 1;
 				}
 			}
 		}
@@ -952,9 +992,9 @@ DoRecursion:
 		context->pattern = pattern;
 
 		// Copy the directory down.
-		context->basePathLen = context->basePathEndPtr - context->basePath;
-		strncpy(context->basePath, context->patternBuf, context->basePathLen);
-		context->basePath[context->basePathLen] = 0;
+		context->basePathLen = context->basePathEndPos;
+		buffer_addstring(&context->basePath, buffer_ptr(&context->patternBuf), context->basePathLen);
+		buffer_addchar(&context->basePath, 0);
 	}
 
 #if defined(WIN32)
@@ -971,20 +1011,21 @@ DoRecursion:
 #if !defined(WIN32)
 #endif
 			int isDir = 0;
-			size_t patternLen = strlen(context->patternBuf);
-			if (context->patternBuf[patternLen - 1] == '/'  ||  context->patternBuf[patternLen - 1] == '\\') {
+			size_t patternLen = buffer_pos(&context->patternBuf) - 1;
+			if (buffer_ptr(&context->patternBuf)[patternLen - 1] == '/'  ||  buffer_ptr(&context->patternBuf)[patternLen - 1] == '\\') {
 			    isDir = 1;
-				context->patternBuf[patternLen - 1] = 0;
+				buffer_ptr(&context->patternBuf)[patternLen - 1] = 0;
+				buffer_deltapos(&context->patternBuf, -1);
 			}
 #if defined(WIN32)
-			context->handle = FindFirstFile(context->patternBuf, &context->fd);
+			context->handle = FindFirstFile(buffer_ptr(&context->patternBuf), &context->fd);
 			if (isDir) {
 				size_t len = strlen(context->fd.cFileName);
 				context->fd.cFileName[len] = '/';
 				context->fd.cFileName[len + 1] = '\0';
-			    context->patternBuf[patternLen - 1] = '/';
+			    buffer_ptr(&context->patternBuf)[patternLen - 1] = '/';
 			}
-			*context->basePathLastSlashPtr = 0;
+			buffer_ptr(&context->basePath)[context->basePathLastSlashPos] = 0;
 			if (context->handle != INVALID_HANDLE_VALUE)
 				return 1;
 #else
@@ -1009,29 +1050,26 @@ DoRecursion:
 		context->matchFiles = *context->pattern == 0;
 
 		// Copy the wildcard matching string.
-		matchLen = (context->pattern - context->patternBuf) - context->basePathLen;
-		strncpy(context->matchPattern, context->patternBuf + context->basePathLen, matchLen + 1);
-		if (context->matchPattern[matchLen] == '/')
-			context->matchPattern[matchLen + 1] = 0;
+		matchLen = (context->pattern - buffer_ptr(&context->patternBuf)) - context->basePathLen;
+		buffer_reset(&context->matchPattern);
+		buffer_addstring(&context->matchPattern, buffer_ptr(&context->patternBuf) + context->basePathLen, matchLen + 1);
+		buffer_deltapos(&context->matchPattern, -1);
+		if (*buffer_posptr(&context->matchPattern) == '/') {
+			buffer_deltapos(&context->matchPattern, 1);
+			buffer_addchar(&context->matchPattern, 0);
+		}
 
-		if (!hasWildcard) {
-			// This is probably a single file lookup.
-			strcpy(context->basePathEndPtr, context->matchPattern);
-			if (context->basePathEndPtr[strlen(context->basePathEndPtr) - 1] == '/')
-				context->basePathEndPtr[strlen(context->basePathEndPtr) - 1] = 0;
-		}
 #if defined(WIN32)
-		else {
-			// Do the file search with *.* in the directory specified in basePattern.
-			strcpy(context->basePathEndPtr, "*.*");
-		}
-		
+		// Do the file search with *.* in the directory specified in basePattern.
+		buffer_setpos(&context->basePath, context->basePathEndPos);
+		buffer_addstring(&context->basePath, "*.*", 4);
+
 		// Start the find.
-		context->handle = FindFirstFile(context->basePath, &context->fd);
+		context->handle = FindFirstFile(buffer_ptr(&context->basePath), &context->fd);
 		if (context->handle == INVALID_HANDLE_VALUE) {
 			found = 0;
 		}
-#else		
+#else
 		// Start the find.
 		context->dirp = opendir(context->basePath[0] ? context->basePath : ".");
 		if (!context->dirp) {
@@ -1043,11 +1081,12 @@ DoRecursion:
 #endif
 
 		// Clear out the *.* so we can use the original basePattern string.
-		*context->basePathEndPtr = 0;
+		buffer_setpos(&context->basePath, context->basePathEndPos);
+		buffer_putchar(&context->basePath, 0);
 	} else {
 		goto NextFile;
 	}
-		
+
 	// Any files found?
 #if defined(WIN32)
 	if (context->handle != INVALID_HANDLE_VALUE) {
@@ -1079,16 +1118,16 @@ DoRecursion:
 					size_t len = strlen(filename);
 					filename[len] = '/';
 					filename[len + 1] = '\0';
-					matches = WildMatch(context->matchPattern, filename, 0);
+					matches = WildMatch(buffer_ptr(&context->matchPattern), filename, 0);
 				}
 
 				// Do a wildcard match.
 				if (!ignore  &&  matches) {
 					// It matched.  Let's see if the file should be ignored.
-					
+
 					// See if this is a directory to ignore.
 					ignore = _fileglob_MatchIgnoreDirectoryPattern(self, filename);
-					
+
 					// Is this pattern exclusive?
 					if (self->exclusiveDirectoryPatternsHead) {
 						int exclusive = _fileglob_MatchExclusiveDirectoryPattern(self, filename);
@@ -1096,27 +1135,27 @@ DoRecursion:
 //						if (exclusive)
 //							break;
 					}
-					
+
 					// Should this file be ignored?
 //					if (!ignore  &&  !context->matchFiles  &&  *context->pattern == 0)
 //						break;
 					if (!ignore) {
-						_fileglob_list_append(&context->directoryListHead, &context->directoryListTail, filename);
+						_fileglob_list_append(self, &context->directoryListHead, &context->directoryListTail, filename);
 						if ((!context->matchFiles  ||  self->filesAndFolders)  &&  *context->pattern == 0)
 							break;
 					}
 				}
 			} else {
 				// Do a wildcard match.
-				if (WildMatch(context->matchPattern, filename, 0)) {
+				if (WildMatch(buffer_ptr(&context->matchPattern), filename, 0)) {
 					// It matched.  Let's see if the file should be ignored.
 					int ignore = _fileglob_MatchIgnoreFilePattern(self, filename);
-					
+
 					// Is this pattern exclusive?
 					if (!ignore  &&  self->exclusiveFilePatternsHead) {
 						ignore = !_fileglob_MatchExclusiveFilePattern(self, filename);
 					}
-					
+
 					// Should this file be ignored?
 					if (!ignore) {
 						if (context->matchFiles)
@@ -1156,84 +1195,6 @@ NextFile:
 			context->iterNode = context->directoryListHead;
 		}
 	}
-	
-#if 0
-	// Start the find.
-	DIR* dirp = opendir(basePath[0] ? basePath : ".");
-	if (!dirp)
-		return;
-
-	// Any files found?
-	struct dirent* dp;
-	while ((dp = readdir(dirp)) != NULL)
-	{
-		for (;;)
-		{
-			struct stat attr;
-			strcpy(basePathEndPtr, dp->d_name);
-			stat(basePath, &attr);
-			*basePathEndPtr = 0;
-			
-			// Is the file a directory?
-			if ((attr.st_mode & S_IFDIR) != 0  &&  !matchFiles)
-			{
-				// Do a wildcard match.
-				if (WildMatch(matchPattern, dp->d_name, false))
-				{
-					// It matched.  Let's see if the file should be ignored.
-					bool ignore = false;
-					
-					// Knock out "." or ".." if they haven't already been.
-					size_t len = strlen(dp->d_name);
-					dp->d_name[len] = '/';
-					dp->d_name[len + 1] = '\0';
-					
-					// See if this is a directory to ignore.
-					ignore = MatchIgnorePattern(dp->d_name);
-					
-					dp->d_name[len] = 0;
-					
-					// Should this file be ignored?
-					if (!ignore)
-					{
-						// Nope.  Add it to the linked list.
-						fileList.push_back(dp->d_name);
-					}
-				}
-			}
-			else if ((attr.st_mode & S_IFDIR) == 0  &&  matchFiles)
-			{
-				// Do a wildcard match.
-				if (WildMatch(matchPattern, dp->d_name, false))
-				{
-					// It matched.  Let's see if the file should be ignored.
-					bool ignore = MatchIgnorePattern(dp->d_name);
-					
-					// Is this pattern exclusive?
-					if (!ignore  &&  m_exclusiveFilePatterns.begin() != m_exclusiveFilePatterns.end())
-					{
-						ignore = !MatchExclusivePattern(dp->d_name);
-					}
-					
-					// Should this file be ignored?
-					if (!ignore)
-					{
-						// Nope.  Add it to the linked list.
-						fileList.push_back(dp->d_name);
-					}
-				}
-			}
-			
-			// Look up the next file.
-			if ((dp = readdir(dirp)) == NULL)
-				break;
-		}
-		
-		// Close down the file find handle.
-		closedir(dirp);
-	}
-	
-#endif
 
 	// Iterate the file list and either recurse or add the file as a found
 	// file.
@@ -1245,13 +1206,14 @@ NextFile:
 NextDirectory:
 		if (context->iterNode) {
 			// Need more directories.
-			SplicePath(self->combinedName, context->basePath, context->iterNode->buffer);
-			strcpy(self->combinedName + strlen(self->combinedName) - 1, context->pattern);
+			SplicePath(&self->combinedName, buffer_ptr(&context->basePath), context->iterNode->buffer);
+			buffer_deltapos(&self->combinedName, -2);
+			buffer_addstring(&self->combinedName, context->pattern, strlen(context->pattern) + 1);
 
 			context->iterNode = context->iterNode->next;
 
 			context = NULL;
-			inPattern = self->combinedName;
+			inPattern = buffer_ptr(&self->combinedName);
 			goto Setup;
 		}
 	} else {
@@ -1261,7 +1223,7 @@ NextDirectory:
 
 	// Do we need to recurse?
 NewContext:
-	if (!context->recurseAtPtr) {
+	if (context->recurseAtPos == (size_t)-1) {
 		_fileglob_FreeContextLevel(self);
 
 		context = self->context;
@@ -1271,13 +1233,15 @@ NewContext:
 		goto NextDirectory;
 	}
 
-	strcpy(context->matchPattern, context->recurseAtPtr);
-	strcpy(context->recurseAtPtr, "*/**/");
-	strcat(context->patternBuf, context->matchPattern);
+	buffer_reset(&context->matchPattern);
+	buffer_setpos(&context->patternBuf, context->recurseAtPos);
+	buffer_addstring(&context->matchPattern, buffer_posptr(&context->patternBuf), strlen(buffer_posptr(&context->patternBuf)));
+	buffer_addstring(&context->patternBuf, "*/**/", 5);
+	buffer_addstring(&context->patternBuf, buffer_ptr(&context->matchPattern), buffer_pos(&context->matchPattern) + 1);
 
-	inPattern = context->patternBuf;
+	inPattern = buffer_ptr(&context->patternBuf);
 	context->pattern = NULL;
-	_fileglob_list_clear(&context->directoryListHead, &context->directoryListTail);
+	_fileglob_list_clear(self, &context->directoryListHead, &context->directoryListTail);
 	goto DoRecursion;
 }
 
