@@ -537,7 +537,7 @@ function DumpWorkspace(workspace)
 
 	for projectName in ivalues(workspace.Projects) do
 		local project = Projects[projectName]
-		if project then
+		if project and project.RelativePath then
 			DumpProject(project)
 		else
 			print('* Attempting to write unknown project [' .. projectName .. '].')
