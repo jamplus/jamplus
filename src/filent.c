@@ -704,6 +704,11 @@ void getprocesspath(char* buffer, size_t bufferLen)
 	*ptr = 0;
 }
 
+void getexecutablepath(char* buffer, size_t bufferLen)
+{
+    GetModuleFileName(NULL, buffer, (DWORD)bufferLen);
+}
+
 #endif
 
 #ifdef OPT_PRINT_TOTAL_TIME_EXT
