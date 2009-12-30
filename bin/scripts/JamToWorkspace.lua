@@ -3,12 +3,14 @@
 -------------------------------------------------------------------------------
 OS = os.getenv("OS")
 OSPLAT = os.getenv("OSPLAT")
-if not OS  or  not OSPLAT then
+JAM_EXECUTABLE = os.getenv("JAM_EXECUTABLE")
+if not OS  or  not OSPLAT  or  not JAM_EXECUTABLE then
 	print('*** JamToWorkspace must be called directly from Jam.')
 	print('\nUsage: jam --workspace ...')
 	os.exit(-1)
 end
 
+require 'list'
 require 'getopt'
 require 'ex'
 require 'md5'
@@ -802,7 +804,7 @@ ProcessCommandLine()
 if opts.jamexepath then
 	jamExePathNoQuotes = os.path.combine(opts.jamexepath)
 else
-	jamExePathNoQuotes = os.path.combine(jamPath, OS:lower() .. OSPLAT:lower(), 'jam')
+	jamExePathNoQuotes = JAM_EXECUTABLE
 end
 jamExePath = os.path.escape(jamExePathNoQuotes)
 
