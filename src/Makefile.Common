@@ -76,8 +76,7 @@ SOURCES = \
 	execunix.c \
 	execvms.c \
 	expand.c \
-	fileglob.cpp \
-	FileGlobBase.cpp \
+	fileglob.c \
 	filemac.c \
 	filent.c \
 	fileos2.c \
