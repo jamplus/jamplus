@@ -16,9 +16,8 @@ extern "C" {
 	
 #if !defined(FILEGLOB_BUILD_IMPLEMENTATION)
 typedef struct _fileglob fileglob;
-#endif
-
 typedef void* (*fileglob_Alloc)(void* userData, void* ptr, unsigned int size);
+#endif
 
 fileglob* fileglob_Create(const char* inPattern);
 fileglob* fileglob_CreateWithAlloc(const char* inPattern, fileglob_Alloc alloc, void* userData);

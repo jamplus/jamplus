@@ -1030,15 +1030,14 @@ DoRecursion:
 				return 1;
 #else
 			context->hasattr = 1;
-			int ret = stat(context->patternBuf, &context->attr);
+			int ret = stat(buffer_ptr(&context->patternBuf), &context->attr);
 			if (isDir) {
 //				size_t len = strlen(context->fd.cFileName);
 //				context->fd.cFileName[len] = '/';
 //				context->fd.cFileName[len + 1] = '\0';
-			    context->patternBuf[patternLen - 1] = '/';
+			    buffer_ptr(&context->patternBuf)[patternLen - 1] = '/';
 			}
 			context->statted = 1;
-			*context->basePathLastSlashPtr = 0;
 			if (ret != -1)
 				return 1;
 #endif
@@ -1071,7 +1070,9 @@ DoRecursion:
 		}
 #else
 		// Start the find.
-		context->dirp = opendir(context->basePath[0] ? context->basePath : ".");
+		buffer_setpos(&context->basePath, context->basePathEndPos);
+		buffer_addchar(&context->basePath, 0);
+		context->dirp = opendir(buffer_ptr(&context->basePath)[0] ? buffer_ptr(&context->basePath) : ".");
 		if (!context->dirp) {
 			found = 0;
 		} else {
