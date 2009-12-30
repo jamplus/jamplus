@@ -332,6 +332,14 @@ int main( int argc, char **argv, char **arg_environ )
                 putenv( OSMINOR );
                 putenv( OSPLAT );
 
+				{
+					char exeName[ 4096 ];
+					strcpy( exeName, "JAM_EXECUTABLE=" );
+					
+					getexecutablepath( exeName + strlen( exeName ), 4096 - strlen( exeName ) );
+					putenv( exeName );
+				}
+
                 exec_init();
                 execcmd( commandLine, NULL, NULL, NULL, 0 );
                 execwait();
