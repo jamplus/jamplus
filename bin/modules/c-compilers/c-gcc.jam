@@ -123,6 +123,7 @@ rule C._MultiCppCompile_SetupFlags
 
 		local md5 = [ MD5 $(_flags) ] ;
 		local _pchName = @($(_pch[3]:LBS):G=$(grist)-$(md5)) ;
+		BINDING on $(_pchName) = $(_pch[3]) ;
 		local _pchFilename = $(_pchName).gch ;
 
 		if ! $(built-$(_pchName)) {
