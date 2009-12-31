@@ -11,10 +11,14 @@ function Test()
 
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
-		TestFiles(originalFiles)
+	TestFiles(originalFiles)
 
 	---------------------------------------------------------------------------
-	local pattern = [[
+	do
+		local pattern
+		local pass1Files
+		if Platform == 'win32' then
+			pattern = [[
 Pass 1
 *** found 9 target(s)...
 *** updating 5 target(s)...
@@ -36,24 +40,57 @@ Pass 3
 *** updating 10 target(s)...
 ]]
 
-	TestPattern(pattern, RunJam())
+			pass1Files =
+			{
+				'Jamfile.jam',
+				'foo.cpp',
+				'foo.h',
+				'foo.obj',
+				'main.cpp',
+				'main.obj',
+				'test.release.exe',
+				'test.release.exe.intermediate.manifest',
+				'test.release.pdb',
+				'vc.pdb',
+			}
 
-	local pass1Files =
-	{
-		'Jamfile.jam',
-		'foo.cpp',
-		'foo.h',
-		'foo.obj',
-		'main.cpp',
-		'main.obj',
-		'test.release.exe',
-		'test.release.exe.intermediate.manifest',
-		'test.release.pdb',
-		'vc.pdb',
-	}
+		else
+			pattern = [[
+Pass 1 
+*** found 9 target(s)...
+*** updating 5 target(s)...
+@ WriteFile <test>foo.cpp 
+@ C.C++ <test>foo.o 
+*** updated 2 target(s)...
+Pass 2 
+*** found 19 target(s)...
+*** updating 10 target(s)...
+@ WriteFile <test>foo.h 
+@ WriteFile <test>main.cpp 
+@ C.C++ <test>main.o 
+@ C.Link <test>test.release 
+*** updated 5 target(s)...
+Pass 3 
+*** found 28 target(s)...
+]]
 
-	TestDirectories(originalDirs)
-	TestFiles(pass1Files)
+			pass1Files = {
+				'foo.cpp',
+				'foo.h',
+				'foo.o',
+				'Jamfile.jam',
+				'main.cpp',
+				'main.o',
+				'test.lua',
+				'test.release',
+			}
+		end
+
+		TestPattern(pattern, RunJam())
+
+		TestDirectories(originalDirs)
+		TestFiles(pass1Files)
+	end
 
 	---------------------------------------------------------------------------
 	local cleanpattern_allpasses = [[

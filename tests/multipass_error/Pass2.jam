@@ -1,18 +1,22 @@
-actions Anyway
-{
-	copy /b file.dat+file.txt test.zip
+if $(NT) {
+
+	actions Anyway
+	{
+		copy /b file.dat+file.txt test.zip
+	}
+
+} else {
+
+	actions Anyway
+	{
+		cat file.dat file.txt > test.zip
+	}
+
 }
 
 Depends all : test.zip ;
 Depends test.zip : file.dat ;
 
-#actions Copy2
-#{
-#copy file.txt file.dat
-#}
-
-#Copy2 file.dat : file.txt ;
 Clean clean : test.zip file.dat ;
 
 Anyway test.zip : file.dat ;
-#Always test.zip ;

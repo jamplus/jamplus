@@ -1,6 +1,6 @@
 if $(NT) {
 	text = [ Shell "dir /b *.lua" "dir /b *.jam" ] ;
 } else {
-	text = [ Shell ls ] ;
+	text = [ Shell "ls *.lua" "ls *.jam" ] ;
 }
 Echo **$(text)** ;

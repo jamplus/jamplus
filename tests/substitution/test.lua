@@ -1,11 +1,24 @@
 function Test()
 	do
-		local pattern = [[
+		local pattern
+		if Platform == 'win32' then			
+			pattern = [[
 $ = $
 $
-$(TEMP) - C:\Users\Joshua\AppData\Local\Temp
+$(TEMP) - ]] .. os.getenv("TEMP") .. [[
+
 M__UFFILENAME_UFFILENAME__F
 ]]
+
+		else
+			pattern = [[
+$ = $ 
+$ 
+$(TMPDIR) - ]] .. os.getenv('TMPDIR') .. [[
+
+M__UFFILENAME_UFFILENAME__F 
+]]		
+		end
 
 		TestPattern(pattern, RunJam{ '-fsubstitution.jam' })
 	end

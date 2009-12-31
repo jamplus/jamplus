@@ -21,7 +21,11 @@ function Test()
 	TestFiles(originalFiles)
 
 	---------------------------------------------------------------------------
-	local pattern = [[
+	local pass1Files
+	do
+		local pattern
+	    if Platform == 'win32' then
+			pattern = [[
 *** found 17 target(s)...
 *** updating 4 target(s)...
 @ C.CC <platform>platform.obj
@@ -33,44 +37,89 @@ Generating Code...
 *** updated 4 target(s)...
 ]]
 
-	TestPattern(pattern, RunJam())
+			pass1Files =
+			{
+				'.jamcache',
+				'CreateVS2008JamWorkspace.bat',
+				'Jamfile.jam',
+				'filedebug.c',
+				'filerelease.c',
+				'filerelease.obj',
+				'macosx.c',
+				'platform.c',
+				'platform.obj',
+				'platform.release.exe',
+				'platform.release.exe.intermediate.manifest',
+				'platform.release.pdb',
+				'test.lua',
+				'vc.pdb',
+				'win32.c',
+				'win32.obj',
+			}
 
-	local pass1Files =
-	{
-		'.jamcache',
-		'CreateVS2008JamWorkspace.bat',
-		'Jamfile.jam',
-		'filedebug.c',
-		'filerelease.c',
-		'filerelease.obj',
-		'macosx.c',
-		'platform.c',
-		'platform.obj',
-		'platform.release.exe',
-		'platform.release.exe.intermediate.manifest',
-		'platform.release.pdb',
-		'test.lua',
-		'vc.pdb',
-		'win32.c',
-		'win32.obj',
-	}
+		else
+			pattern = [[
+*** found 11 target(s)...
+*** updating 4 target(s)...
+@ C.CC <platform>platform.o 
+@ C.CC <platform>macosx.o 
+@ C.CC <platform>filerelease.o 
+@ C.Link <platform>platform.release 
+*** updated 4 target(s)...
+]]
 
-	TestDirectories(originalDirs)
-	TestFiles(pass1Files)
+			pass1Files = {
+				'.jamcache',
+				'CreateVS2008JamWorkspace.bat',
+				'filedebug.c',
+				'filerelease.c',
+				'filerelease.o',
+				'Jamfile.jam',
+				'macosx.c',
+				'macosx.o',
+				'platform.c',
+				'platform.o',
+				'platform.release',
+				'win32.c',
+			}
+
+		end
+
+		TestPattern(pattern, RunJam())
+
+		TestDirectories(originalDirs)
+		TestFiles(pass1Files)
+	end
 
 	---------------------------------------------------------------------------
-	local pattern2 = [[
+	local pattern3
+	if Platform == 'win32' then
+		local pattern2 = [[
 Using win32
 This is a Win32 build.
 RELEASE: What's up?!
 ]]
-	TestPattern(pattern2, ex.collectlines{'platform.release.exe'})
-	
-	---------------------------------------------------------------------------
-	local pattern3 = [[
+		TestPattern(pattern2, ex.collectlines{'platform.release.exe'})
+
+		pattern3 = [[
 *** found 17 target(s)...
 ]]
 
+	else
+		local pattern2 = [[
+Using macosx
+This is a Mac OS X build.
+RELEASE: What's up?!
+]]
+		TestPattern(pattern2, ex.collectlines{'platform.release.exe'})
+
+		pattern3 = [[
+*** found 11 target(s)...
+]]
+
+	end
+	
+	---------------------------------------------------------------------------
 	TestPattern(pattern3, RunJam())
 	TestDirectories(originalDirs)
 	TestFiles(pass1Files)

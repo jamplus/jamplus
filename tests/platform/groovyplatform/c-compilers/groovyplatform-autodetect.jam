@@ -1,16 +1,20 @@
 rule C.AutoDetect {
-	local PATHS =
-		c:/mingw
-		d:/mingw
-	;
+	if $(NT) {
+		local PATHS =
+			c:/mingw
+			d:/mingw
+		;
 
-	local gcc = [ Glob $(PATHS)/bin : gcc.exe ] ;
-	if ! $(gcc)
-	{
-		return ;
+		local gcc = [ Glob $(PATHS)/bin : gcc.exe ] ;
+		if ! $(gcc)
+		{
+			return ;
+		}
+
+		GROOVY_ROOT = [ Match (.+)/bin : $(gcc[1]) ] ;
+	} else {
+		GROOVY_ROOT = /usr ;
 	}
-
-	GROOVY_ROOT = [ Match (.+)/bin : $(gcc[1]) ] ;
 
 	if ! $(GROOVY_ROOT) {
 		return ;
