@@ -11,8 +11,7 @@
 #include <time.h>
 #include "buffer.h"
 
-static void* fileglob_DefaultAllocFunction(void* userData, void* ptr, unsigned int size)
-{
+static void* fileglob_DefaultAllocFunction(void* userData, void* ptr, unsigned int size) {
 	(void)userData;
 
 	if (size == 0) {
@@ -68,8 +67,7 @@ typedef struct fileglob_Context {
 
 typedef void* (*fileglob_Alloc)(void* userData, void* ptr, unsigned int size);
 
-typedef struct _fileglob
-{
+typedef struct _fileglob {
 	fileglob_Context* context;
 	fileglob_Context* previousContext;
 
@@ -111,8 +109,7 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern);
 
 #if defined(WIN32)
 
-static time_t glob_ConvertToTime_t(const FILETIME* fileTime)
-{
+time_t fileglob_ConvertToTime_t(const FILETIME* fileTime) {
 	FILETIME localTime;
 	SYSTEMTIME sysTime;
 	TIME_ZONE_INFORMATION timeZone;
@@ -168,13 +165,12 @@ static void _fileglob_list_append(fileglob* self, fileglob_StringNode** head, fi
 
 
 /**
-	\internal
 	\author Jack Handy
 
 	Borrowed from http://www.codeproject.com/string/wildcmp.asp.
 	Modified by Joshua Jensen.
 **/
-static int WildMatch(const char* pattern, const char *string, int caseSensitive) {
+int fileglob_WildMatch(const char* pattern, const char *string, int caseSensitive) {
 	const char* mp = 0;
 	const char* cp = 0;
 
@@ -537,8 +533,7 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern) {
 
 	\param name The exclusive pattern.
 **/
-void fileglob_AddExclusivePattern(fileglob* self, const char* pattern)
-{
+void fileglob_AddExclusivePattern(fileglob* self, const char* pattern) {
 	fileglob_StringNode* node;
 
 	if (pattern[strlen(pattern) - 1] == '/') {
@@ -575,8 +570,7 @@ void fileglob_AddExclusivePattern(fileglob* self, const char* pattern)
 
 	\param name The pattern to ignore.
 **/
-void fileglob_AddIgnorePattern(fileglob* self, const char* pattern)
-{
+void fileglob_AddIgnorePattern(fileglob* self, const char* pattern) {
 	fileglob_StringNode* node;
 
 	if (pattern[strlen(pattern) - 1] == '/') {
@@ -615,7 +609,7 @@ int _fileglob_MatchExclusiveDirectoryPattern(fileglob* self, const char* text) {
 	fileglob_StringNode* node;
 
 	for (node = self->exclusiveDirectoryPatternsHead; node; node = node->next) {
-		if (WildMatch(node->buffer, text, 0))
+		if (fileglob_WildMatch(node->buffer, text, 0))
 			return 1;
 	}
 
@@ -633,7 +627,7 @@ int _fileglob_MatchExclusiveFilePattern(fileglob* self, const char* text) {
 	fileglob_StringNode* node;
 
 	for (node = self->exclusiveFilePatternsHead; node; node = node->next) {
-		if (WildMatch(node->buffer, text, 0))
+		if (fileglob_WildMatch(node->buffer, text, 0))
 			return 1;
 	}
 
@@ -651,7 +645,7 @@ static int _fileglob_MatchIgnoreDirectoryPattern(fileglob* self, const char* tex
 	fileglob_StringNode* node;
 
 	for (node = self->ignoreDirectoryPatternsHead; node; node = node->next) {
-		if (WildMatch(node->buffer, text, 0))
+		if (fileglob_WildMatch(node->buffer, text, 0))
 			return 1;
 	}
 
@@ -669,7 +663,7 @@ static int _fileglob_MatchIgnoreFilePattern(fileglob* self, const char* text) {
 	fileglob_StringNode* node;
 
 	for (node = self->ignoreFilePatternsHead; node; node = node->next) {
-		if (WildMatch(node->buffer, text, 0))
+		if (fileglob_WildMatch(node->buffer, text, 0))
 			return 1;
 	}
 
@@ -681,8 +675,7 @@ static int _fileglob_MatchIgnoreFilePattern(fileglob* self, const char* text) {
 	\internal Simple path splicing (assumes no '/' in either part)
 	\author Matthias Wandel (MWandel@rim.net) http://www.sentex.net/~mwandel/
 **/
-static void SplicePath(BUFFER* dest, const char * p1, const char * p2)
-{
+static void SplicePath(BUFFER* dest, const char * p1, const char * p2) {
 	size_t l;
 	buffer_reset(dest);
 	l = strlen(p1);
@@ -727,7 +720,7 @@ const char* fileglob_FileName(fileglob* self) {
 fileglob_uint64 fileglob_CreationTime(fileglob* self) {
 #if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
-		return glob_ConvertToTime_t(&self->context->fd.ftCreationTime);
+		return fileglob_ConvertToTime_t(&self->context->fd.ftCreationTime);
 	}
 #else
 	if (self->context->dirp) {
@@ -746,7 +739,7 @@ fileglob_uint64 fileglob_CreationTime(fileglob* self) {
 fileglob_uint64 fileglob_AccessTime(fileglob* self) {
 #if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
-		return glob_ConvertToTime_t(&self->context->fd.ftLastAccessTime);
+		return fileglob_ConvertToTime_t(&self->context->fd.ftLastAccessTime);
 	}
 #else
 	if (self->context->dirp) {
@@ -765,7 +758,7 @@ fileglob_uint64 fileglob_AccessTime(fileglob* self) {
 fileglob_uint64 fileglob_WriteTime(fileglob* self) {
 #if defined(WIN32)
 	if (self->context->handle != INVALID_HANDLE_VALUE) {
-		return glob_ConvertToTime_t(&self->context->fd.ftLastWriteTime);
+		return fileglob_ConvertToTime_t(&self->context->fd.ftLastWriteTime);
 	}
 #else
 	if (self->context->dirp) {
@@ -905,8 +898,7 @@ int fileglob_IsReadOnly(fileglob* self) {
 		on systems that support it.
 **/
 
-int _fileglob_GlobHelper(fileglob* self, const char* inPattern)
-{
+int _fileglob_GlobHelper(fileglob* self, const char* inPattern) {
 	fileglob_Context* context = self->context;
 	int hasWildcard;
 	int found;
@@ -993,8 +985,14 @@ DoRecursion:
 
 		// Copy the directory down.
 		context->basePathLen = context->basePathEndPos;
+		buffer_reset(&context->basePath);
 		buffer_addstring(&context->basePath, buffer_ptr(&context->patternBuf), context->basePathLen);
 		buffer_addchar(&context->basePath, 0);
+
+		if (context->iterNode) {
+			context->matchFiles = *context->pattern == 0;
+			goto NextDirectory;
+		}
 	}
 
 #if defined(WIN32)
@@ -1003,46 +1001,6 @@ DoRecursion:
 	if (!context->dirp  &&  !context->statted) {
 #endif
 		size_t matchLen;
-
-		// If there is no wildcard this time, then just add the current file and
-		// get out of here.
-		if (!hasWildcard)
-		{
-#if !defined(WIN32)
-#endif
-			int isDir = 0;
-			size_t patternLen = buffer_pos(&context->patternBuf) - 1;
-			if (buffer_ptr(&context->patternBuf)[patternLen - 1] == '/'  ||  buffer_ptr(&context->patternBuf)[patternLen - 1] == '\\') {
-			    isDir = 1;
-				buffer_ptr(&context->patternBuf)[patternLen - 1] = 0;
-				buffer_deltapos(&context->patternBuf, -1);
-			}
-#if defined(WIN32)
-			context->handle = FindFirstFile(buffer_ptr(&context->patternBuf), &context->fd);
-			if (isDir) {
-				size_t len = strlen(context->fd.cFileName);
-				context->fd.cFileName[len] = '/';
-				context->fd.cFileName[len + 1] = '\0';
-			    buffer_ptr(&context->patternBuf)[patternLen - 1] = '/';
-			}
-			buffer_ptr(&context->basePath)[context->basePathLastSlashPos] = 0;
-			if (context->handle != INVALID_HANDLE_VALUE)
-				return 1;
-#else
-			context->hasattr = 1;
-			int ret = stat(buffer_ptr(&context->patternBuf), &context->attr);
-			if (isDir) {
-//				size_t len = strlen(context->fd.cFileName);
-//				context->fd.cFileName[len] = '/';
-//				context->fd.cFileName[len + 1] = '\0';
-			    buffer_ptr(&context->patternBuf)[patternLen - 1] = '/';
-			}
-			context->statted = 1;
-			if (ret != -1)
-				return 1;
-#endif
-			goto NewContext;
-		}
 
 		// Did we make it to the end of the pattern?  If so, we should match files,
 		// since there were no slashes encountered.
@@ -1119,7 +1077,7 @@ DoRecursion:
 					size_t len = strlen(filename);
 					filename[len] = '/';
 					filename[len + 1] = '\0';
-					matches = WildMatch(buffer_ptr(&context->matchPattern), filename, 0);
+					matches = fileglob_WildMatch(buffer_ptr(&context->matchPattern), filename, 0);
 				}
 
 				// Do a wildcard match.
@@ -1129,26 +1087,24 @@ DoRecursion:
 					// See if this is a directory to ignore.
 					ignore = _fileglob_MatchIgnoreDirectoryPattern(self, filename);
 
-					// Is this pattern exclusive?
-					if (self->exclusiveDirectoryPatternsHead) {
-						int exclusive = _fileglob_MatchExclusiveDirectoryPattern(self, filename);
-						ignore = !exclusive;
-//						if (exclusive)
-//							break;
-					}
-
 					// Should this file be ignored?
-//					if (!ignore  &&  !context->matchFiles  &&  *context->pattern == 0)
-//						break;
 					if (!ignore) {
 						_fileglob_list_append(self, &context->directoryListHead, &context->directoryListTail, filename);
-						if ((!context->matchFiles  ||  self->filesAndFolders)  &&  *context->pattern == 0)
-							break;
+
+						// Is this pattern exclusive?
+						if (self->exclusiveDirectoryPatternsHead) {
+							if (_fileglob_MatchExclusiveDirectoryPattern(self, filename))
+								break;
+						} else {
+							if ((!context->matchFiles  &&  context->pattern[0] == '/'  &&  context->pattern[1] == 0)
+									||  (self->filesAndFolders  &&  context->pattern[0] == 0))
+								break;
+						}
 					}
 				}
 			} else {
 				// Do a wildcard match.
-				if (WildMatch(buffer_ptr(&context->matchPattern), filename, 0)) {
+				if (fileglob_WildMatch(buffer_ptr(&context->matchPattern), filename, 0)) {
 					// It matched.  Let's see if the file should be ignored.
 					int ignore = _fileglob_MatchIgnoreFilePattern(self, filename);
 
@@ -1223,7 +1179,6 @@ NextDirectory:
 	}
 
 	// Do we need to recurse?
-NewContext:
 	if (context->recurseAtPos == (size_t)-1) {
 		_fileglob_FreeContextLevel(self);
 
@@ -1242,7 +1197,12 @@ NewContext:
 
 	inPattern = buffer_ptr(&context->patternBuf);
 	context->pattern = NULL;
-	_fileglob_list_clear(self, &context->directoryListHead, &context->directoryListTail);
+
+	if (context->matchFiles) {
+		context->iterNode = context->directoryListHead;
+	} else {
+		_fileglob_list_clear(self, &context->directoryListHead, &context->directoryListTail);
+	}
 	goto DoRecursion;
 }
 

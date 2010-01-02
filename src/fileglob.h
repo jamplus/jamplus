@@ -11,9 +11,9 @@ extern "C" {
 #if defined(WIN32)
 	typedef unsigned __int64 fileglob_uint64;
 #else
-	typedef unsigned long long fileglob_uint64;	
+	typedef unsigned long long fileglob_uint64;
 #endif
-	
+
 #if !defined(FILEGLOB_BUILD_IMPLEMENTATION)
 typedef struct _fileglob fileglob;
 typedef void* (*fileglob_Alloc)(void* userData, void* ptr, unsigned int size);
@@ -37,6 +37,12 @@ fileglob_uint64 fileglob_WriteFILETIME(fileglob* self);
 fileglob_uint64 fileglob_FileSize(fileglob* self);
 int fileglob_IsDirectory(fileglob* self);
 int fileglob_IsReadOnly(fileglob* self);
+
+int fileglob_WildMatch(const char* pattern, const char *string, int caseSensitive);
+
+#if defined(WIN32)  &&  defined(FILEGLOB_NEED_FILETIME_TO_TIME_T_CONVERSION)
+time_t fileglob_ConvertToTime_t(const FILETIME* fileTime);
+#endif
 
 #ifdef __cplusplus
 } /* extern "C" */
