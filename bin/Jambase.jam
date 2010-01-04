@@ -724,6 +724,11 @@ rule ActiveTarget TARGET
 }
 
 
+rule AutoSourceGroup TARGET : SOURCES
+{
+}
+
+
 rule NoWorkspace WORKSPACE_NAME
 {
 }

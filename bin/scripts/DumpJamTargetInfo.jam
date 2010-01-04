@@ -56,6 +56,33 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES
 }
 
 
+rule AutoSourceGroup TARGET : SOURCES
+{
+	if ! $(SOURCES)  {  return ;  }
+
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+
+	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
+
+	local project ;
+	for project in $(TARGET)
+	{
+		local prefix = "Projects[ [[$(project)]] ]" ;
+
+		local source ;
+		for source in $(SOURCES) {
+			local folderName = $(source:D\\) ;
+			if $(folderName) {
+				Contents += "$(prefix).SourceGroups[ [[$(folderName)]] ] = concat($(prefix).SourceGroups[ [[$(folderName)]] ], $(NEWLINE){$(NEWLINE)" ;
+					Contents += "$(TAB)$(TAB)[[$(source:TR=$(subdir))]],$(NEWLINE)" ;
+				Contents += "})$(NEWLINE)" ;
+			}
+		}
+	}
+
+}
+
+
 rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 {
 	# Write initial Project information.
