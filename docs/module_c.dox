@@ -7,7 +7,7 @@
 
 The C module provides rules to build C and C++ applications, shared libraries, and static libraries.
 
-When first loaded, it attempts to detect the compiler on the machine.  On Windows, it can successfully detect and run Visual C++ 6, Visual Studio 2003, Visual Studio 2005, Visual Studio 2008, and Visual Studio 2010.  On other OSes, it attempts to detect GCC.
+When first loaded, it attempts to detect the compiler on the machine.  On Windows, it can successfully detect and run Visual Studio 2010, Visual Studio 2008, Visual Studio 2005, Visual Studio 2003, and Visual C++ 6.  MinGW can also be specified.  On other OSes, it attempts to detect GCC.
 
 \section module_c_ruleslist List of Rules
 

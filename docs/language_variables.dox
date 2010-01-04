@@ -128,6 +128,8 @@ Because of this product expansion, if any variable reference in a token is undef
   </tr>
 </table>
 
+\anchor variable_expansion_c
+
 A variable element's string value can be parsed into grist and filename-related components.  Modifiers to a variable are used to select elements, select components, and replace components.  Modifiers are applied in the order of the table below:
 
 <table width=75% border=1 align=center>
@@ -161,7 +163,7 @@ A variable element's string value can be parsed into grist and filename-related 
   </tr>
   <tr>
     <td><code> :C </code></td>
-	<td>EsCapes the string as if it were a file path.  On Windows, if the path has spaces, it is quoted.  On other platforms, spaces, parentheses, and a few other special characters are escaped with a backslash.s</td>
+	<td>EsCapes the string as if it were a file path.  On Windows, if the path has spaces, it is quoted.  On other platforms, spaces, parentheses, and a few other special characters are escaped with a backslash.</td>
   </tr>
   <tr>
     <td><code> :B </code></td>

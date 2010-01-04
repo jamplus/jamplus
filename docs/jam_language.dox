@@ -120,6 +120,7 @@ When a rule with updating actions is invoked, those actions are added to those a
 \subsection language_statements Statements
 \anchor actions_screenoutput
 \anchor actions_autosettings
+\anchor actions_removeemptydirs
 
 <tt>Jam</tt>'s language has the following statements:
 
@@ -210,6 +211,9 @@ The following action \em modifiers are understood:
     <td><tt>actions quietly</tt></td>
     <td>The action is not echoed to the standard output.</td>
   </tr>
+  <tr>
+    <td><tt>actions removeemptydirs</tt></td>
+    <td>Although useful in other circumstances, \c removeemptydirs is primarily intended to be used with the various Clean actions.  For any sources sent to an action using \c removeemptydirs, any empty directories associated with the source target location are removed.
   <tr>
     <td><tt>actions response</tt></td>
     <td>Enables automatically generated response files.  Response files store text surrounded by <tt>@@(text...)</tt> into a temporary response file.  The <tt>@@(text)</tt> in the action is replaced with the full path to the temporary response file.

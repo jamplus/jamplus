@@ -20,7 +20,7 @@
 \section rule_C_UseMFC rule C.UseMFC TARGET [ : OPTIONS ]
 \addindex rule_C_UseMFC
 
-Applies settings to the specified \c TARGET, allowing it to build an MFC-enabled project.
+Applies settings to the specified \c TARGET, allowing it to build an MFC-enabled project on Win32 or Win64 targets.
 
 \param TARGET The target to assign the MFC settings to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param OPTIONS (optional) The following options are available:
@@ -35,12 +35,12 @@ Applies settings to the specified \c TARGET, allowing it to build an MFC-enabled
 \code
     # Applies MFC settings to MyLibrary.
     C.UseMFC MyLibrary ;
-	
+
     # Applies MFC settings, including the appropriate linker flags, to MyApplication.
     C.UseMFC MyApplication : link ;
 
     # Applies MFC settings to MyApplication.  Uses the MFC runtime DLLs.
-    C.UseMFC MyApplication : link shared ;	
+    C.UseMFC MyApplication : link shared ;
 \endcode
 
 

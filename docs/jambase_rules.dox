@@ -14,6 +14,7 @@ documentation:
 \refitem rule_ActiveProject ActiveProject
 \refitem rule_AutoSourceGroup AutoSourceGroup
 \refitem rule_FGristDirectories FGristDirectories
+\refitem rule_GroupByVar GroupByVar
 \refitem rule_IncludeModule IncludeModule
 \refitem rule_MakeLocate MakeLocate
 \refitem rule_MkDir MkDir
@@ -23,6 +24,7 @@ documentation:
 \refitem rule_RmTemps RmTemps
 \refitem rule_SearchSource SearchSource
 \refitem rule_SourceGroup SourceGroup
+\refitem rule_Split Split
 \refitem rule_SubDir SubDir
 \refitem rule_SubInclude SubInclude
 \refitem rule_Workspace Workspace
@@ -83,6 +85,55 @@ Given a list of \c DIRECTORIES, a gristed version of each is returned.  Currentl
 
 \code
     Echo [ FGristDirectories $(TEMP)/stuff ] ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_GroupByVar rule GroupByVar TARGETS_VARIABLE : VARIABLE_NAME [ : MAX_PER_GROUP ]
+\addindex rule_GroupByVar
+
+Returns a list of targets with identical settings as specified by \c VARIABLE_NAME using the first target specified in \c TARGETS_VARIABLE.
+
+Example: The C/C++ compilation puts a variety of compilation flags in a variable declared per target called \c MFLAGS.  For compilers that support batching of files using the same build flags, GroupByVar returns each set of matching files one after another to send to the compiler.
+
+\param TARGETS_VARIABLE The variable containing the targets to return matching groups from.  The first target in the variable is used as the target to match against.  \c TARGETS_VARIABLE is updated with the remaining list of targets after the current found group has been identified.
+\param VARIABLE_NAME The settings variable used to obtain matches from.
+\param MAX_PER_GROUP The maximum number of files to return in the group.  If not specified, there is no upper limit.
+\return Returns a list of 1 or more \c TARGETS matching the string list in \c VARIABLE_NAME.
+
+\code
+    # Prints:
+    #
+    # Together - targeta targetc targete targetf
+    # Together - targetb
+    # Together - targetd
+    # (2 max) - targeta targetc
+    # (2 max) - targetb
+    # (2 max) - targetd
+    # (2 max) - targete targetf
+    files = targeta targetb targetc targetd targete targetf ;
+    FLAGS on targeta = a b c ;
+    FLAGS on targetb = a b c d ;
+    FLAGS on targetc = a b c ;
+    FLAGS on targetd = a b c e ;
+    FLAGS on targete = a b c ;
+    FLAGS on targetf = a b c ;
+
+    while $(files) {
+        local together = [ GroupByVar files : FLAGS ] ;
+        Echo Together - $(together) ;
+    }
+
+
+    files = targeta targetb targetc targetd targete targetf ;
+    while $(files) {
+        local together = [ GroupByVar files : FLAGS : 2 ] ;
+        Echo (2 max) - $(together) ;
+    }
 \endcode
 
 
@@ -263,6 +314,32 @@ For workspace projects that support grouping of files into folders, the \c Sourc
 	SourceGroup Misc : "string\\trio" : $(TRIO_SRCS) ;
 \endcode
 
+
+
+
+
+
+
+<hr>
+\section rule_Split rule Split STRINGS : SPLIT_CHARACTERS
+\addindex rule_Split
+
+Splits each of the \c STRINGS at \c SPLIT_CHARACTERS.  All splits are returned as a string list.
+
+\param STRINGS The list of strings to split at the points specified by \c SPLIT_CHARACTERS.
+\param SPLIT_CHARACTERS One or more characters to split the list of \c STRINGS at.
+\return Returns a list of strings split at the points specified by \c SPLIT_CHARACTERS.
+
+\code
+    # Prints:
+    #
+    # **I** **like** **peas.**
+    # No splits here
+    local list = [ Split I like peas. : " " ] ;
+    Echo **$(list)** ;
+
+    Echo [ Split No splits here : "|" ] ;
+\endcode
 
 
 
