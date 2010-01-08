@@ -30,7 +30,7 @@ TAB = "	" ;
 NEWLINE = "
 " ;
 
-JAMBASE_VERSION = "JamPlus 0.3 (2009.03.20)" ;
+JAMBASE_VERSION = "JamPlus 1.0 RC1 (2010.01.04)" ;
 
 #
 # OS specific variable settings
@@ -55,8 +55,6 @@ else if $(UNIX)
 	{
 		case CYGWIN :
 			JAMSHELL	?= sh -c ;
-
-#		case MACOSX :
 	}
 
 	CHMOD		?= chmod ;
@@ -69,7 +67,6 @@ else if $(UNIX)
 # General defaults; a lot like UNIX
 #
 
-AWK			?= awk ;
 CP			?= cp -f ;
 DOT			?= . ;
 DOTDOT		?= .. ;
