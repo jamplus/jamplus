@@ -22,7 +22,7 @@ Start-up Phase</a></h3>
 <p>To set a variable's value on the command line, overriding the variable's environment value, use the <code>-s</code> option. To see variable assignments made during jam's execution, use the <code>-d+7</code> option.</p>
 <h3><a class="anchor" id="operation_parsing">
 Parsing Phase</a></h3>
-<p>In the parsing phase, <b>Jam</b> reads and executes the <code>Jambase.jam</code> file. It finds a <code>Jambase.jam</code> file by looking for one in the current working directory and then looking up through 10 parent directories. If one has not been found by this point, the <code>Jambase.jam</code> sitting side-by-side with the <b>Jam</b> executable is read in.</p>
+<p>In the parsing phase, <b>Jam</b> reads and executes the <code>Jambase.jam</code> file. It finds a <code>Jambase.jam</code> file by looking for one in the current working directory. If the <code>Jambase.jam</code> is not found in the current directory, the <code>Jambase.jam</code> sitting side-by-side with or one level up from the <b>Jam</b> executable is read in.</p>
 <p>The <code>Jambase</code> file is written in the <b>Jam</b> <a class="el" href="jam_language.html#language_main">Language</a>. The last action of the <code>Jambase</code> is to read (via the "include" rule) a user-provided file called "<code>Jamfile.jam</code>".</p>
 <p>Collectively, the purpose of the <code>Jambase</code> and the <code>Jamfile</code> is to name built target and source files, construct the dependency graph among them, and associate build actions with targets. The <code>Jambase</code> defines boilerplate rules and variable assignments, and the <code>Jamfile</code> uses these to specify the actual relationship among the target and source files. See the <a class="el" href="jambase_rules.html">Jambase Rules</a> document for information.</p>
 <h3><a class="anchor" id="operation_binding">
@@ -55,7 +55,15 @@ Overview</a></h3>
 Lexical Features</a></h3>
 <p><b>Jam</b> treats its input files as whitespace-separated tokens, with two exceptions: double quotes (\) can enclose whitespace to embed it into a token, and everything between the matching curly braces ({}) in the definition of a updating actions is treated as a single string. A backslash (\) can escape a double quote, or any single whitespace character. Both a newline and a tab must be represented physically within quotes. There is no backslash escape for them.</p>
 <p><b>Jam</b> requires whitespace (blanks, tabs, or newlines) to surround all tokens, <b>including the colon (:) and semicolon (;) tokens</b>. If a colon or semicolon is found and is not surrounded by whitespace, an error is raised unless the colon or semicolon and surrounding content is in double quotes.</p>
-<p><b>Jam</b> keywords (as mentioned in this document) are reserved and generally must be quoted with double quotes (\) to be used as arbitrary tokens, such as variable or target names.</p>
+<div class="fragment"><pre class="fragment"><span class="preprocessor"># Parses successfully.</span>
+<span class="preprocessor"></span>MyRule arg1 : arg2 : arg3 ;
+
+<span class="preprocessor"># Does not parse due to the colon at the end of Error.</span>
+<span class="preprocessor"></span>Echo Error: This won<span class="stringliteral">&apos;t work! ;</span>
+<span class="stringliteral"></span>
+<span class="stringliteral"># Parses successfully.</span>
+<span class="stringliteral">Echo &quot;Error: This works fine!&quot; ;</span>
+</pre></div><p><b>Jam</b> keywords (as mentioned in this document) are reserved and generally must be quoted with double quotes (\) to be used as arbitrary tokens, such as variable or target names.</p>
 <h3><a class="anchor" id="language_datatype">
 Datatype</a></h3>
 <p><b>Jam</b>'s only data type is a one-dimensional list of arbitrary strings. They arise as literal (whitespace-separated) tokens in the Jambase or included files, as the result of variable expansion of those tokens, or as the return value from a rule invocation.</p>
@@ -84,7 +92,7 @@ Updating Actions</a></h3>
 <p>When a rule with updating actions is invoked, those actions are added to those associated with its built targets ($(1)) before the rule's procedure is run. Later, to build the targets in the updating phase, the actions are passed to the OS command shell, with $(1) and $(2) replaced by bound versions of the target names. See <a class="el" href="jam_language.html#operation_binding">Binding Phase</a> above.</p>
 <h3><a class="anchor" id="language_statements">
 Statements</a></h3>
-<p><a class="anchor" id="actions_screenoutput"></a> <a class="anchor" id="actions_autosettings"></a></p>
+<p><a class="anchor" id="actions_autosettings"></a> <a class="anchor" id="actions_lua"></a> <a class="anchor" id="actions_removeemptydirs"></a> <a class="anchor" id="actions_screenoutput"></a></p>
 <p><code>Jam</code>'s language has the following statements:</p>
  <blockquote> <p><code><em>rulename</em> <em>field1</em> : <em>field2</em> : ... : <em>fieldN</em> ;</code></p>
  <blockquote> <p>Invoke a rule. A rule is invoked with values in <em>field1</em> through <em>fieldN</em> (9 max). They may be referenced in the procedure's <em>statements</em> as $(1) through $(&lt;9&gt;N). $(&lt;) and $(&gt;) are synonymous with $(1) and $(2).</p>
@@ -152,6 +160,10 @@ DoEcho all3 : : myshell ;
 <tr>
 <td><p><code>actions quietly</code> </p>
 </td><td><p>The action is not echoed to the standard output.  </p>
+</td></tr>
+<tr>
+<td><p><code>actions removeemptydirs</code> </p>
+</td><td><p>Although useful in other circumstances, <code>removeemptydirs</code> is primarily intended to be used with the various Clean actions. For any sources sent to an action using <code>removeemptydirs</code>, any empty directories associated with the source target location are removed. </p>
 </td></tr>
 <tr>
 <td><p><code>actions response</code> </p>
@@ -286,7 +298,7 @@ DoEcho all3 : : myshell ;
  </blockquote> <p><code>while <em>cond</em> { <em>statements</em> }</code></p>
  <blockquote> <p>Repeatedly execute <em>statements</em> while <em>cond</em> remains true upon entry. (See the description of <em>cond</em> expression syntax under if above).</p>
  </blockquote>  </blockquote>  </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Sep 15 22:06:18 2009 for JamPlus manual by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:44 2010 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

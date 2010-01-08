@@ -14,7 +14,7 @@ To set a variable's value on the command line, overriding the variable's environ
 
 \subsection operation_parsing Parsing Phase
 
-In the parsing phase, \b Jam reads and executes the <tt>Jambase.jam</tt> file.  It finds a <tt>Jambase.jam</tt> file by looking for one in the current working directory and then looking up through 10 parent directories.  If one has not been found by this point, the <tt>Jambase.jam</tt> sitting side-by-side with the \b Jam executable is read in.
+In the parsing phase, \b Jam reads and executes the <tt>Jambase.jam</tt> file.  It finds a <tt>Jambase.jam</tt> file by looking for one in the current working directory.  If the <tt>Jambase.jam</tt> is not found in the current directory, the <tt>Jambase.jam</tt> sitting side-by-side with or one level up from the \b Jam executable is read in.
 
 The \c Jambase file is written in the \b Jam \ref language_main. The last action of the \c Jambase is to read (via the "include" rule) a user-provided file called &quot;<tt>Jamfile.jam</tt>&quot;.
 
@@ -65,9 +65,20 @@ Jam has a interpreted, procedural language with a few select features to effect 
 
 \subsection language_lexical_features Lexical Features
 
-\b Jam treats its input files as whitespace-separated tokens, with two exceptions: double quotes (\") can enclose whitespace to embed it into a token, and everything between the matching curly braces ({}) in the definition of a updating actions is treated as a single string. A backslash (\) can escape a double quote, or any single whitespace character. Both a newline and a tab must be represented physically within quotes. There is no backslash escape for them.
+\b Jam treats its input files as whitespace-separated tokens, with two exceptions: double quotes (\\") can enclose whitespace to embed it into a token, and everything between the matching curly braces ({}) in the definition of a updating actions is treated as a single string. A backslash (\) can escape a double quote, or any single whitespace character. Both a newline and a tab must be represented physically within quotes. There is no backslash escape for them.
 
 \b Jam requires whitespace (blanks, tabs, or newlines) to surround all tokens, <b>including the colon (:) and semicolon (;) tokens</b>.  If a colon or semicolon is found and is not surrounded by whitespace, an error is raised unless the colon or semicolon and surrounding content is in double quotes.
+
+\code
+# Parses successfully.
+MyRule arg1 : arg2 : arg3 ;
+
+# Does not parse due to the colon at the end of Error.
+Echo Error: This won't work! ;
+
+# Parses successfully.
+Echo "Error: This works fine!" ;
+\endcode
 
 \b Jam keywords (as mentioned in this document) are reserved and generally must be quoted with double quotes (\") to be used as arbitrary tokens, such as variable or target names.
 
@@ -118,9 +129,10 @@ When a rule with updating actions is invoked, those actions are added to those a
 
 
 \subsection language_statements Statements
-\anchor actions_screenoutput
 \anchor actions_autosettings
+\anchor actions_lua
 \anchor actions_removeemptydirs
+\anchor actions_screenoutput
 
 <tt>Jam</tt>'s language has the following statements:
 

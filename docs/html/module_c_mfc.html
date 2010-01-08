@@ -25,7 +25,7 @@ Rules</a></h2>
  <h2><a class="anchor" id="rule_C_UseMFC">
 rule C.UseMFC TARGET [ : OPTIONS ]</a></h2>
 <p></p>
-<p>Applies settings to the specified <code>TARGET</code>, allowing it to build an MFC-enabled project.</p>
+<p>Applies settings to the specified <code>TARGET</code>, allowing it to build an MFC-enabled project on Win32 or Win64 targets.</p>
 <dl><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target to assign the MFC settings to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
@@ -41,15 +41,15 @@ rule C.UseMFC TARGET [ : OPTIONS ]</a></h2>
 </ul>
  </blockquote> <div class="fragment"><pre class="fragment"><span class="preprocessor">    # Applies MFC settings to MyLibrary.</span>
 <span class="preprocessor"></span>    C.UseMFC MyLibrary ;
-        
+
 <span class="preprocessor">    # Applies MFC settings, including the appropriate linker flags, to MyApplication.</span>
 <span class="preprocessor"></span>    C.UseMFC MyApplication : link ;
 
 <span class="preprocessor">    # Applies MFC settings to MyApplication.  Uses the MFC runtime DLLs.</span>
-<span class="preprocessor">    C.UseMFC MyApplication : link shared ;      </span>
+<span class="preprocessor">    C.UseMFC MyApplication : link shared ;</span>
 </pre></div><hr/>
  </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Sep 15 22:06:18 2009 for JamPlus manual by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:44 2010 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

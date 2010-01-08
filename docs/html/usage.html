@@ -19,6 +19,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
     [ -j <em>jobs</em> ]
     [ -o <em>actionsfile</em> ]
     [ -s <em>var</em>=<em>value</em> ]
+    [ -S ]
     [ <em>var</em>=<em>value</em> ]
     [ -t <em>target</em> ]
     [ <em>target</em> ... ]
@@ -127,6 +128,11 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
 <p></p>
 </td></tr>
 <tr>
+<td valign="top"><p><code> -S</code> </p>
+</td><td><p>When specified, any rules called that have not been defined are skipped without warning. <code>jam --workspace</code> makes extensive use of it. This command line option will mask problems with your Jamfiles, so it is recommended you don't use it.</p>
+<p></p>
+</td></tr>
+<tr>
 <td valign="top"><p><code><em>var</em>=<em>value</em></code> </p>
 </td><td><p>Set the variable <em>var</em> to <em>value</em>, overriding both internal variables and variables imported from the environment. This is a simpler to use version of <code>-s</code></p>
 <p></p>
@@ -148,7 +154,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
 </td></tr>
 </table>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Sep 15 22:06:18 2009 for JamPlus manual by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:45 2010 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

@@ -16,12 +16,14 @@ When first loaded, it attempts to detect the compiler on the machine.  On Window
 \refitem rule_C_Application C.Application
 \refitem rule_C_BatchCompileGroupSize C.BatchCompileGroupSize
 \refitem rule_C_CFlags C.CFlags
+\refitem rule_C_CppExceptions C.C++Exceptions
 \refitem rule_C_CppFlags C.C++Flags
 \refitem rule_C_CompileOptions C.CompileOptions
 \refitem rule_C_RuntimeType C.RuntimeType
 \refitem rule_C_DefFile C.DefFile
 \refitem rule_C_Defines C.Defines
 \refitem rule_C_ExcludeFromBuild C.ExcludeFromBuild
+\refitem rule_C_Flags C.Flags
 \refitem rule_C_ForceInclude C.ForceInclude
 \refitem rule_C_IncludeDirectories C.IncludeDirectories
 \refitem rule_C_Library C.Library
@@ -298,6 +300,29 @@ For the given project \c TARGET, exclude the \c SOURCES from the build.  If usin
     {
         C.ExcludeFromBuild myproject : $(XBOX_SRCS) ;
     }
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_Flags rule C.Flags TYPE : TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_Flags
+
+For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.  \c TYPE can be any known source compilation type, such as \c CC for C-style files, \c C++ for C++-style files, and on certain compilers, \c M for Objective C files, or \c MM for Objective C++ files.
+
+\param TYPE A source compilation type added through \ref "rule_C_AddBuildExtensions" "C.AddBuildExtensions".
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of flags to apply.
+\param THE_CONFIG (optional) If not specified, the default is all configurations.
+\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+
+\code
+    C.Flags CC  : * : -g -O0 -arch i386 : debug : macosx32 ;
+    C.Flags C++ : * : -g -O0 -arch i386 : debug : macosx32 ;
 \endcode
 
 

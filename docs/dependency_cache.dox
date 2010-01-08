@@ -4,8 +4,7 @@
 
 \note Much of this documentation comes directly from Matt Armstrong's README.header_scan_cache document in the Perforce Public Depot.
 
-When the \ref built_in_variables_hdrscan are used, Jam scans source files for other files the source files might include.  In order to speed this process up, both in the current run and subsequent runs of Jam, the dependency cache caches these scans, so the entire
-source tree need not be scanned each time \b Jam is run.  This brings the following benefits:
+When the \ref built_in_variables_hdrscan are used, Jam scans source files for other files the source files might include.  In order to speed this process up, both in the current run and subsequent runs of Jam, the dependency cache caches these scans, so the entire source tree need not be scanned each time \b Jam is run.  This brings the following benefits:
 
 - If a file would otherwise be scanned multiple times in a single jam run (because the same file is represented by multiple targets, perhaps each with a different grist), it will now be scanned only once.  In this way, things are faster even if the cache file is not present when Jam is run.
 
@@ -27,10 +26,10 @@ Setting LOCATE and SEARCH on the the <tt>DEPCACHE.cachename</tt> works as well, 
 DEPCACHE.standard = $(ALL_LOCATE_TARGET)/.depcache ;
 \endcode
 
-The global \c DEPCACHE variable sets the active dependency cache.
+The global \c DEPCACHE variable sets the active dependency cache.  \c DEPCACHE defaults to the cachename of \c standard.  It can be overridden, if desired.
 
 \code
-DEPCACHE = standard ;
+DEPCACHE = standard ;  # Unnecessary, as the default is standard.
 \endcode
 
 If the dependency cache needs to be changed for a target, the \ref rule_UseDepCache "UseDepCache" rule is used to override the global value.

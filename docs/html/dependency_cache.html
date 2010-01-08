@@ -28,8 +28,8 @@ Dependency Cache Usage</a></h2>
 <p>The actual name of the cache file is controlled by the <code>DEPCACHE.cachename</code>. If <code>DEPCACHE.cachename</code> is left unset (the default), reading and writing of a cache file is not performed. The cache is always used internally regardless of <code>DEPCACHE.cachename</code>, which helps when HDRGRIST causes the same file to be scanned multiple times.</p>
 <p>Setting LOCATE and SEARCH on the the <code>DEPCACHE.cachename</code> works as well, so you can place anywhere on disk you like or even search for it in several directories. You may also set it in your environment to share it amongst all your projects.</p>
 <div class="fragment"><pre class="fragment">DEPCACHE.standard = $(ALL_LOCATE_TARGET)/.depcache ;
-</pre></div><p>The global <code>DEPCACHE</code> variable sets the active dependency cache.</p>
-<div class="fragment"><pre class="fragment">DEPCACHE = standard ;
+</pre></div><p>The global <code>DEPCACHE</code> variable sets the active dependency cache. <code>DEPCACHE</code> defaults to the cachename of <code>standard</code>. It can be overridden, if desired.</p>
+<div class="fragment"><pre class="fragment">DEPCACHE = standard ;  # Unnecessary, as the <span class="keywordflow">default</span> is standard.
 </pre></div><p>If the dependency cache needs to be changed for a target, the <a class="el" href="builtin_rules.html#rule_UseDepCache">UseDepCache</a> rule is used to override the global value.</p>
 <div class="fragment"><pre class="fragment">UseDepCache $(TARGET) : platform ;
 </pre></div><p>There can be as many dependency caches as are needed by assigning additional <code>DEPCACHE.cachename</code> file entries. The default dependency cache is known as <b>standard</b>. Generally, the <b>standard</b> cache refers to entries affected by the current platform and configuration. You might also have a <b>platform</b> cache attached to targets that are platform specific but not configuration specific. You might also have a <b>global</b> cache attached to targets that work for any platform or configuration.</p>
@@ -43,7 +43,7 @@ Technical Details</a></h2>
 </ul>
 <p>You control the maximum age with the DEPCACHEMAXAGE variable. If set to 0, no cache aging is performed. Otherwise it is the number of times <b>Jam</b> must be run before an unused cache entry is purged. The default for DEPCACHEMAXAGE if left unset is 100. </p>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Sep 15 22:06:18 2009 for JamPlus manual by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:44 2010 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

@@ -8,6 +8,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
     [ -j <i>jobs</i> ]
     [ -o <i>actionsfile</i> ]
     [ -s <i>var</i>=<i>value</i> ]
+    [ -S ]
     [ <i>var</i>=<i>value</i> ]
     [ -t <i>target</i> ]
     [ <i>target</i> ... ]
@@ -91,6 +92,10 @@ If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target;</
   <tr>
     <td valign=top><code> -s <i>var</I>=<I>value</I></code>
 	<td> Set the variable <i>var</i> to <i>value</I>, overriding both internal variables and variables imported from the environment.
+
+  <tr>
+    <td valign=top><code> -S</code>
+	<td> When specified, any rules called that have not been defined are skipped without warning.  <tt>jam --workspace</tt> makes extensive use of it.  This command line option will mask problems with your Jamfiles, so it is recommended you don't use it.
 
   <tr>
     <td valign=top><code><i>var</I>=<I>value</I></code>

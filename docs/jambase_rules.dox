@@ -13,6 +13,7 @@ documentation:
 \secreflist
 \refitem rule_ActiveProject ActiveProject
 \refitem rule_AutoSourceGroup AutoSourceGroup
+\refitem rule_Clean Clean
 \refitem rule_FGristDirectories FGristDirectories
 \refitem rule_GroupByVar GroupByVar
 \refitem rule_IncludeModule IncludeModule
@@ -68,6 +69,24 @@ For workspace projects that support grouping of files into folders, the \c AutoS
     AutoSourceGroup MyProject : $(SRCS) ;
 \endcode
 
+
+
+
+
+
+
+<hr>
+\section rule_Clean rule Clean TARGETS : FILES
+\addindex rule_Clean
+
+When executing actions for \c TARGETS, the specified list of \c FILES are removed from the disk, and any empty directories resulting from the file deletions are removed, too.
+
+\param TARGETS A list of one or more targets.  Generally, the target name is \c clean or <tt>clean:SOMETARGET</tt>.
+\param FILES A list of files to be deleted.
+
+\code
+    Clean clean : <mytarget>myfile.txt $(TEMP)/anotherfile.txt ;
+\endcode
 
 
 
