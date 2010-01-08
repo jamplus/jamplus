@@ -6,22 +6,23 @@ rotatingCharacters = { '|', '/', '-', '\\' }
 testsSucceeded = 0
 totalTests = 0
 
-function TestNumberUpdate()
-	testNumber = testNumber + 1
-	testsSucceeded = testsSucceeded + 1
-	totalTests = totalTests + 1
-	io.write( rotatingCharacters[testNumber % 4 + 1] .. '\b' )
+function TestNumberUpdate(amount)
+	amount = amount or 1
+	testNumber = testNumber + amount
+	testsSucceeded = testsSucceeded + amount
+	totalTests = totalTests + amount
+	io.write( rotatingCharacters[(testNumber % 4) + 1] .. '\b' )
 end
 
 function RunJam(commandLine)
 	if not commandLine then commandLine = {} end
 	table.insert(commandLine, 1, 'jam')
 	table.insert(commandLine, 2, '-j1')
-	
+
 	if Platform == 'win32' then
 		commandLine[#commandLine + 1] = '2>&1'
 	end
-	
+
 	return ex.collectlines(commandLine)
 end
 
@@ -75,7 +76,7 @@ function TestPattern(pattern, lines)
 		else
 			patternMatches = line == pattern
 		end
-		
+
 		if not patternMatches then
 			if not next  or  not pattern then
 				if ooo then
@@ -204,7 +205,7 @@ else
 	local f = io.popen('uname')
 	uname = f:read('*a'):lower():gsub('\n', '')
 	f:close()
-	
+
 	if uname == 'darwin' then
 		Platform = 'macosx'
 	end
@@ -253,7 +254,7 @@ for _, dir in ipairs(dirs) do
 					io.write(' at line number ' .. lineNumber)
 				end
 				io.write('.\n\n')
-				
+
 				err = err:gsub('^runtests.lua:%d-: ', '')
 				io.write('\t' .. err .. '\n')
 				print(ErrorTraceback)

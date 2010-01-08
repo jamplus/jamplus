@@ -2,7 +2,8 @@ function Test()
 	local lines = RunJam{ '-ftestluaparser.jam' }
 	local numTestsPassed, totalTests = lines[1]:match('Tests passed: (%d+)/(%d+)')
 	TestExpression(numTestsPassed == totalTests, "One of the Lua parser tests failed")
-	
+	TestNumberUpdate(numTestsPassed - 1)
+
 	local start = os.time()
 	local pattern = [[
 *** found 4 target(s)...
