@@ -154,8 +154,8 @@ A variable element's string value can be parsed into grist and filename-related 
 	<td>Expand a variable expansion within a string.  When a string has been read from an external source and contains a variable in <tt>$(var)</tt> or <tt>\@(var)</tt> syntax, the <tt>:A</tt> modifier can be used to expand it as if it had been inline in the Jam script.</td>
   </tr>
   <tr>
-    <td><code> :W=<i>wildcard</i> </code></td>
-	<td>Populate the list with directory contents matching <i>wildcard</i>.</td>
+    <td><code> :W[=<i>remove_path</i>] </code></td>
+	<td>Populate the list with directory contents matching the string.  If specified, <i>remove_path</i> is removed from the beginning of each found file.</td>
   </tr>
   <tr>
     <td><code> :T </code></td>
@@ -531,6 +531,10 @@ When using the <tt>:W</tt> modifier, the following file globbing syntax is avail
     Echo @(../sharedlib/app/**:WB=more\\dir\\file:\\) ;
                                             # ..\\sharedlib\\app\\more\\dir\\file.jam
                                             # ..\\sharedlib\\app\\more\\dir\\file.c
+
+    Echo @(../sharedlib/app/**:W=../sharedlib/:B=more\\dir\\file:\\) ;
+                                            # app\\more\\dir\\file.jam
+                                            # app\\more\\dir\\file.c
 
 
     #------------------------------------------------------------------------------

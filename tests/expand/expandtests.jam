@@ -17,6 +17,8 @@ rule TestExpansion LEFT : RIGHT
 	}
 }
 
+NEWLINE = "
+" ;
 
 rule TestWildcard ACTUAL : EXPECTED
 {
@@ -25,7 +27,7 @@ rule TestWildcard ACTUAL : EXPECTED
 	{
 		if ! ( $(_expected) in $(ACTUAL) )
 		{
-			Echo "fail: $(ACTUAL) \!\= $(EXPECTED)" ;
+			Echo "fail: $(ACTUAL) \!\= $(EXPECTED)"$(NEWLINE) ;
 			return ;
 		}
 	}
@@ -129,6 +131,11 @@ TestWildcard @(@(../sharedlib/app/*:W):BS) : Jamfile.jam main.c ;
 TestWildcard @(../sharedlib/app/**:WB=more\\dir\\file:\\) :
 		..\\sharedlib\\app\\more\\dir\\file.jam
 		..\\sharedlib\\app\\more\\dir\\file.c
+;
+
+TestWildcard @(../sharedlib/app/**:W=../sharedlib/:B=more\\dir\\file:\\) :
+		app\\more\\dir\\file.jam
+		app\\more\\dir\\file.c
 ;
 
 #------------------------------------------------------------------------------

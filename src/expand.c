@@ -64,6 +64,7 @@ typedef struct {
 #endif
 #ifdef OPT_EXPAND_FILEGLOB_EXT
 	char		wildcard;
+	PATHPART	wildcard_remove_prepend;
 #endif
 #ifdef OPT_EXPAND_LITERALS_EXT
 	char		expandliteral;
@@ -375,7 +376,7 @@ var_expand(
 
 			glob = fileglob_Create( value->string );
 			while ( fileglob_Next( glob ) ) {
-				foundfiles = list_new( foundfiles, fileglob_FileName( glob ), 0 );
+			    foundfiles = list_new( foundfiles, fileglob_FileName( glob ) + edits.wildcard_remove_prepend.len, 0 );
 			}
 			fileglob_Destroy( glob );
 
@@ -686,7 +687,7 @@ var_edit_parse(
 	    case 'X': mod[0] = 'X'; goto listval;
 #endif
 #ifdef OPT_EXPAND_FILEGLOB_EXT
-	    case 'W': edits->wildcard = 1; continue;
+	    case 'W': edits->wildcard = 1; fp = &edits->wildcard_remove_prepend; goto strval;
 #endif
 #ifdef OPT_EXPAND_LITERALS_EXT
 	    case 'A': edits->expandliteral = 1; continue;
