@@ -160,6 +160,12 @@ TestExpansion $(FILES:I=\\.c$:I=\\.obj:X="^file1":X=\\.c$) :
 TestExpansion $(FILES:X="^file1":X=\\.obj$:I=\\.h$) :
 		file1.h file2.h file3.h ;
 
+TEST = a b c d ;
+TestExpansion $(TEST:I=a) : a ;
+TestExpansion $(TEST:X=a) : b c d ;
+TestExpansion $(TEST:X=a:I=.*) : a b c d ;
+TestExpansion $(TEST:I=.*:X=a) : b c d ;
+
 #------------------------------------------------------------------------------
 if $(NT) {
 	local filename = this/will/have/quotes ;

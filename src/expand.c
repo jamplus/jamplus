@@ -529,14 +529,27 @@ var_expand(
 		    LIST *newl = L0;
 
 		    LIST *origl = l;
+		    int hasInclude = 0;
 
 		    if ( !regexhash )
 			regexhash = hashinit( sizeof(regexdata), "regex" );
 
+		    {
+			LIST *inex = edits.includes_excludes;
+			while ( inex ) {
+			    char mod = inex->string[0];
+			    inex = list_next( inex );
+
+			    if ( mod == 'I' ) {
+				hasInclude = 1;
+			    }
+			}
+		    }
+
 		    for ( ; l; l = list_next( l ) )
 		    {
 			LIST *inex = edits.includes_excludes;
-			int remove = 1;
+			int remove = hasInclude;
 
 			while ( inex ) {
 			    char mod = inex->string[0];
@@ -555,7 +568,7 @@ var_expand(
 			    if ( mod == 'X' ) {
 				if( jam_regexec( re, l->string ) )
 				    remove = 1;
-			    } else {
+			    } else if ( mod == 'I' ) {
 				if( jam_regexec( re, l->string ) )
 				    remove = 0;
 			    }
