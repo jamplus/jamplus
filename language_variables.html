@@ -112,6 +112,7 @@ $(Z) -&gt; <br/>
 <p><code> </code>  </p>
 </td></tr>
 </table>
+<p><a class="anchor" id="variable_expansion_c"></a></p>
 <p>A variable element's string value can be parsed into grist and filename-related components. Modifiers to a variable are used to select elements, select components, and replace components. Modifiers are applied in the order of the table below:</p>
 <table width="75%" border="1" align="center" cellspacing="3" cellpadding="3">
 <tr>
@@ -135,8 +136,8 @@ $(Z) -&gt; <br/>
 </td><td><p>Expand a variable expansion within a string. When a string has been read from an external source and contains a variable in <code></code> or <code>@(var)</code> syntax, the <code>:A</code> modifier can be used to expand it as if it had been inline in the Jam script.  </p>
 </td></tr>
 <tr>
-<td><p><code> :W=<em>wildcard</em> </code> </p>
-</td><td><p>Populate the list with directory contents matching <em>wildcard</em>.  </p>
+<td><p><code> :W[=<em>remove_path</em>] </code> </p>
+</td><td><p>Populate the list with directory contents matching the string. If specified, <em>remove_path</em> is removed from the beginning of each found file.  </p>
 </td></tr>
 <tr>
 <td><p><code> :T </code> </p>
@@ -144,7 +145,7 @@ $(Z) -&gt; <br/>
 </td></tr>
 <tr>
 <td><p><code> :C </code> </p>
-</td><td><p>EsCapes the string as if it were a file path. On Windows, if the path has spaces, it is quoted. On other platforms, spaces, parentheses, and a few other special characters are escaped with a backslash.s  </p>
+</td><td><p>EsCapes the string as if it were a file path. On Windows, if the path has spaces, it is quoted. On other platforms, spaces, parentheses, and a few other special characters are escaped with a backslash.  </p>
 </td></tr>
 <tr>
 <td><p><code> :B </code> </p>
@@ -490,6 +491,10 @@ Variable Expansion Examples</a></h2>
 <span class="comment">                                            # ..\\sharedlib\\app\\more\\dir\\file.jam</span>
 <span class="comment">                                            # ..\\sharedlib\\app\\more\\dir\\file.c</span>
 <span class="comment"></span>
+<span class="comment">    Echo @(../sharedlib/app</span><span class="comment">/**:W=../sharedlib/:B=more\\dir\\file:\\) ;</span>
+<span class="comment">                                            # app\\more\\dir\\file.jam</span>
+<span class="comment">                                            # app\\more\\dir\\file.c</span>
+<span class="comment"></span>
 <span class="comment"></span>
 <span class="comment">    #------------------------------------------------------------------------------</span>
 <span class="comment">    top = AppRoot ;</span>
@@ -520,7 +525,7 @@ Variable Expansion Examples</a></h2>
 <span class="comment">    Echo $(FILES:X=&quot;^file1&quot;:X=\\.obj$:I=\\.h$) ;</span>
 <span class="comment">                                    # file1.h file2.h file3.h</span>
 </pre></div> </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Sat Oct 3 12:35:44 2009 for JamPlus manual by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:44 2010 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

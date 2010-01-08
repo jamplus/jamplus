@@ -11,27 +11,27 @@
 <div class="contents">
 
 
-<h1><a class="anchor" id="changelog">Changelog </a></h1><h2><a class="anchor" id="version0_4">
-Version 0.4</a></h2>
-<h2>New features for 0.4:</h2>
+<h1><a class="anchor" id="changelog">Changelog </a></h1><h2><a class="anchor" id="version1_0">
+Version 1.0</a></h2>
+<h2>New features for 1.0:</h2>
 <ul>
-<li>C/C++ build rules have been separated into their own <a class="el" href="module_c.html">Jam module called 'c'</a>. This module is currently automatically loaded on any Jam invocation. Most rules are now namespaced with a <code>C.</code>. That is, you'll use <a class="el" href="module_c.html#rule_C_Application">C.Application</a> instead of <code>Application</code>. To use the old names, <a class="el" href="jambase_rules.html#rule_IncludeModule">IncludeModule</a> <code>c-deprecated</code>. If you do this, please upgrade to the new method, as the deprecated module will go away in the next release of JamPlus.<ul>
-<li>With the new C module, it is easy to add additional platforms, configurations, and compilers. See the tests/platform/groovyplatform/ example to see this in action.</li>
+<li>C/C++ build rules have been separated into their own <a class="el" href="module_c.html">Jam module called 'c'</a>. This module is automatically loaded on any Jam invocation. As a result, most rules are now namespaced with a <code>C.</code>. That is, you'll use <a class="el" href="module_c.html#rule_C_Application">C.Application</a> instead of just <code>Application</code>. To use the old names, <a class="el" href="jambase_rules.html#rule_IncludeModule">IncludeModule</a> <code>c-deprecated</code>. If you do this, please upgrade to the new method, as the deprecated module will go away in the next release of JamPlus.<ul>
+<li>With the new C module, it is easy to add additional platforms, configurations, and compilers. See the <b>tests/platform/groovyplatform/</b> example to see this in action.</li>
 <li>Renamed the following Jam modules:<ul>
-<li>c/directx: Renamed from DirectX.</li>
-<li>c/dotnet: Renamed from DotNet.</li>
-<li>c/mfc: Renamed from MFC. Access it as <a class="el" href="module_c_mfc.html#rule_C_UseMFC">C.UseMFC</a>.</li>
-<li>c/midl: Renamed from Midl. Access it as C.Midl*.</li>
-<li>c/wxwidgets: Renamed from WxWidgets. Access it as <a class="el" href="module_c_wxwidgets.html#rule_C_UseWxWidgets">C.UseWxWidgets</a>.</li>
+<li><code>c/directx:</code> Renamed from DirectX.</li>
+<li><code>c/dotnet:</code> Renamed from DotNet.</li>
+<li><code>c/mfc:</code> Renamed from MFC. Access it as <a class="el" href="module_c_mfc.html#rule_C_UseMFC">C.UseMFC</a>.</li>
+<li><code>c/midl:</code> Renamed from Midl. Access it as C.Midl*.</li>
+<li><code>c/wxwidgets:</code> Renamed from WxWidgets. Access it as <a class="el" href="module_c_wxwidgets.html#rule_C_UseWxWidgets">C.UseWxWidgets</a>.</li>
 </ul>
 </li>
-<li>Created a c/win32resource module with the ResourceCompiler rules.</li>
+<li>Created a <code>c/win32resource</code> module with the <a class="el" href="module_c_win32resource.html">ResourceCompiler rules</a>.</li>
 </ul>
 </li>
-<li>The Jam binaries have been moved from the <code>jamplus/bin/</code> directory to <code>jamplus/bin/$(OS)$(OSPLAT)</code>. On Windows, this ends up being <code>jamplus/bin/ntx86/</code>. On Mac OS X, the directory is <code>jamplus/bin/macosxx64/</code>. All associated scripts have been moved to this directory, as has the Lua directory structure. This new structure will allow for multiple platform binaries to exist side by side. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
-<li>The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files). Additionally, iPhone and iPhone Simulator platforms can be built, but they can not be debugged (yet).</li>
-<li>Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.</li>
+<li>The Jam binaries have been moved from the <code>jamplus/bin/</code> directory to <code>jamplus/bin/$(OS)$(OSPLAT)</code>. On Windows, this ends up being <code>jamplus/bin/ntx86/</code>. On Mac OS X, the directory is <code>jamplus/bin/macosxx64/</code>. All associated scripts have been moved to this directory, as has the Lua directory structure. This new structure allows for multiple platform binaries to exist side by side. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
+<li>The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files). Additionally, iPhone and iPhone Simulator applications can be built, but they can not be debugged (yet).</li>
 <li>Visual Studio 2010 support has been added by Philipp Teschner. It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.</li>
+<li>Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.</li>
 <li>Automated tests have been added consisting of 45 categoric test suites made of over 400 individual tests. The suite is run by ensuring JamPlus's bin/platform/ directory is in the PATH and then running <code>tests/runtests.bat</code> (on Windows) or <code>tests/runtests</code> on Mac OS X.</li>
 </ul>
 <h2>Bootstrapping/Building:</h2>
@@ -46,71 +46,75 @@ Version 0.4</a></h2>
 <li>Intermediate files are built to an intermediate folder instead of littering the extra files in the src/ directory.</li>
 <li>The Mac OS X bootstrapped build uses the 10.4 SDK and GCC 4.0 to build. The SDK can be changed near the top of the <code>src/Jamfile.jam</code>.</li>
 </ul>
-<h2>Documentation:</h2>
-<ul>
-<li>Large number of documentation updates, including the further documenting of the Jam modules.</li>
-</ul>
 <h2>Jam Executable:</h2>
 <ul>
-<li>Multipass support past 2 passes was broken. It is fixed now.</li>
-<li>Built-in rules:<ul>
-<li>Added a PRIORITY parameter to <a class="el" href="builtin_rules.html#rule_QueueJamFile">QueueJamFile</a>. By default, queued Jamfiles are processed in the order they are queued. There may be cases where the queued order does not allow for proper processing of the Jamfiles. In the event the Jamfile order matters for the upcoming pass, the <code>PRIORITY</code> will affect queueing order.</li>
+<li><b>Built-in rules:</b><ul>
+<li>Added a <code>PRIORITY</code> parameter to <a class="el" href="builtin_rules.html#rule_QueueJamFile">QueueJamFile</a>. By default, queued Jamfiles are processed in the order they are queued. There may be cases where the queued order does not allow for proper processing of the Jamfiles. In the event the Jamfile order matters for the upcoming pass, the <code>PRIORITY</code> will affect queueing order.</li>
 <li>Added rule <a class="el" href="builtin_rules.html#rule_ScanContents">ScanContents</a>. When <a class="el" href="builtin_rules.html#rule_ScanContents">ScanContents</a> is specified for a source target (even a generated one) and if the timestamp differs, the contents of the source target are compared against the last run. If they differ, the build proceeds as normal. If they are the same, no further building is necessary.</li>
 <li>Added rule <a class="el" href="builtin_rules.html#rule_Shell">Shell</a>, used for executing shell commands and retrieving their output.</li>
-<li>Added built-in rule GroupByVar, a high speed version of the oft-called Jambase rule used by the C module's helper rule <code>MultiCppCompile</code>. #ifdef'ed as <code>OPT_BUILTIN_GROUPBYVAR_EXT</code>.</li>
-<li>Added built-in rule Split. #ifdef'ed as <code>OPT_BUILTIN_SPLIT_EXT</code>.</li>
+<li>Added built-in rule <a class="el" href="jambase_rules.html#rule_GroupByVar">GroupByVar</a>, a high speed version of the oft-called Jambase rule used by the C module's helper rule <code>MultiCppCompile</code>. (Made available through <code>#define OPT_BUILTIN_GROUPBYVAR_EXT</code>.)</li>
+<li>Added built-in rule <a class="el" href="jambase_rules.html#rule_Split">Split</a>. (Made available through <code>#define OPT_BUILTIN_SPLIT_EXT</code>.)</li>
 </ul>
 </li>
 <li>Actions:<ul>
-<li>Allow for the failure of an <code>actions lua</code> block at runtime.</li>
 <li>Added a new action modifier, <a class="el" href="jam_language.html#actions_screenoutput">screenoutput</a>. Normally, actions collect all output before displaying it to the user in order to avoid interleaving the output from different processes. 'screenoutput' may be used to display the output as it happens.</li>
 <li>Support a third parameter to an action for <a class="el" href="jam_language.html#actions_autosettings">autosettings</a>. This takes any settings assigned to the autosettings target and makes them active during the course of the action.</li>
-<li>Added a new actions modifier keyword, <code>removeemptydirs</code>, intended to be used with the various <code>Clean</code> actions. For any sources sent to a <code>Clean</code> action, any empty directories associated with the source target location are removed. #ifdef'ed as <code>OPT_REMOVE_EMPTY_DIRS_EXT</code>.</li>
+<li>Added a new actions modifier keyword, <a class="el" href="jam_language.html#actions_removeemptydirs">removeemptydirs</a>, intended to be used with the various <code>Clean</code> actions. For any sources sent to a <code>Clean</code> action, any empty directories associated with the source target location are removed. #ifdef'ed as <code>OPT_REMOVE_EMPTY_DIRS_EXT</code>.</li>
 </ul>
 </li>
-<li>Added support for misplaced semicolon and colon detection in the parser. If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace, and a parser error is reported. You may need to quote strings that didn't need to be quoted before. #ifdef'ed as <code>OPT_FIND_BAD_SEMICOLON_USAGE_EXT</code>.</li>
-<li>Support for new <a class="el" href="jamtoworkspace.html#jamtoworkspace_usage">Jam command line options</a> to build the workspace, convert folders to a Jamfile, and convert the contents of a .vcproj to a Jamfile. These command line options replace the old calls to <b>JamToWorkspace</b> and other helper scripts.</li>
-<li>Simplify the -s command line flag (which is still available) by parsing KEY=VALUE pairs off the command line. That is, 'jam -sCONFIG=debug all' and 'jam CONFIG=debug all' mean the same thing. See <a class="el" href="usage.html">Usage</a> for more information. (Made available through <code>#define OPT_KEY_EQUALS_VALUE_DEFINES_EXT</code>.)</li>
-<li>Added a way of accessing the targets specified on the command line from within Jam through the global variable <code>JAM_COMMAND_LINE_TARGETS</code>. One method of using this variable is to filter sections of the Jam script to save build time. (Made available through <code>#define OPT_SET_JAMCOMMANDLINETARGETS_EXT</code>.)</li>
-<li>If an action is empty, don't put any of the whitespace through. It dies on Unix shells.</li>
-<li>Added a new missing rule "silence" command line option: -S</li>
-<li>Added the ability to escape paths in a platform specific way with the string expansion modifier :C. #ifdef'ed as <code>OPT_EXPAND_ESCAPE_PATH_EXT</code>.</li>
-<li>Defaulted <code>DEPCACHE</code> to equal <code>standard</code>. This does not automatically turn on a dependency cache. There is still need to set it up with <code>DEPCACHE.standard = .depcache</code> or some equivalent.</li>
-<li>Fixed a couple of multipass issues covered in tests/multipass_error where an error occurs during the action on the first pass, and anything dependent on the 'errored' file on a subsequent pass should abort. Also covers the case where the action fails in the first pass but succeeds in the second pass, letting dependent targets process successfully.</li>
-<li>Fixed an issue where Jam did not properly handle a generated source/header when there were multiple targets applied to an action.</li>
-<li>When a target is missing and there are queued Jamfiles, the actions of that target are now shifted into the next pass.</li>
+<li>Added support for misplaced semicolon and colon detection in the parser. If a semicolon or colon is the first or last character of an identifier, it may be missing its surrounding whitespace, and a parser error is reported. You may need to quote strings that didn't need to be quoted before. See <a class="el" href="jam_language.html#language_lexical_features">Lexical Features</a> for additional information. #ifdef'ed as <code>OPT_FIND_BAD_SEMICOLON_USAGE_EXT</code>.</li>
+<li>Support for new <a class="el" href="jamtoworkspace.html#jamtoworkspace_usage">Jam command line options</a>, specified in the form <code>jam --helperscript ...</code>. <code>jam --workspace</code> builds a workspace, <code>jam --folderstojamfile</code> converts folders to a Jamfile, and <code>jam --vcprojtojamfile</code> converts the contents of a .vcproj to a Jamfile. These command line options replace the old calls to <b>JamToWorkspace</b> and other helper scripts.</li>
+<li>Simplify the <code>-s</code> command line flag (which is still available) by parsing KEY=VALUE pairs off the command line. That is, 'jam -sCONFIG=debug all' and 'jam CONFIG=debug all' mean the same thing. See <a class="el" href="usage.html">Usage</a> for more information. (Made available through <code>#define OPT_KEY_EQUALS_VALUE_DEFINES_EXT</code>.)</li>
+<li>Added a way of accessing the targets specified on the command line from within Jam through the global variable <code>JAM_COMMAND_LINE_TARGETS</code>. One method of using this variable is to filter sections of the Jam script to save build time. See <a class="el" href="builtin_variables.html#language_built_in_variables_misc">Miscellaneous Variables</a> for additional information. (Made available through <code>#define OPT_SET_JAMCOMMANDLINETARGETS_EXT</code>.)</li>
+<li>Added a new missing rule "silence" command line option: <code>-S</code>. When specified, any rules called that have not been defined are skipped without warning. <code>jam --workspace</code> makes extensive use of it. This command line option will mask problems with your Jamfiles, so it is recommended you don't use it. See <a class="el" href="usage.html">Usage</a> for more information.</li>
+<li>Added the ability to escape paths in a platform specific way with the <a class="el" href="language_variables.html#variable_expansion_c">string expansion modifier :C</a>. For example, if a Windows filename has spaces in it, using the <code>:C</code> modifier will result in the filename being quoted. #ifdef'ed as <code>OPT_EXPAND_ESCAPE_PATH_EXT</code>.</li>
+<li>Defaulted <code>DEPCACHE</code> to equal <code>standard</code>. This does not automatically turn on a dependency cache. There is still need to set it up with <code>DEPCACHE.standard = .depcache</code> or some equivalent. See <a class="el" href="dependency_cache.html#dependency_cache_usage">Dependency Cache Usage</a> for additional information.</li>
 </ul>
 <h3>Technical Details:</h3>
 <ul>
-<li>In multipass builds where the <a class="el" href="builtin_rules.html#rule_NoCare">NoCare</a> flag has been applied to a target that is missing, do not attempt to move the missing file's build to the next pass. Properly process it in the current pass.</li>
-<li>Mac OS X has a case preserving, case insensitive file system. Turned on <code>#define DOWNSHIFT_PATHS</code> to compensate for that.</li>
-<li>Fix the Mac OS X directory creation under certain instances in the function <code>file_mkdir()</code>.</li>
-<li>Alter the <code>OPT_UPDATED_CHILD_FIX</code> from <a href="http://maillist.perforce.com/pipermail/jamming/2006-May/002676.html">http://maillist.perforce.com/pipermail/jamming/2006-May/002676.html</a> to handle the case where an child target's includes target has a fate of anything greater than <code>T_FATE_STABLE</code>. This specifically guards against the case where <code>T_FATE_MISSING</code> is applied to one of the children, and it doesn't build in the current Jam execution.</li>
-<li>Turn off <code>OPT_PERCENT_DONE_EXT</code> for now. It provided faulty percentages due to all of the patches that JamPlus employs.</li>
-<li>Registry scanning bug fix from Philipp Teschner. Previous to the fix, <a class="el" href="builtin_rules.html#rule_W32_GETREG">W32_GETREG</a> only worked with <code>HKEY_LOCAL_MACHINE</code>. If you used anything else, it would infinitely loop.</li>
-<li>Undo the <code>OPT_CHILD_UPDATED</code> patch in make.c. It does not work properly with certain combinations of assets, and in truth, I'm not sure what problem it is really trying to solve or even if another patch solves it already.</li>
+<li>Allow for the failure of an <a class="el" href="jam_language.html#actions_lua">actions lua</a> block at runtime.</li>
+<li>Multipass support:<ul>
+<li>Multipass support past 2 passes was broken. It is fixed now. See <a class="el" href="multiple_passes.html">Multiple Passes</a> for more information.</li>
+<li>In multipass builds where the <a class="el" href="builtin_rules.html#rule_NoCare">NoCare</a> flag has been applied to a target that is missing, the build will not attempt to move the missing file's build to the next pass. It will now be properly processed in the current pass.</li>
+<li>Fixed a couple of multipass issues illustrated in <b>tests/multipass_error</b> where an error occurs during the action on the first pass, and anything dependent on the 'errored' file on a subsequent pass should abort. This fix also covers the case where the action fails in the first pass but succeeds in the second pass, letting dependent targets process successfully.</li>
+<li>When a target is missing and there are queued Jamfiles, the actions of that target are now shifted into the next pass.</li>
+</ul>
+</li>
+<li>Fixed an issue where Jam did not properly handle a generated source/header when there were multiple targets applied to an action.</li>
+<li>Altered the <code>OPT_UPDATED_CHILD_FIX</code> from <a href="http://maillist.perforce.com/pipermail/jamming/2006-May/002676.html">http://maillist.perforce.com/pipermail/jamming/2006-May/002676.html</a> to handle the case where an child target's includes target has a fate of anything greater than <code>T_FATE_STABLE</code>. This specifically guards against the case where <code>T_FATE_MISSING</code> is applied to one of the children, and it doesn't build in the current Jam execution.</li>
+<li><code>OPT_PERCENT_DONE_EXT</code> is turned off for now. It provided faulty percentages due to all of the patches that JamPlus employs.</li>
+<li>Applied a registry scanning bug fix from Philipp Teschner. Previous to the fix, <a class="el" href="builtin_rules.html#rule_W32_GETREG">W32_GETREG</a> only worked with <code>HKEY_LOCAL_MACHINE</code>. If the Jam script used anything else, it would infinitely loop.</li>
+<li>Turned off the <code>OPT_CHILD_UPDATED</code> patch in make.c. It does not work properly with certain combinations of assets, and in truth, I'm not sure what problem it is really trying to solve or even if another patch solves it already.</li>
 <li>Fixed a bug in the glob expansion directory matching: **/ now works.</li>
-<li>Enable Lua actions on Mac OS X. This requires polling for process exits, as on Windows, instead of just calling the C runtime wait() function.</li>
 <li>A minor fix to <code>OPT_BUILTIN_NEEDS_EXT</code> was made for certain conditions when <a class="el" href="builtin_rules.html#rule_Needs">Needs</a> is used with <a class="el" href="builtin_rules.html#rule_MightNotUpdate">MightNotUpdate</a>.</li>
 <li>Handle a case in <a class="el" href="builtin_rules.html#rule_MightNotUpdate">MightNotUpdate</a> that would cause dependent targets to build when they shouldn't on a second run of Jam.</li>
+<li>Mac OS X:<ul>
+<li>Mac OS X has a case preserving, case insensitive file system. Turned on <code>#define DOWNSHIFT_PATHS</code> to compensate for that.</li>
+<li>Fixed the Mac OS X directory creation from failing under certain instances in the function <code>file_mkdir()</code>.</li>
 <li>Fixed the directory wildcarding on Mac OS X.</li>
-<li>Fixed the Lua module loading support within a Jam action on Mac OS X.</li>
-<li>Fixed a case where the directory scan didn't identify single character directory names as directories. How silly.</li>
-<li>Turn on <code>OPT_TIMESTAMP_IMMEDIATE_PARENT_CHECK_EXT</code>. This improves the performance of a no-op build a bit.</li>
+<li>Enabled Lua actions on Mac OS X. This requires polling for process exits, as on Windows, instead of just calling the C runtime wait() function. It also needed fixes to the Lua module loading support within a Jam action on Mac OS X, including a very necessary (but unnoticable) immediate relaunch of the Jam executable with the addition of the Lua path into the environment variable <code>DYLD_FALLBACK_LIBRARY_PATH</code>.</li>
 <li>Prevent stat'ing from occuring while reading in a directory on Mac OS X. It will be done lazily elsewhere.</li>
-<li>A fix to make the Visual C++ linker's CONFIG=debug DLLs properly write out export libraries and prevent dependent targets from building when there was no change to the header.</li>
+</ul>
+</li>
+<li>Fixed a case where the directory scan didn't identify single character directory names as directories. How silly.</li>
+<li>Turned on <code>OPT_TIMESTAMP_IMMEDIATE_PARENT_CHECK_EXT</code>. This improves the performance of a no-op build a bit.</li>
+<li>Applied a fix to make the Visual C++ linker's CONFIG=debug DLLs properly write out export libraries and prevent dependent targets from building when there was no change to the header.</li>
+<li>Fixed an issue when an action is empty, and the remaining whitespace caused Unix shells to die.</li>
 <li>64-bit platform warning clean up in the source code.</li>
 </ul>
 <h2>Jambase:</h2>
 <ul>
-<li>On platforms supporting a recursive mkdir, only run the mkdir action once. Do not internally handle it recursively.</li>
 <li>Made the <a class="el" href="jambase_rules.html#rule_SearchSource">SearchSource</a> rule take an optional second parameter, the SEARCH_PATH. If the parameter is not specified, then $(SEARCH_SOURCE) is used.</li>
 <li><a class="el" href="jambase_rules.html#rule_IncludeModule">IncludeModule</a> searches the current SubDir, current working directory, any user Jam module paths, and then <code>bin/modules/</code>.</li>
-<li>Changed the internal Jambase to not search 10 levels up to find the real Jambase.</li>
-<li>Made the clean target depend on clean:all.</li>
-<li>The <code>Clean</code>, <code>Mkdir1</code>, and <code>RmTemps</code> actions properly escape filenames for the current platform.</li>
-<li>The Clean rule was changed to use \ characters for Windows filenames.</li>
+<li>Changed the internal Jambase to not search 10 levels up to find the real Jambase. Instead, it searches for a <code>Jambase.jam</code> in the current working directory, directory containing the <b>Jam</b> executable, and then the directory immediately above the <b>Jam</b> executable. See <a class="el" href="jam_language.html#operation_parsing">Parsing Phase</a> for additional information.</li>
 <li>Jambase: When <code>ALL_LOCATE_TARGET</code> is specified, the <a class="el" href="jambase_rules.html#rule_SubDir">SubDir</a> root name is prepended to the relative path directory for <code>LOCATE_SOURCE</code> and <code>LOCATE_TARGET</code>. Before this change, one Jamfile could execute <code>SubDir ProjectA</code> and another execute <code>SubDir ProjectB</code>. Both would end up building their intermediates and outputs into the same directory.</li>
+</ul>
+<h3>Technical Details:</h3>
+<ul>
+<li>On platforms supporting a recursive mkdir, the mkdir action is run only once. On other platforms, it is still run recursively.</li>
+<li>Made the <b>clean</b> target depend on <b>clean:all</b>.</li>
+<li>The actions for <a class="el" href="jambase_rules.html#rule_Clean">Clean</a>, <a class="el" href="jambase_rules.html#rule_MkDir">MkDir</a>, and <a class="el" href="jambase_rules.html#rule_RmTemps">RmTemps</a> properly escape filenames for the current platform.</li>
+<li>The <a class="el" href="jambase_rules.html#rule_Clean">Clean</a> rule was changed to use \ characters for Windows filenames.</li>
 </ul>
 <h2>Jam Modules:</h2>
 <ul>
@@ -119,7 +123,7 @@ Version 0.4</a></h2>
 <li>Visual Studio 2010 support provided by Philipp Teschner.</li>
 <li>Reorganized huge portions of the Jambase to compiler/platform/configuration specific files in <code>modules/c-compilers/</code>. Moved platform and configuration check to <code>modules/c-compilers/c-autodetect.jam</code>.</li>
 <li>Added a 64-bit Windows platform for Visual C++ called <b>win64</b>.</li>
-<li>Added rule C.Flags, a generic way of adding C/C++/M/MM/etc flags.</li>
+<li>Added rule <a class="el" href="module_c.html#rule_C_Flags">C.Flags</a>, a generic way of adding C/C++/M/MM/etc flags.</li>
 <li>Added rule C.InstallNamePath. This is currently available only on Mac OS X to provide the <code>-install_name</code> flag to the linker.</li>
 <li>Added rule C.ForceFileType which can change the compilation of a .c file to a .cpp file and so on.</li>
 <li>Allow VALID_PLATFORMS and VALID_CONFIGS to be overridden. If PLATFORM is not specified, the first element of the VALID_PLATFORMS list is chosen. This is similar for CONFIG, only it will use VALID_CONFIGS.</li>
@@ -148,15 +152,15 @@ Version 0.4</a></h2>
 <li>Considerably sped up <a class="el" href="module_c.html#rule_C_CompileOptions">C.CompileOptions</a> <code>outputastree</code>.</li>
 <li>On Mac OS X, apply the proper -mmacosx-version-min flag to the compile and link.</li>
 <li>Fix the <a class="el" href="module_c.html#rule_C_ForceInclude">C.ForceInclude</a> and <a class="el" href="module_c.html#rule_C_ObjectForceInclude">C.ObjectForceInclude</a> rules to not root the include against the <a class="el" href="jambase_rules.html#rule_SubDir">SubDir</a>. If it does so, it can't always be properly used on Visual C++ as a precompiled header.</li>
-<li>Removed the GroupByVar1 rule. It has been replaced with the GroupByVar built-in rule.</li>
+<li>Removed the GroupByVar1 rule. It has been replaced with the <a class="el" href="jambase_rules.html#rule_GroupByVar">GroupByVar</a> built-in rule.</li>
 <li>Properly support multiple precompiled headers under GCC.</li>
 <li>Allow precompiled headers to handle any registered C/C++ file extension.</li>
 <li>For Visual C++, the precompiled header is automatically force included and proper dependencies are set up.</li>
-<li>Fixed <a class="el" href="module_c.html#rule_C_ObjectCFlags">C.ObjectCFlags</a> and rule_C_ObjectC++Flags "C.ObjectC++Flags". The new updates were ignoring files instead of including them.</li>
+<li>Fixed <a class="el" href="module_c.html#rule_C_ObjectCFlags">C.ObjectCFlags</a> and <a class="el" href="module_c.html#rule_C_ObjectCppFlags">C.ObjectC++Flags</a>. The new updates were ignoring files instead of including them.</li>
 <li>Was not cleaning intermediates for shared libraries. Fixed.</li>
 <li>Visual C++ fix to remove a potential circular dependency with shared libraries.</li>
 <li>Bug fixes to the win64 platform to use x86_amd64 and to create the proper .vcproj x64 native platform. Thanks to Gregory Bell for sending a patch for this.</li>
-<li>Added rule rule_C_C++Exceptions "C.C++Exceptions". This rule can turn on and off exception handling. Exception handling is on by default.</li>
+<li>Added rule C.C++Exceptions. This rule can turn on and off exception handling. Exception handling is on by default.</li>
 <li>Remove the ability to generically handle generated headers from <code>C.HdrRule</code>. There needs to be a method put in place that is faster than what is there now.</li>
 <li>Added built-in rule ForceCare, which negates the effect of NoCare.</li>
 <li>Added $(C.STDHDRS) to the end of the target's include directories list.</li>
@@ -165,6 +169,11 @@ Version 0.4</a></h2>
 <li>Added built-in rule C.BundleInfo which gives an easy way of creating the Info.plist file within a Mac OS X application bundle.</li>
 <li>In the C.MacOSX_SDK rule, use GCC 4.0 for 10.4 builds. This makes 10.4 properly compile on Snow Leopard.</li>
 <li>Change the lump comment style to work on both C and C++ compilers.</li>
+<li>C module: <a class="el" href="module_c.html#rule_C_ForceInclude">C.ForceInclude</a> and <a class="el" href="module_c.html#rule_C_ObjectForceInclude">C.ObjectForceInclude</a> were not setting proper dependencies. That has been fixed, although both lost support for CONFIG and PLATFORM-specific forced includes.</li>
+<li>Updates to the iphonesimulator platform to handle the 3.1 and 3.1.2 SDKs.</li>
+<li>Add the iphonesimulator-autodetect.jam script.</li>
+<li>Add the iphone-autodetect.jam script.</li>
+<li>Fix precompiled header support on GCC when the header exists at a relative path.</li>
 </ul>
 </li>
 <li><b>CopyDirectory module:</b><ul>
@@ -235,14 +244,16 @@ Version 0.4</a></h2>
 <li>The build log file for .vcproj projects was getting output to the wrong directory.</li>
 <li>Support was broken for using the MinGW compiler with a Visual Studio IDE. This has now been fixed.</li>
 <li>Too much information was being dumped into the <code>_targetinfo_/</code> files for the <code>*</code> platform and any configuration. This has been fixed and has the side effect of making the JamToWorkspace process faster.</li>
+<li>Allow the project generation to proceed if the project doesn't exist but is expected by the workspace.</li>
+<li>Pass the currently running Jam executable to jam --workspace.</li>
 </ul>
 <h2>Samples:</h2>
 <ul>
 <li>Added samples/macosx/cf, a simple CoreFoundation command line test.</li>
 <li>Added samples/macosx/glut, a simple Mac OS X demonstration of some OpenGL features.</li>
 <li>Added samples/onesharedlib.</li>
-<li>Added samples/glob.</li>
-<li>In samples/simplewx, show how  ref_C_BundleInfo "C.BundleInfo" can be used to automatically populate the Info.plist file.</li>
+<li>Added samples/glob, a command line executable wrapping the fileglob code.</li>
+<li>In samples/simplewx, show how C.BundleInfo can be used to automatically populate the Info.plist file.</li>
 </ul>
 <h2>Tests:</h2>
 <ul>
@@ -485,7 +496,7 @@ Version 0.1</a></h2>
 <li>Initial release. </li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Dec 1 07:26:11 2009 for JamPlus manual by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:44 2010 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

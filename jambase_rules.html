@@ -20,7 +20,10 @@ Introduction</a></h2>
 <div class="multicol">
 <ul>
 <li><a href="jambase_rules.html#rule_ActiveProject">ActiveProject</a></li>
+<li><a href="jambase_rules.html#rule_AutoSourceGroup">AutoSourceGroup</a></li>
+<li><a href="jambase_rules.html#rule_Clean">Clean</a></li>
 <li><a href="jambase_rules.html#rule_FGristDirectories">FGristDirectories</a></li>
+<li><a href="jambase_rules.html#rule_GroupByVar">GroupByVar</a></li>
 <li><a href="jambase_rules.html#rule_IncludeModule">IncludeModule</a></li>
 <li><a href="jambase_rules.html#rule_MakeLocate">MakeLocate</a></li>
 <li><a href="jambase_rules.html#rule_MkDir">MkDir</a></li>
@@ -30,6 +33,7 @@ Introduction</a></h2>
 <li><a href="jambase_rules.html#rule_RmTemps">RmTemps</a></li>
 <li><a href="jambase_rules.html#rule_SearchSource">SearchSource</a></li>
 <li><a href="jambase_rules.html#rule_SourceGroup">SourceGroup</a></li>
+<li><a href="jambase_rules.html#rule_Split">Split</a></li>
 <li><a href="jambase_rules.html#rule_SubDir">SubDir</a></li>
 <li><a href="jambase_rules.html#rule_SubInclude">SubInclude</a></li>
 <li><a href="jambase_rules.html#rule_Workspace">Workspace</a></li>
@@ -48,6 +52,41 @@ rule ActiveProject PROJECT</a></h2>
   </dd>
 </dl>
 <hr/>
+ <h2><a class="anchor" id="rule_AutoSourceGroup">
+rule AutoSourceGroup TARGET : SOURCES</a></h2>
+<p></p>
+<p>For workspace projects that support grouping of files into folders, the <code>AutoSourceGroup</code> rule is used to tell the <b>jam --workspace</b> generator to create folders within a project based on the relative paths of the <code>SOURCES</code>.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The project to which the folders will be created. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>SOURCES</em>&nbsp;</td><td>The list of files to derive folder names from.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # Put helloworld.cpp and .h in the top-level project folder.</span>
+<span class="preprocessor"></span><span class="preprocessor">    # Put filename.cpp and .h in a project folder caled platform\\directory (in SourceGroup syntax).</span>
+<span class="preprocessor"></span>    SRCS =
+            helloworld.cpp
+            helloworld.h
+            platform/directory/filename.cpp
+            platform/directory/filename.h
+    ;
+
+    AutoSourceGroup MyProject : $(SRCS) ;
+</pre></div><hr/>
+ <h2><a class="anchor" id="rule_Clean">
+rule Clean TARGETS : FILES</a></h2>
+<p></p>
+<p>When executing actions for <code>TARGETS</code>, the specified list of <code>FILES</code> are removed from the disk, and any empty directories resulting from the file deletions are removed, too.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>TARGETS</em>&nbsp;</td><td>A list of one or more targets. Generally, the target name is <code>clean</code> or <code>clean:SOMETARGET</code>. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>FILES</em>&nbsp;</td><td>A list of files to be deleted.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><pre class="fragment">    Clean clean : &lt;mytarget&gt;myfile.txt $(TEMP)/anotherfile.txt ;
+</pre></div><hr/>
  <h2><a class="anchor" id="rule_FGristDirectories">
 rule FGristDirectories DIRECTORIES</a></h2>
 <p></p>
@@ -60,6 +99,49 @@ rule FGristDirectories DIRECTORIES</a></h2>
 </dl>
 <dl class="return"><dt><b>Returns:</b></dt><dd>Returns the gristed version of each directory.</dd></dl>
 <div class="fragment"><pre class="fragment">    Echo [ FGristDirectories $(TEMP)/stuff ] ;
+</pre></div><hr/>
+ <h2><a class="anchor" id="rule_GroupByVar">
+rule GroupByVar TARGETS_VARIABLE : VARIABLE_NAME [ : MAX_PER_GROUP ]</a></h2>
+<p></p>
+<p>Returns a list of targets with identical settings as specified by <code>VARIABLE_NAME</code> using the first target specified in <code>TARGETS_VARIABLE</code>.</p>
+<p>Example: The C/C++ compilation puts a variety of compilation flags in a variable declared per target called <code>MFLAGS</code>. For compilers that support batching of files using the same build flags, GroupByVar returns each set of matching files one after another to send to the compiler.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>TARGETS_VARIABLE</em>&nbsp;</td><td>The variable containing the targets to return matching groups from. The first target in the variable is used as the target to match against. <code>TARGETS_VARIABLE</code> is updated with the remaining list of targets after the current found group has been identified. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>VARIABLE_NAME</em>&nbsp;</td><td>The settings variable used to obtain matches from. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>MAX_PER_GROUP</em>&nbsp;</td><td>The maximum number of files to return in the group. If not specified, there is no upper limit. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>Returns a list of 1 or more <code>TARGETS</code> matching the string list in <code>VARIABLE_NAME</code>.</dd></dl>
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # Prints:</span>
+<span class="preprocessor"></span><span class="preprocessor">    #</span>
+<span class="preprocessor"></span><span class="preprocessor">    # Together - targeta targetc targete targetf</span>
+<span class="preprocessor"></span><span class="preprocessor">    # Together - targetb</span>
+<span class="preprocessor"></span><span class="preprocessor">    # Together - targetd</span>
+<span class="preprocessor"></span><span class="preprocessor">    # (2 max) - targeta targetc</span>
+<span class="preprocessor"></span><span class="preprocessor">    # (2 max) - targetb</span>
+<span class="preprocessor"></span><span class="preprocessor">    # (2 max) - targetd</span>
+<span class="preprocessor"></span><span class="preprocessor">    # (2 max) - targete targetf</span>
+<span class="preprocessor"></span>    files = targeta targetb targetc targetd targete targetf ;
+    FLAGS on targeta = a b c ;
+    FLAGS on targetb = a b c d ;
+    FLAGS on targetc = a b c ;
+    FLAGS on targetd = a b c e ;
+    FLAGS on targete = a b c ;
+    FLAGS on targetf = a b c ;
+
+    <span class="keywordflow">while</span> $(files) {
+        local together = [ GroupByVar files : FLAGS ] ;
+        Echo Together - $(together) ;
+    }
+
+
+    files = targeta targetb targetc targetd targete targetf ;
+    <span class="keywordflow">while</span> $(files) {
+        local together = [ GroupByVar files : FLAGS : 2 ] ;
+        Echo (2 max) - $(together) ;
+    }
 </pre></div><hr/>
  <h2><a class="anchor" id="rule_IncludeModule">
 rule IncludeModule MODULE_NAME</a></h2>
@@ -187,6 +269,27 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES</a></h2>
 <div class="fragment"><pre class="fragment">        SourceGroup Misc : <span class="stringliteral">&quot;zlib&quot;</span> : $(ZLIB_SRCS) ;
         SourceGroup Misc : <span class="stringliteral">&quot;string\\trio&quot;</span> : $(TRIO_SRCS) ;
 </pre></div><hr/>
+ <h2><a class="anchor" id="rule_Split">
+rule Split STRINGS : SPLIT_CHARACTERS</a></h2>
+<p></p>
+<p>Splits each of the <code>STRINGS</code> at <code>SPLIT_CHARACTERS</code>. All splits are returned as a string list.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>STRINGS</em>&nbsp;</td><td>The list of strings to split at the points specified by <code>SPLIT_CHARACTERS</code>. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>SPLIT_CHARACTERS</em>&nbsp;</td><td>One or more characters to split the list of <code>STRINGS</code> at. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>Returns a list of strings split at the points specified by <code>SPLIT_CHARACTERS</code>.</dd></dl>
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # Prints:</span>
+<span class="preprocessor"></span><span class="preprocessor">    #</span>
+<span class="preprocessor"></span><span class="preprocessor">    # **I** **like** **peas.**</span>
+<span class="preprocessor"></span><span class="preprocessor">    # No splits here</span>
+<span class="preprocessor"></span>    local list = [ Split I like peas. : <span class="stringliteral">&quot; &quot;</span> ] ;
+    Echo **$(list)** ;
+
+    Echo [ Split No splits here : <span class="stringliteral">&quot;|&quot;</span> ] ;
+</pre></div><hr/>
  <h2><a class="anchor" id="rule_SubDir">
 rule SubDir TOP d1...dn : SUBNAME</a></h2>
 <p></p>
@@ -227,7 +330,7 @@ rule Workspace WORKSPACE_NAME : TARGETS</a></h2>
 <div class="fragment"><pre class="fragment">        Workspace Project-all : AppA AppB AppC ;
 </pre></div><hr/>
  </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Sep 15 22:06:18 2009 for JamPlus manual by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:44 2010 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

@@ -14,7 +14,7 @@
 <h1><a class="anchor" id="module_c">C/C++ Rules </a></h1><div class="fragment"><pre class="fragment"><span class="preprocessor">    # Automatically made available, so this isn&apos;t needed.</span>
 <span class="preprocessor">    IncludeModule c ;</span>
 </pre></div><p>The C module provides rules to build C and C++ applications, shared libraries, and static libraries.</p>
-<p>When first loaded, it attempts to detect the compiler on the machine. On Windows, it can successfully detect and run Visual C++ 6, Visual Studio 2003, Visual Studio 2005, Visual Studio 2008, and Visual Studio 2010. On other OSes, it attempts to detect GCC.</p>
+<p>When first loaded, it attempts to detect the compiler on the machine. On Windows, it can successfully detect and run Visual Studio 2010, Visual Studio 2008, Visual Studio 2005, Visual Studio 2003, and Visual C++ 6. MinGW can also be specified. On other OSes, it attempts to detect GCC.</p>
 <h2><a class="anchor" id="module_c_ruleslist">
 List of Rules</a></h2>
 <div class="multicol">
@@ -23,12 +23,14 @@ List of Rules</a></h2>
 <li><a href="module_c.html#rule_C_Application">C.Application</a></li>
 <li><a href="module_c.html#rule_C_BatchCompileGroupSize">C.BatchCompileGroupSize</a></li>
 <li><a href="module_c.html#rule_C_CFlags">C.CFlags</a></li>
+<li><a href=".html#">C.C++Exceptions</a></li>
 <li><a href="module_c.html#rule_C_CppFlags">C.C++Flags</a></li>
 <li><a href="module_c.html#rule_C_CompileOptions">C.CompileOptions</a></li>
 <li><a href="module_c.html#rule_C_RuntimeType">C.RuntimeType</a></li>
 <li><a href="module_c.html#rule_C_DefFile">C.DefFile</a></li>
 <li><a href="module_c.html#rule_C_Defines">C.Defines</a></li>
 <li><a href="module_c.html#rule_C_ExcludeFromBuild">C.ExcludeFromBuild</a></li>
+<li><a href="module_c.html#rule_C_Flags">C.Flags</a></li>
 <li><a href="module_c.html#rule_C_ForceInclude">C.ForceInclude</a></li>
 <li><a href="module_c.html#rule_C_IncludeDirectories">C.IncludeDirectories</a></li>
 <li><a href="module_c.html#rule_C_Library">C.Library</a></li>
@@ -249,6 +251,23 @@ rule C.ExcludeFromBuild TARGET : SOURCES</a></h2>
         C.ExcludeFromBuild myproject : $(XBOX_SRCS) ;
     }
 </pre></div><hr/>
+ <h2><a class="anchor" id="rule_C_Flags">
+rule C.Flags TYPE : TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</a></h2>
+<p></p>
+<p>For the given project <code>TARGET</code>, assign the <code>FLAGS</code> to the appropriate configuration and platform. <code>TYPE</code> can be any known source compilation type, such as <code>CC</code> for C-style files, <code>C++</code> for C++-style files, and on certain compilers, <code>M</code> for Objective C files, or <code>MM</code> for Objective C++ files.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>TYPE</em>&nbsp;</td><td>A source compilation type added through "rule_C_AddBuildExtensions" "C.AddBuildExtensions". </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target to assign the <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the flags are made available globally. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>FLAGS</em>&nbsp;</td><td>The list of flags to apply. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>THE_CONFIG</em>&nbsp;</td><td>(optional) If not specified, the default is all configurations. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>THE_PLATFORM</em>&nbsp;</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><pre class="fragment">    C.Flags CC  : * : -g -O0 -arch i386 : debug : macosx32 ;
+    C.Flags C++ : * : -g -O0 -arch i386 : debug : macosx32 ;
+</pre></div><hr/>
  <h2><a class="anchor" id="rule_C_ForceInclude">
 rule C.ForceInclude TARGET : INCLUDES [ : THE_CONFIG : THE_PLATFORM ]</a></h2>
 <p></p>
@@ -410,13 +429,14 @@ rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]<
 <div class="fragment"><pre class="fragment">    C.LinkPrebuiltLibraries MiniApp : advapi32 gdi32 ole32 shell32 user32 ;
 </pre></div><hr/>
  <h2><a class="anchor" id="rule_C_Lump">
-rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME [ : PCH_HEADER : PCH_HEADER_FILENAME : LUMP_EXT : EXTRA_INCLUDE_PATHS ]</a></h2>
+rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME [ : PCH_FILENAMES : EXTRA_INCLUDE_PATHS ]</a></h2>
 <p></p>
-<p>Generates a <code>.c</code> or <code>.cpp</code> file containing an <code>#include</code> amalgamation of files passed into the rule.</p>
-<p>The name of the generated lump file is <code>$(LOCATE_SOURCE)/!$(LUMP_NAME)!.$(LUMP_EXT)</code>. The lump file has the following contents:</p>
+<p>Generates a small file containing an <code>#include</code> amalgamation of files passed into the rule.</p>
+<p>The name of the generated lump file is <code>$(LOCATE_SOURCE)/!$(LUMP_NAME)!.$(LUMP_NAME:S)</code>. If <code>LUMP_NAME</code> does not have an extension, then the extension from $(PCH_FILENAMES[1]:S) is used. If that doesn't exist, then the default is <code>.cpp</code>.</p>
+<p>The lump file has the following contents:</p>
 <ol>
 <li>
-If a precompiled header is specified through <code>PCH_HEADER</code> and <code>PCH_HEADER_FILENAME</code>, a <code>#include "$(PCH_HEADER_FILENAME)"</code> line is added to the lump file. </li>
+If a precompiled header is specified through <code>PCH_FILENAMES</code>, a <code>#include "\$(PCH_FILENAMES[1])"</code> line is added to the lump file. </li>
 <li>
 For each C-style source specified in <code>SOURCES_VARIABLE_NAME</code> that is not excluded from the build via <a class="el" href="module_c.html#rule_C_ExcludeFromBuild">rule C.ExcludeFromBuild TARGET : SOURCES</a>, a <code>#include "filename"</code> is added to the lump file. </li>
 </ol>
@@ -424,22 +444,22 @@ For each C-style source specified in <code>SOURCES_VARIABLE_NAME</code> that is 
 <dl><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>PARENT</em>&nbsp;</td><td>The parent target to which the lump file belongs. <code>PARENT</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>SOURCES_VARIABLE_NAME</em>&nbsp;</td><td>The variable name listing the source files to be added to the lump. This is not an expanded version through <code></code> but rather, it is the actual name of the variable, <code>SRCS</code>. On return from the <code>Lump</code> rule, <code>SOURCES_VARIABLE_NAME</code> will be populated with the gristed name of the lump file. It will not contain the original file list anymore. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>PCH_HEADER</em>&nbsp;</td><td>(optional) If <code>PCH_HEADER</code> is specified, <code>PCH_HEADER_FILENAME</code> must also be specified. <code>PCH_HEADER</code> should be the title of the file that is the precompiled header. That is, if the precompiled header is <code>StdAfx.cpp</code>, <code>PCH_HEADER</code> must be <code>StdAfx</code>. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>PCH_HEADER_FILENAME</em>&nbsp;</td><td>(optional, but required if <code>PCH_HEADER</code> is passed in) <code>PCH_HEADER_FILENAME</code> is used when building the lump file, as seen above in #1 of the lump file contents. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>LUMP_EXT</em>&nbsp;</td><td>(optional) If a different lump file extension than the default <code>.cpp</code> is required, pass it here. It should not contain the opening period. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>SOURCES_VARIABLE_NAME</em>&nbsp;</td><td>The variable name listing the source files to be added to the lump. This is not an expanded version through <code></code> but rather, it is the actual name of the variable, <code>SRCS</code>. On return from the <code>Lump</code> rule, <code>SOURCES_VARIABLE_NAME</code> will be populated with the gristed name of the lump file. It will not contain the original file list anymore. It may include the precompiled header source filename $(PCH_FILENAMES[1]) if $(PCH_FILENAMES[3]) is set. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>PCH_FILENAMES</em>&nbsp;</td><td>(optional) <code>PCH_FILENAMES</code>[1] is the filename of the precompiled header source file (generally, the .cpp). <code>PCH_FILENAMES</code>[2] is the filename of the precompiled header's header file. If <code>PCH_FILENAMES</code>[2] is not specified, then <code>$(PCH_FILENAMES[1]:S=.h)</code> is used. Finally, if <code>PCH_FILENAMES</code>[3] is set to <code>1</code>, the precompiled header's source file (set through <code>PCH_FILENAMES</code>[1]) is added to the <code>SOURCES_VARIABLE_NAME</code> list. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>EXTRA_INCLUDE_PATHS</em>&nbsp;</td><td>If additional include paths are needed for this lump file, specify them here.</td></tr>
   </table>
   </dd>
 </dl>
 <div class="fragment"><pre class="fragment"><span class="preprocessor">    # For the Misc target, use the contents of SRCS to build a lump called</span>
-<span class="preprocessor"></span><span class="preprocessor">    # MiscLump.  In addition, this lump should use the precompiled header file</span>
-<span class="preprocessor"></span><span class="preprocessor">    # Misc_InternalPch.h.</span>
-<span class="preprocessor"></span>    C.Lump Misc : SRCS : MiscLump : Misc_InternalPch : Misc_InternalPch.h : cpp ;
+<span class="preprocessor"></span><span class="preprocessor">    # MiscLump.cpp.  In addition, this lump should use the precompiled header file</span>
+<span class="preprocessor"></span><span class="preprocessor">    # Misc_InternalPch.h, filtering any references to Misc_InternalPch.cpp out of</span>
+<span class="preprocessor"></span><span class="preprocessor">        # its file lists.  Since 1 is specified as the third string item of the</span>
+<span class="preprocessor"></span><span class="preprocessor">        # PCH_FILENAMES parameter, Misc_InternalPch.cpp is added to the SRCS list.</span>
+<span class="preprocessor"></span>    C.Lump Misc : SRCS : MiscLump.cpp : Misc_InternalPch.cpp Misc_InternalPch.h 1 ;
 
 <span class="preprocessor">    # A separate lump in the Misc target is made for PNG_SRCS.  It doesn&apos;t have</span>
-<span class="preprocessor"></span><span class="preprocessor">    # a precompiled header, but it should be generated as a C file.</span>
-<span class="preprocessor">    C.Lump Misc : PNG_SRCS : PNGLump : : : c ;</span>
+<span class="preprocessor"></span><span class="preprocessor">    # a precompiled header, and it will be generated as a .c file.</span>
+<span class="preprocessor">    C.Lump Misc : PNG_SRCS : PNGLump.c ;</span>
 </pre></div><hr/>
  <h2><a class="anchor" id="rule_C_NoPrecompiledHeader">
 rule C.NoPrecompiledHeader TARGET : FILES</a></h2>
@@ -674,7 +694,7 @@ rule C.PrecompiledHeader TARGET : NAME : FILES</a></h2>
 <span class="preprocessor">    C.PrecompiledHeader SimpleMFC : stdafx.cpp stdafx.h : $(SRCS) ;</span>
 </pre></div><hr/>
  </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Tue Sep 15 22:06:18 2009 for JamPlus manual by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:44 2010 for JamPlus manual by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
