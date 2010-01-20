@@ -358,7 +358,7 @@ if $(LUA_BIN)
 				lua51.dll
 				luaplus_1100.debug.dll
 				modules/ex.debug.dll
-				modules/glob.debug.dll
+				modules/filefind.debug.dll
 				modules/lua51-lanes.debug.dll
 				modules/lxp.debug.dll
 				modules/md5.debug.dll
@@ -374,7 +374,7 @@ if $(LUA_BIN)
 				lua51.dll
 				luaplus_1100.dll
 				modules/ex.dll
-				modules/glob.dll
+				modules/filefind.dll
 				modules/lua51-lanes.dll
 				modules/lxp.dll
 				modules/md5.dll
