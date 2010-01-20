@@ -97,7 +97,7 @@ Generating Code...
 				'win32.c',
 			}
 
-			if Platform == 'macosx32' then
+			if Platform == 'macosx' then
 				pass1Files[#pass1Files + 1] = 'macosx.o'
 			else
 				pass1Files[#pass1Files + 1] = 'linux.o'
