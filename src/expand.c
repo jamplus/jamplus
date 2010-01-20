@@ -445,6 +445,7 @@ var_expand(
 				const char* endptr = ptr + strlen( ptr );
 				BUFFER escapebuff;
 				buffer_init( &escapebuff );
+			    save_buffer_pos = buffer_pos( &buff );
 
 #ifdef NT
 				while ( ptr != endptr  &&  *ptr != ' '  &&  *ptr != '/' )
@@ -470,6 +471,7 @@ var_expand(
 				buffer_addstring( &buff, buffer_ptr( &escapebuff ), buffer_pos( &escapebuff ) );
 #endif
 
+				buffer_setpos( &buff, save_buffer_pos );
 				buffer_free( &escapebuff );
 			}
 #endif
@@ -584,9 +586,9 @@ var_expand(
 		}
 #endif
 
-#ifdef OPT_EXPAND_LITERALS_EXT
-		buffer_free( &buff );
-#endif
+//#ifdef OPT_EXPAND_LITERALS_EXT
+//		buffer_free( &buff );
+//#endif
 #ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT
 		list_free( edits.includes_excludes );
 #endif
