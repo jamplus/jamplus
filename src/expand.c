@@ -467,7 +467,6 @@ var_expand(
 					++ptr;
 				}
 				buffer_addchar( &escapebuff, 0 );
-				buffer_reset( &buff );
 				buffer_addstring( &buff, buffer_ptr( &escapebuff ), buffer_pos( &escapebuff ) );
 #endif
 
