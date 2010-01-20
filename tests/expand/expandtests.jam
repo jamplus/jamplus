@@ -110,7 +110,10 @@ TestExpansion $(FILENAME:G) : <thegrist> ;
 TestExpansion $(FILENAME:G=anothergrist) : <anothergrist>c:/some/directory/filename.txt ;
 
 NEW_ROOT = d:/root/directory ;
-TestExpansion $(FILENAME:R="d:/root/directory") : <thegrist>c:/some/directory/filename.txt ;
+if $(OS) = NT
+{
+	TestExpansion $(FILENAME:R="d:/root/directory") : <thegrist>c:/some/directory/filename.txt ;
+}
 TestExpansion @(filename.txt:R=$(NEW_ROOT)) : d:/root/directory/filename.txt ;
 
 TestExpansion @(lowercase_now_uppercase:U) : LOWERCASE_NOW_UPPERCASE ;
