@@ -55,7 +55,7 @@ function Test()
 	else
 		pass1Directories = {
 			'includes/',
-			'mypch-434a2a231ee15aac39cf16f7cffa8cb1/',
+			'mypch%-%x+/',
 		}
 
 		pass1Files = {
@@ -67,13 +67,13 @@ function Test()
 			'mypch.o',
 			'test.lua',
 			'includes/mypch.h',
-			'mypch-434a2a231ee15aac39cf16f7cffa8cb1/mypch.h.gch',
+			'mypch%-%x+/mypch.h.gch',
 		}
 
 		pattern = [[
 			*** found 12 target(s)...
 			*** updating 5 target(s)...
-			@ C.PCH <main-434a2a231ee15aac39cf16f7cffa8cb1>mypch.h.gch 
+			@ C.PCH <main%-%x+>mypch.h.gch
 			@ C.C++ <main>main.o 
 			@ C.C++ <main>mypch.o 
 			@ C.Link <main>main.release 

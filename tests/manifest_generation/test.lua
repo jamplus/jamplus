@@ -103,7 +103,7 @@ project1.cpp
 			'source/project1/Jamfile.jam',
 			'source/project1/project1.cpp',
 			'source/project1/project1.o',
-			'source/project1/obj/macosx32/release/project1.release',
+			'source/project1/obj/$PlatformDir/release/project1.release',
 		}
 
 		local pass1Directories =
@@ -111,8 +111,8 @@ project1.cpp
 			'source/',
 			'source/project1/',
 			'source/project1/obj/',
-			'source/project1/obj/macosx32/',
-			'source/project1/obj/macosx32/release/',
+			'source/project1/obj/$PlatformDir/',
+			'source/project1/obj/$PlatformDir/release/',
 		}
 
 --		for component in (cwd .. [[/source/project1/project1.o]]):gmatch('(.-/)') do

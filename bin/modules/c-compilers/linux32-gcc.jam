@@ -1,0 +1,8 @@
+C.AR			?= ar ru ;
+C.CC			?= gcc ;
+C.C++			?= g++ ;
+C.LINK		?= g++ ;
+C.RANLIB		?= ranlib ;
+
+SUFMODULE	= .so ;
+

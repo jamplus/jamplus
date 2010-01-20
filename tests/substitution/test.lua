@@ -11,10 +11,13 @@ M__UFFILENAME_UFFILENAME__F
 ]]
 
 		else
+			local tmpdir = os.getenv('TMPDIR')
+			if not tmpdir or tmpdir == '' then tmpdir = '/tmp' end
+			
 			pattern = [[
 $ = $ 
 $ 
-$(TMPDIR) - ]] .. os.getenv('TMPDIR') .. [[
+$(TMPDIR) - ]] .. tmpdir .. [[
 
 M__UFFILENAME_UFFILENAME__F 
 ]]		

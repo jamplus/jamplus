@@ -1359,7 +1359,7 @@ void make0calcmd5sum( TARGET *t, int source )
 static void
 dependGraphOutputTimes( time_t time )
 {
-    printf( "(time:%u)\n", time );
+    printf( "(time:%d)\n", (int)time );
 }
 
 static void

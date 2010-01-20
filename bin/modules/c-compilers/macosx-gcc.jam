@@ -192,6 +192,28 @@ rule C._ApplicationFromObjects_PostBuild
 }
 
 
+rule C._SharedLibraryFromObjects_LinkFlags
+{
+	if module in $(OPTIONS) {
+		linkFlags += -bundle -undefined dynamic_lookup ;
+	} else {
+		local installName =
+			[ C._retrieveVar INSTALL_NAME_PATH : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+			[ C._retrieveVar INSTALL_NAME_PATH : * : $(CONFIG) : $(PLATFORM) ] ;
+		if ! $(installName)
+		{
+			installName = $(_t:TD) ;
+		}
+		else
+		{
+			installName = $(installName[1]) ;
+		}
+		installName = $(_t:BSR=$(installName)) ;
+		on $(TARGET) linkFlags += -dynamiclib -install_name $(installName) ;
+	}
+}
+
+
 } else {
 
 rule C.BundleInfo TARGET : TYPE : VALUE {

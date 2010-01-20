@@ -205,7 +205,11 @@ else if $(UNIX)
 #	}
 #	CCFLAGS += -Wall ;
 
-	C.LinkPrebuiltLibraries jam : /usr/lib/libstdc++-static ;
+	if $(OS) != LINUX {
+		C.LinkPrebuiltLibraries jam : /usr/lib/libstdc++-static ;
+	} else {
+		C.LinkFlags jam : -ldl ;
+	}
 }
 else
 {
@@ -318,9 +322,9 @@ C.Library libjam :
 
 
 local file ;
-for file in [ Glob $(OS) : *.* : 0 ]
+for file in [ Glob $(OS:L) : *.* : 0 ]
 {
-	CopyFile all : $(BIN_PATH)/$(file) : $(OS)/$(file) ;
+	CopyFile all : $(BIN_PATH)/$(file) : $(OS:L)/$(file) ;
 }
 
 if $(LUA_BIN)
@@ -381,6 +385,13 @@ if $(LUA_BIN)
 	}
 	else
 	{
+		local MODULE_EXT ;
+		switch $(OS)
+		{
+			case MACOSX : MODULE_EXT = dylib ;
+			case LINUX : MODULE_EXT = so ;
+		}
+
 		LUA_SRCS =
 				share/lua/5.1/base.lua
 				share/lua/5.1/ex.lua
@@ -401,13 +412,13 @@ if $(LUA_BIN)
 			LUA_SRCS +=
 				lua.debug
 				luaplus_1100.debug.so
-				lib/lua/5.1/ex.debug.dylib
-				lib/lua/5.1/glob.debug.dylib
-				lib/lua/5.1/lua51-lanes.debug.dylib
-				lib/lua/5.1/lxp.debug.dylib
-				lib/lua/5.1/md5.debug.dylib
-				lib/lua/5.1/uuid.debug.dylib
-				lib/lua/5.1/vdrive.debug.dylib
+				lib/lua/5.1/ex.debug.$(MODULE_EXT)
+				lib/lua/5.1/filefind.debug.$(MODULE_EXT)
+				lib/lua/5.1/lua51-lanes.debug.$(MODULE_EXT)
+				lib/lua/5.1/lxp.debug.$(MODULE_EXT)
+				lib/lua/5.1/md5.debug.$(MODULE_EXT)
+				lib/lua/5.1/uuid.debug.$(MODULE_EXT)
+				lib/lua/5.1/vdrive.debug.$(MODULE_EXT)
 			;
 		}
 		else
@@ -415,13 +426,13 @@ if $(LUA_BIN)
 			LUA_SRCS +=
 				lua
 				luaplus_1100.so
-				lib/lua/5.1/ex.dylib
-				lib/lua/5.1/glob.dylib
-				lib/lua/5.1/lua51-lanes.dylib
-				lib/lua/5.1/lxp.dylib
-				lib/lua/5.1/md5.dylib
-				lib/lua/5.1/uuid.dylib
-				lib/lua/5.1/vdrive.dylib
+				lib/lua/5.1/ex.$(MODULE_EXT)
+				lib/lua/5.1/filefind.$(MODULE_EXT)
+				lib/lua/5.1/lua51-lanes.$(MODULE_EXT)
+				lib/lua/5.1/lxp.$(MODULE_EXT)
+				lib/lua/5.1/md5.$(MODULE_EXT)
+				lib/lua/5.1/uuid.$(MODULE_EXT)
+				lib/lua/5.1/vdrive.$(MODULE_EXT)
 			;
 		}
 	}

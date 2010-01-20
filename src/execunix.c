@@ -63,6 +63,8 @@
 # include <io.h>
 # else
 # include <unistd.h>
+# include <sys/types.h>
+# include <sys/wait.h>
 # endif
 
 static int my_wait( int *status );

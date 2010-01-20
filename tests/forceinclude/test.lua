@@ -79,12 +79,10 @@ project1.cpp
 *** updating 6 target(s)...
 @ C.C++ <common>print.o 
 @ C.Archive <common>common.a 
-ar: creating archive common/common.release.a
-@ C.Ranlib <common>common.a 
+!NEXT!@ C.Ranlib <common>common.a 
 @ C.C++ <libA>libA.o 
 @ C.Archive <libA>libA.a 
-ar: creating archive libA/libA.release.a
-@ C.Ranlib <libA>libA.a 
+!NEXT!@ C.Ranlib <libA>libA.a
 @ C.C++ <project1>project1.o 
 @ C.Link <project1>project1.release 
 *** updated 6 target(s)...

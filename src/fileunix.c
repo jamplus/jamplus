@@ -913,6 +913,14 @@ void getprocesspath(char* buffer, size_t bufferLen)
 	CFRelease(normalizedString);
 	CFRelease(bundleUrl);
 #else
+	int count = readlink("/proc/self/exe", buffer, bufferLen);
+	if (count != -1)
+	{
+		buffer[count] = 0;
+		dirname(buffer);
+		strcat(buffer, "/");
+		return;
+	}
 	*buffer = 0;
 #endif
 }
@@ -929,6 +937,10 @@ void getexecutablepath(char* buffer, size_t bufferLen)
 	CFRelease(executableString);
 	CFRelease(normalizedString);
 #else
+	if (readlink("/proc/self/exe", buffer, bufferLen) != -1)
+	{
+		return;
+	}
 	*buffer = 0;
 #endif	
 }

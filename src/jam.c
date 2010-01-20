@@ -803,7 +803,7 @@ int main( int argc, char **argv, char **arg_environ )
 		if (minutes > 0)
 		    printf("%ld min %ld sec\n", minutes, seconds);
 		else
-		    printf("%ld.%02d sec\n", seconds, hundredths);
+		    printf("%ld.%02d sec\n", seconds, (int)hundredths);
 //		printf("*** finished in %d\n", elapsed);
 		}
 	    }

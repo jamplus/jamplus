@@ -66,7 +66,7 @@ function Test()
 		dirs = {
 			'jam/',
 			'src/',
-			'jam/precomp-10708b2c9f7dbac75f1ba74e0c9b6cf6/',
+			'jam/precomp%-%x+/',
 		}
 
 		files = {
@@ -75,7 +75,7 @@ function Test()
 			'jam/helloworld.release',
 			'jam/Jamfile.jam',
 			'jam/main.o',
-			'jam/precomp-10708b2c9f7dbac75f1ba74e0c9b6cf6/precomp.h.gch',
+			'jam/precomp%-%x+/precomp.h.gch',
 			'src/createprecomp.c',
 			'src/file.c',
 			'src/main.c',
@@ -85,7 +85,7 @@ function Test()
 		pattern = [[
 			*** found 15 target(s)...
 			*** updating 6 target(s)...
-			@ C.PCH <helloworld-10708b2c9f7dbac75f1ba74e0c9b6cf6>precomp.h.gch 
+			@ C.PCH <helloworld%-%x+>precomp.h.gch 
 			@ C.CC <helloworld>file.o 
 			@ C.CC <helloworld>main.o 
 			@ C.CC <helloworld>createprecomp.o 
@@ -139,7 +139,7 @@ function Test()
 			pattern = [[
 				*** found 15 target(s)...
 				*** updating 5 target(s)...
-				@ C.PCH <helloworld-10708b2c9f7dbac75f1ba74e0c9b6cf6>precomp.h.gch 
+				@ C.PCH <helloworld%-%x+>precomp.h.gch 
 				@ C.CC <helloworld>file.o 
 				@ C.CC <helloworld>main.o 
 				@ C.CC <helloworld>createprecomp.o 

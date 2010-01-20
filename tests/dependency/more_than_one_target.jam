@@ -11,9 +11,21 @@ rule Update
     Includes $(>) : $(>) ;
 }
 
+if $(OS) = NT
+{
+
 actions Update
 {
     Echo Updating $(<) : $(>)
+}
+
+} else {
+
+actions Update
+{
+	echo Updating $(<) : $(>)
+}
+
 }
 
 Update a b : a_src b_tmp ;

@@ -13,6 +13,11 @@ switch $(OS)
 	case MACOSX :
 #		VALID_PLATFORMS ?= macosx iphone iphonesimulator ;
 		VALID_PLATFORMS ?= macosx32 macosx64 ;
+
+	case LINUX :
+		VALID_PLATFORMS ?= linux32 ;
+
+		PLATFORM ?= linux32 ;
 }
 
 PLATFORM ?= $(VALID_PLATFORMS[1]) ;

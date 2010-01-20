@@ -1,5 +1,5 @@
 require 'ex'
-require 'glob'
+require 'filefind'
 
 rotatingCharacters = { '|', '/', '-', '\\' }
 
@@ -82,7 +82,7 @@ function TestPattern(pattern, lines)
 				if ooo then
 					patternsToFind[#patternsToFind + 1] = pattern
 				end
-				if line ~= patternsToFind[1] then
+				if patternsToFind[1]  and  not patternsToFind[1]:match(line) then
 					if not ooo  and  pattern then
 						error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or patternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
 					else
@@ -117,6 +117,7 @@ function TestDirectories(expectedDirs)
 
 	local expectedDirsMap = {}
 	for _, dirName in ipairs(expectedDirs) do
+		dirName = dirName:gsub('$PlatformDir', PlatformDir)
 		if dirName:sub(1, 1) == '?' then
 			expectedDirsMap[dirName:sub(2)] = '?'
 		else
@@ -125,15 +126,27 @@ function TestDirectories(expectedDirs)
 	end
 
 	local foundDirsMap = {}
-	for _, dirName in ipairs(glob.match('**/')) do
-		foundDirsMap[dirName] = true
+	for entry in filefind.glob('**/') do
+		foundDirsMap[entry.filename] = true
 	end
 
 	local extraDirs = {}
 	for foundDir in pairs(foundDirsMap) do
 		if not expectedDirsMap[foundDir] then
-			extraDirs[#extraDirs + 1] = foundDir
+			local found = false
+			for _, dirName in ipairs(expectedDirs) do
+				if foundDir:match('^' .. dirName .. '$') then
+					expectedDirsMap[dirName] = nil
+					found = true
+					break
+				end
+			end
+
+			if not found then
+				extraDirs[#extraDirs + 1] = foundDir
+			end
 		end
+
 		expectedDirsMap[foundDir] = nil
 	end
 	if #extraDirs > 0 then
@@ -158,6 +171,7 @@ function TestFiles(expectedFiles)
 
 	local expectedFilesMap = {}
 	for _, fileName in ipairs(expectedFiles) do
+		fileName = fileName:gsub('$PlatformDir', PlatformDir)
 		if fileName:sub(1, 1) == '?' then
 			expectedFilesMap[fileName:sub(2)] = '?'
 		else
@@ -166,15 +180,26 @@ function TestFiles(expectedFiles)
 	end
 
 	local foundFilesMap = {}
-	for _, fileName in ipairs(glob.match('**')) do
-		foundFilesMap[fileName] = true
+	for entry in filefind.glob('**') do
+		foundFilesMap[entry.filename] = true
 	end
 
 	local extraFiles = {}
 	for foundFile in pairs(foundFilesMap) do
 		if foundFile ~= 'test.lua'  and  foundFile ~= 'test.out' then
 			if not expectedFilesMap[foundFile] then
-				extraFiles[#extraFiles + 1] = foundFile
+				local found = false
+				for _, fileName in ipairs(expectedFiles) do
+					if foundFile:match('^' .. fileName .. '$') then
+						expectedFilesMap[fileName] = nil
+						found = true
+						break
+					end
+				end
+
+				if not found then
+					extraFiles[#extraFiles + 1] = foundFile
+				end
 			end
 		end
 		expectedFilesMap[foundFile] = nil
@@ -199,8 +224,10 @@ end
 -- Detect OS
 if os.getenv("OS") == "Windows_NT" then
  	Platform = 'win32'
+	PlatformDir = 'win32'
 elseif os.getenv("OSTYPE") == "darwin9.0" then
 	Platform = 'macosx'
+	PlatformDir = 'macosx32'
 else
 	local f = io.popen('uname')
 	uname = f:read('*a'):lower():gsub('\n', '')
@@ -208,6 +235,10 @@ else
 
 	if uname == 'darwin' then
 		Platform = 'macosx'
+		PlatformDir = 'macosx32'
+	elseif uname == 'linux' then
+		Platform = 'linux'
+		PlatformDir = 'linux32'
 	end
 end
 
@@ -217,7 +248,10 @@ local dirs
 if arg and arg[1] then
 	dirs = arg
 else
-	dirs = glob.match('**/')
+	dirs = {}
+	for entry in filefind.glob('**/') do
+		dirs[#dirs + 1] = entry.filename
+	end
 end
 table.sort(dirs)
 

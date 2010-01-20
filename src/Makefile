@@ -8,7 +8,7 @@ PLAT = none
 CC = gcc
 CFLAGS =
 EXENAME = ./jam0
-LINKLIBS = -lstdc++
+LINKLIBS =
 TARGET = -o $(EXENAME)
 
 # Special flavors - uncomment appropriate lines
@@ -39,13 +39,16 @@ TARGET = -o $(EXENAME)
 # QNX rtp (neutrino)
 #CC = gcc
 
-PLATS = macosx
+PLATS = linux macosx
 
 default: $(PLAT)
 
 none:
 	@echo "Please choose a platform"
 	@echo "    $(PLATS)"
+
+linux:
+	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions" LINKLIBS="$(LINKLIBS)"
 
 macosx:
 	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions" LINKLIBS="$(LINKLIBS) -framework CoreFoundation -framework CoreServices"

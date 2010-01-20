@@ -8,7 +8,8 @@ if $(NT) {
 } else {
 	tempString = $(tempString)(TMPDIR) ;
 }
-Echo $(tempString) - @($(tempString):A) ;
+local tmp = @($(tempString):A) ;
+Echo $(tempString) - $(tmp:E=/tmp) ;
 
 local var1 = Uf@(filename.txt:B) ;
 Echo @(m__$(var1)_$(var1)__f:U) ;

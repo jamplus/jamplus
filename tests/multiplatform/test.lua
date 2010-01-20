@@ -6,6 +6,7 @@ function Test()
 		'Jamfile.jam',
 		'filedebug.c',
 		'filerelease.c',
+		'linux.c',
 		'macosx.c',
 		'platform.c',
 		'win32.c',
@@ -45,6 +46,7 @@ Generating Code...
 				'filedebug.c',
 				'filerelease.c',
 				'filerelease.obj',
+				'linux.c',
 				'macosx.c',
 				'platform.c',
 				'platform.obj',
@@ -58,7 +60,8 @@ Generating Code...
 			}
 
 		else
-			pattern = [[
+			if Platform == 'macosx32' then
+				pattern = [[
 *** found 11 target(s)...
 *** updating 4 target(s)...
 @ C.CC <platform>platform.o 
@@ -67,6 +70,17 @@ Generating Code...
 @ C.Link <platform>platform.release 
 *** updated 4 target(s)...
 ]]
+			else
+				pattern = [[
+*** found 11 target(s)...
+*** updating 4 target(s)...
+@ C.CC <platform>platform.o
+@ C.CC <platform>linux.o
+@ C.CC <platform>filerelease.o
+@ C.Link <platform>platform.release
+*** updated 4 target(s)...
+]]
+			end
 
 			pass1Files = {
 				'.jamcache',
@@ -75,13 +89,19 @@ Generating Code...
 				'filerelease.c',
 				'filerelease.o',
 				'Jamfile.jam',
+				'linux.c',
 				'macosx.c',
-				'macosx.o',
 				'platform.c',
 				'platform.o',
 				'platform.release',
 				'win32.c',
 			}
+
+			if Platform == 'macosx32' then
+				pass1Files[#pass1Files + 1] = 'macosx.o'
+			else
+				pass1Files[#pass1Files + 1] = 'linux.o'
+			end
 
 		end
 
@@ -105,13 +125,25 @@ RELEASE: What's up?!
 *** found 17 target(s)...
 ]]
 
-	else
+	elseif Platform == 'macosx32' then
 		local pattern2 = [[
 Using macosx
 This is a Mac OS X build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, ex.collectlines{'platform.release.exe'})
+		TestPattern(pattern2, ex.collectlines{'platform.release'})
+
+		pattern3 = [[
+*** found 11 target(s)...
+]]
+
+	else
+		local pattern2 = [[
+Using linux
+This is a Linux build.
+RELEASE: What's up?!
+]]
+		TestPattern(pattern2, ex.collectlines{'platform.release'})
 
 		pattern3 = [[
 *** found 11 target(s)...

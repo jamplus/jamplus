@@ -1,5 +1,5 @@
 require 'getopt'
-require 'glob'
+require 'filefind'
 
 package.path = (debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. "/?.lua;" .. package.path
 require 'FolderTree'
@@ -16,7 +16,7 @@ end
 
 local files = {}
 
-local sources = glob.match('**')
+local sources = filefind.glob('**')
 for _, source in ipairs(sources) do
 	local path, filename = source:match('(.+)/(.*)')
 	if not path then
