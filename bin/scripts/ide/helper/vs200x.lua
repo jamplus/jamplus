@@ -18,7 +18,8 @@ local function RealVSPlatform(platform)
 		return MapPlatformToVSPlatform[platform]
 	end
 
-	return platform
+	return "Win32"
+--	return platform
 end
 
 local function RealVSConfig(platform, config)
