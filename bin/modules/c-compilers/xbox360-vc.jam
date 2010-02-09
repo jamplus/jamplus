@@ -1,0 +1,37 @@
+MSVCBIN			?= "$(XEDK)/bin/win32/" ;
+MSVCNT_BIN_PATH ?= $(MSVCBIN) ;
+C.AR			= "$(MSVCBIN)lib" ;
+C.CC			= "$(MSVCBIN)cl" ;
+C.C++			= "$(MSVCBIN)cl" ;
+C.LINK			= "$(MSVCBIN)link" ;
+C.STDHDRS		?= "$(MSSDK_STDHDRS)" ;
+C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
+
+C.Defines * : _XBOX : : xbox360 ;
+C.Defines * : _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE : : xbox360 ;
+
+rule ImageXex TARGET
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	local _t ;
+	on $(TARGET) _t = $(LINK_TARGET) ;
+	local xex = $(_t:S=.xex) ;
+	MakeLocate $(xex) : $(LOCATE_TARGET) ;
+	Depends $(TARGET) : $(xex) : $(_t) ;
+	Clean clean:$(TARGET) : $(xex) $(xex:S=.pe) $(xex:S=.xdb) ;
+	ImageXex1 $(xex) : $(_t) ;
+}
+
+actions ImageXex1
+{
+	"$(XEDK)/bin/win32/imagexex" /out:"$(1)" /nologo "$(2)"
+}
+
+rule C._ApplicationFromObjects_PostBuild
+{
+	ImageXex $(TARGET) ;
+}
+
+VSPLATFORMMAP.xbox360 = "Xbox 360" ;
+VSNATIVEPLATFORM.xbox360 = 1 ;

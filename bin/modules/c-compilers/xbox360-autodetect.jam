@@ -1,0 +1,32 @@
+rule C.AutoDetect
+{
+	if $(COMPILER.$(PLATFORM))  &&  $(COMPILER.$(PLATFORM)) != xbox360 {
+		return ;
+	}
+
+	XEDK = $(XEDK:J=" ") ;
+
+	# Do we need to attempt to detect the compiler?
+	if ! $(COMPILER.$(PLATFORM))  ||  ! $(MSVCNT)
+	{
+		MSVCNT = $(XEDK) ;
+		if ! $(MSVCNT) {
+			return ;
+		}
+	}
+
+	COMPILER.$(PLATFORM) = xbox360 ;
+
+	MSSDK = $(MSVCNT) ;
+	MSSDK ?= $(MSVCNT) ;
+	MSSDK_STDHDRS = "$(MSVCNT)/include/xbox" ;
+	MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/xbox" ;
+
+	IncludeModule c-compilers/c-vc ;
+	if $(PLATFORM) != *  &&  $(CONFIG) != * {
+		IncludeModule c-compilers/$(PLATFORM)-vc ;
+		IncludeModule c-compilers/$(PLATFORM)-$(CONFIG)-vc ;
+	}
+
+	return $(COMPILER.$(PLATFORM)) ;
+}
