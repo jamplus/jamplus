@@ -1,0 +1,6 @@
+C.Flags CC	: * : -g -O2 : release : groovyplatform ;
+C.Flags C++	: *	: -g -O2 : release : groovyplatform ;
+C.Flags M	: *	: -g -O2 : release : groovyplatform ;
+C.Flags MM	: *	: -g -O2 : release : groovyplatform ;
+
+VSCONFIGMAP.release = "Groovy Release" ;

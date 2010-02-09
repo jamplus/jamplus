@@ -1,0 +1,4 @@
+SubDir TOP ;
+
+C.Application helloworld : helloworld.c ;
+

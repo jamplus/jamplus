@@ -1,0 +1,32 @@
+rule C.AutoDetect {
+	if $(NT) {
+		local PATHS =
+			c:/mingw
+			d:/mingw
+		;
+
+		local gcc = [ Glob $(PATHS)/bin : gcc.exe ] ;
+		if ! $(gcc)
+		{
+			return ;
+		}
+
+		GROOVY_ROOT = [ Match (.+)/bin : $(gcc[1]) ] ;
+	} else {
+		GROOVY_ROOT = /usr ;
+	}
+
+	if ! $(GROOVY_ROOT) {
+		return ;
+	}
+
+	COMPILER.$(PLATFORM) = groovycompiler ;
+	VSPLATFORMMAP.groovyplatform = "Groovy Platform" ;
+
+	IncludeModule c-compilers/c-groovycompiler ;
+	if $(PLATFORM) != *  &&  $(CONFIG) != * {
+		IncludeModule c-compilers/$(PLATFORM)-groovycompiler-$(CONFIG) ;
+	}
+
+	return $(COMPILER.$(PLATFORM)) ;
+}
