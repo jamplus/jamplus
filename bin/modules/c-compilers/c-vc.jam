@@ -113,7 +113,7 @@ actions updated response C.CC
 {
 	PATH=$(MSVCNT_BIN_PATH);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.CC:\\)" /nologo @@($(MFLAGS) "$(>)")
+	$(C.CC:\\C) /nologo @@($(MFLAGS) $(>:C))
 }
 
 
@@ -121,26 +121,26 @@ actions updated response C.C++
 {
 	PATH=$(MSVCNT_BIN_PATH);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.C++:\\)" /nologo @@($(MFLAGS) "$(>)")
+	$(C.C++:\\C) /nologo @@($(MFLAGS) $(>:C))
 }
 
 
 actions together response C.Archive
 {
 	PATH=$(MSVCNT_BIN_PATH);%PATH%
-	"$(C.AR)" /nologo $(LIBFLAGS) /out:"$(<)" @@("$(>:\\)")
+	$(C.AR:C) /nologo $(LIBFLAGS) /out:$(<:C) @@($(>:\\C))
 }
 
 
 actions RegSvr32
 {
-	regsvr32 /s /c "$(1)"
+	regsvr32 /s /c $(1:C)
 }
 
 
 actions existing UnRegSvr32
 {
-	regsvr32 /s /u "$(2)"
+	regsvr32 /s /u $(2:C)
 }
 
 ########################################################################
