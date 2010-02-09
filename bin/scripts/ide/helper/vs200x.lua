@@ -28,7 +28,7 @@ local function RealVSConfig(platform, config)
 		return realConfig
 	end
 
-	return RealVSPlatform(platform) .. ' ' .. realConfig
+	return GetMapPlatformToVSPlatform(platform) .. ' ' .. realConfig
 end
 
 function VisualStudio200xProjectMetaTable:Write(outputPath, commandLines)
