@@ -101,7 +101,7 @@ rule C._C++Exceptions
 	}
 	else if $(TYPE) = true
 	{
-		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += -fno-exceptions ;
+		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += -fexceptions ;
 	}
 }
 
