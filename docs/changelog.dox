@@ -4,6 +4,10 @@
 
 <h2>New features for 1.0:</h2>
 
+- The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files).  Additionally, iPhone and iPhone Simulator applications can be built, but they can not be debugged (yet).
+- Linux support added.  No Linux workspace generation support is available yet.
+- Visual Studio 2010 support has been added by Philipp Teschner.  It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.
+- Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.
 - C/C++ build rules have been separated into their own \ref module_c "Jam module called 'c'".  This module is automatically loaded on any Jam invocation.  As a result, most rules are now namespaced with a <tt>C.</tt>.  That is, you'll use \ref rule_C_Application "C.Application" instead of just <tt>Application</tt>.  To use the old names, \ref rule_IncludeModule "IncludeModule" <tt>c-deprecated</tt>.  If you do this, please upgrade to the new method, as the deprecated module will go away in the next release of JamPlus.
 	- With the new C module, it is easy to add additional platforms, configurations, and compilers.  See the <b>tests/platform/groovyplatform/</b> example to see this in action.
 	- Renamed the following Jam modules:
@@ -14,10 +18,7 @@
 		- <tt>c/wxwidgets:</tt> Renamed from WxWidgets.  Access it as \ref rule_C_UseWxWidgets "C.UseWxWidgets".
 	- Created a <tt>c/win32resource</tt> module with the \ref module_c_win32resource "ResourceCompiler rules".
 - The Jam binaries have been moved from the <tt>jamplus/bin/</tt> directory to <tt>jamplus/bin/\$(OS)\$(OSPLAT)</tt>.  On Windows, this ends up being <tt>jamplus/bin/ntx86/</tt>.  On Mac OS X, the directory is <tt>jamplus/bin/macosxx64/</tt>.  All associated scripts have been moved to this directory, as has the Lua directory structure.  This new structure allows for multiple platform binaries to exist side by side.  See \ref building_overview "Building Overview" for more information.
-- The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files).  Additionally, iPhone and iPhone Simulator applications can be built, but they can not be debugged (yet).
-- Visual Studio 2010 support has been added by Philipp Teschner.  It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.
-- Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.
-- Automated tests have been added consisting of 45 categoric test suites made of over 400 individual tests.  The suite is run by ensuring JamPlus's bin/platform/ directory is in the PATH and then running <tt>tests/runtests.bat</tt> (on Windows) or <tt>tests/runtests</tt> on Mac OS X.
+- Automated tests have been added consisting of 45 categoric test suites made of over 400 individual tests.  The suite is run by ensuring JamPlus's bin/platform/ directory is in the PATH and then running <tt>tests/runtests.bat</tt> (on Windows) or <tt>tests/runtests-macosxx64</tt> on Mac OS Xor <tt>tests/tuntests-linux32</tt> on Linux.
 
 
 
@@ -59,6 +60,10 @@
 - Added a new missing rule "silence" command line option: <tt>-S</tt>.  When specified, any rules called that have not been defined are skipped without warning.  <tt>jam --workspace</tt> makes extensive use of it.  This command line option will mask problems with your Jamfiles, so it is recommended you don't use it.  See \ref usage for more information.
 - Added the ability to escape paths in a platform specific way with the \ref variable_expansion_c "string expansion modifier :C".  For example, if a Windows filename has spaces in it, using the <tt>:C</tt> modifier will result in the filename being quoted.  \#ifdef'ed as \c OPT_EXPAND_ESCAPE_PATH_EXT.
 - Defaulted \c DEPCACHE to equal \c standard.  This does not automatically turn on a dependency cache.  There is still need to set it up with <tt>DEPCACHE.standard = .depcache</tt> or some equivalent.  See \ref dependency_cache_usage for additional information.
+- Fix the variable expansion modifier <tt>:X=</tt> when used without a <tt>:I=</tt>.
+- Accept <tt>:W=remove_text</tt> as another form of the wildcard variable expansion modifier.  Removes remote_text characters from the beginning of the found wildcard.
+
+
 
 
 
@@ -101,7 +106,8 @@
 - Made the \ref rule_SearchSource "SearchSource" rule take an optional second parameter, the SEARCH_PATH.  If the parameter is not specified, then \$(SEARCH_SOURCE) is used.
 - \ref rule_IncludeModule "IncludeModule" searches the current SubDir, current working directory, any user Jam module paths, and then <tt>bin/modules/</tt>.
 - Changed the internal Jambase to not search 10 levels up to find the real Jambase.  Instead, it searches for a <tt>Jambase.jam</tt> in the current working directory, directory containing the \b Jam executable, and then the directory immediately above the \b Jam executable.  See \ref operation_parsing for additional information.
-- Jambase: When \c ALL_LOCATE_TARGET is specified, the \ref rule_SubDir "SubDir" root name is prepended to the relative path directory for \c LOCATE_SOURCE and \c LOCATE_TARGET.  Before this change, one Jamfile could execute <tt>SubDir ProjectA</tt> and another execute <tt>SubDir ProjectB</tt>.  Both would end up building their intermediates and outputs into the same directory.
+- When \c ALL_LOCATE_TARGET is specified, the \ref rule_SubDir "SubDir" root name is prepended to the relative path directory for \c LOCATE_SOURCE and \c LOCATE_TARGET.  Before this change, one Jamfile could execute <tt>SubDir ProjectA</tt> and another execute <tt>SubDir ProjectB</tt>.  Both would end up building their intermediates and outputs into the same directory.
+- Added rule \ref rule_AutoSourceGroup "AutoSourceGroup" for automatically generating \ref rule_SourceGroup "SourceGroup" folders from the relative paths of the sources specified.
 
 <h3>Technical Details:</h3>
 

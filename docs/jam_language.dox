@@ -44,7 +44,7 @@ After binding each target, \b Jam determines whether the target needs updating, 
 
 \subsubsection operation_binding_header_file_scanning Header File Scanning
 
-During the binding phase, \b Jam also performs "header" file scanning, where it looks inside source files for the implicit dependencies on other files caused by C's \#include syntax (or whatever is appropriate for other file formats). This is controlled by the special variables \$(HDRSCAN) and \$(HDRRULE). The result of the scan is formed into a rule invocation, with the scanned file as the target and the found included file names as the sources. Note that this is the only case where rules are invoked outside the parsing phase. See \ref built_in_variables_hdrscan.
+During the binding phase, \b Jam also performs \"header\" file scanning, where it looks inside source files for the implicit dependencies on other files caused by C's \#include syntax (or whatever is appropriate for other file formats). This is controlled by the special variables \$(HDRSCAN) and \$(HDRRULE). The result of the scan is formed into a rule invocation, with the scanned file as the target and the found included file names as the sources. Note that this is the only case where rules are invoked outside the parsing phase. See \ref built_in_variables_hdrscan.
 
 
 \subsection operation_updating Updating Phase

@@ -156,6 +156,34 @@ For the given project \c TARGET, assign the \c FLAGS to the appropriate configur
 
 
 <hr>
+\section rule_C_CppExceptions rule C.C++Exceptions TARGET : TYPE [ : THE_CONFIG : THE_PLATFORM ]
+\addindex rule_C_C++Exceptions
+
+For the given project \c TARGET, turn on/off C++ exception support within the specified configuration and platform.
+
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param TYPE \c true to turn on exceptions, \c false (default) to turn off exceptions.
+\param THE_CONFIG (optional) If not specified, the default is the current \c \$(CONFIG).
+\param THE_PLATFORM (optional) If not specified, the default is the current \c \$(PLATFORM).
+
+\code
+    # Turn on exceptions in the target mycppapp for the current $(CONFIG).
+    C.C++Exceptions mycppapp : true ;
+
+    # Turn on exceptions in the target mycppapp for all configs.
+    C.C++Exceptions mycppapp : true : * ;
+
+    # Turn off exceptions in the target mycppapp for all configs.
+    C.C++Exceptions mycppapp : false : * ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_C_CppFlags rule C.C++Flags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_C_CppFlags
 
