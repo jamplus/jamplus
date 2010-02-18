@@ -770,6 +770,14 @@ include "$(scriptPath)DumpJamTargetInfo.jam" ;
 								usedProjects[projectName] = true
 							end
 						end
+						if Projects['C.*'] then
+							for projectName in ivalues(Projects['C.*'].Libraries) do
+								if not usedProjects[projectName] then
+									workspace.Projects[#workspace.Projects + 1] = projectName
+									usedProjects[projectName] = true
+								end
+							end
+						end
 					end
 				end
 
