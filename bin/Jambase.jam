@@ -730,6 +730,9 @@ ACTIVE_PROJECT = "" ;
 rule ActiveTarget TARGET
 {
 	ACTIVE_PROJECT = $(TARGET) ;
+	if $(ALL_SUBDIR_TOKENS) {
+		SubDir : $(TARGET) ;
+	}
 }
 
 
