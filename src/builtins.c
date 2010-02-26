@@ -54,6 +54,8 @@
 # include "execcmd.h"
 #endif
 
+#include "fileglob.h"
+
 /*
  * compile_builtin() - define builtin rules
  */
@@ -111,6 +113,8 @@ LIST *builtin_groupbyvar( PARSE *parse, LOL *args, int *jmp );
 #ifdef OPT_BUILTIN_SPLIT_EXT
 LIST *builtin_split( PARSE *parse, LOL *args, int *jmp );
 #endif
+
+LIST *builtin_expandfilelist( PARSE *parse, LOL *args, int *jmp );
 
 int glob( const char *s, const char *c );
 
@@ -255,6 +259,9 @@ load_builtins()
 	bindrule( "Split" )->procedure =
 		parse_make( builtin_split, P0, P0, P0, C0, C0, 0 );
 #endif
+
+	bindrule( "ExpandFileList" )->procedure =
+		parse_make( builtin_expandfilelist, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -1182,3 +1189,40 @@ builtin_split(
     return  result;
 }
 #endif
+
+
+
+LIST *
+builtin_expandfilelist(
+	PARSE	*parse,
+	LOL	*args,
+	int	*jmp )
+{
+	LIST* files = lol_get( args, 0 );
+	LIST* result = L0;
+
+    for ( ; files; files = files->next ) {
+		int wildcard = 0;
+		const char* ptr = files->string;
+		while ( *ptr ) {
+			if ( *ptr == '*'  ||  *ptr == '?' ) {
+				wildcard = 1;
+				break;
+			}
+			++ptr;
+		}
+
+		if ( !wildcard ) {
+			result = list_new( result, files->string, 1 );
+		} else {
+			fileglob* glob = fileglob_Create( files->string );
+			while ( fileglob_Next( glob ) ) {
+	            result = list_new( result, fileglob_FileName( glob ), 0 );
+			}
+			fileglob_Destroy( glob );
+		}
+	}
+
+    return result;
+}
+
