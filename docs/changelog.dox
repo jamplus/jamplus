@@ -5,7 +5,7 @@
 <h2>New features for 1.0:</h2>
 
 - The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files).  Additionally, iPhone and iPhone Simulator applications can be built, but they can not be debugged (yet).
-- Linux support added.  No Linux workspace generation support is available yet.
+- Linux support added.  No Linux workspace generation support is available yet, although the CodeBlocks support may work.
 - Visual Studio 2010 support has been added by Philipp Teschner.  It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.
 - Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.
 - C/C++ build rules have been separated into their own \ref module_c "Jam module called 'c'".  This module is automatically loaded on any Jam invocation.  As a result, most rules are now namespaced with a <tt>C.</tt>.  That is, you'll use \ref rule_C_Application "C.Application" instead of just <tt>Application</tt>.  To use the old names, \ref rule_IncludeModule "IncludeModule" <tt>c-deprecated</tt>.  If you do this, please upgrade to the new method, as the deprecated module will go away in the next release of JamPlus.
@@ -60,8 +60,8 @@
 - Added a new missing rule "silence" command line option: <tt>-S</tt>.  When specified, any rules called that have not been defined are skipped without warning.  <tt>jam --workspace</tt> makes extensive use of it.  This command line option will mask problems with your Jamfiles, so it is recommended you don't use it.  See \ref usage for more information.
 - Added the ability to escape paths in a platform specific way with the \ref variable_expansion_c "string expansion modifier :C".  For example, if a Windows filename has spaces in it, using the <tt>:C</tt> modifier will result in the filename being quoted.  \#ifdef'ed as \c OPT_EXPAND_ESCAPE_PATH_EXT.
 - Defaulted \c DEPCACHE to equal \c standard.  This does not automatically turn on a dependency cache.  There is still need to set it up with <tt>DEPCACHE.standard = .depcache</tt> or some equivalent.  See \ref dependency_cache_usage for additional information.
-- Fix the variable expansion modifier <tt>:X=</tt> when used without a <tt>:I=</tt>.
-- Accept <tt>:W=remove_text</tt> as another form of the wildcard variable expansion modifier.  Removes remote_text characters from the beginning of the found wildcard.
+- Fixed the variable expansion modifier <tt>:X=</tt> when used without a <tt>:I=</tt>.
+- Added <tt>:W=remove_text</tt> as another form of the wildcard variable expansion modifier.  Removes remote_text characters from the beginning of the found wildcard.
 
 
 
