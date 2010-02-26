@@ -182,6 +182,7 @@ rule C._MultiCppCompile_ObjName_Pass1
 rule C.MultiCppCompile TARGET : SOURCES
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	SOURCES = [ ExpandFileList $(SOURCES) ] ;
 
 	local grist = $(TARGET) ;
 
