@@ -1388,6 +1388,13 @@ rule C.OutputSuffix TARGET : SUFFIX : THE_CONFIG : THE_PLATFORM
 }
 
 
+rule C.TargetGrist TARGET : FILES
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	return <$(TARGET)>$(FILES) ;
+}
+
+
 C.Defines * : _DEBUG DEBUG : debug ;
 C.Defines * : NDEBUG : release ;
 C.Defines * : NDEBUG : releaseltcg ;
