@@ -511,8 +511,8 @@ function DumpWorkspace(workspace)
 	if uname == 'windows' then
 		updateWorkspaceCommandLines =
 		{
-			outPath .. 'updateworkspace.bat',
-			outPath .. 'updateworkspace.bat',
+			os.path.make_backslash(outPath .. 'updateworkspace.bat'),
+			os.path.make_backslash(outPath .. 'updateworkspace.bat'),
 		}
 	else
 		updateWorkspaceCommandLines =
@@ -664,7 +664,7 @@ include $(jamPath)Jambase.jam ;
 
 	if uname == 'windows' then
 		-- Write jam.bat.
-		jamScript = os.path.combine(destinationRootPath, 'jam.bat')
+		jamScript = os.path.make_backslash(os.path.combine(destinationRootPath, 'jam.bat'))
 		io.writeall(jamScript,
 			'@' .. (opts.jamexepath or jamExePath) .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
 
