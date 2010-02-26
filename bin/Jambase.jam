@@ -214,7 +214,7 @@ rule RmTemps
 	Temporary $(>) ;
 }
 
-rule SubDir
+rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 {
 	#
 	# SubDir TOP d1 d2 ... ;
@@ -253,10 +253,11 @@ rule SubDir
 	#	$(SOURCE_GRIST) = $(SUBDIR_TOKENS) with !'s
 	#
 
-	local _top = $(<[1]) ;
-	local _tokens = $(<[2-]) ;
+	if ! $(SUBDIR_PATH)  {  SUBDIR_PATH = $(ALL_SUBDIR_TOKENS) ;  }
+	local _top = $(SUBDIR_PATH[1]) ;
+	local _tokens = $(SUBDIR_PATH[2-]) ;
 
-	ALL_SUBDIR_TOKENS = $(<) ;
+	ALL_SUBDIR_TOKENS = $(SUBDIR_PATH) ;
 
 	#
 	# First time through sets up relative root and includes Jamrules.
@@ -341,7 +342,7 @@ rule SubDir
 
 			if $(SUBDIR_DOWN) && $(_tokens)
 			{
-				Echo "Warning: SubDir $(<) misplaced!" ;
+				Echo "Warning: SubDir $(SUBDIR_PATH) misplaced!" ;
 			}
 
 			# We'll remember the relative (UP/DOWN) path that
@@ -392,14 +393,14 @@ rule SubDir
 	SUBDIR_ROOT = $($(_top)-ROOT) ;
     SUBDIR_TOKENS = $(SUBDIR_DOWN) ;
 
-	SUBDIR = [ FSubDirPath $(<) ] ;
+	SUBDIR = [ FSubDirPath $(SUBDIR_PATH) ] ;
 
 	# Now set up SEARCH_SOURCE, LOCATE_TARGET, SOURCE_GRIST
 	# These can be reset if needed.	 For example, if the source
 	# directory should not hold object files, LOCATE_TARGET can
 	# subsequently be redefined.
 
-	local target = /$(>) ;
+	local target = /$(TARGET_DIRECTORY) ;
 
 	local _optionalRoot ;
 	if $(ALL_LOCATE_TARGET) {
@@ -431,7 +432,7 @@ rule SubDir
 	# rule names listed in SUBDIRRULES.
 	# Note use of variable expanded rule invocation
 
-	$(SUBDIRRULES) $(<) ;
+	$(SUBDIRRULES) $(SUBDIR_PATH) ;
 }
 
 rule FSubDirPath
