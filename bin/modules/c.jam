@@ -528,8 +528,8 @@ rule C.Application TARGET : SOURCES : OPTIONS
 {
 	local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
 	local linkTargets = [ C.ApplicationFromObjects $(TARGET) : $(objects) : $(OPTIONS) ] ;
+	ActiveTarget ;
 	return $(linkTargets) ;
-	ACTIVE_PROJECT = "" ;
 }
 
 
@@ -632,8 +632,8 @@ rule C.Library TARGET : SOURCES : OPTIONS
 	{
 		linkTargets = [ C.LibraryFromObjects $(TARGET) : $(objects) ] ;
 	}
+	ActiveTarget ;
 	return $(linkTargets) ;
-	ACTIVE_PROJECT = ;
 }
 
 
