@@ -85,6 +85,8 @@ rule AutoSourceGroup TARGET : SOURCES
 
 rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 {
+	SOURCES = [ ExpandFileList $(SOURCES) ] ;
+
 	# Write initial Project information.
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 	local project = "Projects['$(TARGETS[0])']" ;
