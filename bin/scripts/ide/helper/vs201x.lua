@@ -18,7 +18,7 @@ local function RealVSPlatform(platform)
 		return MapPlatformToVSPlatform[platform]
 	end
 
-	return platform
+	return "Win32"
 end
 
 local function RealVSConfig(platform, config)
@@ -27,7 +27,7 @@ local function RealVSConfig(platform, config)
 		return realConfig
 	end
 
-	return RealVSPlatform(platform) .. ' ' .. realConfig
+	return GetMapPlatformToVSPlatform(platform) .. ' ' .. realConfig
 end
 
 function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
@@ -84,16 +84,13 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 
 	table.insert(self.Contents, [[
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-]])
-
-	table.insert(self.Contents, [[
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 ]])
 
 	-- Write Configurations.
 	for platformName in ivalues(Config.Platforms) do
 		for configName in ivalues(Config.Configurations) do
-			local jamCommandLine = os.path.escape(jamScript) .. ' ' ..
+			local jamCommandLine = os.path.escape(os.path.make_backslash(jamScript)) .. ' ' ..
 					os.path.escape('-C' .. destinationRootPath) .. ' ' ..
 					'-sPLATFORM=' .. platformName .. ' ' ..
 					'-sCONFIG=' .. configName
@@ -233,9 +230,10 @@ function VisualStudio201xProject(projectName, options)
 end
 
 
-function VisualStudio201xProjectMetaTable:_WriteFolders(folder, filter)
+function VisualStudio201xProjectMetaTable:_WriteFolders(folder, inFilter)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
+			local filter = inFilter
 			if filter ~= '' then filter = filter .. '\\' end
 			filter = filter .. entry.folder
 			self:_WriteFolders(entry, filter)
@@ -248,15 +246,16 @@ function VisualStudio201xProjectMetaTable:_WriteFolders(folder, filter)
 end
 
 
-function VisualStudio201xProjectMetaTable:_WriteFiles(folder, filter)
+function VisualStudio201xProjectMetaTable:_WriteFiles(folder, inFilter)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
+			local filter = inFilter
 			if filter ~= '' then filter = filter .. '\\' end
 			filter = filter .. entry.folder
 			self:_WriteFiles(entry, filter)
 		else
 			table.insert(self.Contents, '    <None Include="' .. entry:gsub('/', '\\') .. '">\n')
-			table.insert(self.Contents, '      <Filter>' .. filter .. '</Filter>\n')
+			table.insert(self.Contents, '      <Filter>' .. inFilter .. '</Filter>\n')
 			table.insert(self.Contents, '    </None>\n')
 		end
 	end
