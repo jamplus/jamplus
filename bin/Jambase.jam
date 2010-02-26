@@ -498,6 +498,11 @@ rule SubInclude
 	}
 }
 
+rule SubIncludeRelative RELATIVE_PATH : REQUESTED_JAMFILE
+{
+	SubInclude $(ALL_SUBDIR_TOKENS) $(RELATIVE_PATH) : $(REQUESTED_JAMFILE) ;
+}
+
 rule SubRules
 {
 	# SubRules TOP d1 ... : Other-TOP ;
