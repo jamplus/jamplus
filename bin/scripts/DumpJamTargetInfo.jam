@@ -161,6 +161,7 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 
 rule Project PROJECT_NAME : SOURCES
 {
+	PROJECT_NAME = [ _retrieveActiveTargetName $(PROJECT_NAME) ] ;
 	DumpProjectInfo $(PROJECT_NAME) : $(SOURCES) ;
 }
 
