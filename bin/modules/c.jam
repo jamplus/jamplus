@@ -527,7 +527,8 @@ actions C.MakeLump
 rule C.Application TARGET : SOURCES : OPTIONS
 {
 	local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
-	C.ApplicationFromObjects $(TARGET) : $(objects) : $(OPTIONS) ;
+	local linkTargets = [ C.ApplicationFromObjects $(TARGET) : $(objects) : $(OPTIONS) ] ;
+	return $(linkTargets) ;
 	ACTIVE_PROJECT = "" ;
 }
 
@@ -595,6 +596,8 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
 
 	C._ApplicationFromObjects_PostBuild ;
+
+	return $(_linkTargets) ;
 }
 
 
@@ -620,14 +623,16 @@ rule C._ApplicationFromObjects_PostBuild
 rule C.Library TARGET : SOURCES : OPTIONS
 {
 	local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
+	local linkTargets ;
 	if shared in $(OPTIONS)  ||  module in $(OPTIONS)
 	{
-		C.SharedLibraryFromObjects $(TARGET) : $(objects) : $(OPTIONS) ;
+		linkTargets = [ C.SharedLibraryFromObjects $(TARGET) : $(objects) : $(OPTIONS) ] ;
 	}
 	else
 	{
-		C.LibraryFromObjects $(TARGET) : $(objects) ;
+		linkTargets = [ C.LibraryFromObjects $(TARGET) : $(objects) ] ;
 	}
+	return $(linkTargets) ;
 	ACTIVE_PROJECT = ;
 }
 
@@ -715,6 +720,8 @@ rule C.LibraryFromObjects TARGET : OBJECTS
 	# If we can't scan the library, we have to leave the .o's around.
 
 	if ! ( $(NOARSCAN) || $(NOARUPDATE) ) { RmTemps $(_l) : $(_s) ; }
+
+	return $(_l) ;
 }
 
 
@@ -798,6 +805,8 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	C._SharedLibraryFromObjects_RegServer ;
 
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
+
+	return $(_linkTargets) ;
 }
 
 
