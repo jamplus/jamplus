@@ -19,7 +19,6 @@ local function RealVSPlatform(platform)
 	end
 
 	return "Win32"
---	return platform
 end
 
 local function RealVSConfig(platform, config)
