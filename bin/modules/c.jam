@@ -665,11 +665,13 @@ rule C.LibraryFromObjects TARGET : OBJECTS
 	# For compatibility, we only do this if the library doesn't
 	# already have a path.
 
+	local objectsInArchive ;
 	if ! $(_l:D)
 	{
 		local outputPath = [ C._retrieveOutputPath $(TARGET) ] ;
-	    MakeLocate $(_l) $(_l)($(_s:BS)) : $(outputPath) ;
-		BINDING on $(_l)($(_s:BS)) = $(_lBINDING) ;
+		local objectsInArchive = $(_l)($(_s:BS)) ;
+	    MakeLocate $(_l) $(objectsInArchive) : $(outputPath) ;
+		BINDING on $(objectsInArchive) = $(_lBINDING) ;
 	}
 
 	if $(NOARSCAN)
@@ -686,7 +688,7 @@ rule C.LibraryFromObjects TARGET : OBJECTS
 	    # on its members and each member depend on the on-disk
 	    # object file.
 
-	    Depends $(_l) : $(_l)($(_s:BS)) ;
+	    Depends $(_l) : $(objectsInArchive) ;
 
 		local _i ;
 	    for _i in $(_s)
