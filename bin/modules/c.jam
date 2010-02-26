@@ -152,6 +152,33 @@ rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_
 }
 
 
+rule C._MultiCppCompile_ObjName_Pass1_OutputAsTree
+{
+	if $(sufobj[1]) {
+		_obj = $(_src:S=$(sufobj[1]))$(sufobj[2]) ;
+	} else {
+		_obj = $(_src)$(sufobj[2]) ;
+	}
+	_obj = [ Subst $(_obj) : %.%. : __ ] ;
+	_obj = [ Subst $(_obj) : \: : -- ] ;
+	local _objdir = $(_obj:DR=$(LOCATE_TARGET)) ;
+	MakeLocate $(_obj) : $(_objdir) ;
+	BINDING on $(_obj) = $(_obj:BS) ;
+	_postmflags = "/c \"/Fo$(_objdir:\\)\\\\\" \"/Fd$(_VCPDB:T)\"" ;
+}
+
+
+rule C._MultiCppCompile_ObjName_Pass1
+{
+	if $(sufobj[1]) {
+		_obj = $(_src:S=$(sufobj[1]):D=)$(sufobj[2]) ;
+	} else {
+		_obj = $(_src)$(sufobj[2]) ;
+	}
+	MakeLocate $(_obj) : $(LOCATE_TARGET) ;
+}
+
+
 rule C.MultiCppCompile TARGET : SOURCES
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
@@ -236,6 +263,15 @@ rule C.MultiCppCompile TARGET : SOURCES
 	local newsrcs ;
 	local _src ;
 
+	local makeobj_pass1 ;
+	if $(__MultiCppCompile_OutputAsTree) != 0 {
+		makeobj_pass1 = C._MultiCppCompile_ObjName_Pass1_OutputAsTree ;
+	} else {
+		makeobj_pass1 = C._MultiCppCompile_ObjName_Pass1 ;
+	}
+
+	local FIncludes_dot = [ C.FIncludes . ] ;
+
 	for _src in $(sources) {
 		local forceFileType ;
 		local _nopch ;
@@ -252,7 +288,8 @@ rule C.MultiCppCompile TARGET : SOURCES
 		}
 		local ext = $(_src:S) ;
 		local BUILD_EXT = C.BUILD$(forceFileType:E=$(ext)) ;
-		if ! $($(BUILD_EXT).RULE) {
+		local BUILD_EXT_RULE = $($(BUILD_EXT).RULE) ;
+		if ! $(BUILD_EXT_RULE) {
 			_allobjs += $(_src) ;
 			continue ;
 		}
@@ -262,33 +299,18 @@ rule C.MultiCppCompile TARGET : SOURCES
 		local sufobj = $($(BUILD_EXT).SUFOBJ) ;
 
 		local _obj ;
-		if $(__MultiCppCompile_OutputAsTree) != 0 {
-			if $(sufobj[1]) {
-				_obj = $(_src:S=$(sufobj[1]))$(sufobj[2]) ;
-			} else {
-				_obj = $(_src)$(sufobj[2]) ;
-			}
-			_obj = [ Subst $(_obj) : %.%. : __ ] ;
-			_obj = [ Subst $(_obj) : \: : -- ] ;
-			local _objdir = $(_obj:DR=$(LOCATE_TARGET)) ;
-			MakeLocate $(_obj) : $(_objdir) ;
-			BINDING on $(_obj) = $(_obj:BS) ;
-			_postmflags = "/c \"/Fo$(_objdir:\\)\\\\\" \"/Fd$(_VCPDB:T)\"" ;
-		} else {
-			if $(sufobj[1]) {
-				_obj = $(_src:S=$(sufobj[1]):D=)$(sufobj[2]) ;
-			} else {
-				_obj = $(_src)$(sufobj[2]) ;
-			}
-			MakeLocate $(_obj) : $(LOCATE_TARGET) ;
-		}
+		$(makeobj_pass1) ;
 
 		local _hdrs = $(SEARCH_SOURCE) ;
 		local objectForceIncludes = $(forceIncludes) ;
 
+		local objflags ;
+		local objdefines ;
 		on $(_obj) {
 			_hdrs += $(HDRS.$(ALL_TYPES)) ;
 			objectForceIncludes += $(FORCE_INCLUDES) ;
+			objflags = $($($(BUILD_EXT).FLAGS).$(ALL_TYPES)) ;
+			objdefines = $(DEFINES.$(ALL_TYPES)) ;
 		}
 		_hdrs += $(postHDRS) $(C.STDHDRS) ;
 
@@ -297,28 +319,37 @@ rule C.MultiCppCompile TARGET : SOURCES
 		# Rest
 		Depends $(_obj) : $(_src) ;
 
-	#		$($(BUILD_EXT).COMPILER) on $(_obj) = $($(BUILD_EXT).COMPILER) ;
-
-		local _flags = $($(BUILD_EXT).RULE) $(sufobj) $($(BUILD_EXT).ADD_TO_LINK) ;
+		local _flags = $(BUILD_EXT_RULE) $(sufobj) $($(BUILD_EXT).ADD_TO_LINK) ;
 		_flags += $($($(BUILD_EXT).PREFLAGS)) ;
-		on $(_obj) _flags += $($($(BUILD_EXT).FLAGS).$(ALL_TYPES)) ;
-		_flags += $($($(BUILD_EXT).SUBDIRFLAGS)) ;
+		if $(objflags[1]) {
+			_flags += $(objflags) ;
+		}
+		local subdirflags = $($($(BUILD_EXT).SUBDIRFLAGS)) ;
+		if $(subdirflags[1]) {
+			_flags += $(subdirflags) ;
+		}
 
 		# if the source should create pch
 		if $(_pch[1]) {
 			_flags += [ C.FIncludes $(LOCATE_SOURCE) ] ;
 		}
 
-		_flags += [ C.FIncludes . $(_hdrs) ] ;
+		_flags += $(FIncludes_dot) [ C.FIncludes $(_hdrs) ] ;
 
 		_flags += $(preDEFINES) ;
-		on $(_obj) _flags += [ C.FDefines $(DEFINES.$(ALL_TYPES)) ] ;
+		if $(objdefines[1]) {
+			_flags += [ C.FDefines $(objdefines) ] ;
+		}
 
 		# now that general flags on the file are determined
 
-		_flags -= $(flagsToRemove) ;
-		_flags += $(flagsToAdd) ;
-		
+		if $(flagsToRemove[1]) {
+			_flags -= $(flagsToRemove) ;
+		}
+		if $(flagsToAdd[1]) {
+			_flags += $(flagsToAdd) ;
+		}
+
 		C._MultiCppCompile_SetupFlags ;
 
 		MFLAGS on $(_src) = $(_flags) ;

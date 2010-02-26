@@ -230,11 +230,16 @@ rule C._MultiCppCompile_PreCompile
 
 rule C._MultiCppCompile_SetupFlags
 {
-	_flags += $(postREFERENCEDIRECTORIES) ;
+	if $(postREFERENCEDIRECTORIES[1]) {
+		_flags += $(postREFERENCEDIRECTORIES) ;
+	}
 
-	local forceIncludeHeader = $(_pch[2]:G=$(grist)|force) ;
-	BINDING on $(forceIncludeHeader) = $(_pch[3]) ;
-	SEARCH on $(forceIncludeHeader) = $(_hdrs) ;
+	local forceIncludeHeader ;
+	if $(_pch[2]) {
+		forceIncludeHeader = $(_pch[2]:G=$(grist)|force) ;
+		BINDING on $(forceIncludeHeader) = $(_pch[3]) ;
+		SEARCH on $(forceIncludeHeader) = $(_hdrs) ;
+	}
 
 	if $(_pch[4]) {
 		# add extra flags to enable pch creation
@@ -261,9 +266,11 @@ rule C._MultiCppCompile_SetupFlags
 		Includes $(_src) : $(forceIncludeHeader) ;
 	}
 
-	Includes $(_src) : $(objectForceIncludes) ;
-	SEARCH on $(objectForceIncludes) = $(_hdrs) ;
-	_flags += "/FI\"$(objectForceIncludes:G=)\"" ;
+	if $(objectForceIncludes[1]) {
+		Includes $(_src) : $(objectForceIncludes) ;
+		SEARCH on $(objectForceIncludes) = $(_hdrs) ;
+		_flags += "/FI\"$(objectForceIncludes:G=)\"" ;
+	}
 
 	# bind flags, defines and includes to the target
 	_flags += $(_postmflags) ;
