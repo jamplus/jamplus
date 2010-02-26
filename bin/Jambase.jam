@@ -708,6 +708,12 @@ rule _retrieveActiveTargetName TARGET
 	return $(TARGET:E=$(ACTIVE_PROJECT:E="")) ;
 }
 
+rule RetrieveActiveTarget TARGET
+{
+	if $(TARGET) = * {  return C.* ;  }
+	return $(TARGET:E=$(ACTIVE_PROJECT:E="")) ;
+}
+
 ########################################################################
 ########################################################################
 
