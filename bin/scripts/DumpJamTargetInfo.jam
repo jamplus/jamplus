@@ -24,7 +24,7 @@ rule DumpSources prefix : SOURCES
 rule ProjectGroup TARGET : FOLDERNAME : PROJECTS
 {
 	if $(PLATFORM) != *  ||  $(CONFIG) != *  {  return ;  }
-	if ! $(FOLDERNAME)  ||  ! $(SOURCES)  {  return ;  }
+	if ! $(FOLDERNAME)  ||  ! $(PROJECTS)  {  return ;  }
 
 	local workspace ;
 	for workspace in $(TARGET)
