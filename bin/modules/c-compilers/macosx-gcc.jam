@@ -6,6 +6,13 @@ C.RANLIB		?= ranlib ;
 
 SUFMODULE	= .dylib ;
 
+actions C.Link
+{
+	MACOSX_DEPLOYMENT_TARGET=10.5
+	export MACOSX_DEPLOYMENT_TARGET
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:T) $(LINKLIBS)
+}
+
 if $(DONTUSEMERIGHTNOW)
 {
 	local isysroot ;

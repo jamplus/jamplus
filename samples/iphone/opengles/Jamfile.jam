@@ -1,0 +1,45 @@
+SubDir TOP ;
+
+ActiveProject opengles ;
+
+C.MacOSX_SDK : $(PLATFORM) ;
+
+IncludeModule CopyFile ;
+
+C.OutputPostfixClear : debug ;
+
+local SRCS =
+		Classes/EAGLView.h
+		Classes/EAGLView.m
+		Classes/ES1Renderer.h
+		Classes/ES1Renderer.m
+		Classes/ES2Renderer.h
+		Classes/ES2Renderer.m
+		Classes/ESRenderer.h
+		Classes/openglesAppDelegate.h
+		Classes/openglesAppDelegate.m
+		main.m
+		opengles_Prefix.pch
+;
+
+C.LinkFrameworks : Foundation UIKit OpenGLES QuartzCore ;
+
+C.BundleInfo : displayname : opengles ;
+local outputName = [ C._retrieveOutputName opengles ] ;
+C.BundleInfo : executable : $(outputName) ;
+C.BundleInfo : iconfile : "" ;
+C.BundleInfo : identifier : com.yourcompany.testapp ;
+C.BundleInfo : bundlename : opengles ;
+C.BundleInfo : bundleversion : 1.0 ;
+C.BundleInfo : mainnibfile : MainWindow ;
+
+C.Application : $(SRCS) : bundle ;
+
+XIB opengles : MainWindow.xib ;
+
+local bundlePath ;
+on opengles bundlePath = $(BUNDLE_PATH) ;
+CopyFile opengles : $(bundlePath)/Shader.fsh : $(SUBDIR)/Shaders/Shader.fsh ;
+CopyFile opengles : $(bundlePath)/Shader.vsh : $(SUBDIR)/Shaders/Shader.vsh ;
+
+#CopyFile opengles : $(bundlePath)/Info.plist : $(SUBDIR)/Info.plist ;

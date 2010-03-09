@@ -565,9 +565,9 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 	local linkFlags =
 		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
 		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : C.* : $(CONFIG) : $(PLATFORM) ] ]
-		[ C._retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-		[ C._retrieveVar LINKFLAGS : C.* : $(CONFIG) : $(PLATFORM) ]
 		[ C.FLibraryPaths $(C.STDLINKDIRECTORIES) ]
+		[ C._retrieveVar LINKFLAGS : C.* : $(CONFIG) : $(PLATFORM) ]
+		[ C._retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 	;
 
 	local linkRule = C.Link ;
@@ -776,9 +776,9 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	local linkFlags =
 		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
 		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : C.* : $(CONFIG) : $(PLATFORM) ] ]
-		[ C._retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-		[ C._retrieveVar LINKFLAGS : C.* : $(CONFIG) : $(PLATFORM) ]
 		[ C.FLibraryPaths $(C.STDLINKDIRECTORIES) ]
+		[ C._retrieveVar LINKFLAGS : C.* : $(CONFIG) : $(PLATFORM) ]
+		[ C._retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 	;
 
 	local linkRule = C.Link ;
@@ -1116,7 +1116,7 @@ rule C.Application TARGET : SOURCES : OPTIONS
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	Workspace $(TARGET) : $(TARGET) : all ;
 
-	DumpProjectInfo $(TARGET) : $(SOURCES) : app ;
+	DumpProjectInfo $(TARGET) : $(SOURCES) : app $(OPTIONS) ;
 	Depends all : $(TARGET) ;
 }
 
@@ -1126,11 +1126,11 @@ rule C.Library TARGET : SOURCES : OPTIONS
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	if shared in $(OPTIONS)
 	{
-		DumpProjectInfo $(TARGET) : $(SOURCES) : shared ;
+		DumpProjectInfo $(TARGET) : $(SOURCES) : $(OPTIONS) ;
 	}
 	else
 	{
-		DumpProjectInfo $(TARGET) : $(SOURCES) : lib ;
+		DumpProjectInfo $(TARGET) : $(SOURCES) : lib $(OPTIONS) ;
 	}
 	Depends all : $(TARGET) ;
 }

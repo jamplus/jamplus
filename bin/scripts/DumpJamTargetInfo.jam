@@ -98,6 +98,8 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 		Contents += "$(project).Path = '$(subdir)'$(NEWLINE)" ;
 		Contents += "$(project).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'$(NEWLINE)" ;
 		Contents += "$(project).Jamfile = [[$(CURRENT_JAMFILE)]]$(NEWLINE)" ;
+		Contents += "if not $(project).Options then $(project).Options = {} end$(NEWLINE)" ;
+		Contents += "$(project).Options['$(OPTIONS)'] = true$(NEWLINE)" ;
 	}
 
 	if ! ( lib in $(OPTIONS) )

@@ -6,6 +6,14 @@ C.RANLIB		?= ranlib ;
 
 SUFMODULE	= .dylib ;
 
+actions C.Link
+{
+	MACOSX_DEPLOYMENT_TARGET=10.5
+	export MACOSX_DEPLOYMENT_TARGET
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:T) $(LINKLIBS)
+}
+
+if $(DONTUSEMERIGHTNOW)
 {
 	local developerRoot ;
 	local isysroot ;
@@ -13,11 +21,13 @@ SUFMODULE	= .dylib ;
 	local developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
 	SUBPLATFORM ?= 2.2 ;
 	switch $(SUBPLATFORM) {
-		case 2.0 :	isysroot = $(developerRoot)/SDKs/iPhoneOS2.0.sdk ;
-		case 2.1 :	isysroot = $(developerRoot)/SDKs/iPhoneOS2.1.sdk ;
-		case 2.2 :	isysroot = $(developerRoot)/SDKs/iPhoneOS2.2.sdk ;
-		case 3.0 :	isysroot = $(developerRoot)/SDKs/iPhoneOS3.0.sdk ;
-		case * :	Exit "* MacOSX_SDK: Unsupported subplatform $(SUBPLATFORM) for SDK platform $(PLATFORM)." ;
+		case 2.0 :		isysroot = $(developerRoot)/SDKs/iPhoneOS2.0.sdk ;
+		case 2.1 :		isysroot = $(developerRoot)/SDKs/iPhoneOS2.1.sdk ;
+		case 2.2 :		isysroot = $(developerRoot)/SDKs/iPhoneOS2.2.sdk ;
+		case 3.0 :		isysroot = $(developerRoot)/SDKs/iPhoneOS3.0.sdk ;
+		case 3.1 :		isysroot = $(developerRoot)/SDKs/iPhoneOS3.1.sdk ;
+		case 3.1.2 :	isysroot = $(developerRoot)/SDKs/iPhoneOS3.1.2.sdk ;
+		case * :		Exit "* MacOSX_SDK: Unsupported subplatform $(SUBPLATFORM) for SDK platform $(PLATFORM)." ;
 	}
 
 	C.Flags CC	: * : -isysroot $(isysroot) : : $(PLATFORM) ;
@@ -33,4 +43,262 @@ rule C.LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM
 	C.LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 }
 
+
+rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
+	if ! ( $(PLATFORM) in macosx32 macosx64 iphonesimulator iphone ) { return ; }
+
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local developerRoot ;
+	local isysroot ;
+	local flags ;
+	switch $(SDK_PLATFORM) {
+		case macosx :
+			developerRoot = /Developer/SDKs ;
+			SDK_VERSION ?= 10.5 ;
+			switch $(SDK_VERSION) {
+				case 10.4 :
+					C.CC	= gcc-4.0 ;
+					C.C++	= g++-4.0 ;
+					C.LINK	= g++-4.0 ;
+					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
+					flags += -mmacosx-version-min=10.4 ;
+				case 10.4u :
+					C.CC	= gcc-4.0 ;
+					C.C++	= g++-4.0 ;
+					C.LINK	= g++-4.0 ;
+					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
+					flags += -mmacosx-version-min=10.4 ;
+				case 10.5 :
+					C.CC	= gcc ;
+					C.C++	= g++ ;
+					C.LINK	= g++ ;
+					isysroot = $(developerRoot)/MacOSX10.5.sdk ;
+					flags += -mmacosx-version-min=10.5 ;
+				case 10.6 :
+					C.CC	= gcc ;
+					C.C++	= g++ ;
+					C.LINK	= g++ ;
+					isysroot = $(developerRoot)/MacOSX10.6.sdk ;
+					flags += -mmacosx-version-min=10.6 ;
+				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
+			}
+			developerRoot = $(isysroot) ;
+
+		case iphone :
+			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
+			SDK_VERSION ?= 3.1.2 ;
+			switch $(SDK_VERSION) {
+				case 2.0 :		isysroot = $(developerRoot)/SDKs/iPhoneOS2.0.sdk ;
+				case 2.1 :		isysroot = $(developerRoot)/SDKs/iPhoneOS2.1.sdk ;
+				case 2.2 :		isysroot = $(developerRoot)/SDKs/iPhoneOS2.2.sdk ;
+				case 3.0 :		isysroot = $(developerRoot)/SDKs/iPhoneOS3.0.sdk ;
+				case 3.1 :		isysroot = $(developerRoot)/SDKs/iPhoneOS3.1.sdk ;
+				case 3.1.2 :
+					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					isysroot = $(developerRoot)/SDKs/iPhoneOS3.1.2.sdk ;
+					flags += -arch armv6 -miphoneos-version-min=3.1.2 ;
+
+				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
+			}
+
+		case iphonesimulator :
+			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
+			SDK_VERSION ?= 3.1.2 ;
+			switch $(SDK_VERSION) {
+				case 2.0 :		isysroot = $(developerRoot)/SDKs/iPhoneSimulator2.0.sdk ;
+				case 2.1 :		isysroot = $(developerRoot)/SDKs/iPhoneSimulator2.1.sdk ;
+				case 2.2 :		isysroot = $(developerRoot)/SDKs/iPhoneSimulator2.2.sdk ;
+				case 3.0 :
+					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					isysroot = $(developerRoot)/SDKs/iPhoneSimulator3.0.sdk ;
+					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30000 -arch i386 ;
+
+				case 3.1 :
+					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					isysroot = $(developerRoot)/SDKs/iPhoneSimulator3.1.sdk ;
+					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30000 -arch i386 ;
+
+				case 3.1.2 :
+					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					isysroot = $(developerRoot)/SDKs/iPhoneSimulator3.1.2.sdk ;
+					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30000 -arch i386 -mmacosx-version-min=10.5 ;
+
+				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
+			}
+	}
+
+	flags += -fvisibility=hidden -gdwarf-2 ;
+
+	C.Flags CC	: * : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+	C.Flags C++	: * : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+	C.Flags M	: * : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+	C.Flags MM	: * : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+	C.LinkFlags * : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+}
+
+
+rule C._BundleInfoString KEY {
+	INFO_PLIST on $(TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<string>$(VALUE)</string>$(NEWLINE)" ;
+}
+
+rule C.BundleInfo TARGET : TYPE : VALUE {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	INFO_PLIST on $(TARGET) ?= "<?xml version="1.0" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+" ;
+	switch $(TYPE:L) {
+		case info :				C._BundleInfoString CFBundleGetInfoString ;
+		case iconfile :			C._BundleInfoString CFBundleIconFile ;
+		case longversion :		C._BundleInfoString CFBundleLongVersionString ;
+		case bundlename :		C._BundleInfoString CFBundleName ;
+		case displayname :		C._BundleInfoString CFBundleDisplayName ;
+		case executable :		C._BundleInfoString CFBundleExecutable ;
+		case identifier :		C._BundleInfoString CFBundleIdentifier ;
+		case shortversion :		C._BundleInfoString CFShortVersionString ;
+		case bundleversion :	C._BundleInfoString CFBundleVersion ;
+		case copyright :		C._BundleInfoString NSHumanReadableCopyright ;
+		case mainnibfile :		C._BundleInfoString NSMainNibFile ;
+	}
+}
+
+
+rule C._ApplicationFromObjects_LinkFlags
+{
+	if bundle in $(OPTIONS) {
+		local outputName = [ C._retrieveOutputName $(TARGET) ] ;
+		MakeLocate $(_linkTargets) : $(outputPath)/$(outputName).app ;
+	}
+}
+
+
+actions C._GenerateDSYMFile
+{
+	/Developer/usr/bin/dsymutil $(2:C) -o $(1:DC)
+}
+
+
+rule C.GenerateDSYMFile TARGET
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	local bundlePath ;
+	local _t ;
+	on $(TARGET) _t = $(LINK_TARGET) ;
+	on $(TARGET) bundlePath = $(BUNDLE_PATH) ;
+	local dsymBundlePath = $(bundlePath).dSYM ;
+	local _t.dsym = $(_t).DSYM ;
+	BINDING on $(_t) = $(_t:BS) ;
+	MakeLocate $(_t.dsym) : $(dsymBundlePath) ;
+	Depends $(TARGET) : $(_t.dsym) : $(_t) ;
+	Clean clean:$(TARGET) : $(_t.dsym) ;
+	C._GenerateDSYMFile $(_t.dsym) : $(_t) ;
+}
+
+
+rule C._ApplicationFromObjects_PostBuild
+{
+	if bundle in $(OPTIONS) {
+		local outputName = [ C._retrieveOutputName $(TARGET) ] ;
+		local bundlePath = $(outputPath)/$(outputName).app ;
+		BUNDLE_PATH on $(TARGET) = $(bundlePath) ;
+
+		local pkginfo = @(PkgInfo:G=$(grist)) ;
+		MakeLocate $(pkginfo) : $(bundlePath) ;
+		local contents = APPL???? ;
+		CONTENTS on $(pkginfo) = $(contents) ;
+		WriteFile $(pkginfo) ;
+		UseCommandLine $(pkginfo) : $(contents) ;
+		Depends $(TARGET) : $(pkginfo) ;
+		Clean clean:$(TARGET) : $(pkginfo) ;
+		
+		local infoplistcontents ;
+		on $(TARGET) infoplistcontents = $(INFO_PLIST) ;
+		if $(infoplistcontents) {
+			infoplistcontents += "</dict>
+</plist>
+" ;
+			infoplistcontents = $(infoplistcontents:J="") ;
+
+			local infoplist = @(Info.plist:G=$(grist)) ;
+			MakeLocate $(infoplist) : $(bundlePath) ;
+			CONTENTS on $(infoplist) = $(infoplistcontents) ;
+			WriteFile $(infoplist) ;
+			
+			UseCommandLine $(infoplist) : $(infoplistcontents) ;
+			Depends $(TARGET) : $(infoplist) ;
+			Clean clean:$(TARGET) : $(infoplist) ;
+		}
+		
+	}
+	
+	C.GenerateDSYMFile $(TARGET) ;
+}
+
+
+if $(TARGETINFO_LOCATE) {
+
+rule XIB
+{
+
+}
+
+} else {
+
+rule XIB PARENT : SOURCES : THE_CONFIG : THE_PLATFORM
+{
+	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
+	THE_CONFIG ?= $(CONFIG) ;
+	THE_PLATFORM ?= $(PLATFORM) ;
+	
+	local bundlePath ;
+	on $(PARENT) bundlePath = $(BUNDLE_PATH) ;
+
+	local grist = $(PARENT) ;
+	SOURCES = $(SOURCES:G=$(grist)) ;
+	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
+	
+	local targets = $(SOURCES:S=.nib) ;
+	
+	MakeLocate $(targets) : $(bundlePath) ;
+	Clean clean:$(PARENT) : $(targets) ;	
+	
+	Depends $(PARENT) : $(targets) ;
+
+	local source ;
+	for source in $(SOURCES)
+	{
+		local target = $(source:S=.nib) ;
+		Depends $(target) : $(source) ;
+	
+		CompileXIB $(target) : $(source) ;
+	}
+}
+
+actions CompileXIB
+{
+	PATH=$(MACOSX_SDK_DEVELOPER_ROOT)/usr/bin:$PATH
+	/Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile $(1:C) $(2:C)
+}
+
+}
 
