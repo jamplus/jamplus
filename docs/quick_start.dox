@@ -2,7 +2,7 @@
 
 \section quick_start_overview Overview
 
-JamPlus works out of the box with C/C++ compilation for Visual C++ compilers, GCC, MinGW, and others.  It can also generate workspaces for Visual Studio 200x, Visual C++ 6, Xcode, and CodeBlocks.
+JamPlus works out of the box with C/C++ compilation for Visual C++ compilers, GCC, MinGW, and others.  It can also generate workspaces for Visual Studio 20xx, Visual C++ 6, Xcode, and CodeBlocks.
 
 When the Jam executable is run, it reads a file called <tt>Jamfile.jam</tt> in the current working directory.  The Jamfile contains a description of how to build the current project.  In the tutorials below, we'll talk about how to properly set up a Jamfile build description.
 
@@ -34,8 +34,9 @@ In the same directory as <tt>main.c</tt>, we need to create <tt>Jamfile.jam</tt>
 # This file is Jamfile.jam.
 #
 # Please note that Jam tokens are whitespace separated.  Even the semicolon
-# dilineating the end of statements has whitespace before it.
+# delineating the end of statements has whitespace before it.
 SubDir TOP ;
+#         ^ Space here
 
 C.Application helloworld : main.c ;
 \endcode
@@ -92,10 +93,10 @@ jam CONFIG=release clean
 
 One of the exciting features of JamPlus is its ability to build IDE workspaces for Visual Studio or Xcode or others.  It does so with a set of scripts that ship in the JamPlus binary package.  These scripts create an out-of-source build tree optimized for best performance within JamPlus.  By being out-of-source, the source tree remains pristine, and all compiler intermediates are stored in a separate location.
 
-For the \b helloworld application, let's build a Visual Studio 2005 solution.
+For the \b helloworld application, let's build a Visual Studio 2008 solution.
 
 \code
-jam --workspace --gen=vs2005 Jamfile.jam build
+jam --workspace --gen=vs2008 Jamfile.jam build
 \endcode
 
 On Mac OS X, you may want to build an Xcode workspace:
@@ -104,11 +105,11 @@ On Mac OS X, you may want to build an Xcode workspace:
 jam --workspace --gen=xcode Jamfile.jam build
 \endcode
 
-In just a quick moment, the new out-of-source work area will have been created.  Inside the generated <tt>01-helloworld/build/vs2005/</tt> directory, you'll find a <tt>helloworld.sln</tt>.  Open this file in Visual Studio to proceed.
+In just a quick moment, the new out-of-source work area will have been created.  Inside the generated <tt>01-helloworld/build/_workspace.vs2008_/</tt> directory, you'll find a <tt>helloworld.sln</tt>.  Open this file in Visual Studio to proceed.
 
 When Visual Studio has loaded the <tt>helloworld.sln</tt>, you'll find it contains the \b helloworld project within the Solution Explorer.  If the \b helloworld project is not already the active project, right click on it and choose <b>Set as StartUp Project</b>.
 
-On Mac OS X, you'll find the appropriate .xcodeproj as <tt>01-helloworld/build/xcode.projects/helloworld.workspace.xcodeproj</tt>.  Open this project file in Xcode.
+On Mac OS X, you'll find the appropriate .xcodeproj as <tt>01-helloworld/build/_workspace.xcode_/helloworld.workspace.xcodeproj</tt>.  Open this project file in Xcode.
 
 At this point, build as you normally would.  Change between the Debug and Release configurations if you'd like.  In fact, you can even debug as if the project were manually created!
 
