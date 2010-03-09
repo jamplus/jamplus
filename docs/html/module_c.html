@@ -23,7 +23,7 @@ List of Rules</a></h2>
 <li><a href="module_c.html#rule_C_Application">C.Application</a></li>
 <li><a href="module_c.html#rule_C_BatchCompileGroupSize">C.BatchCompileGroupSize</a></li>
 <li><a href="module_c.html#rule_C_CFlags">C.CFlags</a></li>
-<li><a href=".html#">C.C++Exceptions</a></li>
+<li><a href="module_c.html#rule_C_CppExceptions">C.C++Exceptions</a></li>
 <li><a href="module_c.html#rule_C_CppFlags">C.C++Flags</a></li>
 <li><a href="module_c.html#rule_C_CompileOptions">C.CompileOptions</a></li>
 <li><a href="module_c.html#rule_C_RuntimeType">C.RuntimeType</a></li>
@@ -136,6 +136,28 @@ rule C.CFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</a></h2>
 <span class="preprocessor">    # Assign /clr:oldsyntax to all C files in managedapp for the debug</span>
 <span class="preprocessor"></span><span class="preprocessor">    # configuration and win32 platform.</span>
 <span class="preprocessor">    C.CFlags managedapp : /clr:oldsyntax : debug : win32 ;</span>
+</pre></div><hr/>
+ <h2><a class="anchor" id="rule_C_CppExceptions">
+rule C.C++Exceptions TARGET : TYPE [ : THE_CONFIG : THE_PLATFORM ]</a></h2>
+<p></p>
+<p>For the given project <code>TARGET</code>, turn on/off C++ exception support within the specified configuration and platform.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>TARGET</em>&nbsp;</td><td>The target to assign the <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the flags are made available globally. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>TYPE</em>&nbsp;</td><td><code>true</code> to turn on exceptions, <code>false</code> (default) to turn off exceptions. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>THE_CONFIG</em>&nbsp;</td><td>(optional) If not specified, the default is the current <code>$</code>(CONFIG). </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>THE_PLATFORM</em>&nbsp;</td><td>(optional) If not specified, the default is the current <code>$</code>(PLATFORM).</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><pre class="fragment"><span class="preprocessor">    # Turn on exceptions in the target mycppapp for the current $(CONFIG).</span>
+<span class="preprocessor"></span>    C.C++Exceptions mycppapp : true ;
+
+<span class="preprocessor">    # Turn on exceptions in the target mycppapp for all configs.</span>
+<span class="preprocessor"></span>    C.C++Exceptions mycppapp : <span class="keyword">true</span> : * ;
+
+<span class="preprocessor">    # Turn off exceptions in the target mycppapp for all configs.</span>
+<span class="preprocessor">    C.C++Exceptions mycppapp : false : * ;</span>
 </pre></div><hr/>
  <h2><a class="anchor" id="rule_C_CppFlags">
 rule C.C++Flags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</a></h2>
@@ -694,8 +716,5 @@ rule C.PrecompiledHeader TARGET : NAME : FILES</a></h2>
 <span class="preprocessor">    C.PrecompiledHeader SimpleMFC : stdafx.cpp stdafx.h : $(SRCS) ;</span>
 </pre></div><hr/>
  </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:44 2010 for JamPlus manual by&nbsp;
-<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
 </html>

@@ -40,7 +40,7 @@ Update Determination</a></h4>
 <p>After binding each target, <b>Jam</b> determines whether the target needs updating, and, if so, marks the target for the updating phase. A target is normally so marked if it is missing, md5 command line flags have changed, is older than any of its sources, or any of its sources are marked for updating. This behavior can be modified by the application of special built-in rules. See <a class="el" href="builtin_rules.html#language_built_in_rules_modifying_binding">Modifying Binding</a>.</p>
 <h4><a class="anchor" id="operation_binding_header_file_scanning">
 Header File Scanning</a></h4>
-<p>During the binding phase, <b>Jam</b> also performs "header" file scanning, where it looks inside source files for the implicit dependencies on other files caused by C's #include syntax (or whatever is appropriate for other file formats). This is controlled by the special variables $(HDRSCAN) and $(HDRRULE). The result of the scan is formed into a rule invocation, with the scanned file as the target and the found included file names as the sources. Note that this is the only case where rules are invoked outside the parsing phase. See <a class="el" href="builtin_variables.html#built_in_variables_hdrscan">Header Scanning Variables</a>.</p>
+<p>During the binding phase, <b>Jam</b> also performs \"header\" file scanning, where it looks inside source files for the implicit dependencies on other files caused by C's #include syntax (or whatever is appropriate for other file formats). This is controlled by the special variables $(HDRSCAN) and $(HDRRULE). The result of the scan is formed into a rule invocation, with the scanned file as the target and the found included file names as the sources. Note that this is the only case where rules are invoked outside the parsing phase. See <a class="el" href="builtin_variables.html#built_in_variables_hdrscan">Header Scanning Variables</a>.</p>
 <h3><a class="anchor" id="operation_updating">
 Updating Phase</a></h3>
 <p>After binding, <b>Jam</b> again recursively descends the dependency graph, this time executing the update actions for each target marked for update during the binding phase. If a target's updating actions fail, then all other targets which depend on that target are skipped.</p>
@@ -298,8 +298,5 @@ DoEcho all3 : : myshell ;
  </blockquote> <p><code>while <em>cond</em> { <em>statements</em> }</code></p>
  <blockquote> <p>Repeatedly execute <em>statements</em> while <em>cond</em> remains true upon entry. (See the description of <em>cond</em> expression syntax under if above).</p>
  </blockquote>  </blockquote>  </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:44 2010 for JamPlus manual by&nbsp;
-<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
 </html>

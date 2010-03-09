@@ -15,6 +15,10 @@
 Version 1.0</a></h2>
 <h2>New features for 1.0:</h2>
 <ul>
+<li>The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files). Additionally, iPhone and iPhone Simulator applications can be built, but they can not be debugged (yet).</li>
+<li>Linux support added. No Linux workspace generation support is available yet, although the CodeBlocks support may work.</li>
+<li>Visual Studio 2010 support has been added by Philipp Teschner. It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.</li>
+<li>Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.</li>
 <li>C/C++ build rules have been separated into their own <a class="el" href="module_c.html">Jam module called 'c'</a>. This module is automatically loaded on any Jam invocation. As a result, most rules are now namespaced with a <code>C.</code>. That is, you'll use <a class="el" href="module_c.html#rule_C_Application">C.Application</a> instead of just <code>Application</code>. To use the old names, <a class="el" href="jambase_rules.html#rule_IncludeModule">IncludeModule</a> <code>c-deprecated</code>. If you do this, please upgrade to the new method, as the deprecated module will go away in the next release of JamPlus.<ul>
 <li>With the new C module, it is easy to add additional platforms, configurations, and compilers. See the <b>tests/platform/groovyplatform/</b> example to see this in action.</li>
 <li>Renamed the following Jam modules:<ul>
@@ -29,10 +33,7 @@ Version 1.0</a></h2>
 </ul>
 </li>
 <li>The Jam binaries have been moved from the <code>jamplus/bin/</code> directory to <code>jamplus/bin/$(OS)$(OSPLAT)</code>. On Windows, this ends up being <code>jamplus/bin/ntx86/</code>. On Mac OS X, the directory is <code>jamplus/bin/macosxx64/</code>. All associated scripts have been moved to this directory, as has the Lua directory structure. This new structure allows for multiple platform binaries to exist side by side. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
-<li>The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files). Additionally, iPhone and iPhone Simulator applications can be built, but they can not be debugged (yet).</li>
-<li>Visual Studio 2010 support has been added by Philipp Teschner. It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.</li>
-<li>Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.</li>
-<li>Automated tests have been added consisting of 45 categoric test suites made of over 400 individual tests. The suite is run by ensuring JamPlus's bin/platform/ directory is in the PATH and then running <code>tests/runtests.bat</code> (on Windows) or <code>tests/runtests</code> on Mac OS X.</li>
+<li>Automated tests have been added consisting of 45 categoric test suites made of over 400 individual tests. The suite is run by ensuring JamPlus's bin/platform/ directory is in the PATH and then running <code>tests/runtests.bat</code> (on Windows) or <code>tests/runtests-macosxx64</code> on Mac OS Xor <code>tests/tuntests-linux32</code> on Linux.</li>
 </ul>
 <h2>Bootstrapping/Building:</h2>
 <ul>
@@ -69,6 +70,8 @@ Version 1.0</a></h2>
 <li>Added a new missing rule "silence" command line option: <code>-S</code>. When specified, any rules called that have not been defined are skipped without warning. <code>jam --workspace</code> makes extensive use of it. This command line option will mask problems with your Jamfiles, so it is recommended you don't use it. See <a class="el" href="usage.html">Usage</a> for more information.</li>
 <li>Added the ability to escape paths in a platform specific way with the <a class="el" href="language_variables.html#variable_expansion_c">string expansion modifier :C</a>. For example, if a Windows filename has spaces in it, using the <code>:C</code> modifier will result in the filename being quoted. #ifdef'ed as <code>OPT_EXPAND_ESCAPE_PATH_EXT</code>.</li>
 <li>Defaulted <code>DEPCACHE</code> to equal <code>standard</code>. This does not automatically turn on a dependency cache. There is still need to set it up with <code>DEPCACHE.standard = .depcache</code> or some equivalent. See <a class="el" href="dependency_cache.html#dependency_cache_usage">Dependency Cache Usage</a> for additional information.</li>
+<li>Fixed the variable expansion modifier <code>:X=</code> when used without a <code>:I=</code>.</li>
+<li>Added <code>:W=remove_text</code> as another form of the wildcard variable expansion modifier. Removes remote_text characters from the beginning of the found wildcard.</li>
 </ul>
 <h3>Technical Details:</h3>
 <ul>
@@ -107,7 +110,8 @@ Version 1.0</a></h2>
 <li>Made the <a class="el" href="jambase_rules.html#rule_SearchSource">SearchSource</a> rule take an optional second parameter, the SEARCH_PATH. If the parameter is not specified, then $(SEARCH_SOURCE) is used.</li>
 <li><a class="el" href="jambase_rules.html#rule_IncludeModule">IncludeModule</a> searches the current SubDir, current working directory, any user Jam module paths, and then <code>bin/modules/</code>.</li>
 <li>Changed the internal Jambase to not search 10 levels up to find the real Jambase. Instead, it searches for a <code>Jambase.jam</code> in the current working directory, directory containing the <b>Jam</b> executable, and then the directory immediately above the <b>Jam</b> executable. See <a class="el" href="jam_language.html#operation_parsing">Parsing Phase</a> for additional information.</li>
-<li>Jambase: When <code>ALL_LOCATE_TARGET</code> is specified, the <a class="el" href="jambase_rules.html#rule_SubDir">SubDir</a> root name is prepended to the relative path directory for <code>LOCATE_SOURCE</code> and <code>LOCATE_TARGET</code>. Before this change, one Jamfile could execute <code>SubDir ProjectA</code> and another execute <code>SubDir ProjectB</code>. Both would end up building their intermediates and outputs into the same directory.</li>
+<li>When <code>ALL_LOCATE_TARGET</code> is specified, the <a class="el" href="jambase_rules.html#rule_SubDir">SubDir</a> root name is prepended to the relative path directory for <code>LOCATE_SOURCE</code> and <code>LOCATE_TARGET</code>. Before this change, one Jamfile could execute <code>SubDir ProjectA</code> and another execute <code>SubDir ProjectB</code>. Both would end up building their intermediates and outputs into the same directory.</li>
+<li>Added rule <a class="el" href="jambase_rules.html#rule_AutoSourceGroup">AutoSourceGroup</a> for automatically generating <a class="el" href="jambase_rules.html#rule_SourceGroup">SourceGroup</a> folders from the relative paths of the sources specified.</li>
 </ul>
 <h3>Technical Details:</h3>
 <ul>
@@ -160,7 +164,7 @@ Version 1.0</a></h2>
 <li>Was not cleaning intermediates for shared libraries. Fixed.</li>
 <li>Visual C++ fix to remove a potential circular dependency with shared libraries.</li>
 <li>Bug fixes to the win64 platform to use x86_amd64 and to create the proper .vcproj x64 native platform. Thanks to Gregory Bell for sending a patch for this.</li>
-<li>Added rule C.C++Exceptions. This rule can turn on and off exception handling. Exception handling is on by default.</li>
+<li>Added rule <a class="el" href="module_c.html#rule_C_CppExceptions">C.C++Exceptions</a>. This rule can turn on and off exception handling. Exception handling is on by default.</li>
 <li>Remove the ability to generically handle generated headers from <code>C.HdrRule</code>. There needs to be a method put in place that is faster than what is there now.</li>
 <li>Added built-in rule ForceCare, which negates the effect of NoCare.</li>
 <li>Added $(C.STDHDRS) to the end of the target's include directories list.</li>
@@ -496,8 +500,5 @@ Version 0.1</a></h2>
 <li>Initial release. </li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on Thu Jan 7 23:41:44 2010 for JamPlus manual by&nbsp;
-<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
 </html>
