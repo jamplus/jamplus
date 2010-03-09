@@ -143,7 +143,7 @@ static int hits = 0;
 static int
 cache_maxage(void)
 {
-    int age = 100;
+    int age = 0;
     LIST *var = var_get( "DEPCACHEMAXAGE" );
 
     if( var ) {
