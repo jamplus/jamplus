@@ -197,19 +197,31 @@ function ProcessCommandLine()
 	end
 end
 
-function ReadTargetInfo(outPath, platform, config)
+local function _getTargetInfoFilename(outPath, platform, config)
 	local targetInfoFilename = outPath .. '_targetinfo_/targetinfo.' ..
 			(platform == '*' and '!all!' or platform) .. '.' ..
 			(config == '*' and '!all!' or config) .. '.lua'
-	local chunk, message = loadfile(targetInfoFilename)
-	if not chunk then
-		error('* Error parsing ' .. targetInfoFilename .. '.\n\n' .. message)
+	return targetInfoFilename
+end
+
+function ReadTargetInfo(outPath, platform, config)
+	local targetInfoFilename = _getTargetInfoFilename(outPath, platform, config)
+	if os.path.exists(targetInfoFilename) then
+		local chunk, message = loadfile(targetInfoFilename)
+		if not chunk then
+			error('* Error parsing ' .. targetInfoFilename .. '.\n\n' .. message)
+		end
+		chunk()
+	else
+		print('* Unable to find ' .. targetInfoFilename .. '.')
 	end
-	chunk()
 end
 
 function CreateTargetInfoFiles(outPath)
 	function DumpConfig(platform, config)
+		local targetInfoFilename = _getTargetInfoFilename(outPath, platform, config)
+		os.remove(targetInfoFilename)
+
 		local collectConfigurationArgs =
 		{
 			jamExePath,
@@ -767,14 +779,14 @@ include "$(scriptPath)DumpJamTargetInfo.jam" ;
 							print('* Project [' .. projectName .. '] is in workspace [' .. workspace.Name .. '] but not defined.')
 						else
 							for projectName in ivalues(project.Libraries) do
-								if not usedProjects[projectName] then
+								if Projects[projectName]  and  not usedProjects[projectName] then
 									workspace.Projects[#workspace.Projects + 1] = projectName
 									usedProjects[projectName] = true
 								end
 							end
 							if Projects['C.*'] then
 								for projectName in ivalues(Projects['C.*'].Libraries) do
-									if not usedProjects[projectName] then
+									if Projects[projectName]  and  not usedProjects[projectName] then
 										workspace.Projects[#workspace.Projects + 1] = projectName
 										usedProjects[projectName] = true
 									end
