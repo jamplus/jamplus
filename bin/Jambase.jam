@@ -488,7 +488,7 @@ rule SubInclude
 	local saveCurrentJamfile = $(CURRENT_JAMFILE) ;
 	SubDir $(<) ;
 
-	CURRENT_JAMFILE = $(jamfile:D=$(SUBDIR)) ;
+	CURRENT_JAMFILE = $(jamfile:R=$(SUBDIR)) ;
 	include $(CURRENT_JAMFILE) ;
 
 	if $(saveTokens)
