@@ -4,11 +4,11 @@
 
 <h2>New features for 1.0:</h2>
 
-- The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files).  Additionally, iPhone and iPhone Simulator applications can be built, but they can not be debugged (yet).
+- The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files).  Additionally, iPhone and iPhone Simulator applications can be built.  iPhone Simulator applications can be debugged, but iPhone applications are not properly deployed (yet).
 - Linux support added.  No Linux workspace generation support is available yet, although the CodeBlocks support may work.
 - Visual Studio 2010 support has been added by Philipp Teschner.  It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.
 - Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.
-- C/C++ build rules have been separated into their own \ref module_c "Jam module called 'c'".  This module is automatically loaded on any Jam invocation.  As a result, most rules are now namespaced with a <tt>C.</tt>.  That is, you'll use \ref rule_C_Application "C.Application" instead of just <tt>Application</tt>.  To use the old names, \ref rule_IncludeModule "IncludeModule" <tt>c-deprecated</tt>.  If you do this, please upgrade to the new method, as the deprecated module will go away in the next release of JamPlus.
+- C/C++ build rules have been separated into their own \ref module_c "Jam module called 'c'".  This module is automatically loaded on any Jam invocation.  As a result, most rules are now namespaced with a <tt>C.</tt>.  That is, you'll use \ref rule_C_Application "C.Application" instead of just <tt>Application</tt>.  To use the old names, you can attempt to \ref rule_IncludeModule "IncludeModule" <tt>c-deprecated</tt>.  None of this is guaranteed to work.
 	- With the new C module, it is easy to add additional platforms, configurations, and compilers.  See the <b>tests/platform/groovyplatform/</b> example to see this in action.
 	- Renamed the following Jam modules:
 		- <tt>c/directx:</tt> Renamed from DirectX.
@@ -49,6 +49,7 @@
       - Added rule \ref rule_Shell "Shell", used for executing shell commands and retrieving their output.
       - Added built-in rule \ref rule_GroupByVar "GroupByVar", a high speed version of the oft-called Jambase rule used by the C module's helper rule \c MultiCppCompile.  (Made available through <tt>\#define OPT_BUILTIN_GROUPBYVAR_EXT</tt>.)
       - Added built-in rule \ref rule_Split "Split".  (Made available through <tt>\#define OPT_BUILTIN_SPLIT_EXT</tt>.)
+      - Added built-in rule \ref rule_ExpandFileList "ExpandFileList" which takes a list of files, including glob-capable wildcards, and expands them, returning the list to the user.
 - Actions:
       - Added a new action modifier, \ref actions_screenoutput "screenoutput".  Normally, actions collect all output before displaying it to the user in order to avoid interleaving the output from different processes.  'screenoutput' may be used to display the output as it happens.
       - Support a third parameter to an action for \ref actions_autosettings "autosettings".  This takes any settings assigned to the autosettings target and makes them active during the course of the action.
@@ -62,6 +63,7 @@
 - Defaulted \c DEPCACHE to equal \c standard.  This does not automatically turn on a dependency cache.  There is still need to set it up with <tt>DEPCACHE.standard = .depcache</tt> or some equivalent.  See \ref dependency_cache_usage for additional information.
 - Fixed the variable expansion modifier <tt>:X=</tt> when used without a <tt>:I=</tt>.
 - Added <tt>:W=remove_text</tt> as another form of the wildcard variable expansion modifier.  Removes remote_text characters from the beginning of the found wildcard.
+- Set the header cache max age to 0.  This should prevent the current frequent rebuilds every 100 Jam runs.
 
 
 
@@ -108,6 +110,11 @@
 - Changed the internal Jambase to not search 10 levels up to find the real Jambase.  Instead, it searches for a <tt>Jambase.jam</tt> in the current working directory, directory containing the \b Jam executable, and then the directory immediately above the \b Jam executable.  See \ref operation_parsing for additional information.
 - When \c ALL_LOCATE_TARGET is specified, the \ref rule_SubDir "SubDir" root name is prepended to the relative path directory for \c LOCATE_SOURCE and \c LOCATE_TARGET.  Before this change, one Jamfile could execute <tt>SubDir ProjectA</tt> and another execute <tt>SubDir ProjectB</tt>.  Both would end up building their intermediates and outputs into the same directory.
 - Added rule \ref rule_AutoSourceGroup "AutoSourceGroup" for automatically generating \ref rule_SourceGroup "SourceGroup" folders from the relative paths of the sources specified.
+- \ref rule_SubDir "SubDir's" first parameter is now optional and can be used to alter the relative TARGET_DIRECTORY (the second parameter) for the rest of the build until the next SubDir call.
+- Add rule SubIncludeRelative to include a new Jamfile relative to the current SubDir tokens.
+- Add a publicly named \ref rule_RetrieveActiveTarget "RetrieveActiveTarget" to replace the private _retrieveActiveTargetName.
+- When the rule \ref rule_ActiveTarget "ActiveTarget" is called, the target build path is set by calling <tt>SubDir : $(TARGET)</tt>.
+
 
 <h3>Technical Details:</h3>
 
@@ -117,16 +124,20 @@
 - The \ref rule_Clean "Clean" rule was changed to use \ characters for Windows filenames.
 
 
+
+
 <h2>Jam Modules:</h2>
 
 - Renamed <tt>bin/jammodules/</tt> to <tt>bin/modules/</tt>.
 - <b>C module:</b>
       - Visual Studio 2010 support provided by Philipp Teschner.
+      - iPhone and iPhone Simulator support.
       - Reorganized huge portions of the Jambase to compiler/platform/configuration specific files in <tt>modules/c-compilers/</tt>.  Moved platform and configuration check to <tt>modules/c-compilers/c-autodetect.jam</tt>.
       - Added a 64-bit Windows platform for Visual C++ called \b win64.
       - Added rule \ref rule_C_Flags "C.Flags", a generic way of adding C/C++/M/MM/etc flags.
       - Added rule \ref rule_C_InstallNamePath "C.InstallNamePath".  This is currently available only on Mac OS X to provide the <tt>-install_name</tt> flag to the linker.
       - Added rule \ref rule_C_ForceFileType "C.ForceFileType" which can change the compilation of a .c file to a .cpp file and so on.
+      - Added rule \ref rule_C_TargetGrist "C.TargetGrist" for generating a properly formatted grist for a given target.
       - Allow VALID_PLATFORMS and VALID_CONFIGS to be overridden.  If PLATFORM is not specified, the first element of the VALID_PLATFORMS list is chosen.  This is similar for CONFIG, only it will use VALID_CONFIGS.
       - COMPILER renamed to COMPILER.platform (where platform is a valid Jam build platform).
       - When the list of files in a library archive changes, the archive is populated again from the object files.  This solves the bug where removing a file from the list of files in an archive left the removed file in the archive.
@@ -175,6 +186,17 @@
       - Add the iphonesimulator-autodetect.jam script.
       - Add the iphone-autodetect.jam script.
       - Fix precompiled header support on GCC when the header exists at a relative path.
+      - Some basic reordering of the link flags and link directories.
+      - Optimizations for calls to \ref rule_C_Library "C.Library".
+      - For the C.Application and C.Library rules, reset the Active Target properly.
+      - Fix GCC support to allow enabling of exceptions.  The wrong flag was being passed in.
+      - (minor) In the Visual C++ build, remove the forced quotes in actions and only quote when necessary.
+      - Add a user provided native Xbox 360 C compiler module which is largely based on the Win32 configuration.
+      - Optimizations to the C.MultiCppCompile rule.
+      - Set the maximum batch group size to be 10 files.  This may still need tuning, but it seems to be a happy medium at the moment.
+      - Expand any wildcarded file lists when calling rules \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library".
+      - When calling \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library", return the gristed name of the target being built/linked.  For C.Application, this would be an executable.  For C.Library, the return value is the library name.
+
 - <b>CopyDirectory module:</b>
       - Allow parentheses in the path to work properly.
       - The CopyDirectory rule now accepts an additional argument, RECURSIVE.  If RECURSIVE is specified, then a recursive directory copy is performed.  If it is not specified, then CopyDirectory merely copies the file contents of the SOURCE_PATH, and directories are ignored.
@@ -199,6 +221,9 @@
       - Added support for wxWidgets on non-Windows platforms.
       - Don't abort the build if wxWidgets is not found.  Allow the Jamfile to make the determination whether the build should be aborted.
 
+
+
+
 <h2>JamToWorkspace:</h2>
 
 - JamToWorkspace now runs on Mac OS X.  Xcode projects for i386, ppc, x86_64, iphone, and the iphonesimulator platforms can be output, with a special workspace project that contains all files from any dependent project.  Even Visual Studio projects can be written on Mac OS X without issue.
@@ -214,13 +239,15 @@
 - ProjectGroups and SourceGroups can be specified anywhere in the set of Jamfiles.  Previously, they had to exist immediately before a call to the \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library" rules.
 - Allow platform-specific and configuration-specific sources to be discovered and written to the project files.  \ref rule_C_ExcludeFromBuild "C.ExcludeFromBuild" still works, but source lists within if/switch statement blocks are also found properly.
 - Using the VSPLATFORMMAP and VSCONFIGMAP variables, data driven platform and configuration names can be provided for a generated .vcproj from the c-compilers/c-visualc-platform-config.jam files.
+- Fixed VS200x .sln generation for non-native platforms.
+- When \ref rule_C_LinkLibraries "C.LinkLibraries" is specified with the <tt>*</tt> target, workspace generation did not populate the workspace properly.
 
 
 <h3>Technical Details:</h3>
 
 - Applied proper quoting of filenames in a number of places.  Some quoting isn't necessary on other OSes but is required on Windows 7.
 - Removed possible grists from sources lists when generating the workspace.
-- Fixed a crash bug when a project's information isn't available.
+- Fixed some crash bugs when a project's information isn't available.
 - Status update text changed to be more clear as to what is happening.
 - Split out each of the IDE workspace generators into separate files.  In a later build, these will be autodetected.  For now, their use remains hardcoded.
 - Defines and include directories work properly in the generated project's "Intellisense".
@@ -230,12 +257,15 @@
 - Too much information was being dumped into the <tt>_targetinfo_/</tt> files for the <tt>*</tt> platform and any configuration.  This has been fixed and has the side effect of making the JamToWorkspace process faster.
 - Allow the project generation to proceed if the project doesn't exist but is expected by the workspace.
 - Pass the currently running Jam executable to jam --workspace.
+- Retrieve the active target name for calls to \ref rule_Project "Project".
+- Apply proper backslashes to the updateworkspace.bat calls when generated the !UpdateWorkspace project for Visual Studio.
 
 
 
 
 <h2>Samples:</h2>
 
+- Added samples/iphone/opengles, a conversion of the basic OpenGL generated sample.
 - Added samples/macosx/cf, a simple CoreFoundation command line test.
 - Added samples/macosx/glut, a simple Mac OS X demonstration of some OpenGL features.
 - Added samples/onesharedlib.
@@ -270,7 +300,7 @@
 - tests/shell: Make work on Unixy platforms.
 - tests/substitution: Make work on Unixy platforms.
 - Add tests/platform/groovyplatform to show how to create a custom platform.
-
+- Add tests/platform/groovypluswin32, an example of two platforms in one Visual Studio solution.
 
 
 
