@@ -114,6 +114,8 @@
 - Add rule SubIncludeRelative to include a new Jamfile relative to the current SubDir tokens.
 - Add a publicly named \ref rule_RetrieveActiveTarget "RetrieveActiveTarget" to replace the private _retrieveActiveTargetName.
 - When the rule \ref rule_ActiveTarget "ActiveTarget" is called, the target build path is set by calling <tt>SubDir : $(TARGET)</tt>.
+- \ref rule_SubInclude "SubInclude" was not properly rooting the Jamfile when it existed in an alternate location (as with the new LuaPlus distribution).
+- \ref rule_SearchSource "SearchSource" now roots passed in SOURCES against SEARCH_SOURCE.
 
 
 <h3>Technical Details:</h3>
@@ -197,14 +199,15 @@
       - Expand any wildcarded file lists when calling rules \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library".
       - When calling \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library", return the gristed name of the target being built/linked.  For C.Application, this would be an executable.  For C.Library, the return value is the library name.
 
-- <b>CopyDirectory module:</b>
+- <b>copydirectory module:</b>
       - Allow parentheses in the path to work properly.
       - The CopyDirectory rule now accepts an additional argument, RECURSIVE.  If RECURSIVE is specified, then a recursive directory copy is performed.  If it is not specified, then CopyDirectory merely copies the file contents of the SOURCE_PATH, and directories are ignored.
       - Handle recursion properly.
       - Fix to make the CopyDirectory rule work when no SubDir was specified in the Jamfile.
-- <b>CopyFile module:</b>
+- <b>copyfile module:</b>
       - The CopyFile rule will use the ActiveProject if the PARENT parameter is not specified.
       - The source and destination filenames are now quoted on the copy command line.
+      - Add rule CopyFiles for copying a group of files to a certain directory.
 - <b>csharp module:</b>
       - On NT, choose vs2008 as the default (still needs discovery like the C++ compiler).  Now, on other platforms, choose mono.
       - Properly find Mono at /usr/bin.
