@@ -118,6 +118,8 @@ Version 1.0</a></h2>
 <li>Add rule SubIncludeRelative to include a new Jamfile relative to the current SubDir tokens.</li>
 <li>Add a publicly named RetrieveActiveTarget to replace the private _retrieveActiveTargetName.</li>
 <li>When the rule ActiveTarget is called, the target build path is set by calling <code>SubDir : </code>.</li>
+<li><a class="el" href="jambase__rules.html#rule_SubInclude">SubInclude</a> was not properly rooting the Jamfile when it existed in an alternate location (as with the new LuaPlus distribution).</li>
+<li><a class="el" href="jambase__rules.html#rule_SearchSource">SearchSource</a> now roots passed in SOURCES against SEARCH_SOURCE.</li>
 </ul>
 <h3>Technical Details:</h3>
 <ul>
@@ -200,16 +202,17 @@ Version 1.0</a></h2>
 </li>
 </ul>
 <ul>
-<li><b>CopyDirectory module:</b><ul>
+<li><b>copydirectory module:</b><ul>
 <li>Allow parentheses in the path to work properly.</li>
 <li>The CopyDirectory rule now accepts an additional argument, RECURSIVE. If RECURSIVE is specified, then a recursive directory copy is performed. If it is not specified, then CopyDirectory merely copies the file contents of the SOURCE_PATH, and directories are ignored.</li>
 <li>Handle recursion properly.</li>
 <li>Fix to make the CopyDirectory rule work when no SubDir was specified in the Jamfile.</li>
 </ul>
 </li>
-<li><b>CopyFile module:</b><ul>
+<li><b>copyfile module:</b><ul>
 <li>The CopyFile rule will use the ActiveProject if the PARENT parameter is not specified.</li>
 <li>The source and destination filenames are now quoted on the copy command line.</li>
+<li>Add rule CopyFiles for copying a group of files to a certain directory.</li>
 </ul>
 </li>
 <li><b>csharp module:</b><ul>
