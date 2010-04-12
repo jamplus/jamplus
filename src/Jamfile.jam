@@ -363,7 +363,7 @@ if $(LUA_BIN)
 				modules/lxp.debug.dll
 				modules/md5.debug.dll
 				modules/uuid.debug.dll
-				modules/vdrive.debug.dll
+				modules/ziparchive.debug.dll
 			;
 		}
 		else
@@ -379,7 +379,7 @@ if $(LUA_BIN)
 				modules/lxp.dll
 				modules/md5.dll
 				modules/uuid.dll
-				modules/vdrive.dll
+				modules/ziparchive.dll
 			;
 		}
 	}
@@ -418,7 +418,7 @@ if $(LUA_BIN)
 				lib/lua/5.1/lxp.debug.$(MODULE_EXT)
 				lib/lua/5.1/md5.debug.$(MODULE_EXT)
 				lib/lua/5.1/uuid.debug.$(MODULE_EXT)
-				lib/lua/5.1/vdrive.debug.$(MODULE_EXT)
+				lib/lua/5.1/ziparchive.debug.$(MODULE_EXT)
 			;
 		}
 		else
@@ -432,7 +432,7 @@ if $(LUA_BIN)
 				lib/lua/5.1/lxp.$(MODULE_EXT)
 				lib/lua/5.1/md5.$(MODULE_EXT)
 				lib/lua/5.1/uuid.$(MODULE_EXT)
-				lib/lua/5.1/vdrive.$(MODULE_EXT)
+				lib/lua/5.1/ziparchive.$(MODULE_EXT)
 			;
 		}
 	}
