@@ -17,24 +17,36 @@ rule HardLink PARENT : TARGET : SOURCE
 
 actions _HardLink
 {
-	$(RM) "$(1)" && $(LN) "$(2)" "$(1)"
+	$(RM) "$(1[1])" && $(LN) "$(2[1])" "$(1[1])"
 }
 
 
 
 
 
-rule SoftLink PARENT : TARGET : SOURCE
+rule SoftLink PARENT : TARGET : SOURCE : SOFTLINK_SOURCE_RELATIVE_PATH
 {
 	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
 	local grist = $(PARENT) ;
-	SOURCE = $(SOURCE:g=$(grist)) ;
-	TARGET = $(TARGET:g=$(grist)) ;
-	MakeLocate $(TARGET) : $(TARGET:D) ;
-	BINDING on $(TARGET) = $(TARGET:BS) ;
+	if ! $(SOURCE:G) {
+		SOURCE = $(SOURCE:G=$(grist)) ;
+	}
+	if ! $(TARGET:G) {
+		TARGET = $(TARGET:G=$(grist)) ;
+	}
+	on $(TARGET) {
+		if ! $(LOCATE) {
+			MakeLocate $(TARGET) : $(TARGET:D) ;
+		}
+		if ! $(BINDING) {
+			BINDING on $(TARGET) = $(TARGET:BS) ;
+		}
+	}
 	
 	Depends $(PARENT) : $(TARGET) : $(SOURCE) ;
 	SearchSource $(SOURCE) : $(SEARCH_SOURCE) ;
+
+	SOFTLINK_SOURCE_RELATIVE_PATH on $(TARGET) = $(SOFTLINK_SOURCE_RELATIVE_PATH[1]:E=$(TARGET:T)) ;
 	
 	Clean clean:$(PARENT) : $(TARGET) ;
 
@@ -43,7 +55,7 @@ rule SoftLink PARENT : TARGET : SOURCE
 
 actions _SoftLink
 {
-	$(RM) "$(1)" && $(LN) -s "$(2)" "$(1)"
+	$(RM) $(1) && $(LN) -s $(SOFTLINK_SOURCE_RELATIVE_PATH:C) $(1[1]:C)
 }
 
 
