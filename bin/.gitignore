@@ -1,7 +1,3 @@
-*.exe
-*.dll
-*.ilk
-*.pdb
-lua/
+linuxx86/
 macosxx86/
 ntx86/
