@@ -202,7 +202,7 @@ rule C._ApplicationFromObjects_PostBuild
 rule C._SharedLibraryFromObjects_LinkFlags
 {
 	if module in $(OPTIONS) {
-		linkFlags += -bundle -undefined dynamic_lookup ;
+		linkFlags += -bundle -undefined dynamic_lookup -fPIC ;
 	} else {
 		local installName =
 			[ C._retrieveVar INSTALL_NAME_PATH : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
@@ -216,7 +216,7 @@ rule C._SharedLibraryFromObjects_LinkFlags
 			installName = $(installName[1]) ;
 		}
 		installName = $(_t:BSR=$(installName)) ;
-		on $(TARGET) linkFlags += -dynamiclib -install_name $(installName) ;
+		on $(TARGET) linkFlags += -dynamiclib -fPIC -install_name $(installName) ;
 	}
 }
 
