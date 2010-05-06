@@ -1117,6 +1117,7 @@ rule C.Application TARGET : SOURCES : OPTIONS
 	Workspace $(TARGET) : $(TARGET) : all ;
 
 	DumpProjectInfo $(TARGET) : $(SOURCES) : app $(OPTIONS) ;
+	ActiveTarget ;
 	Depends all : $(TARGET) ;
 }
 
