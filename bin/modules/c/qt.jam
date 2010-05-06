@@ -1,0 +1,212 @@
+if ! $(QT_ROOT) {
+	if $(NT) {
+		QT_BIN = [ Glob $(PATH) $(Path) : qmake.exe ] ;
+	} else {
+		QT_BIN = [ Glob $(PATH) : qmake ] ;
+	}
+	if $(QT_BIN[1]) {
+		QT_BIN = $(QT_BIN:D) ;
+		QT_ROOT = @($(QT_BIN)/..:R=) ;
+		QT_FOUND = 1 ;
+	}
+}
+
+
+rule C.UseQt TARGETS : COMPONENTS : OPTIONS {
+	if ! $(QT_ROOT) {
+		Exit Qt not found. ;
+	}
+	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
+
+	QT_INCLUDE_PATH = $(QT_ROOT)/include ;
+	C.LinkDirectories $(TARGETS) : $(QT_ROOT)/lib ;
+
+	for component in $(COMPONENTS) {
+		switch $(component) {
+			case core :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtCore ;
+				
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtCored4 : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtCore4 : release ;
+				}
+
+			case gui :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtGui ;
+
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtGuid4 : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtGui4 : release ;
+				}
+				
+			case network :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtNetwork ;
+
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtNetworkd4 : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtNetwork4 : release ;
+				}
+
+			case opengl :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtOpenGL ;
+
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtOpenGLd4 : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtOpenGL4 : release ;
+				}
+
+			case script :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtScript ;
+
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtScriptd4 : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtScript4 : release ;
+				}
+
+			case svg :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtSvg ;
+
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtSvgd4 : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtSvg4 : release ;
+				}
+
+			case webkit :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtWebKit ;
+
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtWebKitd4 : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtWebKit4 : release ;
+				}
+
+			case xml :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtXml ;
+
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtXmld4 : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtXml4 : release ;
+				}
+
+			case xmlpatterns :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtXmlPatterns ;
+
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtXmlPatternsd4 : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtXmlPatterns4 : release ;
+				}
+
+		}
+	}
+
+	C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH) ;
+}
+
+
+if ! $(TARGETINFO_LOCATE) {
+
+rule C.Qt.Moc PARENTS : SOURCES {
+	PARENTS = [ _retrieveActiveTargetName $(PARENTS) ] ;
+
+	local grist = $(PARENTS) ;
+
+	local returnSources ;
+	for source in $(SOURCES) {
+		source = $(source:G=$(grist)) ;
+		local ext = $(source:S) ;
+
+		local target ;
+		if $(ext) in .h .hpp {
+			target = @(moc_$(source:B).cpp:G=$(grist)) ;
+		} else if $(ext) = .cpp {
+			target = @($(source:B).moc:G=$(grist)) ;
+			source = $(source:G=$(grist)|source ;		# Avoid complaints of a circular dependency: file.cpp -> file.moc -> file.cpp
+			ForceCare $(target) ;
+			C.ObjectIncludeDirectories $(PARENTS) : $(source) : $(LOCATE_SOURCE) ;
+		}
+		SearchSource $(source) : $(SEARCH_SOURCE) ;
+		returnSources += $(target) ;
+		MakeLocate $(target) : $(LOCATE_SOURCE) ;
+
+		UseCommandLine $(target) : $(flags) ;
+		Depends $(target) : $(source) ;
+
+		Clean clean:$(PARENTS) : $(target) ;
+
+		FLAGS on $(target) = $(flags) ;
+		C.Qt._Moc $(target) : $(source) ;
+	}
+
+	return $(returnSources) ;
+}
+
+
+actions C.Qt._Moc {
+	$(QT_ROOT)/bin/moc.exe $(FLAGS) $(2) -o $(1)
+}
+
+
+rule C.Qt.Rcc PARENTS : SOURCES : NAME {
+	PARENTS = [ _retrieveActiveTargetName $(PARENTS) ] ;
+
+	local grist = $(PARENTS) ;
+
+	SearchSource $(SOURCES) : $(SEARCH_SOURCE) ;
+
+	local targets = @(qrc_$(SOURCES:B).cpp:G=$(grist)) ;
+	MakeLocate $(targets) : $(LOCATE_SOURCE) ;
+	ForceCare $(targets) ;
+
+	Depends $(targets) : $(SOURCES) ;
+
+	UseCommandLine $(targets) : $(NAME) ;
+
+	Clean clean:$(PARENTS) : $(targets) ;
+
+	RCC_NAME on $(targets) = $(NAME) ;
+	C.Qt._Rcc $(targets) : $(SOURCES) ;
+
+	return $(targets) ;
+}
+
+
+actions C.Qt._Rcc {
+	$(QT_ROOT)/bin/rcc.exe -name $(RCC_NAME) $(2) -o $(1)
+}
+
+
+rule C.Qt.Uic PARENTS : SOURCES {
+	PARENTS = [ _retrieveActiveTargetName $(PARENTS) ] ;
+
+	local grist = $(PARENTS) ;
+
+	SearchSource $(SOURCES) : $(SEARCH_SOURCE) ;
+
+	local targets = @(ui_$(SOURCES:B).h:G=$(grist)) ;
+	MakeLocate $(targets) : $(LOCATE_SOURCE) ;
+	ForceCare $(targets) ;
+
+	Depends $(targets) : $(SOURCES) ;
+
+	Clean clean:$(PARENTS) : $(targets) ;
+
+	C.Qt._Uic $(targets) : $(SOURCES) ;
+}
+
+
+actions C.Qt._Uic {
+	$(QT_ROOT)/bin/uic.exe $(2) -o $(1)
+}
+
+
+} else {
+
+rule C.Qt.Moc PARENTS : SOURCES {
+}
+
+rule C.Qt.Rcc PARENTS : SOURCES : NAME {
+}
+
+rule C.Qt.Uic PARENTS : SOURCES {
+}
+
+}
