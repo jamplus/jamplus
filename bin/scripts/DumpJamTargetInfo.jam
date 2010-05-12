@@ -39,7 +39,7 @@ rule ProjectGroup TARGET : FOLDERNAME : PROJECTS
 
 rule SourceGroup TARGET : FOLDERNAME : SOURCES
 {
-	if $(PLATFORM) != *  ||  $(CONFIG) != *  {  return ;  }
+#	if $(PLATFORM) != *  ||  $(CONFIG) != *  {  return ;  }
 	if ! $(FOLDERNAME)  ||  ! $(SOURCES)  {  return ;  }
 
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
