@@ -102,7 +102,7 @@ function VisualC6ProjectMetaTable:Write(outputPath, commandLines)
 				OutputPath = '',
 			}
 
-			if project and project.Name then
+			if project and project.Name and project.Name ~= '!BuildWorkspace' and project.Name ~= '!UpdateWorkspace' then
 				if project.OutputPaths then
 					configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
 					configInfo.OutputName = project.OutputNames[platformName][configName]
@@ -111,14 +111,10 @@ function VisualC6ProjectMetaTable:Write(outputPath, commandLines)
 				configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
 				configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
 				configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
-			elseif not commandLines then
-				configInfo.BuildCommandLine = jamCommandLine
-				configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
-				configInfo.CleanCommandLine = jamCommandLine .. ' clean'
 			else
-				configInfo.BuildCommandLine = commandLines[1] or ''
-				configInfo.RebuildCommandLine = commandLines[2] or ''
-				configInfo.CleanCommandLine = commandLines[3] or ''
+				configInfo.BuildCommandLine = project.BuildCommandLine and project.BuildCommandLine[1] or jamCommandLine
+				configInfo.RebuildCommandLine = project.RebuildCommandLine and project.RebuildCommandLine[1] or (jamCommandLine .. ' -a')
+				configInfo.CleanCommandLine = project.CleanCommandLine and project.CleanCommandLine[1] or (jamCommandLine .. ' clean')
 			end
 
 			if first then

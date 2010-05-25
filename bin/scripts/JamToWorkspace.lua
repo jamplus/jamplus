@@ -454,8 +454,6 @@ function DumpProject(project)
 	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_', project.RelativePath) .. '/'
 	os.mkdir(outPath)
 
-	BuildSourceTree(project)
-
 	local exporter = Exporters[opts.gen]
 	local projectExporter = exporter.ProjectExporter(project.Name, exporter.Options)
 	projectExporter:Write(outPath)
@@ -507,6 +505,8 @@ function DumpWorkspace(workspace)
 		jamPath:gsub('\\', '/') .. '/Jambase.jam'
 	}
 	Projects[buildWorkspaceName].SourcesTree = Projects[buildWorkspaceName].Sources
+	Projects[buildWorkspaceName].Name = buildWorkspaceName
+	Projects[buildWorkspaceName].TargetName = ''
 	local projectExporter = exporter.ProjectExporter(buildWorkspaceName, exporter.Options)
 	projectExporter:Write(outPath)
 
@@ -517,6 +517,7 @@ function DumpWorkspace(workspace)
 		jamPath:gsub('\\', '/') .. '/Jambase.jam'
 	}
 	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
+	Projects[updateWorkspaceName].Name = updateWorkspaceName
 	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options)
 
 	local updateWorkspaceCommandLines
@@ -525,16 +526,21 @@ function DumpWorkspace(workspace)
 		{
 			os.path.make_backslash(outPath .. 'updateworkspace.bat'),
 			os.path.make_backslash(outPath .. 'updateworkspace.bat'),
+			os.path.make_backslash(outPath .. 'updateworkspace.bat'),
 		}
 	else
 		updateWorkspaceCommandLines =
 		{
 			outPath .. 'updateworkspace',
 			outPath .. 'updateworkspace',
+			outPath .. 'updateworkspace',
 		}
 	end
 
-	projectExporter:Write(outPath, updateWorkspaceCommandLines)
+	Projects[updateWorkspaceName].BuildCommandLine = { updateWorkspaceCommandLines[1] }
+	Projects[updateWorkspaceName].RebuildCommandLine = { updateWorkspaceCommandLines[2] }
+	Projects[updateWorkspaceName].CleanCommandLine = { updateWorkspaceCommandLines[3] }
+	projectExporter:Write(outPath)
 
 	if not workspace.ProjectGroups then
 		workspace.ProjectGroups = {}
@@ -548,6 +554,11 @@ function DumpWorkspace(workspace)
 	table.insert(jamSupport, updateWorkspaceName)
 
 	BuildProjectTree(workspace)
+
+	for projectName in ivalues(workspace.Projects) do
+		local project = Projects[projectName]
+		BuildSourceTree(project)
+	end
 
 	for projectName in ivalues(workspace.Projects) do
 		local project = Projects[projectName]

@@ -1,0 +1,4 @@
+C.Flags CC	: * : -g -O3 : releaseltcg : ipad ;
+C.Flags C++	: *	: -g -O3 : releaseltcg : ipad ;
+C.Flags M	: *	: -g -O3 : releaseltcg : ipad ;
+C.Flags MM	: *	: -g -O3 : releaseltcg : ipad ;

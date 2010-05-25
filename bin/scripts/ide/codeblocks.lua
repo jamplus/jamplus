@@ -84,7 +84,7 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 			Output = '',
 		}
 
-		if project and project.Name then
+		if project and project.Name and project.Name ~= '!BuildWorkspace' and project.Name ~= '!UpdateWorkspace' then
 			if project.Defines then
 				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
 			end
@@ -97,14 +97,10 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 			configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
 			configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
 			configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
-		elseif not commandLines then
-			configInfo.BuildCommandLine = jamCommandLine
-			configInfo.RebuildCommandLine = jamCommandLine .. ' -a'
-			configInfo.CleanCommandLine = jamCommandLine .. ' clean'
 		else
-			configInfo.BuildCommandLine = commandLines[1] or ''
-			configInfo.RebuildCommandLine = commandLines[2] or ''
-			configInfo.CleanCommandLine = commandLines[3] or ''
+			configInfo.BuildCommandLine = project.BuildCommandLine and project.BuildCommandLine[1] or jamCommandLine
+			configInfo.RebuildCommandLine = project.RebuildCommandLine and project.RebuildCommandLine[1] or (jamCommandLine .. ' -a')
+			configInfo.CleanCommandLine = project.CleanCommandLine and project.CleanCommandLine[1] or (jamCommandLine .. ' clean')
 		end
 
 		table.insert(self.Contents, expand([==[
