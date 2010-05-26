@@ -415,11 +415,13 @@ function BuildSourceTree(project)
 	local files = {}
 	local sourcesMap = {}
 	local newSources = {}
-	for _, source in ipairs(project.Sources) do
-		local lowerSource = source:lower()
-		if not sourcesMap[lowerSource] then
-			newSources[#newSources + 1] = source
-			sourcesMap[lowerSource] = source
+	if project.Sources then
+		for _, source in ipairs(project.Sources) do
+			local lowerSource = source:lower()
+			if not sourcesMap[lowerSource] then
+				newSources[#newSources + 1] = source
+				sourcesMap[lowerSource] = source
+			end
 		end
 	end
 	project.Sources = newSources
@@ -557,7 +559,9 @@ function DumpWorkspace(workspace)
 
 	for projectName in ivalues(workspace.Projects) do
 		local project = Projects[projectName]
-		BuildSourceTree(project)
+		if project then
+			BuildSourceTree(project)
+		end
 	end
 
 	for projectName in ivalues(workspace.Projects) do

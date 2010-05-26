@@ -92,15 +92,12 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 	local project = "Projects['$(TARGETS[0])']" ;
 	Contents += "$(NEWLINE)$(NEWLINE)--------------------------------------------------------------------$(NEWLINE)" ;
 
-	if $(PLATFORM) = *
-	{
-		Contents += "$(project).Name = '$(TARGETS[0])'$(NEWLINE)" ;
-		Contents += "$(project).Path = '$(subdir)'$(NEWLINE)" ;
-		Contents += "$(project).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'$(NEWLINE)" ;
-		Contents += "$(project).Jamfile = [[$(CURRENT_JAMFILE)]]$(NEWLINE)" ;
-		Contents += "if not $(project).Options then $(project).Options = {} end$(NEWLINE)" ;
-		Contents += "$(project).Options['$(OPTIONS)'] = true$(NEWLINE)" ;
-	}
+	Contents += "$(project).Name = '$(TARGETS[0])'$(NEWLINE)" ;
+	Contents += "$(project).Path = '$(subdir)'$(NEWLINE)" ;
+	Contents += "$(project).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'$(NEWLINE)" ;
+	Contents += "$(project).Jamfile = [[$(CURRENT_JAMFILE)]]$(NEWLINE)" ;
+	Contents += "if not $(project).Options then $(project).Options = {} end$(NEWLINE)" ;
+	Contents += "$(project).Options['$(OPTIONS)'] = true$(NEWLINE)" ;
 
 	if ! ( lib in $(OPTIONS) )
 	{
