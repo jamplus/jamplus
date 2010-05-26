@@ -25,9 +25,6 @@ local SRCS =
 C.LinkFrameworks : Foundation UIKit OpenGLES QuartzCore ;
 
 C.BundleInfo : displayname : opengles ;
-local outputName = [ C._retrieveOutputName opengles ] ;
-C.BundleInfo : executable : $(outputName) ;
-C.BundleInfo : iconfile : "" ;
 C.BundleInfo : identifier : com.yourcompany.testapp ;
 C.BundleInfo : bundlename : opengles ;
 C.BundleInfo : bundleversion : 1.0 ;
