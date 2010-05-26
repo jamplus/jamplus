@@ -107,6 +107,10 @@ struct ar_hdr		/* archive file member header - printable ascii */
 # include "md5.h"
 #endif
 
+#ifdef __FreeBSD__
+#include <sys/sysctl.h>
+#endif
+
 #include <errno.h>
 
 /*
@@ -899,6 +903,27 @@ void md5file(const char *filename, MD5SUM sum)
 
 #ifdef OPT_SET_JAMPROCESSPATH_EXT
 
+#ifdef __FreeBSD__
+void sysctl_get_pathname(char* buffer, size_t bufferLen)
+{
+	int mib[4];
+
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_PATHNAME;
+	mib[3] = -1;
+
+	if (sysctl(mib, 4, buffer, &bufferLen, 0, 0) != 0)
+	{
+		buffer[0] = 0;
+	}
+	else
+	{
+		buffer[bufferLen] = 0;
+	}
+}
+#endif
+
 void getprocesspath(char* buffer, size_t bufferLen)
 {
 #if defined( OS_MACOSX )
@@ -912,6 +937,10 @@ void getprocesspath(char* buffer, size_t bufferLen)
 	CFRelease(workingString);
 	CFRelease(normalizedString);
 	CFRelease(bundleUrl);
+#elif defined(__FreeBSD__)
+	sysctl_get_pathname(buffer, bufferLen);
+	dirname(buffer);
+	strcat(buffer, "/");
 #else
 	int count = readlink("/proc/self/exe", buffer, bufferLen);
 	if (count != -1)
@@ -936,6 +965,8 @@ void getexecutablepath(char* buffer, size_t bufferLen)
 	CFRelease(executableUrl);
 	CFRelease(executableString);
 	CFRelease(normalizedString);
+#elif defined(__FreeBSD__)
+	sysctl_get_pathname(buffer, bufferLen);
 #else
 	if (readlink("/proc/self/exe", buffer, bufferLen) != -1)
 	{
