@@ -268,7 +268,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 				if subProject.BuildCommandLine then
 					table.insert(self.Contents, '\t\t\tbuildArgumentsString = "";\n')
 				else
-					table.insert(self.Contents, '\t\t\tbuildArgumentsString = "\\\"-sPLATFORM=$(PLATFORM) -sCONFIG=$(CONFIG)\\\" $(ACTION) $(TARGET_NAME)";\n')
+					table.insert(self.Contents, '\t\t\tbuildArgumentsString = "$(PLATFORM) $(CONFIG) $(ACTION) $(TARGET_NAME)";\n')
 				end
 			end
 			table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. subProjectInfo.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. subProjectInfo.Name .. '" */;\n')
@@ -292,10 +292,14 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 
 			if subProjectInfo.ExecutablePath then
 				table.insert(self.Contents, '\t\t\tproductReference = ' .. info.EntryUuids['app>' .. subProjectInfo.ExecutablePath] .. '; /* ' .. subProjectInfo.ExecutablePath .. ' */\n')
-				if subProject.Options  and  subProject.Options.bundle then
+			end
+			if subProject.Options then
+				if subProject.Options.bundle then
 					table.insert(self.Contents, '\t\t\tproductType = "com.apple.product-type.application";\n');
-				else
+				elseif subProject.Options.app then
 					table.insert(self.Contents, '\t\t\tproductType = "com.apple.product-type.tool";\n');
+				elseif subProject.Options.lib then
+					table.insert(self.Contents, '\t\t\tproductType = "com.apple.product-type.library.static";\n');
 				end
 			end
 
@@ -330,7 +334,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 		if subProject.BuildCommandLine then
 			table.insert(self.Contents, subProject.BuildCommandLine[1] .. '";\n')
 		else
-			table.insert(self.Contents, os.path.combine(projectsPath, 'xcodejam') .. [[ \\\"-sPLATFORM=$PLATFORM -sCONFIG=$CONFIG\\\" $ACTION $TARGET_NAME";]] .. '\n')
+			table.insert(self.Contents, os.path.combine(projectsPath, 'xcodejam') .. [[ $PLATFORM $CONFIG $ACTION $TARGET_NAME";]] .. '\n')
 		end
 		table.insert(self.Contents, "\t\t};\n")
 	end
@@ -407,9 +411,7 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 				end
 			end
 ]]			
-			if productName ~= '' then
-				table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = \"" .. productName .. "\";\n")
-			end
+			table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = \"" .. ((productName and productName ~= '') and productName or projectName) .. "\";\n")
 --			table.insert(self.Contents, '\t\t\t\tINFOPLIST_FILE = "myopengl-Info.plist";\n');
 --			table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
 			if platformName == 'macosx32'  or  platformName == 'macosx64' then
@@ -769,14 +771,14 @@ function XcodeInitialize()
 	io.writeall(outPath .. 'xcodejam', [[
 #!/bin/sh
 TARGET_NAME=
-if [ "$3" = "" ]; then
-	TARGET_NAME=$2
-elif [ "$2" = build ]; then
+if [ "$4" = "" ]; then
 	TARGET_NAME=$3
-elif [ "$2" = clean ]; then
-	TARGET_NAME=$3
+elif [ "$3" = build ]; then
+	TARGET_NAME=$4
+elif [ "$3" = clean ]; then
+	TARGET_NAME=$4
 fi
-]] .. os.path.escape(os.path.combine(destinationRootPath, 'jam')) .. [[ $1 $TARGET_NAME
+]] .. os.path.escape(os.path.combine(destinationRootPath, 'jam')) .. [[ -sPLATFORM=$1 -sCONFIG=$2 $TARGET_NAME
 ]])
 	os.chmod(outPath .. 'xcodejam', 777)
 end
