@@ -179,9 +179,9 @@ rule C._SharedLibraryFromObjects_ExportLib
 rule C._SharedLibraryFromObjects_LinkFlags
 {
 	if module in $(OPTIONS) {
-		linkFlags += -shared ;
+		linkFlags += -shared -fPIC ;
 	} else {
-		on $(TARGET) linkFlags += -shared ;
+		on $(TARGET) linkFlags += -shared -fPIC ;
 	}
 }
 
