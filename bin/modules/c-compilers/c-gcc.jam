@@ -161,6 +161,10 @@ rule C._MultiCppCompile_SetupFlags
 	_flags += "-include $(objectForceIncludes:G=)" ;
 
 	_flags += "-o \"$(_obj:T)\"" ;
+
+	if $(C_LIBRARY_SHARED_MODULE) {
+		_flags += -fPIC ;
+	}
 }
 
 rule C._SharedLibraryFromObjects_ExportLib

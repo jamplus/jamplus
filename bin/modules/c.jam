@@ -622,14 +622,16 @@ rule C._ApplicationFromObjects_PostBuild
 
 rule C.Library TARGET : SOURCES : OPTIONS
 {
-	local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
 	local linkTargets ;
 	if shared in $(OPTIONS)  ||  module in $(OPTIONS)
 	{
+		local C_LIBRARY_SHARED_MODULE = 1 ;
+		local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
 		linkTargets = [ C.SharedLibraryFromObjects $(TARGET) : $(objects) : $(OPTIONS) ] ;
 	}
 	else
 	{
+		local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
 		linkTargets = [ C.LibraryFromObjects $(TARGET) : $(objects) ] ;
 	}
 	ActiveTarget ;
