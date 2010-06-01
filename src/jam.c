@@ -354,6 +354,7 @@ int main( int argc, char **argv, char **arg_environ )
     }
 #endif
 
+#if 0
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 #ifndef OS_NT
     if ( !getenv( "JAM_DYLD_FALLBACK_LIBRARY_PATH_SET" ) )
@@ -375,6 +376,7 @@ int main( int argc, char **argv, char **arg_environ )
 
 	return 0;
     }
+#endif
 #endif
 #endif
 
