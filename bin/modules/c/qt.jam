@@ -2,7 +2,7 @@ if ! $(QT_ROOT) {
 	if $(NT) {
 		QT_BIN = [ Glob $(PATH) $(Path) : qmake.exe ] ;
 	} else {
-		QT_BIN = [ Glob $(PATH) : qmake ] ;
+#		QT_BIN = [ Glob $(PATH) : qmake ] ;
 	}
 	if $(QT_BIN[1]) {
 		QT_BIN = $(QT_BIN:D) ;
