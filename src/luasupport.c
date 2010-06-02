@@ -94,12 +94,12 @@ int   (*ls_lua_next) (ls_lua_State *L, int idx);
 
 #define ls_lua_newtable(L)		ls_lua_createtable(L, 0, 0)
 
-void (*luaL_openlibs) (ls_lua_State *L);
-int (*luaL_loadstring) (ls_lua_State *L, const char *s);
-int (*luaL_loadfile) (ls_lua_State *L, const char *filename);
-ls_lua_State *(*luaL_newstate) (void);
-int (*luaL_ref) (ls_lua_State *L, int t);
-void (*luaL_unref) (ls_lua_State *L, int t, int ref);
+void (*ls_luaL_openlibs) (ls_lua_State *L);
+int (*ls_luaL_loadstring) (ls_lua_State *L, const char *s);
+int (*ls_luaL_loadfile) (ls_lua_State *L, const char *filename);
+ls_lua_State *(*ls_luaL_newstate) (void);
+int (*ls_luaL_ref) (ls_lua_State *L, int t);
+void (*ls_luaL_unref) (ls_lua_State *L, int t, int ref);
 
 
 
@@ -288,7 +288,7 @@ static int pmain (ls_lua_State *L)
     int top;
     int ret;
 
-    luaL_openlibs(L);
+    ls_luaL_openlibs(L);
 
     ls_lua_pushcclosure(L, LS_jam_getvar, 0);
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_getvar");
@@ -298,7 +298,7 @@ static int pmain (ls_lua_State *L)
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_evaluaterule");
 
     top = ls_lua_gettop(L);
-    ret = luaL_loadstring(L, "require 'lanes'");
+    ret = ls_luaL_loadstring(L, "require 'lanes'");
     ls_lua_callhelper(top, ret);
     return 0;
 }
@@ -402,14 +402,14 @@ void ls_lua_init()
 
     ls_lua_next = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_next");
 
-    luaL_openlibs = (void (*)(ls_lua_State *))ls_lua_loadsymbol(handle, "luaL_openlibs");
-    luaL_loadstring = (int (*)(ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "luaL_loadstring");
-    luaL_loadfile = (int (*)(ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "luaL_loadfile");
-    luaL_newstate = (ls_lua_State *(*)(void))ls_lua_loadsymbol(handle, "luaL_newstate");
-    luaL_ref = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "luaL_ref");
-    luaL_unref = (void (*)(ls_lua_State *, int, int))ls_lua_loadsymbol(handle, "luaL_unref");
+    ls_luaL_openlibs = (void (*)(ls_lua_State *))ls_lua_loadsymbol(handle, "luaL_openlibs");
+    ls_luaL_loadstring = (int (*)(ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "luaL_loadstring");
+    ls_luaL_loadfile = (int (*)(ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "luaL_loadfile");
+    ls_luaL_newstate = (ls_lua_State *(*)(void))ls_lua_loadsymbol(handle, "luaL_newstate");
+    ls_luaL_ref = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "luaL_ref");
+    ls_luaL_unref = (void (*)(ls_lua_State *, int, int))ls_lua_loadsymbol(handle, "luaL_unref");
 
-    L = luaL_newstate();
+    L = ls_luaL_newstate();
     ls_lua_cpcall(L, &pmain, 0);
 }
 
@@ -430,7 +430,7 @@ int luahelper_taskadd(const char* taskscript)
     newTaskScript = malloc( taskscriptlen + 1 );
     strncpy(newTaskScript, taskscript, taskscriptlen);
     newTaskScript[taskscriptlen] = 0;
-    ret = luaL_loadstring(L, newTaskScript);			/* lanes gen * script */
+    ret = ls_luaL_loadstring(L, newTaskScript);			/* lanes gen * script */
     if (ret != 0)
     {
 	if (ls_lua_isstring(L, -1))
@@ -466,7 +466,7 @@ int luahelper_taskadd(const char* taskscript)
 	return -1;
     }
 
-    ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    ref = ls_luaL_ref(L, LUA_REGISTRYINDEX);
     ls_lua_pop(L, 1);
     return ref;
 }
@@ -489,7 +489,7 @@ int luahelper_taskisrunning(int taskid)
     if (strcmp(status, "done") == 0)
     {
 	ls_lua_pop(L, 2);
-	luaL_unref(L, LUA_REGISTRYINDEX, taskid);
+	ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
 	return 0;
     }
     else if (strcmp(status, "error") == 0  ||  strcmp(status, "cancelled") == 0)
@@ -517,7 +517,7 @@ int luahelper_taskisrunning(int taskid)
 
 	ls_lua_pop(L, 4);								/* */
 
-	luaL_unref(L, LUA_REGISTRYINDEX, taskid);
+	ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
 	return ret;
     }
 
@@ -619,7 +619,7 @@ builtin_luastring(
     }
     ls_lua_init();
     top = ls_lua_gettop(L);
-    ret = luaL_loadstring(L, l->string);
+    ret = ls_luaL_loadstring(L, l->string);
     return ls_lua_callhelper(top, ret);
 }
 
@@ -648,7 +648,7 @@ builtin_luafile(
 	ls_lua_rawseti(L, -2, ++index);
     }
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "arg");
-    ret = luaL_loadfile(L, l->string);
+    ret = ls_luaL_loadfile(L, l->string);
     return ls_lua_callhelper(top, ret);
 }
 
