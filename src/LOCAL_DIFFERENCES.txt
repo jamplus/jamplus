@@ -81,6 +81,13 @@ upstream version as distributed by Perforce.
     This option is controlled by the OPT_BUILTIN_W32_GETREG_EXT
     #define.
 
+** W32_GETREG64
+
+	Same as above, except returns a 64 bit key.
+
+    This option is controlled by the OPT_BUILTIN_W32_GETREG64_EXT
+    #define.
+
 ** W32_SHORTNAME
 
     Available only under WinNT (Win2k as well).  Takes a string

@@ -27,8 +27,9 @@ static struct keydef keynames[] = {
 /*
  * Get a value from the Windows registry and return it as a string.
  */
+
 const char*
-w32_getreg(LIST* pathlist)
+w32_getreg_internal(LIST* pathlist, INT is64Bit)
 {
     HKEY key = HKEY_LOCAL_MACHINE;
     const char* valueName = 0;
@@ -36,7 +37,7 @@ w32_getreg(LIST* pathlist)
     DWORD dataType  = 0;
     DWORD dataSize  = 0;
     char* dataValue = 0;
-    const char* retval = 0;
+	const char* retval = 0;
 	    
     if (!pathlist) return 0;
 
@@ -57,6 +58,7 @@ w32_getreg(LIST* pathlist)
             DWORD retCode = RegOpenKeyEx(key, valueName, 0,
                                          KEY_EXECUTE |
                                          KEY_QUERY_VALUE |
+										 ( is64Bit ? KEY_WOW64_64KEY : 0 ) |
                                          KEY_ENUMERATE_SUB_KEYS, &key);
             if (retCode != ERROR_SUCCESS) {
 		return 0;
@@ -112,6 +114,21 @@ w32_getreg(LIST* pathlist)
 	return retval;
     }
 }
+
+const char*
+w32_getreg(LIST* pathlist)
+{
+	return w32_getreg_internal( pathlist, 0 );
+}
+
+
+#ifdef OPT_BUILTIN_W32_GETREG64_EXT
+const char*
+w32_getreg64(LIST* pathlist)
+{
+	return w32_getreg_internal( pathlist, 1 );
+}
+#endif
 
 #endif
 #endif

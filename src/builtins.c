@@ -94,6 +94,10 @@ static LIST* builtin_math( PARSE *parse, LOL *args, int *jmp );
 static LIST* builtin_w32_getreg( PARSE *parse, LOL *args, int *jmp );
 #endif
 
+#ifdef OPT_BUILTIN_W32_GETREG64_EXT
+static LIST* builtin_w32_getreg64( PARSE *parse, LOL *args, int *jmp );
+#endif
+
 #ifdef OPT_BUILTIN_W32_SHORTNAME_EXT
 static LIST* builtin_w32_shortname( PARSE *parse, LOL *args, int *jmp );
 #endif
@@ -199,6 +203,10 @@ load_builtins()
 #ifdef OPT_BUILTIN_W32_GETREG_EXT
 	bindrule( "W32_GETREG" )->procedure =
 		parse_make( builtin_w32_getreg, P0, P0, P0, C0, C0, 0 );
+#endif
+#ifdef OPT_BUILTIN_W32_GETREG64_EXT
+	bindrule( "W32_GETREG64" )->procedure =
+		parse_make( builtin_w32_getreg64, P0, P0, P0, C0, C0, 0 );
 #endif
 #ifdef OPT_BUILTIN_W32_SHORTNAME_EXT
 	bindrule( "W32_SHORTNAME" )->procedure =
@@ -936,6 +944,24 @@ builtin_w32_getreg( PARSE *parse, LOL *args, int *jmp )
 		return list_new(L0, result, 0);
 	return L0;
 }
+
+#ifdef OPT_BUILTIN_W32_GETREG64_EXT
+/*
+* builtin_w32_getreg64() - W32_GETREG64 rule, returns a 64bit registry entry
+* 			given a list of keys.
+*
+* Usage: result = [ W32_GETREG64 list ] ;
+*/
+static LIST*
+builtin_w32_getreg64( PARSE *parse, LOL *args, int *jmp )
+{
+	const char* result = w32_getreg64(lol_get(args, 0));
+	if (result)
+		return list_new(L0, result, 0);
+	return L0;
+}
+#endif
+
 #endif
 
 #ifdef OPT_BUILTIN_W32_SHORTNAME_EXT
