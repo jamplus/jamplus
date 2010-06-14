@@ -44,7 +44,7 @@ SubDir TOP *** ;
 	text[#text + 1] = table.concat(filesText)
 	text[#text + 1] = table.concat(sourceGroupsText)
 
-	text[#text + 1] = '\nLibrary ' .. target .. ' : $(SRCS) ;\n'
+	text[#text + 1] = '\nC.Library ' .. target .. ' : $(SRCS) ;\n'
 	text[#text + 1] = '\n}\n'
 	return io.writeall(filename, table.concat(text))
 end
