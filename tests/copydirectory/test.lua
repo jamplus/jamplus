@@ -25,17 +25,22 @@ function Test()
 
 	local run1pattern =
 	{
-		'*** found 18 target(s)...',
-		'*** updating 11 target(s)...',
+		'*** found 30 target(s)...',
+		'*** updating 20 target(s)...',
 		'@ CopyFile1 destination/file1.txt',
 		'!NEXT!@ CopyFile1 destination/file2.txt',
 		'!NEXT!@ CopyFile1 destination/dira/file3.dat',
 		'!NEXT!@ CopyFile1 destination/dirb/abc.txt',
 		'!NEXT!@ CopyFile1 destination/dirb/copyme/copyme.txt',
 		'!NEXT!@ CopyFile1 destination/dirb/ignore/dontcopy.txt',
-		'!NEXT!*** updated 11 target(s)...',
+		'!NEXT!@ CopyFile1 destination2/file2.txt',
+		'!NEXT!@ CopyFile1 destination2/dira/file3.dat',
+		'!NEXT!@ CopyFile1 destination2/dirb/abc.txt',
+		'!NEXT!@ CopyFile1 destination2/dirb/copyme/copyme.txt',
+		'!NEXT!@ CopyFile1 destination2/dirb/ignore/dontcopy.txt',
+		'!NEXT!*** updated 20 target(s)...',
 	}
-	
+
 	TestPattern(run1pattern, RunJam())
 
 	local newFiles =
@@ -47,6 +52,11 @@ function Test()
 		'destination/dirb/abc.txt',
 		'destination/dirb/copyme/copyme.txt',
 		'destination/dirb/ignore/dontcopy.txt',
+		'destination2/file1.txt',
+		'destination2/file2.txt',
+		'destination2/dira/file3.dat',
+		'destination2/dirb/abc.txt',
+		'destination2/dirb/copyme/copyme.txt',
 		'source/file1.txt',
 		'source/file2.txt',
 		'source/dira/file3.dat',
