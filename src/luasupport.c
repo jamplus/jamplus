@@ -472,57 +472,72 @@ int luahelper_taskadd(const char* taskscript)
 }
 
 
-int luahelper_taskisrunning(int taskid)
+int luahelper_taskisrunning(int taskid, int* returnValue)
 {
-    const char* status;
-    ls_lua_init();
+	const char* status;
+	ls_lua_init();
 
-    ls_lua_rawgeti(L, LUA_REGISTRYINDEX, taskid);		/* lane_h */
-    if (!ls_lua_istable(L, -1))
-    {
-        ls_lua_pop(L, 1);
-        return 0;
-    }
-    ls_lua_getfield(L, -1, "status");					/* lane_h status */
-
-    status = ls_lua_tostring(L, -1);
-    if (strcmp(status, "done") == 0)
-    {
-	ls_lua_pop(L, 2);
-	ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
-	return 0;
-    }
-    else if (strcmp(status, "error") == 0  ||  strcmp(status, "cancelled") == 0)
-    {
-	int ret;
-
-	ls_lua_pop(L, 1);								/* lane_h */
-	ls_lua_getfield(L, -1, "join");				/* lane_h join(function) */
-	ls_lua_pushvalue(L, -2);						/* lane_h join(function) lane_h */
-	ret = ls_lua_pcall(L, 1, 3, 0);				/* lane_h nil err stack_tbl */
-	if (ret != 0)
+	ls_lua_rawgeti(L, LUA_REGISTRYINDEX, taskid);		/* lane_h */
+	if (!ls_lua_istable(L, -1))
 	{
-	    if (ls_lua_isstring(L, -1))
-		printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -1));
-	    ls_lua_pop(L, 2);
-	    return -1;
+		*returnValue = 1;
+		ls_lua_pop(L, 1);
+		return 0;
+	}
+	ls_lua_getfield(L, -1, "status");					/* lane_h status */
+
+	status = ls_lua_tostring(L, -1);
+	if (strcmp(status, "done") == 0)
+	{
+		int ret;
+
+		ls_lua_pop(L, 1);								/* lane_h */
+		ls_lua_getfield(L, -1, "join");					/* lane_h join(function) */
+		ls_lua_pushvalue(L, -2);						/* lane_h join(function) lane_h */
+		ret = ls_lua_pcall(L, 1, 1, 0);					/* lane_h ret */
+		if (ret != 0)
+		{
+			if (ls_lua_isstring(L, -1))
+				printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -1));
+			*returnValue = 1;
+		}
+		if (ls_lua_isnumber(L, -1))
+			*returnValue = (int)ls_lua_tonumber(L, -1);
+		ls_lua_pop(L, 2);
+		ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
+		return 0;
+	}
+	else if (strcmp(status, "error") == 0  ||  strcmp(status, "cancelled") == 0)
+	{
+		int ret;
+
+		*returnValue = 1;
+
+		ls_lua_pop(L, 1);								/* lane_h */
+		ls_lua_getfield(L, -1, "join");					/* lane_h join(function) */
+		ls_lua_pushvalue(L, -2);						/* lane_h join(function) lane_h */
+		ret = ls_lua_pcall(L, 1, 3, 0);					/* lane_h nil err stack_tbl */
+		if (ret != 0)
+		{
+			if (ls_lua_isstring(L, -1))
+				printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -1));
+			ls_lua_pop(L, 2);
+			return 0;
+		}
+
+		if (ls_lua_isstring(L, -2))
+		{
+			printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -2));
+		}
+
+		ls_lua_pop(L, 4);								/* */
+
+		ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
+		return 0;
 	}
 
-    ret = 1;
-    if (ls_lua_isstring(L, -2))
-    {
-        printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -2));
-        ret = -1;
-    }
-
-	ls_lua_pop(L, 4);								/* */
-
-	ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
-	return ret;
-    }
-
-    ls_lua_pop(L, 2);
-    return 1;
+	ls_lua_pop(L, 2);
+	return 1;
 }
 
 

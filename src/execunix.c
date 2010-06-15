@@ -646,12 +646,8 @@ my_wait( int *status )
 	    if ( cmdtab[i].pid ) {
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 		if ( cmdtab[i].lua ) {
-            int ret = luahelper_taskisrunning( cmdtab[i].pid );
+            int ret = luahelper_taskisrunning( cmdtab[i].pid, status );
             if ( ret == 0 ) {
-                *status = 0;
-                return cmdtab[i].pid;
-            } else if ( ret == -1 ) {
-                *status = 1;
                 return cmdtab[i].pid;
             }
 		    ++num_lua_active;
@@ -722,12 +718,8 @@ my_wait( int *status )
 		if ( cmdtab[i].pid ) {
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 		    if ( cmdtab[i].lua ) {
-                int ret = luahelper_taskisrunning( cmdtab[i].pid );
+                int ret = luahelper_taskisrunning( cmdtab[i].pid, status );
                 if ( ret == 0 ) {
-                    *status = 0;
-                    return cmdtab[i].pid;
-                } else if ( ret == -1 ) {
-                    *status = 1;
                     return cmdtab[i].pid;
                 }
 		    }

@@ -17,7 +17,7 @@ builtin_luafile(
 	int		*jmp );
 
 int luahelper_taskadd(const char* taskscript);
-int luahelper_taskisrunning(int taskid);
+int luahelper_taskisrunning(int taskid, int* returnValue);
 void luahelper_taskcancel(int taskid);
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
