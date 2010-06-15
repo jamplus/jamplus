@@ -3,7 +3,7 @@ IncludeModule copyfile ;
 if ! $(TARGETINFO_LOCATE)
 {
 
-rule _CopyDirectoryHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING : RECURSIVE
+rule _CopyDirectoryRecursiveHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING : RECURSIVE
 {
 	local files = @($(SOURCE_PATH)/$(SEARCH_STRING:E=*):W) ;
 	local file ;
@@ -11,13 +11,23 @@ rule _CopyDirectoryHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRIN
 		CopyFile $(PARENT) : $(file:BSR=$(DESTINATION_PATH)) : $(file) ;
 	}
 
-	if $(RECURSIVE) {
-		local dirs = @($(SOURCE_PATH)/*/:W) ;
-		local dir ;
-		for dir in $(dirs) {
-			local parent = $(dir:P) ;
-			_CopyDirectoryHelper $(PARENT) : $(parent:BR=$(DESTINATION_PATH)) : $(dir) : $(SEARCH_STRING) : $(RECURSIVE) ;
-		}
+	local dirs = @($(SOURCE_PATH)/*/:W) ;
+	local dir ;
+	for dir in $(dirs) {
+		local parent = $(dir:P) ;
+		_CopyDirectoryRecursiveHelper $(PARENT) : $(parent:BR=$(DESTINATION_PATH)) : $(dir) : $(SEARCH_STRING) : $(RECURSIVE) ;
+	}
+}
+
+rule _CopyDirectoryGlobHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING
+{
+	SOURCE_PATH = @($(SOURCE_PATH)/:D)/ ;
+	local files = @($(SOURCE_PATH)$(SEARCH_STRING:E=*):W) ;
+	local source ;
+	for source in $(files) {
+		local destination = [ Subst $(source) : ^$(SOURCE_PATH) : : 1 ] ;
+		destination = $(destination:R=$(DESTINATION_PATH)) ;
+		CopyFile $(PARENT) : $(destination) : $(source) ;
 	}
 }
 
@@ -27,7 +37,11 @@ rule CopyDirectory PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING : REC
 	SOURCE_PATH = $(SOURCE_PATH:R=$(SUBDIR:E="")) ;
 	DESTINATION_PATH = $(DESTINATION_PATH:R=$(SUBDIR:E="")) ;
 
-	_CopyDirectoryHelper $(PARENT) : $(DESTINATION_PATH) : $(SOURCE_PATH) : $(SEARCH_STRING) : $(RECURSIVE) ;
+	if $(RECURSIVE) = 1 {
+		_CopyDirectoryRecursiveHelper $(PARENT) : $(DESTINATION_PATH) : $(SOURCE_PATH) : $(SEARCH_STRING) : $(RECURSIVE) ;
+	} else {
+		_CopyDirectoryGlobHelper $(PARENT) : $(DESTINATION_PATH) : $(SOURCE_PATH) : $(SEARCH_STRING) ;
+	}
 }
 
 }
