@@ -1,0 +1,17 @@
+SubDir TOP ;
+
+ADD_EXE = [ C.Application add : add.c ] ;
+
+Depends tests : $(ADD_EXE) ;
+
+actions lua RunTests
+{
+	ADD_EXE = [[$(ADD_EXE:T)]]
+	local chunk = loadfile('unittests.lua')
+	local ret, err = pcall(chunk)
+	return err
+}
+
+Always tests ;
+NotFile tests ;
+RunTests tests ;
