@@ -748,7 +748,7 @@ my_wait( int *status )
 		if ( cmdtab[i].pid ) {
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 			if ( cmdtab[i].lua ) {
-				if ( !luahelper_taskisrunning( cmdtab[i].pid ) ) {
+				if ( !luahelper_taskisrunning( cmdtab[i].pid, status ) ) {
 					*status = 0;
 					return cmdtab[i].pid;
 				}
