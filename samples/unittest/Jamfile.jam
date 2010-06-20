@@ -1,12 +1,17 @@
 SubDir TOP ;
 
 ADD_EXE = [ C.Application add : add.c ] ;
+TEST_LOG = <tests>test.log ;
+MakeLocate $(TEST_LOG) : output ;
+Clean clean : $(TEST_LOG) ;
 
-Depends tests : $(ADD_EXE) ;
+Depends tests : $(TEST_LOG) : $(ADD_EXE) ;
 
 actions lua RunTests
 {
+	print("In RunTests action...")
 	ADD_EXE = [[$(ADD_EXE:T)]]
+	print("ADD_EXE = " .. ADD_EXE)
 	local chunk = loadfile('unittests.lua')
 	local ret, err = pcall(chunk)
 	return err
