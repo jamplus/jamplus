@@ -414,32 +414,28 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 			table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = \"" .. ((productName and productName ~= '') and productName or projectName) .. "\";\n")
 --			table.insert(self.Contents, '\t\t\t\tINFOPLIST_FILE = "myopengl-Info.plist";\n');
 --			table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
+			table.insert(self.Contents, "\t\t\t\tSDKROOT = " .. XCODE_SDKROOTS[platformName] .. ";\n")
 			if platformName == 'macosx32'  or  platformName == 'macosx64' then
 				table.insert(self.Contents, "\t\t\t\tARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\";\n");
-				table.insert(self.Contents, "\t\t\t\tSDKROOT = macosx10.5;\n")
 			elseif platformName == 'iphone' then
 				table.insert(self.Contents, '\t\t\t\t"ARCHS[sdk=iphoneos*]" = armv6;\n')
 				table.insert(self.Contents, '\t\t\t\t"ARCHS[sdk=iphonesimulator*]" = i386;\n')
 				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
-				table.insert(self.Contents, "\t\t\t\tSDKROOT = iphoneos3.1.2;\n")
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 1;\n")
 			elseif platformName == 'iphonesimulator' then
 				table.insert(self.Contents, '\t\t\t\t"ARCHS[sdk=iphoneos*]" = armv6;\n')
 				table.insert(self.Contents, '\t\t\t\t"ARCHS[sdk=iphonesimulator*]" = i386;\n')
 				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
-				table.insert(self.Contents, "\t\t\t\tSDKROOT = iphoneos3.1.2;\n")
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 1;\n")
 			elseif platformName == 'ipad' then
 				table.insert(self.Contents, '\t\t\t\t"ARCHS[sdk=iphoneos*]" = armv7;\n')
 				table.insert(self.Contents, '\t\t\t\t"ARCHS[sdk=iphonesimulator*]" = i386;\n')
 				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
-				table.insert(self.Contents, "\t\t\t\tSDKROOT = iphoneos3.2;\n")
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 2;\n")
 			elseif platformName == 'ipadsimulator' then
 				table.insert(self.Contents, '\t\t\t\t"ARCHS[sdk=iphoneos*]" = armv7;\n')
 				table.insert(self.Contents, '\t\t\t\t"ARCHS[sdk=iphonesimulator*]" = i386;\n')
 				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
-				table.insert(self.Contents, "\t\t\t\tSDKROOT = iphoneos3.2;\n")
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 2;\n")
 			end
 			table.insert(self.Contents, "\t\t\t};\n")
