@@ -192,7 +192,14 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 	C._MultiCppCompile_PreCompile ;
 
-	local ALL_TYPES =
+	local FLAGS_ALL_TYPES =
+			*.*
+			$(PLATFORM).*
+			*.$(CONFIG)
+			$(PLATFORM).$(CONFIG)
+	;
+
+	local INCLUDES_ALL_TYPES =
 			$(PLATFORM).$(CONFIG)
 			*.$(CONFIG)
 			$(PLATFORM).*
@@ -212,34 +219,34 @@ rule C.MultiCppCompile TARGET : SOURCES
 	postHDRS += $(SUBDIRHDRS) ;
 
 	on C.* {
-		postHDRS += $(HDRS.$(ALL_TYPES)) ;
+		postHDRS += $(HDRS.$(INCLUDES_ALL_TYPES)) ;
 		if $(MSVCNT) {
 			local flags = /I /AI ;
-			postREFERENCEDIRECTORIES += $(flags)\"$(REFERENCEDIRECTORIES.$(ALL_TYPES))\" ;
+			postREFERENCEDIRECTORIES += $(flags)\"$(REFERENCEDIRECTORIES.$(INCLUDES_ALL_TYPES))\" ;
 		}
-		preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
-		preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
-		preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
-		preMFLAGS += $(MFLAGS.$(ALL_TYPES)) ;
-		preMMFLAGS += $(MMFLAGS.$(ALL_TYPES)) ;
-		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
-		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+		preDEFINES += $(DEFINES.$(FLAGS_ALL_TYPES)) ;
+		preCCFLAGS += $(CCFLAGS.$(FLAGS_ALL_TYPES)) ;
+		preC++FLAGS += $(C++FLAGS.$(FLAGS_ALL_TYPES)) ;
+		preMFLAGS += $(MFLAGS.$(FLAGS_ALL_TYPES)) ;
+		preMMFLAGS += $(MMFLAGS.$(FLAGS_ALL_TYPES)) ;
+		flagsToRemove += $(FLAGS_TO_REMOVE.$(FLAGS_ALL_TYPES)) ;
+		flagsToAdd += $(FLAGS_TO_ADD.$(FLAGS_ALL_TYPES)) ;
 	}
 
 	local forceIncludes ;
 	on $(TARGET) {
-		postHDRS = $(HDRS.$(ALL_TYPES)) $(postHDRS) ;
+		postHDRS = $(HDRS.$(INCLUDES_ALL_TYPES)) $(postHDRS) ;
 		if $(MSVCNT) {
 			local flags = /I /AI ;
-			postREFERENCEDIRECTORIES = $(flags)\"$(REFERENCEDIRECTORIES.$(ALL_TYPES))\" $(postREFERENCEDIRECTORIES) ;
+			postREFERENCEDIRECTORIES = $(flags)\"$(REFERENCEDIRECTORIES.$(INCLUDES_ALL_TYPES))\" $(postREFERENCEDIRECTORIES) ;
 		}
-		preDEFINES += $(DEFINES.$(ALL_TYPES)) ;
-		preCCFLAGS += $(CCFLAGS.$(ALL_TYPES)) ;
-		preC++FLAGS += $(C++FLAGS.$(ALL_TYPES)) ;
-		preMFLAGS += $(MFLAGS.$(ALL_TYPES)) ;
-		preMMFLAGS += $(MMFLAGS.$(ALL_TYPES)) ;
-		flagsToRemove += $(FLAGS_TO_REMOVE.$(ALL_TYPES)) ;
-		flagsToAdd += $(FLAGS_TO_ADD.$(ALL_TYPES)) ;
+		preDEFINES += $(DEFINES.$(FLAGS_ALL_TYPES)) ;
+		preCCFLAGS += $(CCFLAGS.$(FLAGS_ALL_TYPES)) ;
+		preC++FLAGS += $(C++FLAGS.$(FLAGS_ALL_TYPES)) ;
+		preMFLAGS += $(MFLAGS.$(FLAGS_ALL_TYPES)) ;
+		preMMFLAGS += $(MMFLAGS.$(FLAGS_ALL_TYPES)) ;
+		flagsToRemove += $(FLAGS_TO_REMOVE.$(FLAGS_ALL_TYPES)) ;
+		flagsToAdd += $(FLAGS_TO_ADD.$(FLAGS_ALL_TYPES)) ;
 		forceIncludes = $(FORCE_INCLUDES) ;
 	}
 
@@ -308,10 +315,10 @@ rule C.MultiCppCompile TARGET : SOURCES
 		local objflags ;
 		local objdefines ;
 		on $(_obj) {
-			_hdrs += $(HDRS.$(ALL_TYPES)) ;
+			_hdrs += $(HDRS.$(INCLUDES_ALL_TYPES)) ;
 			objectForceIncludes += $(FORCE_INCLUDES) ;
-			objflags = $($($(BUILD_EXT).FLAGS).$(ALL_TYPES)) ;
-			objdefines = $(DEFINES.$(ALL_TYPES)) ;
+			objflags = $($($(BUILD_EXT).FLAGS).$(FLAGS_ALL_TYPES)) ;
+			objdefines = $(DEFINES.$(FLAGS_ALL_TYPES)) ;
 		}
 		_hdrs += $(postHDRS) $(C.STDHDRS) ;
 
