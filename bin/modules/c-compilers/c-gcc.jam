@@ -196,7 +196,7 @@ C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
 C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
 C.AddBuildExtensions M : .m : C.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
 C.AddBuildExtensions MM : .mm : C.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
-C.AddBuildExtensions PCH : .h : C.PCH : "" .gch ;
+C.AddBuildExtensions PCH : .h .pch : C.PCH : "" .gch ;
 
 
 
