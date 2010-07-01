@@ -32,6 +32,8 @@ C.BundleInfo : mainnibfile : MainWindow ;
 C.BundleInfo : uistatusbarhidden : true ;
 C.BundleInfo : uisupportedinterfaceorientations : portrait portraitupsidedown landscapeleft landscaperight ;
 
+C.PrecompiledHeader : opengles_Prefix.pch opengles_Prefix.pch : $(SRCS) ;
+
 C.Application : $(SRCS) : bundle ;
 
 XIB opengles : MainWindow.xib ;
