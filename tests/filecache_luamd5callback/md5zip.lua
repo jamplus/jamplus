@@ -2,21 +2,21 @@ function md5zip(filename)
 	print("md5zip: Calculating " .. filename .. "...")
 
 	require 'md5'
-	require 'vdrive'
+	require 'ziparchive'
 
-	local drive = vdrive.VirtualDrive()
-	if not drive:Open(filename) then
+	local archive = ziparchive.open(filename)
+	if not archive then
 		return nil
 	end
 
 	local md5sum = md5.new()
-	for index = 1, drive:GetFileEntryCount() do
-		local fileEntry = drive:GetFileEntry(index)
-		md5sum:update(string.pack('A', fileEntry.FileName))
-		md5sum:update(string.pack('I', fileEntry.CRC))
+	for index = 1, archive:fileentrycount() do
+		local fileEntry = archive:fileentry(index)
+		md5sum:update(string.pack('A', fileEntry.filename))
+		md5sum:update(string.pack('I', fileEntry.crc))
 	end
 
-	drive:Close()
+	archive:close()
 
 	return md5sum:digest(true)
 end
