@@ -19,28 +19,28 @@ IF NOT "%ProgramFiles(x86)%"=="" SET WOW6432NODE=WOW6432NODE\
 
 REM Test for Visual Studio 2010
 
-rem if %VERBOSE% == 1 echo.Checking Visual Studio 2010
-rem if %VERBOSE% == 1 echo.  ...looking in registry
+if %VERBOSE% == 1 echo.Checking Visual Studio 2010
+if %VERBOSE% == 1 echo.  ...looking in registry
 
-rem (for /f "tokens=1,2*" %%i in ('reg query HKLM\software\%WOW6432NODE%Microsoft\VisualStudio\10.0 /v InstallDir') do set VSDir=%%k) 2>nul
+(for /f "tokens=1,2*" %%i in ('reg query HKLM\software\%WOW6432NODE%Microsoft\VisualStudio\10.0 /v InstallDir') do set VSDir=%%k) 2>nul
 
-rem if %VERBOSE% == 1 echo.  ...done
+if %VERBOSE% == 1 echo.  ...done
 
-rem if NOT "%VSDir%" == "" (
-rem   set VS=2010
-rem   set COMNTOOLS="%VSDir%..\..\Common7\Tools\"
-rem   goto :foundenv
-rem )
+if NOT "%VSDir%" == "" (
+  set VS=2010
+  set COMNTOOLS="%VSDir%..\..\Common7\Tools\"
+  goto :foundenv
+)
 
-rem if %VERBOSE% == 1 echo.  ...looking in environment
+if %VERBOSE% == 1 echo.  ...looking in environment
 
-rem if NOT "%VS100COMNTOOLS%" == "" (
-rem   set VS=2009
-rem   set COMNTOOLS="%VS100COMNTOOLS%"
-rem   goto :foundenv
-rem )
+if NOT "%VS100COMNTOOLS%" == "" (
+  set VS=2010
+  set COMNTOOLS="%VS100COMNTOOLS%"
+  goto :foundenv
+)
 
-rem if %VERBOSE% == 1 echo   ...done
+if %VERBOSE% == 1 echo   ...done
 
 REM Test for Visual Studio 2008
 
