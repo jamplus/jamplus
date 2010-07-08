@@ -1,6 +1,6 @@
 switch $(COMPILER.$(PLATFORM)) {
 	case vs2010 :
-		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
+		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows v7.0a InstallationFolder ;
 		MSSDK = [ W32_GETREG $(key) ] ;
 		MSSDK ?= $(MSVCNT) ;
 		MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;

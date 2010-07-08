@@ -1,4 +1,4 @@
-VISUAL_STUDIO_FORCE_VERSION = 9.0 ;
+VISUAL_STUDIO_FORCE_VERSION = 10.0 ;
 
 vs_versions.10.0 = vs2010 ;
 vs_versions.9.0 = vs2008 ;
