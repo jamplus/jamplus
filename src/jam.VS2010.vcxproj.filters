@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="buffer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="builtins.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="command.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="compile.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="execmac.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="execunix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="execvms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="expand.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fileglob.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filemac.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filent.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fileos2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fileunix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filevms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glob.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hash.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hcache.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="headers.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jam.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jambase-j.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jamgram.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lists.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luagsub.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luasupport.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="make.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="make1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="md5c.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mempool.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="newstr.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="option.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parse.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pathmac.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pathunix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pathvms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="progress.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="regexp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rules.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scan.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="search.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="timestamp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tmpunix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="variable.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="w32_getreg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="w32_shortname.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="builtins.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="command.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="compile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="envexp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="execcmd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="expand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fileglob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="filesys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hcache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jambase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jamgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jamgramtab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lists.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luasupport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="make.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mempool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="newstr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="option.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="patchlevel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pathsys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="progress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="regexp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rules.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="search.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timestamp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tmpfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="variable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="w32_getreg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="w32_shortname.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
