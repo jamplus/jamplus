@@ -536,7 +536,9 @@ actions C.MakeLump
 
 rule C.Application TARGET : SOURCES : OPTIONS
 {
-	local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) ] ;
+	LINKED_OBJECTS on $(TARGET) += $(objects) ;
 	local linkTargets = [ C.ApplicationFromObjects $(TARGET) : $(objects) : $(OPTIONS) ] ;
 	ActiveTarget ;
 	return $(linkTargets) ;
@@ -635,13 +637,16 @@ rule C.Library TARGET : SOURCES : OPTIONS
 	local linkTargets ;
 	if shared in $(OPTIONS)  ||  module in $(OPTIONS)
 	{
+		TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+
 		local C_LIBRARY_SHARED_MODULE = 1 ;
-		local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
+		local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) ] ;
+		LINKED_OBJECTS on $(TARGET) += $(objects) ;
 		linkTargets = [ C.SharedLibraryFromObjects $(TARGET) : $(objects) : $(OPTIONS) ] ;
 	}
 	else
 	{
-		local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) : $(TARGET) ] ;
+		local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) ] ;
 		linkTargets = [ C.LibraryFromObjects $(TARGET) : $(objects) ] ;
 	}
 	ActiveTarget ;
