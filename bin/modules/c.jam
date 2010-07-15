@@ -462,17 +462,20 @@ rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_FILENAMES : EXTRA_I
 	if $(LUMP) = 0 {
 		return ;
 	}
-
+	
 	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
 	local grist = $(PARENT) ;
 
 	local PCH_SOURCE_FILENAME = $(PCH_FILENAMES[1]) ;
 	local PCH_HEADER_FILENAME = $(PCH_FILENAMES[2]) ;
 
-	local LUMP_EXT ;
-	LUMP_EXT ?= $(LUMP_NAME:S) ;
-	LUMP_EXT ?= $(PCH_SOURCE_FILENAME:S) ;
-	LUMP_EXT ?= .cpp ;
+	local LUMP_EXT = $(LUMP_NAME:S) ;
+	if ! $(LUMP_EXT) {
+		LUMP_EXT = $(PCH_SOURCE_FILENAME:S) ;
+	}
+	if ! $(LUMP_EXT) {
+		LUMP_EXT = .cpp ;
+	}
 
 	local contents = "/* This lump file is a generated file.  Do not modify. */$(NEWLINE)" ;
 	if $(PCH_SOURCE_FILENAME) {
