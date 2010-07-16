@@ -1409,7 +1409,7 @@ rule C.OutputSuffix TARGET : SUFFIX : THE_CONFIG : THE_PLATFORM
 rule C.TargetGrist TARGET : FILES
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	return <$(TARGET)>$(FILES) ;
+	return $(FILES:G=<$(TARGET)>) ;
 }
 
 
