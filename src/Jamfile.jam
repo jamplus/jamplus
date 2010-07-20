@@ -208,7 +208,7 @@ else if $(UNIX)
 #	CCFLAGS += -Wall ;
 
 	if $(OS) != LINUX {
-		C.LinkPrebuiltLibraries jam : /usr/lib/libstdc++-static ;
+		C.LinkPrebuiltLibraries jam : stdc++-static ;
 	} else {
 		C.LinkFlags jam : -ldl ;
 	}

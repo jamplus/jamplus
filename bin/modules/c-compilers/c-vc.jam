@@ -1,6 +1,7 @@
 {
 	SUFEXE			= .exe ;
 	SUFLIB			= .lib ;
+	SUFLINKLIBS		= .lib ;
 	SUFMODULE		= .dll ;
 	SUFOBJ			= .obj ;
 	SUFSHAREDLIB	= .dll ;
@@ -34,6 +35,11 @@ rule C._C++Exceptions
 	{
 		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += /EHsc ;
 	}
+}
+
+
+rule C._LinkPrebuiltLibraries
+{
 }
 
 
@@ -75,7 +81,7 @@ actions response C.Link
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:C))
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT))
 }
 
 } else {
@@ -84,25 +90,25 @@ actions response C.Link
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:C))
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT))
 }
 
 actions response C.DebugLinkWithManifest
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:C))
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT))
 	if exist $(MANIFEST).intermediate.manifest "$(C.MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
 	if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
 	"$(C.RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:C))
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:CT))
 }
 
 actions response C.LinkWithManifest
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:C))
+	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:CT))
 	"$(C.MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
 }
 

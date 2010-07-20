@@ -5,12 +5,13 @@ C.LINK			?= g++ ;
 C.RANLIB		?= ranlib ;
 
 SUFMODULE	= .dylib ;
+SUFLINKLIBS = $(SUFLIB) $(SUFMODULE) ;
 
 actions C.Link
 {
 	MACOSX_DEPLOYMENT_TARGET=10.5
 	export MACOSX_DEPLOYMENT_TARGET
-	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:T) $(LINKLIBS)
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:T) $(LINKLIBS:T)
 }
 
 if $(DONTUSEMERIGHTNOW)

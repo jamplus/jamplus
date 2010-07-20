@@ -574,10 +574,13 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 	Depends allclean:$(TARGET) : clean:$(TARGET) ;
 	Clean clean:$(TARGET) : $(_linkTargets) ;
 
+	local linkDirectories =
+		[ C._retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+		[ C._retrieveVar LINKDIRECTORIES : C.* : $(CONFIG) : $(PLATFORM) ]
+	;
+
 	local linkFlags =
-		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
-		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : C.* : $(CONFIG) : $(PLATFORM) ] ]
-		[ C.FLibraryPaths $(C.STDLINKDIRECTORIES) ]
+		[ C.FLibraryPaths $(linkDirectories) $(C.STDLINKDIRECTORIES) ]
 		[ C._retrieveVar LINKFLAGS : C.* : $(CONFIG) : $(PLATFORM) ]
 		[ C._retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 	;
@@ -591,6 +594,10 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 		[ C._retrieveVar LINKLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ C._retrieveVar LINKLIBS : C.* : $(CONFIG) : $(PLATFORM) ] ;
 
+	SEARCH on $(linkLibs) += $(linkDirectories) $(C.STDLINKDIRECTORIES) ;
+	LINKLIBS on $(_linkTargets) = $(linkLibs) ;
+	Depends $(_linkTargets) : $(linkLibs) ;
+
 	local needLibs =
 		[ C._retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ C._retrieveVar NEEDLIBS : C.* : $(CONFIG) : $(PLATFORM) ] ;
@@ -599,7 +606,6 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 	Depends $(_linkTargets) : $(needLibs) ;
 
 	LINKFLAGS on $(_linkTargets) = $(linkFlags) ;
-	LINKLIBS on $(_linkTargets) = $(linkLibs) ;
 
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
@@ -790,9 +796,13 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	Depends allclean:$(TARGET) : clean:$(TARGET) ;
 	Clean clean:$(TARGET) : $(_linkTargets) ;
 
+	local linkDirectories =
+		[ C._retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
+		[ C._retrieveVar LINKDIRECTORIES : C.* : $(CONFIG) : $(PLATFORM) ]
+	;
+
 	local linkFlags =
-		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : $(TARGET) : $(CONFIG) : $(PLATFORM) ] ]
-		[ C.FLibraryPaths [ C._retrieveVar LINKDIRECTORIES : C.* : $(CONFIG) : $(PLATFORM) ] ]
+		[ C.FLibraryPaths $(linkDirectories) ]
 		[ C.FLibraryPaths $(C.STDLINKDIRECTORIES) ]
 		[ C._retrieveVar LINKFLAGS : C.* : $(CONFIG) : $(PLATFORM) ]
 		[ C._retrieveVar LINKFLAGS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
@@ -807,6 +817,10 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 		[ C._retrieveVar LINKLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ C._retrieveVar LINKLIBS : C.* : $(CONFIG) : $(PLATFORM) ] ;
 
+	SEARCH on $(linkLibs) += $(linkDirectories) $(C.STDLINKDIRECTORIES) ;
+	LINKLIBS on $(_linkTargets) = $(linkLibs) ;
+	Depends $(_linkTargets) : $(linkLibs) ;
+
 	local needLibs =
 		[ C._retrieveVar NEEDLIBS : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
 		[ C._retrieveVar NEEDLIBS : C.* : $(CONFIG) : $(PLATFORM) ] ;
@@ -815,7 +829,6 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 	Depends $(_t) : $(needLibs) ;
 
 	LINKFLAGS on $(_linkTargets) = $(linkFlags) ;
-	LINKLIBS on $(_linkTargets) = $(linkLibs) ;
 
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
@@ -1025,16 +1038,12 @@ rule C.LinkLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 rule C.LinkPrebuiltLibraries TARGET : LIBRARIES : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	local newLibraries ;
-	local lib ;
-	for lib in $(LIBRARIES) {
-		if $(lib:S) {
-			newLibraries += $(lib) ;
-		} else {
-			newLibraries += $(lib)$(SUFLIB) ;
-		}
-	}
-	LINKLIBS.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) += $(newLibraries) ;
+	local grist = $(TARGET):prebuiltlib ;
+	local gristedLibraries = $(LIBRARIES:G=$(grist)) ;
+	C._LinkPrebuiltLibraries ;
+	SEARCH on $(gristedLibraries) += $(SUBDIR) ;
+	SEARCH_EXTENSIONS on $(gristedLibraries) = $(SUFLINKLIBS) ;
+	LINKLIBS.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(TARGET) += $(gristedLibraries) ;
 }
 
 

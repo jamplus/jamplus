@@ -4,6 +4,7 @@
 	SUFEXE	?= "" ;
 	SUFLIB	?= .a ;
 	SUFMODULE ?= .so ;
+	SUFLINKLIBS ?= $(SUFLIB) $(SUFMODULE) ;
 	SUFOBJ	?= .o ;
 	SUFSHAREDLIB ?= .so ;
 
@@ -48,6 +49,19 @@ rule C.FIncludes { return -I$(<) ; }
 rule C.FLibraryPaths { return -L$(<) ; }
 
 
+rule C._LinkPrebuiltLibraries
+{
+	local lib ;
+	for lib in $(gristedLibraries) {
+		if ! $(lib:D) {
+   			BINDING on $(lib) = lib$(lib:B) ;
+			EXPAND_TEXT on $(lib) = -l$(lib:G=) ;
+			NoCare $(lib) ;
+   		}
+	}
+}
+
+
 actions updated together piecemeal C.Archive
 {
 	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
@@ -55,7 +69,7 @@ actions updated together piecemeal C.Archive
 
 actions C.Link
 {
-	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:T) $(LINKLIBS)
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:T)
 }
 
 actions together C.Ranlib

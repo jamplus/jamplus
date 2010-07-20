@@ -36,7 +36,7 @@ actions updated together piecemeal C.Archive
 
 actions C.Link
 {
-	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:T) $(LINKLIBS)
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS)
 }
 
 actions together C.Ranlib
