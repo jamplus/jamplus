@@ -653,6 +653,7 @@ rule C.Library TARGET : SOURCES : OPTIONS
 	else
 	{
 		local objects = [ C.MultiCppCompile $(TARGET) : $(SOURCES) ] ;
+		LINKED_OBJECTS on $(TARGET) += $(objects) ;
 		linkTargets = [ C.LibraryFromObjects $(TARGET) : $(objects) ] ;
 	}
 	ActiveTarget ;
