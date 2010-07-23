@@ -589,7 +589,8 @@ function BuildProject()
 	{
 		locateTargetText = [[
 ALL_LOCATE_TARGET = "$(destinationRootPath:gsub('\\', '/'))$$(PLATFORM)-$$(CONFIG)" ;
-]]
+]],
+		settingsFile = os.path.make_slash(os.path.combine(destinationRootPath, 'customsettings.jam')),
 	}
 
 	---------------------------------------------------------------------------
@@ -601,8 +602,22 @@ $(locateTargetText)
 DEPCACHE.standard = "$$(ALL_LOCATE_TARGET)/.depcache" ;
 DEPCACHE = standard ;
 
+NoCare $(settingsFile) ;
+include $(settingsFile) ;
+
 ]], locateTargetText, _G) }
 
+	---------------------------------------------------------------------------
+	-- Write the UserSettings.jam.
+	---------------------------------------------------------------------------
+	if not os.path.exists(locateTargetText.settingsFile) then
+		io.writeall(locateTargetText.settingsFile, [[
+# This file is included before any other Jamfiles.
+#
+# Enter your own settings here.
+]])
+	end
+	
 	-- Write the Jamfile variables out.
 	if Config.JamfileVariables then
 		for _, variable in ipairs(Config.JamfileVariables) do
