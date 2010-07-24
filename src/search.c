@@ -37,48 +37,48 @@ search(
 #ifdef OPT_PATH_BINDING_EXT
 	if ( varlist = var_get( "BINDING" ) )
 	{
-	    PATHNAME bf[1];
-	    path_parse( varlist->string, bf );
+		PATHNAME bf[1];
+		path_parse( varlist->string, bf );
 
-	    f->f_dir = bf->f_dir;
-	    f->f_base = bf->f_base;
-	    f->f_suffix = bf->f_suffix;
+		f->f_dir = bf->f_dir;
+		f->f_base = bf->f_base;
+		f->f_suffix = bf->f_suffix;
 	}
 #endif
 
 	if( varlist = var_get( "LOCATE" ) )
 	{
-	    f->f_root.ptr = varlist->string;
-	    f->f_root.len = (int)(strlen( varlist->string ));
-
-	    path_build( f, buf, 1 );
-
-	    if( DEBUG_SEARCH )
-		printf( "locate %s: %s\n", target, buf );
-
-	    timestamp( buf, time );
-
-	    return newstr( buf );
-	}
-	else if( varlist = var_get( "SEARCH" ) )
-	{
-	    while( varlist )
-	    {
 		f->f_root.ptr = varlist->string;
 		f->f_root.len = (int)(strlen( varlist->string ));
 
 		path_build( f, buf, 1 );
 
 		if( DEBUG_SEARCH )
-		    printf( "search %s: %s\n", target, buf );
+			printf( "locate %s: %s\n", target, buf );
 
 		timestamp( buf, time );
 
-		if( *time )
-		    return newstr( buf );
+		return newstr( buf );
+	}
+	else if( varlist = var_get( "SEARCH" ) )
+	{
+		while( varlist )
+		{
+			f->f_root.ptr = varlist->string;
+			f->f_root.len = (int)(strlen( varlist->string ));
 
-		varlist = list_next( varlist );
-	    }
+			path_build( f, buf, 1 );
+
+			if( DEBUG_SEARCH )
+				printf( "search %s: %s\n", target, buf );
+
+			timestamp( buf, time );
+
+			if( *time )
+				return newstr( buf );
+
+			varlist = list_next( varlist );
+		}
 	}
 
 	/* Look for the obvious */
@@ -91,7 +91,7 @@ search(
 	path_build( f, buf, 1 );
 
 	if( DEBUG_SEARCH )
-	    printf( "search %s: %s\n", target, buf );
+		printf( "search %s: %s\n", target, buf );
 
 	timestamp( buf, time );
 
