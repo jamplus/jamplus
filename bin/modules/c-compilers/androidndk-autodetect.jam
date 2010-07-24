@@ -1,0 +1,55 @@
+# C.AutoDetect will check for an Android NDK install we can use, and will setup the following three variables:
+# 1. NDKROOT			- pointing to root of NDK, e.g. c:\android\android-ndk-1.6_r1 - setup by NDK install.
+# 2. CYGWIN_PATH		- pointing to root of cygwin, e.g. c:\cygwin - users have to manually set this up.
+# 3. NDK_WRAPPERS_BASE	- pointing to the root of the ndk-wrappers,
+#                         see: http://tungchingkai.blogspot.com/2009/10/android-ndk-add-stlport-and-compile-c.html
+
+rule C.AutoDetect
+{
+	if $(COMPILER.$(PLATFORM))  &&  $(COMPILER.$(PLATFORM)) != androidndk 
+	{
+		return ;
+	}
+
+	# 1. NDKROOT
+	NDKROOT = $(NDKROOT:J=" ") ;	
+	if ! $(NDKROOT) 
+	{
+		return ;
+	}
+	
+	# 2. CYGWIN_PATH
+	CYGWIN_PATH = $(CYGWIN_PATH:J=" ") ;	
+	if ! $(CYGWIN_PATH) 
+	{
+		Echo *** Warning \: NDKROOT environment variable found, but CYGWIN_PATH not set. Please set to root of your cygwin install ;
+		return ;
+	}
+	
+	# 3. NDK_WRAPPERS_BASE
+	NDK_WRAPPERS_BASE = $(NDK_WRAPPERS_BASE:J=" ") ;	
+	if ! $(NDK_WRAPPERS_BASE) 
+	{
+		# Wrappers base not set, check if it is inside NDKROOT
+		NDK_WRAPPERS_BASE = [ Glob $(NDKROOT) : ndk-wrappers/ ] ;
+		if ! $(NDK_WRAPPERS_BASE)
+		{
+			Echo *** Warning \: NDKROOT and CYGWIN_PATH environment variable found, but NDK_WRAPPERS_BASE not set. Please set to root of your ndk-wrappers-base ;
+			return ;
+		}
+	}
+
+	# Set platform
+	COMPILER.$(PLATFORM) = androidndk ;
+
+	# Use generic gcc module.
+	UseModule c-compilers/c-gcc ;
+	
+	if $(PLATFORM) != *  &&  $(CONFIG) != * 
+	{
+		# Use Android specific gcc module.
+		UseModule c-compilers/$(PLATFORM)-gcc ;
+	}
+
+	return $(COMPILER.$(PLATFORM)) ;
+}
