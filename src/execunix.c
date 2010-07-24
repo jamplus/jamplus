@@ -47,6 +47,7 @@
 # ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 # include "luasupport.h"
 # endif /* OPT_BUILTIN_LUA_SUPPORT_EXT */
+#include "variable.h"
 
 # ifdef USE_EXECUNIX
 
@@ -134,6 +135,16 @@ exec_init()
 		tempdir = getenv( "TEMP" );
 	else if( getenv( "TMP" ) )
 		tempdir = getenv( "TMP" );
+
+	{
+		LIST *jobsList = var_get( "JAM_NUM_JOBS" );
+		if ( jobsList )
+		{
+			int jobs = atoi( jobsList->string );
+			if ( jobs > 0 )
+				globs.jobs = jobs;
+		}
+	}
 
 	for( i = 0; i < globs.jobs; ++i )
 	{
