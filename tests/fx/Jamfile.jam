@@ -1,29 +1,31 @@
 SubDir TOP ;
 
-DXSDK_DIR = $(DXSDK_DIR:J=$(SPACE)) ;
-FXC = $(DXSDK_DIR)/Utilities/Bin/x86/fxc.exe ;
+if $(DXSDK_DIR) {
+	DXSDK_DIR = $(DXSDK_DIR:J=$(SPACE)) ;
+	FXC = $(DXSDK_DIR)/Utilities/Bin/x86/fxc.exe ;
 
-rule Effect PARENTS : SOURCES
-{
-	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
-
-	local targets = $(SOURCES:S=.fxo) ;
-	MakeLocate $(targets) : $(LOCATE_TARGET) ;
-	Depends $(PARENTS) : $(targets) ;
-	Clean clean : $(targets) ;
-
-	local source ;
-	for source in $(SOURCES)
+	rule Effect PARENTS : SOURCES
 	{
-		local target = $(source:S=.fxo) ;
-		Depends $(target) : $(source) ;
-		CompileEffect $(target) : $(source) ;
+		SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
+
+		local targets = $(SOURCES:S=.fxo) ;
+		MakeLocate $(targets) : $(LOCATE_TARGET) ;
+		Depends $(PARENTS) : $(targets) ;
+		Clean clean : $(targets) ;
+
+		local source ;
+		for source in $(SOURCES)
+		{
+			local target = $(source:S=.fxo) ;
+			Depends $(target) : $(source) ;
+			CompileEffect $(target) : $(source) ;
+		}
 	}
-}
 
-actions CompileEffect
-{
-	"$(FXC)" /Tfx_2_0 /Fo"$(1)" "$(2)"
-}
+	actions CompileEffect
+	{
+		"$(FXC)" /Tfx_2_0 /Fo"$(1)" "$(2)"
+	}
 
-Effect all : simple.fx ;
+	Effect all : simple.fx ;
+}
