@@ -45,7 +45,7 @@ struct _pathname {
 
 } ;
 
-void path_build( PATHNAME *f, char *file, int binding );
+char* path_build( PATHNAME *f, char *file, int binding );
 void path_parse( const char *file, PATHNAME *f );
 void path_parent( PATHNAME *f );
 

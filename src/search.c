@@ -26,6 +26,9 @@ search(
 	PATHNAME f[1];
 	LIST	*varlist;
 	char	buf[ MAXJPATH ];
+#ifdef OPT_PATH_BINDING_EXT
+	PATHNAME bf[1];
+#endif
 
 	/* Parse the filename */
 
@@ -37,7 +40,6 @@ search(
 #ifdef OPT_PATH_BINDING_EXT
 	if ( varlist = var_get( "BINDING" ) )
 	{
-		PATHNAME bf[1];
 		path_parse( varlist->string, bf );
 
 		f->f_dir = bf->f_dir;
@@ -62,22 +64,49 @@ search(
 	}
 	else if( varlist = var_get( "SEARCH" ) )
 	{
-		while( varlist )
+		LIST *searchextensionslist = var_get( "SEARCH_EXTENSIONS" );
+		if ( searchextensionslist )
 		{
-			f->f_root.ptr = varlist->string;
-			f->f_root.len = (int)(strlen( varlist->string ));
+			for ( ; searchextensionslist; searchextensionslist = list_next( searchextensionslist ) )
+			{
+				while( varlist )
+				{
+					f->f_root.ptr = varlist->string;
+					f->f_root.len = (int)(strlen( varlist->string ));
 
-			path_build( f, buf, 1 );
+					strcpy( path_build( f, buf, 1 ), searchextensionslist->string );
 
-			if( DEBUG_SEARCH )
-				printf( "search %s: %s\n", target, buf );
+					if( DEBUG_SEARCH )
+						printf( "search %s: %s\n", target, buf );
 
-			timestamp( buf, time );
+					timestamp( buf, time );
 
-			if( *time )
-				return newstr( buf );
+					if( *time )
+						return newstr( buf );
 
-			varlist = list_next( varlist );
+					varlist = list_next( varlist );
+				}
+			}
+		}
+		else
+		{
+			while( varlist )
+			{
+				f->f_root.ptr = varlist->string;
+				f->f_root.len = (int)(strlen( varlist->string ));
+
+				path_build( f, buf, 1 );
+
+				if( DEBUG_SEARCH )
+					printf( "search %s: %s\n", target, buf );
+
+				timestamp( buf, time );
+
+				if( *time )
+					return newstr( buf );
+
+				varlist = list_next( varlist );
+			}
 		}
 	}
 

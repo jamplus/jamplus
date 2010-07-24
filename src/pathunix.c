@@ -134,7 +134,7 @@ path_parse(
  * path_build() - build a filename given dir/base/suffix/member
  */
 
-void
+char*
 path_build(
 	PATHNAME *f,
 	char	*file,
@@ -317,6 +317,7 @@ path_build(
 	if ( *file == pathdelim )
 	    *file = 0;
 #endif
+	return file + 1;
 }
 
 /*
