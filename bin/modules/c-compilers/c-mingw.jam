@@ -72,12 +72,6 @@ actions updated response C.PCH
 }
 
 
-rule C._ForceIncludeHelper
-{
-	C.AddFlags $(TARGET) : "-include $(INCLUDES)" : $(THE_CONFIG:E=*) : $(THE_PLATFORM:E=*) ;
-}
-
-
 rule C._C++Exceptions
 {
 	FLAGS_TO_REMOVE.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += -fno-exceptions ;
@@ -88,7 +82,7 @@ rule C._C++Exceptions
 	}
 	else if $(TYPE) = true
 	{
-		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += -fno-exceptions ;
+		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += -fexceptions ;
 	}
 }
 
@@ -109,7 +103,8 @@ rule C._MultiCppCompile_SetupFlags
 		_flags += -Winvalid-pch ;
 
 		local md5 = [ MD5 $(_flags) ] ;
-		local _pchName = @($(_pch[3]:LDBS):G=$(grist)-$(md5)) ;
+		local _pchName = @($(_pch[3]:LBS):G=$(grist)-$(md5)) ;
+		BINDING on $(_pchName) = $(_pch[3]) ;
 		local _pchFilename = $(_pchName).gch ;
 
 		if ! $(built-$(_pchName)) {
@@ -142,7 +137,15 @@ rule C._MultiCppCompile_SetupFlags
 		}
 	}
 
+	Includes $(_src) : $(objectForceIncludes) ;
+	SEARCH on $(objectForceIncludes) = $(_hdrs) ;
+	_flags += "-include $(objectForceIncludes:G=)" ;
+
 	_flags += "-o \"$(_obj:T)\"" ;
+
+	if $(C_LIBRARY_SHARED_MODULE) {
+		_flags += -fPIC ;
+	}
 }
 
 rule C._SharedLibraryFromObjects_ExportLib
@@ -161,21 +164,9 @@ rule C._SharedLibraryFromObjects_ExportLib
 rule C._SharedLibraryFromObjects_LinkFlags
 {
 	if module in $(OPTIONS) {
-		linkFlags += -bundle -undefined dynamic_lookup ;
+		linkFlags += -shared -fPIC ;
 	} else {
-		local installName =
-			[ C._retrieveVar INSTALL_NAME_PATH : $(TARGET) : $(CONFIG) : $(PLATFORM) ]
-			[ C._retrieveVar INSTALL_NAME_PATH : * : $(CONFIG) : $(PLATFORM) ] ;
-		if ! $(installName)
-		{
-			installName = $(_t:TD) ;
-		}
-		else
-		{
-			installName = $(installName[1]) ;
-		}
-		installName = $(_t:BSR=$(installName)) ;
-		on $(TARGET) linkFlags += -dynamiclib -install_name $(installName) ;
+		on $(TARGET) linkFlags += -shared -fPIC ;
 	}
 }
 
@@ -186,7 +177,7 @@ C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
 C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
 C.AddBuildExtensions M : .m : C.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
 C.AddBuildExtensions MM : .mm : C.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
-C.AddBuildExtensions PCH : .h : C.PCH : "" .gch ;
+C.AddBuildExtensions PCH : .h .pch : C.PCH : "" .gch ;
 
 
 
