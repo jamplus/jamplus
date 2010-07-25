@@ -415,11 +415,18 @@ var_expand(
 
 #ifdef OPT_EXPAND_BINDING_EXT
 		    if( colon && edits.expandbinding ) {
-			time_t time;
-			TARGET *t = bindtarget( valuestring );
-			pushsettings( t->settings );
-			valuestring = search( t->name, &time );
-			popsettings( t->settings );
+				SETTINGS *expandText;
+				TARGET *t = bindtarget( valuestring );
+				expandText = quicksettingslookup( t, "EXPAND_TEXT" );
+				if ( expandText ) {
+					valuestring = expandText->value->string;
+				} else {
+					if( t->binding == T_BIND_UNBOUND ) {
+						t->boundname = search_using_target_settings( t, t->name, &t->time );
+						t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
+					}
+					valuestring = t->boundname;
+				}
 		    }
 #endif
 
