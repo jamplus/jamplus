@@ -1078,20 +1078,6 @@ builtin_shell(
 
 #ifdef OPT_BUILTIN_GROUPBYVAR_EXT
 
-SETTINGS* quicklookup( TARGET* t, const char* symbol )
-{
-	SETTINGS *vars;
-	if ( !t  ||  !symbol )
-		return NULL;
-
-	for ( vars = t->settings; vars; vars = vars->next )
-	    if ( vars->symbol[0] == symbol[0]  &&  strcmp( vars->symbol, symbol ) == 0 )
-			return vars;
-
-	return NULL;
-}
-
-
 LIST *
 builtin_groupbyvar(
 	PARSE	*parse,
@@ -1129,7 +1115,7 @@ builtin_groupbyvar(
 	all = var_get( filelist->string );
 
 	/* */
-	vars = quicklookup( bindtarget( all->string ), varname->string );
+	vars = quicksettingslookup( bindtarget( all->string ), varname->string );
 	if ( !vars )
 		return L0;
 	var1 = vars->value;
@@ -1138,7 +1124,7 @@ builtin_groupbyvar(
 		LIST* it;
 		LIST* it1;
 		LIST* var;
-		vars = quicklookup( bindtarget( f->string ), varname->string );
+		vars = quicksettingslookup( bindtarget( f->string ), varname->string );
 		if ( !vars )
 			continue;
 		var = vars->value;

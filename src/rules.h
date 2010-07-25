@@ -262,3 +262,4 @@ void 	pushsettings( SETTINGS *v );
 void 	popsettings( SETTINGS *v );
 void 	freesettings( SETTINGS *v );
 void	donerules();
+SETTINGS* quicksettingslookup( TARGET* t, const char* symbol );

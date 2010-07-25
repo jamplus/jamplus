@@ -500,6 +500,24 @@ freesettings( SETTINGS *v )
 }
 
 /*
+ *    quicksettingslookup() - look up target-specific settings without adding the settings to the environment
+ */
+
+SETTINGS* quicksettingslookup( TARGET* t, const char* symbol )
+{
+	SETTINGS *vars;
+	if ( !t  ||  !symbol )
+		return NULL;
+	
+	for ( vars = t->settings; vars; vars = vars->next )
+	    if ( vars->symbol[0] == symbol[0]  &&  strcmp( vars->symbol, symbol ) == 0 )
+			return vars;
+	
+	return NULL;
+}
+
+
+/*
  * donerules() - free RULE and TARGET tables
  */
 
