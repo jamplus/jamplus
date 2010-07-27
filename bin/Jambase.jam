@@ -772,6 +772,8 @@ rule Workspace WORKSPACE_NAME : TARGETS
 {
 }
 
+INCREDIBUILD ?= off ;
+
 if ! $(TARGETINFO_LOCATE) {
 	IncludeModule c-autodetect ;
 }

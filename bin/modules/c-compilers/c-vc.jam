@@ -81,7 +81,7 @@ actions response C.Link
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT))
+	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
 }
 
 } else {
@@ -90,25 +90,25 @@ actions response C.Link
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT))
+	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
 }
 
 actions response C.DebugLinkWithManifest
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT))
+	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
 	if exist $(MANIFEST).intermediate.manifest "$(C.MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
 	if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
 	"$(C.RC:\\)" /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:CT))
+	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:CT)) /out:$(<[1])
 }
 
 actions response C.LinkWithManifest
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo /out:$(<[1]) @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:CT))
+	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:CT)) /out:$(<[1])
 	"$(C.MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
 }
 
@@ -119,7 +119,7 @@ actions updated response C.CC
 {
 	PATH=$(MSVCNT_BIN_PATH);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	$(C.CC:\\C) /nologo @@($(MFLAGS) $(>:C))
+	$(C.CC:\\C) /nologo @@($(MFLAGS)) $(>:C)
 }
 
 
@@ -127,14 +127,14 @@ actions updated response C.C++
 {
 	PATH=$(MSVCNT_BIN_PATH);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	$(C.C++:\\C) /nologo @@($(MFLAGS) $(>:C))
+	$(C.C++:\\C) /nologo @@($(MFLAGS)) $(>:C)
 }
 
 
 actions together response C.Archive
 {
 	PATH=$(MSVCNT_BIN_PATH);%PATH%
-	$(C.AR:C) /nologo $(LIBFLAGS) /out:$(<:C) @@($(>:\\C))
+	$(C.AR:C) /nologo $(LIBFLAGS) @@($(>:\\C)) /out:$(<:C)
 }
 
 
@@ -296,7 +296,10 @@ rule C._MultiCppCompile_PchDeps
 rule C._MultiCppCompile_PostCompile
 {
 	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010 {
-		SEMAPHORE on $(objects) = $(_VCPDB) ;
+		# If Incredibuild is enabled, we do not need the semaphore as Incredibuild does something magic to get around the problem.
+		if $(INCREDIBUILD) != "on" {
+			SEMAPHORE on $(objects) = $(_VCPDB) ;
+		}
 	}
 }
 
