@@ -1058,8 +1058,15 @@ static int filecache_findlink(const char *cachedname, MD5SUM blobmd5sum)
 
 	if (findfile(buffer_ptr(&wildbuff), &linknamebuff))
 	{
-		const char* dashPtr = strchr(buffer_ptr(&linknamebuff), '-');
-		haveblobmd5sum = read_md5sum_string(dashPtr + 1, blobmd5sum);
+		const char* dashPtr = strrchr(buffer_ptr(&linknamebuff), '-');
+		const char* slashPtr = strrchr(buffer_ptr(&linknamebuff), '/');
+#ifdef OS_NT
+		const char* backslashPtr = strrchr(buffer_ptr(&linknamebuff), '\\');
+		if (backslashPtr > slashPtr)
+			slashPtr = backslashPtr;
+#endif
+		if (dashPtr > slashPtr)
+			haveblobmd5sum = read_md5sum_string(dashPtr + 1, blobmd5sum);
 	}
 
 	buffer_free(&linknamebuff);
