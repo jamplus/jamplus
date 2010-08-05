@@ -704,6 +704,8 @@ LIST *
 
 	l = headers1( c->boundname, hdrscan );
 
+	l = list_append( list_copy( 0, var_get( "HDREXTRA" ) ), l );
+
 	c->includes = list_copy( 0, l );
 
 	{
