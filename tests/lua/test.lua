@@ -5,7 +5,8 @@ function Test()
 		local numTestsPassed, totalTests = lines[index]:match('Tests passed: (%d+)/(%d+)')
 		if numTestsPassed then
 			TestExpression(numTestsPassed == totalTests, "One of the Lua parser tests failed")
-			TestNumberUpdate(numTestsPassed - 1)
+			TestNumberUpdate(totalTests - 1)
+			TestSucceeded(numTestsPassed - 1)
 			ranTest = true
 			break
 		end

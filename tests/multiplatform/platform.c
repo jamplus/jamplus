@@ -6,6 +6,8 @@ extern void Func();
 extern void Win32();
 #elif defined(USING_MACOSX)
 extern void MacOSX();
+#elif defined(USING_LINUX)
+extern void Linux();
 #endif
 
 main()
@@ -16,6 +18,9 @@ main()
 #elif defined(USING_MACOSX)
 	printf("Using macosx\n");
 	MacOSX();
+#elif defined(USING_LINUX)
+	printf("Using linux\n");
+	Linux();
 #endif
 	Func();
 }

@@ -9,15 +9,23 @@ totalTests = 0
 function TestNumberUpdate(amount)
 	amount = amount or 1
 	testNumber = testNumber + amount
-	testsSucceeded = testsSucceeded + amount
 	totalTests = totalTests + amount
 	io.write( rotatingCharacters[(testNumber % 4) + 1] .. '\b' )
+end
+
+function TestSucceeded(amount)
+	amount = amount or 1
+	testsSucceeded = testsSucceeded + amount
 end
 
 function RunJam(commandLine)
 	if not commandLine then commandLine = {} end
 	table.insert(commandLine, 1, 'jam')
 	table.insert(commandLine, 2, '-j1')
+	
+	if Compiler then
+		table.insert(commandLine, 3, 'COMPILER=' .. Compiler)
+	end
 
 	if Platform == 'win32' then
 		commandLine[#commandLine + 1] = '2>&1'
@@ -32,69 +40,142 @@ function TestExpression(result, failMessage)
 	if not result then
 		error(failMessage)
 	end
+	
+	TestSucceeded()
 end
 
-function TestPattern(pattern, lines)
+function TestPattern(patterns, lines)
 	TestNumberUpdate()
 
-	if type(pattern) == 'string' then
+	if type(patterns) == 'string' then
 		local splitLines = {}
-		for line in (pattern .. '\n'):gmatch('(.-)\n') do
+		for line in (patterns .. '\n'):gmatch('(.-)\n') do
 			splitLines[#splitLines + 1] = line
 		end
 		if splitLines[#splitLines] == '' then
 			table.remove(splitLines, #splitLines)
 		end
-		pattern = splitLines
+		patterns = splitLines
 	end
 
 	local lineIndex = 1
 	local patternIndex = 1
-	local patternsToFind = {}
-	while lineIndex <= #lines  and  (patternIndex - #patternsToFind) <= #pattern do
+	local oooGroupPatternsToFind = {}
+	local oooPatternsToFind = {}
+	local lastMatchedLineIndex = 0
+	while lineIndex <= #lines  and  (patternIndex - #oooPatternsToFind) <= #patterns do
 		local line = lines[lineIndex]:gsub('^%s+', ''):gsub('%s+$', '')
-		local pattern = pattern[patternIndex]
+		local pattern
 		local ooo
+		local ooogroup = oooGroupPatternsToFind[1] ~= nil
+		if not ooogroup then
+			pattern = patterns[patternIndex]
+			if pattern then
+				pattern = pattern:gsub('$%(SUFEXE%)', SUFEXE)
+			end
+		end
+
 		local next
 		if pattern then
 			pattern = pattern:gsub('^%s+', ''):gsub('%s+$', '')
-			next = pattern:sub(1, 6) == '!NEXT!'
-			if next then
-				pattern = pattern:sub(7)
+			ooogroup = pattern:sub(1, 10) == '!OOOGROUP!'
+			if ooogroup then
+				-- Collect Out Of Order entries.
+				while patternIndex <= #patterns do
+					pattern = patterns[patternIndex]
+					pattern = pattern:gsub('^%s+', ''):gsub('%s+$', '')
+					if pattern:sub(1, 10) ~= '!OOOGROUP!' then break end
+					pattern = pattern:sub(11)
+					pattern = pattern:gsub('$%(SUFEXE%)', SUFEXE)
+					oooGroupPatternsToFind[#oooGroupPatternsToFind + 1] = pattern
+					pattern = nil
+					patternIndex = patternIndex + 1
+				end
 			else
-				ooo = pattern:sub(1, 5) == '!OOO!'
-				if ooo then
-					pattern = pattern:sub(6)
+				next = pattern:sub(1, 6) == '!NEXT!'
+				if next then
+					pattern = pattern:sub(7)
+				else
+					ooo = pattern:sub(1, 5) == '!OOO!'
+					if ooo then
+						pattern = pattern:sub(6)
+					end
 				end
 			end
 		else
 			hi = 5
 		end
+
 		local patternMatches = false
-		if pattern and pattern:sub(1, 1) == '&' then
-		  	patternMatches = not not line:match(pattern:sub(2))
-		else
-			patternMatches = line == pattern
+		if pattern then
+			if pattern:sub(1, 1) == '&' then
+				patternMatches = not not line:match(pattern:sub(2))
+			else
+				patternMatches = line == pattern
+			end
 		end
 
-		if not patternMatches then
+		if patternMatches then
+			lastMatchedLineIndex = lineIndex
+		else
 			if not next  or  not pattern then
-				if ooo then
-					patternsToFind[#patternsToFind + 1] = pattern
-				end
-				if patternsToFind[1]  and  not patternsToFind[1]:match(line) then
-					if not ooo  and  pattern then
-						error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or patternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
-					else
-						if pattern then
-							lineIndex = lineIndex - 1
+				if oooGroupPatternsToFind[1] then
+					local patternFoundIndex
+					for patternsToFindIndex = 1, #oooGroupPatternsToFind do
+						local testPattern = oooGroupPatternsToFind[patternsToFindIndex]
+						if testPattern:sub(1, 1) == '&' then
+							patternMatches = not not line:match(testPattern:sub(2))
 						else
-							patternIndex = patternIndex - 1
+							patternMatches = line == testPattern
+						end
+						if patternMatches then
+							patternFoundIndex = patternsToFindIndex
+							break
 						end
 					end
+					if oooGroupPatternsToFind[1]  and  not patternFoundIndex then
+						if not ooo  and  pattern then
+							error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or oooGroupPatternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
+						else
+							if pattern then
+								lineIndex = lineIndex - 1
+							else
+								patternIndex = patternIndex - 1
+							end
+						end
+					else
+						if patternFoundIndex then
+							lastMatchedLineIndex = lineIndex
+							table.remove(oooGroupPatternsToFind, patternFoundIndex)
+						end
+						patternIndex = patternIndex - 1
+					end
 				else
-					table.remove(patternsToFind, 1)
-					patternIndex = patternIndex - 1
+					if ooo then
+						oooPatternsToFind[#oooPatternsToFind + 1] = pattern
+					end
+
+					local testPattern = oooPatternsToFind[1]
+					if testPattern  and  testPattern:sub(1, 1) == '&' then
+						patternMatches = not not line:match(testPattern:sub(2))
+					else
+						patternMatches = line == testPattern
+					end
+
+					if oooPatternsToFind[1]  and  not patternMatches then
+						if not ooo  and  pattern then
+							error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or oooGroupPatternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
+						else
+							if pattern then
+								lineIndex = lineIndex - 1
+							else
+								patternIndex = patternIndex - 1
+							end
+						end
+					else
+						table.remove(oooPatternsToFind, 1)
+						patternIndex = patternIndex - 1
+					end
 				end
 			else
 				patternIndex = patternIndex - 1
@@ -105,9 +186,25 @@ function TestPattern(pattern, lines)
 		patternIndex = patternIndex + 1
 	end
 
-	if #patternsToFind > 0 then
-		error('\nExpecting the following output:\n' .. table.concat(patternsToFind, '\n'))
+	if #oooGroupPatternsToFind > 0 then
+		error('\nExpecting the following output:\n' .. table.concat(oooGroupPatternsToFind, '\n'))
 	end
+ 	if #oooPatternsToFind > 0 then
+ 		error('\nExpecting the following output:\n' .. table.concat(oooPatternsToFind, '\n'))
+ 	end
+	if patternIndex <= #patterns then
+		local patternsExpected = {}
+		for index = patternIndex, #patterns do
+			patternsExpected[#patternsExpected + 1] = patterns[index]
+		end
+		local linesExpected = {}
+		for index = lastMatchedLineIndex + 1, #lines do
+			linesExpected[#linesExpected + 1] = lines[index]
+		end
+		error('\nExpected:\n' .. table.concat(patternsExpected, '\n') .. '\n\nFull output:\n' .. table.concat(linesExpected, '\n'))
+	end
+	
+	TestSucceeded()
 	return true
 end
 
@@ -163,6 +260,7 @@ function TestDirectories(expectedDirs)
 	if #missingDirs > 0 then
 		error('These directories are missing:\n\t\t' .. table.concat(missingDirs, '\n\t\t'))
 	end
+	TestSucceeded()
 end
 
 
@@ -171,7 +269,7 @@ function TestFiles(expectedFiles)
 
 	local expectedFilesMap = {}
 	for _, fileName in ipairs(expectedFiles) do
-		fileName = fileName:gsub('$PlatformDir', PlatformDir)
+		fileName = fileName:gsub('$PlatformDir', PlatformDir):gsub('$%(SUFEXE%)', SUFEXE)
 		if fileName:sub(1, 1) == '?' then
 			expectedFilesMap[fileName:sub(2)] = '?'
 		else
@@ -218,6 +316,7 @@ function TestFiles(expectedFiles)
 	if #missingFiles > 0 then
 		error('These files are missing:\n\t\t' .. table.concat(missingFiles, '\n\t\t'))
 	end
+	TestSucceeded()
 end
 
 
@@ -225,9 +324,11 @@ end
 if os.getenv("OS") == "Windows_NT" then
  	Platform = 'win32'
 	PlatformDir = 'win32'
+	SUFEXE = '.exe'
 elseif os.getenv("OSTYPE") == "darwin9.0" then
 	Platform = 'macosx'
 	PlatformDir = 'macosx32'
+	SUFEXE = ''
 else
 	local f = io.popen('uname')
 	uname = f:read('*a'):lower():gsub('\n', '')
@@ -240,10 +341,18 @@ else
 		Platform = 'linux'
 		PlatformDir = 'linux32'
 	end
+
+	SUFEXE = ''
 end
 
 
 local dirs
+
+if arg and arg[1] == '--compiler' then
+	Compiler = arg[2]
+	table.remove(arg, 1)
+	table.remove(arg, 1)
+end
 
 if arg and arg[1] then
 	dirs = arg

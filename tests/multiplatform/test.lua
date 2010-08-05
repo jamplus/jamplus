@@ -27,7 +27,7 @@ function Test()
 		local pattern
 	    if Platform == 'win32' then
 			pattern = [[
-*** found 17 target(s)...
+*** found 16 target(s)...
 *** updating 4 target(s)...
 @ C.CC <platform>platform.obj
 platform.c
@@ -60,7 +60,7 @@ Generating Code...
 			}
 
 		else
-			if Platform == 'macosx32' then
+			if Platform == 'macosx' then
 				pattern = [[
 *** found 11 target(s)...
 *** updating 4 target(s)...
@@ -122,16 +122,16 @@ RELEASE: What's up?!
 		TestPattern(pattern2, ex.collectlines{'platform.release.exe'})
 
 		pattern3 = [[
-*** found 17 target(s)...
+*** found 16 target(s)...
 ]]
 
-	elseif Platform == 'macosx32' then
+	elseif Platform == 'macosx' then
 		local pattern2 = [[
 Using macosx
 This is a Mac OS X build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, ex.collectlines{'platform.release'})
+		TestPattern(pattern2, ex.collectlines{'./platform.release'})
 
 		pattern3 = [[
 *** found 11 target(s)...
@@ -143,7 +143,7 @@ Using linux
 This is a Linux build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, ex.collectlines{'platform.release'})
+		TestPattern(pattern2, ex.collectlines{'./platform.release'})
 
 		pattern3 = [[
 *** found 11 target(s)...

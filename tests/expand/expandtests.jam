@@ -76,19 +76,23 @@ TestExpansion @($(var1)$(var2):A) : $(list) ;
 FILE = somefile.txt ;
 TestExpansion $(FILE:T) : somefile.txt ;
 
-LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
-TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/somefile.txt ;
+FILE2 = somefile2.txt ;
+LOCATE on $(FILE2) = /somewhere/on/the/hard/drive ;
+TestExpansion $(FILE2:T) : /somewhere/on/the/hard/drive/somefile2.txt ;
 
-BINDING on $(FILE) = newname.txt ;
-TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/newname.txt ;
+FILE3 = somefile3.txt ;
+BINDING on $(FILE3) = newname.txt ;
+LOCATE on $(FILE3) = /somewhere/on/the/hard/drive ;
+TestExpansion $(FILE3:T) : /somewhere/on/the/hard/drive/newname.txt ;
 
-BINDING on $(FILE) = ;
-SEARCH on $(FILE) = data ;
-LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;
-TestExpansion $(FILE:T) : /somewhere/on/the/hard/drive/somefile.txt ;
+FILE4 = somefile4.txt ;
+SEARCH on $(FILE4) = data ;
+LOCATE on $(FILE4) = /somewhere/on/the/hard/drive ;
+TestExpansion $(FILE4:T) : /somewhere/on/the/hard/drive/somefile4.txt ;
 
-LOCATE on $(FILE) = ;
-TestExpansion $(FILE:T) : data/somefile.txt ;
+FILE5 = somefile5.txt ;
+SEARCH on $(FILE5) = data ;
+TestExpansion $(FILE5:T) : data/somefile5.txt ;
 
 #------------------------------------------------------------------------------
 FILENAME = <thegrist>c:/some/directory/filename.txt ;

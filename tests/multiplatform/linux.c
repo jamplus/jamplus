@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-void MacOSX()
+void Linux()
 {
 	printf("This is a Linux build.\n");
 }

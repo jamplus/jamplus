@@ -57,7 +57,7 @@ function Test()
 		TestFiles(originalFiles)
 	end
 
-	if Platform == 'win32' then
+	if Platform == 'win32'  and  Compiler ~= 'mingw' then
 		local dirs =
 		{
 			'liba/',
@@ -344,21 +344,21 @@ Generating Code...
 @ C.C++ <liba>__/outer/outer.o 
 @ C.Archive <liba>liba.a 
 !NEXT!@ C.Ranlib <liba>liba.a 
-@ C.C++ <libb>filec.o 
-@ C.C++ <libb>fileb.o 
-@ C.C++ <libb>filea.o 
+!OOOGROUP!@ C.C++ <libb>filea.o 
+!OOOGROUP!@ C.C++ <libb>fileb.o 
+!OOOGROUP!@ C.C++ <libb>filec.o 
 @ C.C++ <libb>onelevel/oneleveldeeper.o 
 @ C.C++ <libb>__/outerb/outer.o 
 @ C.Archive <libb>libb.a 
 !NEXT!@ C.Ranlib <libb>libb.a 
-@ C.C++ <libc>src/Loading/Loading.o 
-@ C.C++ <libc>src/Saving/SavingB.o 
-@ C.C++ <libc>src/Saving/Saving1.o 
-@ C.C++ <libc>src/Saving/Saving3.o 
-@ C.C++ <libc>src/memory/memorya.o 
-@ C.C++ <libc>src/memory/memoryb.o 
-@ C.C++ <libc>src/integral/integral1.o 
-@ C.C++ <libc>src/integral/integral2.o 
+!OOOGROUP!@ C.C++ <libc>src/Saving/Saving1.o 
+!OOOGROUP!@ C.C++ <libc>src/Saving/Saving3.o 
+!OOOGROUP!@ C.C++ <libc>src/Saving/SavingB.o 
+!OOOGROUP!@ C.C++ <libc>src/memory/memorya.o 
+!OOOGROUP!@ C.C++ <libc>src/memory/memoryb.o 
+!OOOGROUP!@ C.C++ <libc>src/integral/integral2.o 
+!OOOGROUP!@ C.C++ <libc>src/integral/integral1.o 
+!OOOGROUP!@ C.C++ <libc>src/Loading/Loading.o 
 @ C.Archive <libc>libc.a 
 !NEXT!@ C.Ranlib <libc>libc.a 
 *** updated 32 target(s)...

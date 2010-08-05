@@ -26,7 +26,7 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 25 target(s)...
+*** found 24 target(s)...
 *** updating 6 target(s)...
 @ C.C++ <common>print.obj
 print.cpp
@@ -69,7 +69,7 @@ project1.cpp
 		TestDirectories(originalDirs)
 
 		local pattern2 = [[
-*** found 25 target(s)...
+*** found 24 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	else
@@ -123,7 +123,7 @@ project1.cpp
 
 	if Platform == 'win32' then
 		local pattern3 = [[
-*** found 25 target(s)...
+*** found 24 target(s)...
 *** updating 4 target(s)...
 @ C.C++ <libA>libA.obj
 libA.cpp

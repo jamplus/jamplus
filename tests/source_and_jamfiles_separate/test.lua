@@ -51,7 +51,7 @@ function Test()
 		}
 
 		pattern = [[
-			*** found 20 target(s)...
+			*** found 18 target(s)...
 			*** updating 5 target(s)...
 			@ C.CC <helloworld>precomp.h.pch
 			createprecomp.c
@@ -83,9 +83,9 @@ function Test()
 		}
 		
 		pattern = [[
-			*** found 15 target(s)...
+			*** found 16 target(s)...
 			*** updating 6 target(s)...
-			@ C.PCH <helloworld%-%x+>precomp.h.gch 
+			&@ C.PCH <helloworld%-%x+>precomp.h.gch 
 			@ C.CC <helloworld>file.o 
 			@ C.CC <helloworld>main.o 
 			@ C.CC <helloworld>createprecomp.o 
@@ -105,11 +105,11 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 20 target(s)...
+				*** found 18 target(s)...
 ]]
 		else
 			pattern = [[
-				*** found 15 target(s)...
+				*** found 16 target(s)...
 ]]
 		end
 		TestPattern(pattern, RunJam{ '-Cjam' })
@@ -124,7 +124,7 @@ function Test()
 
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 20 target(s)...
+				*** found 18 target(s)...
 				*** updating 5 target(s)...
 				@ C.CC <helloworld>precomp.h.pch
 				createprecomp.c
@@ -137,9 +137,9 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 15 target(s)...
+				*** found 16 target(s)...
 				*** updating 5 target(s)...
-				@ C.PCH <helloworld%-%x+>precomp.h.gch 
+				&@ C.PCH <helloworld%-%x+>precomp.h.gch 
 				@ C.CC <helloworld>file.o 
 				@ C.CC <helloworld>main.o 
 				@ C.CC <helloworld>createprecomp.o 
@@ -157,11 +157,11 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 20 target(s)...
+				*** found 18 target(s)...
 ]]
 		else
 			pattern = [[
-				*** found 15 target(s)...
+				*** found 16 target(s)...
 ]]
 		end
 		TestPattern(pattern, RunJam{ '-Cjam' })
@@ -176,7 +176,7 @@ function Test()
 
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 20 target(s)...
+				*** found 18 target(s)...
 				*** updating 5 target(s)...
 				@ C.CC <helloworld>precomp.h.pch
 				createprecomp.c
@@ -189,7 +189,7 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 15 target(s)...
+				*** found 16 target(s)...
 				*** updating 2 target(s)...
 				@ C.CC <helloworld>createprecomp.o 
 				@ C.Link <helloworld>helloworld.release 

@@ -9,12 +9,12 @@ function Test()
 	}
 	TestFiles(cleanFiles)
 
-	if Platform == 'win32' then
+	if Platform == 'win32'  and  Compiler ~= 'mingw' then
 		local run1pattern =
 		{
 			'Building appA...',
 			'Building appB...',
-			'*** found 24 target(s)...',
+			'*** found 22 target(s)...',
 			'*** updating 4 target(s)...',
 			'@ C.C++ <appA>appA.obj',
 			'appA.cpp',
@@ -50,7 +50,7 @@ Building appB...
 		---------------------------------------------------------------------------
 		local appAPattern = [[
 Building appA...
-*** found 12 target(s)...
+*** found 11 target(s)...
 *** updating 2 target(s)...
 @ C.C++ <appA>appA.obj
 appA.cpp
@@ -67,7 +67,7 @@ appA.cpp
 
 		local appBPattern = [[
 Building appB...
-*** found 12 target(s)...
+*** found 11 target(s)...
 *** updating 2 target(s)...
 @ C.C++ <appB>appB.obj
 appB.cpp
@@ -103,9 +103,9 @@ Building appB...
 *** found 12 target(s)...
 *** updating 4 target(s)...
 @ C.C++ <appA>appA.o 
-@ C.Link <appA>appA.release 
+@ C.Link <appA>appA.release$(SUFEXE) 
 @ C.C++ <appB>appB.o 
-@ C.Link <appB>appB.release 
+@ C.Link <appB>appB.release$(SUFEXE) 
 *** updated 4 target(s)...
 ]]
 
@@ -113,8 +113,8 @@ Building appB...
 
 		TestFiles{
 			'Jamfile.jam',
-			'appA.cpp', 'appA.o', 'appA.release',
-			'appB.cpp', 'appB.o', 'appB.release',
+			'appA.cpp', 'appA.o', 'appA.release$(SUFEXE)',
+			'appB.cpp', 'appB.o', 'appB.release$(SUFEXE)',
 		}
 
 		---------------------------------------------------------------------------
@@ -136,14 +136,14 @@ Building appA...
 *** found 6 target(s)...
 *** updating 2 target(s)...
 @ C.C++ <appA>appA.o 
-@ C.Link <appA>appA.release 
+@ C.Link <appA>appA.release$(SUFEXE) 
 *** updated 2 target(s)...
 ]]
 
 		TestPattern(appAPattern, RunJam{ 'appA' })
 		TestFiles{
 			'Jamfile.jam',
-			'appA.cpp', 'appA.o', 'appA.release',
+			'appA.cpp', 'appA.o', 'appA.release$(SUFEXE)',
 			'appB.cpp',
 		}
 
@@ -153,15 +153,15 @@ Building appB...
 *** found 6 target(s)...
 *** updating 2 target(s)...
 @ C.C++ <appB>appB.o 
-@ C.Link <appB>appB.release 
+@ C.Link <appB>appB.release$(SUFEXE)
 *** updated 2 target(s)...
 ]]
 
 		TestPattern(appBPattern, RunJam{ 'appB' })
 		TestFiles{
 			'Jamfile.jam',
-			'appA.cpp', 'appA.o', 'appA.release',
-			'appB.cpp', 'appB.o', 'appB.release',
+			'appA.cpp', 'appA.o', 'appA.release$(SUFEXE)',
+			'appB.cpp', 'appB.o', 'appB.release$(SUFEXE)',
 		}
 
 		---------------------------------------------------------------------------
@@ -169,7 +169,7 @@ Building appB...
 		TestFiles{
 			'Jamfile.jam',
 			'appA.cpp',
-			'appB.cpp', 'appB.o', 'appB.release',
+			'appB.cpp', 'appB.o', 'appB.release$(SUFEXE)',
 		}
 
 		---------------------------------------------------------------------------

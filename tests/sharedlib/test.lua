@@ -111,7 +111,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 		 	pattern = [[
-*** found 46 target(s)...
+*** found 44 target(s)...
 *** updating 17 target(s)...
 @ C.CC <lib-c>add.obj
 add.c
@@ -153,7 +153,7 @@ main.c
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 46 target(s)...
+*** found 44 target(s)...
 ]]
 		else
 			pattern = [[
@@ -172,7 +172,7 @@ main.c
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 46 target(s)...
+*** found 44 target(s)...
 *** updating 4 target(s)...
 @ C.CC <slib-a>slib-a.obj
 slib-a.c
@@ -180,8 +180,7 @@ slib-a.c
 !NEXT!@ C.CC <slib-b>slib-b.obj
 slib-b.c
 @ C.LinkWithManifest <slib-b>slib-b.release.dll
-!NEXT!@ C.LinkWithManifest <app>app.release.exe
-*** updated 5 target(s)...
+*** updated 4 target(s)...
 ]]
 		else
 			pattern = [[
@@ -204,7 +203,7 @@ slib-b.c
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 46 target(s)...
+*** found 44 target(s)...
 ]]
 		else
 			pattern = [[
@@ -223,15 +222,14 @@ slib-b.c
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 46 target(s)...
-*** updating 4 target(s)...
+*** found 44 target(s)...
+*** updating 5 target(s)...
 @ C.CC <lib-c>add.obj
 add.c
 @ C.Archive <lib-c>lib-c.lib
 @ C.LinkWithManifest <slib-a>slib-a.release.dll
 !NEXT!@ C.LinkWithManifest <slib-b>slib-b.release.dll
-!NEXT!@ C.LinkWithManifest <app>app.release.exe
-*** updated 5 target(s)...
+*** updated 4 target(s)...
 ]]
 		else
 			pattern = [[
@@ -255,7 +253,7 @@ add.c
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 46 target(s)...
+*** found 44 target(s)...
 ]]
 		else
 			pattern = [[
@@ -274,13 +272,12 @@ add.c
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 46 target(s)...
-*** updating 2 target(s)...
+*** found 44 target(s)...
+*** updating 3 target(s)...
 @ C.CC <slib-a>slib-a.obj
 slib-a.c
 @ C.LinkWithManifest <slib-a>slib-a.release.dll
-!NEXT!@ C.LinkWithManifest <app>app.release.exe
-*** updated 3 target(s)...
+*** updated 2 target(s)...
 ]]
 		else
 			pattern = [[
@@ -301,7 +298,7 @@ slib-a.c
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 46 target(s)...
+*** found 44 target(s)...
 ]]
 		else
 			pattern = [[

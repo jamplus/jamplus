@@ -42,7 +42,7 @@ world hello Lua from
 	do
 		local pattern = [[
 substitution.jam testgsub.jam testwildcards.jam
-file2.c file3.c file2.o file3.o
+file2.c file2.o file3.c file3.o
 file1.c file2.c file3.c
 file1.c file2.c file3.c file1.o file2.o file3.o
 ]]

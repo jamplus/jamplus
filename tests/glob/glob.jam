@@ -1,9 +1,9 @@
-Echo All - [ Glob ../copydirectory : * ] ;
-Echo Dirs Only - [ Glob ../copydirectory : */ ] ;
-Echo Files Only - [ Glob ../copydirectory : *[^/] ] ;
+Echo All - [ ListSort [ Glob ../copydirectory : * ] : 0 ] ;
+Echo Dirs Only - [ ListSort [ Glob ../copydirectory : */ ] : 0 ] ;
+Echo Files Only - [ ListSort [ Glob ../copydirectory : *[^/] ] : 0 ] ;
 
 Echo ----------------------- No prepend ;
-Echo All - [ Glob ../copydirectory : * : 0 ] ;
-Echo Dirs Only - [ Glob ../copydirectory : */ : 0 ] ;
-Echo Files Only - [ Glob ../copydirectory : *[^/] : 0 ] ;
+Echo All - [ ListSort [ Glob ../copydirectory : * : 0 ] : 0 ] ;
+Echo Dirs Only - [ ListSort [ Glob ../copydirectory : */ : 0 ] : 0 ] ;
+Echo Files Only - [ ListSort [ Glob ../copydirectory : *[^/] : 0 ] : 0 ] ;
 
