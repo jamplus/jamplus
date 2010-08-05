@@ -360,6 +360,8 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 		C._MultiCppCompile_SetupFlags ;
 
+		HDREXTRA on $(_src) += $(objectForceIncludes) ;
+
 		MFLAGS on $(_src) = $(_flags) ;
 	}
 

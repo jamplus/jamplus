@@ -155,9 +155,17 @@ rule C._MultiCppCompile_SetupFlags
 
 			Depends $(_pchFilename) : $(_pchName) ;
 			SEARCH on $(_pchName) = $(_hdrs) ;
+
+			# source needs to be scanned for header dependencies
+			HDRRULE on $(_pchName) = C.HdrRule ;
+			HDRSCAN on $(_pchName) = $(C.HDRPATTERN) ;
+			HDRGRIST on $(_pchName) = $(grist) ;
+			HDRSEARCH on $(_pchName) = $(_hdrs) ;
 		}
 
 		_flags += -include $(_pchFilename:T:S=:C) ;
+
+		HDREXTRA on $(_src) += $(_pchName:T) ;
 
 		# if the source should use pch
 		if $(_pch[2]) {
@@ -170,9 +178,10 @@ rule C._MultiCppCompile_SetupFlags
 		}
 	}
 
-	Includes $(_src) : $(objectForceIncludes) ;
-	SEARCH on $(objectForceIncludes) = $(_hdrs) ;
-	_flags += "-include $(objectForceIncludes:G=)" ;
+	if $(objectForceIncludes[1]) {
+		SEARCH on $(objectForceIncludes) = $(_hdrs) ;
+		_flags += "-include $(objectForceIncludes:G=)" ;
+	}
 
 	_flags += "-o \"$(_obj:T)\"" ;
 

@@ -245,35 +245,33 @@ rule C._MultiCppCompile_SetupFlags
 		forceIncludeHeader = $(_pch[2]:G=$(grist)|force) ;
 		BINDING on $(forceIncludeHeader) = $(_pch[3]) ;
 		SEARCH on $(forceIncludeHeader) = $(_hdrs) ;
+		objectForceIncludes = $(forceIncludeHeader) $(objectForceIncludes) ;
 	}
 
 	if $(_pch[4]) {
 		# add extra flags to enable pch creation
 		local _pchFilename = $(_pch[3]:LBS).pch ;
 		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
-		_flags += /Fp\"$(_pchDiskFilename:\\)\" /Yc\"$(_pch[2])\" /FI\"$(_pch[2])\" ;
+		_flags += /Fp\"$(_pchDiskFilename:\\)\" /Yc\"$(_pch[2])\" ;
 		# mark that it will be created by compilation through srcref
 		_pchFilename = $(_pchFilename:G=$(grist)) ;
 		BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
 		MakeLocate $(_pchFilename) : $(LOCATE_TARGET) ;
 		Depends $(_pchFilename) : $(_src) ;
 		Clean clean:$(TARGET) : $(_pchFilename) ;
-		Includes $(_src) : $(forceIncludeHeader) ;
 
 	# if the source should use pch
 	} else if $(_pch[2]) && ! $(_nopch) {
 		# add extra flags to enable pch loading
 		local _pchFilename = $(_pch[3]:LBS).pch ;
 		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
-		_flags += /Fp\"$(_pchDiskFilename:\\)\" /Yu\"$(_pch[2])\" /FI\"$(_pch[2])\" ;
+		_flags += /Fp\"$(_pchDiskFilename:\\)\" /Yu\"$(_pch[2])\" ;
 		# mark that compilation will depend on it
 		_pchFilename = $(_pchFilename:G=$(grist)) ;
 		Includes $(_src) : $(_pchFilename) ;
-		Includes $(_src) : $(forceIncludeHeader) ;
 	}
 
 	if $(objectForceIncludes[1]) {
-		Includes $(_src) : $(objectForceIncludes) ;
 		SEARCH on $(objectForceIncludes) = $(_hdrs) ;
 		_flags += "/FI\"$(objectForceIncludes:G=)\"" ;
 	}

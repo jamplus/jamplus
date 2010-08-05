@@ -29,6 +29,19 @@ rule C.FIncludes { return -I$(<) ; }
 rule C.FLibraryPaths { return -L$(<) ; }
 
 
+rule C._LinkPrebuiltLibraries
+{
+	local lib ;
+	for lib in $(gristedLibraries) {
+		if ! $(lib:D) {
+   			BINDING on $(lib) = lib$(lib:B) ;
+			EXPAND_TEXT on $(lib) = -l$(lib:G=) ;
+			NoCare $(lib) ;
+   		}
+	}
+}
+
+
 actions updated together piecemeal C.Archive
 {
 	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
@@ -36,7 +49,7 @@ actions updated together piecemeal C.Archive
 
 actions C.Link
 {
-	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS)
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:T)
 }
 
 actions together C.Ranlib
@@ -122,9 +135,17 @@ rule C._MultiCppCompile_SetupFlags
 
 			Depends $(_pchFilename) : $(_pchName) ;
 			SEARCH on $(_pchName) = $(_hdrs) ;
+
+			# source needs to be scanned for header dependencies
+			HDRRULE on $(_pchName) = C.HdrRule ;
+			HDRSCAN on $(_pchName) = $(C.HDRPATTERN) ;
+			HDRGRIST on $(_pchName) = $(grist) ;
+			HDRSEARCH on $(_pchName) = $(_hdrs) ;
 		}
 
 		_flags += -include $(_pchFilename:T:S=:C) ;
+
+		HDREXTRA on $(_src) += $(_pchName:T) ;
 
 		# if the source should use pch
 		if $(_pch[2]) {
@@ -137,9 +158,10 @@ rule C._MultiCppCompile_SetupFlags
 		}
 	}
 
-	Includes $(_src) : $(objectForceIncludes) ;
-	SEARCH on $(objectForceIncludes) = $(_hdrs) ;
-	_flags += "-include $(objectForceIncludes:G=)" ;
+	if $(objectForceIncludes[1]) {
+		SEARCH on $(objectForceIncludes) = $(_hdrs) ;
+		_flags += "-include $(objectForceIncludes:G=)" ;
+	}
 
 	_flags += "-o \"$(_obj:T)\"" ;
 
