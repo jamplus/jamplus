@@ -24,19 +24,45 @@ getoptions(
     int argc,
     char **argv,
     const char *opts,
-    option *optv )
+    option *optv,
+    char** targets )
 {
-	int i;
+	int i, n;
 	int optc = N_OPTS;
 
 	memset( (char *)optv, '\0', sizeof( *optv ) * N_OPTS );
 
+	n = 0;
 	for( i = 0; i < argc; i++ )
 	{
 		char *arg;
 
-		if( argv[i][0] != '-' || !isalpha( argv[i][1] ) )
-			break;
+		if ( argv[i][0] != '-' )
+		{
+			const char *equals = strchr( argv[i],'=' );
+			if ( equals  &&  equals != argv[i] )
+			{
+				if ( !optc-- )
+				{
+					printf( "too many options (%d max)\n", N_OPTS );
+					return -1;
+				}
+
+				optv->flag  = 's';
+				optv++->val = argv[i];
+			}
+			else
+			{
+				if ( n >= N_TARGETS )
+				{
+					printf( "too many targets (%d max)\n", N_TARGETS );
+					return -1;
+				}
+				targets[n++] = argv[i];
+			}
+
+			continue;
+		}
 
 		if( !optc-- )
 		{
@@ -82,7 +108,7 @@ getoptions(
 		}
 	}
 
-	return i;
+	return n;
 }
 
 /*

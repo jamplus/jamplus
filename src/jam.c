@@ -216,9 +216,10 @@ extern char **environ;
 
 int main( int argc, char **argv, char **arg_environ )
 {
-	int		n;
+	int		n, num_targets;
 	const char	*s;
 	struct option	optv[N_OPTS];
+	char*       targets[N_TARGETS];
 	const char	*all = "all";
 	int		anyhow = 0;
 	int		status;
@@ -381,9 +382,9 @@ int main( int argc, char **argv, char **arg_environ )
 #endif
 
 #ifdef OPT_SETCWD_SETTING_EXT
-	if( ( n = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qvS", optv ) ) < 0 )
+	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qvS", optv, targets ) ) < 0 )
 #else
-	if( ( n = getoptions( argc, argv, "d:j:f:gs:t:ano:qv", optv ) ) < 0 )
+	if( ( num_targets = getoptions( argc, argv, "d:j:f:gs:t:ano:qv", optv, targets ) ) < 0 )
 #endif
 	{
 	    printf( "\nusage: jam [ options ] targets...\n\n" );
@@ -433,8 +434,6 @@ int main( int argc, char **argv, char **arg_environ )
 #endif
 	    exit( EXITBAD );
 	}
-
-	argc -= n, argv += n;
 
 	/* Version info. */
 
@@ -641,30 +640,6 @@ int main( int argc, char **argv, char **arg_environ )
 	    var_defines( symv );
 	}
 
-#if OPT_KEY_EQUALS_VALUE_DEFINES_EXT
-	{
-	    int i;
-	    int lowest = 0;
-
-        for ( i = 0; i < argc; ++i )
-        {
-            if ( strstr( argv[i], "=" ) )
-            {
-                const char *symv[2];
-                symv[0] = argv[i];
-                symv[1] = 0;
-                var_defines( symv );
-            }
-            else
-            {
-                argv[lowest++] = argv[i];
-            }
-	    }
-
-        argc = lowest;
-	}
-#endif /* OPT_KEY_EQUALS_VALUE_DEFINES_EXT */
-
 	/* Initialize built-in rules */
 
 	load_builtins();
@@ -714,13 +689,13 @@ int main( int argc, char **argv, char **arg_environ )
 		/* Go through the list of targets specified on the command line, */
 		/* and add them to a variable called JAM_COMMAND_LINE_TARGETS. */
 		LIST* l = L0;
-		int n_targets = argc ? argc : 1;
-		const char** targets = argc ? (const char**)argv : &all;
+		int n_targets = num_targets ? num_targets : 1;
+		const char** actual_targets = num_targets ? targets : &all;
 		int i;
 
 		for ( i = 0; i < n_targets; ++i )
 		{
-			l = list_new( l, targets[ i ], 0 );
+			l = list_new( l, actual_targets[ i ], 0 );
 		}
 
 		var_set( "JAM_COMMAND_LINE_TARGETS", l, VAR_SET );
@@ -756,10 +731,10 @@ int main( int argc, char **argv, char **arg_environ )
 
 	/* Now make target */
 
-	if( !argc )
+	if( !num_targets )
 	    status |= make( 1, &all, anyhow );
 	else
-	    status |= make( argc, (const char **)argv, anyhow );
+	    status |= make( num_targets, (const char**)targets, anyhow );
 
 	/* Widely scattered cleanup */
 
