@@ -1,0 +1,4 @@
+l = AB aa ZZ zx bd bf ;
+Echo Unsorted - $(l) ;
+Echo Sorted case sensitive - [ ListSort $(l) : 1 ] ;
+Echo Sorted case insensitive - [ ListSort $(l) : 0 ] ;

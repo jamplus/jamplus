@@ -78,8 +78,10 @@ LIST *	list_sublist( LIST *l, int start, int count );
 #ifdef OPT_DEBUG_MEM_TOTALS_EXT
 void	list_done(void);
 #endif
+LIST *	list_sort( LIST *l, int case_sensitive );
 
 # define list_next( l ) ((l)->next)
+
 
 # define L0 ((LIST *)0)
 

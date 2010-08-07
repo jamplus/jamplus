@@ -119,6 +119,7 @@ LIST *builtin_split( PARSE *parse, LOL *args, int *jmp );
 #endif
 
 LIST *builtin_expandfilelist( PARSE *parse, LOL *args, int *jmp );
+LIST* builtin_listsort( PARSE *parse, LOL *args, int *jmp );
 
 int glob( const char *s, const char *c );
 
@@ -270,6 +271,8 @@ load_builtins()
 
 	bindrule( "ExpandFileList" )->procedure =
 		parse_make( builtin_expandfilelist, P0, P0, P0, C0, C0, 0 );
+	bindrule( "ListSort" )->procedure =
+		parse_make( builtin_listsort, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -1236,5 +1239,18 @@ builtin_expandfilelist(
 	}
 
     return result;
+}
+
+
+
+LIST *builtin_listsort( PARSE *parse, LOL *args, int *jmp )
+{
+	LIST *l = list_copy( L0, lol_get( args, 0 ) );
+    LIST *caseSensitiveList = lol_get( args, 1 );
+	int caseSensitive = 1;
+	if ( caseSensitiveList )
+		caseSensitive = atoi( caseSensitiveList->string );
+	l = list_sort( l, caseSensitive );
+	return l;
 }
 
