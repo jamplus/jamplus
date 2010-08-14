@@ -4,7 +4,7 @@
 
 JamPlus comes with some simple makefiles to bootstrap the initial build of the JamPlus executable.  A good portion of the makefile contents in <tt>Makefile.Common</tt> are shared between the Visual C++ NMake-based build and the GCC-based make build.
 
-Binaries are built into a platform specific directory under the <tt>bin/</tt> directory, such as <tt>bin/ntx86/</tt> or <tt>bin/macosx/</tt>.  All associated scripts and Lua binaries are also within this platform directory.  In doing this, multiple JamPlus platform binaries can be deployed within the same directory tree, making it easy to check into your source control system.	
+Binaries are built into a platform specific directory under the <tt>bin/</tt> directory, such as <tt>bin/ntx86/</tt> or <tt>bin/macosx/</tt>.  All associated scripts and Lua binaries are also within this platform directory.  In doing this, multiple JamPlus platform binaries can be deployed within the same directory tree, making it easy to check into your source control system.
 
 In order to build a fully working JamPlus directory, certain LuaPlus binaries are required.  By setting the environment variable <tt>LUA_BIN</tt> to the directory containing the LuaPlus binaries, the build processes described below will automatically populate the JamPlus bin/ directory with the LuaPlus binaries.
 
@@ -45,7 +45,54 @@ In order to build JamPlus on Mac OS X, do the following:
     make macosx
 \endcode
 
-When finished, the Jam executable will have been built as <tt>bin/macosxx86/jam</tt>.
+When finished, the Jam executable will have been built as <tt>bin/macosxx64/jam</tt>.
 
 Alternatively, an Xcode project for debugging Jam is maintained.  Open <tt>src/jam.xcodeproj</tt> to build within Xcode.  Please note that the Release build does not currently work.  Build a Release build using the makefile instructions above.
+
+
+
+
+
+\section building_macosx Building for Linux
+
+In order to build JamPlus on Linux, do the following:
+
+\code
+    cd src
+    make linux
+\endcode
+
+When finished, the Jam executable will have been built as <tt>bin/linuxx86/jam</tt>.
+
+
+
+\section build_luaplus Building and Copying the LuaPlus Binaries
+
+Grab the LuaPlus source code.  One way of doing so is by cloning the LuaPlus Git repository:
+
+\code
+    git clone http://git.luaplus.org/luaplus51-all.git
+\endcode
+
+Change directories into <tt>luaplus51-all</tt>.  Build LuaPlus by running:
+
+\code
+    jam
+\endcode
+
+When finished a <tt>bin.compilers.platform/</tt> directory will have been created.  Set the <tt>LUA_BIN</tt> environment variable to point to the directory.
+
+On Windows, you would do so like:
+
+\code
+    set LUA_BIN=d:/luaplus51-all/bin.vs2010.win32
+\endcode
+
+In a Bash shell under Linux or Mac OS X, you would export:
+
+\code
+    export LUA_BIN=~/luaplus51-all/bin.gcc.linux32
+\endcode
+
+Change directories back to the <tt>JamPlus/src/</tt> directory.  Run the appropriate <tt>jmake</tt>/<tt>make</tt> command again, and the LuaPlus binaries will be copied to the appropriate <tt>JamPlus/bin/</tt> directory.
 */

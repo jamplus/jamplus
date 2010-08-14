@@ -49,16 +49,12 @@ Compiling the \b helloworld application is simple.  Assuming the Jam executable 
 jam
 \endcode
 
-That's it.  Jam will detect your OS and then the appropriate compilers for your platform.  On Windows, Jam looks for Visual Studio 2010, then 2008, and so on until Visual C++ 6.  If it can't find any of those, it looks for a MinGW installation in the <tt>c:/mingw/</tt> and <tt>d:/mingw/</tt> directories.  On Mac OS X, Jam looks for gcc. When a compiler is found, the the \b helloworld application's Debug configuration is built.  The resultant filename will be <tt>helloworld.debug.exe</tt> on Windows or <tt>helloworld.debug</tt> on other platforms.
+That's it.  Jam will detect your OS and then the appropriate compilers for your platform.  On Windows, Jam looks for Visual Studio 2010, then 2008, and so on until Visual C++ 6.  If it can't find any of those, it looks for a MinGW installation in the <tt>c:/mingw/</tt> and <tt>d:/mingw/</tt> directories.  On Mac OS X, Jam looks for gcc. When a compiler is found, the \b helloworld application's Debug configuration is built.  The resultant filename will be <tt>helloworld.debug.exe</tt> on Windows or <tt>helloworld.debug</tt> on other platforms.
 
 Building the \b helloworld application Release configuration is performed with a command line flag.  In this case, the built executable will be <tt>helloworld.release.exe</tt> (without the <tt>.exe</tt> on other platforms).
 
 \code
 jam CONFIG=release
-
-or:
-
-jam -sCONFIG=release
 \endcode
 
 If you would like to run with another compiler by default, such as MinGW, an additional command line flag must be provided.

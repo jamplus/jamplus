@@ -4,9 +4,10 @@
 
 <h2>New features for 1.0:</h2>
 
-- The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files).  Additionally, iPhone and iPhone Simulator applications can be built.  iPhone Simulator applications can be debugged, but iPhone applications are not properly deployed (yet).
+- The Mac OS X build is much more functional than past releases of JamPlus with support for Xcode workspace generation, Lua scripts, multiple OS X SDKS (10.4 to 10.6), and application bundles (including automatic creation of the PkgInfo and Info.plist files).  Additionally, iPhone, iPhone Simulator, iPad, and iPad Simulator applications can be built and run.
+- Initial Android NDK support provided by Steven Craft.
 - Linux support added.  No Linux workspace generation support is available yet, although the CodeBlocks support may work.
-- Visual Studio 2010 support has been added by Philipp Teschner.  It is currently turned off as an active bootstrapping build type, as Visual Studio 2010 has not been released yet.
+- Visual Studio 2010 support has been added by Philipp Teschner.
 - Visual C++ 6 compiler support works much better, and Visual C++ 6 .dsw and .dsp files can be generated.
 - C/C++ build rules have been separated into their own \ref module_c "Jam module called 'c'".  This module is automatically loaded on any Jam invocation.  As a result, most rules are now namespaced with a <tt>C.</tt>.  That is, you'll use \ref rule_C_Application "C.Application" instead of just <tt>Application</tt>.  To use the old names, you can attempt to \ref rule_IncludeModule "IncludeModule" <tt>c-deprecated</tt>.  None of this is guaranteed to work.
 	- With the new C module, it is easy to add additional platforms, configurations, and compilers.  See the <b>tests/platform/groovyplatform/</b> example to see this in action.
@@ -18,7 +19,7 @@
 		- <tt>c/wxwidgets:</tt> Renamed from WxWidgets.  Access it as \ref rule_C_UseWxWidgets "C.UseWxWidgets".
 	- Created a <tt>c/win32resource</tt> module with the \ref module_c_win32resource "ResourceCompiler rules".
 - The Jam binaries have been moved from the <tt>jamplus/bin/</tt> directory to <tt>jamplus/bin/\$(OS)\$(OSPLAT)</tt>.  On Windows, this ends up being <tt>jamplus/bin/ntx86/</tt>.  On Mac OS X, the directory is <tt>jamplus/bin/macosxx64/</tt>.  All associated scripts have been moved to this directory, as has the Lua directory structure.  This new structure allows for multiple platform binaries to exist side by side.  See \ref building_overview "Building Overview" for more information.
-- Automated tests have been added consisting of 45 categoric test suites made of over 400 individual tests.  The suite is run by ensuring JamPlus's bin/platform/ directory is in the PATH and then running <tt>tests/runtests.bat</tt> (on Windows) or <tt>tests/runtests-macosxx64</tt> on Mac OS Xor <tt>tests/tuntests-linux32</tt> on Linux.
+- Automated tests have been added consisting of over 50 categoric test suites made of nearing 500 individual tests.  The suite is run by ensuring JamPlus's bin/platform/ directory is in the PATH and then running <tt>tests/runtests.bat</tt> (on Windows) or <tt>tests/runtests-macosxx64</tt> on Mac OS X or <tt>tests/tuntests-linux32</tt> on Linux.
 
 
 
@@ -28,11 +29,15 @@
 
 - Added a bootstrapping .xcodeproj as <tt>src/jam.xcodeproj</tt> to debug Mac OS X Jam issues in.  This project is currently only set up for Debug mode; the Release configuration does not work.  Use <b>make macosx</b> to build a high performance Release build.
 - If the environment variable <tt>LUA_BIN</tt> is set, the appropriate Lua files are copied to the appropriate platform binary directory during the Jam executable build.  See \ref building_overview "Building Overview" for more information.
+- Support for building jam0 on FreeBSD.  Thanks to Arseny Kapoulkine for the update.
+- Turn on the Visual Studio 2010 support in jmake.cmd.
+- Add jam.VS2010.sln/.vcxproj.
+
 
 
 <h3>Technical Details:</h3>
 
-- The Visual Studio 2005 solution and project files, <tt>src/jam.VS2005.sln</tt> and <tt>src/jam.VS2005.vcproj</tt>, have been removed.  Only a Visual Studio 2008 version is included for this release.  The Visual Studio solution is available only for debug purposes.  The link time code generated Visual C++ Release LTCG build built by the bootstrapped Jam is far faster than the Release build provided by the jam.VS2008.vcproj file.
+- The Visual Studio 2005 solution and project files, <tt>src/jam.VS2005.sln</tt> and <tt>src/jam.VS2005.vcproj</tt>, have been removed.  Only a Visual Studio 2008 and 2010 versions are included for this release.  The Visual Studio solution is available only for debug purposes.  The link time code generated Visual C++ Release LTCG build built by the bootstrapped Jam is far faster than the Release build provided by the jam.VS2008.vcproj file.
 - <tt>Jambase-j.c</tt> is properly generated from <tt>Jambase-j</tt> during the bootstrapping run.
 - Intermediate files are built to an intermediate folder instead of littering the extra files in the src/ directory.
 - The Mac OS X bootstrapped build uses the 10.4 SDK and GCC 4.0 to build.  The SDK can be changed near the top of the <tt>src/Jamfile.jam</tt>.
@@ -64,9 +69,13 @@
 - Fixed the variable expansion modifier <tt>:X=</tt> when used without a <tt>:I=</tt>.
 - Added <tt>:W=remove_text</tt> as another form of the wildcard variable expansion modifier.  Removes remote_text characters from the beginning of the found wildcard.
 - Set the header cache max age to 0.  This should prevent the current frequent rebuilds every 100 Jam runs.
-
-
-
+- Add support for the new Jamfile variable JAM_NUM_JOBS.  This allows the user to override the -j command line option via a variable in one of the Jamfiles (possibly even altered on a subsequent pass).
+- Add the ability to search file extensions for a target.
+- :T expansion now uses settings directly from the target and supports EXPAND_TEXT.
+- Fix KEY-VALUE pairs on the command to work after the target list.  Uses an alternate approach mostly adopted from ftjam.
+- Add built-in rule: [ ListSort LIST : CASE_SENSITIVE:1/0 ].Add built-in rule: [ ListSort LIST : CASE_SENSITIVE:1/0 ].
+- When scanning for headers (or restoring them from the header cache), prepend the target's HDREXTRA to the list.  This is where force includes can be added.
+- Support for querying 64 bit registry values.
 
 
 
@@ -134,6 +143,7 @@
 - <b>C module:</b>
       - Visual Studio 2010 support provided by Philipp Teschner.
       - iPhone and iPhone Simulator support.
+      - iPad and iPad Simulator support.
       - Reorganized huge portions of the Jambase to compiler/platform/configuration specific files in <tt>modules/c-compilers/</tt>.  Moved platform and configuration check to <tt>modules/c-compilers/c-autodetect.jam</tt>.
       - Added a 64-bit Windows platform for Visual C++ called \b win64.
       - Added rule \ref rule_C_Flags "C.Flags", a generic way of adding C/C++/M/MM/etc flags.
@@ -145,6 +155,7 @@
       - When the list of files in a library archive changes, the archive is populated again from the object files.  This solves the bug where removing a file from the list of files in an archive left the removed file in the archive.
       - Revamp the assignment of C/C++ extensions.  They can now be created through the public rule \ref rule_C_AddBuildExtensions "AddBuildExtensions".  As part of this change, support for Objective C/C++ files, .m and .mm, and assembly files (.s) files has been added.  This support is for GNU only compilers.
       - Add -isysroot compiler flags for Mac OS X.
+      - For Mac OS X, add -fPIC to dynamic libraries when being created.
       - Fix optimization flags for GCC platforms.
       - Add \ref rule_C_LinkFrameworks "C.LinkFrameworks" rule for linking against frameworks on Mac OS X.
       - Add \ref rule_C_ForceInclude "C.ForceInclude" rule, which forces the inclusion of the listed header files before any other \#include lines.
@@ -198,12 +209,23 @@
       - Set the maximum batch group size to be 10 files.  This may still need tuning, but it seems to be a happy medium at the moment.
       - Expand any wildcarded file lists when calling rules \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library".
       - When calling \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library", return the gristed name of the target being built/linked.  For C.Application, this would be an executable.  For C.Library, the return value is the library name.
+      - When building up the list of compilation flags, the generated list was applied in reverse order of what it should have been.  This has been corrected, and include directory order remains the same (or rather, the reverse of the flags).
+      - For GCC, add .pch as a known file type for generating precompiled headers from.
+      - Default to VS2010 and use the 7.0a Windows SDK.
+      - Minor fix to the C.Lump rule that prevented the lump file extension from working if the passed in LUMP_NAME did not contain an extension.
+      - For the C.Application and C.Library rules, a LINKED_OBJECTS variable is set on the TARGET containing all object files fed to the linker.  Later, this will be used to perform incremental links for the Visual C++ linker.
+      - Fix C.TargetGrist so it replaces the original grist, instead of just prepending.
+      - C.LinkPrebuiltLibraries updates with support for relative paths, libname.* linking on GCC based platforms, and proper dependency checking on Windows.
+      - Change the deprecated link flag /INCREMENTAL:YES to, more simply, /INCREMENTAL.
+      - Add force includes to the header scan.  Also, for MinGW and GCC, add header scan settings to the precompiled header.
+      - Introduce INCREDIBUILD variable, defaulted to off. When set to on, cl will build multiple files from the same project (as Incredibuild can handle this). Made last parameter to actions for vc builds to be suitable for a 'label' for the job, this is what Incredibuild requires, and I don't think it'll have a negative effect elsewhere
 
 - <b>copydirectory module:</b>
       - Allow parentheses in the path to work properly.
       - The CopyDirectory rule now accepts an additional argument, RECURSIVE.  If RECURSIVE is specified, then a recursive directory copy is performed.  If it is not specified, then CopyDirectory merely copies the file contents of the SOURCE_PATH, and directories are ignored.
       - Handle recursion properly.
       - Fix to make the CopyDirectory rule work when no SubDir was specified in the Jamfile.
+      - Handle the ** wildcard syntax properly when the RECURSIVE parameter is not set.
 - <b>copyfile module:</b>
       - The CopyFile rule will use the ActiveProject if the PARENT parameter is not specified.
       - The source and destination filenames are now quoted on the copy command line.
@@ -215,9 +237,12 @@
       - Fix discovery of gmcs.  Also allow CSC to be set externally and use that as an override when finding the C# compiler.
 - <b>c/dotnet module:</b>
       - Add windows/Microsoft.NET/Framework/v2.0.50727 to the include directories.
+      - Add support for Visual Studio 2010.
 - <b>hardsoftlink module:</b>
       - Added rules for establishing a HardLink and a SoftLink (symbolic link).
 - <b>c/mysql module:</b>
+      - Newly added.
+- <b>c/qt module:</b>
       - Newly added.
 - <b>c/wxwidgets module:</b>
       - Added a call to \ref rule_C_RcIncludeDirectories "C.RcIncludeDirectories" to allow access to the proper wxWidgets resources.
@@ -244,6 +269,8 @@
 - Using the VSPLATFORMMAP and VSCONFIGMAP variables, data driven platform and configuration names can be provided for a generated .vcproj from the c-compilers/c-visualc-platform-config.jam files.
 - Fixed VS200x .sln generation for non-native platforms.
 - When \ref rule_C_LinkLibraries "C.LinkLibraries" is specified with the <tt>*</tt> target, workspace generation did not populate the workspace properly.
+- Much better Xcode project generation support.  Combines all dependent projects into one workspace xcodeproj where all targets can be built.  Corrects the iPhone and iPhone Simulator generators.  Adds iPad and iPad Simulator support.
+- Output a customsettings.jam in the out of source build directory.  This file is included before the first project Jamfile and gives you the opportunity to override #defines, include directories, or any other settings as you see fit.
 
 
 <h3>Technical Details:</h3>
@@ -262,7 +289,9 @@
 - Pass the currently running Jam executable to jam --workspace.
 - Retrieve the active target name for calls to \ref rule_Project "Project".
 - Apply proper backslashes to the updateworkspace.bat calls when generated the !UpdateWorkspace project for Visual Studio.
-
+- During workspace generation, reset the active target after a call to C.Application.
+- Do not do an enforced * PLATFORM or * CONFIG check for SourceGroups.
+- Fix some crash bugs when the project exists only in a certain platform or has no file list.
 
 
 
@@ -274,6 +303,9 @@
 - Added samples/onesharedlib.
 - Added samples/glob, a command line executable wrapping the fileglob code.
 - In samples/simplewx, show how \ref ref_C_BundleInfo "C.BundleInfo" can be used to automatically populate the Info.plist file.
+- Add qt/mainwindow sample.
+- Add iPad opengles sample.
+- Add unittest sample to show how one might run unit tests on an executable.  Use the 'tests' target to build the executable and run the tests.
 
 
 <h2>Tests:</h2>
@@ -314,7 +346,7 @@
 - tests/commandlinetargets - Allow clean:appA and clean:appB to work.
 - tests/expandtests - Added additional :C expansion tests.
 - tests/split - Added.
-
+- tests/copydirectory - Update the test with support for ** wildcards.
 
 
 

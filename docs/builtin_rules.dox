@@ -220,6 +220,7 @@ The remaining rules are utility rules.
 \refitem rule_Echo Echo
 \refitem rule_Exit Exit
 \refitem rule_Glob Glob
+\refitem rule_GroupByVar GroupByVar
 \refitem rule_Match Match
 \refitem rule_Math Math
 \refitem rule_MD5 MD5
@@ -265,6 +266,10 @@ Scans \c DIRECTORIES for files matching \c PATTERNS, returning the list of match
 
 On Windows, the glob matching is performed in a case insensitive manner.
 
+\param DIRECTORIES The list of directories to perform the glob scan within.
+\param PATTERNS The list of patterns to scan.
+\param PREPEND (optional) If 1 (default), prepend the directory name.  If 0, do not.
+
 \code
     # Returns all files and directories.  Directories have a / appended.
     # Directories . and .. are not returned.
@@ -275,6 +280,60 @@ On Windows, the glob matching is performed in a case insensitive manner.
 
     # Returns just files without bin/ prepended.
     Glob bin : *[^/] : 0;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_GroupByVar rule GroupByVar TARGETLIST_VARIABLE_NAME : COMPARISON_SETTINGS_NAME [ : MAX_PER_GROUP ] ;
+\addindex rule_GroupByVar
+
+Given a list of targets determined by the \c TARGETLIST_VARIABLE_NAME, those targets whose \c COMPARISON_SETTINGS_NAME contents match one another are grouped together and returned to the caller.  The remaining targets are assigned back to \c TARGETLIST_VARIABLE_NAME.
+
+The matched grouping is limited to the maximum number of targets specified via \c MAX_PER_GROUP.
+
+\param TARGETLIST_VARIABLE_NAME The name of the variable containing the target list to obtain matching groups of targets from.  It is <i>not</i> the actual list of targets.
+\param COMPARISON_SETTINGS_NAME The setting used to obtain matches from \c COMPARISON_SETTINGS_NAME.
+\param MAX_PER_GROUP (optional) The maximum number of targets to include in the group.  If unspecified, there is no limit.
+\return Returns the remaining elements to be grouped.  When all elements have been grouped, the return value is an empty list.
+
+\code
+    files = targeta targetb targetc targetd targete targetf ;
+    FLAGS on targeta = a b c ;
+    FLAGS on targetb = a b c d ;
+    FLAGS on targetc = a b c ;
+    FLAGS on targetd = a b c e ;
+    FLAGS on targete = a b c ;
+    FLAGS on targetf = a b c ;
+
+    # Together - targeta targetc targete targetf    <- because all FLAGS are: a b c
+    Echo Together - [ GroupByVar files : FLAGS ] ;
+
+    # Together - targetb                            <- only targetb has FLAGS: a b c d
+    Echo Together - [ GroupByVar files : FLAGS ] ;
+
+    # Together - targetd                            <- only targetd has FLAGS: a b c e
+    Echo Together - [ GroupByVar files : FLAGS ] ;
+
+    # files is empty at this point.
+
+    files = targeta targetb targetc targetd targete targetf ;
+
+    # (2 max) - targeta targetc
+    Echo (2 max) - [ GroupByVar files : FLAGS : 2 ] ;
+
+    # (2 max) - targetb
+    Echo (2 max) - [ GroupByVar files : FLAGS : 2 ] ;
+
+    # (2 max) - targetd
+    Echo (2 max) - [ GroupByVar files : FLAGS : 2 ] ;
+
+    # (2 max) - targete targetf
+    Echo (2 max) - [ GroupByVar files : FLAGS : 2 ] ;
 \endcode
 
 

@@ -10,7 +10,9 @@ Jam has four phases of operation: start-up, parsing, binding, and updating.
 
 Upon start-up, Jam imports environment variable settings into Jam variables. Environment variables are split at blanks with each word becoming an element in the variable's list of values. Environment variables whose names end in \c PATH are split at \$(SPLITPATH) characters (e.g., <tt>";"</tt> for Windows and <tt>":"</tt> for Unix).
 
-To set a variable's value on the command line, overriding the variable's environment value, use the <tt>-s</tt> option. To see variable assignments made during jam's execution, use the <tt>-d+7</tt> option.
+To set a variable's value on the command line, overriding the variable's environment value, use a <tt>KEY=VALUE</tt> syntax.
+
+(To see variable assignments made during jam's execution, use the <tt>-d+7</tt> option.)
 
 \subsection operation_parsing Parsing Phase
 
