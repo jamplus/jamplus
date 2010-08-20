@@ -159,9 +159,12 @@ function VisualStudio200xProjectMetaTable:Write(outputPath)
 			configInfo.RebuildCommandLine = configInfo.RebuildCommandLine:gsub('"', '&quot;')
 			configInfo.CleanCommandLine = configInfo.CleanCommandLine:gsub('"', '&quot;')
 
+			table.insert(self.Contents, [==[
+		<Configuration
+]==])
+
 			if self.Options.vs2003 then
 				table.insert(self.Contents, expand([==[
-		<Configuration
 			Name="$(VSConfig)|$(VSPlatform)"
 			OutputDirectory="$$(ConfigurationName)"
 			IntermediateDirectory="$$(ConfigurationName)"
@@ -174,12 +177,10 @@ function VisualStudio200xProjectMetaTable:Write(outputPath)
 				CleanCommandLine="$(CleanCommandLine)"
 				Output="$(Output)"
 			/>
-		</Configuration>
 ]==], configInfo, info, _G))
 
 			elseif self.Options.vs2005 or self.Options.vs2008 then
 				table.insert(self.Contents, expand([==[
-		<Configuration
 			Name="$(VSConfig)|$(VSPlatform)"
 			OutputDirectory="$$(ConfigurationName)"
 			IntermediateDirectory="$$(ConfigurationName)"
@@ -199,9 +200,45 @@ function VisualStudio200xProjectMetaTable:Write(outputPath)
 				ForcedUsingAssemblies=""
 				CompileAsManaged=""
 			/>
-		</Configuration>
 ]==], configInfo, info, _G))
 			end
+
+			-- Write out custom tools.
+			if project.MakefileTool then
+				local sortedTools = {}
+				for toolKey in pairs(project.MakefileTool) do
+					sortedTools[#sortedTools + 1] = toolKey
+				end
+				table.sort(sortedTools)
+				
+				for _, toolKey in ipairs(sortedTools) do
+					local tool = project.MakefileTool[toolKey]
+
+					table.insert(self.Contents, [==[
+			<Tool
+				Name="]==] .. toolKey .. [==["
+]==])
+
+					local sortedKeys = {}
+					for key in pairs(tool) do
+						sortedKeys[#sortedKeys + 1] = key
+					end
+					table.sort(sortedKeys)
+
+					for _, key in ipairs(sortedKeys) do
+						local value = tool[key]
+						table.insert(self.Contents, '\t\t\t\t' .. key .. '="' .. value .. '"' .. '\n')
+					end
+					
+					table.insert(self.Contents, [==[
+			/>
+]==])
+				end
+			end
+			
+			table.insert(self.Contents, [==[
+		</Configuration>
+]==])
 		end
 	end
 

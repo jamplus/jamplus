@@ -22,3 +22,10 @@ MapConfigToVSConfig[ [[$(CONFIG)]] ] = [[$(vsconfig)]]
 " ;
 }
 
+
+
+rule Project.MakefileTool TARGET : TOOL : KEY : VALUE {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+
+	Contents += "Projects['$(TARGET)'].MakefileTool[ [[$(TOOL)]] ][ [[$(KEY)]] ] = [[$(VALUE:E="")]]$(NEWLINE)" ;
+}
