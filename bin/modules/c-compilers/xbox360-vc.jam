@@ -33,5 +33,12 @@ rule C._ApplicationFromObjects_PostBuild
 	ImageXex $(TARGET) ;
 }
 
+rule C.Xbox360DeployToolSettings TARGET : REMOTE_ROOT : DEPLOYMENT_TYPE : DEPLOYMENT_FILES
+{
+	Project.MakefileTool $(TARGET) : VCX360DeploymentTool : RemoteRoot : $(REMOTE_ROOT) ;
+	Project.MakefileTool $(TARGET) : VCX360DeploymentTool : DeploymentFiles : $(DEPLOYMENT_FILES:E="") ;
+	Project.MakefileTool $(TARGET) : VCX360DeploymentTool : DeploymentType : $(DEPLOYMENT_TYPE:E=0) ;
+}
+
 VSPLATFORMMAP.xbox360 = "Xbox 360" ;
 VSNATIVEPLATFORM.xbox360 = 1 ;
