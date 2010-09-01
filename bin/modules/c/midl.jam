@@ -22,6 +22,12 @@ switch $(COMPILER.$(PLATFORM))
 		MIDL = "$(MSSDK)/bin/midl" ;
 		MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
 		MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
+
+	case vs2010 :
+		LINK_PATHS += $(MSSDK)/bin ;
+		MIDL = "$(MSSDK)/bin/midl" ;
+		MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
+		MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
 }
 
 # OPTIONS = proxy ;
