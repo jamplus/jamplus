@@ -25,7 +25,8 @@ rule _CopyDirectoryGlobHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_S
 	local files = @($(SOURCE_PATH)$(SEARCH_STRING:E=*):W) ;
 	local source ;
 	for source in $(files) {
-		local destination = [ Subst $(source) : ^$(SOURCE_PATH) : : 1 ] ;
+		local adjustedSourcePathForRegularExpression = [ SubstLiteralize $(SOURCE_PATH) ] ;
+		local destination = [ Subst $(source) : ^$(adjustedSourcePathForRegularExpression) : : 1 ] ;
 		destination = $(destination:R=$(DESTINATION_PATH)) ;
 		CopyFile $(PARENT) : $(destination) : $(source) ;
 	}
