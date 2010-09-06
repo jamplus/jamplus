@@ -73,6 +73,7 @@ LIST *builtin_glob( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_match( PARSE *parse, LOL *args, int *jmp );
 #ifdef OPT_BUILTIN_SUBST_EXT
 LIST *builtin_subst( PARSE *parse, LOL *args, int *jmp );
+LIST *builtin_subst_literalize( PARSE *parse, LOL *args, int *jmp );
 #endif
 #ifdef OPT_MULTIPASS_EXT
 LIST *builtin_queuejamfile( PARSE *parse, LOL *args, int *jmp );
@@ -178,7 +179,9 @@ load_builtins()
 
 #ifdef OPT_BUILTIN_SUBST_EXT
 	bindrule( "Subst" )->procedure =
-	parse_make( builtin_subst, P0, P0, P0, C0, C0, 0 );
+		parse_make( builtin_subst, P0, P0, P0, C0, C0, 0 );
+	bindrule( "SubstLiteralize" )->procedure =
+		parse_make( builtin_subst_literalize, P0, P0, P0, C0, C0, 0 );
 #endif
 
     bindrule( "Temporary" )->procedure =
@@ -633,6 +636,38 @@ builtin_subst(
 
 	return result;
 }
+
+
+
+LIST *builtin_subst_literalize( PARSE	*parse, LOL	*args, int	*jmp )
+{
+	LIST *pattern;
+	LIST *result = L0;
+
+	for( pattern = lol_get( args, 0 ); pattern; pattern = pattern->next )
+	{
+		const char* patternString;
+		BUFFER patternBuff;
+		buffer_init( &patternBuff );
+
+		for ( patternString = pattern->string; *patternString; ++patternString )
+		{
+			if ( *patternString == '('  ||  *patternString == ')'  ||  *patternString == '.'  ||
+					*patternString == '%'  ||  *patternString == '+'  ||  *patternString == '-'  ||  
+					*patternString == '*'  ||  *patternString == '?'  ||  *patternString == '['  ||  
+					*patternString == ']'  ||  *patternString == '^'  ||  *patternString == '$' )
+			{
+				buffer_addchar( &patternBuff, '%' );
+			}
+			buffer_addchar( &patternBuff, *patternString );
+		}
+		buffer_addchar( &patternBuff, 0 );
+		result = list_new( result, buffer_ptr( &patternBuff ), 0 );
+	}
+
+	return result;
+}
+
 #endif /* OPT_BUILTIN_SUBST_EXT */
 
 
