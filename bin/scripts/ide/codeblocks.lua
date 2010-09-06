@@ -19,6 +19,7 @@ MapCompilerToCodeBlocksCompiler =
 	['vs2003'] = 'msvc7',
 	['vs2005'] = 'msvc8',
 	['vs2008'] = 'msvc9',
+	['vs2010'] = 'msvc10',
 	['mingw'] = 'gcc',
 }
 
@@ -45,7 +46,7 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 
 	local info = ProjectExportInfo[self.ProjectName]
 	if not info then
-		info = { Name = self.ProjectName, Filename = filename, Uuid = uuid.new():upper() }
+		info = { Name = self.ProjectName, Filename = filename, Uuid = '{' .. uuid.new():upper() .. '}' }
 		ProjectExportInfo[self.ProjectName] = info
 	end
 
