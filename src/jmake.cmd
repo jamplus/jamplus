@@ -28,7 +28,7 @@ if %VERBOSE% == 1 echo.  ...done
 
 if NOT "%VSDir%" == "" (
   set VS=2010
-  set COMNTOOLS="%VSDir%..\..\Common7\Tools\"
+  set COMNTOOLS="%VSDir%..\..\Common7\Tools\vsvars32.bat"
   goto :foundenv
 )
 
@@ -36,7 +36,7 @@ if %VERBOSE% == 1 echo.  ...looking in environment
 
 if NOT "%VS100COMNTOOLS%" == "" (
   set VS=2010
-  set COMNTOOLS="%VS100COMNTOOLS%"
+  set COMNTOOLS="%VS100COMNTOOLS%vsvars32.bat"
   goto :foundenv
 )
 
@@ -53,16 +53,16 @@ if %VERBOSE% == 1 echo.  ...done
 
 if NOT "%VSDir%" == "" (
   set VS=2008
-  set COMNTOOLS="%VSDir%..\..\Common7\Tools\"
+  set COMNTOOLS="%VSDir%..\..\Common7\Tools\vsvars32.bat"
   goto :foundenv
 )
 
 if %VERBOSE% == 1 echo.  ...looking in environment
-)
+
 
 if NOT "%VS90COMNTOOLS%" == "" (
   set VS=2008
-  set COMNTOOLS="%VS90COMNTOOLS%"
+  set COMNTOOLS="%VS90COMNTOOLS%vsvars32.bat"
   goto :foundenv
 )
 
@@ -79,7 +79,7 @@ if %VERBOSE% == 1 echo.  ...done
 
 if NOT "%VSDir%" == "" (
   set VS=2005
-  set COMNTOOLS="%VSDir%..\..\Common7\Tools\"
+  set COMNTOOLS="%VSDir%..\..\Common7\Tools\vsvars32.bat"
   goto :foundenv
 )
 
@@ -87,7 +87,7 @@ if %VERBOSE% == 1 echo.  ...looking in environment
 
 if NOT "%VS80COMNTOOLS%" == "" (
   set VS=2005
-  set COMNTOOLS="%VS80COMNTOOLS%"
+  set COMNTOOLS="%VS80COMNTOOLS%vsvars32.bat"
   goto :foundenv
 )
 
@@ -104,7 +104,7 @@ if %VERBOSE% == 1 echo.  ...done
 
 if NOT "%VSDir%" == "" (
   set VS=2003
-  set COMNTOOLS="%VSDir%..\..\Common7\Tools\"
+  set COMNTOOLS="%VSDir%..\..\Common7\Tools\vsvars32.bat"
   goto :foundenv
 )
 
@@ -112,7 +112,7 @@ if %VERBOSE% == 1 echo.  ...looking in environment
 
 if NOT "%VS71COMNTOOLS%" == "" (
   set VS=2003
-  set COMNTOOLS="%VS71COMNTOOLS%"
+  set COMNTOOLS="%VS71COMNTOOLS%vsvars32.bat"
   goto :foundenv
 )
 
@@ -129,7 +129,7 @@ if %VERBOSE% == 1 echo.  ...done
 
 if NOT "%VSDir%" == "" (
   set VS=2002
-  set COMNTOOLS="%VSDir%..\..\Common7\Tools\"
+  set COMNTOOLS="%VSDir%..\..\Common7\Tools\vsvars32.bat"
   goto :foundenv
 )
 
@@ -137,11 +137,26 @@ if %VERBOSE% == 1 echo.  ...looking in environment
 
 if NOT "%VS70COMNTOOLS%" == "" (
   set VS=2002
-  set COMNTOOLS="%VS70COMNTOOLS%"
+  set COMNTOOLS="%VS70COMNTOOLS%vsvars32.bat"
   goto :foundenv
 )
 
 if %VERBOSE% == 1 echo.  ...done
+
+REM Test for Visual C++ 6.0
+
+if %VERBOSE% == 1 echo.Checking Visual C++ 6.0
+if %VERBOSE% == 1 echo.  ...looking in registry
+
+(for /f "tokens=1,2*" %%i in ('reg query "HKLM\SOFTWARE\Microsoft\DevStudio\6.0\Products\Microsoft Visual C++" /v ProductDir') do set VSDir=%%k) 2>nul
+if %VERBOSE% == 1 echo.  ...done
+
+if NOT "%VSDir%" == "" (
+  set VS=6.0
+  set COMNTOOLS="%VSDir%\Bin\vcvars32.bat"
+  goto :foundenv
+)
+
 
 :foundenv
 
@@ -153,7 +168,7 @@ if %COMNTOOLS% == "" (
 if %VERBOSE% == 1 echo.Found Visual Studio %VS%
 if %VERBOSE% == 1 echo.
 
-if "%VCINSTALLDIR%" == "" call %COMNTOOLS%vsvars32.bat
+if "%VCINSTALLDIR%" == "" call %COMNTOOLS%
 
 nmake /f Makefile.Windows
 

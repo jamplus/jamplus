@@ -49,7 +49,7 @@ rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 	if ! ( postmidl in $(OPTIONS) )
 	{
 		if $(COMPILER.$(PLATFORM)) = vc6 {
-			targets += $(tlbFile) $(hFile) ;
+			targets += $(tlbFile) $(hFile) $(iidFile) ;
 		} else {
 			targets += $(tlbFile) $(hFile) $(iidFile) ;
 			if proxy in $(OPTIONS)

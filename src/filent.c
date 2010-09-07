@@ -715,7 +715,11 @@ void getexecutablepath(char* buffer, size_t bufferLen)
 
 #pragma comment(lib, "winmm.lib")
 
+#if _MSC_VER  &&  _MSC_VER < 1300
+unsigned __int64 getmilliseconds()
+#else
 unsigned long long getmilliseconds()
+#endif
 {
     return timeGetTime();
 }

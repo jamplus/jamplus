@@ -612,3 +612,7 @@ void* track_realloc(void *ptr, size_t size);
 typedef unsigned char MD5SUM[MD5_SUMSIZE];
 #endif
 
+#if _MSC_VER  &&  _MSC_VER < 1300
+typedef int intptr_t;
+#endif
+

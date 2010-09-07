@@ -224,7 +224,11 @@ int main( int argc, char **argv, char **arg_environ )
 	int		anyhow = 0;
 	int		status;
 #ifdef OPT_PRINT_TOTAL_TIME_EXT
+#if _MSC_VER  &&  _MSC_VER < 1300
+	unsigned __int64 start;
+#else
 	unsigned long long	start;
+#endif
 	start = getmilliseconds();
 //	time_t		start;
 //	time(&start);
@@ -758,7 +762,11 @@ int main( int argc, char **argv, char **arg_environ )
 
 #ifdef OPT_PRINT_TOTAL_TIME_EXT
 	{
+#if _MSC_VER  &&  _MSC_VER < 1300
+	    unsigned __int64 now;
+#else
 	    unsigned long long now;
+#endif
 //	    time_t now;
 	    long elapsed;
 	    const char* elapsed_logfile_name;

@@ -29,9 +29,11 @@ switch $(COMPILER.$(PLATFORM)) {
 		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
 
 	case vc6 :
-		MSSDK = $(MSVCNT) ;
-		MSSDK_STDHDRS = "$(MSSDK)/Include" ; # "$(MSSDK)/PlatformSDK/Include" ;
-		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/Lib" ; # "$(MSVCNT)/PlatformSDK/lib" ;
+		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft MicrosoftSDK Directories "Install Dir" ;
+		MSSDK = [ W32_GETREG $(key) ] ;
+		MSSDK ?= $(MSVCNT) ;
+		MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSVCNT)/Include" ;
+		MSSDK_LINKDIRECTORIES = "$(MSSDK)/Lib" "$(MSVCNT)/Lib" ;
 }
 
 MSVCBIN			?= "$(MSVCNT)/bin/" ;

@@ -38,9 +38,6 @@ JAMBASE_VERSION = "JamPlus 1.0 RC1 (2010.01.04)" ;
 
 if $(NT)
 {
-	MSVCNT ?= $(MSVCDIR) ;
-	MSVCNT ?= $(MSVCDir) ;
-
 	MV		?= move /y ;
 	CP		?= copy ;
 	MKDIR	?= mkdir ;
