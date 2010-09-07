@@ -60,7 +60,7 @@
 # define FINDTYPE intptr_t
 
 void
-file_dirscan( 
+file_dirscan(
 	const char *dir,
 	scanback func,
 	void	*closure )
@@ -82,7 +82,7 @@ file_dirscan(
 	dir = *dir ? dir : ".";
 
  	/* Special case \ or d:\ : enter it */
- 
+
 #ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
  	if( f.f_dir.len == 1 && (f.f_dir.ptr[0] == '\\' || f.f_dir.ptr[0] == '/') )
  	    (*func)( closure, dir, 0 /* not stat()'ed */, (time_t)0, 1 );
@@ -389,7 +389,7 @@ int file_mkdir(const char *inPath)
 // From some MSDN sample, I think.
 static int CreatePipeChild(HANDLE* child, HANDLE* inH, HANDLE* outH, HANDLE* errH, int redirect_stderr_to_stdout, LPCTSTR Command)
 {
-    SECURITY_ATTRIBUTES lsa;     
+    SECURITY_ATTRIBUTES lsa;
     HANDLE ChildIn;
     HANDLE ChildOut;
     HANDLE ChildErr = NULL;

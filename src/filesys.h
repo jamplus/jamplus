@@ -5,7 +5,7 @@
  */
 
 /*
- * filesys.h - OS specific file routines 
+ * filesys.h - OS specific file routines
  *
  * 11/04/02 (seiwald) - const-ing for string literals
  */

@@ -15,7 +15,7 @@
  *
  * Each word must be an individual element in a jam variable value.
  *
- * In $(JAMSHELL), % expands to the command string and ! expands to 
+ * In $(JAMSHELL), % expands to the command string and ! expands to
  * the slot number (starting at 1) for multiprocess (-j) invocations.
  * If $(JAMSHELL) doesn't include a %, it is tacked on as the last
  * argument.
@@ -56,7 +56,7 @@
 # include <process.h>
 # endif
 
-# ifdef OS_NT 
+# ifdef OS_NT
 # define USE_EXECNT
 # include <process.h>
 # define WIN32_LEAN_AND_MEAN
@@ -149,7 +149,7 @@ exec_init()
 	for( i = 0; i < globs.jobs; ++i )
 	{
 		cmdtab[ i ].outputFilename = malloc( strlen( tempdir ) + 32 );
-		sprintf( cmdtab[ i ].outputFilename, "%s%cjam%dout%d", 
+		sprintf( cmdtab[ i ].outputFilename, "%s%cjam%dout%d",
 			tempdir, PATH_DELIM, getpid(), i );
 	}
 }
@@ -179,7 +179,7 @@ exec_done()
  */
 
 void
-execlua( 
+execlua(
 	char *string,
 #ifdef OPT_SERIAL_OUTPUT_EXT
 	void (*func)( const char* outputname, void *closure, int status ),
@@ -266,7 +266,7 @@ execlua(
  */
 
 void
-execcmd( 
+execcmd(
 	const char *string,
 #ifdef OPT_SERIAL_OUTPUT_EXT
 	void (*func)( const char* outputname, void *closure, int status ),
@@ -286,7 +286,7 @@ execcmd(
 # ifdef USE_EXECNT
 	int quote = 0;
 #endif
-	
+
 # ifdef USE_EXECNT
 	char *p;
 # endif
@@ -347,7 +347,7 @@ execcmd(
 
 		cmdtab[ slot ].tempfile = malloc( strlen( tempdir ) + 32 );
 
-		sprintf( cmdtab[ slot ].tempfile, "%s%cjam%dcmd%d.bat", 
+		sprintf( cmdtab[ slot ].tempfile, "%s%cjam%dcmd%d.bat",
 			tempdir, PATH_DELIM, getpid(), slot );
 	}
 
@@ -500,7 +500,7 @@ execcmd(
 	}
 # else
 # ifdef NO_VFORK
-	if ((pid = fork()) == 0) 
+	if ((pid = fork()) == 0)
 	{
 # ifdef OPT_SERIAL_OUTPUT_EXT
 		int fd;
@@ -517,7 +517,7 @@ execcmd(
 		_exit(127);
 	}
 # else
-	if ((pid = vfork()) == 0) 
+	if ((pid = vfork()) == 0)
 	{
 # ifdef OPT_SERIAL_OUTPUT_EXT
 		if ( serialOutput )
@@ -766,7 +766,7 @@ my_wait( int *status )
 			} else
 #endif /* OPT_BUILTIN_LUA_SUPPORT_EXT */
 				if ( waitpid( cmdtab[i].pid, status, WNOHANG ) != 0 ) {
-					return cmdtab[i].pid;			
+					return cmdtab[i].pid;
 				}
 		}
 	}
@@ -774,7 +774,7 @@ my_wait( int *status )
 	usleep( 1000 );
 
 	errno = EINTR;
-	return -1;		
+	return -1;
 #endif
 
 FAILED:
@@ -782,7 +782,7 @@ FAILED:
 	errno = GetLastError();
 #endif
 	return -1;
-    
+
 }
 
 # endif /* USE_EXECUNIX */
