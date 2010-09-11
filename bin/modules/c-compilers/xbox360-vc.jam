@@ -10,27 +10,41 @@ C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
 C.Defines * : _XBOX : : xbox360 ;
 C.Defines * : _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE : : xbox360 ;
 
-rule ImageXex TARGET
+rule ImageXexHelper
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	local grist = $(TARGET) ;
-	local _t ;
-	on $(TARGET) _t = $(LINK_TARGET) ;
 	local xex = $(_t:S=.xex) ;
-	MakeLocate $(xex) : $(LOCATE_TARGET) ;
+	MakeLocate $(xex) : $(outputPath) ;
 	Depends $(TARGET) : $(xex) : $(_t) ;
 	Clean clean:$(TARGET) : $(xex) $(xex:S=.pe) $(xex:S=.xdb) ;
-	ImageXex1 $(xex) : $(_t) ;
+	ImageXex $(xex) : $(_t) ;
 }
 
-actions ImageXex1
+actions ImageXex
 {
 	"$(XEDK)/bin/win32/imagexex" /out:"$(1)" /nologo "$(2)"
 }
 
+rule DeployXexHelper
+{
+	local deployLocation ;
+	on $(TARGET) deployLocation = $(DEPLOY_LOCATION) ;
+	if $(deployLocation)
+	{
+		local xex = $(_t:S=.xex) ;
+		DEPLOY_LOCATION on $(xex) = $(deployLocation) ;
+		DeployXex $(xex) ;
+	}
+}
+
+actions DeployXex
+{
+	"$(XEDK)/bin/win32/xbecopy" $(1:C\\) "$(DEPLOY_LOCATION)\$(1:BS)" /nologo
+}
+
 rule C._ApplicationFromObjects_PostBuild
 {
-	ImageXex $(TARGET) ;
+	ImageXexHelper ;
+	DeployXexHelper ;
 }
 
 rule C._ApplicationTargetInfo
@@ -38,12 +52,22 @@ rule C._ApplicationTargetInfo
 	DEBUGGEROUTPUTNAME.$(PLATFORM).$(CONFIG) on $(TARGET) = $(_t:S=.xex:R=$(outputPath):G=) ;
 }
 
+rule C.DeployXex TARGET : DEPLOY_LOCATION
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	DEPLOY_LOCATION on $(TARGET) = $(DEPLOY_LOCATION) ;
+}
+
 rule C.Xbox360DeployToolSettings TARGET : REMOTE_ROOT : DEPLOYMENT_TYPE : DEPLOYMENT_FILES
 {
-	Project.MakefileTool $(TARGET) : VCX360DeploymentTool : RemoteRoot : $(REMOTE_ROOT) ;
-	Project.MakefileTool $(TARGET) : VCX360DeploymentTool : DeploymentFiles : $(DEPLOYMENT_FILES:E="") ;
-	Project.MakefileTool $(TARGET) : VCX360DeploymentTool : DeploymentType : $(DEPLOYMENT_TYPE:E=0) ;
+	if $(TARGETINFO_LOCATE)
+	{
+		Project.MakefileTool $(TARGET) : VCX360DeploymentTool : RemoteRoot : $(REMOTE_ROOT) ;
+		Project.MakefileTool $(TARGET) : VCX360DeploymentTool : DeploymentFiles : $(DEPLOYMENT_FILES:E="") ;
+		Project.MakefileTool $(TARGET) : VCX360DeploymentTool : DeploymentType : $(DEPLOYMENT_TYPE:E=0) ;
+	}
 }
 
 VSPLATFORMMAP.xbox360 = "Xbox 360" ;
 VSNATIVEPLATFORM.xbox360 = 1 ;
+
