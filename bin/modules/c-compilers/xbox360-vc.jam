@@ -33,6 +33,11 @@ rule C._ApplicationFromObjects_PostBuild
 	ImageXex $(TARGET) ;
 }
 
+rule C._ApplicationTargetInfo
+{
+	DEBUGGEROUTPUTNAME.$(PLATFORM).$(CONFIG) on $(TARGET) = $(_t:S=.xex:R=$(outputPath):G=) ;
+}
+
 rule C.Xbox360DeployToolSettings TARGET : REMOTE_ROOT : DEPLOYMENT_TYPE : DEPLOYMENT_FILES
 {
 	Project.MakefileTool $(TARGET) : VCX360DeploymentTool : RemoteRoot : $(REMOTE_ROOT) ;

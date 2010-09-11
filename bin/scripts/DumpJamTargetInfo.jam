@@ -112,6 +112,12 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 
 		local outputPath = [ C._retrieveOutputPath $(TARGETS) : $(CONFIG) : $(PLATFORM) ] ;
 		Contents += "$(project).OutputPaths['$(PLATFORM)']['$(CONFIG)'] = [[$(outputPath[1])/]]$(NEWLINE)" ;
+
+		local debuggerOutputName ;
+		on $(TARGETS) debuggerOutputName = $(DEBUGGEROUTPUTNAME.$(PLATFORM).$(CONFIG)) ;
+		if $(debuggerOutputName) {
+			Contents += "$(project).DebuggerOutputNames['$(PLATFORM)']['$(CONFIG)'] = [[$(debuggerOutputName)]]$(NEWLINE)" ;
+		}
 	}
 
 	local defines ;

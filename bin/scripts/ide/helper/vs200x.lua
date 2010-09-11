@@ -143,7 +143,10 @@ function VisualStudio200xProjectMetaTable:Write(outputPath)
 				if project.IncludePaths and project.IncludePaths[platformName] and project.IncludePaths[platformName][configName] then
 					configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
 				end
-				if project.OutputPaths and project.OutputPaths[platformName] and project.OutputPaths[platformName][configName] then
+				if project.DebuggerOutputNames  and  project.DebuggerOutputNames[platformName]  and  project.DebuggerOutputNames[platformName][configName] then
+					configInfo.Output = project.DebuggerOutputNames[platformName][configName]
+				end
+				if configInfo.Output == ''  and  project.OutputPaths and project.OutputPaths[platformName] and project.OutputPaths[platformName][configName] then
 					configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
 				end
 				configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName

@@ -637,6 +637,10 @@ rule C._ApplicationFromObjects_PostBuild
 {
 }
 
+rule C._ApplicationTargetInfo
+{
+}
+
 ########################################################################
 ########################################################################
 
@@ -1120,6 +1124,14 @@ rule C.Application TARGET : SOURCES : OPTIONS
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	Workspace $(TARGET) : $(TARGET) : all ;
+
+	local grist = $(TARGET) ;
+	local _t = [ C._retrieveOutputName $(TARGET) : SUFEXE ] ;
+	_t = $(_t:G=$(grist)) ;
+
+	local outputPath = [ C._retrieveOutputPath $(TARGET) ] ;
+
+	C._ApplicationTargetInfo ;
 
 	DumpProjectInfo $(TARGET) : $(SOURCES) : app $(OPTIONS) ;
 	ActiveTarget ;
