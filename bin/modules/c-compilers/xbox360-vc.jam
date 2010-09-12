@@ -31,9 +31,21 @@ rule DeployXexHelper
 	if $(deployLocation)
 	{
 		local xex = $(_t:S=.xex) ;
-		DEPLOY_LOCATION on $(xex) = $(deployLocation) ;
-		DeployXex $(xex) ;
+		local deployXex = $(xex:G=$(TARGET)|deploy) ;
+		MakeLocate $(deployXex) : $(LOCATE_TARGET)/deploy ;
+		Depends $(deployXex) : $(xex) ;
+		CopyXex $(deployXex) : $(xex) ;
+		Clean clean:$(TARGET) : $(deployXex) ;
+		
+		DEPLOY_LOCATION on $(deployXex) = $(deployLocation) ;
+		DeployXex $(deployXex) ;
+		Depends $(TARGET) : $(deployXex) ;
 	}
+}
+
+actions CopyXex
+{
+	copy $(2:C\\) $(1:C\\)
 }
 
 actions DeployXex
