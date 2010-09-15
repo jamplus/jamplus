@@ -1250,6 +1250,15 @@ builtin_expandfilelist(
 {
 	LIST* files = lol_get( args, 0 );
 	LIST* result = L0;
+	LIST* searchSource = var_get( "SEARCH_SOURCE" );
+	size_t searchSourceLen;
+	int searchSourceExtraLen = 0;
+
+	if ( searchSource ) {
+		searchSourceLen = strlen( searchSource->string );
+		if ( searchSource->string[ searchSourceLen - 1 ] != '/'  &&  searchSource->string[ searchSourceLen - 1 ] != '\\' )
+			searchSourceExtraLen = 1;
+	}
 
     for ( ; files; files = files->next ) {
 		int wildcard = 0;
@@ -1265,9 +1274,28 @@ builtin_expandfilelist(
 		if ( !wildcard ) {
 			result = list_new( result, files->string, 1 );
 		} else {
-			fileglob* glob = fileglob_Create( files->string );
+			PATHNAME	f;
+			char		buf[ MAXJPATH ];
+			size_t testIndex = 0;
+			fileglob* glob;
+			int matches = 1;
+
+			path_parse( files->string, &f );
+			f.f_root.len = searchSourceLen;
+			f.f_root.ptr = searchSource->string;
+			path_build( &f, buf, 0 );
+
+			while ( testIndex < searchSourceLen ) {
+				if ( buf[ testIndex ] != searchSource->string[ testIndex ] ) {
+					matches = 0;
+					break;
+				}
+				++testIndex;
+			}
+
+			glob = fileglob_Create( buf );
 			while ( fileglob_Next( glob ) ) {
-	            result = list_new( result, fileglob_FileName( glob ), 0 );
+	            result = list_new( result, fileglob_FileName( glob ) + ( matches ? searchSourceLen : 0 ) + searchSourceExtraLen, 0 );
 			}
 			fileglob_Destroy( glob );
 		}
