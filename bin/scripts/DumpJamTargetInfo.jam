@@ -43,6 +43,8 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES
 	if ! $(FOLDERNAME)  ||  ! $(SOURCES)  {  return ;  }
 
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	SOURCES = [ ExpandFileList $(SOURCES) ] ;
+
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 
 	local project ;
@@ -61,6 +63,7 @@ rule AutoSourceGroup TARGET : SOURCES
 	if ! $(SOURCES)  {  return ;  }
 
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	SOURCES = [ ExpandFileList $(SOURCES) ] ;
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 
