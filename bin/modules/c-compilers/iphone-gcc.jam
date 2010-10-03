@@ -371,7 +371,7 @@ rule C._ApplicationFromObjects_LinkFlags
 
 actions C._GenerateDSYMFile
 {
-	/Developer/usr/bin/dsymutil $(2:C) -o $(1:DC)
+	/Developer/usr/bin/dsymutil $(2:C) -o $(OUTPUT_PATH:C)
 }
 
 
@@ -381,12 +381,16 @@ rule C.GenerateDSYMFile TARGET
 	local grist = $(TARGET) ;
 	local bundlePath ;
 	local _t ;
-	on $(TARGET) _t = $(LINK_TARGET) ;
-	on $(TARGET) bundlePath = $(BUNDLE_PATH) ;
+	on $(TARGET) {
+		_t = $(LINK_TARGET) ;
+		bundlePath = $(BUNDLE_PATH) ;
+	}
 	local dsymBundlePath = $(bundlePath).dSYM ;
 	local _t.dsym = $(_t).DSYM ;
 	BINDING on $(_t) = $(_t:BS) ;
-	MakeLocate $(_t.dsym) : $(dsymBundlePath) ;
+	BINDING on $(_t.dsym) = $(_t:BS) ;
+	OUTPUT_PATH on $(_t.dsym) = $(dsymBundlePath) ;
+	MakeLocate $(_t.dsym) : $(dsymBundlePath)/Contents/Resources/DWARF ;
 	Depends $(TARGET) : $(_t.dsym) : $(_t) ;
 	Clean clean:$(TARGET) : $(_t.dsym) ;
 	C._GenerateDSYMFile $(_t.dsym) : $(_t) ;
