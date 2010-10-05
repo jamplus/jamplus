@@ -241,7 +241,7 @@ rule C._MultiCppCompile_SetupFlags
 	}
 
 	local forceIncludeHeader ;
-	if $(_pch[2]) {
+	if $(_pch[2]) && ! $(_nopch) {
 		forceIncludeHeader = $(_pch[2]:G=$(grist)|force) ;
 		BINDING on $(forceIncludeHeader) = $(_pch[3]) ;
 		SEARCH on $(forceIncludeHeader) = $(_hdrs) ;
