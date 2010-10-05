@@ -42,7 +42,7 @@ if $(DONTUSEMERIGHTNOW)
 }
     
 
-rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
+rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : MACOSX_VERSION_MIN {
 	if ! ( $(PLATFORM) in macosx32 macosx64 ) { return ; }
 
 	if $(SDK_PLATFORM) in macosx32 macosx64 {
@@ -53,6 +53,7 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
 	local developerRoot ;
 	local isysroot ;
 	local flags ;
+	local defaultversionmin ;
 	switch $(SDK_PLATFORM) {
 		case macosx :
 			developerRoot = /Developer/SDKs ;
@@ -63,7 +64,7 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
 					C.C++	= g++-4.0 ;
 					C.LINK	= g++-4.0 ;
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
-					flags += -mmacosx-version-min=10.4 ;
+					defaultversionmin = 10.4 ;
 					XCODE_SDKROOT = macosx10.4 ;
 
 				case 10.4u :
@@ -71,7 +72,7 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
 					C.C++	= g++-4.0 ;
 					C.LINK	= g++-4.0 ;
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
-					flags += -mmacosx-version-min=10.4 ;
+					defaultversionmin = 10.4 ;
 					XCODE_SDKROOT = macosx10.4 ;
 
 				case 10.5 :
@@ -79,7 +80,7 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
 					C.C++	= g++ ;
 					C.LINK	= g++ ;
 					isysroot = $(developerRoot)/MacOSX10.5.sdk ;
-					flags += -mmacosx-version-min=10.5 ;
+					defaultversionmin = 10.5 ;
 					XCODE_SDKROOT = macosx10.5 ;
 
 				case 10.6 :
@@ -87,11 +88,13 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
 					C.C++	= g++ ;
 					C.LINK	= g++ ;
 					isysroot = $(developerRoot)/MacOSX10.6.sdk ;
-					flags += -mmacosx-version-min=10.6 ;
+					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = macosx10.6 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
+			MACOSX_VERSION_MIN ?= $(defaultversionmin) ;
+			flags += -mmacosx-version-min=$(MACOSX_VERSION_MIN) ;
 			developerRoot = $(isysroot) ;
 	}
 
