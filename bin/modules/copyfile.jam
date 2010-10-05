@@ -6,8 +6,10 @@ rule CopyFile PARENT : TARGET : SOURCE
 	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
 	Depends $(PARENT) : $(TARGET) : $(SOURCE) ;
 	SearchSource $(SOURCE) : $(SEARCH_SOURCE) ;
-	MakeLocate $(TARGET) : $(TARGET:D) ;
-	BINDING on $(TARGET) = $(TARGET:BS) ;
+	on $(TARGET) if ! $(LOCATE) {
+		MakeLocate $(TARGET) : $(TARGET:D) ;
+		BINDING on $(TARGET) = $(TARGET:BS) ;
+	}
 	CopyFile1 $(TARGET) : $(SOURCE) ;
 	Clean clean:$(PARENT) : $(TARGET) ;
 }
