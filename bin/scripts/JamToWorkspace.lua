@@ -602,8 +602,8 @@ $(locateTargetText)
 DEPCACHE.standard = "$$(ALL_LOCATE_TARGET)/.depcache" ;
 DEPCACHE = standard ;
 
-NoCare $(settingsFile) ;
-include $(settingsFile) ;
+NoCare "$(settingsFile)" ;
+include "$(settingsFile)" ;
 
 ]], locateTargetText, _G) }
 
@@ -872,7 +872,7 @@ end
 
 Config.SubIncludes =
 {
-	{ 'AppRoot', '$(sourceRootPath)', sourceJamfile },
+	{ 'AppRoot', '"$(sourceRootPath)"', sourceJamfile },
 }
 
 Config.JamFlags = JamFlags
