@@ -526,9 +526,9 @@ function DumpWorkspace(workspace)
 	if uname == 'windows' then
 		updateWorkspaceCommandLines =
 		{
-			os.path.make_backslash(outPath .. 'updateworkspace.bat'),
-			os.path.make_backslash(outPath .. 'updateworkspace.bat'),
-			os.path.make_backslash(outPath .. 'updateworkspace.bat'),
+			os.path.make_backslash( '"' .. outPath .. 'updateworkspace.bat' .. '"' ),
+			os.path.make_backslash( '"' .. outPath .. 'updateworkspace.bat' .. '"' ),
+			os.path.make_backslash( '"' .. outPath .. 'updateworkspace.bat' .. '"' ),
 		}
 	else
 		updateWorkspaceCommandLines =
