@@ -37,6 +37,11 @@ rule C.ResourceCompiler PARENT : SOURCES : OPTIONS
 		$(SUBDIRHDRS)
 		$(C.STDHDRS)
 	;
+	
+	# Resources can have #include directives which we need to be aware of.
+	HDRRULE on $(SOURCES) = C.HdrRule ;
+	HDRSCAN on $(SOURCES) = $(C.HDRPATTERN) ;
+	HDRGRIST on $(SOURCES) = $(grist) ;
 
 	UseCommandLine $(TARGETS) :
 			[ on $(TARGETS) Var RCDEFINES ]
@@ -59,13 +64,13 @@ rule C.ResourceCompiler PARENT : SOURCES : OPTIONS
 actions C.ResourceCompile
 {
 	SET INCLUDE=$(RCHDRS:\\J=;)
-	"$(C.RC:\\)" /fo $(1) $(RCFLAGS) /d$(RCDEFINES) $(2)
+	"$(C.RC:\\)" /fo $(1:\\C) $(RCFLAGS) /d$(RCDEFINES) $(2:\\C)
 }
 
 actions quietly C.ResourceCompileQuiet
 {
 	SET INCLUDE=$(RCHDRS:\\J=;)
-	"$(C.RC:\\)" /fo $(1) $(RCFLAGS) /d$(DEFINES) $(2)
+	"$(C.RC:\\)" /fo $(1:\\C) $(RCFLAGS) /d$(DEFINES) $(2:\\C)
 }
 
 # Set resource compiler options
