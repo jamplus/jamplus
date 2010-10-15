@@ -845,6 +845,8 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
 
+	C._SharedLibraryFromObjects_PostBuild ;
+
 	return $(_linkTargets) ;
 }
 
@@ -870,6 +872,10 @@ rule C._SharedLibraryFromObjects_CleanIntermediates
 }
 
 rule C._SharedLibraryFromObjects_RegServer
+{
+}
+
+rule C._SharedLibraryFromObjects_PostBuild
 {
 }
 
