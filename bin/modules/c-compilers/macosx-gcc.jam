@@ -41,9 +41,9 @@ if $(DONTUSEMERIGHTNOW)
     
 
 rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : MACOSX_VERSION_MIN {
-	if ! ( $(PLATFORM) in macosx32 macosx64 ) { return ; }
+	if ! ( $(PLATFORM) in macosx32 macosx64 macosxppc ) { return ; }
 
-	if $(SDK_PLATFORM) in macosx32 macosx64 {
+	if $(SDK_PLATFORM) in macosx32 macosx64 macosxppc {
 		SDK_PLATFORM = macosx ;
 	}
 

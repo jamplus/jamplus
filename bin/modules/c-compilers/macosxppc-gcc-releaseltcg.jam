@@ -1,0 +1,5 @@
+C.Flags CC	: * : -g -O3 -fomit-frame-pointer -fstrength-reduce -arch ppc : releaseltcg : macosxppc ;
+C.Flags C++	: *	: -g -O3 -fomit-frame-pointer -fstrength-reduce -arch ppc : releaseltcg : macosxppc ;
+C.Flags M	: *	: -g -O3 -fomit-frame-pointer -fstrength-reduce -arch ppc : releaseltcg : macosxppc ;
+C.Flags MM	: *	: -g -O3 -fomit-frame-pointer -fstrength-reduce -arch ppc : releaseltcg : macosxppc ;
+C.LinkFlags * : -arch ppc : releaseltcg : macosxppc ;

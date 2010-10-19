@@ -1,0 +1,5 @@
+C.Flags CC	: * : -g -O2 -arch ppc : release : macosxppc ;
+C.Flags C++	: *	: -g -O2 -arch ppc : release : macosxppc ;
+C.Flags M	: *	: -g -O2 -arch ppc : release : macosxppc ;
+C.Flags MM	: *	: -g -O2 -arch ppc : release : macosxppc ;
+C.LinkFlags * : -arch ppc : release : macosxppc ;
