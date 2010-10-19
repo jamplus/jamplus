@@ -414,7 +414,15 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 			table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = \"" .. ((productName and productName ~= '') and productName or projectName) .. "\";\n")
 --			table.insert(self.Contents, '\t\t\t\tINFOPLIST_FILE = "myopengl-Info.plist";\n');
 --			table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
-			table.insert(self.Contents, "\t\t\t\tSDKROOT = " .. XCODE_SDKROOTS[platformName] .. ";\n")
+			local sdkRoot
+			if subProject.XCODE_SDKROOT  and  subProject.XCODE_SDKROOT[platformName]  and  subProject.XCODE_SDKROOT[platformName][configName] then
+				sdkRoot = subProject.XCODE_SDKROOT[platformName][configName]
+			elseif Projects['C.*']  and  Projects['C.*'].XCODE_SDKROOT  and  Projects['C.*'].XCODE_SDKROOT[platformName]  and  Projects['C.*'].XCODE_SDKROOT[platformName][configName] then
+				sdkRoot = Projects['C.*'].XCODE_SDKROOT[platformName][configName]			
+		   	end
+			if sdkRoot then
+				table.insert(self.Contents, "\t\t\t\tSDKROOT = " .. sdkRoot .. ";\n")
+			end
 			if platformName == 'macosx32'  or  platformName == 'macosx64' then
 				table.insert(self.Contents, "\t\t\t\tARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\";\n");
 			elseif platformName == 'iphone' then

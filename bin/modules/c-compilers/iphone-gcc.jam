@@ -218,6 +218,11 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION {
 	C.Flags M	: * : -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch : : $(PLATFORM) ;
 	C.Flags MM	: * : -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch : : $(PLATFORM) ;
 	C.LinkFlags * : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+
+	if $(TARGETINFO_LOCATE) {
+		Contents += "Projects[ [[$(TARGET)]] ].XCODE_SDKROOT[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(XCODE_SDKROOT)]]
+
+" ;
 }
 
 

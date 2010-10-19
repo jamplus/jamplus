@@ -1,28 +1,8 @@
 rule CompilerPlatformInfo
 {
-	local vsplatform = $(VSPLATFORMMAP.$(PLATFORM)) ;
-	local vsnative = $(VSNATIVEPLATFORM.$(PLATFORM)) ;
-	local text = "if not MapPlatformToVSPlatform then MapPlatformToVSPlatform = {} end
-MapPlatformToVSPlatform[ [[$(PLATFORM)]] ] = [[$(vsplatform)]]
-" ;
-	if $(vsnative) {
-		text += "if not VSNativePlatforms then VSNativePlatforms = {} end
-VSNativePlatforms[ [[$(PLATFORM)]] ] = true
-" ;
-	}
-
-	text += "if not XCODE_SDKROOTS then XCODE_SDKROOTS = {} end
-XCODE_SDKROOTS[ [[$(PLATFORM)]] ] = [[$(XCODE_SDKROOT)]]
-" ;
-
-	return $(text) ;
 }
 
 rule CompilerConfigInfo
 {
-	local vsconfig = $(VSCONFIGMAP.$(CONFIG)) ;
-	return "if not MapConfigToVSConfig then MapConfigToVSConfig = {} end
-MapConfigToVSConfig[ [[$(CONFIG)]] ] = [[$(vsconfig)]]
-" ;
 }
 

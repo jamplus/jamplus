@@ -101,6 +101,12 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : MACOSX_VERSION_MIN {
 	C.Flags M	: $(TARGET) : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
 	C.Flags MM	: $(TARGET) : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
 	C.LinkFlags $(TARGET) : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+
+	if $(TARGETINFO_LOCATE) {
+		Contents += "Projects[ [[$(TARGET)]] ].XCODE_SDKROOT[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(XCODE_SDKROOT)]]
+
+" ;
+	}
 }
 
 
