@@ -210,6 +210,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 }
 
 rule C.LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM {
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	C.LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 }
 
