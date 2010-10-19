@@ -1,0 +1,4 @@
+C.Flags CC	: * : -g -O0 -m64 : debug : nacl32 ;
+C.Flags C++	: *	: -g -O0 -m64 : debug : nacl32 ;
+C.Flags M	: *	: -g -O0 -m64 : debug : nacl32 ;
+C.Flags MM	: *	: -g -O0 -m64 : debug : nacl32 ;
