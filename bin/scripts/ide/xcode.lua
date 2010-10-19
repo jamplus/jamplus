@@ -665,6 +665,10 @@ function XcodeWorkspaceMetaTable:Write(outputPath)
 	local workspace = Workspaces[self.Name]
 	local workspaceName = self.Name .. '.workspace'
 
+	for projectName, project in pairs(Projects) do
+		project._insertedapp = nil
+	end
+
 	Projects[self.Name .. '.workspace'] = {}
 
 	local info = XcodeHelper_GetProjectExportInfo(workspaceName)
