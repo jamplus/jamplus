@@ -1043,6 +1043,7 @@ rule C.ObjectCFlags TARGET : SOURCES : FLAGS : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
+	local dollar = "$" ;
 	local colon = ":" ;
 	local list = @(I=\\$(C.C_STYLE_BUILD_EXTENSIONS)$:J=$(colon)) ;
 	local sources = @($(dollar)(SOURCES$(colon)$(list)):A) ;
