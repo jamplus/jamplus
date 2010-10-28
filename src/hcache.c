@@ -505,10 +505,7 @@ static HCACHEFILE* hcachefile_get(TARGET *t)
 			hcachevar = var_get( varBuffer );
 			if( hcachevar ) {
 				TARGET *t = bindtarget( hcachevar->string );
-
-				pushsettings( t->settings );
-				t->boundname = search( t->name, &t->time );
-				popsettings( t->settings );
+				t->boundname = search_using_target_settings( t, t->name, &t->time );
 
 				file->cachefilename = copystr( t->boundname );
 				hcache_readfile( file );
