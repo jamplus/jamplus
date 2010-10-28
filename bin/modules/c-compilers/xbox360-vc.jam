@@ -12,16 +12,41 @@ C.Defines * : _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_D
 
 rule ImageXexHelper
 {
+	local _configFile ;
+	on $(TARGET) _configFile = $(CONFIG_FILE) ;
+	
 	local xex = $(_t:S=.xex) ;
 	MakeLocate $(xex) : $(outputPath) ;
 	Depends $(TARGET) : $(xex) : $(_t) ;
 	Clean clean:$(TARGET) : $(xex) $(xex:S=.pe) $(xex:S=.xdb) ;
-	ImageXex $(xex) : $(_t) ;
+	if $(_configFile)
+	{
+		Depends $(xex) : $(_configFile) ;
+		ImageXexWithConfig $(xex) : $(_t) $(_configFile) ;
+	}
+	else
+	{
+		ImageXex $(xex) : $(_t) ;
+	}
 }
 
 actions ImageXex
 {
 	"$(XEDK)/bin/win32/imagexex" /out:"$(1)" /nologo "$(2)"
+}
+
+actions ImageXexWithConfig
+{
+	CD /D $(2[2]:PC\\)
+	"$(XEDK)/bin/win32/imagexex" /out:"$(1)" /nologo "$(2[1])" /CONFIG:"$(2[2]:\\)"
+}
+
+rule C.Xbox360ImageXexToolSettings TARGET : CONFIG_FILE
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	CONFIG_FILE = [ C.TargetGrist $(TARGET) : $(CONFIG_FILE) ] ;
+	SearchSource $(CONFIG_FILE) ;
+	CONFIG_FILE on $(TARGET) = $(CONFIG_FILE) ;      
 }
 
 rule DeployXexHelper
@@ -51,6 +76,7 @@ actions CopyXex
 actions DeployXex
 {
 	"$(XEDK)/bin/win32/xbecopy" $(1:C\\) "$(DEPLOY_LOCATION)\$(1:BS)" /nologo
+	EXIT /B 0
 }
 
 rule C._ApplicationFromObjects_PostBuild
