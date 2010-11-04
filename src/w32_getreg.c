@@ -86,6 +86,7 @@ w32_getreg_internal(LIST* pathlist, INT is64Bit)
         switch (dataType) {
 	case REG_SZ:
 	case REG_EXPAND_SZ:
+	case REG_DWORD:
 	    break;
 	default:
 	    return 0;
@@ -95,7 +96,14 @@ w32_getreg_internal(LIST* pathlist, INT is64Bit)
 	    return 0;
 	}
 
-        dataSize += 5;
+		if ( dataType == REG_DWORD )
+		{
+			dataSize = sizeof( DWORD );
+		}
+		else
+		{
+			dataSize += 5;
+		}
         dataValue = malloc(dataSize);
 
         retCode = RegQueryValueEx(key,
@@ -109,7 +117,17 @@ w32_getreg_internal(LIST* pathlist, INT is64Bit)
 	    free(dataValue);
             return 0;
         }
-	retval = newstr(dataValue);
+
+	if ( dataType == REG_DWORD )
+	{
+		char buffer[ 128 ];
+		itoa( ( ( DWORD *)dataValue )[ 0 ], buffer, 10 );
+		retval = newstr( buffer );
+	}
+	else
+	{
+		retval = newstr(dataValue);
+	}
 	free(dataValue);
 	return retval;
     }
