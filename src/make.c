@@ -160,75 +160,75 @@ int actionpass = 0;
 
 void
 make_fixparents(
-	    TARGETS *targets )
+	TARGETS *targets )
 {
-    for ( ; targets; targets = targets->next )
-    {
-	if ( targets->target->flags & T_FLAG_FIXPROGRESS_VISITED )
-	    continue;
-	if ( targets->target->fate != T_FATE_TOUCHED )
-	    targets->target->fate = T_FATE_INIT;
-	targets->target->progress = T_MAKE_INIT;
-	make_fixparents( targets->target->parents );
-    }
+	for ( ; targets; targets = targets->next )
+	{
+		if ( targets->target->flags & T_FLAG_FIXPROGRESS_VISITED )
+			continue;
+		if ( targets->target->fate != T_FATE_TOUCHED )
+			targets->target->fate = T_FATE_INIT;
+		targets->target->progress = T_MAKE_INIT;
+		make_fixparents( targets->target->parents );
+	}
 }
 
 void
 make_fixprogress(
-	     TARGET	*t )
+	TARGET	*t )
 {
-    TARGETS *c;
-    ACTIONS *actions;
+	TARGETS *c;
+	ACTIONS *actions;
 
-    if ( t->flags & T_FLAG_FIXPROGRESS_VISITED )
-        return;
-    t->flags |= T_FLAG_FIXPROGRESS_VISITED;
+	if ( t->flags & T_FLAG_FIXPROGRESS_VISITED )
+		return;
+	t->flags |= T_FLAG_FIXPROGRESS_VISITED;
 
-    if ( t->fate == T_FATE_INIT  ||  t->fate == T_FATE_TOUCHED  ||  t->fate == T_FATE_MISSING  ||
-	    t->fate == T_FATE_STABLE  ||
-	    t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_CANTMAKE  ||  t->status == 3 /*EXEC_CMD_NEXTPASS*/ )
-    {
-	if ( t->fate != T_FATE_TOUCHED )
-	    t->fate = T_FATE_INIT;
-	t->progress = T_MAKE_INIT;
-	make_fixparents( t->parents );
-    }
+	if ( t->fate == T_FATE_INIT  ||  t->fate == T_FATE_TOUCHED  ||  t->fate == T_FATE_MISSING  ||
+		t->fate == T_FATE_STABLE  ||
+		t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_CANTMAKE  ||  t->status == 3 /*EXEC_CMD_NEXTPASS*/ )
+	{
+		if ( t->fate != T_FATE_TOUCHED )
+			t->fate = T_FATE_INIT;
+		t->progress = T_MAKE_INIT;
+		make_fixparents( t->parents );
+	}
 
-    if ( t->binding != T_BIND_EXISTS )
-	t->binding = T_BIND_UNBOUND;
-    if ( t->parents )
-	targetlist_free( t->parents );
-    t->parents = NULL;
-    t->flags &= ~T_FLAG_VISITED;
+	if ( t->binding != T_BIND_EXISTS )
+		t->binding = T_BIND_UNBOUND;
+	if ( t->parents )
+		targetlist_free( t->parents );
+	t->parents = NULL;
+	t->flags &= ~T_FLAG_VISITED;
 	t->status = 0;
 
-    for ( actions = t->actions; actions; actions = actions->next )
-    {
-	if ( actions->action->pass == actionpass )
+	for ( actions = t->actions; actions; actions = actions->next )
 	{
-	    if ( actions->action->status == 3 /*EXEC_CMD_NEXTPASS*/ )
-	    {
-		for (c = actions->action->sources; c; c = c->next)
+		if ( actions->action->pass == actionpass )
 		{
-		    if ( !c->target->actions )
-		    {
-			actions->action->status = 0;
-			actions->action->pass++;
-		    }
+			if ( actions->action->status == 3 /*EXEC_CMD_NEXTPASS*/ )
+			{
+				for (c = actions->action->sources; c; c = c->next)
+				{
+					if ( !c->target->actions )
+					{
+						actions->action->status = 0;
+						actions->action->pass++;
+					}
+				}
+			}
+
+			if (actions->action->pass == actionpass)
+			{
+				actions->action->running = 0;
+			}
 		}
-	    }
-
-	    if (actions->action->pass == actionpass)
-	    {
-                actions->action->running = 0;
-	    }
 	}
-    }
 
-    for( c = t->depends; c; c = c->next )
-    {
-	make_fixprogress( c->target );
-    }
+	for( c = t->depends; c; c = c->next )
+	{
+		make_fixprogress( c->target );
+	}
 }
 
 LIST *queuedjamfiles;
@@ -386,26 +386,26 @@ pass:
 #ifdef OPT_GRAPH_DEBUG_EXT
 	if( DEBUG_GRAPH )
 	{
-	    for( i = 0; i < n_targets; i++ )
-	    {
-		TARGET *t = bindtarget( targets[i] );
-		dependGraphOutput( t, 0 );
-	    }
+		for( i = 0; i < n_targets; i++ )
+		{
+			TARGET *t = bindtarget( targets[i] );
+			dependGraphOutput( t, 0 );
+		}
 	}
 #endif
 
 	if( DEBUG_MAKE )
 	{
-	    if( counts->targets )
-		printf( "*** found %d target(s)...\n", counts->targets );
-	    if( counts->temp )
-		printf( "*** using %d temp target(s)...\n", counts->temp );
-	    if( counts->updating )
-		printf( "*** updating %d target(s)...\n", counts->updating );
-	    if( counts->cantfind )
-		printf( "*** can't find %d target(s)...\n", counts->cantfind );
-	    if( counts->cantmake )
-		printf( "*** can't make %d target(s)...\n", counts->cantmake );
+		if( counts->targets )
+			printf( "*** found %d target(s)...\n", counts->targets );
+		if( counts->temp )
+			printf( "*** using %d temp target(s)...\n", counts->temp );
+		if( counts->updating )
+			printf( "*** updating %d target(s)...\n", counts->updating );
+		if( counts->cantfind )
+			printf( "*** can't find %d target(s)...\n", counts->cantfind );
+		if( counts->cantmake )
+			printf( "*** can't make %d target(s)...\n", counts->cantmake );
 	}
 
 #ifdef OPT_IMPROVED_PROGRESS_EXT
@@ -487,39 +487,39 @@ pass:
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 int  md5matchescommandline( TARGET *t )
 {
-    SETTINGS *vars;
+	SETTINGS *vars;
 
-    if ( t->rulemd5sumchecked )
-	return t->rulemd5sumclean;
+	if ( t->rulemd5sumchecked )
+		return t->rulemd5sumclean;
 
-    t->rulemd5sumchecked = 1;
+	t->rulemd5sumchecked = 1;
 
-    if ( ! ( t->flags & T_FLAG_USECOMMANDLINE ) )
-    {
-	// Not a source file.
+	if ( ! ( t->flags & T_FLAG_USECOMMANDLINE ) )
+	{
+		// Not a source file.
+		t->rulemd5sumclean = 1;
+		return 1;
+	}
+
+	for ( vars = t->settings; vars; vars = vars->next )
+	{
+		if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
+		{
+			LIST *list;
+			MD5_CTX context;
+			MD5Init( &context );
+
+			for ( list = vars->value; list; list = list->next )
+				MD5Update( &context, (unsigned char*)list->string, (unsigned int)strlen( list->string ) );
+
+			MD5Final( t->rulemd5sum, &context );
+			t->rulemd5sumclean = (char)hcache_getrulemd5sum( t );
+			return t->rulemd5sumclean;
+		}
+	}
+
 	t->rulemd5sumclean = 1;
 	return 1;
-    }
-
-    for ( vars = t->settings; vars; vars = vars->next )
-    {
-	if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
-	{
-	    LIST *list;
-	    MD5_CTX context;
-	    MD5Init( &context );
-
-	    for ( list = vars->value; list; list = list->next )
-		MD5Update( &context, (unsigned char*)list->string, (unsigned int)strlen( list->string ) );
-
-	    MD5Final( t->rulemd5sum, &context );
-	    t->rulemd5sumclean = (char)hcache_getrulemd5sum( t );
-	    return t->rulemd5sumclean;
-	}
-    }
-
-    t->rulemd5sumclean = 1;
-    return 1;
 }
 #endif
 
@@ -557,7 +557,7 @@ make0(
 	 */
 
 	if( DEBUG_MAKEPROG )
-	    printf( "make\t--\t%s%s\n", spaces( depth ), t->name );
+		printf( "make\t--\t%s%s\n", spaces( depth ), t->name );
 
 #ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
 	if ( t->fate == T_FATE_INIT ) {
@@ -567,8 +567,8 @@ make0(
 #endif
 #ifdef OPT_MULTIPASS_EXT
 	if ( t->fate == T_FATE_INIT )
-	    t->fate = T_FATE_MAKING;
-    t->flags &= ~T_FLAG_FIXPROGRESS_VISITED;
+		t->fate = T_FATE_MAKING;
+	t->flags &= ~T_FLAG_FIXPROGRESS_VISITED;
 #else
 	t->fate = T_FATE_MAKING;
 #endif
@@ -587,39 +587,39 @@ make0(
 
 	if( t->binding == T_BIND_UNBOUND && !( t->flags & T_FLAG_NOTFILE ) )
 	{
-	    t->boundname = search( t->name, &t->time );
-	    t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
+		t->boundname = search( t->name, &t->time );
+		t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
 	}
 
 	/* INTERNAL, NOTFILE header nodes have the time of their parents */
 
 	if( p && t->flags & T_FLAG_INTERNAL )
-	    ptime = p;
+		ptime = p;
 
 	/* If temp file doesn't exist but parent does, use parent */
 
 	if( p && t->flags & T_FLAG_TEMP &&
-	    t->binding == T_BIND_MISSING &&
-	    p->binding != T_BIND_MISSING )
+		t->binding == T_BIND_MISSING &&
+		p->binding != T_BIND_MISSING )
 	{
-	    t->binding = T_BIND_PARENTS;
-	    ptime = p;
+		t->binding = T_BIND_PARENTS;
+		ptime = p;
 	}
 
 	/* Step 2c: If its a file, search for headers. */
 	if( t->binding == T_BIND_EXISTS )
-	    headers( t );
+		headers( t );
 
 #ifdef OPT_SEMAPHORE
 	{
-	    LIST *var = var_get( "SEMAPHORE" );
-	    if( var )
-	    {
-		TARGET *semaphore = bindtarget( var->string );
+		LIST *var = var_get( "SEMAPHORE" );
+		if( var )
+		{
+			TARGET *semaphore = bindtarget( var->string );
 
-		semaphore->progress = T_MAKE_SEMAPHORE;
-		t->semaphore = semaphore;
-	    }
+			semaphore->progress = T_MAKE_SEMAPHORE;
+			t->semaphore = semaphore;
+		}
 	}
 #endif
 
@@ -634,26 +634,26 @@ make0(
 
 	if( DEBUG_MAKEPROG )
 	{
-	    if( strcmp( t->name, t->boundname ) )
-	    {
-		printf( "bind\t--\t%s%s: %s\n",
-			spaces( depth ), t->name, t->boundname );
-	    }
+		if( strcmp( t->name, t->boundname ) )
+		{
+			printf( "bind\t--\t%s%s: %s\n",
+				spaces( depth ), t->name, t->boundname );
+		}
 
-	    switch( t->binding )
-	    {
-	    case T_BIND_UNBOUND:
-	    case T_BIND_MISSING:
-	    case T_BIND_PARENTS:
-		printf( "time\t--\t%s%s: %s\n",
-			spaces( depth ), t->name, target_bind[ t->binding ] );
-		break;
+		switch( t->binding )
+		{
+			case T_BIND_UNBOUND:
+			case T_BIND_MISSING:
+			case T_BIND_PARENTS:
+				printf( "time\t--\t%s%s: %s\n",
+					spaces( depth ), t->name, target_bind[ t->binding ] );
+				break;
 
-	    case T_BIND_EXISTS:
-		printf( "time\t--\t%s%s: %s",
-			spaces( depth ), t->name, ctime( &t->time ) );
-		break;
-	    }
+			case T_BIND_EXISTS:
+				printf( "time\t--\t%s%s: %s",
+					spaces( depth ), t->name, ctime( &t->time ) );
+				break;
+		}
 	}
 
 	/*
@@ -664,82 +664,82 @@ make0(
 
 	for( c = t->depends; c; c = c->next )
 	{
-	    int internal = t->flags & T_FLAG_INTERNAL;
+		int internal = t->flags & T_FLAG_INTERNAL;
 
-	    if( DEBUG_DEPENDS )
+		if( DEBUG_DEPENDS )
 #ifdef OPT_BUILTIN_NEEDS_EXT
-		printf( "%s \"%s\" : \"%s\" ;\n",
-		    (internal ? "Includes" : (c->needs ? "Needs" : "Depends")),
-		    t->name, c->target->name );
+			printf( "%s \"%s\" : \"%s\" ;\n",
+					(internal ? "Includes" : (c->needs ? "Needs" : "Depends")),
+					t->name, c->target->name );
 #else
-		printf( "%s \"%s\" : \"%s\" ;\n",
-		    (internal ? "Includes" : "Depends"),
-		    t->name, c->target->name );
+			printf( "%s \"%s\" : \"%s\" ;\n",
+					(internal ? "Includes" : "Depends"),
+					t->name, c->target->name );
 #endif
 
-	    /* Warn about circular deps, except for includes, */
-	    /* which include each other alot. */
+		/* Warn about circular deps, except for includes, */
+		/* which include each other alot. */
 
-	    if( c->target->fate == T_FATE_INIT )
+		if( c->target->fate == T_FATE_INIT )
 #ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
-		make0( c->target, ptime, epoch, depth + 1, counts, anyhow );
+			make0( c->target, ptime, epoch, depth + 1, counts, anyhow );
 #else
-		make0( c->target, ptime, depth + 1, counts, anyhow );
+			make0( c->target, ptime, depth + 1, counts, anyhow );
 #endif
-	    else if( c->target->fate == T_FATE_MAKING && !internal )
-		printf( "warning: %s depends on itself\n", c->target->name );
+		else if( c->target->fate == T_FATE_MAKING && !internal )
+			printf( "warning: %s depends on itself\n", c->target->name );
 #ifdef OPT_FIX_UPDATED
-	    else if( ptime && ptime->binding != T_BIND_UNBOUND &&
-		     c->target->time > ptime->time &&
-		     c->target->fate < T_FATE_NEWER )
-	    {
-		/*
-		 * BUG FIX:
-		 *
-		 * If you have a rule with flag RULE_UPDATED, then any
-		 * dependents must have fate greater than
-		 * T_FATE_STABLE to be included.
-		 *
-		 * However, make.c can get confused for dependency
-		 * trees like this:
-		 *
-		 * a --> b --> d
-		 *   \-> c --> d
-		 *
-		 * In this case, make.c can set the fate of "d" before
-		 * it ever gets to "c".  So you will end up with a
-		 * T_FATE_MISSING target "c" with dependents with
-		 * T_FATE_STABLE.
-		 *
-		 * If "c" happens to have a RULE_UPDATED action,
-		 * RULE_UPDATED, make1list() will refrain from
-		 * including it in the list of targets.
-		 *
-		 * We hack around this here by explicitly checking for
-		 * this case and manually tweaking the dependents fate
-		 * to at least T_FATE_NEWER.
-		 *
-		 * An alternate fix is to modify make1cmds() to take a
-		 * TARGET* instead of an ACTIONS* and, when the target
-		 * is T_FATE_MISSING, have it mask off the
-		 * RULE_UPDATED flag when calling make1list().
-		 */
+		else if( ptime && ptime->binding != T_BIND_UNBOUND &&
+			c->target->time > ptime->time &&
+			c->target->fate < T_FATE_NEWER )
+		{
+			/*
+			 * BUG FIX:
+			 *
+			 * If you have a rule with flag RULE_UPDATED, then any
+			 * dependents must have fate greater than
+			 * T_FATE_STABLE to be included.
+			 *
+			 * However, make.c can get confused for dependency
+			 * trees like this:
+			 *
+			 * a --> b --> d
+			 *   \-> c --> d
+			 *
+			 * In this case, make.c can set the fate of "d" before
+			 * it ever gets to "c".  So you will end up with a
+			 * T_FATE_MISSING target "c" with dependents with
+			 * T_FATE_STABLE.
+			 *
+			 * If "c" happens to have a RULE_UPDATED action,
+			 * RULE_UPDATED, make1list() will refrain from
+			 * including it in the list of targets.
+			 *
+			 * We hack around this here by explicitly checking for
+			 * this case and manually tweaking the dependents fate
+			 * to at least T_FATE_NEWER.
+			 *
+			 * An alternate fix is to modify make1cmds() to take a
+			 * TARGET* instead of an ACTIONS* and, when the target
+			 * is T_FATE_MISSING, have it mask off the
+			 * RULE_UPDATED flag when calling make1list().
+			 */
 #ifdef OPT_GRAPH_DEBUG_EXT
-		if( DEBUG_FATE ) {
-		    if( c->target->fate == T_FATE_STABLE ) {
-			printf("fate change  %s set to %s (parent %s)\n",
-			       c->target->name,
-			       target_fate[T_FATE_NEWER],
-			       ptime->name);
-		    } else {
-			printf("fate change  %s adjusted from %s to %s\n",
-			       c->target->name,
-			       target_fate[c->target->fate],
-			       target_fate[T_FATE_NEWER]);
-		    }
-		}
+			if( DEBUG_FATE ) {
+				if( c->target->fate == T_FATE_STABLE ) {
+					printf("fate change  %s set to %s (parent %s)\n",
+						c->target->name,
+						target_fate[T_FATE_NEWER],
+						ptime->name);
+				} else {
+					printf("fate change  %s adjusted from %s to %s\n",
+						c->target->name,
+						target_fate[c->target->fate],
+						target_fate[T_FATE_NEWER]);
+				}
+			}
 #endif
-//		c->target->fate = T_FATE_NEWER;
+//			c->target->fate = T_FATE_NEWER;
 	    }
 #endif
 	}
@@ -759,12 +759,12 @@ make0(
 
 	for( c = t->depends; c; c = c->next ) {
 #ifdef OPT_BUILTIN_NEEDS_EXT
-            /* If this is a "Needs" dependency, don't care about its timestamp. */
-            if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE)) {
-              continue;
-            }
+		/* If this is a "Needs" dependency, don't care about its timestamp. */
+		if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE)) {
+			continue;
+		}
 #endif
-	    if( c->target->includes ) {
+		if( c->target->includes ) {
 #ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
 			if ( c->target->includes->epoch == epoch  &&  c->target->includes->depth <= depth ) {
 				/* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html and
@@ -799,19 +799,18 @@ make0(
 
 #else /* !OPT_CIRCULAR_GENERATED_HEADER_FIX */
 #ifdef OPT_BUILTIN_NEEDS_EXT
-		incs = targetentry( incs, c->target->includes, 0 );
+			incs = targetentry( incs, c->target->includes, 0 );
 #else
-		incs = targetentry( incs, c->target->includes );
+			incs = targetentry( incs, c->target->includes );
 #endif /* OPT_BUILTIN_NEEDS_EXT */
 #endif /* OPT_CIRCULAR_GENERATED_HEADER_FIX */
 #ifdef OPT_UPDATED_CHILD_FIX
-		/* See http://maillist.perforce.com/pipermail/jamming/2006-May/002676.html */
-		/* If the includes are newer than we are their original target
-		    also needs to be marked newer. This is needed so that 'updated'
-		    correctly will include the original target in the $(<) variable. */
-		if(
-			c->target->includes->time > ptime->time || c->target->includes->fate > T_FATE_STABLE)
-		    c->target->fate = max( T_FATE_NEWER, c->target->fate );
+			/* See http://maillist.perforce.com/pipermail/jamming/2006-May/002676.html */
+			/* If the includes are newer than we are their original target
+				also needs to be marked newer. This is needed so that 'updated'
+				correctly will include the original target in the $(<) variable. */
+			if(c->target->includes->time > ptime->time || c->target->includes->fate > T_FATE_STABLE)
+				c->target->fate = max( T_FATE_NEWER, c->target->fate );
 #endif
 	    }
 	}
@@ -831,41 +830,33 @@ make0(
 	for( c = t->depends; c; c = c->next )
 	{
 #ifdef OPT_BUILTIN_NEEDS_EXT
-            /* If this is a "Needs" dependency, don't care about its timestamp. */
-            if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE)) {
-              continue;
-            }
+		/* If this is a "Needs" dependency, don't care about its timestamp. */
+		if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE)) {
+			continue;
+		}
 #endif
 
-	    /* If LEAVES has been applied, we only heed the timestamps of */
-	    /* the leaf source nodes. */
+		/* If LEAVES has been applied, we only heed the timestamps of */
+		/* the leaf source nodes. */
 
-	    leaf = max( leaf, c->target->leaf );
+		leaf = max( leaf, c->target->leaf );
 
-	    if( t->flags & T_FLAG_LEAVES )
-	    {
-		last = leaf;
-		continue;
-	    }
+		if( t->flags & T_FLAG_LEAVES )
+		{
+			last = leaf;
+			continue;
+		}
 
-	    last = max( last, c->target->time );
+		last = max( last, c->target->time );
 #ifdef OPT_GRAPH_DEBUG_EXT
-	    if( DEBUG_FATE )
-		if( fate < c->target->fate )
-		    printf( "fate change  %s from %s to %s by dependency %s\n",
-			    t->name,
-			    target_fate[fate], target_fate[c->target->fate],
-			    c->target->name);
+		if( DEBUG_FATE && fate < c->target->fate ) {
+			printf( "fate change  %s from %s to %s by dependency %s\n",
+				t->name,
+				target_fate[fate], target_fate[c->target->fate],
+				c->target->name);
+		}
 #endif
-#ifdef OPT_GRAPH_DEBUG_EXT
-	    if( DEBUG_FATE && fate < c->target->fate ) {
-		printf( "fate change  %s from %s to %s by dependency %s\n",
-			t->name,
-			target_fate[fate], target_fate[c->target->fate],
-			c->target->name);
-	    }
-#endif
-	    fate = max( fate, c->target->fate );
+		fate = max( fate, c->target->fate );
 	}
 
 	/* Step 4b: pick up included headers time */
@@ -888,14 +879,14 @@ make0(
 	if( t->flags & T_FLAG_NOUPDATE )
 	{
 #ifdef OPT_GRAPH_DEBUG_EXT
-	    if( DEBUG_FATE && fate != T_FATE_STABLE ) {
-		printf("fate change  %s back to stable by NOUPDATE.\n",
-		       t->name);
-	    }
+		if( DEBUG_FATE && fate != T_FATE_STABLE ) {
+			printf("fate change  %s back to stable by NOUPDATE.\n",
+				t->name);
+		}
 #endif
-	    last = 0;
-	    t->time = 0;
-	    fate = T_FATE_STABLE;
+		last = 0;
+		t->time = 0;
+		fate = T_FATE_STABLE;
 	}
 
 	/* Step 4d: determine fate: rebuild target or what? */
@@ -925,96 +916,96 @@ make0(
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 	if ( !md5matchescommandline( t ) )
 	{
-	    ACTIONS *actions;
-	    for ( actions = t->actions; actions; actions = actions->next )
-	    {
-		TARGETS *targets;
-		for ( targets = actions->action->targets; targets; targets = targets->next )
+		ACTIONS *actions;
+		for ( actions = t->actions; actions; actions = actions->next )
 		{
-		    if ( targets->target == t )
-		    {
-			targets->parentcommandlineoutofdate = 1;
-			break;
-		    }
-		}
-		for ( targets = actions->action->sources; targets; targets = targets->next )
-		{
-		    for( c = t->depends; c; c = c->next )
-		    {
-			if ( targets->target == c->target )
+			TARGETS *targets;
+			for ( targets = actions->action->targets; targets; targets = targets->next )
 			{
-			    targets->parentcommandlineoutofdate = 1;
+				if ( targets->target == t )
+				{
+					targets->parentcommandlineoutofdate = 1;
+					break;
+				}
 			}
-		    }
+			for ( targets = actions->action->sources; targets; targets = targets->next )
+			{
+				for( c = t->depends; c; c = c->next )
+				{
+					if ( targets->target == c->target )
+					{
+						targets->parentcommandlineoutofdate = 1;
+					}
+				}
+			}
 		}
-	    }
 
-	    fate = T_FATE_UPDATE;
+		fate = T_FATE_UPDATE;
 	}
 #endif
 
 	if( fate >= T_FATE_BROKEN )
 	{
-	    fate = T_FATE_CANTMAKE;
+		fate = T_FATE_CANTMAKE;
 	}
 	else if( fate >= T_FATE_SPOIL )
 	{
-	    fate = T_FATE_UPDATE;
+		fate = T_FATE_UPDATE;
 	}
 	else if( t->binding == T_BIND_MISSING )
 	{
-	    fate = T_FATE_MISSING;
+		fate = T_FATE_MISSING;
 	}
 	else if( t->binding == T_BIND_EXISTS && last > t->time )
 	{
 #ifdef OPT_GRAPH_DEBUG_EXT
-	    oldTimeStamp = 1;
+		oldTimeStamp = 1;
 #endif
-	    fate = T_FATE_OUTDATED;
+		fate = T_FATE_OUTDATED;
 	}
 	else if( t->binding == T_BIND_PARENTS && last > p->time )
 	{
-	    fate = T_FATE_NEEDTMP;
+		fate = T_FATE_NEEDTMP;
 	}
 	else if( t->binding == T_BIND_PARENTS && hlast > p->time )
 	{
 #ifdef OPT_GRAPH_DEBUG_EXT
-	    oldTimeStamp = 1;
+		oldTimeStamp = 1;
 #endif
-	    fate = T_FATE_NEEDTMP;
+		fate = T_FATE_NEEDTMP;
 	}
 	else if( t->flags & T_FLAG_TOUCHED )
 	{
-	    fate = T_FATE_TOUCHED;
+		fate = T_FATE_TOUCHED;
 	}
 	else if( anyhow && !( t->flags & T_FLAG_NOUPDATE ) )
 	{
-	    fate = T_FATE_TOUCHED;
+		fate = T_FATE_TOUCHED;
 	}
 	else if( t->binding == T_BIND_EXISTS && t->flags & T_FLAG_TEMP )
 	{
-	    fate = T_FATE_ISTMP;
+		fate = T_FATE_ISTMP;
 	}
 	// See http://maillist.perforce.com/pipermail/jamming/2003-January/001853.html.
 	else if( t->binding == T_BIND_EXISTS && p &&
-		 p->binding != T_BIND_UNBOUND && t->time > p->time )
+		p->binding != T_BIND_UNBOUND && t->time > p->time )
 	{
-	    fate = T_FATE_NEWER;
+		fate = T_FATE_NEWER;
 	}
 	else
 	{
-	    fate = T_FATE_STABLE;
+		fate = T_FATE_STABLE;
 	}
 #ifdef OPT_GRAPH_DEBUG_EXT
 	if( DEBUG_FATE && fate != savedFate )
-	    if( savedFate == T_FATE_STABLE )
-		printf( "fate change  %s set to %s%s\n",
-		       t->name, target_fate[fate],
-		       oldTimeStamp ? " (by timestamp)" : "" );
-	    else
-		printf( "fate change  %s adjusted from %s to %s%s\n",
-		       t->name, target_fate[savedFate], target_fate[fate],
-		       oldTimeStamp ? " (by timestamp)" : "" );
+		if( savedFate == T_FATE_STABLE )
+			printf( "fate change  %s set to %s%s\n",
+				t->name, target_fate[fate],
+				oldTimeStamp ? " (by timestamp)" : "" );
+		else
+			printf( "fate change  %s adjusted from %s to %s%s\n",
+				t->name, target_fate[savedFate], target_fate[fate],
+				oldTimeStamp ? " (by timestamp)" : "" );
 #endif
 
 	/* Step 4e: handle missing files */
@@ -1029,21 +1020,21 @@ make0(
 	if( fate == T_FATE_MISSING && !t->actions && !t->depends )
 #endif
 	{
-	    if( t->flags & T_FLAG_NOCARE )
-	    {
+		if( t->flags & T_FLAG_NOCARE )
+		{
 #ifdef OPT_GRAPH_DEBUG_EXT
-	    if( DEBUG_FATE )
-		printf( "fate change  %s to STABLE from %s, "
-		        "no actions, no dependents and don't care\n",
-		       t->name, target_fate[fate]);
+			if( DEBUG_FATE )
+				printf( "fate change  %s to STABLE from %s, "
+					"no actions, no dependents and don't care\n",
+					t->name, target_fate[fate]);
 #endif
-		fate = T_FATE_STABLE;
-	    }
-	    else
-	    {
-		printf( "don't know how to make %s\n", t->name );
+			fate = T_FATE_STABLE;
+		}
+		else
+		{
+			printf( "don't know how to make %s\n", t->name );
 
-		fate = T_FATE_CANTFIND;
+			fate = T_FATE_CANTFIND;
 	    }
 	}
 
@@ -1060,10 +1051,10 @@ make0(
 
 #ifdef OPT_FIX_NOTFILE_NEWESTFIRST
 	if( globs.newestfirst && !( t->flags & T_FLAG_NOTFILE ) )
-	    t->depends = make0sort( t->depends );
+		t->depends = make0sort( t->depends );
 #else
 	if( globs.newestfirst )
-	    t->depends = make0sort( t->depends );
+		t->depends = make0sort( t->depends );
 #endif
 
 	/*
@@ -1073,39 +1064,39 @@ make0(
 	/* Don't count or report interal includes nodes. */
 
 	if( t->flags & T_FLAG_INTERNAL )
-	    return;
+		return;
 
 
 #ifdef OPT_IMPROVED_PATIENCE_EXT
 	++counts->targets;
 #else
 	if( !( ++counts->targets % 1000 ) && DEBUG_MAKE )
-	    printf( "*** patience...\n" );
+		printf( "*** patience...\n" );
 #endif
 
 	if( fate == T_FATE_ISTMP )
-	    counts->temp++;
+		counts->temp++;
 	else if( fate == T_FATE_CANTFIND )
-	    counts->cantfind++;
+		counts->cantfind++;
 	else if( fate == T_FATE_CANTMAKE && t->actions )
-	    counts->cantmake++;
+		counts->cantmake++;
 	else if( fate >= T_FATE_BUILD && fate < T_FATE_BROKEN && t->actions )
-	    counts->updating++;
+		counts->updating++;
 
 	if( !( t->flags & T_FLAG_NOTFILE ) && fate >= T_FATE_SPOIL )
-	    flag = "+";
+		flag = "+";
 	else if( t->binding == T_BIND_EXISTS && p && t->time > p->time )
-	    flag = "*";
+		flag = "*";
 
 	if( DEBUG_MAKEPROG )
-	    printf( "made%s\t%s\t%s%s\n",
-		flag, target_fate[ t->fate ],
-		spaces( depth ), t->name );
+		printf( "made%s\t%s\t%s%s\n",
+			flag, target_fate[ t->fate ],
+			spaces( depth ), t->name );
 
 	if( DEBUG_CAUSES &&
-	    t->fate >= T_FATE_NEWER &&
-	    t->fate <= T_FATE_MISSING )
-		printf( "%s %s\n", target_fate[ t->fate ], t->name );
+		t->fate >= T_FATE_NEWER &&
+		t->fate <= T_FATE_MISSING )
+			printf( "%s %s\n", target_fate[ t->fate ], t->name );
 }
 
 /*
@@ -1128,25 +1119,25 @@ make0sort( TARGETS *chain )
 
 	while( chain )
 	{
-	    TARGETS *c = chain;
-	    TARGETS *s = result;
+		TARGETS *c = chain;
+		TARGETS *s = result;
 
-	    chain = chain->next;
+		chain = chain->next;
 
 	    /* Find point s in result for c */
 
-	    while( s && s->target->time > c->target->time )
-		s = s->next;
+		while( s && s->target->time > c->target->time )
+			s = s->next;
 
 	    /* Insert c in front of s (might be 0). */
 	    /* Don't even think of deciphering this. */
 
-	    c->next = s;			/* good even if s = 0 */
-	    if( result == s ) result = c;	/* new head of chain? */
-	    if( !s ) s = result;		/* wrap to ensure a next */
-	    if( result != c ) s->tail->next = c; /* not head? be prev's next */
-	    c->tail = s->tail;			/* take on next's prev */
-	    s->tail = c;			/* make next's prev us */
+		c->next = s;			/* good even if s = 0 */
+		if( result == s ) result = c;	/* new head of chain? */
+		if( !s ) s = result;		/* wrap to ensure a next */
+		if( result != c ) s->tail->next = c; /* not head? be prev's next */
+		c->tail = s->tail;			/* take on next's prev */
+		s->tail = c;			/* make next's prev us */
 	}
 
 	return result;
@@ -1160,71 +1151,71 @@ make0sort( TARGETS *chain )
 TARGETS *
 make0sortbyname( TARGETS *chain )
 {
- TARGETS *result = 0;
+	TARGETS *result = 0;
 
- /* We walk chain, taking each item and inserting it on the */
- /* sorted result, with newest items at the front.  This involves */
- /* updating each TARGETS' c->next and c->tail.  Note that we */
- /* make c->tail a valid prev pointer for every entry.  Normally, */
- /* it is only valid at the head, where prev == tail.  Note also */
- /* that while tail is a loop, next ends at the end of the chain. */
+	/* We walk chain, taking each item and inserting it on the */
+	/* sorted result, with newest items at the front.  This involves */
+	/* updating each TARGETS' c->next and c->tail.  Note that we */
+	/* make c->tail a valid prev pointer for every entry.  Normally, */
+	/* it is only valid at the head, where prev == tail.  Note also */
+	/* that while tail is a loop, next ends at the end of the chain. */
 
- /* Walk current target list */
+	/* Walk current target list */
 
- while( chain )
- {
-     TARGETS *c = chain;
-     TARGETS *s = result;
+	while( chain )
+	{
+		TARGETS *c = chain;
+		TARGETS *s = result;
 
-     chain = chain->next;
+		chain = chain->next;
 
-     /* Find point s in result for c */
+		/* Find point s in result for c */
 
-            while( s && strcmp( s->target->name, c->target->name ) > 0 )
-  s = s->next;
+		while( s && strcmp( s->target->name, c->target->name ) > 0 )
+			s = s->next;
 
-     /* Insert c in front of s (might be 0). */
-     /* Don't even think of deciphering this. */
+		/* Insert c in front of s (might be 0). */
+		/* Don't even think of deciphering this. */
 
-     c->next = s;   /* good even if s = 0 */
-     if( result == s ) result = c; /* new head of chain? */
-     if( !s ) s = result;  /* wrap to ensure a next */
-     if( result != c ) s->tail->next = c; /* not head? be prev's next */
-     c->tail = s->tail;   /* take on next's prev */
-     s->tail = c;   /* make next's prev us */
- }
+		c->next = s;   /* good even if s = 0 */
+		if( result == s ) result = c; /* new head of chain? */
+		if( !s ) s = result;  /* wrap to ensure a next */
+		if( result != c ) s->tail->next = c; /* not head? be prev's next */
+		c->tail = s->tail;   /* take on next's prev */
+		s->tail = c;   /* make next's prev us */
+	}
 
- return result;
+	return result;
 }
 
 static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t )
 {
-    TARGETS *c;
+	TARGETS *c;
 
-    for( c = t->depends; c; c = c->next )
-    {
-	if( c->target->binding == T_BIND_UNBOUND && !( c->target->flags & T_FLAG_NOTFILE ) )
+	for( c = t->depends; c; c = c->next )
 	{
-	    SETTINGS *s = copysettings( c->target->settings );
-	    pushsettings( s );
-	    c->target->boundname = search( c->target->name, &c->target->time );
-	    popsettings( s );
-	    freesettings( s );
-	    c->target->binding = c->target->time ? T_BIND_EXISTS : T_BIND_MISSING;
+		if( c->target->binding == T_BIND_UNBOUND && !( c->target->flags & T_FLAG_NOTFILE ) )
+		{
+			SETTINGS *s = copysettings( c->target->settings );
+			pushsettings( s );
+			c->target->boundname = search( c->target->name, &c->target->time );
+			popsettings( s );
+			freesettings( s );
+			c->target->binding = c->target->time ? T_BIND_EXISTS : T_BIND_MISSING;
+		}
+		if ( !( c->target->flags & T_FLAG_NOTFILE ) && !( c->target->flags & T_FLAG_INTERNAL ) && !( c->target->flags & T_FLAG_NOUPDATE ) )
+		{
+			getcachedmd5sum( c->target, 1 );
+			if ( c->target->contentmd5sum_calculated )
+			{
+				MD5Update( context, c->target->contentmd5sum, sizeof( c->target->contentmd5sum ) );
+				if( DEBUG_MD5HASH )
+					printf( "\t\t%s: %s\n", c->target->name, md5tostring( c->target->contentmd5sum ) );
+			}
+		}
+		if ( c->target->includes )
+			make0recurseincludesmd5sum( context, c->target->includes );
 	}
-        if ( !( c->target->flags & T_FLAG_NOTFILE ) && !( c->target->flags & T_FLAG_INTERNAL ) && !( c->target->flags & T_FLAG_NOUPDATE ) )
-	{
-	    getcachedmd5sum( c->target, 1 );
-	    if ( c->target->contentmd5sum_calculated )
-	    {
-		MD5Update( context, c->target->contentmd5sum, sizeof( c->target->contentmd5sum ) );
-		if( DEBUG_MD5HASH )
-		    printf( "\t\t%s: %s\n", c->target->name, md5tostring( c->target->contentmd5sum ) );
-	    }
-	}
-	if ( c->target->includes )
-	    make0recurseincludesmd5sum( context, c->target->includes );
-    }
 }
 
 
@@ -1233,120 +1224,120 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t )
  */
 void make0calcmd5sum( TARGET *t, int source )
 {
-    MD5_CTX context;
-    TARGETS *c;
+	MD5_CTX context;
+	TARGETS *c;
 
-    if ( t->buildmd5sum_calculated )
-	return;
+	if ( t->buildmd5sum_calculated )
+		return;
 
-    if ( ( t->flags & T_FLAG_NOTFILE ) || ( t->flags & T_FLAG_INTERNAL ) || ( t->flags & T_FLAG_NOUPDATE ) )
-    {
-	memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
-	return;
-    }
+	if ( ( t->flags & T_FLAG_NOTFILE ) || ( t->flags & T_FLAG_INTERNAL ) || ( t->flags & T_FLAG_NOUPDATE ) )
+	{
+		memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
+		return;
+	}
 
-    getcachedmd5sum( t, 1 );
+	getcachedmd5sum( t, 1 );
 
-    if ( !source )
-    {
-	memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
-	return;
-    }
+	if ( !source )
+	{
+		memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
+		return;
+	}
 
-    if ( !t->contentmd5sum_calculated )
-    {
-	memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
-	t->buildmd5sum_calculated = 0;
-	return;
-    }
+	if ( !t->contentmd5sum_calculated )
+	{
+		memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
+		t->buildmd5sum_calculated = 0;
+		return;
+	}
 
-    /* sort all dependents by name, so we can make reliable md5sums */
-    t->depends = make0sortbyname( t->depends );
+	/* sort all dependents by name, so we can make reliable md5sums */
+	t->depends = make0sortbyname( t->depends );
 
-    MD5Init( &context );
+	MD5Init( &context );
 
-    /* add the path of the file to the sum - it is significant because one command can create more than one file */
-    MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
+	/* add the path of the file to the sum - it is significant because one command can create more than one file */
+	MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
 
-    if( DEBUG_MD5HASH )
-	printf( "\t\t%s\n", t->name );
+	if( DEBUG_MD5HASH )
+		printf( "\t\t%s\n", t->name );
 
     /* if this is a source */
     if (source)
     {
-	/* start by adding your own content */
-	MD5Update( &context, t->contentmd5sum, sizeof( t->contentmd5sum ) );
-	if( DEBUG_MD5HASH )
-	    printf( "\t\tcontent: %s\n", md5tostring( t->contentmd5sum ) );
-    }
+		/* start by adding your own content */
+		MD5Update( &context, t->contentmd5sum, sizeof( t->contentmd5sum ) );
+		if( DEBUG_MD5HASH )
+			printf( "\t\tcontent: %s\n", md5tostring( t->contentmd5sum ) );
+	}
 
     /* add in the COMMANDLINE */
-    if ( t->flags & T_FLAG_USECOMMANDLINE )
-    {
-        SETTINGS *vars;
-	for ( vars = t->settings; vars; vars = vars->next )
+	if ( t->flags & T_FLAG_USECOMMANDLINE )
 	{
-	    if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
-	    {
-		LIST *list;
-		for ( list = vars->value; list; list = list->next )
+		SETTINGS *vars;
+		for ( vars = t->settings; vars; vars = vars->next )
 		{
-		    MD5Update( &context, (unsigned char*)list->string, (unsigned int)strlen( list->string ) );
-		    if( DEBUG_MD5HASH )
-			printf( "\t\tCOMMANDLINE: %s\n", list->string );
+			if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
+			{
+				LIST *list;
+				for ( list = vars->value; list; list = list->next )
+				{
+					MD5Update( &context, (unsigned char*)list->string, (unsigned int)strlen( list->string ) );
+					if( DEBUG_MD5HASH )
+						printf( "\t\tCOMMANDLINE: %s\n", list->string );
+				}
+
+				break;
+			}
 		}
-
-		break;
-	    }
 	}
-    }
 
-    /* add sum of your includes */
-    if ( !t->includes )
-    {
-	SETTINGS *s = copysettings( t->settings );
-	pushsettings( s );
-	headers( t );
-	popsettings( s );
-	freesettings( s );
-    }
+	/* add sum of your includes */
+	if ( !t->includes )
+	{
+		SETTINGS *s = copysettings( t->settings );
+		pushsettings( s );
+		headers( t );
+		popsettings( s );
+		freesettings( s );
+	}
 
-    if ( t->includes )
-    {
-	const char* includesStr = "#includes";
-	MD5Update( &context, (unsigned char*)includesStr, (unsigned int)strlen( includesStr ) );
+	if ( t->includes )
+	{
+		const char* includesStr = "#includes";
+		MD5Update( &context, (unsigned char*)includesStr, (unsigned int)strlen( includesStr ) );
 
-	if( DEBUG_MD5HASH )
-	    printf( "\t\t#includes:\n" );
-	make0recurseincludesmd5sum( &context, t->includes );
-    }
+		if( DEBUG_MD5HASH )
+			printf( "\t\t#includes:\n" );
+		make0recurseincludesmd5sum( &context, t->includes );
+	}
 
     /* for each of your dependencies */
-    for( c = t->depends; c; c = c->next )
-    {
-	/* If this is a "Needs" dependency, don't care about its contents. */
-        if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE))
+	for( c = t->depends; c; c = c->next )
 	{
-	    continue;
+		/* If this is a "Needs" dependency, don't care about its contents. */
+		if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE))
+		{
+			continue;
+		}
+
+		make0calcmd5sum( c->target, 1 );
+
+		/* add name of the dependency and its contents */
+		if ( c->target->buildmd5sum_calculated )
+		{
+			if( DEBUG_MD5HASH )
+				printf( "\t\tdepends: %s %s\n", c->target->name, md5tostring( c->target->buildmd5sum ) );
+			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
+			MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+		}
+	}
+	MD5Final( t->buildmd5sum, &context );
+	if( DEBUG_MD5HASH ) {
+		printf( "%s (%s)\n", t->name, md5tostring(t->buildmd5sum));
 	}
 
-        make0calcmd5sum( c->target, 1 );
-
-	/* add name of the dependency and its contents */
-	if ( c->target->buildmd5sum_calculated )
-	{
-	    if( DEBUG_MD5HASH )
-		printf( "\t\tdepends: %s %s\n", c->target->name, md5tostring( c->target->buildmd5sum ) );
-	    MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
-	    MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
-	}
-    }
-    MD5Final( t->buildmd5sum, &context );
-    if( DEBUG_MD5HASH ) {
-	printf( "%s (%s)\n", t->name, md5tostring(t->buildmd5sum));
-    }
-
-    t->buildmd5sum_calculated = 1;
+	t->buildmd5sum_calculated = 1;
 }
 #endif
 
@@ -1365,115 +1356,115 @@ dependGraphOutputTimes( time_t time )
 static void
 dependGraphOutput( TARGET *t, int depth )
 {
-    TARGETS	*c;
-    TARGET	*include;
+	TARGETS	*c;
+	TARGET	*include;
 
-    int internal = t->flags & T_FLAG_INTERNAL;
+	int internal = t->flags & T_FLAG_INTERNAL;
 
-    if (   (t->flags & T_FLAG_VISITED) != 0
-	|| !t->name
-	|| !t->boundname)
-	return;
+	if (   (t->flags & T_FLAG_VISITED) != 0
+		|| !t->name
+		|| !t->boundname)
+		return;
 
-    t->flags |= T_FLAG_VISITED;
+	t->flags |= T_FLAG_VISITED;
 
-    switch (t->fate)
-    {
-      case T_FATE_TOUCHED:
-      case T_FATE_MISSING:
-      case T_FATE_OUTDATED:
-      case T_FATE_UPDATE:
-	printf( "->" );
-	break;
-      default:
-	printf( "  " );
-	break;
-    }
+	switch (t->fate)
+	{
+	case T_FATE_TOUCHED:
+	case T_FATE_MISSING:
+	case T_FATE_OUTDATED:
+	case T_FATE_UPDATE:
+		printf( "->" );
+		break;
+	default:
+		printf( "  " );
+		break;
+	}
 
-    if( internal )
-	printf( "%s%2d Name: (internal) %s\n", spaces(depth), depth, t->name );
-    else
-	printf( "%s%2d Name: %s\n", spaces(depth), depth, t->name );
+	if( internal )
+		printf( "%s%2d Name: (internal) %s\n", spaces(depth), depth, t->name );
+	else
+		printf( "%s%2d Name: %s\n", spaces(depth), depth, t->name );
 
-    if( strcmp (t->name, t->boundname) )
-    {
-	printf( "  %s    Loc: %s\n", spaces(depth), t->boundname );
-    }
+	if( strcmp (t->name, t->boundname) )
+	{
+		printf( "  %s    Loc: %s\n", spaces(depth), t->boundname );
+	}
 
-    switch( t->fate )
-    {
-      case T_FATE_STABLE:
-        printf( "  %s       : Stable\n", spaces(depth) );
-        break;
-      case T_FATE_NEWER:
-        printf( "  %s       : Newer\n", spaces(depth) );
-        break;
-      case T_FATE_ISTMP:
-        printf( "  %s       : Up to date temp file\n", spaces(depth) );
-        break;
-      case T_FATE_TOUCHED:
-        printf( "  %s       : Been touched, updating it\n", spaces(depth) );
-        break;
-      case T_FATE_MISSING:
-        printf( "  %s       : Missing, creating it\n", spaces(depth) );
-        break;
-      case T_FATE_OUTDATED:
-        printf( "  %s       : Outdated, updating it\n", spaces(depth) );
-        break;
-      case T_FATE_UPDATE:
-        printf( "  %s       : Updating it\n", spaces(depth) );
-        break;
-      case T_FATE_CANTFIND:
-        printf( "  %s       : Can't find it\n", spaces(depth) );
-        break;
-      case T_FATE_CANTMAKE:
-        printf( "  %s       : Can't make it\n", spaces(depth) );
-        break;
-    }
+	switch( t->fate )
+	{
+		case T_FATE_STABLE:
+			printf( "  %s       : Stable\n", spaces(depth) );
+			break;
+		case T_FATE_NEWER:
+			printf( "  %s       : Newer\n", spaces(depth) );
+			break;
+		case T_FATE_ISTMP:
+			printf( "  %s       : Up to date temp file\n", spaces(depth) );
+			break;
+		case T_FATE_TOUCHED:
+			printf( "  %s       : Been touched, updating it\n", spaces(depth) );
+			break;
+		case T_FATE_MISSING:
+			printf( "  %s       : Missing, creating it\n", spaces(depth) );
+			break;
+		case T_FATE_OUTDATED:
+			printf( "  %s       : Outdated, updating it\n", spaces(depth) );
+			break;
+		case T_FATE_UPDATE:
+			printf( "  %s       : Updating it\n", spaces(depth) );
+			break;
+		case T_FATE_CANTFIND:
+			printf( "  %s       : Can't find it\n", spaces(depth) );
+			break;
+		case T_FATE_CANTMAKE:
+			printf( "  %s       : Can't make it\n", spaces(depth) );
+			break;
+	}
 
-    printf( "  %s  Times: ", spaces(depth) );
-    dependGraphOutputTimes( t->time );
+	printf( "  %s  Times: ", spaces(depth) );
+	dependGraphOutputTimes( t->time );
 
-    if( t->flags & ~T_FLAG_VISITED )
-    {
-	printf( "  %s       : ", spaces(depth) );
-	if( t->flags & T_FLAG_TEMP ) printf ("TEMPORARY ");
-	if( t->flags & T_FLAG_NOCARE ) printf ("NOCARE ");
-	if( t->flags & T_FLAG_FORCECARE ) printf ("FORCECARE ");
-	if( t->flags & T_FLAG_NOTFILE ) printf ("NOTFILE ");
-	if( t->flags & T_FLAG_TOUCHED ) printf ("TOUCHED ");
-	if( t->flags & T_FLAG_LEAVES ) printf ("LEAVES ");
-	if( t->flags & T_FLAG_NOUPDATE ) printf ("NOUPDATE ");
-	if( t->flags & T_FLAG_INTERNAL ) printf ("INTERNAL ");
+	if( t->flags & ~T_FLAG_VISITED )
+	{
+		printf( "  %s       : ", spaces(depth) );
+		if( t->flags & T_FLAG_TEMP ) printf ("TEMPORARY ");
+		if( t->flags & T_FLAG_NOCARE ) printf ("NOCARE ");
+		if( t->flags & T_FLAG_FORCECARE ) printf ("FORCECARE ");
+		if( t->flags & T_FLAG_NOTFILE ) printf ("NOTFILE ");
+		if( t->flags & T_FLAG_TOUCHED ) printf ("TOUCHED ");
+		if( t->flags & T_FLAG_LEAVES ) printf ("LEAVES ");
+		if( t->flags & T_FLAG_NOUPDATE ) printf ("NOUPDATE ");
+		if( t->flags & T_FLAG_INTERNAL ) printf ("INTERNAL ");
 #ifdef OPT_BUILTIN_NEEDS_EXT
-	if( t->flags & T_FLAG_MIGHTNOTUPDATE ) printf ("MIGHTNOTUPDATE ");
-	if( t->flags & T_FLAG_SCANCONTENTS ) printf ("SCANCONTENTS ");
+		if( t->flags & T_FLAG_MIGHTNOTUPDATE ) printf ("MIGHTNOTUPDATE ");
+		if( t->flags & T_FLAG_SCANCONTENTS ) printf ("SCANCONTENTS ");
 #endif
-	printf( "\n" );
-    }
+		printf( "\n" );
+	}
 
-    for( c = t->depends; c; c = c->next )
-    {
-	printf( "  %s       : Depends on %s (%s) ", spaces(depth),
-	       c->target->name, target_fate[ c->target->fate ] );
-	dependGraphOutputTimes( c->target->time );
-    }
+	for( c = t->depends; c; c = c->next )
+	{
+		printf( "  %s       : Depends on %s (%s) ", spaces(depth),
+			c->target->name, target_fate[ c->target->fate ] );
+		dependGraphOutputTimes( c->target->time );
+	}
 
-    include = t->includes;
-    if( include )
-    {
-	printf( "  %s       : Includes %s (%s) ", spaces(depth),
-	       include->name, target_fate[ include->fate ] );
-	dependGraphOutputTimes( include->time );
-    }
+	include = t->includes;
+	if( include )
+	{
+		printf( "  %s       : Includes %s (%s) ", spaces(depth),
+			include->name, target_fate[ include->fate ] );
+		dependGraphOutputTimes( include->time );
+	}
 
-    for( c = t->depends; c; c = c->next )
-    {
-	dependGraphOutput( c->target, depth + 1 );
-    }
+	for( c = t->depends; c; c = c->next )
+	{
+		dependGraphOutput( c->target, depth + 1 );
+	}
 
-    if( include )
-	dependGraphOutput( include, depth + 1 );
+	if( include )
+		dependGraphOutput( include, depth + 1 );
 }
 
 #endif
