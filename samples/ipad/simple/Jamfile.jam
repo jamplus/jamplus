@@ -1,0 +1,22 @@
+SubDir TOP ;
+
+ActiveProject simple ;
+
+C.MacOSX_SDK : $(PLATFORM) ;
+
+C.OutputPostfixClear : debug ;
+
+local SRCS =
+		main.m
+;
+
+C.LinkFrameworks : Foundation UIKit ;
+
+C.BundleInfo : displayname : simple ;
+C.BundleInfo : identifier : com.yourcompany.simple ;
+#C.BundleInfo : bundlename : simple ;
+#C.BundleInfo : bundleversion : 1.0 ;
+C.BundleInfo : uistatusbarhidden : true ;
+#C.BundleInfo : uisupportedinterfaceorientations : portrait portraitupsidedown landscapeleft landscaperight ;
+
+C.Application : $(SRCS) : bundle ;
