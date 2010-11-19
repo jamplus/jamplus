@@ -63,12 +63,28 @@ rule C.UseQt TARGETS : COMPONENTS : OPTIONS {
 					C.LinkPrebuiltLibraries $(TARGETS) : QtScript4 : release ;
 				}
 
+			case sql :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtSql ;
+
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtSqld4 : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtSql4 : release ;
+				}
+
 			case svg :
 				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtSvg ;
 
 				if link in $(OPTIONS) {
 					C.LinkPrebuiltLibraries $(TARGETS) : QtSvgd4 : debug ;
 					C.LinkPrebuiltLibraries $(TARGETS) : QtSvg4 : release ;
+				}
+
+			case uitools :
+				C.IncludeDirectories $(TARGETS) : $(QT_INCLUDE_PATH)/QtUiTools ;
+
+				if link in $(OPTIONS) {
+					C.LinkPrebuiltLibraries $(TARGETS) : QtUiToolsd : debug ;
+					C.LinkPrebuiltLibraries $(TARGETS) : QtUiTools : release ;
 				}
 
 			case webkit :
