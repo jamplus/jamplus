@@ -500,6 +500,11 @@ rule C.GenerateDSYMFile TARGET
 }
 
 
+actions CpResource
+{
+	/Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -strip-debug-symbols -resolve-src-symlinks $(2) $(1:D)
+}
+
 rule C._ApplicationFromObjects_PostBuild
 {
 	if bundle in $(OPTIONS) {
@@ -545,7 +550,19 @@ rule C._ApplicationFromObjects_PostBuild
 			Depends $(bundleTarget) : $(infoplist) ;
 			Clean $(cleanBundleTarget) : $(infoplist) ;
 		}
-		
+	
+		if $(PLATFORM) in ipad iphone {	
+			# Copy ResourceRules.plist.
+			local sourceResourceRulesPlist = @(ResourceRules.plist:G=$(grist)|source) ;
+			SEARCH on $(sourceResourceRulesPlist) = $(isysroot) ;
+			local destResourceRulesPlist = @(ResourceRules.plist:G=$(grist)) ;
+			MakeLocate $(destResourceRulesPlist) : $(bundlePath) ;
+
+			Depends $(bundleTarget) : $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;	
+			Clean $(cleanBundleTarget) : $(destResourceRulesPlist) ;
+			CpResource $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;
+
+		}
 	}
 	
 	C.GenerateDSYMFile $(TARGET) ;
