@@ -455,7 +455,19 @@ rule C._ApplicationFromObjects_LinkFlags
 {
 	if bundle in $(OPTIONS) {
 		local outputName = [ C._retrieveOutputName $(TARGET) ] ;
-		MakeLocate $(_linkTargets) : $(outputPath)/$(outputName).app ;
+		local bundlePath = $(outputPath)/$(outputName).app ;
+		BUNDLE_PATH on $(TARGET) = $(bundlePath) ;
+		MakeLocate $(_linkTargets) : $(bundlePath) ;
+
+		local bundleTarget = $(TARGET):bundle ;
+		local cleanBundleTarget = clean:$(bundleTarget) ;
+		BUNDLE_TARGET on $(TARGET) = $(bundleTarget) ;
+		CLEAN_BUNDLE_TARGET on $(TARGET) = $(cleanBundleTarget) ;
+		Depends $(TARGET) : $(bundleTarget) ;
+		NotFile $(bundleTarget) ;
+		Depends clean:$(TARGET) : $(cleanBundleTarget) ;
+		NotFile $(cleanBundleTarget) ;
+		Always $(cleanBundleTarget) ;
 	}
 }
 
@@ -491,9 +503,21 @@ rule C.GenerateDSYMFile TARGET
 rule C._ApplicationFromObjects_PostBuild
 {
 	if bundle in $(OPTIONS) {
-		local outputName = [ C._retrieveOutputName $(TARGET) ] ;
-		local bundlePath = $(outputPath)/$(outputName).app ;
-		BUNDLE_PATH on $(TARGET) = $(bundlePath) ;
+		local bundlePath ;
+		local bundleTarget ;
+		local cleanBundleTarget ;
+		local isysroot ;
+		on $(TARGET) {
+			bundlePath = $(BUNDLE_PATH) ;
+			bundleTarget = $(BUNDLE_TARGET) ;
+			cleanBundleTarget = $(CLEAN_BUNDLE_TARGET) ;
+			isysroot = $(ISYSROOT) ;
+		}
+		if ! $(isysroot) {
+			on C.* {
+				isysroot = $(ISYSROOT) ;
+			}
+		}
 
 		local pkginfo = @(PkgInfo:G=$(grist)) ;
 		MakeLocate $(pkginfo) : $(bundlePath) ;
@@ -501,8 +525,8 @@ rule C._ApplicationFromObjects_PostBuild
 		CONTENTS on $(pkginfo) = $(contents) ;
 		WriteFile $(pkginfo) ;
 		UseCommandLine $(pkginfo) : $(contents) ;
-		Depends $(TARGET) : $(pkginfo) ;
-		Clean clean:$(TARGET) : $(pkginfo) ;
+		Depends $(bundleTarget) : $(pkginfo) ;
+		Clean $(cleanBundleTarget) : $(pkginfo) ;
 		
 		local infoplistcontents ;
 		on $(TARGET) infoplistcontents = $(INFO_PLIST) ;
@@ -518,8 +542,8 @@ rule C._ApplicationFromObjects_PostBuild
 			WriteFile $(infoplist) ;
 			
 			UseCommandLine $(infoplist) : $(infoplistcontents) ;
-			Depends $(TARGET) : $(infoplist) ;
-			Clean clean:$(TARGET) : $(infoplist) ;
+			Depends $(bundleTarget) : $(infoplist) ;
+			Clean $(cleanBundleTarget) : $(infoplist) ;
 		}
 		
 	}
