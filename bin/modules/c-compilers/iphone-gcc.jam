@@ -597,6 +597,12 @@ rule XIB
 
 }
 
+
+rule C.CodeSign TARGET
+{
+}
+
+
 rule C._ApplicationTargetInfo
 {
 	if $(PLATFORM) in ipad iphone {
@@ -662,6 +668,52 @@ actions CompileXIB
 	PATH=$(MACOSX_SDK_DEVELOPER_ROOT)/usr/bin:$PATH
 	/Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile $(1:C) $(2:C)
 }
+
+
+actions C._CodeSign
+{
+	/usr/bin/codesign -f -s "$(PROVISIONING_PROFILE)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
+}
+
+
+rule C.CodeSign TARGET : PROVISIONING_PROFILE
+{
+	if $(PLATFORM) in ipad iphone {
+		local bundlePath ;
+		local bundleTarget ;
+		local cleanBundleTarget ;
+		local linkTarget ;
+		local entitlements ;
+
+		on $(TARGET) {
+			bundlePath = $(BUNDLE_PATH) ;
+			bundleTarget = $(BUNDLE_TARGET) ;
+			cleanBundleTarget = $(CLEAN_BUNDLE_TARGET) ;
+			linkTarget = $(LINK_TARGET) ;
+			entitlements = $(ENTITLEMENTS) ;
+		}
+
+		local codeResources = [ C.TargetGrist $(TARGET) : CodeResources ] ;
+		MakeLocate $(codeResources) : $(bundlePath)/_CodeSignature ;
+
+		local codeResourcesSymbolicLink = [ C.TargetGrist $(TARGET) : CodeResourcesLink ] ;
+		BINDING on $(codeResourcesSymbolicLink) = CodeResources ;
+		MakeLocate $(codeResourcesSymbolicLink) : $(bundlePath) ;
+
+		BUNDLE_PATH on $(codeResources) = $(bundlePath) ;
+		ENTITLEMENTS on $(codeResources) = $(entitlements) ;
+		PROVISIONING_PROFILE on $(codeResources) = $(PROVISIONING_PROFILE) ;
+
+		local dependsList = [ DependsList $(bundleTarget) ] $(linkTarget) $(entitlements) ;
+		C._CodeSign $(codeResources) : $(dependsList) ; 
+
+		UseCommandLine $(codeResources) : $(dependsList) ;
+		Depends $(TARGET) : $(codeResources) : $(dependsList) ;
+		Clean $(cleanBundleTarget) : $(codeResources) $(codeResourcesSymbolicLink) ;
+	}
+}
+
+
 
 } # TARGETINFO_LOCATE
 
