@@ -508,6 +508,14 @@ actions CpResource
 	/Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -strip-debug-symbols -resolve-src-symlinks $(2) $(1:D)
 }
 
+C.__DOLLAR = \\$ ;
+
+actions ProcessEntitlements
+{
+	cp $(2) $(1)
+	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" $(1)
+}
+
 rule C._ApplicationFromObjects_PostBuild
 {
 	if bundle in $(OPTIONS) {
@@ -565,6 +573,16 @@ rule C._ApplicationFromObjects_PostBuild
 			Clean $(cleanBundleTarget) : $(destResourceRulesPlist) ;
 			CpResource $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;
 
+			# Create Entitlements.plist.
+			local sourceEntitlementsPlist = @(Entitlements.plist:G=$(grist)|source) ;
+			SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
+			local destEntitlementsPlist = @(Entitlements.plist:G=$(grist)) ;
+			MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
+			ENTITLEMENTS on $(TARGET) = $(destEntitlementsPlist) ;
+			Depends $(bundleTarget) : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
+			on $(TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) ;
+			Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
+			ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(TARGET) ;
 		}
 	}
 	
@@ -577,6 +595,34 @@ if $(TARGETINFO_LOCATE) {
 rule XIB
 {
 
+}
+
+rule C._ApplicationTargetInfo
+{
+	if $(PLATFORM) in ipad iphone {
+		local isysroot ;
+		on $(TARGET) {
+			isysroot = $(ISYSROOT) ;
+		}
+		if ! $(isysroot) {
+			on C.* {
+				isysroot = $(ISYSROOT) ;
+			}
+		}
+		
+		# Create Entitlements.plist.
+		local sourceEntitlementsPlist = @(Entitlements.plist:G=$(grist)|source) ;
+		SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
+		local destEntitlementsPlist = @(Entitlements.plist:G=$(grist)) ;
+		MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
+		Depends all : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
+		on $(TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) ;
+		ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(TARGET) ;
+
+		Contents += "Projects[ [[$(TARGET)]] ].XCODE_ENTITLEMENTS[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(destEntitlementsPlist:T)]]
+
+" ;
+	}
 }
 
 } else {
