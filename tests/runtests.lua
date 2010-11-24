@@ -65,6 +65,8 @@ function TestPattern(patterns, lines)
 	local lastMatchedLineIndex = 0
 	while lineIndex <= #lines  and  (patternIndex - #oooPatternsToFind) <= #patterns do
 		local line = lines[lineIndex]:gsub('^%s+', ''):gsub('%s+$', '')
+		line = line:gsub('@%s*%d+%%', '@')
+
 		local pattern
 		local ooo
 		local ooogroup = oooGroupPatternsToFind[1] ~= nil
