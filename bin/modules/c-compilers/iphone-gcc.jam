@@ -317,7 +317,8 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 			SDK_VERSION_MIN ?= $(SDK_VERSION) ;
 			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
 	}
-	
+
+	ISYSROOT on $(TARGET) = $(isysroot) ;	
 	IPHONEOS_SDK_VERSION = $(SDK_VERSION) ;
 	IOS_SDK_VERSION_MIN = $(SDK_VERSION_MIN) ;
 
