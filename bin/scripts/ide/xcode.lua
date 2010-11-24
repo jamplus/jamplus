@@ -401,7 +401,7 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 			table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. platformName .. ";\n")
 			table.insert(self.Contents, "\t\t\t\tCONFIG = " .. configName .. ";\n")
 			if configInfo.OutputPath ~= '' then
-				table.insert(self.Contents, "\t\t\t\tCONFIGURATION_BUILD_DIR = \"" .. configInfo.OutputPath .. "\";\n")
+				table.insert(self.Contents, "\t\t\t\tCONFIGURATION_BUILD_DIR = \"" .. os.path.remove_slash(configInfo.OutputPath) .. "\";\n")
 			end
 			
 			local productName = configInfo.OutputName
