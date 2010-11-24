@@ -422,7 +422,10 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 		case bundlename :			C._BundleInfoString CFBundleName : $(VALUE) ;
 		case displayname :			C._BundleInfoString CFBundleDisplayName : $(VALUE) ;
 		case executable :			C._BundleInfoString CFBundleExecutable : $(VALUE) ;
-		case identifier :			C._BundleInfoString CFBundleIdentifier : $(VALUE) ;
+		case identifier :
+			C._BundleInfoString CFBundleIdentifier : $(VALUE[1]) ;
+			CFBundleIdentifier on $(TARGET) = $(VALUE[1]) ;
+			AppIdentifierPrefix on $(TARGET) = $(VALUE[2]) ;
 		case shortversion :			C._BundleInfoString CFShortVersionString : $(VALUE) ;
 		case bundleversion :		C._BundleInfoString CFBundleVersion : $(VALUE) ;
 		case copyright :			C._BundleInfoString NSHumanReadableCopyright : $(VALUE) ;
