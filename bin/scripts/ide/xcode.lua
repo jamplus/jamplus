@@ -423,6 +423,18 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 			if sdkRoot then
 				table.insert(self.Contents, "\t\t\t\tSDKROOT = " .. sdkRoot .. ";\n")
 			end
+
+			-- Write CODE_SIGN_ENTITLEMENTS.
+			local codeSignEntitlements
+			if subProject.XCODE_ENTITLEMENTS  and  subProject.XCODE_ENTITLEMENTS[platformName]  and  subProject.XCODE_ENTITLEMENTS[platformName][configName] then
+				codeSignEntitlements = subProject.XCODE_ENTITLEMENTS[platformName][configName]
+			elseif Projects['C.*']  and  Projects['C.*'].XCODE_ENTITLEMENTS  and  Projects['C.*'].XCODE_ENTITLEMENTS[platformName]  and  Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName] then
+				codeSignEntitlements = Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName]			
+		   	end
+			if codeSignEntitlements then
+				table.insert(self.Contents, "\t\t\t\tCODE_SIGN_ENTITLEMENTS = " .. codeSignEntitlements .. ";\n")
+			end
+
 			if platformName == 'macosx32'  or  platformName == 'macosx64' then
 				table.insert(self.Contents, "\t\t\t\tARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\";\n");
 			elseif platformName == 'iphone' then
