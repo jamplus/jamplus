@@ -1437,9 +1437,3 @@ rule C.TargetGrist TARGET : FILES
 	return $(FILES:G=<$(TARGET)>) ;
 }
 
-
-C.Defines * : _DEBUG DEBUG : debug ;
-C.Defines * : NDEBUG : release ;
-C.Defines * : NDEBUG : releaseltcg ;
-
-
