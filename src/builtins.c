@@ -122,6 +122,8 @@ LIST *builtin_split( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_expandfilelist( PARSE *parse, LOL *args, int *jmp );
 LIST* builtin_listsort( PARSE *parse, LOL *args, int *jmp );
 
+LIST *builtin_dependslist( PARSE *parse, LOL *args, int *jmp );
+
 int glob( const char *s, const char *c );
 
 void
@@ -276,6 +278,9 @@ load_builtins()
 		parse_make( builtin_expandfilelist, P0, P0, P0, C0, C0, 0 );
 	bindrule( "ListSort" )->procedure =
 		parse_make( builtin_listsort, P0, P0, P0, C0, C0, 0 );
+
+	bindrule( "DependsList" )->procedure =
+		parse_make( builtin_dependslist, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -1317,3 +1322,22 @@ LIST *builtin_listsort( PARSE *parse, LOL *args, int *jmp )
 	return l;
 }
 
+
+
+LIST *builtin_dependslist(PARSE *parse, LOL *args, int *jmp)
+{
+	LIST *result = L0;
+	LIST *parents;
+	
+    for (parents = lol_get(args, 0); parents; parents = parents->next) {
+		TARGET *t = bindtarget(parents->string);
+		TARGETS *child;
+
+		for (child = t->depends; child; child = child->next)
+		{
+			result = list_new(result, child->target->name, 1);
+	    }
+	}
+	
+	return result;
+}
