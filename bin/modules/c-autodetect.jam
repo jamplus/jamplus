@@ -44,7 +44,7 @@ rule C.ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 	}
 
 	if $(THE_PLATFORM) != * {
-		if (THE_CONFIG) != * {
+		if $(THE_CONFIG) != * {
 			IncludeModule c-compilers/global-$(THE_CONFIG) ;
 		}
 		IncludeModule c-compilers/$(THE_PLATFORM)-autodetect ;
