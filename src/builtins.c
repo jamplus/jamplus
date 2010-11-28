@@ -539,11 +539,19 @@ builtin_glob(
 
 	for( ; l; l = list_next( l ) )
 	{
-	    globbing.dirname = l->string;
-	    globbing.dirnamelen = strlen( l->string );
-	    if ( globbing.dirname[ globbing.dirnamelen - 1 ] != '/'  &&  globbing.dirname[ globbing.dirnamelen - 1 ] != '\\' )
-		globbing.dirnamelen++;
-	    file_dirscan( l->string, builtin_glob_back, &globbing );
+		PATHNAME	f;
+		char		buf[ MAXJPATH ];
+		
+		path_parse( l->string, &f );
+		f.f_root.len = strlen( l->string );
+		f.f_root.ptr = l->string;
+		path_build( &f, buf, 0 );
+		
+		globbing.dirname = buf;
+		globbing.dirnamelen = strlen( buf );
+		if ( globbing.dirname[ globbing.dirnamelen - 1 ] != '/'  &&  globbing.dirname[ globbing.dirnamelen - 1 ] != '\\' )
+			globbing.dirnamelen++;
+	    file_dirscan( buf, builtin_glob_back, &globbing );
 	}
 #else
 	for( ; l; l = list_next( l ) )
