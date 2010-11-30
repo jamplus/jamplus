@@ -141,7 +141,7 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
 					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
 					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
-					isysroot = $(developerRoot)/SDKs/iPhoneOS4.1.sdk ;
+					isysroot = $(developerRoot)/SDKs/iPhoneOS4.2.sdk ;
 					flags += -arch armv6 -miphoneos-version-min=4.2 ;
 					XCODE_SDKROOT = iphoneos4.2 ;
 
