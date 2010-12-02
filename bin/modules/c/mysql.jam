@@ -6,18 +6,31 @@ if $(MYSQL_INCLUDE_DIRECTORIES)  &&  $(MYSQL_LIBRARIES) {
 	local LIBRARY_PATHS ;
 
 	if $(NT) {
-		INCLUDE_PATHS =
-			$(ProgramFiles(x86):J=$(SPACE))/MySQL/*/include
-			$(ProgramFiles:J=$(SPACE))/MySQL/*/include
-			$(SystemDrive)/MySQL/*/include
-		;
+		if $(PLATFORM) = win64 {
+			INCLUDE_PATHS =
+				$(ProgramFiles:J=$(SPACE))/MySQL/*/include
+				$(SystemDrive)/MySQL/*/include
+			;
 
-		LIBRARY_PATHS =
-			$(Path)
-			$(ProgramFiles(x86):J=$(SPACE))/MySQL/*/lib/opt
-			$(ProgramFiles:J=$(SPACE))/MySQL/*/lib/opt
-			$(SystemDrive)/MySQL/*/lib/opt
-		;
+			LIBRARY_PATHS =
+				$(Path)
+				$(ProgramFiles:J=$(SPACE))/MySQL/*/lib/opt
+				$(SystemDrive)/MySQL/*/lib/opt
+			;
+		} else {
+			INCLUDE_PATHS =
+				$(ProgramFiles(x86):J=$(SPACE))/MySQL/*/include
+				$(ProgramFiles:J=$(SPACE))/MySQL/*/include
+				$(SystemDrive)/MySQL/*/include
+			;
+
+			LIBRARY_PATHS =
+				$(Path)
+				$(ProgramFiles(x86):J=$(SPACE))/MySQL/*/lib/opt
+				$(ProgramFiles:J=$(SPACE))/MySQL/*/lib/opt
+				$(SystemDrive)/MySQL/*/lib/opt
+			;
+		}
 
 	} else {
 		INCLUDE_PATHS =
