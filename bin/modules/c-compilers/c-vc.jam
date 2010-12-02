@@ -79,7 +79,7 @@ if $(COMPILER.$(PLATFORM)) in vc6 vs2002 vs2003
 
 actions response C.Link
 {
-	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
 }
@@ -88,14 +88,14 @@ actions response C.Link
 
 actions response C.Link
 {
-	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
 }
 
 actions response C.DebugLinkWithManifest
 {
-	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
 	if exist $(MANIFEST).intermediate.manifest "$(C.MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
@@ -106,7 +106,7 @@ actions response C.DebugLinkWithManifest
 
 actions response C.LinkWithManifest
 {
-	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);$(LINK_PATHS:E);%PATH%
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:CT)) /out:$(<[1])
 	"$(C.MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
@@ -117,7 +117,7 @@ actions response C.LinkWithManifest
 
 actions updated response C.CC
 {
-	PATH=$(MSVCNT_BIN_PATH);%PATH%
+	PATH=$(MSVCNT_BIN_PATH:J=;);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	$(C.CC:\\C) /nologo @@($(MFLAGS)) $(>:C)
 }
@@ -125,7 +125,7 @@ actions updated response C.CC
 
 actions updated response C.C++
 {
-	PATH=$(MSVCNT_BIN_PATH);%PATH%
+	PATH=$(MSVCNT_BIN_PATH:J=;);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	$(C.C++:\\C) /nologo @@($(MFLAGS)) $(>:C)
 }
@@ -133,7 +133,7 @@ actions updated response C.C++
 
 actions together response C.Archive
 {
-	PATH=$(MSVCNT_BIN_PATH);%PATH%
+	PATH=$(MSVCNT_BIN_PATH:J=;);%PATH%
 	$(C.AR:C) /nologo $(LIBFLAGS) @@($(>:\\C)) /out:$(<:C)
 }
 

@@ -112,7 +112,7 @@ rule C.MidlCompiler PARENT : SOURCE
 
 actions C.Midl
 {
-	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH);%PATH%
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);%PATH%
 	set INCLUDE=$(MSSDK_STDHDRS:J=;);%INCLUDE%
 	"$(MIDL)" $(FLAGS) /out $(1[1]:D) $(2)
 }
