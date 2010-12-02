@@ -60,9 +60,9 @@ path_parse(
 
 	if( file[0] == '<' && ( p = strchr( file, '>' ) ) )
 	{
-	    f->f_grist.ptr = file;
-	    f->f_grist.len = (int)(p - file);
-	    file = p + 1;
+		f->f_grist.ptr = file;
+		f->f_grist.len = (int)(p - file);
+		file = p + 1;
 	}
 
 	/* Look for dir/ */
@@ -72,29 +72,29 @@ path_parse(
 # if PATH_DELIM == '\\'
 	/* On NT, look for dir\ as well */
 	{
-	    char *p1 = strrchr( file, '\\' );
-	    p = p1 > p ? p1 : p;
+		char *p1 = strrchr( file, '\\' );
+		p = p1 > p ? p1 : p;
 	}
 # endif
 
 	if( p )
 	{
-	    f->f_dir.ptr = file;
-	    f->f_dir.len = (int)(p - file);
+		f->f_dir.ptr = file;
+		f->f_dir.len = (int)(p - file);
 
-	    /* Special case for / - dirname is /, not "" */
+		/* Special case for / - dirname is /, not "" */
 
-	    if( !f->f_dir.len )
-		f->f_dir.len = 1;
+		if( !f->f_dir.len )
+			f->f_dir.len = 1;
 
 # if PATH_DELIM == '\\'
-	    /* Special case for D:/ - dirname is D:/, not "D:" */
+		/* Special case for D:/ - dirname is D:/, not "D:" */
 
-	    if( f->f_dir.len == 2 && file[1] == ':' )
-		f->f_dir.len = 3;
+		if( f->f_dir.len == 2 && file[1] == ':' )
+			f->f_dir.len = 3;
 # endif
 
-	    file = p + 1;
+		file = p + 1;
 	}
 
 	end = file + strlen( file );
@@ -103,9 +103,9 @@ path_parse(
 
 	if( ( p = strchr( file, '(' ) ) && end[-1] == ')' )
 	{
-	    f->f_member.ptr = p + 1;
-	    f->f_member.len = (int)(end - p - 2);
-	    end = p;
+		f->f_member.ptr = p + 1;
+		f->f_member.len = (int)(end - p - 2);
+		end = p;
 	}
 
 	/* Look for .suffix */
@@ -115,13 +115,13 @@ path_parse(
 	q = file;
 
 	while( q = (char *)memchr( q, '.', end - q ) )
-	    p = q++;
+		p = q++;
 
 	if( p )
 	{
-	    f->f_suffix.ptr = p;
-	    f->f_suffix.len = (int)(end - p);
-	    end = p;
+		f->f_suffix.ptr = p;
+		f->f_suffix.len = (int)(end - p);
+		end = p;
 	}
 
 	/* Leaves base */
@@ -147,26 +147,26 @@ path_build(
 	char pathdelim = '/';
 	if ( pathdelim_oldstyle == -1 )
 	{
-	    LIST *oldstyle = var_get( "PATHDELIM_OLDSTYLE" );
-	    if ( oldstyle )
-		pathdelim_oldstyle = strcmp( oldstyle->string, "1" ) == 0  ||  strcmp( oldstyle->string, "true" ) == 0;
-	    else
-		pathdelim_oldstyle = 0;
+		LIST *oldstyle = var_get( "PATHDELIM_OLDSTYLE" );
+		if ( oldstyle )
+			pathdelim_oldstyle = strcmp( oldstyle->string, "1" ) == 0  ||  strcmp( oldstyle->string, "true" ) == 0;
+		else
+			pathdelim_oldstyle = 0;
 	}
 	if ( pathdelim_oldstyle )
-	    pathdelim = PATH_DELIM;
+		pathdelim = PATH_DELIM;
 
 	/* Start with the grist.  If the current grist isn't */
 	/* surrounded by <>'s, add them. */
 
 	if( f->f_grist.len )
 	{
-	    if( f->f_grist.ptr[0] != '<' ) *file++ = '<';
-	    memcpy( file, f->f_grist.ptr, f->f_grist.len );
-	    file += f->f_grist.len;
-	    if( file[-1] != '>' ) *file++ = '>';
+		if( f->f_grist.ptr[0] != '<' ) *file++ = '<';
+		memcpy( file, f->f_grist.ptr, f->f_grist.len );
+		file += f->f_grist.len;
+		if( file[-1] != '>' ) *file++ = '>';
 #ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
-	    fileorg = file;
+		fileorg = file;
 #endif
 	}
 
@@ -175,35 +175,35 @@ path_build(
 # if PATH_DELIM == '/'
 
 	if( f->f_root.len
-	    && !( f->f_root.len == 1 && f->f_root.ptr[0] == '.' )
-	    && !( f->f_dir.len && f->f_dir.ptr[0] == '/' ) )
+		&& !( f->f_root.len == 1 && f->f_root.ptr[0] == '.' )
+		&& !( f->f_dir.len && f->f_dir.ptr[0] == '/' ) )
 
 # else /* unix */
 
 	if( f->f_root.len
-	    && !( f->f_root.len == 1 && f->f_root.ptr[0] == '.' )
-	    && !( f->f_dir.len && f->f_dir.ptr[0] == '/' )
-	    && !( f->f_dir.len && f->f_dir.ptr[0] == '\\' )
-	    && !( f->f_dir.len && f->f_dir.ptr[1] == ':' ) )
+		&& !( f->f_root.len == 1 && f->f_root.ptr[0] == '.' )
+		&& !( f->f_dir.len && f->f_dir.ptr[0] == '/' )
+		&& !( f->f_dir.len && f->f_dir.ptr[0] == '\\' )
+		&& !( f->f_dir.len && f->f_dir.ptr[1] == ':' ) )
 
 # endif /* unix */
 
 	{
-	    memcpy( file, f->f_root.ptr, f->f_root.len );
-	    file += f->f_root.len;
+		memcpy( file, f->f_root.ptr, f->f_root.len );
+		file += f->f_root.len;
 #ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
-	    /* avoid double slash */
-	    if ( file > fileorg  &&  file[-1] != '/'  &&  file[-1] != '\\' )
-		*file++ = pathdelim;
+		/* avoid double slash */
+		if ( file > fileorg  &&  file[-1] != '/'  &&  file[-1] != '\\' )
+			*file++ = pathdelim;
 #else
-	    *file++ = pathdelim;
+		*file++ = pathdelim;
 #endif
 	}
 
 	if( f->f_dir.len )
 	{
-	    memcpy( file, f->f_dir.ptr, f->f_dir.len );
-	    file += f->f_dir.len;
+		memcpy( file, f->f_dir.ptr, f->f_dir.len );
+		file += f->f_dir.len;
 	}
 
 	/* UNIX: Put / between dir and file */
@@ -211,111 +211,111 @@ path_build(
 
 	if( f->f_dir.len && ( f->f_base.len || f->f_suffix.len ) )
 	{
-	    /* UNIX: Special case for dir \ : don't add another \ */
-	    /* NT:   Special case for dir / : don't add another / */
+		/* UNIX: Special case for dir \ : don't add another \ */
+		/* NT:   Special case for dir / : don't add another / */
 
 # if PATH_DELIM == '\\'
-	    if( !( f->f_dir.len == 3 && f->f_dir.ptr[1] == ':' ) )
+		if( !( f->f_dir.len == 3 && f->f_dir.ptr[1] == ':' ) )
 # endif
-		if( !( f->f_dir.len == 1 && f->f_dir.ptr[0] == PATH_DELIM ) )
-		    *file++ = pathdelim;
+			if( !( f->f_dir.len == 1 && f->f_dir.ptr[0] == PATH_DELIM ) )
+				*file++ = pathdelim;
 	}
 
 	if( f->f_base.len )
 	{
-	    memcpy( file, f->f_base.ptr, f->f_base.len );
-	    file += f->f_base.len;
+		memcpy( file, f->f_base.ptr, f->f_base.len );
+		file += f->f_base.len;
 	}
 
 	if( f->f_suffix.len )
 	{
-	    memcpy( file, f->f_suffix.ptr, f->f_suffix.len );
-	    file += f->f_suffix.len;
+		memcpy( file, f->f_suffix.ptr, f->f_suffix.len );
+		file += f->f_suffix.len;
 	}
 
 	if( f->f_member.len )
 	{
-	    *file++ = '(';
-	    memcpy( file, f->f_member.ptr, f->f_member.len );
-	    file += f->f_member.len;
-	    *file++ = ')';
+		*file++ = '(';
+		memcpy( file, f->f_member.ptr, f->f_member.len );
+		file += f->f_member.len;
+		*file++ = ')';
 	}
 	*file = 0;
 
 #ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
 	{
-	    char *ptr = fileorg;
-	    char *endptr = file;
-	    file = fileorg;
-	    while ( ptr != endptr )
-	    {
-		// Skip './'
-		if ( *ptr == '.' )
+		char *ptr = fileorg;
+		char *endptr = file;
+		file = fileorg;
+		while ( ptr != endptr )
 		{
-		    if ( ptr[1] == 0  ||  ptr[1] == '/'  ||  ptr[1] == '\\' )
-		    {
-			int add = ptr[1] ? 1 : 0;
-			ptr += 1 + add;
-			if ( file == fileorg )
+			// Skip './'
+			if ( *ptr == '.' )
 			{
-			    file += 1 + add;
-			    fileorg += 1 + add;
+				if ( ptr[1] == 0  ||  ptr[1] == '/'  ||  ptr[1] == '\\' )
+				{
+					int add = ptr[1] ? 1 : 0;
+					ptr += 1 + add;
+					if ( file == fileorg )
+					{
+						file += 1 + add;
+						fileorg += 1 + add;
+					}
+				}
+				else if ( ptr[1] == '.'  &&  ( ptr[2] == 0  ||  ptr[2] == '/'  ||  ptr[2] == '\\' ) )
+				{
+					// Go up a subdirectory.
+					int add = ptr[2] ? 1 : 0;
+					ptr += 2 + add;
+					if ( file != fileorg )
+					{
+						file -= 2;
+						while ( file >= fileorg  &&  ( *file != '/'  &&  *file != '\\' ) )
+							file--;
+						file++;
+					}
+					else
+					{
+						file += 2 + add;
+						fileorg += 2 + add;
+					}
+				}
+				else
+				{
+					*file++ = *ptr++;
+				}
 			}
-		    }
-		    else if ( ptr[1] == '.'  &&  ( ptr[2] == 0  ||  ptr[2] == '/'  ||  ptr[2] == '\\' ) )
-		    {
-			// Go up a subdirectory.
-			int add = ptr[2] ? 1 : 0;
-			ptr += 2 + add;
-			if ( file != fileorg )
+			else if ( *ptr == '\\'  ||  *ptr == '/' )
 			{
-			    file -= 2;
-			    while ( file >= fileorg  &&  ( *file != '/'  &&  *file != '\\' ) )
-				file--;
-			    file++;
+				if ( file > fileorg  &&  ( file[-1] == '/'  ||  file[-1] == '\\' ) )
+				{
+					ptr++;
+				}
+				else
+				{
+					/* is it a unc path? */
+					if ( file == fileorg  &&  file[0] == '\\'  &&  file[1] == '\\' )
+					{
+						file += 2;
+						ptr += 2;
+					}
+					else
+					{
+						*file++ = pathdelim;
+						ptr++;
+					}
+				}
 			}
 			else
 			{
-			    file += 2 + add;
-			    fileorg += 2 + add;
+				*file++ = *ptr++;
 			}
-		    }
-		    else
-		    {
-			*file++ = *ptr++;
-		    }
 		}
-		else if ( *ptr == '\\'  ||  *ptr == '/' )
-		{
-		    if ( file > fileorg  &&  ( file[-1] == '/'  ||  file[-1] == '\\' ) )
-		    {
-			ptr++;
-		    }
-		    else
-		    {
-			/* is it a unc path? */
-			if ( file == fileorg  &&  file[0] == '\\'  &&  file[1] == '\\' )
-			{
-			    file += 2;
-			    ptr += 2;
-			}
-			else
-			{
-			    *file++ = pathdelim;
-			    ptr++;
-			}
-		    }
-		}
-		else
-		{
-		    *file++ = *ptr++;
-		}
-	    }
 	}
 	*file = 0;
 	file--;
 	if ( *file == pathdelim )
-	    *file = 0;
+		*file = 0;
 #endif
 	return file + 1;
 }
@@ -330,12 +330,12 @@ path_parent( PATHNAME *f )
 	/* just set everything else to nothing */
 
 	f->f_base.ptr =
-	f->f_suffix.ptr =
-	f->f_member.ptr = "";
+		f->f_suffix.ptr =
+		f->f_member.ptr = "";
 
 	f->f_base.len =
-	f->f_suffix.len =
-	f->f_member.len = 0;
+		f->f_suffix.len =
+		f->f_member.len = 0;
 }
 
 # endif /* unix, NT, OS/2, AmigaOS */
