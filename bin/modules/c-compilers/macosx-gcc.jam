@@ -219,7 +219,10 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 rule C.FrameworkDirectories TARGET : FRAMEWORKDIRS : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	C.C++Flags $(TARGET)  : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.Flags CC	: $(TARGET)  : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.Flags C++	: $(TARGET)  : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.Flags M	: $(TARGET)  : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+	C.Flags MM	: $(TARGET)  : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 	C.LinkFlags $(TARGET) : "-F$(FRAMEWORKDIRS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
 }
 
