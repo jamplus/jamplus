@@ -276,8 +276,13 @@ path_build(
 					}
 					else
 					{
-						file += 2 + add;
-						fileorg += 2 + add;
+						file += 2;
+						fileorg += 2;
+						if ( add )
+						{
+							*file++ = pathdelim;
+							fileorg++;
+						}
 					}
 				}
 				else
