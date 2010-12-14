@@ -48,7 +48,13 @@ if ! $(wxWidgets_ROOT)
 			wxWidgets
 		;
 
-		local wx.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include/wx : wx.h ] ;
+		local wx.h ;
+		if $(PLATFORM) = win64 {
+			wx.h = [ Glob $(PATHS)$(PATH_SUFFIXES).x64/include/wx : wx.h ] ;
+		}
+		if ! $(wx.h) {
+			wx.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include/wx : wx.h ] ;
+		}
 		if $(wx.h)
 		{
 			wxWidgets_ROOT = [ Match (.+)/include/wx/wx.h : $(wx.h[1]) ] ;
