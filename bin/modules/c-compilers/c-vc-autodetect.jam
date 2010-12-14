@@ -34,7 +34,7 @@ rule FindVisualStudioHelper VERSION {
 			}
 			if $(MSVCNT) {
 				MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
-				MSVCNT_BIN_PATH = $(MSVCNT)/../Common7/IDE ;
+				MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
 				compiler = vs2008 ;
 			}
 
