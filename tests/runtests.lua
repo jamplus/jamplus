@@ -286,7 +286,8 @@ function TestFiles(expectedFiles)
 
 	local extraFiles = {}
 	for foundFile in pairs(foundFilesMap) do
-		if foundFile ~= 'test.lua'  and  foundFile ~= 'test.out'  and  not foundFile:match('%.swp') then
+		if foundFile ~= 'test.lua'  and  foundFile ~= 'test.out'  and  not foundFile:match('%.swp') 
+				and  not foundFile:match('~$') then
 			if not expectedFilesMap[foundFile] then
 				local found = false
 				for _, fileName in ipairs(expectedFiles) do
