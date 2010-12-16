@@ -48,7 +48,7 @@ none:
 	@echo "    $(PLATS)"
 
 linux:
-	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions" LINKLIBS="$(LINKLIBS)"
+	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions -m32" LINKLIBS="$(LINKLIBS) -m32"
 
 macosx:
 	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions" LINKLIBS="$(LINKLIBS) -framework CoreFoundation -framework CoreServices"
