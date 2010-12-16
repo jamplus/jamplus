@@ -39,7 +39,7 @@ TARGET = -o $(EXENAME)
 # QNX rtp (neutrino)
 #CC = gcc
 
-PLATS = linux macosx
+PLATS = linux32 macosx32 linux64 macosx64
 
 default: $(PLAT)
 
@@ -47,11 +47,14 @@ none:
 	@echo "Please choose a platform"
 	@echo "    $(PLATS)"
 
-linux:
-	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions -m32" LINKLIBS="$(LINKLIBS) -m32"
-
-macosx:
-	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions" LINKLIBS="$(LINKLIBS) -framework CoreFoundation -framework CoreServices"
+linux32:
+	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions -m32" LINKLIBS="$(LINKLIBS) -m32" PLATFORM=$@
+linux64:
+	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions -m64" LINKLIBS="$(LINKLIBS) -m64" PLATFORM=$@
+macosx32:
+	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions -m32" LINKLIBS="$(LINKLIBS) -m32 -framework CoreFoundation -framework CoreServices" PLATFORM=$@
+macosx64:
+	$(MAKE) all CFLAGS="$(CFLAGS) -fexceptions -m64" LINKLIBS="$(LINKLIBS) -m64 -framework CoreFoundation -framework CoreServices" PLATFORM=$@
 
 .PHONY: all $(PLATS)
 
