@@ -6,3 +6,6 @@ C.RANLIB		?= ranlib ;
 
 SUFMODULE	= .so ;
 
+C.Flags CC      : * : -m32 : * : linux32 ;
+C.Flags C++     : * : -m32 : * : linux32 ;
+C.LinkFlags   * : -m32 : * : linux32 ;
