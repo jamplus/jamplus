@@ -309,7 +309,7 @@ if $(VMS)
 # The guts of the Jamfile: how to build Jam
 #
 
-local BIN_PATH = ../bin/$(OSFULL[1]:L) ;
+local BIN_PATH = ../bin/$(PLATFORM) ;
 GenFile jam : jambase-j.c : mkjambase Jambase-j ;
 C.LinkLibraries jam : libjam ;
 C.OutputPath jam : $(BIN_PATH) ;
