@@ -20,6 +20,7 @@ switch $(OS)
 		PLATFORM ?= linux32 ;
 }
 
+if $(PLATFORM) = "" { PLATFORM = ; }
 PLATFORM ?= $(VALID_PLATFORMS[1]) ;
 
 #if ! $(CONFIG) in * $(VALID_CONFIGS)
