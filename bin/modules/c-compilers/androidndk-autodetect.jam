@@ -1,8 +1,8 @@
 # C.AutoDetect will check for an Android NDK install we can use, and will setup the following three variables:
-# 1. NDKROOT			- pointing to root of NDK, e.g. c:\android\android-ndk-1.6_r1 - setup by NDK install.
-# 2. CYGWIN_PATH		- pointing to root of cygwin, e.g. c:\cygwin - users have to manually set this up.
-# 3. NDK_WRAPPERS_BASE	- pointing to the root of the ndk-wrappers,
-#                         see: http://tungchingkai.blogspot.com/2009/10/android-ndk-add-stlport-and-compile-c.html
+# 1. NDKROOT			- pointing to root of NDK, e.g. c:\android\android-ndk-r5 - setup by NDK install.
+# 2. NDK_TOOLCHAIN		- toolchain version (i.e. arm-eabi-4.4.0) - optional
+# 3. NDK_PLATFORM		- toolchain platform API (i.e. android-5) - optional
+# 3. NDK_ABI			- android ARM ABI level (i.e. armeabi) - optional, only armv5 supported
 
 rule C.AutoDetect
 {
@@ -15,29 +15,69 @@ rule C.AutoDetect
 	NDKROOT = $(NDKROOT:J=" ") ;	
 	if ! $(NDKROOT) 
 	{
+		echo NDKROOT not set ;
 		return ;
 	}
 	
-	# 2. CYGWIN_PATH
-	CYGWIN_PATH = $(CYGWIN_PATH:J=" ") ;	
-	if ! $(CYGWIN_PATH) 
+	# 2. Toolchain version
+	NDK_TOOLCHAIN = $(NDK_TOOLCHAIN:J=" ") ;
+	if ! $(NDK_TOOLCHAIN)
 	{
-		Echo *** Warning \: NDKROOT environment variable found, but CYGWIN_PATH not set. Please set to root of your cygwin install ;
-		return ;
-	}
-	
-	# 3. NDK_WRAPPERS_BASE
-	NDK_WRAPPERS_BASE = $(NDK_WRAPPERS_BASE:J=" ") ;	
-	if ! $(NDK_WRAPPERS_BASE) 
-	{
-		# Wrappers base not set, check if it is inside NDKROOT
-		NDK_WRAPPERS_BASE = [ Glob $(NDKROOT) : ndk-wrappers/ ] ;
-		if ! $(NDK_WRAPPERS_BASE)
+		NDK_TOOLCHAIN = [ Glob $(NDKROOT)/toolchains : arm-eabi-4.4.0/ ] ;
+		NDK_TOOLCHAIN = $(NDK_TOOLCHAIN:P) ;
+		NDK_TOOLCHAIN = $(NDK_TOOLCHAIN:D=) ;
+		if ! $(NDK_TOOLCHAIN)
 		{
-			Echo *** Warning \: NDKROOT and CYGWIN_PATH environment variable found, but NDK_WRAPPERS_BASE not set. Please set to root of your ndk-wrappers-base ;
+			Echo *** Warning \: NDK_TOOLCHAIN not set, and default 'arm-eabi-4.4.0' could not be found. Please set to desired toolchain version ;
 			return ;
 		}
+		else
+		{
+			Echo *** Warning \: NDK_TOOLCHAIN defaults to $(NDK_TOOLCHAIN) ;
+		}
 	}
+
+	# 3. Platform (API) version
+	NDK_PLATFORM = $(NDK_PLATFORM:J=" ") ;
+	if ! $(NDK_PLATFORM)
+	{
+		NDK_PLATFORM = [ Glob $(NDKROOT)/platforms : android-5/ ] ;
+		NDK_PLATFORM = $(NDK_PLATFORM:P) ;
+		NDK_PLATFORM = $(NDK_PLATFORM:D=) ;
+		if ! $(NDK_PLATFORM)
+		{
+			Echo *** Warning \: NDK_PLATFORM not set, and default 'android-5' could not be found. Please set to desired platform version ;
+			return ;
+		}
+		else
+		{
+			Echo *** Warning \: NDK_PLATFORM defaults to $(NDK_PLATFORM) ;
+		}
+	}
+
+	# 4. ABI (API) version
+	NDK_ABI = $(NDK_ABI:J=" ") ;
+	if ! $(NDK_ABI)
+	{
+		NDK_ABI = "armeabi" ;
+		Echo *** Warning \: NDK_ABI defaults to $(NDK_ABI) ;
+	}
+
+	switch $(OS)
+	{
+		case NT :
+		case CYGWIN :
+			NDK_HOST	= "windows" ;
+			HOST_SUFEXE = ".exe" ;
+		case MACOSX :
+			NDK_HOST	= "darwin-x86" ;
+			HOST_SUFEXE = "" ;
+		case * :
+			Echo *** Error \: Unable to detect host platform for NDK based on '$(OS)' ;
+			return ;
+	}
+
+	NDK_TOOLCHAIN_ROOT = "$(NDKROOT)/toolchains/$(NDK_TOOLCHAIN)/prebuilt/$(NDK_HOST)" ;
 
 	# Set platform
 	COMPILER.$(PLATFORM) = androidndk ;
