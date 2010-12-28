@@ -22,7 +22,7 @@ function RunJam(commandLine)
 	if not commandLine then commandLine = {} end
 	table.insert(commandLine, 1, 'jam')
 	table.insert(commandLine, 2, '-j1')
-	
+
 	if Compiler then
 		table.insert(commandLine, 3, 'COMPILER=' .. Compiler)
 	end
@@ -40,7 +40,7 @@ function TestExpression(result, failMessage)
 	if not result then
 		error(failMessage)
 	end
-	
+
 	TestSucceeded()
 end
 
@@ -205,7 +205,7 @@ function TestPattern(patterns, lines)
 		end
 		error('\nExpected:\n' .. table.concat(patternsExpected, '\n') .. '\n\nFull output:\n' .. table.concat(linesExpected, '\n'))
 	end
-	
+
 	TestSucceeded()
 	return true
 end
@@ -272,6 +272,7 @@ function TestFiles(expectedFiles)
 	local expectedFilesMap = {}
 	for _, fileName in ipairs(expectedFiles) do
 		fileName = fileName:gsub('$PlatformDir', PlatformDir):gsub('$%(SUFEXE%)', SUFEXE)
+		if fileName:match('vc.pdb$') then fileName = '?' .. fileName end
 		if fileName:sub(1, 1) == '?' then
 			expectedFilesMap[fileName:sub(2)] = '?'
 		else
@@ -286,7 +287,7 @@ function TestFiles(expectedFiles)
 
 	local extraFiles = {}
 	for foundFile in pairs(foundFilesMap) do
-		if foundFile ~= 'test.lua'  and  foundFile ~= 'test.out'  and  not foundFile:match('%.swp') 
+		if foundFile ~= 'test.lua'  and  foundFile ~= 'test.out'  and  not foundFile:match('%.swp')
 				and  not foundFile:match('~$') then
 			if not expectedFilesMap[foundFile] then
 				local found = false
