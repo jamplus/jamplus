@@ -7,9 +7,6 @@ C.LINK			= "$(MSVCBIN)link" ;
 C.STDHDRS		?= "$(MSSDK_STDHDRS)" ;
 C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
 
-C.Defines * : _XBOX : : xbox360 ;
-C.Defines * : _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE : : xbox360 ;
-
 rule ImageXexHelper
 {
 	local _configFile ;

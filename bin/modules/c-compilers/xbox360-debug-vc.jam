@@ -3,4 +3,6 @@ C.C++Flags * : /Od /EHsc /MTd /W3 /Z7 : debug : xbox360 ;
 C.LibFlags * : : debug : xbox360 ;
 C.LinkFlags * : /INCREMENTAL /DEBUG : debug : xbox360 ;
 
+C.Defines * : _XBOX : debug : xbox360 ;
+
 VSCONFIGMAP.debug = Debug ;

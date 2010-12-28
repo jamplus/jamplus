@@ -2,6 +2,8 @@ C.CFlags * 		: /O2 /Oi /EHsc /Gy /MD /W3 /Z7 : releaseltcg : win32 ;
 C.C++Flags * 	: /O2 /Oi /EHsc /Gy /MD /W3 /Z7 : releaseltcg : win32 ;
 C.LinkFlags *	: /INCREMENTAL:NO /DEBUG /MACHINE:X86 /OPT:REF /OPT:ICF : releaseltcg : win32 ;
 
+C.Defines *		: WIN32 WINDOWS : releaseltcg : win32 ;
+
 if $(COMPILER.$(PLATFORM)) != vc6 {
 	C.CFlags * 		: /GL : releaseltcg : win32 ;
 	C.C++Flags * 	: /GL : releaseltcg : win32 ;
