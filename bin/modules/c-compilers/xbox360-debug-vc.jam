@@ -1,5 +1,5 @@
-C.CFlags * : /Od /EHsc /MTd /W3 /Zi : debug : xbox360 ;
-C.C++Flags * : /Od /EHsc /MTd /W3 /Zi : debug : xbox360 ;
+C.CFlags * : /Od /EHsc /MTd /W3 /Z7 : debug : xbox360 ;
+C.C++Flags * : /Od /EHsc /MTd /W3 /Z7 : debug : xbox360 ;
 C.LibFlags * : : debug : xbox360 ;
 C.LinkFlags * : /INCREMENTAL /DEBUG : debug : xbox360 ;
 

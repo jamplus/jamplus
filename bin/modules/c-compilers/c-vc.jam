@@ -214,6 +214,11 @@ rule C.DefFile TARGET : SOURCES
 }
 
 
+actions existing quietly DeletePCHFile
+{
+$(RM) $(>:\\C)
+}
+
 rule C._MultiCppCompile_PreCompile
 {
 	if ! $(PLATFORM) in win32 win64 {
@@ -252,13 +257,14 @@ rule C._MultiCppCompile_SetupFlags
 		# add extra flags to enable pch creation
 		local _pchFilename = $(_pch[3]:LBS).pch ;
 		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
-		_flags += /Fp\"$(_pchDiskFilename:\\)\" /Yc\"$(_pch[2])\" ;
+		_flags += /Fp\"$(_pchDiskFilename:\\)\" /Yc\"$(_pch[2])\" /Yl\"__jp__$(TARGET)\" ;
 		# mark that it will be created by compilation through srcref
 		_pchFilename = $(_pchFilename:G=$(grist)) ;
 		BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
 		MakeLocate $(_pchFilename) : $(LOCATE_TARGET) ;
 		Depends $(_pchFilename) : $(_src) ;
 		Clean clean:$(TARGET) : $(_pchFilename) ;
+		DeletePCHFile $(_pchFilename) : $(_pchFilename) ;
 
 	# if the source should use pch
 	} else if $(_pch[2]) && ! $(_nopch) {
@@ -296,7 +302,7 @@ rule C._MultiCppCompile_PostCompile
 	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010 {
 		# If Incredibuild is enabled, we do not need the semaphore as Incredibuild does something magic to get around the problem.
 		if $(INCREDIBUILD) != "on" {
-			SEMAPHORE on $(objects) = $(_VCPDB) ;
+#			SEMAPHORE on $(objects) = $(_VCPDB) ;
 		}
 	}
 }
