@@ -154,28 +154,18 @@ rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_
 
 rule C._MultiCppCompile_ObjName_Pass1_OutputAsTree
 {
-	if $(sufobj[1]) {
-		_obj = $(_src:S=$(sufobj[1]))$(sufobj[2]) ;
-	} else {
-		_obj = $(_src)$(sufobj[2]) ;
-	}
-	_obj = [ Subst $(_obj) : %.%. : __ ] ;
-	_obj = [ Subst $(_obj) : \: : -- ] ;
-	local _objdir = $(_obj:DR=$(LOCATE_TARGET)) ;
+	local outputAsTree_obj = [ Subst $(_obj) : %.%. : __ ] ;
+	outputAsTree_obj = [ Subst $(outputAsTree_obj) : \: : -- ] ;
+	local _objdir = $(outputAsTree_obj:DR=$(LOCATE_TARGET)) ;
 	MakeLocate $(_obj) : $(_objdir) ;
-	BINDING on $(_obj) = $(_obj:BS) ;
 	_postmflags = "/c \"/Fo$(_objdir:\\)\\\\\" \"/Fd$(_VCPDB:T)\"" ;
 }
 
 
 rule C._MultiCppCompile_ObjName_Pass1
 {
-	if $(sufobj[1]) {
-		_obj = $(_src:S=$(sufobj[1]):D=)$(sufobj[2]) ;
-	} else {
-		_obj = $(_src)$(sufobj[2]) ;
-	}
-	MakeLocate $(_obj) : $(LOCATE_TARGET) ;
+	LOCATE on $(_obj) = $(LOCATE_TARGET) ;
+	Depends $(_obj) : $(LOCATE_TARGET[1]:G=!dir!) ;
 }
 
 
@@ -276,6 +266,8 @@ rule C.MultiCppCompile TARGET : SOURCES
 		makeobj_pass1 = C._MultiCppCompile_ObjName_Pass1_OutputAsTree ;
 	} else {
 		makeobj_pass1 = C._MultiCppCompile_ObjName_Pass1 ;
+
+		MkDir $(LOCATE_TARGET[1]:G=!dir!) ;
 	}
 
 	local FIncludes_dot = [ C.FIncludes . ] ;
@@ -307,6 +299,13 @@ rule C.MultiCppCompile TARGET : SOURCES
 		local sufobj = $($(BUILD_EXT).SUFOBJ) ;
 
 		local _obj ;
+		if $(sufobj[1]) {
+			_obj = $(_src:S=$(sufobj[1]))$(sufobj[2]) ;
+		} else {
+			_obj = $(_src)$(sufobj[2]) ;
+		}
+		BINDING on $(_obj) = $(_obj:BS) ;
+
 		$(makeobj_pass1) ;
 
 		local _hdrs = $(SEARCH_SOURCE) ;
@@ -395,20 +394,10 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 		# start with empty lists of objects for this batch
 		local objects ;
-		if $(__MultiCppCompile_OutputAsTree) != 0 {
-			if $(sufobj[1]) {
-				objects = $(_sources:S=$(sufobj[1]))$(sufobj[2]) ;
-			} else {
-				objects = $(_sources)$(sufobj[2]) ;
-			}
-			objects = [ Subst $(objects) : %.%. : __ ] ;
-			objects = [ Subst $(objects) : \: : -- ] ;
+		if $(sufobj[1]) {
+			objects = $(_sources:S=$(sufobj[1]))$(sufobj[2]) ;
 		} else {
-			if $(sufobj[1]) {
-				objects = $(_sources:S=$(sufobj[1]):D=)$(sufobj[2]) ;
-			} else {
-				objects = $(_sources)$(sufobj[2]) ;
-			}
+			objects = $(_sources)$(sufobj[2]) ;
 		}
 
 		if $(addToLink) = 1 {
