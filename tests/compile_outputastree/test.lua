@@ -174,7 +174,7 @@ function Test()
 rootfile.cpp
 @ C.C++ <liba>treea/treeb/deepfile.obj
 deepfile.cpp
-@ C.C++ <liba>__/outer/outer.obj
+@ C.C++ <liba>../outer/outer.obj
 outer.cpp
 @ C.Archive <liba>liba.lib
 @ C.C++ <libb>filea.obj
@@ -184,7 +184,7 @@ filec.cpp
 Generating Code...
 @ C.C++ <libb>onelevel/oneleveldeeper.obj
 oneleveldeeper.cpp
-@ C.C++ <libb>__/outerb/outer.obj
+@ C.C++ <libb>../outerb/outer.obj
 outer.cpp
 @ C.Archive <libb>libb.lib
 @ C.C++ <libc>src/Loading/Loading.obj
@@ -341,14 +341,14 @@ Generating Code...
 *** updating 32 target(s)...
 @ C.C++ <liba>rootfile.o 
 @ C.C++ <liba>treea/treeb/deepfile.o 
-@ C.C++ <liba>__/outer/outer.o 
+@ C.C++ <liba>../outer/outer.o 
 @ C.Archive <liba>liba.a 
 !NEXT!@ C.Ranlib <liba>liba.a 
 !OOOGROUP!@ C.C++ <libb>filea.o 
 !OOOGROUP!@ C.C++ <libb>fileb.o 
 !OOOGROUP!@ C.C++ <libb>filec.o 
 @ C.C++ <libb>onelevel/oneleveldeeper.o 
-@ C.C++ <libb>__/outerb/outer.o 
+@ C.C++ <libb>../outerb/outer.o 
 @ C.Archive <libb>libb.a 
 !NEXT!@ C.Ranlib <libb>libb.a 
 !OOOGROUP!@ C.C++ <libc>src/Saving/Saving1.o 

@@ -21,12 +21,13 @@ function Test()
 
 	-- First build
 	local cwd = os.getcwd():gsub(':', '--'):gsub('\\', '/')
+	local cwdNoDashes = os.getcwd():gsub('\\', '/')
 	
 	if Platform == 'win32' then
 		local pattern = [[
 *** found 19 target(s)...
 *** updating 11 target(s)...
-@ C.C++ <project1>]] .. cwd .. [[/source/project1/project1.obj
+@ C.C++ <project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
 project1.cpp
 @ C.LinkWithManifest <project1>project1.release.exe
 *** updated 11 target(s)...
@@ -74,7 +75,7 @@ project1.cpp
 		local pattern3 = [[
 *** found 19 target(s)...
 *** updating 2 target(s)...
-@ C.C++ <project1>]] .. cwd .. [[/source/project1/project1.obj
+@ C.C++ <project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
 project1.cpp
 @ C.LinkWithManifest <project1>project1.release.exe
 *** updated 2 target(s)...

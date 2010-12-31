@@ -55,7 +55,7 @@ function Test()
 			*** updating 5 target(s)...
 			@ C.CC <helloworld>precomp.h.pch
 			createprecomp.c
-			@ C.CC <helloworld>file.obj
+			@ C.CC <helloworld>../src/file.obj
 			file.c
 			main.c
 			Generating Code...
@@ -86,9 +86,9 @@ function Test()
 			*** found 16 target(s)...
 			*** updating 6 target(s)...
 			&@ C.PCH <helloworld%-%x+>precomp.h.gch 
-			@ C.CC <helloworld>file.o 
-			@ C.CC <helloworld>main.o 
-			@ C.CC <helloworld>createprecomp.o 
+			@ C.CC <helloworld>../src/file.o 
+			@ C.CC <helloworld>../src/main.o 
+			@ C.CC <helloworld>../src/createprecomp.o 
 			@ C.Link <helloworld>helloworld.release 
 			*** updated 6 target(s)...
 ]]
@@ -128,7 +128,7 @@ function Test()
 				*** updating 5 target(s)...
 				@ C.CC <helloworld>precomp.h.pch
 				createprecomp.c
-				@ C.CC <helloworld>file.obj
+				@ C.CC <helloworld>../src/file.obj
 				file.c
 				main.c
 				Generating Code...
@@ -140,9 +140,9 @@ function Test()
 				*** found 16 target(s)...
 				*** updating 5 target(s)...
 				&@ C.PCH <helloworld%-%x+>precomp.h.gch 
-				@ C.CC <helloworld>file.o 
-				@ C.CC <helloworld>main.o 
-				@ C.CC <helloworld>createprecomp.o 
+				@ C.CC <helloworld>../src/file.o 
+				@ C.CC <helloworld>../src/main.o 
+				@ C.CC <helloworld>../src/createprecomp.o 
 				@ C.Link <helloworld>helloworld.release 
 				*** updated 5 target(s)...
 ]]
@@ -180,7 +180,7 @@ function Test()
 				*** updating 5 target(s)...
 				@ C.CC <helloworld>precomp.h.pch
 				createprecomp.c
-				@ C.CC <helloworld>file.obj
+				@ C.CC <helloworld>../src/file.obj
 				file.c
 				main.c
 				Generating Code...
@@ -191,7 +191,7 @@ function Test()
 			pattern = [[
 				*** found 16 target(s)...
 				*** updating 2 target(s)...
-				@ C.CC <helloworld>createprecomp.o 
+				@ C.CC <helloworld>../src/createprecomp.o 
 				@ C.Link <helloworld>helloworld.release 
 				*** updated 2 target(s)...
 ]]
