@@ -313,11 +313,15 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 		local objflags ;
 		local objdefines ;
+		local objectFlagsToRemove ;
+		local objectFlagsToAdd ;
 		on $(_obj) {
 			_hdrs += $(HDRS.$(INCLUDES_ALL_TYPES)) ;
 			objectForceIncludes += $(FORCE_INCLUDES) ;
 			objflags = $($($(BUILD_EXT).FLAGS).$(FLAGS_ALL_TYPES)) ;
 			objdefines = $(DEFINES.$(FLAGS_ALL_TYPES)) ;
+			objectFlagsToRemove = $(FLAGS_TO_REMOVE.$(FLAGS_ALL_TYPES)) ;
+			objectFlagsToAdd = $(FLAGS_TO_ADD.$(FLAGS_ALL_TYPES)) ;
 		}
 		_hdrs += $(postHDRS) $(C.STDHDRS) ;
 
@@ -349,12 +353,17 @@ rule C.MultiCppCompile TARGET : SOURCES
 		}
 
 		# now that general flags on the file are determined
-
 		if $(flagsToRemove[1]) {
 			_flags -= $(flagsToRemove) ;
 		}
 		if $(flagsToAdd[1]) {
 			_flags += $(flagsToAdd) ;
+		}
+		if $(objectFlagsToRemove[1]) {
+			_flags -= $(objectFlagsToRemove) ;
+		}
+		if $(objectFlagsToAdd[1]) {
+			_flags += $(objectFlagsToAdd) ;
 		}
 
 		C._MultiCppCompile_SetupFlags ;
@@ -1358,6 +1367,17 @@ rule C.IncludeDirectories TARGET : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
 }
 
 
+rule C.ObjectAddFlags TARGET : SOURCES : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	SOURCES = [ C._FilterSourcesForCompilableOnly ] ;
+	local objTargets = $(SOURCES:S=$(SUFOBJ)) ;
+	FLAGS_TO_ADD.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) += $(FLAGS) ;
+	FLAGS_TO_REMOVE.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) -= $(FLAGS) ;
+}
+
+
 rule C.ObjectDefines TARGET : SOURCES : DEFINES : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
@@ -1378,6 +1398,16 @@ rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES : THE_CONFIG : THE_PLATFOR
 }
 
 
+rule C._FilterSourcesForCompilableOnly
+{
+	# for each file
+	local dollar = $ ;
+	local colon = ":" ;
+	local listIncludes = @(I=\\$(C.BUILD_EXTENSIONS)$:J=$(colon)) ;
+	local sources = @($(dollar)(SOURCES$(colon)$(listIncludes)):A:G=$(grist)) ;
+	return $(sources) ;
+}
+
 rule C.ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
@@ -1386,6 +1416,17 @@ rule C.ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS : THE_CONFIG : T
 	THE_PLATFORM ?= * ;
 	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
 	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(INCLUDEPATHS:R=$(SUBDIR:E="")) ;
+}
+
+
+rule C.ObjectRemoveFlags TARGET : SOURCES : FLAGS : THE_CONFIG : THE_PLATFORM
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	SOURCES = [ C._FilterSourcesForCompilableOnly ] ;
+	local objTargets = $(SOURCES:S=$(SUFOBJ)) ;
+	FLAGS_TO_ADD.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) -= $(FLAGS) ;
+	FLAGS_TO_REMOVE.$(THE_PLATFORM:E=*).$(THE_CONFIG:E=*) on $(objTargets) += $(FLAGS) ;
 }
 
 
