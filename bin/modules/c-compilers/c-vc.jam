@@ -20,7 +20,7 @@ if ! $(TARGETINFO_LOCATE) {
 
 rule C.FDefines { return /D$(<) ; }
 rule C.FIncludes { return /I"\"$(<)\"" ; }
-rule C.FLibraryPaths { return \"/LIBPATH:$(<)\" ; }
+rule C.FLibraryPaths { return \"/LIBPATH:$(<)\" ; } #"
 
 
 rule C._C++Exceptions
