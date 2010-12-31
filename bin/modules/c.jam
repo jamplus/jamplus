@@ -1414,7 +1414,8 @@ rule C.ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS : THE_CONFIG : T
 	local grist = $(TARGET) ;
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;
-	local objTargets = $(SOURCES:S=$(SUFOBJ):G=$(grist)) ;
+	SOURCES = [ C._FilterSourcesForCompilableOnly ] ;
+	local objTargets = $(SOURCES:S=$(SUFOBJ)) ;
 	HDRS.$(THE_PLATFORM).$(THE_CONFIG) on $(objTargets) += $(INCLUDEPATHS:R=$(SUBDIR:E="")) ;
 }
 
