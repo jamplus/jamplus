@@ -18,7 +18,7 @@
 		- <tt>c/midl:</tt> Renamed from Midl.  Access it as C.Midl*.
 		- <tt>c/wxwidgets:</tt> Renamed from WxWidgets.  Access it as \ref rule_C_UseWxWidgets "C.UseWxWidgets".
 	- Created a <tt>c/win32resource</tt> module with the \ref module_c_win32resource "ResourceCompiler rules".
-- The Jam binaries have been moved from the <tt>jamplus/bin/</tt> directory to <tt>jamplus/bin/\$(OS)\$(OSPLAT)</tt>.  On Windows, this ends up being <tt>jamplus/bin/ntx86/</tt>.  On Mac OS X, the directory is <tt>jamplus/bin/macosxx64/</tt>.  All associated scripts have been moved to this directory, as has the Lua directory structure.  This new structure allows for multiple platform binaries to exist side by side.  See \ref building_overview "Building Overview" for more information.
+- The Jam binaries have been moved from the <tt>jamplus/bin/</tt> directory to <tt>jamplus/bin/\$(PLATFORM)</tt>.  On Windows, this ends up being <tt>jamplus/bin/win32/</tt>.  On Mac OS X, the directory is <tt>jamplus/bin/macosx32/</tt>.  All associated scripts have been moved to this directory, as has the Lua directory structure.  This new structure allows for multiple platform binaries to exist side by side.  See \ref building_overview "Building Overview" for more information.
 - Automated tests have been added consisting of over 50 categoric test suites made of nearing 500 individual tests.  The suite is run by ensuring JamPlus's bin/platform/ directory is in the PATH and then running <tt>tests/runtests.bat</tt> (on Windows) or <tt>tests/runtests-macosxx64</tt> on Mac OS X or <tt>tests/tuntests-linux32</tt> on Linux.
 
 
@@ -32,6 +32,7 @@
 - Support for building jam0 on FreeBSD.  Thanks to Arseny Kapoulkine for the update.
 - Turn on the Visual Studio 2010 support in jmake.cmd.
 - Add jam.VS2010.sln/.vcxproj.
+- Jam executable can be built under Visual C++ 6.0.
 
 
 
@@ -55,6 +56,8 @@
       - Added built-in rule \ref rule_GroupByVar "GroupByVar", a high speed version of the oft-called Jambase rule used by the C module's helper rule \c MultiCppCompile.  (Made available through <tt>\#define OPT_BUILTIN_GROUPBYVAR_EXT</tt>.)
       - Added built-in rule \ref rule_Split "Split".  (Made available through <tt>\#define OPT_BUILTIN_SPLIT_EXT</tt>.)
       - Added built-in rule \ref rule_ExpandFileList "ExpandFileList" which takes a list of files, including glob-capable wildcards, and expands them, returning the list to the user.
+      - Added rule SubstLiteralize, a helper function to hand a literal string to the Subst rule.
+      - Added rule \ref rule_DependsList "DependsList" which returns a list of child dependencies for a given target.
 - Actions:
       - Added a new action modifier, \ref actions_screenoutput "screenoutput".  Normally, actions collect all output before displaying it to the user in order to avoid interleaving the output from different processes.  'screenoutput' may be used to display the output as it happens.
       - Support a third parameter to an action for \ref actions_autosettings "autosettings".  This takes any settings assigned to the autosettings target and makes them active during the course of the action.
@@ -76,7 +79,7 @@
 - Add built-in rule: [ ListSort LIST : CASE_SENSITIVE:1/0 ].Add built-in rule: [ ListSort LIST : CASE_SENSITIVE:1/0 ].
 - When scanning for headers (or restoring them from the header cache), prepend the target's HDREXTRA to the list.  This is where force includes can be added.
 - Support for querying 64 bit registry values.
-
+- Ability to read DWORD values from the registry
 
 
 
@@ -107,8 +110,8 @@
 - Applied a fix to make the Visual C++ linker's CONFIG=debug DLLs properly write out export libraries and prevent dependent targets from building when there was no change to the header.
 - Fixed an issue when an action is empty, and the remaining whitespace caused Unix shells to die.
 - 64-bit platform warning clean up in the source code.
-
-
+- Avoid inheriting active settings when running search() on an hcache.
+- Fix resolution of slashes in paths when the opening characters are ..\.
 
 
 
@@ -142,8 +145,17 @@
 - Renamed <tt>bin/jammodules/</tt> to <tt>bin/modules/</tt>.
 - <b>C module:</b>
       - Visual Studio 2010 support provided by Philipp Teschner.
-      - iPhone and iPhone Simulator support.
-      - iPad and iPad Simulator support.
+      - iOS support:
+            - Upgrade iOS support to handle version 4.2.
+            - Make the ISYSROOT available per target.
+            - Assign a new pseudotarget TARGET:bundle for various bundle calculations.
+            - Build in support for copying the ResourceRules.plist into the bundle.
+            - "C.BundleInfo identifier" now takes two values, the standard com.yourcompany.testapp and the AppIdentifierPrefix.
+            - Automatically generate the CODE_SIGN_ENTITLEMENTS for the application.
+            - Add C.CodeSign TARGETS : PROVISIONING_PROFILE for properly code signing the application bundle.  Uses TARGET:bundle's dependencies for calculation.
+      - Removed the configuration specific C.Defines from c.jam to new global-config.jam files.
+      - Added a new platform, macosxppc, for building on older Macs.
+      - Add new platforms, nacl32 and nacl64, for building against Google Native Client SDK.
       - Reorganized huge portions of the Jambase to compiler/platform/configuration specific files in <tt>modules/c-compilers/</tt>.  Moved platform and configuration check to <tt>modules/c-compilers/c-autodetect.jam</tt>.
       - Added a 64-bit Windows platform for Visual C++ called \b win64.
       - Added rule \ref rule_C_Flags "C.Flags", a generic way of adding C/C++/M/MM/etc flags.
@@ -161,6 +173,7 @@
       - Add \ref rule_C_ForceInclude "C.ForceInclude" rule, which forces the inclusion of the listed header files before any other \#include lines.
       - Add \ref rule_C_ObjectForceInclude "C.ObjectForceInclude" rule, which forces the inclusion of the listed header files before any other \#include lines, but only for one or more files.
       - The \ref rule_C_Lump "C.Lump" rule now accepts all CC and C++ extensions.
+      - Add \ref rule_C_FrameworkDirectories "C.FrameworkDirectories" rule for specifying additional search paths for linked frameworks.
       - Add new \ref rule_C_NoPrecompiledHeader "C.NoPrecompiledHeader" rule to turn off precompiled headers for the specified files.
       - \ref rule_C_ObjectIncludeDirectories "C.ObjectIncludeDirectories" now roots relative paths against \$(SUBDIR).
       - The <tt>C.ApplicationFromObjects</tt> rule was not properly using the <tt>C.LinkDebug</tt> action for Visual Studio when building the debug configuration.  <tt>C.SharedLibraryFromObjects</tt> was using it fine, however.  Thanks to Tim S for finding this bug.
@@ -173,6 +186,9 @@
       - \$(COMPILER) is used internally as \$(COMPILER.\$(PLATFORM)).
       - Autodetect GCC on Mac OS X.
       - Add C.MacOSX_SDK rule back.
+            - Add an extra parameter to the rule C.MacOSX_SDK called MACOSX_VERSION_MIN which allows specification of a custom minimum MacOS when specifying which sdk to compile with.
+            - Instead of C.MacOSX_SDK applying its settings to all targets, apply it to the active or specified target.
+            - From within the Link action for Mac OS X, remove MACOSX_DEPLOYMENT_TARGET, as it is deprecated.  -macosx_version_min, passed on the command line, is used instead.
       - If COMPILER is passed in on the command line, use it as a proper override.
       - Considerably sped up \ref rule_C_CompileOptions "C.CompileOptions" \c outputastree.
       - On Mac OS X, apply the proper -mmacosx-version-min flag to the compile and link.
@@ -219,6 +235,16 @@
       - Change the deprecated link flag /INCREMENTAL:YES to, more simply, /INCREMENTAL.
       - Add force includes to the header scan.  Also, for MinGW and GCC, add header scan settings to the precompiled header.
       - Introduce INCREDIBUILD variable, defaulted to off. When set to on, cl will build multiple files from the same project (as Incredibuild can handle this). Made last parameter to actions for vc builds to be suitable for a 'label' for the job, this is what Incredibuild requires, and I don't think it'll have a negative effect elsewhere
+      - For a Visual C++ build, setting C.NoPrecompiledHeader still resulted in the force include for the precompiled header file being applied.  This is fixed now.
+      - Unbreak built-in C.C++Exceptions rule for gcc targets.
+      - Added C._SharedLibraryFromObjects_PostBuild for performing post build stuff on shared libraries i.e. dll's.
+      - Switch Visual C++ to use /Z7 for faster compilation.
+      - Enable building linux32 targets on a linux64bit host by appending -m32 to compile and linker cmdlines.
+      - Add overridable c-vc-crt-defines.jam script containing the secure C runtime #defines.
+      - Shift the #defines specific to a platform to more overridable locations.
+      - Preserve naming of passed in sources by using BINDING more liberally in C.MultiCppCompile.
+      - Add C.ObjectAddFlags and C.ObjectRemoveFlags.
+      - Filter compilable files only for C.ObjectIncludeDirectories.
 
 - <b>copydirectory module:</b>
       - Allow parentheses in the path to work properly.
@@ -226,10 +252,12 @@
       - Handle recursion properly.
       - Fix to make the CopyDirectory rule work when no SubDir was specified in the Jamfile.
       - Handle the ** wildcard syntax properly when the RECURSIVE parameter is not set.
+      - Directories with certain symbols could not be copied.
 - <b>copyfile module:</b>
       - The CopyFile rule will use the ActiveProject if the PARENT parameter is not specified.
       - The source and destination filenames are now quoted on the copy command line.
       - Add rule CopyFiles for copying a group of files to a certain directory.
+      - Only run MakeLocate and set the BINDING if the LOCATE variable doesn't exist yet.
 - <b>csharp module:</b>
       - On NT, choose vs2008 as the default (still needs discovery like the C++ compiler).  Now, on other platforms, choose mono.
       - Properly find Mono at /usr/bin.
@@ -240,15 +268,20 @@
       - Add support for Visual Studio 2010.
 - <b>hardsoftlink module:</b>
       - Added rules for establishing a HardLink and a SoftLink (symbolic link).
+- <b>c/midl module:</b>
+      - Add vs2010 support.
 - <b>c/mysql module:</b>
       - Newly added.
 - <b>c/qt module:</b>
       - Newly added.
+- <b>c/win32resource module:</b>
+      - Fix the directory creation to create all components of the directory, even those embedded in the target name.
+      - Allow for #include's from inside a resource file via the HDRSCAN stuff.
 - <b>c/wxwidgets module:</b>
       - Added a call to \ref rule_C_RcIncludeDirectories "C.RcIncludeDirectories" to allow access to the proper wxWidgets resources.
       - Added support for wxWidgets on non-Windows platforms.
       - Don't abort the build if wxWidgets is not found.  Allow the Jamfile to make the determination whether the build should be aborted.
-
+      - Support PLATFORM=win64 better by looking for wxWidgets.x64 directories.
 
 
 
@@ -271,7 +304,8 @@
 - When \ref rule_C_LinkLibraries "C.LinkLibraries" is specified with the <tt>*</tt> target, workspace generation did not populate the workspace properly.
 - Much better Xcode project generation support.  Combines all dependent projects into one workspace xcodeproj where all targets can be built.  Corrects the iPhone and iPhone Simulator generators.  Adds iPad and iPad Simulator support.
 - Output a customsettings.jam in the out of source build directory.  This file is included before the first project Jamfile and gives you the opportunity to override #defines, include directories, or any other settings as you see fit.
-
+- Add rule Project.MakefileTool for the VS200x project generator.  Adds support for creating additional Makefile project tools.
+- Add support for specifying the debugger executable name via the new C._ApplicationTargetInfo rule and settings DEBUGGEROUTPUTNAME.$(PLATFORM).$(CONFIG) on the target.
 
 <h3>Technical Details:</h3>
 
@@ -292,7 +326,10 @@
 - During workspace generation, reset the active target after a call to C.Application.
 - Do not do an enforced * PLATFORM or * CONFIG check for SourceGroups.
 - Fix some crash bugs when the project exists only in a certain platform or has no file list.
-
+- Much improved Xcode project SDKROOT generation, allowing .xcodeproj files to be dumped without a C.MacOSX_SDK call and even allowing varying SDKROOTs per project and platform.
+- Quote settings file and sourceRootPath to allow workspace generation from directories with spaces in them.
+- Allow for workspaces to be generated from directories with spaces in.
+- Write the CODE_SIGN_ENTITLEMENTS for iOS into the .xcodeproj.
 
 
 <h2>Samples:</h2>
@@ -306,6 +343,7 @@
 - Add qt/mainwindow sample.
 - Add iPad opengles sample.
 - Add unittest sample to show how one might run unit tests on an executable.  Use the 'tests' target to build the executable and run the tests.
+- Add ios/cocos2d as a demonstration of a Cocos2D capable Jamfile.
 
 
 <h2>Tests:</h2>

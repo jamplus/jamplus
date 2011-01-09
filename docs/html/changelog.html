@@ -35,7 +35,7 @@ Version 1.0</h2>
 <li>Created a <code>c/win32resource</code> module with the <a class="el" href="module_c_win32resource.html">ResourceCompiler rules</a>.</li>
 </ul>
 </li>
-<li>The Jam binaries have been moved from the <code>jamplus/bin/</code> directory to <code>jamplus/bin/$(OS)$(OSPLAT)</code>. On Windows, this ends up being <code>jamplus/bin/ntx86/</code>. On Mac OS X, the directory is <code>jamplus/bin/macosxx64/</code>. All associated scripts have been moved to this directory, as has the Lua directory structure. This new structure allows for multiple platform binaries to exist side by side. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
+<li>The Jam binaries have been moved from the <code>jamplus/bin/</code> directory to <code>jamplus/bin/$(PLATFORM)</code>. On Windows, this ends up being <code>jamplus/bin/win32/</code>. On Mac OS X, the directory is <code>jamplus/bin/macosx32/</code>. All associated scripts have been moved to this directory, as has the Lua directory structure. This new structure allows for multiple platform binaries to exist side by side. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
 <li>Automated tests have been added consisting of over 50 categoric test suites made of nearing 500 individual tests. The suite is run by ensuring JamPlus's bin/platform/ directory is in the PATH and then running <code>tests/runtests.bat</code> (on Windows) or <code>tests/runtests-macosxx64</code> on Mac OS X or <code>tests/tuntests-linux32</code> on Linux.</li>
 </ul>
 <h2>Bootstrapping/Building:</h2>
@@ -45,6 +45,7 @@ Version 1.0</h2>
 <li>Support for building jam0 on FreeBSD. Thanks to Arseny Kapoulkine for the update.</li>
 <li>Turn on the Visual Studio 2010 support in jmake.cmd.</li>
 <li>Add jam.VS2010.sln/.vcxproj.</li>
+<li>Jam executable can be built under Visual C++ 6.0.</li>
 </ul>
 <h3>Technical Details:</h3>
 <ul>
@@ -62,6 +63,8 @@ Version 1.0</h2>
 <li>Added built-in rule <a class="el" href="jambase_rules.html#rule_GroupByVar">GroupByVar</a>, a high speed version of the oft-called Jambase rule used by the C module's helper rule <code>MultiCppCompile</code>. (Made available through <code>#define OPT_BUILTIN_GROUPBYVAR_EXT</code>.)</li>
 <li>Added built-in rule <a class="el" href="jambase_rules.html#rule_Split">Split</a>. (Made available through <code>#define OPT_BUILTIN_SPLIT_EXT</code>.)</li>
 <li>Added built-in rule ExpandFileList which takes a list of files, including glob-capable wildcards, and expands them, returning the list to the user.</li>
+<li>Added rule SubstLiteralize, a helper function to hand a literal string to the Subst rule.</li>
+<li>Added rule DependsList which returns a list of child dependencies for a given target.</li>
 </ul>
 </li>
 <li>Actions:<ul>
@@ -87,6 +90,7 @@ Version 1.0</h2>
 <li>Add built-in rule: [ ListSort LIST : CASE_SENSITIVE:1/0 ].Add built-in rule: [ ListSort LIST : CASE_SENSITIVE:1/0 ].</li>
 <li>When scanning for headers (or restoring them from the header cache), prepend the target's HDREXTRA to the list. This is where force includes can be added.</li>
 <li>Support for querying 64 bit registry values.</li>
+<li>Ability to read DWORD values from the registry</li>
 </ul>
 <h3>Technical Details:</h3>
 <ul>
