@@ -5,6 +5,7 @@ switch $(COMPILER.$(PLATFORM)) {
 		MSSDK ?= $(MSVCNT) ;
 		MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
 		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
+		C.RC-NOLOGO = /nologo ;
 
 	case vs2008 :
 		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
