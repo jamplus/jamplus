@@ -133,12 +133,45 @@ w32_getreg_internal(LIST* pathlist, INT is64Bit)
     }
 }
 
+typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+
+LPFN_ISWOW64PROCESS fnIsWow64Process;
+
+BOOL Is64BitWindows()
+{
+#if defined(_WIN64)
+	return TRUE;  // 64-bit programs run only on Win64
+#elif defined(_WIN32)
+	BOOL bIsWow64 = FALSE;
+
+	//IsWow64Process is not available on all supported versions of Windows.
+	//Use GetModuleHandle to get a handle to the DLL that contains the function
+	//and GetProcAddress to get a pointer to the function if available.
+
+	fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(
+		GetModuleHandle(TEXT("kernel32")),"IsWow64Process");
+
+	if (NULL != fnIsWow64Process)
+	{
+		if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64))
+		{
+			//handle error
+			return FALSE;
+		}
+	}
+	return bIsWow64;
+
+#else
+	return FALSE; // Win64 does not support Win16
+#endif
+}
+
+
 const char*
 w32_getreg(LIST* pathlist)
 {
-	return w32_getreg_internal( pathlist, 0 );
+	return w32_getreg_internal( pathlist, Is64BitWindows() == TRUE ? 1 : 0 );
 }
-
 
 #ifdef OPT_BUILTIN_W32_GETREG64_EXT
 const char*
