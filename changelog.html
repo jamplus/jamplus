@@ -57,7 +57,7 @@ Version 1.0</h2>
 <h2>Jam Executable:</h2>
 <ul>
 <li><b>Built-in rules:</b><ul>
-<li>Added a <code>PRIORITY</code> parameter to <a class="el" href="builtin_rules.html#rule_QueueJamFile">QueueJamFile</a>. By default, queued Jamfiles are processed in the order they are queued. There may be cases where the queued order does not allow for proper processing of the Jamfiles. In the event the Jamfile order matters for the upcoming pass, the <code>PRIORITY</code> will affect queueing order.</li>
+<li>Added a <code>PRIORITY</code> parameter to <a class="el" href="builtin_rules.html#rule_QueueJamfile">QueueJamfile</a>. By default, queued Jamfiles are processed in the order they are queued. There may be cases where the queued order does not allow for proper processing of the Jamfiles. In the event the Jamfile order matters for the upcoming pass, the <code>PRIORITY</code> will affect queueing order.</li>
 <li>Added rule <a class="el" href="builtin_rules.html#rule_ScanContents">ScanContents</a>. When <a class="el" href="builtin_rules.html#rule_ScanContents">ScanContents</a> is specified for a source target (even a generated one) and if the timestamp differs, the contents of the source target are compared against the last run. If they differ, the build proceeds as normal. If they are the same, no further building is necessary.</li>
 <li>Added rule <a class="el" href="builtin_rules.html#rule_Shell">Shell</a>, used for executing shell commands and retrieving their output.</li>
 <li>Added built-in rule <a class="el" href="jambase_rules.html#rule_GroupByVar">GroupByVar</a>, a high speed version of the oft-called Jambase rule used by the C module's helper rule <code>MultiCppCompile</code>. (Made available through <code>#define OPT_BUILTIN_GROUPBYVAR_EXT</code>.)</li>
