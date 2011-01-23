@@ -146,7 +146,7 @@ Utility Rules</h2>
 <li><a href="builtin_rules.html#rule_MD5">MD5</a></li>
 <li><a href="builtin_rules.html#rule_MD5File">MD5File</a></li>
 <li><a href="builtin_rules.html#rule_OptionalFileCache">OptionalFileCache</a></li>
-<li><a href="builtin_rules.html#rule_QueueJamFile">QueueJamFile</a></li>
+<li><a href="builtin_rules.html#rule_QueueJamfile">QueueJamfile</a></li>
 <li><a href="builtin_rules.html#rule_Subst">Subst</a></li>
 <li><a href="builtin_rules.html#rule_UseDepCache">UseDepCache</a></li>
 <li><a href="builtin_rules.html#rule_UseFileCache">UseFileCache</a></li>
@@ -287,10 +287,10 @@ rule OptionalFileCache TARGETS [ : CACHE_NAME ] ;</h2>
 <span class="preprocessor">    # Assign image2.tga to the &#39;weapons&#39; file cache.</span>
 <span class="preprocessor">    OptionalFileCache image2.tga : weapons ;</span>
 </pre></div><hr/>
- <h2><a class="anchor" id="rule_QueueJamFile"></a>
-rule QueueJamFile JAMFILE_LIST [ : PRIORITY ] ;</h2>
-<p><a name="rule_QueueJamFile"></a></p>
-<p>When <code>QueueJamFile</code> is called, another pass on the Jam dependency graph is initiated after the <a class="el" href="jam_language.html#operation_updating">Updating Phase</a>. Further documentation on this can be found on the <a class="el" href="multiple_passes.html">Multiple Passes</a> page.</p>
+ <h2><a class="anchor" id="rule_QueueJamfile"></a>
+rule QueueJamfile JAMFILE_LIST [ : PRIORITY ] ;</h2>
+<p><a name="rule_QueueJamfile"></a></p>
+<p>When <code>QueueJamfile</code> is called, another pass on the Jam dependency graph is initiated after the <a class="el" href="jam_language.html#operation_updating">Updating Phase</a>. Further documentation on this can be found on the <a class="el" href="multiple_passes.html">Multiple Passes</a> page.</p>
 <p>Queued Jamfiles are processed in the order they are queued. There may be cases where the queued order does not allow for proper processing of the Jamfiles. In the event the Jamfile order matters for the upcoming pass, <code>PRIORITY</code> may be applied. When a priority isn't given, the default priority is 0. A queued Jamfile with priority of 100 will be parsed before a Jamfile with a priority of 0. Likewise, a queued Jamfile with a priority of -50 will be parsed after a Jamfile with a priority of 0.</p>
 <dl><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
@@ -300,11 +300,11 @@ rule QueueJamFile JAMFILE_LIST [ : PRIORITY ] ;</h2>
   </dd>
 </dl>
 <div class="fragment"><pre class="fragment"><span class="preprocessor">    # Queue Pass2.jam for the second pass.</span>
-<span class="preprocessor"></span>    QueueJamFile Pass2.jam ;
+<span class="preprocessor"></span>    QueueJamfile Pass2.jam ;
 
 <span class="preprocessor">    # Queue me_first.jam with a higher priority than me_second.jam.</span>
-<span class="preprocessor"></span>    QueueJamFile me_second.jam ;  # Priority of 0.
-    QueueJamFile me_first.jam : 1000 ;  # Parse me_first.jam and then me_second.jam.
+<span class="preprocessor"></span>    QueueJamfile me_second.jam ;  # Priority of 0.
+    QueueJamfile me_first.jam : 1000 ;  # Parse me_first.jam and then me_second.jam.
 </pre></div><hr/>
  <h2><a class="anchor" id="rule_Shell"></a>
 rule Shell COMMANDS ;</h2>

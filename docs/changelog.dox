@@ -50,7 +50,7 @@
 <h2>Jam Executable:</h2>
 
 - <b>Built-in rules:</b>
-      - Added a \c PRIORITY parameter to \ref rule_QueueJamFile "QueueJamFile".  By default, queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, the \c PRIORITY will affect queueing order.
+      - Added a \c PRIORITY parameter to \ref rule_QueueJamfile "QueueJamfile".  By default, queued Jamfiles are processed in the order they are queued.  There may be cases where the queued order does not allow for proper processing of the Jamfiles.  In the event the Jamfile order matters for the upcoming pass, the \c PRIORITY will affect queueing order.
       - Added rule \ref rule_ScanContents "ScanContents".  When \ref rule_ScanContents "ScanContents" is specified for a source target (even a generated one) and if the timestamp differs, the contents of the source target are compared against the last run.  If they differ, the build proceeds as normal.  If they are the same, no further building is necessary.
       - Added rule \ref rule_Shell "Shell", used for executing shell commands and retrieving their output.
       - Added built-in rule \ref rule_GroupByVar "GroupByVar", a high speed version of the oft-called Jambase rule used by the C module's helper rule \c MultiCppCompile.  (Made available through <tt>\#define OPT_BUILTIN_GROUPBYVAR_EXT</tt>.)
@@ -348,7 +348,7 @@
 
 <h2>Tests:</h2>
 - Added tests/forceinclude, an example of using the \ref rule_C_ForceInclude "C.ForceInclude" and \ref rule_C_ObjectForceInclude "C.ObjectForceInclude" rules.
-- Added tests/multipass_convert, an example of a multipass system where we don't know the names of the targets in the first pass.  It also illustrates using the QueueJamFile PRIORITY parameter.
+- Added tests/multipass_convert, an example of a multipass system where we don't know the names of the targets in the first pass.  It also illustrates using the QueueJamfile PRIORITY parameter.
 - Added tests/multipass_nocare, provided by Chris Munn, to illustrate the NoCare Jam executable fix.
 - Add tests/multiplatform, a test involving multiplatform \#defines.
 - Add tests/semicolon/ to test OPT_FIND_BAD_SEMICOLON_USAGE_EXT.
