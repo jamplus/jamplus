@@ -1,0 +1,36 @@
+rule C.AutoDetect
+{
+	if $(COMPILER.$(PLATFORM))  &&  $(COMPILER.$(PLATFORM)) != pandora 
+	{
+		return ;
+	}
+
+	# 1. CODESOURCERY_arm-none-eabi_ROOT
+	CODESOURCERY_ROOT = $(CODESOURCERY_ROOT:J=" ") ;	
+	if ! $(CODESOURCERY_ROOT) 
+	{
+		return ;
+	}
+	
+	# 2. i686-linux-armv7a-linux-gnueabi-toolchain_root
+	i686-linux-armv7a-linux-gnueabi-toolchain_root = $(i686-linux-armv7a-linux-gnueabi-toolchain_root:J=" ") ;	
+	if ! $(i686-linux-armv7a-linux-gnueabi-toolchain_root) 
+	{
+		Echo *** Warning \: CODESOURCERY_arm-none-eabi_ROOT environment variable found, but i686-linux-armv7a-linux-gnueabi-toolchain_root not set. ;
+		return ;
+	}
+	
+	# Set platform
+	COMPILER.$(PLATFORM) = pandora ;
+
+	# Use generic gcc module.
+	UseModule c-compilers/c-gcc ;
+	
+	if $(PLATFORM) != *  &&  $(CONFIG) != * 
+	{
+		# Use pandora specific gcc module.
+		UseModule c-compilers/$(PLATFORM)-gcc ;
+	}
+
+	return $(COMPILER.$(PLATFORM)) ;
+}
