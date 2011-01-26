@@ -4,6 +4,7 @@ C.CC			?= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-gcc$(HOST_SUFEXE)" ;
 C.C++			?= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-g++$(HOST_SUFEXE)" ;
 C.LINK			?= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-gcc$(HOST_SUFEXE)" ;
 C.RANLIB		?= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-ranlib$(HOST_SUFEXE)" ;
+C.STRIP			?= "$(NDKROOT)\\build\\prebuilt\\windows\\arm-eabi-4.2.1\\bin\\arm-eabi-strip.exe" ;
 
 ######################################################################################################################
 # Our 'exe' is actually a shared lib, so make extension .so file.
@@ -35,19 +36,24 @@ COMPILE_FLAGS =
 	-funwind-tables 
 	-fstack-protector 
 	-fno-short-enums 
-	-fomit-frame-pointer 
 	-fno-strict-aliasing 
-	-funswitch-loops 
-	-finline-limit=300 
+	-marm
+	-fno-omit-frame-pointer
 	-fvisibility=hidden 
-	-w
-	-Wno-psabi 
+	-finline-limit=64 
+	-Wa,--noexecstack 
 	-Wreturn-type 
 	-Wa,--noexecstack 
 	;
 	
 COMPILE_FLAGS_DEBUG =
+	-marm
+	-fno-omit-frame-pointer
 	-g
+	;
+	
+COMPILE_FLAGS_RELEASE =
+	-fomit-frame-pointer 
 	;
 
 ######################################################################################################################
@@ -59,6 +65,10 @@ C.CFlags * :
 C.CFlags * :
 	$(COMPILE_FLAGS_DEBUG)
 : debug ;
+	
+C.CFlags * :
+	$(COMPILE_FLAGS_RELEASE)
+: release ;
 
 ######################################################################################################################
 
@@ -142,7 +152,7 @@ VSPLATFORMMAP.androidndk = "Android NDK" ;
 
 actions response C.Link
 {
-	"$(C.LINK)" -Wl,-soname,$(<[1]:CBS) @@($(LINKFLAGS) $(>:C) $(NEEDLIBS:T) $(LINKLIBS)) -o $(<[1]:C)
+	"$(C.LINK)" -Wl,-soname,$(<[1]:CBS) @@($(LINKFLAGS) $(>:C) $(NEEDLIBS:T) $(LINKLIBS:TC)) -o $(<[1]:C) -Wl,-Map=$(<[1]:CS=.map)
 }
 
 actions updated together piecemeal response C.Archive
@@ -165,11 +175,13 @@ if $(NOARUPDATE)
 
 actions updated response C.CC
 {
+	CD /D $(<[0]:D\\C)
 	"$(C.CC)" @@(-c $(MFLAGS)) $(>:C)
 }
 
 actions updated response C.C++
 {
+	CD /D $(<[0]:D\\C)
 	"$(C.C++)" @@(-c $(MFLAGS)) $(>:C)
 }
 
@@ -179,3 +191,25 @@ actions updated response C.PCH
 }
 
 ######################################################################################################################
+
+rule C._ApplicationFromObjects_PostBuild_Platform
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	local _s = $(OBJECTS:G=$(grist)) ;
+	local _t = [ C._retrieveOutputName $(TARGET) : SUFEXE ] ;
+	_t = $(_t:G=$(grist)) ;
+	
+	# Create stripped .so
+	local _strippedLib = $(_t).stripped ;
+	MakeLocate $(_strippedLib) : $(outputPath) ;
+	Depends $(TARGET) : $(_strippedLib) : $(_t) ;
+	Clean clean:$(TARGET) : $(_strippedLib) ;
+	C.Strip $(_strippedLib) : $(_t) ;
+}
+
+actions C.Strip
+{
+	$(CYGWIN_SETUP)
+	$(C.STRIP) -g -S -d -o $(1) $(2)
+}
