@@ -1,0 +1,13 @@
+SubDir TOP ;
+
+actions GenerateCFile {
+	copy $(2:C) $(1:C)
+}
+
+Depends <helloworld>file.c : <helloworld>file.txt ;
+SEARCH on <helloworld>file.txt = $(SUBDIR) ;
+GenerateCFile <helloworld>file.c : <helloworld>file.txt ;
+Clean clean:helloworld : <helloworld>file.c ;
+
+C.Application helloworld : main.c file.c ;
+
