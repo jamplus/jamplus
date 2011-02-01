@@ -708,6 +708,15 @@ include "$(settingsFile)" ;
 			jambaseText[#jambaseText + 1] = expand(info.Key .. ' = ' .. info.Value .. ' ;\n', exporter.Options, _G)
 		end
 
+		-- Write the Jambase variables out.
+		if type(Config.JamModulesUserPath) == 'table' then
+			for _, path in ipairs(Config.JamModulesUserPath) do
+				jambaseText[#jambaseText + 1] = 'JAM_MODULES_USER_PATH += "' .. expand(path, variablesTable) .. '" ;\n'
+			end
+		elseif type(Config.JamModulesUserPath) == 'string' then
+			jambaseText[#jambaseText + 1] = 'JAM_MODULES_USER_PATH += "' .. expand(Config.JamModulesUserPath, variablesTable) .. '" ;\n'
+		end
+
 		jambaseText[#jambaseText + 1] = "JAM_MODULES_USER_PATH += \"" .. sourceRootPath .. "\" ;\n"
 
 		jambaseText[#jambaseText + 1] = expand([[
