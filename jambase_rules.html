@@ -151,13 +151,13 @@ rule IncludeModule MODULE_NAME</h2>
 <p>Loads a Jam module. It searches in the following manner:</p>
 <ul>
 <li>
-The current <code></code> </li>
+The current <code>$(SUBDIR)</code> </li>
 <li>
-The current working directory <code></code> </li>
+The current working directory <code>$(CWD)</code> </li>
 <li>
-<code></code> </li>
+<code>$(JAM_MODULES_USER_PATH)</code> </li>
 <li>
-<code></code> which includes the <code>bin/modules/</code> directory </li>
+<code>$(JAM_MODULES_PATH)</code> which includes the <code>bin/modules/</code> directory </li>
 </ul>
 <p>When <code>IncludeModule</code> is specified more than once for the same <code>MODULE_NAME</code>, the module is only loaded once.</p>
 <dl><dt><b>Parameters:</b></dt><dd>
