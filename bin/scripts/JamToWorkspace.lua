@@ -677,8 +677,6 @@ include "$(settingsFile)" ;
 			jambaseText[#jambaseText + 1] = ' ;\n'
 		end
 
-		jambaseText[#jambaseText + 1] = "JAM_MODULES_USER_PATH += \"" .. sourceRootPath .. "\" ;\n"
-
 		if opts.compiler or Config.Compiler then
 			Config.Compiler = Config.Compiler or opts.compiler
 			jambaseText[#jambaseText + 1] = "COMPILER = \"" .. Config.Compiler .. "\" ;\n"
@@ -695,6 +693,9 @@ include "$(settingsFile)" ;
 		for _, info in ipairs(Config.JamFlags) do
 			jambaseText[#jambaseText + 1] = expand(info.Key .. ' = ' .. info.Value .. ' ;\n', exporter.Options, _G)
 		end
+
+		jambaseText[#jambaseText + 1] = "JAM_MODULES_USER_PATH += \"" .. sourceRootPath .. "\" ;\n"
+
 		jambaseText[#jambaseText + 1] = expand([[
 
 include $(jamPath)Jambase.jam ;
