@@ -682,10 +682,15 @@ include "$(settingsFile)" ;
 			jambaseText[#jambaseText + 1] = "COMPILER = \"" .. Config.Compiler .. "\" ;\n"
 		end
 
+		local variablesTable = {
+			sourceRootPath = sourceRootPath,
+			destinationRootPath = destinationRootPath,
+		}
+
 		-- Write the Jambase variables out.
-		if Config.JambaseVariables then
+		if type(Config.JambaseVariables) == 'table' then
 			for _, variable in ipairs(Config.JambaseVariables) do
-				jambaseText[#jambaseText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2])) .. '" ;\n'
+				jambaseText[#jambaseText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2]), variablesTable) .. '" ;\n'
 			end
 			jambaseText[#jambaseText + 1] = '\n'
 		end
