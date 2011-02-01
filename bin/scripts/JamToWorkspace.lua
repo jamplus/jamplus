@@ -695,6 +695,15 @@ include "$(settingsFile)" ;
 			jambaseText[#jambaseText + 1] = '\n'
 		end
 
+		if type(Config.JambaseText) == 'string' then
+			jambaseText[#jambaseText + 1] = '{\n'
+			for key, value in pairs(variablesTable) do
+				jambaseText[#jambaseText + 1] = '\tlocal ' .. key .. ' = "' .. value .. '" ;\n'
+			end
+			jambaseText[#jambaseText + 1] = Config.JambaseText
+			jambaseText[#jambaseText + 1] = '\n}\n'
+		end
+
 		for _, info in ipairs(Config.JamFlags) do
 			jambaseText[#jambaseText + 1] = expand(info.Key .. ' = ' .. info.Value .. ' ;\n', exporter.Options, _G)
 		end
