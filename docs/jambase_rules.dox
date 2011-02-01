@@ -167,10 +167,10 @@ Example: The C/C++ compilation puts a variety of compilation flags in a variable
 Loads a Jam module.  It searches in the following manner:
 
 <ul>
-  <li>The current <tt>$(SUBDIR)</tt></li>
-  <li>The current working directory <tt>$(CWD)</tt></li>
-  <li><tt>$(JAM_MODULES_USER_PATH)</tt></li>
-  <li><tt>$(JAM_MODULES_PATH)</tt> which includes the <tt>bin/modules/</tt> directory</li>
+  <li>The current <tt>\$(SUBDIR)</tt></li>
+  <li>The current working directory <tt>\$(CWD)</tt></li>
+  <li><tt>\$(JAM_MODULES_USER_PATH)</tt></li>
+  <li><tt>\$(JAM_MODULES_PATH)</tt> which includes the <tt>bin/modules/</tt> directory</li>
 </ul>
 
 When \c IncludeModule is specified more than once for the same \c MODULE_NAME, the module is only loaded once.
