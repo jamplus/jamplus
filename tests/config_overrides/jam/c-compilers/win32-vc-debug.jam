@@ -1,0 +1,7 @@
+C.CFlags * : /Od /MDd /W3 /Z7 : debug : win32 ;
+C.C++Flags * : /Od /MDd /W3 /Z7 : debug : win32 ;
+C.LinkFlags * : /INCREMENTAL /DEBUG /MACHINE:X86 : debug : win32 ;
+
+C.Defines * : WIN32 WINDOWS TEST_DEBUG_DEFINE : debug : win32 ;
+
+VSCONFIGMAP.debug = Debug ;
