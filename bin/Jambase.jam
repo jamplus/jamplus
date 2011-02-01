@@ -94,7 +94,7 @@ Depends clean : clean:all ;
 
 JAM_MODULES_PATH ?= @($(JAM_PROCESS_PATH)/../modules:R=) ;
 
-rule UseModule MODULE_NAME
+rule UseModule MODULE_NAME : OPTIONS
 {
 	local include_marker = included_module_$(MODULE_NAME:J=_) ;
 	if $($(include_marker))
@@ -106,13 +106,17 @@ rule UseModule MODULE_NAME
 	local moduleName = <jam:modules>$(MODULE_NAME).jam ;
 	SEARCH on $(moduleName) = $(SUBDIR) $(CWD) $(JAM_MODULES_USER_PATH) $(JAM_MODULES_PATH) ;
 
+	if optional in $(OPTIONS) {
+		NoCare $(moduleName) ;
+	}
+
 	include $(moduleName) ;
 }
 
 
-rule IncludeModule MODULE_NAME
+rule IncludeModule MODULE_NAME : OPTIONS
 {
-	UseModule $(MODULE_NAME) ;
+	UseModule $(MODULE_NAME) : $(OPTIONS) ;
 }
 
 
