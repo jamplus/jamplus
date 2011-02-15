@@ -73,6 +73,32 @@ rule C._RuntimeTypeHelper
 	}
 }
 
+actions response C.ManifestToRC
+{
+	^^($(1)|$(CONTENTS)) ;
+}
+
+rule C._ManifestHelper TARGET : MANIFEST : MANIFEST_TYPE
+{
+	MANIFEST_TYPE ?= 1 ;
+	local gristedManifest = [ C.TargetGrist $(TARGET) : $(MANIFEST) ] ;
+	local manifestRC = $(gristedManifest:S=.manifest.rc) ;
+	
+	# This won't handle cases where $(manifestRC) contains a path, e.g. <clonewars>pc/filename.manifest.rc
+	# See https://github.com/Scraft/jamplus/commit/124bf2136b9843b8fd7e98d734d09110e04f5566 for example of same problem when building resources.
+	#MakeLocate $(manifestRC) : $(LOCATE_SOURCE) ;
+
+	# Use this instead, again the above URL shows another example of this in action...
+    MakeLocate $(manifestRC) : $(manifestRC:DR=$(LOCATE_SOURCE)) ;
+    BINDING on $(manifestRC) = $(manifestRC:BS) ;
+
+	SearchSource $(gristedManifest) ;
+	Depends $(manifestRC) : $(gristedManifest) ;
+	CONTENTS on $(manifestRC) = "$(MANIFEST_TYPE) 24 $(gristedManifest:TC/)" ;
+	C.ManifestToRC $(manifestRC) : $(gristedManifest) ;
+	
+	return [ C.ResourceCompiler $(TARGET) : $(manifestRC) ] ;
+}
 
 if $(COMPILER.$(PLATFORM)) in vc6 vs2002 vs2003
 {
@@ -95,6 +121,7 @@ actions response C.Link
 
 actions response C.DebugLinkWithManifest
 {
+	REM http://msdn.microsoft.com/en-us/library/ms235591%28VS.80%29.aspx
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
@@ -152,11 +179,11 @@ actions existing UnRegSvr32
 ########################################################################
 ########################################################################
 
-rule C._writeManifest TARGET : _t : MANIFEST_TYPE
+rule C._writeManifest TARGET : _t
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	local grist = $(TARGET) ;
-
+ 
 	local tempIntermediateManifest = @($(_t[1]).intermediate.manifest:G=$(grist)) ;
 	MakeLocate $(tempIntermediateManifest) : $(LOCATE_TARGET) ;
 	Clean clean:$(TARGET) : $(tempIntermediateManifest) ;
@@ -191,17 +218,17 @@ rule C._writeManifest TARGET : _t : MANIFEST_TYPE
 			Includes $(_t[2]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
 		}
 	}
-
-	MANIFEST_TYPE on $(_t) = $(MANIFEST_TYPE) ;
 }
 
+rule C._setManifestType _t : MANIFEST_TYPE
+{
+	MANIFEST_TYPE on $(_t) = $(MANIFEST_TYPE) ;
+}
 
 rule C._linkManifest _t
 {
 	MANIFEST on $(_t) = "$(LOCATE_TARGET)/$(_t[1]:G=)" ;
 }
-
-
 
 rule C.DefFile TARGET : SOURCES
 {
@@ -338,21 +365,27 @@ rule C._ApplicationFromObjects_LinkFlags
 	} else if console in $(OPTIONS) {
 		linkFlags += $(MSVC_SUBSYSTEM_CONSOLE) ;
 	}
-
+	
+	intermediateManifestPath = $(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
+	
 	if manifest in $(OPTIONS) {
-		C._writeManifest $(TARGET) : $(_t) : 1 ;
-		C._linkManifest $(_t) ;
-		linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
-	}
-
-	if $(COMPILER.$(PLATFORM)) != vc6 {
-		if manifest in $(OPTIONS) {
-			if $(CONFIG) = debug {
-				linkRule = C.DebugLinkWithManifest ;
-			} else {
-				linkRule = C.LinkWithManifest ;
+		on $(TARGET) if $(MANIFEST_PATH) {
+			linkFlags += /MANIFEST:NO ;
+		} else {
+			C._writeManifest $(TARGET) : $(_t) ;
+			linkFlags += /MANIFEST /MANIFESTFILE:$(intermediateManifestPath) ;
+			
+			if $(COMPILER.$(PLATFORM)) != vc6 {
+				if $(CONFIG) in debug {
+					linkRule = C.DebugLinkWithManifest ;
+				} else {
+					linkRule = C.LinkWithManifest ;
+				}
 			}
 		}
+		
+		C._linkManifest $(_t) ;
+		C._setManifestType $(_t) : 1 ;
 	}
 }
 
@@ -415,8 +448,9 @@ rule C._SharedLibraryFromObjects_LinkFlags
 
 	if ( nomanifest in $(OPTIONS) ) {
 		linkFlags -= /INCREMENTAL ;
-	} else if manifest in $(OPTIONS) {
-		C._writeManifest $(TARGET) : $(_linkTargets) : 2 ;
+	} else if manifest in $(OPTIONS) {		
+		C._writeManifest $(TARGET) : $(_linkTargets) ;
+		C._setManifestType $(_t) : 2 ;
 		C._linkManifest $(_linkTargets) ;
 		linkFlags += /MANIFEST /MANIFESTFILE:$(LOCATE_TARGET)/$(_t:G=).intermediate.manifest ;
 	}
