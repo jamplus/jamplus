@@ -617,6 +617,8 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 
 	C._ApplicationFromObjects_PostBuild ;
 
+	C._ApplicationFromObjects_PostBuildUser ;
+
 	return $(_linkTargets) ;
 }
 
@@ -634,6 +636,10 @@ rule C._ApplicationFromObjects_LinkFlags
 }
 
 rule C._ApplicationFromObjects_PostBuild
+{
+}
+
+rule C._ApplicationFromObjects_PostBuildUser
 {
 }
 
@@ -1080,6 +1086,19 @@ rule C.RuntimeType TARGET : TYPE : THE_PLATFORM
 	C._RuntimeTypeHelper ;
 }
 
+rule C.Manifest TARGET : MANIFEST
+{
+	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	THE_PLATFORM ?= $(PLATFORM) ;	
+	MANIFEST_PATH on $(TARGET) = $(MANIFEST) ;	
+
+	return [ C._ManifestHelper $(TARGET) : $(MANIFEST) ] ;
+}
+
+rule C._ManifestHelper
+{
+}
+
 rule C.C++Exceptions TARGET : TYPE : THE_CONFIG : THE_PLATFORM
 {
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
@@ -1477,4 +1496,13 @@ rule C.TargetGrist TARGET : FILES
 	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
 	return $(FILES:G=<$(TARGET)>) ;
 }
+
+
+C.Defines * : _DEBUG DEBUG : debug ;
+C.Defines * : NDEBUG : release ;
+C.Defines * : NDEBUG : artist ;
+C.Defines * : NDEBUG : qa ;
+C.Defines * : NDEBUG : master ;
+C.Defines * : NDEBUG : releaseltcg ;
+
 
