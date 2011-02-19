@@ -1,10 +1,10 @@
 ######################################################################################################################
-C.AR			?= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-ar$(HOST_SUFEXE)" ru ;
-C.CC			?= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-gcc$(HOST_SUFEXE)" ;
-C.C++			?= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-g++$(HOST_SUFEXE)" ;
-C.LINK			?= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-gcc$(HOST_SUFEXE)" ;
-C.RANLIB		?= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-ranlib$(HOST_SUFEXE)" ;
-C.STRIP			?= "$(NDKROOT)\\build\\prebuilt\\windows\\arm-eabi-4.2.1\\bin\\arm-eabi-strip.exe" ;
+C.AR			= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-ar$(HOST_SUFEXE)" ruc ;
+C.CC			= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-gcc$(HOST_SUFEXE)" ;
+C.C++			= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-g++$(HOST_SUFEXE)" ;
+C.LINK			= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-gcc$(HOST_SUFEXE)" ;
+C.RANLIB		= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-ranlib$(HOST_SUFEXE)" ;
+C.STRIP			= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-eabi-strip.exe" ;
 
 ######################################################################################################################
 # Our 'exe' is actually a shared lib, so make extension .so file.
@@ -21,6 +21,12 @@ NDK_SEC_INC_DIR		=  $(NDK_TOOLCHAIN_ROOT)/lib/gcc/arm-eabi/4.4.0/include ;
 
 STL_PORT_BASE		?= $(NDKROOT)/sources/cxx-stl/stlport ;
 STL_PORT_INCLUDE	=  $(STL_PORT_BASE)/stlport ;
+
+######################################################################################################################
+
+rule C.FDefines { return -D$(<) ; }
+rule C.FIncludes { return -I$(<) ; }
+rule C.FLibraryPaths { return -L\"$(<)\" ; } 
 
 ######################################################################################################################
 
@@ -89,8 +95,9 @@ C.Defines * :
 	__ARM_ARCH_5__ 
 	__ARM_ARCH_5T__ 
 	__ARM_ARCH_5E__ 
-	__ARM_ARCH_5TE__ 
-	ANDROID 
+	__ARM_ARCH_5TE__
+	ANDROID
+	_ANDROID
 	OS_ANDROID 
 	;
 	
@@ -152,7 +159,7 @@ VSPLATFORMMAP.androidndk = "Android NDK" ;
 
 actions response C.Link
 {
-	"$(C.LINK)" -Wl,-soname,$(<[1]:CBS) @@($(LINKFLAGS) $(>:C) $(NEEDLIBS:T) $(LINKLIBS:TC)) -o $(<[1]:C) -Wl,-Map=$(<[1]:CS=.map)
+	"$(C.LINK)" -Wl,-soname,$(<[1]:CBS) @@($(LINKFLAGS) $(>:C) $(NEEDLIBS:CT) $(LINKLIBS:CT)) -o $(<[1]:C)
 }
 
 actions updated together piecemeal response C.Archive
