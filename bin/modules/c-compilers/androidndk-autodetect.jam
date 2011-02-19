@@ -66,6 +66,8 @@ rule C.AutoDetect
 	switch $(OS)
 	{
 		case NT :
+			NDK_HOST	= "windows" ;
+			HOST_SUFEXE = ".exe" ;
 		case CYGWIN :
 			NDK_HOST	= "windows" ;
 			HOST_SUFEXE = ".exe" ;
