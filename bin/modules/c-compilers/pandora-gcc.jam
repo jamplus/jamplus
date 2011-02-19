@@ -1,7 +1,7 @@
 ######################################################################################################################
 
 C.AR			?= "$(CODESOURCERY_ROOT)\\bin\\arm-none-linux-gnueabi-ar.exe" ru ;
-C.CC			?= "$(CODESOURCERY_ROOT)\\bin\\arm-none-linux-gnueabi-g++.exe" ;
+C.CC			?= "$(CODESOURCERY_ROOT)\\bin\\arm-none-linux-gnueabi-gcc.exe" ;
 C.C++			?= "$(CODESOURCERY_ROOT)\\bin\\arm-none-linux-gnueabi-g++.exe" ;
 C.LINK			?= "$(CODESOURCERY_ROOT)\\bin\\arm-none-linux-gnueabi-g++.exe" ;
 C.RANLIB		?= "$(CODESOURCERY_ROOT)\\bin\\arm-none-linux-gnueabi-ranlib.exe" ;
@@ -140,21 +140,20 @@ actions together C.Ranlib
 	"$(C.RANLIB)" $(<:C)
 }
 
-if $(NOARUPDATE)
+actions response C.Archive
 {
-	actions response C.Archive
-	{
-		"$(C.AR)" @@($(LIBFLAGS) $(<:C)) $(>:C)
-	}
+	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
 }
 
 actions updated response C.CC
 {
+	CD /D $(<[1]:CD\\)
 	"$(C.CC)" @@(-c $(MFLAGS)) $(>:C)
 }
 
 actions updated response C.C++
 {
+	CD /D $(<[1]:CD\\)
 	"$(C.C++)" @@(-c $(MFLAGS)) $(>:C)
 }
 
