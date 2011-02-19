@@ -124,7 +124,6 @@ VSPLATFORMMAP.pandora = "Pandora" ;
 # cygwin setup first, but I'm not sure if that is possible to do right now.
 
 # Tell cygwin not to moan about DOS filenames, and put cygwin's bin folder on the path so it can find cygwin1.dll
-CYGWIN_SETUP = "SET CYGWIN=nodosfilewarning & SET PATH=%PATH%;%CYGWIN_PATH%\\bin" ;
 
 actions response C.Link
 {
