@@ -513,7 +513,7 @@ C.__DOLLAR = \\$ ;
 actions ProcessEntitlements
 {
 	cp $(2) $(1)
-	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" $(1)
+	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" -e "s/<key>keychain-access-groups/$(GET_TASK_ALLOW:E="")<key>keychain-access-groups/g" $(1)
 }
 
 rule C._ApplicationFromObjects_PostBuild
@@ -580,7 +580,9 @@ rule C._ApplicationFromObjects_PostBuild
 			MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 			ENTITLEMENTS on $(TARGET) = $(destEntitlementsPlist) ;
 			Depends $(bundleTarget) : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
-			on $(TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) ;
+			local getTaskAllow = "<key>get-task-allow<\\/key><true\\/>" ;
+			GET_TASK_ALLOW on $(destEntitlementsPlist) = $(getTaskAllow) ;
+			on $(TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) $(getTaskAllow) ;
 			Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
 			ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(TARGET) ;
 		}
