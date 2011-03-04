@@ -426,6 +426,7 @@ rule C.MultiCppCompile TARGET : SOURCES
 
 		C._MultiCppCompile_PostCompile ;
 
+		UseFileCache $(objects) : code ;
 		$(compileRule) $(objects) : $(_sources) ;
 	}
 
@@ -462,7 +463,7 @@ rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_FILENAMES : EXTRA_I
 	if $(LUMP) = 0 {
 		return ;
 	}
-	
+
 	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
 	local grist = $(PARENT) ;
 
@@ -609,6 +610,7 @@ rule C.ApplicationFromObjects TARGET : OBJECTS : OPTIONS
 
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
+	UseFileCache $(_linkTargets) : code ;
 	$(linkRule) $(_linkTargets) : $(_s) ;
 
 	LINK_TARGET on $(TARGET) = $(_linkTargets) ;
@@ -743,6 +745,7 @@ rule C.LibraryFromObjects TARGET : OBJECTS
 
 	UseCommandLine $(_l) : $(libFlags) $(_s) ;
 
+	UseFileCache $(_l) : code ;
 	C.Archive $(_l) : $(_s) ;
 
 	if $(C.RANLIB) { C.Ranlib $(_l) ; }
@@ -837,6 +840,7 @@ rule C.SharedLibraryFromObjects TARGET : OBJECTS : OPTIONS
 
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
+	UseFileCache $(_linkTargets) : code ;
 	$(linkRule) $(_linkTargets) : $(_s) ;
 
 	C._SharedLibraryFromObjects_RegServer ;
