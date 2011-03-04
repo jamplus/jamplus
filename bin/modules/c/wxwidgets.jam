@@ -88,10 +88,12 @@ if ! $(wxWidgets_ROOT)
 
 				wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswd ;
 				wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/msw ;
+				wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/msw ;
 			}
 
 			wxWidgets_POSTFIX.debug = d ;
 			wxWidgets_POSTFIX.release = "" ;
+			wxWidgets_POSTFIX.releaseltcg = "" ;
 
 			wxComponents_ROOT_DIR ?= @(../wxComponents:R=$(wxWidgets_ROOT)) ;
 
@@ -114,7 +116,9 @@ if ! $(wxWidgets_ROOT)
 
 			cxxflags = [ Split [ Shell "wx-config --cxxflags --debug=no" ] : $(SPACE) ] ;
 			wxWidgets_DEFINES.release = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
+			wxWidgets_DEFINES.releaseltcg = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
 			wxWidgets_HDRS.release = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
+			wxWidgets_HDRS.releaseltcg = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
 
 			wxWidgets_FOUND = 1 ;
 		}
