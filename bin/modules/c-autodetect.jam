@@ -53,7 +53,7 @@ rule C.ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
 			return ;
 		}
 
-		Exit * No supported build platform found on this computer. ;
+		echo "warning: No supported C build platform found on this computer." ;
 	}
 }
 
