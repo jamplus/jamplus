@@ -721,7 +721,7 @@ function XcodeWorkspaceMetaTable:Write(outputPath)
 
 		if projectName ~= buildWorkspaceName  and  projectName ~= updateWorkspaceName then
 			local jamProject = deepcopy(curProject)
-			jamProject.Name = '~clean:' .. jamProject.Name
+			jamProject.Name = '!clean:' .. jamProject.Name
 			Projects[jamProject.Name] = jamProject
 			jamProject.TargetName = 'clean:' .. curProject.Name
 			jamProject.SourcesTree = nil
