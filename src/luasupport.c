@@ -346,16 +346,16 @@ void ls_lua_init()
 
 #ifdef OS_NT
 #ifdef _DEBUG
-	strcat(fileName, "/lua/luaplus51-1200_debug.dll");
+	strcat(fileName, "/lua/luaplus51-1201_debug.dll");
 #else
-	strcat(fileName, "/lua/luaplus51-1200.dll");
+	strcat(fileName, "/lua/luaplus51-1201.dll");
 #endif
 	handle = LoadLibrary(fileName);
 #else
 #ifdef _DEBUG
-	strcat(fileName, "/lua/luaplus51-1200_debug.so");
+	strcat(fileName, "/lua/luaplus51-1201_debug.so");
 #else
-	strcat(fileName, "/lua/luaplus51-1200.so");
+	strcat(fileName, "/lua/luaplus51-1201.so");
 #endif
 	handle = dlopen(fileName, RTLD_LAZY | RTLD_GLOBAL);
 #endif
