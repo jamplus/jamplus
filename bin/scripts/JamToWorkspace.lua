@@ -516,7 +516,8 @@ function DumpWorkspace(workspace)
 	Projects[updateWorkspaceName] = {}
 	Projects[updateWorkspaceName].Sources =
 	{
-		jamPath:gsub('\\', '/') .. '/Jambase.jam'
+		jamPath:gsub('\\', '/') .. '/Jambase.jam',
+		os.path.combine(destinationRootPath, 'customsettings.jam'),
 	}
 	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
 	Projects[updateWorkspaceName].Name = updateWorkspaceName
