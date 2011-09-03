@@ -645,11 +645,19 @@ actions piecemeal together existing removeemptydirs Clean
 	$(RM) $(>:C)
 }
 
+actions piecemeal together existing removeemptydirs CleanTree {
+	$(RM) -rf "$(2:\\)"
+}
+
 if $(NT)
 {
 	actions piecemeal together existing removeemptydirs Clean
 	{
 	$(RM) $(>:\\C)
+	}
+
+	actions piecemeal together existing removeemptydirs CleanTree {
+		rd /q /s "$(2:\\)"
 	}
 }
 
