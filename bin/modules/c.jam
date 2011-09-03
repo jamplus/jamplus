@@ -684,7 +684,7 @@ rule C.LibraryFromObjects TARGET : OBJECTS
 
 	# library depends on its member objects
 
-    Depends all : $(TARGET) ;
+#    Depends all : $(TARGET) ;
 	if $(KEEPOBJS)
 	{
 		Depends $(TARGET) : $(_s) ;
