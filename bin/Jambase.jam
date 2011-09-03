@@ -687,27 +687,6 @@ if $(NT)
 	}
 }
 
-#
-# NT specific actions
-#
-
-if $(NT) && $(MSVCNT)
-{
-	actions piecemeal together existing removeemptydirs Clean
-	{
-		$(RM) $(>:\\C)
-	}
-}
-
-if $(WIN98)
-{
-    actions existing removeemptydirs Clean
-    {
-	del $(>:\\C)
-    }
-}
-
-
 ########################################################################
 ########################################################################
 
