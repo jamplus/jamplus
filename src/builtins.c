@@ -123,6 +123,7 @@ LIST *builtin_expandfilelist( PARSE *parse, LOL *args, int *jmp );
 LIST* builtin_listsort( PARSE *parse, LOL *args, int *jmp );
 
 LIST *builtin_dependslist( PARSE *parse, LOL *args, int *jmp );
+LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp);
 
 int glob( const char *s, const char *c );
 
@@ -281,6 +282,9 @@ load_builtins()
 
 	bindrule( "DependsList" )->procedure =
 		parse_make( builtin_dependslist, P0, P0, P0, C0, C0, 0 );
+
+	bindrule( "QuickSettingsLookup" )->procedure =
+		parse_make( builtin_quicksettingslookup, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -1340,4 +1344,27 @@ LIST *builtin_dependslist(PARSE *parse, LOL *args, int *jmp)
 	}
 	
 	return result;
+}
+
+
+LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp)
+{
+	TARGET* t;
+	LIST* symbol;
+	SETTINGS* settings;
+
+	LIST *target = lol_get(args, 0);
+	if (!target)
+		return L0;
+
+	symbol = lol_get(args, 1);
+	if (!symbol)
+		return L0;
+
+	t = bindtarget(target->string);
+	settings = quicksettingslookup(t, symbol->string);
+	if (settings)
+		return list_copy(L0, settings->value);
+
+	return L0;
 }
