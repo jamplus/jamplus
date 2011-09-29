@@ -1,5 +1,4 @@
 SubDir TOP app ;
 
-C.ActiveTarget app ;
-C.LinkLibraries slib-a ;
-C.Application main.c ;
+C.LinkLibraries app : slib-a ;
+C.Application app : main.c ;

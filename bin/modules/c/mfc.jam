@@ -1,31 +1,31 @@
-rule C.UseMFC OPTIONS {
-	local TARGET = $(C.ACTIVE_TARGET) ;
+rule C.UseMFC TARGET : OPTIONS {
+	C.ActiveTarget $(TARGET) ;
 
 	if shared in $(OPTIONS) {
-		C.Defines _AFXDLL ;
+		C.Defines : _AFXDLL ;
 	}
 
-	local MSVCNT = [ QuickSettingsLookup $(C.COMPILER_SUITE_SYMBOL) : MSVCNT ] ;
+	local MSVCNT = $(MSVCNT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 
 	if $(COMPILER) = vc6 {
-		C.IncludeDirectories $(MSVCNT)/mfc/Include $(MSVCNT)/atl/Include ;
+		C.IncludeDirectories : $(MSVCNT)/mfc/Include $(MSVCNT)/atl/Include ;
 
 		if link in $(OPTIONS) {
-			C.LinkDirectories $(MSVCNT)/mfc/Lib ;
+			C.LinkDirectories : $(MSVCNT)/mfc/Lib ;
 		}
 
-		C.RcIncludeDirectories $(MSVCNT)/mfc/Include $(MSVCNT)/atl/Include ;
+		C.RcIncludeDirectories : $(MSVCNT)/mfc/Include $(MSVCNT)/atl/Include ;
 	} else {
-		C.IncludeDirectories $(MSVCNT)/atlmfc/include ;
+		C.IncludeDirectories : $(MSVCNT)/atlmfc/include ;
 
 		if link in $(OPTIONS) {
 			if $(PLATFORM) = win64 {
-				C.LinkDirectories $(MSVCNT)/atlmfc/lib/amd64 ;
+				C.LinkDirectories : $(MSVCNT)/atlmfc/lib/amd64 ;
 			} else {
-				C.LinkDirectories $(MSVCNT)/atlmfc/lib ;
+				C.LinkDirectories : $(MSVCNT)/atlmfc/lib ;
 			}
 		}
 
-		C.RcIncludeDirectories $(MSVCNT)/atlmfc/include ;
+		C.RcIncludeDirectories : $(MSVCNT)/atlmfc/include ;
 	}
 }

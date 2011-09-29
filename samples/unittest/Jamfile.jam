@@ -1,8 +1,6 @@
 SubDir TOP ;
 
-C.ActiveTarget add ;
-ADD_EXE = [ C.Application add.c ] ;
-
+ADD_EXE = [ C.Application add : add.c ] ;
 TEST_LOG = <tests>test.log ;
 MakeLocate $(TEST_LOG) : output ;
 Clean clean : $(TEST_LOG) ;

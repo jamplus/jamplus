@@ -1,4 +1,3 @@
 SubDir TOP lib-c ;
 
-C.ActiveTarget lib-c ;
-C.Library add.c add.h ;
+C.Library lib-c : add.c add.h ;

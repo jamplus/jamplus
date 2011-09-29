@@ -6,13 +6,13 @@ actions GenerateCFile {
 
 C.ActiveTarget helloworld ;
 
-local file.c = @(file.c:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
-local file.txt = @(file.txt:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+local file.c = [ C.GristFiles : file.c ] ;
+local file.txt = [ C.GristFiles : file.txt ] ;
 
 Depends $(file.c) : $(file.txt) ;
 SEARCH on $(file.txt) = $(SUBDIR) ;
 GenerateCFile $(file.c) : $(file.txt) ;
-Clean clean:helloworld : $(file.c) ;
+C.Clean : $(file.c) ;
 
-C.Application main.c file.c ;
+C.Application : main.c file.c ;
 

@@ -1,7 +1,5 @@
 SubDir TOP ;
 
-C.ActiveTarget helloworld ;
-
 SRCS =
 		../src/file.c
 		../src/main.c
@@ -9,7 +7,7 @@ SRCS =
 		../src/precomp.h
 ;
 
-C.PrecompiledHeader ../src/createprecomp.c precomp.h ../src/precomp.h : $(SRCS) ;
+C.PrecompiledHeader helloworld : ../src/createprecomp.c precomp.h ../src/precomp.h : $(SRCS) ;
 
-C.Application $(SRCS) ;
+C.Application helloworld : $(SRCS) ;
 

@@ -9,15 +9,13 @@ local all_clean = all clean ;
 
 if $(ACTIVE_TARGETS.all)  ||  $(ACTIVE_TARGETS.appA)  ||  appA in $(ACTIVE_TARGETS.clean)  ||  1 in $(ACTIVE_TARGETS.clean) {
 	Echo Building appA... ;
-	C.ActiveTarget appA ;
-	C.Application appA.cpp ;
+	C.Application appA : appA.cpp ;
 }
 
 
 if $(ACTIVE_TARGETS.all)  ||  $(ACTIVE_TARGETS.appB)  ||  appB in $(ACTIVE_TARGETS.clean)  ||  1 in $(ACTIVE_TARGETS.clean) {
 	Echo Building appB... ;
-	C.ActiveTarget appB ;
-	C.Application appB.cpp ;
+	C.Application appB : appB.cpp ;
 }
 
 

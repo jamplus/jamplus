@@ -1,1 +1,1 @@
-C.Defines NDEBUG ;
+C.Defines * : NDEBUG ;

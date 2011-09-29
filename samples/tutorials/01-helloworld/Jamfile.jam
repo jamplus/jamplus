@@ -1,5 +1,4 @@
 SubDir TOP ;
 
-C.ActiveTarget helloworld ;
-C.Application main.c ;
+C.Application helloworld : main.c ;
 

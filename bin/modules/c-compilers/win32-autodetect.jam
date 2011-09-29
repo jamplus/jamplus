@@ -1,5 +1,5 @@
 IncludeModule c-compilers/c-vc-autodetect ;
-if [ C.AutoDetect $(THE_COMPILER) : $(THE_PLATFORM) : $(THE_ARCHITECTURE) : $(THE_CONFIG) ] != **empty** {
+if [ C.AutoDetect ] != **empty** {
 	return ;
 }
 

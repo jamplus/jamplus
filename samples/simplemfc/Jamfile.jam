@@ -19,19 +19,19 @@ SRCS =
 
 IncludeModule c/mfc ;
 
-C.ActiveTarget SimpleMFC ;
+ActiveTarget SimpleMFC ;
 
-C.UseMFC link shared ;
+C.UseMFC : link shared ;
 
-C.Lump SRCS : SimpleMFCLump : stdafx.cpp stdafx.h 1 ;
+C.Lump : SRCS : SimpleMFCLump : stdafx.cpp stdafx.h 1 ;
 
-SRCS += [ C.ResourceCompiler SimpleMFC.rc ] ;
+SRCS += [ C.ResourceCompiler : SimpleMFC.rc ] ;
 
-C.PrecompiledHeader stdafx : $(SRCS) ;
+C.PrecompiledHeader : stdafx : $(SRCS) ;
 
 switch $(CONFIG) {
-	case debug : C.OutputPostfix .debug ;
-	case release : C.OutputPostfix .release ;
+	case debug : C.OutputPostfix : .debug ;
+	case release : C.OutputPostfix : .release ;
 }
 
-C.Application $(SRCS) : windows ;
+C.Application : $(SRCS) : windows ;

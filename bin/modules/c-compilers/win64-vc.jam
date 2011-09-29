@@ -1,4 +1,5 @@
 rule C.win64.vc.AutoDetect COMPILER {
+	local rc_nologo ;
 	switch $(COMPILER) {
 		case vs2010 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
@@ -6,6 +7,7 @@ rule C.win64.vc.AutoDetect COMPILER {
 			MSSDK ?= $(MSVCNT) ;
 			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
 			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
+			rc_nologo = /nologo ;
 
 		case vs2008 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
@@ -18,15 +20,16 @@ rule C.win64.vc.AutoDetect COMPILER {
 			Exit ** Win64 support has not been implemented in Jam for $(COMPILER). ;
 	}
 
-	MSVCBIN			?= "$(MSVCNT)/bin/x86_amd64/" ;
-	C.AR			= "$(MSVCBIN)lib" ;
-	C.CC			= "$(MSVCBIN)cl" ;
-	C.C++			= "$(MSVCBIN)cl" ;
-	C.LINK			= "$(MSVCBIN)link" ;
-	C.MT			= "$(MSSDK)/bin/mt" ;
-	C.RC			= "$(MSSDK)/bin/RC" ;
-	C.STDHDRS		?= "$(MSSDK_STDHDRS)" ;
-	C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
+	MSVCBIN			?= "$(MSVCNT)/bin/amd64/" ;
+	C.AR on $(C.COMPILER_SUITE_SYMBOL)			= "$(MSVCBIN)lib" ;
+	C.CC on $(C.COMPILER_SUITE_SYMBOL)			= "$(MSVCBIN)cl" ;
+	C.C++ on $(C.COMPILER_SUITE_SYMBOL)			= "$(MSVCBIN)cl" ;
+	C.LINK on $(C.COMPILER_SUITE_SYMBOL)		= "$(MSVCBIN)link" ;
+	C.MT on $(C.COMPILER_SUITE_SYMBOL)			= "$(MSSDK)/bin/mt" ;
+	C.RC on $(C.COMPILER_SUITE_SYMBOL)			= "$(MSSDK)/bin/RC" ;
+	C.RC_NOLOGO on $(C.COMPILER_SUITE_SYMBOL)	= $(rc_nologo) ;
+	C.STDHDRS on $(C.COMPILER_SUITE_SYMBOL)		= "$(MSSDK_STDHDRS)" ;
+	C.STDLINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = "$(MSSDK_LINKDIRECTORIES)" ;
 }
 
 VSPLATFORMMAP.win64 = x64 ;

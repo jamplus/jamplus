@@ -23,7 +23,6 @@ rule C.vc._C++Exceptions {
 }
 
 
-#TODO
 rule C.vc._RuntimeTypeHelper
 {
 	if ! $(TYPE)  ||  $(TYPE) = dynamic
@@ -46,8 +45,7 @@ rule C.vc._RuntimeTypeHelper
 	}
 }
 
-actions response C.vc.ManifestToRC
-{
+actions response C.vc.ManifestToRC {
 	^^($(1)|$(CONTENTS)) ;
 }
 
@@ -72,16 +70,14 @@ rule C.vc._ManifestHelper MANIFEST : MANIFEST_TYPE {
 	return [ C.ResourceCompiler $(manifestRC) ] ;
 }
 
-actions response C.vc.Link
-{
+actions response C.vc.Link {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
 }
 
 
-actions response C.vc.DebugLinkWithManifest
-{
+actions response C.vc.DebugLinkWithManifest {
 	REM http://msdn.microsoft.com/en-us/library/ms235591%28VS.80%29.aspx
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
@@ -93,8 +89,7 @@ actions response C.vc.DebugLinkWithManifest
 }
 
 
-actions response C.vc.LinkWithManifest
-{
+actions response C.vc.LinkWithManifest {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:CT)) /out:$(<[1])
@@ -102,37 +97,32 @@ actions response C.vc.LinkWithManifest
 }
 
 
-actions updated response C.vc.CC
-{
+actions updated response C.vc.CC {
 	PATH=$(MSVCNT_BIN_PATH:J=;);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	$(C.CC:\\C) /nologo @@($(MFLAGS)) $(>:C)
 }
 
 
-actions updated response C.vc.C++
-{
+actions updated response C.vc.C++ {
 	PATH=$(MSVCNT_BIN_PATH:J=;);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
 	$(C.C++:\\C) /nologo @@($(MFLAGS)) $(>:C)
 }
 
 
-actions together response C.vc.Archive
-{
+actions together response C.vc.Archive {
 	PATH=$(MSVCNT_BIN_PATH:J=;);%PATH%
 	$(C.AR:C) /nologo $(LIBFLAGS) @@($(>:\\C)) /out:$(<:C)
 }
 
 
-actions RegSvr32
-{
+actions RegSvr32 {
 	regsvr32 /s /c $(1:C)
 }
 
 
-actions existing UnRegSvr32
-{
+actions existing UnRegSvr32 {
 	regsvr32 /s /u $(2:C)
 }
 
@@ -167,7 +157,7 @@ rule C.vc._writeManifest {
 		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(tempEmbeddedRc) ;
 		Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
 
-		local tempEmbeddedRes = [ C.ResourceCompiler $(tempEmbeddedRc) : quiet ] ;
+		local tempEmbeddedRes = [ C.ResourceCompiler : $(tempEmbeddedRc) : quiet ] ;
 		_s += $(tempEmbeddedRes) ;
 
 		Depends $(_t[1]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
@@ -178,28 +168,25 @@ rule C.vc._writeManifest {
 	}
 }
 
-rule C.vc._setManifestType  MANIFEST_TYPE
-{
+rule C.vc._setManifestType  MANIFEST_TYPE {
 	MANIFEST_TYPE on $(_t) = $(MANIFEST_TYPE) ;
 }
 
-rule C.vc._linkManifest
-{
+rule C.vc._linkManifest {
 	MANIFEST on $(_t) = "$(LOCATE_TARGET)/$(_tBINDING:G=)" ;
 }
 
-rule C.DefFile SOURCES
-{
+rule C.DefFile TARGET : SOURCES {
+	C.ActiveTarget $(TARGET) ;
 	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
 	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
 	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(SOURCES) ;
-	C.LinkFlags /DEF:"$(SOURCES:T)" ;
+	C.LinkFlags : /DEF:"$(SOURCES:T)" ;
 }
 
 
-actions existing quietly DeletePCHFile
-{
-$(RM) $(>:\\C)
+actions existing quietly DeletePCHFile {
+	$(RM) $(>:\\C)
 }
 
 rule C.vc._MultiCppCompile_PreCompile {
@@ -347,7 +334,7 @@ rule C.vc._SharedLibraryFromObjects_Setup {
 
 rule C.vc._SharedLibraryFromObjects_ExportLib {
 	local suflib = $(SUFLIB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
-	BINDING on $(_tlib) = [ C._retrieveOutputName $(suflib) ] ;
+	BINDING on $(_tlib) = [ C._retrieveOutputName : $(suflib) ] ;
 	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_tlib) : $(_t) ;
 	MightNotUpdate $(_tlib) ;
 	_linkTargets += $(_tlib) ;
@@ -365,8 +352,7 @@ rule C.vc._SharedLibraryFromObjects_UnRegServer {
 	}
 }
 
-rule C.vc._SharedLibraryFromObjects_CleanIntermediates
-{
+rule C.vc._SharedLibraryFromObjects_CleanIntermediates {
 	# Clean the .pdb (etc) files.
 	local sufs = .pdb .map .exp .ilk ;
 	local zap = $(_tBINDING:S=$(sufs)) $(_tBINDING).manifest ;
@@ -376,8 +362,7 @@ rule C.vc._SharedLibraryFromObjects_CleanIntermediates
 	Depends $(zap) : $(_linkTargets) ;
 }
 
-rule C.vc._SharedLibraryFromObjects_LinkFlags
-{
+rule C.vc._SharedLibraryFromObjects_LinkFlags {
 	if ! ( nodefaults in $(OPTIONS) ) {
 		if windows in $(OPTIONS) {
 			linkFlags += $(MSVC_SUBSYSTEM_WINDOWS) ;
@@ -408,17 +393,16 @@ rule C.vc._SharedLibraryFromObjects_LinkFlags
 }
 
 
-rule C.vc._SharedLibraryFromObjects_RegServer
-{
+rule C.vc._SharedLibraryFromObjects_RegServer {
 	if $(regserver) {
 		RegSvr32 $(_linkTargets[1]) ;
 	}
 }
 
 
-rule C.Manifest MANIFEST {
+rule C.Manifest TARGET : MANIFEST {
+	C.ActiveTarget $(TARGET) ;
 	MANIFEST_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(MANIFEST) ;
-
 	return [ C._ManifestHelper ] ;
 }
 

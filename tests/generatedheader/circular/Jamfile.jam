@@ -12,6 +12,5 @@ actions lua SleepThenTouch
 	file:close()
 }
 
-C.ActiveTarget foo ;
-SleepThenTouch [ C.GristFiles generated.h ] ;
-C.Library sourceA.c sourceB.c ;
+SleepThenTouch [ C.GristFiles foo : generated.h ] ;
+C.Library foo : sourceA.c sourceB.c ;

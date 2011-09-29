@@ -71,6 +71,11 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 		C.ToolchainSpecKeys ;
 	}
 
+	local compilerKey ;
+	for compilerKey in $(TOOLCHAIN_COMPILER_KEYS:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+		$(compilerKey) = $($(compilerKey):Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+	}	
+
 	ALL_LOCATE_TARGET = $(save_ALL_LOCATE_TARGET) ;
 
 	C.COMPILER_SUITE_SYMBOL = $(C.COMPILER_SUITE_SYMBOL:Z=$(gristedConfigSpec)) ;

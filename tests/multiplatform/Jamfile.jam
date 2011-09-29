@@ -11,13 +11,13 @@ SRCS =
 
 switch $(PLATFORM) {
 	case win32 :
-		C.Defines USING_WIN32 ;
+		C.Defines : USING_WIN32 ;
 		SRCS += win32.c ;
 	case macosx32 :
-		C.Defines USING_MACOSX ;
+		C.Defines : USING_MACOSX ;
 		SRCS += macosx.c ;
 	case linux32 :
-		C.Defines USING_LINUX ;
+		C.Defines : USING_LINUX ;
 		SRCS += linux.c ;
 }
 
@@ -28,4 +28,4 @@ switch $(CONFIG) {
 		SRCS += filerelease.c ;
 }
 
-C.Application $(SRCS) ;
+C.Application : $(SRCS) ;

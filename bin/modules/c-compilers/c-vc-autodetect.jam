@@ -123,6 +123,8 @@ rule FindVisualStudioHelper VERSION {
 	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : CC : .c .s : C.vc.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
 	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : C++ : .cc .cpp .cxx : C.vc.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
 
+	TOOLCHAIN_COMPILER_KEYS on $(C.COMPILER_SUITE_SYMBOL) += MSVCNT ;
+	
 	return $(compiler) ;
 }
 

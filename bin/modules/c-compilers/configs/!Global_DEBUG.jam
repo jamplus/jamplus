@@ -1,1 +1,1 @@
-C.Defines _DEBUG DEBUG ;
+C.Defines * : _DEBUG DEBUG ;

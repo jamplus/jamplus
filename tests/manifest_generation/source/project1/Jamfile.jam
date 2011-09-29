@@ -1,14 +1,12 @@
 SubDir TOP source project1 : : project1 ;
 
-C.ActiveTarget project1 ;
-
 SRCS =
 	$(SUBDIR)/project1.cpp
 ;
 C.CompileOptions outputastree ;
 
-LOCATE_TARGET = $(SUBDIR)/obj/$(PLATFORM)/$(CONFIG) ;
-C.OutputPath $(SUBDIR)/lib/$(PLATFORM)/$(CONFIG) ;
-C.OutputPostfix ;
+LocateTarget project1 : $(SUBDIR)/obj/$(PLATFORM)/$(CONFIG) ;
+C.OutputPath $(PROJECT_NAME) : $(SUBDIR)/lib/$(PLATFORM)/$(CONFIG) ;
+C.OutputPostfix $(PROJECT_NAME) : ;
 
-C.Application $(SRCS) ;
+C.Application project1 : $(SRCS) ;

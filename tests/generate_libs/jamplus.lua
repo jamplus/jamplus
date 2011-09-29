@@ -4,7 +4,6 @@ function CreateLibJamfileHelper(lib_number, classes, lump)
     os.chdir(cppcodebase.lib_name(lib_number))
     local handle = io.open("Jamfile.jam", "w")
     handle:write("SubDir TOP lib_" .. lib_number .. " ;\n\n")
-    handle:write("C.ActiveTarget lib_" .. lib_number .. " ;\n")
     handle:write("C.SubDirHdrs $(INCLUDES) ;\n\n")
 	handle:write("SRCS =\n")
     for i = 0, classes - 1 do
@@ -13,10 +12,10 @@ function CreateLibJamfileHelper(lib_number, classes, lump)
 	handle:write(';\n\n')
 
 	if lump then
-		handle:write("C.Lump SRCS : lib_" .. lib_number .. " ;\n")
+		handle:write("C.Lump lib_" .. lib_number .. " : SRCS : lib_" .. lib_number .. " ;\n")
 	end
 
-    handle:write("C.Library $(SRCS) ;\n")
+    handle:write("C.Library lib_" .. lib_number .. " : $(SRCS) ;\n")
     os.chdir('..')
 end
 

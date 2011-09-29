@@ -1,6 +1,5 @@
 SubDir TOP ;
 
-C.ActiveTarget main ;
-C.PrecompiledHeader mypch.cpp includes/mypch.h : main.cpp mypch.cpp ;
+C.PrecompiledHeader main : mypch.cpp includes/mypch.h : main.cpp mypch.cpp ;
 
-C.Application main.cpp mypch.cpp includes/mypch.h ;
+C.Application main : main.cpp mypch.cpp includes/mypch.h ;

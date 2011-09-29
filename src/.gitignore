@@ -1,6 +1,8 @@
 .depcache
 .gitconfig
 *.ncb
+*.opensdf
+*.sdf
 *.suo
 *.user
 *.wwdb
@@ -14,3 +16,4 @@ LuaPlus
 jam.xcodeproj/*.mode1v3
 jam.xcodeproj/*.pbxuser
 jam0
+ipch/

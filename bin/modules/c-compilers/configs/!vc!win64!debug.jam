@@ -1,13 +1,11 @@
 C.CFlags * : /Od /EHsc /MDd /W3 /Z7 ;
 C.C++Flags * : /Od /EHsc /MDd /W3 /Z7 ;
-C.LinkFlags * : /INCREMENTAL /DEBUG /MACHINE:X86 ;
+C.LinkFlags * : /INCREMENTAL /DEBUG /MACHINE:X64 ;
 
-C.Defines * : WIN32 WINDOWS ;
+C.Defines * : WIN32 _WIN64 _AMD64_ WINDOWS ;
 
-if $(C.COMPILER) != vc6 {
-	C.CFlags * : /RTC1 ;
-	C.C++Flags * : /RTC1 ;
-}
+C.CFlags * : /RTC1 ;
+C.C++Flags * : /RTC1 ;
 
 C.LINKER_CONFIG on $(C.COMPILER_SUITE_SYMBOL) = debug ;
 

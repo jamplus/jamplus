@@ -22,7 +22,7 @@ local SOURCE_DIRECTORIES =
 local SOURCE_FILES = [ Glob $(SUBDIR)/$(SOURCE_DIRECTORIES) : $(SOURCE_EXTENSIONS) ] ;
 SOURCE_FILES = [ Match $(SUBDIR)/(.*) : $(SOURCE_FILES) ] ;
 
-C.Library $(SOURCE_FILES) ;
+C.Library libc : $(SOURCE_FILES) ;
 
 SubInclude TOP liba ;
 SubInclude TOP libb ;

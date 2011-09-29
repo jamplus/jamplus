@@ -21,11 +21,9 @@ actions CopyAction
 
 PASS_NUM ?= 1 ;
 
-C.ActiveTarget test ;
-
-local main.cpp = [ C.GristFiles main.cpp ] ;
-local foo.cpp = [ C.GristFiles foo.cpp ] ;
-local foo.h = [ C.GristFiles foo.h ] ;
+local main.cpp = [ C.GristFiles test : main.cpp ] ;
+local foo.cpp = [ C.GristFiles test : foo.cpp ] ;
+local foo.h = [ C.GristFiles test : foo.h ] ;
 
 if $(PASS_NUM) = 1
 {
@@ -41,7 +39,7 @@ int main()
 " ;
     WriteFile $(main.cpp) ;
     MakeLocate $(main.cpp) : $(LOCATE_SOURCE) ;
-    C.Clean $(main.cpp) ;
+    C.Clean test : $(main.cpp) ;
 
     CONTENTS on $(foo.cpp) = "#include <stdio.h>
 
@@ -52,10 +50,10 @@ void foo()
 " ;
     WriteFile $(foo.cpp) ;
     MakeLocate $(foo.cpp) : $(LOCATE_TARGET) ;
-    C.Clean $(foo.cpp) ;
+    C.Clean test : $(foo.cpp) ;
     Depends $(main.cpp) : $(foo.h) ;
 
-    C.Application main.cpp foo.cpp ;
+    C.Application test : main.cpp foo.cpp ;
 
     QueueJamfile $(JAMFILE) ;
     PASS_NUM = 2 ;
@@ -66,7 +64,7 @@ else if $(PASS_NUM) = 2
 
     CONTENTS on $(foo.h) = "extern void foo();" ;
     WriteFile $(foo.h) ;
-    C.Clean $(foo.h) ;
+    C.Clean test : $(foo.h) ;
 
     QueueJamfile $(JAMFILE) ;
     PASS_NUM = 3 ;
@@ -74,7 +72,7 @@ else if $(PASS_NUM) = 2
 else
 {
     Echo Pass 3 ;
-	C.Clean $(foo.cpp) $(foo.h) ;
+	C.Clean test : $(foo.cpp) $(foo.h) ;
 
 #    Depends Foo.cpp : Foo.h ;
 

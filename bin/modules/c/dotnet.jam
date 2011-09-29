@@ -5,7 +5,7 @@ rule C.UseDotNet TARGET : OPTIONS
 	local includePaths ;
 	local referencePaths ;
 	local linkPaths ;
-	switch $(COMPILER)
+	switch $(C.COMPILER)
 	{
 		case vs2005 :
 			DOTNETSDK = @("$(MSSDK)/../SDK/v2.0":R=) ;

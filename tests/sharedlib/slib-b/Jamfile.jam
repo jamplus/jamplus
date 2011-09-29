@@ -1,6 +1,5 @@
 SubDir TOP slib-b ;
 
-C.ActiveTarget slib-b ;
-C.OutputPath ../image ;
-C.LinkLibraries lib-c ;
-C.Library slib-b.c : shared ;
+C.OutputPath slib-b : ../image ;
+C.LinkLibraries slib-b : lib-c ;
+C.Library slib-b : slib-b.c : shared ;

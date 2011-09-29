@@ -716,6 +716,12 @@ actions quietly WriteFile
 
 ACTIVE_PROJECT = "" ;
 
+rule ActiveTarget TARGET {
+	return [ C.ActiveTarget $(TARGET) ] ;
+	ACTIVE_PROJECT = $(TARGET) ;
+}
+
+
 rule AutoSourceGroup SOURCES
 {
 }

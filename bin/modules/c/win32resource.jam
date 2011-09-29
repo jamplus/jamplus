@@ -5,14 +5,15 @@ if ! $(TARGETINFO_LOCATE) {
 
 # Originally from http://maillist.perforce.com/pipermail/jamming/2004-July.txt.gz
 # windows resource compiler.
-rule C.ResourceCompiler SOURCES : OPTIONS {
-	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+rule C.ResourceCompiler PARENT : SOURCES : OPTIONS {
+	C.ActiveTarget $(PARENT) ;
+	SOURCES = [ C.GristFiles : $(SOURCES) ] ;
 	local TARGETS = $(SOURCES:S=.res) ;
 
 	local source ;
 	for source in $(SOURCES) {
 		local binding ;
-		binding = [ QuickSettingsLookup $(source) : BINDING ] ;
+		binding = $(BINDING:Z=$(source)) ;
 		if $(binding) {
 			BINDING on $(source:S=.res) = $(binding:S=.res) ;
 		}
@@ -22,7 +23,7 @@ rule C.ResourceCompiler SOURCES : OPTIONS {
 	MakeLocate $(TARGETS) : $(TARGETS:DR=$(LOCATE_TARGET)) ;
 
 	Depends $(TARGETS) : $(SOURCES) ;
-	C.Clean $(TARGETS) ;
+	C.Clean : $(TARGETS) ;
 
 	local rcdefines ;
 	local rcflags ;
@@ -76,6 +77,8 @@ actions quietly C.ResourceCompileQuiet
 
 # Set resource compiler options
 rule C._RcOptions VARIABLE : RESOURCE_NAME : OPTIONS {
+	C.ActiveTarget $(TARGET) ;
+
 	local target ;
 	if $(OPTIONS) {
 		target = $(RESOURCE_NAME:S=.res:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
@@ -88,15 +91,15 @@ rule C._RcOptions VARIABLE : RESOURCE_NAME : OPTIONS {
 }
 
 
-rule C.RcFlags RESOURCE_NAME : FLAGS {
+rule C.RcFlags TARGET : RESOURCE_NAME : FLAGS {
 	C._RcOptions RCFLAGS : $(RESOURCE_NAME) : $(FLAGS) ;
 }
 
-rule C.RcDefines RESOURCE_NAME : DEFINES {
+rule C.RcDefines TARGET : RESOURCE_NAME : DEFINES {
 	C._RcOptions RCDEFINES : $(RESOURCE_NAME) : $(DEFINES) ;
 }
 
-rule C.RcIncludeDirectories RESOURCE_NAME : HDRS {
+rule C.RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS {
 	C._RcOptions RCHDRS : $(RESOURCE_NAME) : $(HDRS) ;
 }
 

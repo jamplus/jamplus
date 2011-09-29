@@ -1,7 +1,6 @@
 SubDir TOP ;
 
-C.ActiveTarget * ;
-C.IncludeDirectories common ;
+C.IncludeDirectories * : common ;
 
 SubInclude TOP project1 : project1 ;
 SubInclude TOP common : common ;
