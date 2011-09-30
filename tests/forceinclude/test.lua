@@ -81,45 +81,57 @@ function Test()
 	else
 		-- First build
 		local pattern = [[
-*** found 19 target(s)...
-*** updating 6 target(s)...
-@ C.C++ <common>print.o 
-@ C.Archive <common>common.a 
-!NEXT!@ C.Ranlib <common>common.a 
-@ C.C++ <libA>libA.o 
-@ C.Archive <libA>libA.a 
-!NEXT!@ C.Ranlib <libA>libA.a
-@ C.C++ <project1>project1.o 
-@ C.Link <project1>project1.release 
-*** updated 6 target(s)...
+*** found 18 target(s)...
+*** updating 9 target(s)...
+@ C.gcc.C++ <macosx32!release:project1>project1.o 
+@ C.gcc.C++ <macosx32!release:common>print.o 
+@ C.gcc.Archive <macosx32!release:common>common.a 
+!NEXT!@ C.gcc.Ranlib <macosx32!release:common>common.a 
+@ C.gcc.C++ <macosx32!release:libA>libA.o 
+@ C.gcc.Archive <macosx32!release:libA>libA.a 
+!NEXT!@ C.gcc.Ranlib <macosx32!release:libA>libA.a
+@ C.gcc.Link <macosx32!release:project1>project1
+*** updated 9 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
+
+		local pass1Dirs = {
+			'common/',
+			'libA/',
+			'project1/',
+			'common/macosx32!release/',
+			'common/macosx32!release/common/',
+			'libA/macosx32!release/',
+			'libA/macosx32!release/libA/',
+			'project1/macosx32!release/',
+			'project1/macosx32!release/project1/',
+		}
 
 		local pass1Files =
 		{
 			'Jamfile.jam',
 			'test.lua',
 			'common/common.jam',
-			'common/common.release.a',
 			'common/print.cpp',
 			'common/print.h',
-			'common/print.o',
+			'common/macosx32!release/common/common.release.a',
+			'common/macosx32!release/common/print.o',
 			'libA/libA.cpp',
 			'libA/libA.jam',
-			'libA/libA.o',
-			'libA/libA.release.a',
+			'libA/macosx32!release/libA/libA.o',
+			'libA/macosx32!release/libA/libA.release.a',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/project1.o',
-			'project1/project1.release',
+			'project1/macosx32!release/project1/project1.o',
+			'project1/macosx32!release/project1/project1.release',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 19 target(s)...
+*** found 18 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	end
@@ -140,13 +152,13 @@ function Test()
 		TestPattern(pattern3, RunJam())
 	else
 		local pattern3 = [[
-*** found 19 target(s)...
+*** found 18 target(s)...
 *** updating 4 target(s)...
-@ C.C++ <libA>libA.o 
-@ C.Archive <libA>libA.a 
-@ C.Ranlib <libA>libA.a 
-@ C.C++ <project1>project1.o 
-@ C.Link <project1>project1.release 
+@ C.gcc.C++ <macosx32!release:project1>project1.o 
+@ C.gcc.C++ <macosx32!release:libA>libA.o 
+@ C.gcc.Archive <macosx32!release:libA>libA.a 
+!NEXT!@ C.gcc.Ranlib <macosx32!release:libA>libA.a
+@ C.gcc.Link <macosx32!release:project1>project1
 *** updated 4 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

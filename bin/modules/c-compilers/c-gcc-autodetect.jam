@@ -1,5 +1,4 @@
-rule FindGCC
-{
+rule FindGCC {
 	local PATHS =
 		$(PATH)
 	;
@@ -20,13 +19,22 @@ rule C.AutoDetect {
 		return ;
 	}
 
-	COMPILER.$(PLATFORM) = gcc ;
+	C.COMPILER = gcc ;
 
-	UseModule c-compilers/c-gcc ;
+	C.COMPILER_SUITE = gcc ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
+
+	IncludeModule c-compilers/c-gcc ;
+
 	if $(PLATFORM) != *  &&  $(CONFIG) != * {
-		UseModule c-compilers/$(PLATFORM)-gcc ;
-		UseModule c-compilers/$(PLATFORM)-gcc-$(CONFIG) ;
+		IncludeModule c-compilers/$(PLATFORM)-gcc ;
 	}
 
-	return $(COMPILER.$(PLATFORM)) ;
+	C.COMPILER_SUITE = gcc ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
+
+	return $(C.COMPILER) ;
 }
+
+C.AutoDetect ;
+

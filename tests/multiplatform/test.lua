@@ -61,13 +61,13 @@ function Test()
 		else
 			if Platform == 'macosx' then
 				pattern = [[
-*** found 11 target(s)...
-*** updating 4 target(s)...
-@ C.CC <platform>platform.o 
-@ C.CC <platform>macosx.o 
-@ C.CC <platform>filerelease.o 
-@ C.Link <platform>platform.release 
-*** updated 4 target(s)...
+*** found 12 target(s)...
+*** updating 5 target(s)...
+@ C.gcc.CC <macosx32!release:platform>platform.o 
+@ C.gcc.CC <macosx32!release:platform>macosx.o 
+@ C.gcc.CC <macosx32!release:platform>filerelease.o 
+@ C.gcc.Link <macosx32!release:platform>platform
+*** updated 5 target(s)...
 ]]
 			else
 				pattern = [[
@@ -81,23 +81,30 @@ function Test()
 ]]
 			end
 
+			pass1Directories = {
+				'macosx32!release/',
+				'macosx32!release/platform/',
+			}
+
 			pass1Files = {
 				'.jamcache',
 				'CreateVS2008JamWorkspace.bat',
 				'filedebug.c',
 				'filerelease.c',
-				'filerelease.o',
 				'Jamfile.jam',
 				'linux.c',
 				'macosx.c',
 				'platform.c',
-				'platform.o',
-				'platform.release',
+				'test.lua',
 				'win32.c',
+				'macosx32!release/platform/filerelease.o',
+				'macosx32!release/platform/macosx.o',
+				'macosx32!release/platform/platform.o',
+				'macosx32!release/platform/platform.release',
 			}
 
 			if Platform == 'macosx' then
-				pass1Files[#pass1Files + 1] = 'macosx.o'
+				pass1Files[#pass1Files + 1] = 'macosx32!release/platform/macosx.o'
 			else
 				pass1Files[#pass1Files + 1] = 'linux.o'
 			end
@@ -130,10 +137,10 @@ Using macosx
 This is a Mac OS X build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, ex.collectlines{'./platform.release'})
+		TestPattern(pattern2, ex.collectlines{'./macosx32!release/platform/platform.release'})
 
 		pattern3 = [[
-*** found 11 target(s)...
+*** found 12 target(s)...
 ]]
 
 	else

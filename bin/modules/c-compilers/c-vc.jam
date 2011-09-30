@@ -23,8 +23,7 @@ rule C.vc._C++Exceptions {
 }
 
 
-rule C.vc._RuntimeTypeHelper
-{
+rule C.vc._RuntimeTypeHelper {
 	if ! $(TYPE)  ||  $(TYPE) = dynamic
 	{
 		FLAGS_TO_REMOVE on $(C.ACTIVE_TOOLCHAIN_TARGET) -= /MDd /MD /MTd /MT ;

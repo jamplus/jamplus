@@ -30,31 +30,31 @@ function Test()
 	end
 
 	---------------------------------------------------------------------------
-	local dirs =
-	{
-		'app/',
-		'image/',
-		'lib-c/',
-		'slib-a/',
-		'slib-b/',
-		'image/TOP/',
-		'image/TOP/app/',
-		'image/TOP/lib-c/',
-		'image/TOP/slib-a/',
-		'image/TOP/slib-b/',
-		'image/TOP/app/win32!release/',
-		'image/TOP/app/win32!release/app/',
-		'image/TOP/lib-c/win32!release/',
-		'image/TOP/lib-c/win32!release/lib-c/',
-		'image/TOP/slib-a/win32!release/',
-		'image/TOP/slib-a/win32!release/slib-a/',
-		'image/TOP/slib-b/win32!release/',
-		'image/TOP/slib-b/win32!release/slib-b/',
-	}
-	
+	local dirs
 	local files
 	
 	if Platform == 'win32' then
+		dirs = {
+			'app/',
+			'image/',
+			'lib-c/',
+			'slib-a/',
+			'slib-b/',
+			'image/TOP/',
+			'image/TOP/app/',
+			'image/TOP/lib-c/',
+			'image/TOP/slib-a/',
+			'image/TOP/slib-b/',
+			'image/TOP/app/win32!release/',
+			'image/TOP/app/win32!release/app/',
+			'image/TOP/lib-c/win32!release/',
+			'image/TOP/lib-c/win32!release/lib-c/',
+			'image/TOP/slib-a/win32!release/',
+			'image/TOP/slib-a/win32!release/slib-a/',
+			'image/TOP/slib-b/win32!release/',
+			'image/TOP/slib-b/win32!release/slib-b/',
+		}
+		
 		files = {
 			'Jamfile.jam',
 			'test.lua',
@@ -87,19 +87,40 @@ function Test()
 			'slib-b/slib-b.c',
 		}
 	else
+		dirs = {
+			'app/',
+			'image/',
+			'lib-c/',
+			'slib-a/',
+			'slib-b/',
+			'image/TOP/',
+			'image/TOP/app/',
+			'image/TOP/lib-c/',
+			'image/TOP/slib-a/',
+			'image/TOP/slib-b/',
+			'image/TOP/app/macosx32!release/',
+			'image/TOP/app/macosx32!release/app/',
+			'image/TOP/lib-c/macosx32!release/',
+			'image/TOP/lib-c/macosx32!release/lib-c/',
+			'image/TOP/slib-a/macosx32!release/',
+			'image/TOP/slib-a/macosx32!release/slib-a/',
+			'image/TOP/slib-b/macosx32!release/',
+			'image/TOP/slib-b/macosx32!release/slib-b/',
+		}
 	
 		files = {
 			'Jamfile.jam',
+			'test.lua',
 			'app/Jamfile.jam',
 			'app/main.c',
-			'app/image/app.release',
+			'image/app.release',
 			'image/slib-a.release.so',
 			'image/slib-b.release.so',
-			'image/TOP/app/main.o',
-			'image/TOP/lib-c/add.o',
-			'image/TOP/lib-c/lib-c.release.a',
-			'image/TOP/slib-a/slib-a.o',
-			'image/TOP/slib-b/slib-b.o',
+			'image/TOP/app/macosx32!release/app/main.o',
+			'image/TOP/lib-c/macosx32!release/lib-c/add.o',
+			'image/TOP/lib-c/macosx32!release/lib-c/lib-c.release.a',
+			'image/TOP/slib-a/macosx32!release/slib-a/slib-a.o',
+			'image/TOP/slib-b/macosx32!release/slib-b/slib-b.o',
 			'lib-c/add.c',
 			'lib-c/add.h',
 			'lib-c/Jamfile.jam',
@@ -128,18 +149,18 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 29 target(s)...
-				*** updating 16 target(s)...
-				@ C.CC <lib-c>add.o 
-				@ C.Archive <lib-c>lib-c.a 
-				!NEXT!@ C.Ranlib <lib-c>lib-c.a 
-				@ C.CC <slib-a>slib-a.o 
-				@ C.Link <slib-a>slib-a.release.so 
-				@ C.CC <slib-b>slib-b.o 
-				@ C.Link <slib-b>slib-b.release.so 
-				@ C.CC <app>main.o 
-				@ C.Link <app>app.release 
-				*** updated 16 target(s)...
+*** found 26 target(s)...
+*** updating 15 target(s)...
+@ C.gcc.CC <macosx32!release:app>main.o 
+@ C.gcc.CC <macosx32!release:slib-a>slib-a.o 
+@ C.gcc.CC <macosx32!release:lib-c>add.o 
+@ C.gcc.Archive <macosx32!release:lib-c>lib-c.a 
+!NEXT!@ C.gcc.Ranlib <macosx32!release:lib-c>lib-c.a 
+@ C.gcc.Link <macosx32!release:slib-a>slib-a.so 
+@ C.gcc.CC <macosx32!release:slib-b>slib-b.o 
+@ C.gcc.Link <macosx32!release:slib-b>slib-b.so 
+@ C.gcc.Link <macosx32!release:app>app
+*** updated 15 target(s)...
 ]]
 		end
 
@@ -156,7 +177,7 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 29 target(s)...
+				*** found 26 target(s)...
 ]]
 		end
 		TestPattern(pattern, RunJam{})
@@ -181,13 +202,13 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 29 target(s)...
+				*** found 26 target(s)...
 				*** updating 7 target(s)...
-				@ C.CC <slib-a>slib-a.o 
-				@ C.Link <slib-a>slib-a.release.so 
-				@ C.CC <slib-b>slib-b.o 
-				@ C.Link <slib-b>slib-b.release.so 
-				@ C.Link <app>app.release 
+				@ C.gcc.CC <macosx32!release:slib-a>slib-a.o 
+				@ C.gcc.Link <macosx32!release:slib-a>slib-a.so 
+				@ C.gcc.CC <macosx32!release:slib-b>slib-b.o 
+				@ C.gcc.Link <macosx32!release:slib-b>slib-b.so 
+				@ C.gcc.Link <macosx32!release:app>app
 				*** updated 7 target(s)...
 ]]
 		end
@@ -204,7 +225,7 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 29 target(s)...
+				*** found 26 target(s)...
 ]]
 		end
 		TestPattern(pattern, RunJam{})
@@ -227,14 +248,14 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 29 target(s)...
+				*** found 26 target(s)...
 				*** updating 7 target(s)...
-				@ C.CC <lib-c>add.o 
-				@ C.Archive <lib-c>lib-c.a 
-				@ C.Ranlib <lib-c>lib-c.a 
-				@ C.Link <slib-a>slib-a.release.so 
-				@ C.Link <slib-b>slib-b.release.so 
-				@ C.Link <app>app.release 
+				@ C.gcc.CC <macosx32!release:lib-c>add.o 
+				@ C.gcc.Archive <macosx32!release:lib-c>lib-c.a 
+				@ C.gcc.Ranlib <macosx32!release:lib-c>lib-c.a 
+				@ C.gcc.Link <macosx32!release:slib-a>slib-a.so 
+				@ C.gcc.Link <macosx32!release:slib-b>slib-b.so 
+				@ C.gcc.Link <macosx32!release:app>app
 				*** updated 7 target(s)...
 ]]
 		end
@@ -251,7 +272,7 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 29 target(s)...
+				*** found 26 target(s)...
 ]]
 		end
 		TestPattern(pattern, RunJam{})
@@ -274,11 +295,11 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 29 target(s)...
+				*** found 26 target(s)...
 				*** updating 4 target(s)...
-				@ C.CC <slib-a>slib-a.o 
-				@ C.Link <slib-a>slib-a.release.so 
-				@ C.Link <app>app.release 
+				@ C.gcc.CC <macosx32!release:slib-a>slib-a.o 
+				@ C.gcc.Link <macosx32!release:slib-a>slib-a.so 
+				@ C.gcc.Link <macosx32!release:app>app
 				*** updated 4 target(s)...
 ]]
 		end
@@ -295,7 +316,7 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 29 target(s)...
+				*** found 26 target(s)...
 ]]
 		end
 		TestPattern(pattern, RunJam{})

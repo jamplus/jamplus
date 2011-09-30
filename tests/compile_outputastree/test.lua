@@ -312,31 +312,33 @@ function Test()
 
 		do
 			local pattern = [[
-*** found 52 target(s)...
+*** found 54 target(s)...
 *** updating 32 target(s)...
-@ C.C++ <liba>rootfile.o 
-@ C.C++ <liba>treea/treeb/deepfile.o 
-@ C.C++ <liba>../outer/outer.o 
-@ C.Archive <liba>liba.a 
-!NEXT!@ C.Ranlib <liba>liba.a 
-!OOOGROUP!@ C.C++ <libb>filea.o 
-!OOOGROUP!@ C.C++ <libb>fileb.o 
-!OOOGROUP!@ C.C++ <libb>filec.o 
-@ C.C++ <libb>onelevel/oneleveldeeper.o 
-@ C.C++ <libb>../outerb/outer.o 
-@ C.Archive <libb>libb.a 
-!NEXT!@ C.Ranlib <libb>libb.a 
-!OOOGROUP!@ C.C++ <libc>src/Saving/Saving1.o 
-!OOOGROUP!@ C.C++ <libc>src/Saving/Saving3.o 
-!OOOGROUP!@ C.C++ <libc>src/Saving/SavingB.o 
-!OOOGROUP!@ C.C++ <libc>src/memory/memorya.o 
-!OOOGROUP!@ C.C++ <libc>src/memory/memoryb.o 
-!OOOGROUP!@ C.C++ <libc>src/integral/integral2.o 
-!OOOGROUP!@ C.C++ <libc>src/integral/integral1.o 
-!OOOGROUP!@ C.C++ <libc>src/Loading/Loading.o 
-@ C.Archive <libc>libc.a 
-!NEXT!@ C.Ranlib <libc>libc.a 
-*** updated 32 target(s)...
+@ C.gcc.C++ <macosx32!release:liba>rootfile.o 
+@ C.gcc.C++ <macosx32!release:liba>treea/treeb/deepfile.o 
+@ C.gcc.C++ <macosx32!release:liba>../outer/outer.o 
+@ C.gcc.Archive <macosx32!release:liba>liba.a 
+!NEXT!@ C.gcc.Ranlib <macosx32!release:liba>liba.a 
+*** updated 8 target(s)...
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libb>filea.o 
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libb>fileb.o 
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libb>filec.o 
+@ C.gcc.C++ <macosx32!release:libb>onelevel/oneleveldeeper.o 
+@ C.gcc.C++ <macosx32!release:libb>../outerb/outer.o 
+@ C.gcc.Archive <macosx32!release:libb>libb.a 
+!NEXT!@ C.gcc.Ranlib <macosx32!release:libb>libb.a 
+*** updated 10 target(s)...
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/Saving/Saving1.o 
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/Saving/Saving3.o 
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/Saving/SavingB.o 
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/memory/memorya.o 
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/memory/memoryb.o 
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/integral/integral2.o 
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/integral/integral1.o 
+!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/Loading/Loading.o 
+@ C.gcc.Archive <macosx32!release:libc>libc.a 
+!NEXT!@ C.gcc.Ranlib <macosx32!release:libc>libc.a 
+*** updated 14 target(s)...
 ]]
 
 			TestPattern(pattern, RunJam{ 'liba', 'libb', 'libc' })
@@ -347,7 +349,7 @@ function Test()
 		---------------------------------------------------------------------------
 		do
 			local pattern = [[
-*** found 52 target(s)...
+*** found 54 target(s)...
 ]]
 
 			TestPattern(pattern, RunJam{ 'liba', 'libb', 'libc' })

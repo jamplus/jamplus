@@ -1,0 +1,12 @@
+C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+
+IncludeModule c-compilers/c-gcc-autodetect ;
+
+C.ToolchainHelper macosx-gcc ;
+
+C.Flags * : CC	: -g -O2 -arch x86_64 ;
+C.Flags * : C++	: -g -O2 -arch x86_64 ;
+C.Flags * : M	: -g -O2 -arch x86_64 ;
+C.Flags * : MM	: -g -O2 -arch x86_64 ;
+C.LinkFlags * : -arch x86_64 ;
+

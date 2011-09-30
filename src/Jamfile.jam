@@ -8,7 +8,7 @@
 IncludeModule copyfile ;
 
 if $(OS) = MACOSX {
-	C.MacOSX_SDK * : macosx : 10.4u ;
+	C.MacOSX_SDK * : macosx : 10.6 ;
 }
 
 if $(VMS) 		{ LOCATE_TARGET ?= [.binvms] ; }

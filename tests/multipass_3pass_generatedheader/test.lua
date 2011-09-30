@@ -59,32 +59,37 @@ Pass 3
 		else
 			pattern = [[
 Pass 1 
-*** found 9 target(s)...
-*** updating 5 target(s)...
-@ WriteFile <test>foo.cpp 
-@ C.C++ <test>foo.o 
-*** updated 2 target(s)...
+*** found 10 target(s)...
+*** updating 6 target(s)...
+@ WriteFile <macosx32!release:test>foo.cpp 
+@ C.gcc.C++ <macosx32!release:test>foo.o 
+*** updated 3 target(s)...
 Pass 2 
-*** found 19 target(s)...
-*** updating 10 target(s)...
-@ WriteFile <test>foo.h 
-@ WriteFile <test>main.cpp 
-@ C.C++ <test>main.o 
-@ C.Link <test>test.release 
+*** found 21 target(s)...
+*** updating 11 target(s)...
+@ WriteFile <macosx32!release:test>foo.h 
+@ WriteFile <macosx32!release:test>main.cpp 
+@ C.gcc.C++ <macosx32!release:test>main.o 
+@ C.gcc.Link <macosx32!release:test>test
 *** updated 5 target(s)...
 Pass 3 
-*** found 28 target(s)...
+*** found 31 target(s)...
 ]]
 
+			pass1Dirs = {
+				'macosx32!release/',
+				'macosx32!release/test/',
+			}
+
 			pass1Files = {
-				'foo.cpp',
 				'foo.h',
-				'foo.o',
 				'Jamfile.jam',
-				'main.cpp',
-				'main.o',
 				'test.lua',
-				'test.release',
+				'macosx32!release/test/foo.cpp',
+				'macosx32!release/test/foo.o',
+				'macosx32!release/test/main.cpp',
+				'macosx32!release/test/main.o',
+				'macosx32!release/test/test.release',
 			}
 		end
 
@@ -95,7 +100,9 @@ Pass 3
 	end
 
 	---------------------------------------------------------------------------
-	local cleanpattern_allpasses = [[
+	local cleanpattern_allpasses
+	if Platform == 'win32' then
+		cleanpattern_allpasses = [[
 Pass 1
 *** found 4 target(s)...
 *** updating 1 target(s)...
@@ -110,6 +117,23 @@ Pass 3
 *** found 8 target(s)...
 *** updating 1 target(s)...
 ]]
+	else
+		cleanpattern_allpasses = [[
+Pass 1
+*** found 4 target(s)...
+*** updating 1 target(s)...
+@ Clean <macosx32!release>clean:test
+*** updated 1 target(s)...
+Pass 2
+*** found 6 target(s)...
+*** updating 1 target(s)...
+@ Clean <macosx32!release>clean:test
+*** updated 1 target(s)...
+Pass 3
+*** found 8 target(s)...
+*** updating 1 target(s)...
+]]
+	end
 	TestPattern(cleanpattern_allpasses, RunJam{ 'clean' })
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)

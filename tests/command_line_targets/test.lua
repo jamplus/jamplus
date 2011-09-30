@@ -17,11 +17,9 @@ function Test()
 			'*** found 27 target(s)...',
 			'*** updating 7 target(s)...',
 			'@ C.vc.C++ <win32!release:appA>appA.obj',
-			'appA.cpp',
-			'@ C.vc.LinkWithManifest <win32!release:appA>appA.exe',
-			'@ C.vc.C++ <win32!release:appB>appB.obj',
-			'appB.cpp',
-			'@ C.vc.LinkWithManifest <win32!release:appB>appB.exe',
+			'!NEXT!@ C.vc.LinkWithManifest <win32!release:appA>appA.exe',
+			'!NEXT!@ C.vc.C++ <win32!release:appB>appB.obj',
+			'!NEXT!@ C.vc.LinkWithManifest <win32!release:appB>appB.exe',
 			'*** updated 7 target(s)...',
 		}
 
@@ -59,8 +57,7 @@ Building appA...
 *** found 14 target(s)...
 *** updating 4 target(s)...
 @ C.vc.C++ <win32!release:appA>appA.obj
-appA.cpp
-@ C.vc.LinkWithManifest <win32!release:appA>appA.exe
+!NEXT!@ C.vc.LinkWithManifest <win32!release:appA>appA.exe
 *** updated 4 target(s)...
 ]]
 
@@ -79,8 +76,7 @@ Building appB...
 *** found 14 target(s)...
 *** updating 3 target(s)...
 @ C.vc.C++ <win32!release:appB>appB.obj
-appB.cpp
-@ C.vc.LinkWithManifest <win32!release:appB>appB.exe
+!NEXT!@ C.vc.LinkWithManifest <win32!release:appB>appB.exe
 *** updated 3 target(s)...
 ]]
 
@@ -118,31 +114,36 @@ appB.cpp
 		local run1pattern = [[
 Building appA... 
 Building appB... 
-*** found 12 target(s)...
-*** updating 4 target(s)...
-@ C.C++ <appA>appA.o 
-@ C.Link <appA>appA.release$(SUFEXE) 
-@ C.C++ <appB>appB.o 
-@ C.Link <appB>appB.release$(SUFEXE) 
-*** updated 4 target(s)...
+*** found 15 target(s)...
+*** updating 6 target(s)...
+@ C.gcc.C++ <macosx32!release:appA>appA.o 
+@ C.gcc.Link <macosx32!release:appA>appA$(SUFEXE) 
+@ C.gcc.C++ <macosx32!release:appB>appB.o 
+@ C.gcc.Link <macosx32!release:appB>appB$(SUFEXE) 
+*** updated 6 target(s)...
 ]]
 
 		TestPattern(run1pattern, RunJam())
 
 		TestFiles{
+			'appA.cpp',
+			'appB.cpp',
 			'Jamfile.jam',
-			'appA.cpp', 'appA.o', 'appA.release$(SUFEXE)',
-			'appB.cpp', 'appB.o', 'appB.release$(SUFEXE)',
+			'test.lua',
+			'macosx32!release/appA/appA.o',
+			'macosx32!release/appA/appA.release',
+			'macosx32!release/appB/appB.o',
+			'macosx32!release/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
 		local cleanPattern = [[
 Building appA... 
 Building appB... 
-*** found 4 target(s)...
+*** found 6 target(s)...
 *** updating 2 target(s)...
-@ Clean clean:appA 
-@ Clean clean:appB 
+@ Clean <macosx32!release>clean:appA 
+@ Clean <macosx32!release>clean:appB 
 *** updated 2 target(s)...
 ]]
 		TestPattern(cleanPattern, RunJam{ 'clean' })
@@ -151,43 +152,54 @@ Building appB...
 		---------------------------------------------------------------------------
 		local appAPattern = [[
 Building appA... 
-*** found 6 target(s)...
-*** updating 2 target(s)...
-@ C.C++ <appA>appA.o 
-@ C.Link <appA>appA.release$(SUFEXE) 
-*** updated 2 target(s)...
+*** found 7 target(s)...
+*** updating 3 target(s)...
+@ C.gcc.C++ <macosx32!release:appA>appA.o 
+@ C.gcc.Link <macosx32!release:appA>appA$(SUFEXE) 
+*** updated 3 target(s)...
 ]]
 
 		TestPattern(appAPattern, RunJam{ 'appA' })
 		TestFiles{
-			'Jamfile.jam',
-			'appA.cpp', 'appA.o', 'appA.release$(SUFEXE)',
+			'appA.cpp',
 			'appB.cpp',
+			'Jamfile.jam',
+			'test.lua',
+			'macosx32!release/appA/appA.o',
+			'macosx32!release/appA/appA.release',
 		}
 
 		---------------------------------------------------------------------------
 		local appBPattern = [[
 Building appB... 
-*** found 6 target(s)...
-*** updating 2 target(s)...
-@ C.C++ <appB>appB.o 
-@ C.Link <appB>appB.release$(SUFEXE)
-*** updated 2 target(s)...
+*** found 7 target(s)...
+*** updating 3 target(s)...
+@ C.gcc.C++ <macosx32!release:appB>appB.o 
+@ C.gcc.Link <macosx32!release:appB>appB$(SUFEXE)
+*** updated 3 target(s)...
 ]]
 
 		TestPattern(appBPattern, RunJam{ 'appB' })
 		TestFiles{
+			'appA.cpp',
+			'appB.cpp',
 			'Jamfile.jam',
-			'appA.cpp', 'appA.o', 'appA.release$(SUFEXE)',
-			'appB.cpp', 'appB.o', 'appB.release$(SUFEXE)',
+			'test.lua',
+			'macosx32!release/appA/appA.o',
+			'macosx32!release/appA/appA.release',
+			'macosx32!release/appB/appB.o',
+			'macosx32!release/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
 		RunJam{ 'clean:appA' }
 		TestFiles{
-			'Jamfile.jam',
 			'appA.cpp',
-			'appB.cpp', 'appB.o', 'appB.release$(SUFEXE)',
+			'appB.cpp',
+			'Jamfile.jam',
+			'test.lua',
+			'macosx32!release/appB/appB.o',
+			'macosx32!release/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------

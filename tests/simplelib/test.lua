@@ -24,16 +24,7 @@ function Test()
 	end
 
 	---------------------------------------------------------------------------
-	local dirs =
-	{
-		'app/',
-		'lib-a/',
-		'app/win32!release/',
-		'app/win32!release/app/',
-		'lib-a/win32!release/',
-		'lib-a/win32!release/lib-a/',
-	}
-	
+	local dirs
 	local files
 	local patternA
 	local patternB
@@ -41,6 +32,16 @@ function Test()
 	local patternD
 	
 	if Platform == 'win32' then
+		dirs =
+		{
+			'app/',
+			'lib-a/',
+			'app/win32!release/',
+			'app/win32!release/app/',
+			'lib-a/win32!release/',
+			'lib-a/win32!release/lib-a/',
+		}
+
 		files = {
 			'Jamfile.jam',
 			'test.lua',
@@ -84,28 +85,38 @@ function Test()
 ]]
 
 	else
+		dirs = {
+			'app/',
+			'lib-a/',
+			'app/macosx32!release/',
+			'app/macosx32!release/app/',
+			'lib-a/macosx32!release/',
+			'lib-a/macosx32!release/lib-a/',
+		}
+
 		files = {
 			'Jamfile.jam',
-			'app/app.release',
+			'test.lua',
 			'app/Jamfile.jam',
 			'app/main.c',
-			'app/main.o',
+			'app/macosx32!release/app/app.release',
+			'app/macosx32!release/app/main.o',
 			'lib-a/add.c',
 			'lib-a/add.h',
-			'lib-a/add.o',
 			'lib-a/Jamfile.jam',
-			'lib-a/lib-a.release.a',
+			'lib-a/macosx32!release/lib-a/add.o',
+			'lib-a/macosx32!release/lib-a/lib-a.release.a',
 		}
 
 		patternA = [[
 *** found 12 target(s)...
-*** updating 4 target(s)...
-@ C.CC <lib-a>add.o 
-@ C.Archive <lib-a>lib-a.a 
-!NEXT!@ C.Ranlib <lib-a>lib-a.a 
-@ C.CC <app>main.o 
-@ C.Link <app>app.release 
-*** updated 4 target(s)...
+*** updating 6 target(s)...
+@ C.gcc.CC <macosx32!release:app>main.o 
+@ C.gcc.CC <macosx32!release:lib-a>add.o 
+@ C.gcc.Archive <macosx32!release:lib-a>lib-a.a 
+!NEXT!@ C.gcc.Ranlib <macosx32!release:lib-a>lib-a.a 
+@ C.gcc.Link <macosx32!release:app>app
+*** updated 6 target(s)...
 ]]
 
 		patternB = [[
@@ -115,8 +126,8 @@ function Test()
 		patternC = [[
 *** found 12 target(s)...
 *** updating 2 target(s)...
-@ C.CC <app>main.o 
-@ C.Link <app>app.release 
+@ C.gcc.CC <macosx32!release:app>main.o 
+@ C.gcc.Link <macosx32!release:app>app
 *** updated 2 target(s)...
 ]]
 

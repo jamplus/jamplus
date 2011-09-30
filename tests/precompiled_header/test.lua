@@ -106,39 +106,41 @@ function Test()
 	else
 		pass1Directories = {
 			'includes/',
-			'mypch%-%x+/',
+			'macosx32!release/',
+			'macosx32!release/main/',
+			'macosx32!release/main/mypch%-%x+/',
 		}
 
 		pass1Files = {
 			'Jamfile.jam',
 			'main.cpp',
-			'main.o',
-			'main.release',
 			'mypch.cpp',
-			'mypch.o',
 			'test.lua',
 			'includes/mypch.h',
 			'includes/usefuldefine.h',
-			'mypch%-%x+/mypch.h.gch',
+			'macosx32!release/main/main.o',
+			'macosx32!release/main/main.release',
+			'macosx32!release/main/mypch.o',
+			'macosx32!release/main/mypch%-%x+/mypch.h.gch',
 		}
 
 		pass1Pattern = [[
-			*** found 14 target(s)...
-			*** updating 5 target(s)...
-			&@ C.PCH <main%-%x+>mypch.h.gch
-			@ C.C++ <main>main.o 
-			@ C.C++ <main>mypch.o 
-			@ C.Link <main>main.release 
-			*** updated 5 target(s)...
+			*** found 15 target(s)...
+			*** updating 6 target(s)...
+			&@ C.gcc.PCH <macosx32!release:main%-%x+>mypch.h.gch
+			@ C.gcc.C++ <macosx32!release:main>main.o 
+			@ C.gcc.C++ <macosx32!release:main>mypch.o 
+			@ C.gcc.Link <macosx32!release:main>main
+			*** updated 6 target(s)...
 ]]
 
 		pass2Pattern = [[
-			*** found 14 target(s)...
+			*** found 15 target(s)...
 			*** updating 4 target(s)...
-			&@ C.PCH <main%-%x+>mypch.h.gch
-			@ C.C++ <main>main.o 
-			@ C.C++ <main>mypch.o 
-			@ C.Link <main>main.release 
+			&@ C.gcc.PCH <macosx32!release:main%-%x+>mypch.h.gch
+			@ C.gcc.C++ <macosx32!release:main>main.o 
+			@ C.gcc.C++ <macosx32!release:main>mypch.o 
+			@ C.gcc.Link <macosx32!release:main>main
 			*** updated 4 target(s)...
 ]]
 	end
@@ -155,7 +157,7 @@ function Test()
 ]]
 	else
 		pattern2 = [[
-*** found 14 target(s)...
+*** found 15 target(s)...
 ]]
 	end
 	TestPattern(pattern2, RunJam{})

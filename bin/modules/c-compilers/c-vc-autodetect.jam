@@ -104,11 +104,9 @@ rule FindVisualStudioHelper VERSION {
 	NOARSCAN on $(C.COMPILER_SUITE_SYMBOL) = true ;
 	NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
 
-#	if $(C.PLATFORM) != *  &&  $(CONFIG) != * {
-#		IncludeModule c-compilers/$(PLATFORM)-vc ;
-#	}
-
-	IncludeModule c-compilers/$(C.PLATFORM)-vc ;
+	if $(C.PLATFORM) != *  &&  $(CONFIG) != * {
+		IncludeModule c-compilers/$(PLATFORM)-vc ;
+	}
 
 	C.$(C.PLATFORM).vc.AutoDetect $(compiler) ;
 

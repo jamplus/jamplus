@@ -597,10 +597,8 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 
 	local linkFlags =
 		[ C.$(C.COMPILER_SUITE).FLibraryPaths $(linkDirectories) $(C.STDLINKDIRECTORIES) ]
-	;
-
-	on $(C.ACTIVE_TOOLCHAIN_*) linkFlags += $(LINKFLAGS) ;
-	on $(C.ACTIVE_TOOLCHAIN_TARGET) linkFlags += $(LINKFLAGS) ;
+		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
 	local linkRule = C.$(C.COMPILER_SUITE).Link ;
 
@@ -611,17 +609,14 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 		C.$(C.COMPILER_SUITE)._ApplicationFromObjects_LinkFlags ;
 	}
 
-	local linkLibs ;
-	local needLibs ;
-
-	on $(TARGET:G=$(C.ACTIVE_TOOLCHAIN)) {
-		linkLibs += $(LINKLIBS) ;
-		needLibs += $(NEEDLIBS) ;
-	}
-	on @(C.*:G=$(C.ACTIVE_TOOLCHAIN)) {
-		linkLibs += $(LINKLIBS) ;
-		needLibs += $(NEEDLIBS) ;
-	}
+	local linkLibs =
+		$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+		$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+	;
+	local needLibs =
+		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+	;
 
 	SEARCH on $(linkLibs) += $(linkDirectories) $(C.STDLINKDIRECTORIES) ;
 	LINKLIBS on $(_linkTargets) = $(linkLibs) ;
@@ -753,7 +748,7 @@ rule C._LibraryFromObjects OBJECTS {
 	UseFileCache $(_l) : code ;
 	C.$(C.COMPILER_SUITE).Archive $(_l) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
 
-	if $(C.$(C.COMPILER_SUITE).RANLIB) { C.$(C.COMPILER_SUITE).Ranlib $(_l) : : $(C.COMPILER_SUITE_SYMBOL) ; }
+	if $(C.RANLIB) { C.$(C.COMPILER_SUITE).Ranlib $(_l) : : $(C.COMPILER_SUITE_SYMBOL) ; }
 
 	# If we can't scan the library, we have to leave the .o's around.
 

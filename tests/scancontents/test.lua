@@ -68,40 +68,45 @@ function Test()
 !NEXT!*** updated 3 target(s)...
 ]]
 	else
+		dirs = {
+			'macosx32!release/',
+			'macosx32!release/test/',
+		}
+
 		noDepCacheFiles = {
 			'generated.h',
 			'Jamfile.jam',
 			'main.c',
 			'main.h',
-			'main.o',
 			'test.c',
 			'test.lua',
-			'test.o',
-			'test.release',
+			'macosx32!release/test/main.o',
+			'macosx32!release/test/test.o',
+			'macosx32!release/test/test.release',
 		}
 		
 		patternA = [[
-*** found 11 target(s)...
-*** updating 4 target(s)...
-@ C.CC <test>main.o 
-@ C.CC <test>test.o 
-@ C.Link <test>test.release 
-*** updated 4 target(s)...
+*** found 13 target(s)...
+*** updating 5 target(s)...
+@ C.gcc.CC <macosx32!release:test>main.o 
+@ C.gcc.CC <macosx32!release:test>test.o 
+@ C.gcc.Link <macosx32!release:test>test
+*** updated 5 target(s)...
 ]]
 
 		patternB = [[
-*** found 11 target(s)...
+*** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.CC <test>main.o 
-@ C.Link <test>test.release 
+@ C.gcc.CC <macosx32!release:test>main.o 
+@ C.gcc.Link <macosx32!release:test>test
 *** updated 3 target(s)...
 ]]
 
 		patternC = [[
-*** found 11 target(s)...
+*** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.CC <test>main.o 
-@ C.Link <test>test.release 
+@ C.gcc.CC <macosx32!release:test>main.o 
+@ C.gcc.Link <macosx32!release:test>test
 *** updated 3 target(s)...
 ]]
 	end
@@ -197,47 +202,47 @@ function Test()
 			'Jamfile.jam',
 			'main.c',
 			'main.h',
-			'main.o',
 			'test.c',
 			'test.lua',
-			'test.o',
-			'test.release',
+			'macosx32!release/test/main.o',
+			'macosx32!release/test/test.o',
+			'macosx32!release/test/test.release',
 		}
 		
 		patternA = [[
-*** found 11 target(s)...
-*** updating 4 target(s)...
-@ C.CC <test>main.o 
-@ C.CC <test>test.o 
-@ C.Link <test>test.release 
-*** updated 4 target(s)...
+*** found 13 target(s)...
+*** updating 5 target(s)...
+@ C.gcc.CC <macosx32!release:test>main.o 
+@ C.gcc.CC <macosx32!release:test>test.o 
+@ C.gcc.Link <macosx32!release:test>test
+*** updated 5 target(s)...
 ]]
 
 		patternB = [[
-*** found 19 target(s)...
+*** found 13 target(s)...
 *** updating 3 target(s)...
 *** updated 1 target(s)...
 ]]
 
 		patternC = [[
-*** found 11 target(s)...
+*** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.CC <test>main.o 
-@ C.Link <test>test.release 
+@ C.gcc.CC <macosx32!release:test>main.o 
+@ C.gcc.Link <macosx32!release:test>test
 *** updated 3 target(s)...
 ]]
 
 		patternD = [[
-*** found 11 target(s)...
+*** found 13 target(s)...
 *** updating 3 target(s)...
 *** updated 1 target(s)...
 ]]
 
 		patternE = [[
-*** found 11 target(s)...
+*** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.CC <test>main.o 
-@ C.Link <test>test.release 
+@ C.gcc.CC <macosx32!release:test>main.o 
+@ C.gcc.Link <macosx32!release:test>test
 *** updated 3 target(s)...
 ]]
 	end

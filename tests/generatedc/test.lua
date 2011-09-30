@@ -70,34 +70,41 @@ file.c
 		TestDirectories(pass1Dirs)
 
 	else
-        error("Not created on non-Windows platforms yet")
 		-- First build
 		local pattern = [[
-*** found 9 target(s)...
-*** updating 3 target(s)...
-@ C.CC <helloworld>main.o
-@ C.CC <helloworld>file.o
-@ C.Link <helloworld>helloworld.release
-*** updated 3 target(s)...
+*** found 11 target(s)...
+*** updating 5 target(s)...
+@ C.gcc.CC <macosx32!release:helloworld>main.o 
+@ GenerateCFile <macosx32!release:helloworld>file.c 
+@ C.gcc.CC <macosx32!release:helloworld>file.o 
+@ C.gcc.Link <macosx32!release:helloworld>helloworld 
+*** updated 5 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
 
+		local pass1Dirs = {
+			'macosx32!release/',
+			'macosx32!release/helloworld/',
+		}
+
 		local pass1Files =
 		{
-			'Jamfile.jam',
 			'file.c',
-			'file.o',
-			'helloworld.release',
+			'file.txt',
+			'Jamfile.jam',
 			'main.c',
-			'main.o',
+			'test.lua',
+			'macosx32!release/helloworld/file.o',
+			'macosx32!release/helloworld/helloworld.release',
+			'macosx32!release/helloworld/main.o',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 9 target(s)...
+*** found 11 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 
@@ -105,15 +112,15 @@ file.c
 		os.touch('file.c')
 
 		local pattern3 = [[
-*** found 9 target(s)...
+*** found 11 target(s)...
 *** updating 2 target(s)...
-@ C.CC <helloworld>file.o
-@ C.Link <helloworld>helloworld.release
+@ C.gcc.CC <macosx32!release:helloworld>file.o
+@ C.gcc.Link <macosx32!release:helloworld>helloworld
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Dirs)
 	end
 
 	RunJam{ 'clean' }

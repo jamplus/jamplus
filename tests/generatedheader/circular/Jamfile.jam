@@ -8,7 +8,6 @@ actions lua SleepThenTouch
     require 'ex'
     os.sleep(5)
     local file = io.open([[$(<)]], 'wb')
-	print(file)
 	file:close()
 }
 

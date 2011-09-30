@@ -1,7 +1,13 @@
 SubDir TOP ;
 
-actions GenerateCFile {
-	copy $(2:C) $(1:C)
+if $(NT) {
+	actions GenerateCFile {
+		copy $(2:C) $(1:C)
+	}
+} else {
+	actions GenerateCFile {
+		cp $(2:C) $(1:C)
+	}
 }
 
 C.ActiveTarget helloworld ;

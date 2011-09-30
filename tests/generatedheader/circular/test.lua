@@ -72,15 +72,15 @@ function Test()
 		local pattern = [[
 *** found 11 target(s)...
 *** updating 4 target(s)...
-@ SleepThenTouch <foo>generated.h 
-@ C.CC <foo>sourceA.o 
-@ C.CC <foo>sourceB.o 
-@ C.Archive <foo>foo.a 
-!NEXT!@ C.Ranlib <foo>foo.a 
+@ SleepThenTouch <macosx32!release:foo>generated.h 
+@ C.gcc.CC <macosx32!release:foo>sourceA.o 
+@ C.gcc.CC <macosx32!release:foo>sourceB.o 
+@ C.gcc.Archive <macosx32!release:foo>foo.a 
+!NEXT!@ C.gcc.Ranlib <macosx32!release:foo>foo.a 
 !NEXT!*** updated 4 target(s)...
 ]]
 
-		TestPattern(pattern, RunJam())
+		TestPattern(pattern, RunJam{ 'foo' })
 
 		local pass1Files =
 		{
@@ -103,7 +103,7 @@ function Test()
 		local pattern2 = [[
 *** found 11 target(s)...
 ]]
-		TestPattern(pattern2, RunJam())
+		TestPattern(pattern2, RunJam{ 'foo' })
 
 		os.sleep(1.0)
 		os.touch('generated.h')
@@ -117,7 +117,7 @@ function Test()
 @ C.Ranlib <foo>foo.a 
 !NEXT!*** updated 3 target(s)...
 ]]
-		TestPattern(pattern3, RunJam())
+		TestPattern(pattern3, RunJam{ 'foo' })
 
 	end
 

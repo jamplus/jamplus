@@ -69,32 +69,37 @@ function Test()
 
 		-- First build
 		local pattern = [[
-*** found 10 target(s)...
-*** updating 4 target(s)...
-@ C.CC <test>main.o 
-@ C.CC <test>test.o 
-@ C.Link <test>test.release 
-*** updated 4 target(s)...
+*** found 11 target(s)...
+*** updating 5 target(s)...
+@ C.gcc.CC <macosx32!release:test>main.o 
+@ C.gcc.CC <macosx32!release:test>test.o 
+@ C.gcc.Link <macosx32!release:test>test 
+*** updated 5 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
 
-		local pass1Files =
-		{
-			'Jamfile.jam',
-			'main.c',
-			'main.o',
-			'test.c',
-			'test.h',
-			'test.o',
-			'test.release',
+		local pass1Dirs = { 
+			'macosx32!release/',
+			'macosx32!release/test/',
 		}
 
+		local pass1Files = { 
+			'Jamfile.jam',
+			'main.c',
+			'test.c',
+			'test.h',
+			'test.lua',
+			'macosx32!release/test/main.o',
+			'macosx32!release/test/test.o',
+			'macosx32!release/test/test.release',
+		}	
+
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 10 target(s)...
+*** found 11 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 
@@ -102,10 +107,10 @@ function Test()
 		os.touch('test.h')
 
 		local pattern3 = [[
-*** found 10 target(s)...
+*** found 11 target(s)...
 *** updating 2 target(s)...
-@ C.CC <test>main.o 
-@ C.Link <test>test.release 
+@ C.gcc.CC <macosx32!release:test>main.o 
+@ C.gcc.Link <macosx32!release:test>test 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

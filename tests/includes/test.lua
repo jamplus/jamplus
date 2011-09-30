@@ -108,38 +108,47 @@ function Test()
 
 		-- First build
 		local pattern = [[
-*** found 17 target(s)...
-*** updating 5 target(s)...
-@ C.C++ <common>print.o 
-@ C.Archive <common>common.a 
-!NEXT!@ C.Ranlib <common>common.a 
-@ C.C++ <project1>project1.o 
-@ C.C++ <project1>adefine.o 
-@ C.Link <project1>project1.release 
-*** updated 5 target(s)...
+*** updating 7 target(s)...
+@ C.gcc.C++ <macosx32!release:project1>project1.o 
+@ C.gcc.C++ <macosx32!release:project1>adefine.o 
+@ C.gcc.C++ <macosx32!release:common>print.o 
+@ C.gcc.Archive <macosx32!release:common>common.a 
+!NEXT!@ C.gcc.Ranlib <macosx32!release:common>common.a 
+@ C.gcc.Link <macosx32!release:project1>project1 
+*** updated 7 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
 
-		local pass1Files =
-		{
+		local pass1Dirs = {
+			'common/',
+			'project1/',
+			'shared/',
+			'common/macosx32!release/',
+			'common/macosx32!release/common/',
+			'project1/macosx32!release/',
+			'project1/macosx32!release/project1/',
+		}
+
+		local pass1Files = {
 			'Jamfile.jam',
+			'test.lua',
 			'common/common.jam',
-			'common/common.release.a',
 			'common/print.cpp',
 			'common/print.h',
-			'common/print.o',
+			'common/macosx32!release/common/common.release.a',
+			'common/macosx32!release/common/print.o',
 			'project1/adefine.cpp',
-			'project1/adefine.o',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/project1.o',
-			'project1/project1.release',
+			'project1/macosx32!release/project1/adefine.o',
+			'project1/macosx32!release/project1/project1.o',
+			'project1/macosx32!release/project1/project1.release',
 			'shared/adefine.h',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
 *** found 17 target(s)...
@@ -152,13 +161,13 @@ function Test()
 		local pattern3 = [[
 *** found 17 target(s)...
 *** updating 2 target(s)...
-@ C.C++ <project1>project1.o 
-@ C.Link <project1>project1.release 
+@ C.gcc.C++ <macosx32!release:project1>project1.o 
+@ C.gcc.Link <macosx32!release:project1>project1 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Dirs)
 
 		os.sleep(1.0)
 		os.touch('shared/adefine.h')
@@ -166,13 +175,13 @@ function Test()
 		local pattern4 = [[
 *** found 17 target(s)...
 *** updating 2 target(s)...
-@ C.C++ <project1>adefine.o 
-@ C.Link <project1>project1.release 
+@ C.gcc.C++ <macosx32!release:project1>adefine.o 
+@ C.gcc.Link <macosx32!release:project1>project1 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern4, RunJam())
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Dirs)
 
 	end
 

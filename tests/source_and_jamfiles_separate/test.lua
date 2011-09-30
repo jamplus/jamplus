@@ -63,16 +63,22 @@ function Test()
 		dirs = {
 			'jam/',
 			'src/',
-			'jam/precomp%-%x+/',
+			'jam/macosx32!release/',
+			'jam/macosx32!release/helloworld/',
+			'jam/macosx32!release/helloworld/precomp%-%x+/',
 		}
 
 		files = {
-			'jam/createprecomp.o',
-			'jam/file.o',
-			'jam/helloworld.release',
+			'src/createprecomp.c',
+			'src/file.c',
+			'src/main.c',
+			'src/precomp.h',
 			'jam/Jamfile.jam',
-			'jam/main.o',
-			'jam/precomp%-%x+/precomp.h.gch',
+			'jam/macosx32!release/helloworld/createprecomp.o',
+			'jam/macosx32!release/helloworld/file.o',
+			'jam/macosx32!release/helloworld/helloworld.release',
+			'jam/macosx32!release/helloworld/main.o',
+			'jam/macosx32!release/helloworld/precomp%-%x+/precomp.h.gch',
 			'src/createprecomp.c',
 			'src/file.c',
 			'src/main.c',
@@ -80,14 +86,14 @@ function Test()
 		}
 		
 		pattern = [[
-			*** found 16 target(s)...
-			*** updating 6 target(s)...
-			&@ C.PCH <helloworld%-%x+>precomp.h.gch 
-			@ C.CC <helloworld>../src/file.o 
-			@ C.CC <helloworld>../src/main.o 
-			@ C.CC <helloworld>../src/createprecomp.o 
-			@ C.Link <helloworld>helloworld.release 
-			*** updated 6 target(s)...
+			*** found 17 target(s)...
+			*** updating 7 target(s)...
+			&@ C.gcc.PCH <macosx32!release:helloworld%-%x+>precomp.h.gch 
+			@ C.gcc.CC <macosx32!release:helloworld>../src/file.o 
+			@ C.gcc.CC <macosx32!release:helloworld>../src/main.o 
+			@ C.gcc.CC <macosx32!release:helloworld>../src/createprecomp.o 
+			@ C.gcc.Link <macosx32!release:helloworld>helloworld 
+			*** updated 7 target(s)...
 ]]
 	
 	end
@@ -106,7 +112,7 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 16 target(s)...
+				*** found 17 target(s)...
 ]]
 		end
 		TestPattern(pattern, RunJam{ '-Cjam' })
@@ -130,13 +136,13 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 16 target(s)...
+				*** found 17 target(s)...
 				*** updating 5 target(s)...
-				&@ C.PCH <helloworld%-%x+>precomp.h.gch 
-				@ C.CC <helloworld>../src/file.o 
-				@ C.CC <helloworld>../src/main.o 
-				@ C.CC <helloworld>../src/createprecomp.o 
-				@ C.Link <helloworld>helloworld.release 
+				&@ C.gcc.PCH <macosx32!release:helloworld%-%x+>precomp.h.gch 
+				@ C.gcc.CC <macosx32!release:helloworld>../src/file.o 
+				@ C.gcc.CC <macosx32!release:helloworld>../src/main.o 
+				@ C.gcc.CC <macosx32!release:helloworld>../src/createprecomp.o 
+				@ C.gcc.Link <macosx32!release:helloworld>helloworld
 				*** updated 5 target(s)...
 ]]
 		end
@@ -154,7 +160,7 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 16 target(s)...
+				*** found 17 target(s)...
 ]]
 		end
 		TestPattern(pattern, RunJam{ '-Cjam' })
@@ -178,10 +184,10 @@ function Test()
 ]]
 		else
 			pattern = [[
-				*** found 16 target(s)...
+				*** found 17 target(s)...
 				*** updating 2 target(s)...
-				@ C.CC <helloworld>../src/createprecomp.o 
-				@ C.Link <helloworld>helloworld.release 
+				@ C.gcc.CC <macosx32!release:helloworld>../src/createprecomp.o 
+				@ C.gcc.Link <macosx32!release:helloworld>helloworld
 				*** updated 2 target(s)...
 ]]
 		end
