@@ -73,8 +73,6 @@ rule LocateTarget TARGET : DIRECTORY {
 	C.ActiveTarget $(TARGET) ;
 	LOCATE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(DIRECTORY) ;
 	LOCATE_TARGET = $(DIRECTORY) ;
-	Echo LOCATE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) \= $(DIRECTORY) ;
-	Echo LOCATE_TARGET \= $(DIRECTORY) ;
 }
 
 
@@ -192,12 +190,8 @@ rule C.AddBuildExtensions COMPILER_SUITE : TYPE : EXTS : RULE : SUFOBJ : ADD_TO_
 
 rule C._MultiCppCompile_ObjName_Pass1_OutputAsTree {
 	local outputAsTree_obj = [ Subst $(_obj) : %.%. : __ ] ;
-	Echo $(_obj) - $(outputAsTree_obj) ;
 	outputAsTree_obj = [ Subst $(outputAsTree_obj) : \: : -- ] ;
-	Echo $(_obj) - $(outputAsTree_obj) ;
-	Echo LOCATE_TARGET - $(LOCATE_TARGET) ;
 	local _objdir = $(outputAsTree_obj:DR=$(LOCATE_TARGET)) ;
-	Echo $(_obj) ------> $(_objdir) ;
 	MakeLocate $(_obj) : $(_objdir) ;
 	_postmflags = "/c \"/Fo$(_objdir:\\)\\\\\" \"/Fd$(_VCPDB:T)\"" ;
 }

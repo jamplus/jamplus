@@ -389,9 +389,9 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
 	}
 
-	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(isysroot) ;	
-	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION) ;
-	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION_MIN) ;
+	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;	
+	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
+	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION_MIN) ;
 
 	flags += -fvisibility=hidden -gdwarf-2 ;
 
@@ -438,7 +438,7 @@ rule C._BundleInfoString KEY : VALUE {
 rule C.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST) {
-		INFO_PLIST on $(TARGET) ?= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+		INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) ?= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
 <plist version=\"1.0\">
 <dict>
@@ -533,7 +533,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 }
 
 
-rule C._ApplicationFromObjects_LinkFlags {
+rule C.gcc._ApplicationFromObjects_LinkFlags {
 	if bundle in $(OPTIONS) {
 		local outputName = [ C._retrieveOutputName ] ;
 		local bundlePath = $(outputPath)/$(outputName).app ;
@@ -561,9 +561,9 @@ actions C._GenerateDSYMFile {
 
 rule C.GenerateDSYMFile TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	local _t = $(_t:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local dsymBundlePath = $(bundlePath).dSYM ;
+	Echo $(dsymBundlePath) ;
 	local _t.dsym = $(_t).DSYM ;
 	BINDING on $(_t) = $(_t:BS) ;
 	BINDING on $(_t.dsym) = $(_t:BS) ;
@@ -588,7 +588,7 @@ actions ProcessEntitlements
 	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" -e "s/<key>keychain-access-groups/$(GET_TASK_ALLOW:E="")<key>keychain-access-groups/g" $(1)
 }
 
-rule C._ApplicationFromObjects_PostBuild {
+rule C.gcc._ApplicationFromObjects_PostBuild {
 	if bundle in $(OPTIONS) {
 		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -596,7 +596,7 @@ rule C._ApplicationFromObjects_PostBuild {
 		local isysroot $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-		local pkginfo = @(PkgInfo:G=$(grist)) ;
+		local pkginfo = @(PkgInfo:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
 		MakeLocate $(pkginfo) : $(bundlePath) ;
 		local contents = APPL???? ;
 		CONTENTS on $(pkginfo) = $(contents) ;
@@ -612,7 +612,7 @@ rule C._ApplicationFromObjects_PostBuild {
 " ;
 			infoplistcontents = $(infoplistcontents:J="") ;
 
-			local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
 			MakeLocate $(infoplist) : $(bundlePath) ;
 			CONTENTS on $(infoplist) = $(infoplistcontents) ;
 			WriteFile $(infoplist) ;

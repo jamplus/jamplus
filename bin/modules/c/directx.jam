@@ -1,13 +1,11 @@
 DXSDK_DIR = $(DXSDK_DIR:J=$(SPACE)) ;
 
-rule C.UseDirectX TARGET : OPTIONS
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+rule C.UseDirectX TARGET : OPTIONS {
+	ActiveTarget $(TARGET) ;
 
-	C.IncludeDirectories $(TARGET) : "$(DXSDK_DIR)Include" ;
+	C.IncludeDirectories $(C.ACTIVE_TOOLCHAIN_TARGET) : "$(DXSDK_DIR)Include" ;
 
-	if link in $(OPTIONS)
-	{
-		C.LinkDirectories $(TARGET) : "$(DXSDK_DIR)/Lib/x86" ;
+	if link in $(OPTIONS) {
+		C.LinkDirectories $(C.ACTIVE_TOOLCHAIN_TARGET) : "$(DXSDK_DIR)/Lib/x86" ;
 	}
 }

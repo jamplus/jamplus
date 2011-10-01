@@ -1,30 +1,24 @@
 if ! $(TARGETINFO_LOCATE)
 {
 
-rule CopyFile PARENT : TARGET : SOURCE
-{
-	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
-	Depends $(PARENT) : $(TARGET) : $(SOURCE) ;
+rule CopyFile PARENT : TARGET : SOURCE {
+	PARENT = [ ActiveTarget $(PARENT) ] ;
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(TARGET) : $(SOURCE) ;
 	SearchSource $(SOURCE) : $(SEARCH_SOURCE) ;
 	on $(TARGET) if ! $(LOCATE) {
 		MakeLocate $(TARGET) : $(TARGET:D) ;
 		BINDING on $(TARGET) = $(TARGET:BS) ;
 	}
 	CopyFile1 $(TARGET) : $(SOURCE) ;
-	Clean clean:$(PARENT) : $(TARGET) ;
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(TARGET) ;
 }
 
-if $(NT)
-{
-	actions CopyFile1
-	{
+if $(NT) {
+	actions CopyFile1 {
 		$(CP) "$(2:\\)" "$(1:\\)"
 	}
-}
-else
-{
-	actions CopyFile1
-	{
+} else {
+	actions CopyFile1 {
 		$(CP) "$(2)" "$(1)"
 	}
 }
@@ -32,15 +26,12 @@ else
 
 rule CopyFiles PARENT : DESTINATION_PATH : SOURCE {
 	local filename ;
-	for filename in $(SOURCE)
-	{
+	for filename in $(SOURCE) {
 		CopyFile $(PARENT) : $(DESTINATION_PATH)/$(filename:BS) : $(filename) ;
 	}
 }
 
-}
-else
-{
+} else {
 
 rule CopyFile
 {
