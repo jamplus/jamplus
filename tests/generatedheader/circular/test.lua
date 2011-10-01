@@ -72,11 +72,11 @@ function Test()
 		local pattern = [[
 *** found 11 target(s)...
 *** updating 4 target(s)...
-@ SleepThenTouch <macosx32!release:foo>generated.h 
-@ C.gcc.CC <macosx32!release:foo>sourceA.o 
-@ C.gcc.CC <macosx32!release:foo>sourceB.o 
-@ C.gcc.Archive <macosx32!release:foo>foo.a 
-!NEXT!@ C.gcc.Ranlib <macosx32!release:foo>foo.a 
+@ SleepThenTouch <$(PLATFORM_CONFIG):foo>generated.h 
+@ C.gcc.CC <$(PLATFORM_CONFIG):foo>sourceA.o 
+@ C.gcc.CC <$(PLATFORM_CONFIG):foo>sourceB.o 
+@ C.gcc.Archive <$(PLATFORM_CONFIG):foo>foo.a 
+!NEXT!@ C.gcc.Ranlib <$(PLATFORM_CONFIG):foo>foo.a 
 !NEXT!*** updated 4 target(s)...
 ]]
 
@@ -111,10 +111,10 @@ function Test()
 		local pattern3 = [[
 *** found 11 target(s)...
 *** updating 3 target(s)...
-@ C.CC <foo>sourceA.o 
-@ C.CC <foo>sourceB.o 
-@ C.Archive <foo>foo.a 
-@ C.Ranlib <foo>foo.a 
+@ C.gcc.CC <$(PLATFORM_CONFIG):foo>sourceA.o 
+@ C.gcc.CC <$(PLATFORM_CONFIG):foo>sourceB.o 
+@ C.gcc.Archive <$(PLATFORM_CONFIG):foo>foo.a 
+@ C.gcc.Ranlib <$(PLATFORM_CONFIG):foo>foo.a 
 !NEXT!*** updated 3 target(s)...
 ]]
 		TestPattern(pattern3, RunJam{ 'foo' })

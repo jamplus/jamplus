@@ -1,31 +1,36 @@
-C.AR			?= ar ru ;
-C.CC			?= gcc ;
-C.C++			?= g++ ;
-C.LINK			?= g++ ;
-C.RANLIB		?= ranlib ;
-
-SUFMODULE	= .dylib ;
-
 actions C.Link
 {
 	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:T)
 }
 
 
-rule C.LinkFrameworks TARGET : FRAMEWORKS : THE_CONFIG : THE_PLATFORM
-{
-	C.LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" : $(THE_CONFIG) : $(THE_PLATFORM) ;
+rule C.FrameworkDirectories TARGET : FRAMEWORKDIRS {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	C.Flags $(TARGET) : CC	: "-F$(FRAMEWORKDIRS)" ;
+	C.Flags $(TARGET) : C++	: "-F$(FRAMEWORKDIRS)" ;
+	C.Flags $(TARGET) : M	: "-F$(FRAMEWORKDIRS)" ;
+	C.Flags $(TARGET) : MM	: "-F$(FRAMEWORKDIRS)" ;
+	C.LinkFlags $(TARGET) : "-F$(FRAMEWORKDIRS)" ;
+}
+
+
+rule C.LinkFrameworks TARGET : FRAMEWORKS {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	C.LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" ;
 }
 
 
 rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 	if ! ( $(PLATFORM) in macosx32 macosx64 iphonesimulator iphone ipadsimulator ipad ) { return ; }
 
+	SDK_PLATFORM ?= $(PLATFORM) ;
+
 	if $(SDK_PLATFORM) in macosx32 macosx64 {
 		SDK_PLATFORM = macosx ;
 	}
 
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local OLD_TARGET = $(C.ACTIVE_TARGET) ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local developerRoot ;
 	local isysroot ;
 	local flags ;
@@ -33,7 +38,7 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 	switch $(SDK_PLATFORM) {
 		case macosx :
 			developerRoot = /Developer/SDKs ;
-			SDK_VERSION ?= 10.5 ;
+			SDK_VERSION ?= 10.6 ;
 			switch $(SDK_VERSION) {
 				case 10.4 :
 					C.CC	= gcc-4.0 ;
@@ -384,53 +389,55 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
 	}
 
-	ISYSROOT on $(TARGET) = $(isysroot) ;	
-	IPHONEOS_SDK_VERSION = $(SDK_VERSION) ;
-	IOS_SDK_VERSION_MIN = $(SDK_VERSION_MIN) ;
+	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(isysroot) ;	
+	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION) ;
+	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION_MIN) ;
 
 	flags += -fvisibility=hidden -gdwarf-2 ;
 
-	C.Flags CC	: * : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
-	C.Flags C++	: * : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
-	C.Flags M	: * : -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch : : $(PLATFORM) ;
-	C.Flags MM	: * : -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch : : $(PLATFORM) ;
-	C.LinkFlags * : -isysroot $(isysroot) $(flags) : : $(PLATFORM) ;
+	C.Flags * : CC	: -isysroot $(isysroot) $(flags) ;
+	C.Flags * : C++	: -isysroot $(isysroot) $(flags) ;
+	C.Flags * : M	: -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch  ;
+	C.Flags * : MM	: -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch ; 
+	C.LinkFlags * : -isysroot $(isysroot) $(flags) ;
 
 	if $(TARGETINFO_LOCATE) {
 		Contents += "Projects[ [[$(TARGET)]] ].XCODE_SDKROOT[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(XCODE_SDKROOT)]]
 
 " ;
 	}
+
+	ActiveTarget $(OLD_TARGET) ;
 }
 
 
 rule C._BundleInfoArray KEY : VALUE {
-	INFO_PLIST on $(TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<array>$(NEWLINE)" ;
+	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<array>$(NEWLINE)" ;
 	for value in $(VALUE) {
-		INFO_PLIST on $(TARGET) += "$(TAB)$(TAB)<string>$(value)</string>$(NEWLINE)" ;
+		INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)$(TAB)<string>$(value)</string>$(NEWLINE)" ;
 	}
-	INFO_PLIST on $(TARGET) += "$(TAB)</array>$(NEWLINE)" ;
+	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)</array>$(NEWLINE)" ;
 }
 
 
 rule C._BundleInfoBoolean KEY : VALUE {
-	INFO_PLIST on $(TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)" ;
+	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)" ;
 	if $(VALUE) = true {
-		INFO_PLIST on $(TARGET) += "<true/>$(NEWLINE)" ;
+		INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "<true/>$(NEWLINE)" ;
 	} else {
-		INFO_PLIST on $(TARGET) += "<false/>$(NEWLINE)" ;
+		INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "<false/>$(NEWLINE)" ;
 	}
 }
 
 
 rule C._BundleInfoString KEY : VALUE {
-	INFO_PLIST on $(TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<string>$(VALUE)</string>$(NEWLINE)" ;
+	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<string>$(VALUE)</string>$(NEWLINE)" ;
 }
 
 
 rule C.BundleInfo TARGET : TYPE : VALUE {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	on $(TARGET) if ! $(INFO_PLIST) {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST) {
 		INFO_PLIST on $(TARGET) ?= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
 <plist version=\"1.0\">
@@ -487,15 +494,15 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 		case longversion :			C._BundleInfoString CFBundleLongVersionString : $(VALUE) ;
 		case bundlename :
 			C._BundleInfoString CFBundleName : $(VALUE) ;
-			CFBundleName on $(TARGET) = $(VALUE) ;
+			CFBundleName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case displayname :
 			C._BundleInfoString CFBundleDisplayName : $(VALUE) ;
-			CFBundleDisplayName on $(TARGET) = $(VALUE) ;
+			CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case executable :			C._BundleInfoString CFBundleExecutable : $(VALUE) ;
 		case identifier :
 			C._BundleInfoString CFBundleIdentifier : $(VALUE[1]) ;
-			CFBundleIdentifier on $(TARGET) = $(VALUE[1]) ;
-			AppIdentifierPrefix on $(TARGET) = $(VALUE[2]) ;
+			CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE[1]) ;
+			AppIdentifierPrefix on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE[2]) ;
 		case shortversion :			C._BundleInfoString CFShortVersionString : $(VALUE) ;
 		case bundleversion :
 			C._BundleInfoString CFBundleVersion : $(VALUE) ;
@@ -526,51 +533,44 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 }
 
 
-rule C._ApplicationFromObjects_LinkFlags
-{
+rule C._ApplicationFromObjects_LinkFlags {
 	if bundle in $(OPTIONS) {
-		local outputName = [ C._retrieveOutputName $(TARGET) ] ;
+		local outputName = [ C._retrieveOutputName ] ;
 		local bundlePath = $(outputPath)/$(outputName).app ;
-		BUNDLE_PATH on $(TARGET) = $(bundlePath) ;
+		BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
 		MakeLocate $(_linkTargets) : $(bundlePath) ;
 
-		local bundleTarget = $(TARGET):bundle ;
-		local cleanBundleTarget = clean:$(bundleTarget) ;
-		BUNDLE_TARGET on $(TARGET) = $(bundleTarget) ;
-		CLEAN_BUNDLE_TARGET on $(TARGET) = $(cleanBundleTarget) ;
-		Depends $(TARGET) : $(bundleTarget) ;
+		local bundleTarget = $(C.ACTIVE_TOOLCHAIN_SUBTARGET):bundle ;
+		local colon = ":" ;
+		local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN)) ;
+		BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleTarget) ;
+		CLEAN_BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(cleanBundleTarget) ;
+		Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(bundleTarget) ;
 		NotFile $(bundleTarget) ;
-		Depends clean:$(TARGET) : $(cleanBundleTarget) ;
+		Depends $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(cleanBundleTarget) ;
 		NotFile $(cleanBundleTarget) ;
 		Always $(cleanBundleTarget) ;
 	}
 }
 
 
-actions C._GenerateDSYMFile
-{
+actions C._GenerateDSYMFile {
 	/Developer/usr/bin/dsymutil $(2:C) -o $(OUTPUT_PATH:C)
 }
 
 
-rule C.GenerateDSYMFile TARGET
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	local grist = $(TARGET) ;
-	local bundlePath ;
-	local _t ;
-	on $(TARGET) {
-		_t = $(LINK_TARGET) ;
-		bundlePath = $(BUNDLE_PATH) ;
-	}
+rule C.GenerateDSYMFile TARGET {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	local _t = $(_t:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local dsymBundlePath = $(bundlePath).dSYM ;
 	local _t.dsym = $(_t).DSYM ;
 	BINDING on $(_t) = $(_t:BS) ;
 	BINDING on $(_t.dsym) = $(_t:BS) ;
 	OUTPUT_PATH on $(_t.dsym) = $(dsymBundlePath) ;
 	MakeLocate $(_t.dsym) : $(dsymBundlePath)/Contents/Resources/DWARF ;
-	Depends $(TARGET) : $(_t.dsym) : $(_t) ;
-	Clean clean:$(TARGET) : $(_t.dsym) ;
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t.dsym) : $(_t) ;
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_t.dsym) ;
 	C._GenerateDSYMFile $(_t.dsym) : $(_t) ;
 }
 
@@ -588,24 +588,13 @@ actions ProcessEntitlements
 	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" -e "s/<key>keychain-access-groups/$(GET_TASK_ALLOW:E="")<key>keychain-access-groups/g" $(1)
 }
 
-rule C._ApplicationFromObjects_PostBuild
-{
+rule C._ApplicationFromObjects_PostBuild {
 	if bundle in $(OPTIONS) {
-		local bundlePath ;
-		local bundleTarget ;
-		local cleanBundleTarget ;
-		local isysroot ;
-		on $(TARGET) {
-			bundlePath = $(BUNDLE_PATH) ;
-			bundleTarget = $(BUNDLE_TARGET) ;
-			cleanBundleTarget = $(CLEAN_BUNDLE_TARGET) ;
-			isysroot = $(ISYSROOT) ;
-		}
-		if ! $(isysroot) {
-			on C.* {
-				isysroot = $(ISYSROOT) ;
-			}
-		}
+		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local isysroot $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
 		local pkginfo = @(PkgInfo:G=$(grist)) ;
 		MakeLocate $(pkginfo) : $(bundlePath) ;
@@ -616,15 +605,14 @@ rule C._ApplicationFromObjects_PostBuild
 		Depends $(bundleTarget) : $(pkginfo) ;
 		Clean $(cleanBundleTarget) : $(pkginfo) ;
 		
-		local infoplistcontents ;
-		on $(TARGET) infoplistcontents = $(INFO_PLIST) ;
+		local infoplistcontents = $(INFO_PLIST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		if $(infoplistcontents) {
 			infoplistcontents += "</dict>
 </plist>
 " ;
 			infoplistcontents = $(infoplistcontents:J="") ;
 
-			local infoplist = @(Info.plist:G=$(grist)) ;
+			local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			MakeLocate $(infoplist) : $(bundlePath) ;
 			CONTENTS on $(infoplist) = $(infoplistcontents) ;
 			WriteFile $(infoplist) ;
@@ -636,9 +624,9 @@ rule C._ApplicationFromObjects_PostBuild
 	
 		if $(PLATFORM) in ipad iphone {	
 			# Copy ResourceRules.plist.
-			local sourceResourceRulesPlist = @(ResourceRules.plist:G=$(grist)|source) ;
+			local sourceResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)|source) ;
 			SEARCH on $(sourceResourceRulesPlist) = $(isysroot) ;
-			local destResourceRulesPlist = @(ResourceRules.plist:G=$(grist)) ;
+			local destResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
 			MakeLocate $(destResourceRulesPlist) : $(bundlePath) ;
 
 			Depends $(bundleTarget) : $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;	
@@ -646,17 +634,17 @@ rule C._ApplicationFromObjects_PostBuild
 			CpResource $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;
 
 			# Create Entitlements.plist.
-			local sourceEntitlementsPlist = @(Entitlements.plist:G=$(grist)|source) ;
+			local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)|source) ;
 			SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
-			local destEntitlementsPlist = @(Entitlements.plist:G=$(grist)) ;
+			local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
 			MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
-			ENTITLEMENTS on $(TARGET) = $(destEntitlementsPlist) ;
+			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destEntitlementsPlist) ;
 			Depends $(bundleTarget) : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
 			local getTaskAllow = "<key>get-task-allow<\\/key><true\\/>" ;
 			GET_TASK_ALLOW on $(destEntitlementsPlist) = $(getTaskAllow) ;
-			on $(TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) $(getTaskAllow) ;
+			on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) $(getTaskAllow) ;
 			Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
-			ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(TARGET) ;
+			ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 		}
 	}
 	
@@ -666,38 +654,28 @@ rule C._ApplicationFromObjects_PostBuild
 
 if $(TARGETINFO_LOCATE) {
 
-rule XIB
-{
+rule XIB {
 
 }
 
 
-rule C.CodeSign TARGET
-{
+rule C.CodeSign {
 }
 
 
-rule C._ApplicationTargetInfo
-{
+rule C._ApplicationTargetInfo {
 	if $(PLATFORM) in ipad iphone {
-		local isysroot ;
-		on $(TARGET) {
-			isysroot = $(ISYSROOT) ;
-		}
-		if ! $(isysroot) {
-			on C.* {
-				isysroot = $(ISYSROOT) ;
-			}
-		}
+		local isysroot $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 		
 		# Create Entitlements.plist.
-		local sourceEntitlementsPlist = @(Entitlements.plist:G=$(grist)|source) ;
+		local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)|source) ;
 		SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
-		local destEntitlementsPlist = @(Entitlements.plist:G=$(grist)) ;
+		local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
 		MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 		Depends all : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
-		on $(TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) ;
-		ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(TARGET) ;
+		on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) ;
+		ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 
 		Contents += "Projects[ [[$(TARGET)]] ].XCODE_ENTITLEMENTS[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(destEntitlementsPlist:T)]]
 
@@ -707,29 +685,23 @@ rule C._ApplicationTargetInfo
 
 } else {
 
-rule XIB PARENT : SOURCES : THE_CONFIG : THE_PLATFORM
-{
-	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
-	THE_CONFIG ?= $(CONFIG) ;
-	THE_PLATFORM ?= $(PLATFORM) ;
+rule XIB PARENT : SOURCES  {
+	PARENT = [ ActiveTarget $(PARENT) ] ;
 	
-	local bundlePath ;
-	on $(PARENT) bundlePath = $(BUNDLE_PATH) ;
+	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
-	local grist = $(PARENT) ;
-	SOURCES = $(SOURCES:G=$(grist)) ;
+	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
 	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
 	
 	local targets = $(SOURCES:S=.nib) ;
 	
 	MakeLocate $(targets) : $(bundlePath) ;
-	Clean clean:$(PARENT) : $(targets) ;	
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(targets) ;	
 	
-	Depends $(PARENT) : $(targets) ;
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(targets) ;
 
 	local source ;
-	for source in $(SOURCES)
-	{
+	for source in $(SOURCES) {
 		local target = $(source:S=.nib) ;
 		Depends $(target) : $(source) ;
 	
@@ -750,27 +722,20 @@ actions C._CodeSign
 }
 
 
-rule C.CodeSign TARGET : PROVISIONING_PROFILE
-{
+rule C.CodeSign TARGET : PROVISIONING_PROFILE {
+	ActiveTarget $(TARGET) ;
+
 	if $(PLATFORM) in ipad iphone {
-		local bundlePath ;
-		local bundleTarget ;
-		local cleanBundleTarget ;
-		local linkTarget ;
-		local entitlements ;
+		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local linkTarget = $(LINK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
-		on $(TARGET) {
-			bundlePath = $(BUNDLE_PATH) ;
-			bundleTarget = $(BUNDLE_TARGET) ;
-			cleanBundleTarget = $(CLEAN_BUNDLE_TARGET) ;
-			linkTarget = $(LINK_TARGET) ;
-			entitlements = $(ENTITLEMENTS) ;
-		}
-
-		local codeResources = [ C.TargetGrist $(TARGET) : CodeResources ] ;
+		local codeResources = [ C.GristFiles : CodeResources ] ;
 		MakeLocate $(codeResources) : $(bundlePath)/_CodeSignature ;
 
-		local codeResourcesSymbolicLink = [ C.TargetGrist $(TARGET) : CodeResourcesLink ] ;
+		local codeResourcesSymbolicLink = [ C.GristFiles : CodeResourcesLink ] ;
 		BINDING on $(codeResourcesSymbolicLink) = CodeResources ;
 		MakeLocate $(codeResourcesSymbolicLink) : $(bundlePath) ;
 
@@ -782,33 +747,27 @@ rule C.CodeSign TARGET : PROVISIONING_PROFILE
 		C._CodeSign $(codeResources) : $(dependsList) ; 
 
 		UseCommandLine $(codeResources) : $(dependsList) ;
-		Depends $(TARGET) : $(codeResources) : $(dependsList) ;
+		Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(codeResources) : $(dependsList) ;
 		Clean $(cleanBundleTarget) : $(codeResources) $(codeResourcesSymbolicLink) ;
 	}
 }
 
 
-rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL
-{
+rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL {
 	# Set up the archive support.
 	if $(PLATFORM) in ipad iphone {
-		TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+		TARGET = [ ActiveTarget $(TARGET) ] ;
 
-		local bundlePath ;
-		local linkTarget ;
-
-		on $(TARGET) {
-			bundlePath = $(BUNDLE_PATH) ;
-			linkTarget = $(LINK_TARGET) ;
-		}
+		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local linkTarget = $(LINK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
 		local archiveTarget = archive:$(TARGET) ;
 		NotFile $(archiveTarget) ;
 
-		local ipaTarget = @($(bundlePath:D=:S=).ipa:G=$(TARGET)) ;
+		local ipaTarget = @($(bundlePath:D=:S=).ipa:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
 		MakeLocate $(ipaTarget) : $(OUTPUT_PATH) ;
 		Depends $(archiveTarget) : $(ipaTarget) : $(linkTarget) ;
-		Clean clean:$(TARGET) : $(ipaTarget) ;
+		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(ipaTarget) ;
 		BUNDLE_PATH on $(ipaTarget) = $(bundlePath) ;
 		PROVISIONING_PROFILE on $(ipaTarget) = $(PROVISIONING_PROFILE) ;
 		C._BundleArchive $(ipaTarget) : $(linkTarget) ;
@@ -817,12 +776,13 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL
 			# Stolen from BetaBuilder:
 
 			# Write manifest.plist.
-			local manifest.plist = @(manifest.plist:G=$(TARGET):archive) ;
+			local manifest.plist = @(manifest.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET):archive) ;
+			Echo manifest.plist - $(manifest.plist) ;
 			MakeLocate $(manifest.plist) : $(OUTPUT_PATH) ;
 			Depends $(archiveTarget) : $(manifest.plist) ;
-			Clean clean:$(TARGET) : $(manifest.plist) ;
+			Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(manifest.plist) ;
 			local contents ;
-			on $(TARGET) contents = "
+			on $(C.ACTIVE_TOOLCHAIN_TARGET) contents = "
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -859,12 +819,12 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL
 			WriteFile $(manifest.plist) ;
 			UseCommandLine $(manifest.plist) : $(contents) ;
 
-			local index.html = @(index.html:G=$(TARGET):archive) ;
+			local index.html = @(index.html:G=$(C.ACTIVE_TOOLCHAIN_TARGET):archive) ;
 			MakeLocate $(index.html) : $(OUTPUT_PATH) ;
 			Depends $(archiveTarget) : $(index.html) ;
-			Clean clean:$(TARGET) : $(index.html) ;
+			Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(index.html) ;
 			local contents ;
-			on $(TARGET) contents = "
+			on $(C.ACTIVE_TOOLCHAIN_TARGET) contents = "
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>

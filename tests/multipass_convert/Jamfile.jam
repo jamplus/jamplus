@@ -39,7 +39,9 @@ actions lua ConvertInputToJam
 		text[#text + 1] = ('Clean clean : "%s" ;\n'):format(line)
 		text[#text + 1] = ('WriteOutput "$(PARENTS)" : "%s" ;\n'):format(line)
 	end
-	io.writeall([[$(1)]], table.concat(text))
+	local file = io.open([[$(1)]], 'wb')
+	file:write(table.concat(text))
+	file:close()
 }
 
 
@@ -83,7 +85,9 @@ actions lua ConvertAlternateInputToJam
 		text[#text + 1] = ('Clean clean : "%s" ;\n'):format(line)
 		text[#text + 1] = ('WriteAlternateOutput "%s" ;\n'):format(line)
 	end
-	io.writeall([[$(1)]], table.concat(text))
+	local file = io.open([[$(1)]], 'wb')
+	file:write(table.concat(text))
+	file:close()
 }
 
 

@@ -1,6 +1,6 @@
 SubDir TOP ;
 
-ActiveProject simple ;
+ActiveTarget simple ;
 
 C.MacOSX_SDK : $(PLATFORM) ;
 

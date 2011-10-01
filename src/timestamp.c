@@ -69,7 +69,7 @@ timestamp(
 	time_t	*time )
 {
 	PATHNAME f1, f2;
-	BINDING	binding, *b = &binding, *fileb = &binding;
+	BINDING	binding, *b = &binding;
 	char buf[ MAXJPATH ];
 
 # ifdef DOWNSHIFT_PATHS

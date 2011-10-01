@@ -346,16 +346,16 @@ void ls_lua_init()
 
 #ifdef OS_NT
 #ifdef _DEBUG
-	strcat(fileName, "/lua/luaplus51-1201_debug.dll");
+	strcat(fileName, "/lua/luaplus51-1202_debug.dll");
 #else
-	strcat(fileName, "/lua/luaplus51-1201.dll");
+	strcat(fileName, "/lua/luaplus51-1202.dll");
 #endif
 	handle = LoadLibrary(fileName);
 #else
 #ifdef _DEBUG
-	strcat(fileName, "/lua/luaplus51-1201_debug.so");
+	strcat(fileName, "/lua/luaplus51-1202_debug.so");
 #else
-	strcat(fileName, "/lua/luaplus51-1201.so");
+	strcat(fileName, "/lua/luaplus51-1202.so");
 #endif
 	handle = dlopen(fileName, RTLD_LAZY | RTLD_GLOBAL);
 #endif
@@ -503,6 +503,8 @@ int luahelper_taskisrunning(int taskid, int* returnValue)
 		}
 		if (ls_lua_isnumber(L, -1))
 			*returnValue = (int)ls_lua_tonumber(L, -1);
+		else
+			*returnValue = 0;
 		ls_lua_pop(L, 2);
 		ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
 		return 0;

@@ -1,0 +1,10 @@
+C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+
+IncludeModule c-compilers/c-gcc-autodetect ;
+
+C.ToolchainHelper ios-gcc ;
+
+C.Flags * : CC	: -g -O3 ;
+C.Flags * : C++	: -g -O3 ;
+C.Flags * : M	: -g -O3 ;
+C.Flags * : MM	: -g -O3 ;

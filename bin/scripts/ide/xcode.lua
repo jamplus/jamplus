@@ -254,56 +254,56 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 		end
 
 		for curProject in ivalues(allTargets) do
-			if curProject.XcodeProjectType ~= projectType then continue end
+			if curProject.XcodeProjectType == projectType then
+				local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
+				local subProject = Projects[curProject.Name]
 
-			local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
-			local subProject = Projects[curProject.Name]
-
-			table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(subProjectInfo.LegacyTargetUuid, subProjectInfo.Name))
-			if projectType == 'native' then
-				table.insert(self.Contents, '\t\t\tisa = PBXNativeTarget;\n')
-			else
-				table.insert(self.Contents, '\t\t\tisa = PBXLegacyTarget;\n')
-
-				if subProject.BuildCommandLine then
-					table.insert(self.Contents, '\t\t\tbuildArgumentsString = "";\n')
+				table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(subProjectInfo.LegacyTargetUuid, subProjectInfo.Name))
+				if projectType == 'native' then
+					table.insert(self.Contents, '\t\t\tisa = PBXNativeTarget;\n')
 				else
-					table.insert(self.Contents, '\t\t\tbuildArgumentsString = "$(PLATFORM) $(CONFIG) $(ACTION) $(TARGET_NAME)";\n')
-				end
-			end
-			table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. subProjectInfo.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. subProjectInfo.Name .. '" */;\n')
-			table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
-			table.insert(self.Contents, '\t\t\t\t' .. subProjectInfo.ShellScriptUuid .. ' /* ShellScript */,\n')
-			table.insert(self.Contents, '\t\t\t);\n')
-			if projectType == 'legacy' then
-				if subProject.BuildCommandLine then
-					table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. subProject.BuildCommandLine[1] .. '";\n')
-				else
-					table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. os.path.combine(projectsPath, 'xcodejam') .. '";\n')
-				end
-			end
-			table.insert(self.Contents, '\t\t\tbuildRules = (\n')
-			table.insert(self.Contents, '\t\t\t);\n');
-			table.insert(self.Contents, '\t\t\tdependencies = (\n')
-			table.insert(self.Contents, '\t\t\t);\n')
-			table.insert(self.Contents, '\t\t\tname = "' .. subProjectInfo.Name .. '";\n')
-			table.insert(self.Contents, '\t\t\tpassBuildSettingsInEnvironment = 1;\n')
-			table.insert(self.Contents, '\t\t\tproductName = "' .. subProjectInfo.Name .. '";\n')
+					table.insert(self.Contents, '\t\t\tisa = PBXLegacyTarget;\n')
 
-			if subProjectInfo.ExecutablePath then
-				table.insert(self.Contents, '\t\t\tproductReference = ' .. info.EntryUuids['app>' .. subProjectInfo.ExecutablePath] .. '; /* ' .. subProjectInfo.ExecutablePath .. ' */\n')
-			end
-			if subProject.Options then
-				if subProject.Options.bundle then
-					table.insert(self.Contents, '\t\t\tproductType = "com.apple.product-type.application";\n');
-				elseif subProject.Options.app then
-					table.insert(self.Contents, '\t\t\tproductType = "com.apple.product-type.tool";\n');
-				elseif subProject.Options.lib then
-					table.insert(self.Contents, '\t\t\tproductType = "com.apple.product-type.library.static";\n');
+					if subProject.BuildCommandLine then
+						table.insert(self.Contents, '\t\t\tbuildArgumentsString = "";\n')
+					else
+						table.insert(self.Contents, '\t\t\tbuildArgumentsString = "$(PLATFORM) $(CONFIG) $(ACTION) $(TARGET_NAME)";\n')
+					end
 				end
-			end
+				table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. subProjectInfo.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. subProjectInfo.Name .. '" */;\n')
+				table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
+				table.insert(self.Contents, '\t\t\t\t' .. subProjectInfo.ShellScriptUuid .. ' /* ShellScript */,\n')
+				table.insert(self.Contents, '\t\t\t);\n')
+				if projectType == 'legacy' then
+					if subProject.BuildCommandLine then
+						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. subProject.BuildCommandLine[1] .. '";\n')
+					else
+						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. os.path.combine(projectsPath, 'xcodejam') .. '";\n')
+					end
+				end
+				table.insert(self.Contents, '\t\t\tbuildRules = (\n')
+				table.insert(self.Contents, '\t\t\t);\n');
+				table.insert(self.Contents, '\t\t\tdependencies = (\n')
+				table.insert(self.Contents, '\t\t\t);\n')
+				table.insert(self.Contents, '\t\t\tname = "' .. subProjectInfo.Name .. '";\n')
+				table.insert(self.Contents, '\t\t\tpassBuildSettingsInEnvironment = 1;\n')
+				table.insert(self.Contents, '\t\t\tproductName = "' .. subProjectInfo.Name .. '";\n')
 
-			table.insert(self.Contents, '\t\t};\n')
+				if subProjectInfo.ExecutablePath then
+					table.insert(self.Contents, '\t\t\tproductReference = ' .. info.EntryUuids['app>' .. subProjectInfo.ExecutablePath] .. '; /* ' .. subProjectInfo.ExecutablePath .. ' */\n')
+				end
+				if subProject.Options then
+					if subProject.Options.bundle then
+						table.insert(self.Contents, '\t\t\tproductType = "com.apple.product-type.application";\n');
+					elseif subProject.Options.app then
+						table.insert(self.Contents, '\t\t\tproductType = "com.apple.product-type.tool";\n');
+					elseif subProject.Options.lib then
+						table.insert(self.Contents, '\t\t\tproductType = "com.apple.product-type.library.static";\n');
+					end
+				end
+
+				table.insert(self.Contents, '\t\t};\n')
+			end
 		end
 		if projectType == 'native' then
 			table.insert(self.Contents, '/* End PBXNativeTarget section */\n\n')
@@ -314,29 +314,29 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 
 	table.insert(self.Contents, "/* Begin PBXShellScriptBuildPhase section */\n")
 	for curProject in ivalues(allTargets) do
-		if curProject.XcodeProjectType ~= 'native' then continue end
-
-		local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
-		local subProject = Projects[curProject.Name]
-		table.insert(self.Contents, expand([[
-		$(ShellScriptUuid) /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "]], subProjectInfo))
-		if subProject.BuildCommandLine then
-			table.insert(self.Contents, subProject.BuildCommandLine[1] .. '";\n')
-		else
-			table.insert(self.Contents, os.path.combine(projectsPath, 'xcodejam') .. [[ $PLATFORM $CONFIG $ACTION $TARGET_NAME";]] .. '\n')
+		if curProject.XcodeProjectType == 'native' then
+			local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
+			local subProject = Projects[curProject.Name]
+			table.insert(self.Contents, expand([[
+			$(ShellScriptUuid) /* ShellScript */ = {
+				isa = PBXShellScriptBuildPhase;
+				buildActionMask = 2147483647;
+				files = (
+				);
+				inputPaths = (
+				);
+				outputPaths = (
+				);
+				runOnlyForDeploymentPostprocessing = 0;
+				shellPath = /bin/sh;
+				shellScript = "]], subProjectInfo))
+			if subProject.BuildCommandLine then
+				table.insert(self.Contents, subProject.BuildCommandLine[1] .. '";\n')
+			else
+				table.insert(self.Contents, os.path.combine(projectsPath, 'xcodejam') .. [[ $PLATFORM $CONFIG $ACTION $TARGET_NAME";]] .. '\n')
+			end
+			table.insert(self.Contents, "\t\t};\n")
 		end
-		table.insert(self.Contents, "\t\t};\n")
 	end
 	table.insert(self.Contents, expand("/* End PBXShellScriptBuildPhase section */\n\n"))
 end
@@ -433,7 +433,7 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 				codeSignEntitlements = Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName]			
 		   	end
 			if codeSignEntitlements then
-				table.insert(self.Contents, "\t\t\t\tCODE_SIGN_ENTITLEMENTS = " .. codeSignEntitlements .. ";\n")
+				table.insert(self.Contents, "\t\t\t\tCODE_SIGN_ENTITLEMENTS = \"" .. codeSignEntitlements .. "\";\n")
 			end
 
 			if platformName == 'macosx32'  or  platformName == 'macosx64' then

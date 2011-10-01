@@ -90,10 +90,10 @@ project1.cpp
 	
 	else
 		local pattern = [[
-*** found 7 target(s)...
+*** found 8 target(s)...
 *** updating 3 target(s)...
-@ C.C++ <project1>]] .. cwd .. [[/source/project1/project1.o
-@ C.Link <project1>project1.release
+@ C.gcc.C++ <$(PLATFORM_CONFIG):project1>]] .. cwd .. [[/source/project1/project1.o
+@ C.gcc.Link <$(PLATFORM_CONFIG):project1>project1
 *** updated 3 target(s)...
 ]]
 
@@ -137,8 +137,8 @@ project1.cpp
 		local pattern3 = [[
 *** found 7 target(s)...
 *** updating 2 target(s)...
-@ C.C++ <project1>]] .. cwd .. [[/source/project1/project1.o
-@ C.Link <project1>project1.release
+@ C.gcc.C++ <$(PLATFORM_CONFIG):project1>]] .. cwd .. [[/source/project1/project1.o
+@ C.gcc.Link <$(PLATFORM_CONFIG):project1>project1
 *** updated 2 target(s)...
 ]]
 

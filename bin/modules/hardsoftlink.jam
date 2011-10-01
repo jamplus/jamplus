@@ -1,15 +1,13 @@
 if ! $(TARGETINFO_LOCATE) {
 
-rule HardLink PARENT : TARGET : SOURCE
-{
-	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
-	local grist = $(PARENT) ;
-	SOURCE = $(SOURCE:g=$(grist)) ;
-	TARGET = $(TARGET:g=$(grist)) ;
+rule HardLink PARENT : TARGET : SOURCE {
+	PARENT = [ ActiveTarget $(PARENT) ] ;
+	SOURCE = [ C.GristFiles $(SOURCE) ] ;
+	TARGET = [ C.GristFiles $(TARGET) ] ;
 	MakeLocate $(TARGET) : $(TARGET:D) ;
 	BINDING on $(TARGET) = $(TARGET:BS) ;
 
-	Depends $(PARENT) : $(TARGET) : $(SOURCE) ;
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(TARGET) : $(SOURCE) ;
 	SearchSource $(SOURCE) : $(SEARCH_SOURCE) ;
 
 	_HardLink $(TARGET) : $(SOURCE) ;
@@ -24,15 +22,13 @@ actions _HardLink
 
 
 
-rule SoftLink PARENT : TARGET : SOURCE : SOFTLINK_SOURCE_RELATIVE_PATH
-{
-	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
-	local grist = $(PARENT) ;
+rule SoftLink PARENT : TARGET : SOURCE : SOFTLINK_SOURCE_RELATIVE_PATH {
+	PARENT = [ ActiveTarget $(PARENT) ] ;
 	if ! $(SOURCE:G) {
-		SOURCE = $(SOURCE:G=$(grist)) ;
+		SOURCE = [ C.GristFiles $(SOURCE) ] ;
 	}
 	if ! $(TARGET:G) {
-		TARGET = $(TARGET:G=$(grist)) ;
+		TARGET = [ C.GristFiles $(TARGET) ] ;
 	}
 	on $(TARGET) {
 		if ! $(LOCATE) {
@@ -48,7 +44,7 @@ rule SoftLink PARENT : TARGET : SOURCE : SOFTLINK_SOURCE_RELATIVE_PATH
 
 	SOFTLINK_SOURCE_RELATIVE_PATH on $(TARGET) = $(SOFTLINK_SOURCE_RELATIVE_PATH[1]:E=$(TARGET:T)) ;
 	
-	Clean clean:$(PARENT) : $(TARGET) ;
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(TARGET) ;
 
 	_SoftLink $(TARGET) : $(SOURCE) ;
 }

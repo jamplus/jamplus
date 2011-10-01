@@ -691,21 +691,6 @@ if $(NT)
 ########################################################################
 ########################################################################
 
-rule _retrieveActiveTargetName TARGET
-{
-	if $(TARGET) = * {  return C.* ;  }
-	return $(TARGET:E=$(ACTIVE_PROJECT:E="")) ;
-}
-
-rule RetrieveActiveTarget TARGET
-{
-	if $(TARGET) = * {  return C.* ;  }
-	return $(TARGET:E=$(ACTIVE_PROJECT:E="")) ;
-}
-
-########################################################################
-########################################################################
-
 actions quietly WriteFile
 {
 	^^($(1)|$(CONTENTS))
@@ -714,11 +699,13 @@ actions quietly WriteFile
 ########################################################################
 ########################################################################
 
-ACTIVE_PROJECT = "" ;
+rule ActiveProject TARGET {
+	return [ C.ActiveTarget $(TARGET) ] ;
+}
+
 
 rule ActiveTarget TARGET {
 	return [ C.ActiveTarget $(TARGET) ] ;
-	ACTIVE_PROJECT = $(TARGET) ;
 }
 
 

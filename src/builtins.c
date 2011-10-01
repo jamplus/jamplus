@@ -1376,7 +1376,6 @@ LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp)
 
 LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp)
 {
-	RULE* r;
 	LIST* symbol;
 
 	symbol = lol_get(args, 0);

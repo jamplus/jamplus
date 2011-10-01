@@ -74,6 +74,7 @@ function TestPattern(patterns, lines)
 			pattern = patterns[patternIndex]
 			if pattern then
 				pattern = pattern:gsub('$%(SUFEXE%)', SUFEXE)
+				pattern = pattern:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '!release')
 			end
 		end
 

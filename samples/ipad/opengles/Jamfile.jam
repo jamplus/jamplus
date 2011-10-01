@@ -1,12 +1,14 @@
 SubDir TOP ;
 
-ActiveProject opengles ;
+ActiveTarget opengles ;
 
-C.MacOSX_SDK : $(PLATFORM) ;
+C.MacOSX_SDK ;
 
 IncludeModule CopyFile ;
 
-C.OutputPostfixClear : debug ;
+if $(CONFIG) = debug {
+	C.OutputPostfixClear ;
+}
 
 local SRCS =
 		Classes/EAGLView.h

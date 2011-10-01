@@ -358,7 +358,7 @@ if $(LUA_BIN)
 				lua.debug.exe
 				lua5.1.debug.dll
 				lua51.debug.dll
-				luaplus51-1201_debug.dll
+				luaplus51-1202_debug.dll
 				modules/ex.debug.dll
 				modules/filefind.debug.dll
 				modules/lua51-lanes.debug.dll
@@ -374,7 +374,7 @@ if $(LUA_BIN)
 				lua.exe
 				lua5.1.dll
 				lua51.dll
-				luaplus51-1201.dll
+				luaplus51-1202.dll
 				modules/ex.dll
 				modules/filefind.dll
 				modules/lua51-lanes.dll
@@ -413,7 +413,7 @@ if $(LUA_BIN)
 		{
 			LUA_SRCS +=
 				lua.debug
-				luaplus51-1201_debug.so
+				luaplus51-1202_debug.so
 				lib/lua/5.1/ex.debug.$(MODULE_EXT)
 				lib/lua/5.1/filefind.debug.$(MODULE_EXT)
 				lib/lua/5.1/lua51-lanes.debug.$(MODULE_EXT)
@@ -427,7 +427,7 @@ if $(LUA_BIN)
 		{
 			LUA_SRCS +=
 				lua
-				luaplus51-1201.so
+				luaplus51-1202.so
 				lib/lua/5.1/ex.$(MODULE_EXT)
 				lib/lua/5.1/filefind.$(MODULE_EXT)
 				lib/lua/5.1/lua51-lanes.$(MODULE_EXT)
