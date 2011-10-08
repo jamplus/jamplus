@@ -50,7 +50,7 @@ rule C.ResourceCompiler PARENT : SOURCES : OPTIONS {
 	# Resources can have #include directives which we need to be aware of.
 	HDRRULE on $(SOURCES) = C.HdrRule ;
 	HDRSCAN on $(SOURCES) = $(C.HDRPATTERN) ;
-	HDRGRIST on $(SOURCES) = $(C.ACTIVE_TOOLCHAIN_SUBTARGET) ;
+	HDRGRIST on $(SOURCES) = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST) ;
 
 	UseCommandLine $(TARGETS) : $(rcdefines) $(rcflags) $(rchdrs) ;
 
@@ -81,7 +81,7 @@ rule C._RcOptions VARIABLE : RESOURCE_NAME : OPTIONS {
 
 	local target ;
 	if $(OPTIONS) {
-		target = $(RESOURCE_NAME:S=.res:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+		target = $(RESOURCE_NAME:S=.res:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 	} else {
 		OPTIONS = $(RESOURCE_NAME) ;
 		target = $(C.ACTIVE_TOOLCHAIN_TARGET) ;

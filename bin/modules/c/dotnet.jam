@@ -1,6 +1,6 @@
 rule C.UseDotNet TARGET : OPTIONS
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	C.ActiveTarget $(TARGET) ;
 
 	local includePaths ;
 	local referencePaths ;
@@ -26,17 +26,17 @@ rule C.UseDotNet TARGET : OPTIONS
 			referencePaths = "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
 	}
 
-	C.IncludeDirectories $(TARGET) : $(includePaths) ;
-	C.ReferenceDirectories $(TARGET) : $(referencePaths) ;
+	C.IncludeDirectories : $(includePaths) ;
+	C.ReferenceDirectories : $(referencePaths) ;
 
 	if link in $(OPTIONS)
 	{
-		C.LinkDirectories $(TARGET) : $(linkPaths) ;
+		C.LinkDirectories : $(linkPaths) ;
 	}
 }
 
 
-rule C.ReferenceDirectories TARGET : DIRECTORIES : THE_CONFIG : THE_PLATFORM
+rule C.ReferenceDirectories TARGET : DIRECTORIES
 {
 	THE_CONFIG ?= * ;
 	THE_PLATFORM ?= * ;

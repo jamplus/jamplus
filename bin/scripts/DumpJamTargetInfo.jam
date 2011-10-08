@@ -37,11 +37,11 @@ rule ProjectGroup TARGET : FOLDERNAME : PROJECTS
 }
 
 
-rule SourceGroup FOLDERNAME : SOURCES {
+rule SourceGroup TARGET : FOLDERNAME : SOURCES {
 #	if $(PLATFORM) != *  ||  $(CONFIG) != *  {  return ;  }
 	if ! $(FOLDERNAME)  ||  ! $(SOURCES)  {  return ;  }
 
-	local TARGET = $(C.ACTIVE_TARGET) ;
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
 	SOURCES = [ ExpandFileList $(SOURCES) ] ;
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
@@ -109,14 +109,13 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 		}
 
 		local suffix = $($(ext):Z=$(C.COMPILER_SUITE_SYMBOL)) ;
-		local outputName = [ C._retrieveOutputName $(suffix) ] ;
+		local outputName = [ C._retrieveOutputName : $(suffix) ] ;
 		Contents += "$(project).OutputNames['$(PLATFORM)']['$(CONFIG)'] = [[$(outputName)]]$(NEWLINE)" ;
 
 		local outputPath = [ C._retrieveOutputPath ] ;
 		Contents += "$(project).OutputPaths['$(PLATFORM)']['$(CONFIG)'] = [[$(outputPath[1])/]]$(NEWLINE)" ;
 
-		local debuggerOutputName ;
-		on $(TARGET) debuggerOutputName = $(DEBUGGEROUTPUTNAME.$(PLATFORM).$(CONFIG)) ;
+		local debuggerOutputName = $(DEBUGGEROUTPUTNAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		if $(debuggerOutputName) {
 			Contents += "$(project).DebuggerOutputNames['$(PLATFORM)']['$(CONFIG)'] = [[$(debuggerOutputName)]]$(NEWLINE)" ;
 		}
@@ -168,6 +167,7 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 
 rule Project PROJECT_NAME : SOURCES
 {
+	PROJECT_NAME = [ C.ActiveTarget $(PROJECT_NAME) ] ;
 	DumpProjectInfo $(PROJECT_NAME) : $(SOURCES) ;
 }
 

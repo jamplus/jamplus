@@ -103,7 +103,7 @@ rule C.gcc._ApplicationFromObjects_PostBuild {
 " ;
 			infoplistcontents = $(infoplistcontents:J="") ;
 
-			local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+			local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 			MakeLocate $(infoplist) : $(bundlePath)/Contents ;
 			CONTENTS on $(infoplist) = $(infoplistcontents) ;
 			WriteFile $(infoplist) ;

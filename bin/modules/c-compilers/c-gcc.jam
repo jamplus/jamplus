@@ -89,7 +89,7 @@ rule C.gcc._MultiCppCompile_SetupFlags {
 		_flags += -Winvalid-pch ;
 
 		local md5 = [ MD5 $(_flags) ] ;
-		local _pchName = @($(_pch[3]:LBS):G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)-$(md5)) ;
+		local _pchName = @($(_pch[3]:LBS):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)-$(md5)) ;
 		BINDING on $(_pchName) = $(_pch[3]) ;
 		local _pchFilename = $(_pchName).gch ;
 
@@ -112,7 +112,7 @@ rule C.gcc._MultiCppCompile_SetupFlags {
 			# source needs to be scanned for header dependencies
 			HDRRULE on $(_pchName) = C.HdrRule ;
 			HDRSCAN on $(_pchName) = $(C.HDRPATTERN) ;
-			HDRGRIST on $(_pchName) = $(C.ACTIVE_TOOLCHAIN_SUBTARGET) ;
+			HDRGRIST on $(_pchName) = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST) ;
 			HDRSEARCH on $(_pchName) = $(_hdrs) ;
 		}
 

@@ -129,13 +129,13 @@ actions existing UnRegSvr32 {
 ########################################################################
 
 rule C.vc._writeManifest {
-	local tempIntermediateManifest = @($(_t[1]).intermediate.manifest:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+	local tempIntermediateManifest = @($(_t[1]).intermediate.manifest:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 	BINDING on $(tempIntermediateManifest) = $(_tBINDING).intermediate.manifest ;
 	MakeLocate $(tempIntermediateManifest) ;
 	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(tempIntermediateManifest) ;
 
 	if $(C.LINKER_CONFIG) = debug {
-		local tempEmbeddedManifest = @($(_t[1]).embed.manifest:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+		local tempEmbeddedManifest = @($(_t[1]).embed.manifest:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		BINDING on $(tempEmbeddedManifest) = $(_tBINDING).embed.manifest ;
 		MakeLocate $(tempEmbeddedManifest) ;
 		CONTENTS on $(tempEmbeddedManifest) =
@@ -146,7 +146,7 @@ rule C.vc._writeManifest {
 		WriteFile $(tempEmbeddedManifest) ;
 		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(tempEmbeddedManifest) ;
 
-		local tempEmbeddedRc = @($(_t[1]).embed.rc:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+		local tempEmbeddedRc = @($(_t[1]).embed.rc:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		BINDING on $(tempEmbeddedRc) = $(_tBINDING).embed.rc ;
 		Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
 		MakeLocate $(tempEmbeddedRc) ;
@@ -177,7 +177,7 @@ rule C.vc._linkManifest {
 
 rule C.DefFile TARGET : SOURCES {
 	C.ActiveTarget $(TARGET) ;
-	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
 	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(SOURCES) ;
 	C.LinkFlags : /DEF:"$(SOURCES:T)" ;
@@ -195,8 +195,8 @@ rule C.vc._MultiCppCompile_PreCompile {
 
 	_VCPDB = vc ;
 
-	local vcidb = $(_VCPDB:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET):S=.idb) ;
-	_VCPDB = $(_VCPDB:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET):S=.pdb) ;
+	local vcidb = $(_VCPDB:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):S=.idb) ;
+	_VCPDB = $(_VCPDB:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):S=.pdb) ;
 	MakeLocate $(vcidb) $(_VCPDB) ;
 
 	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_VCPDB) $(vcidb) ;
@@ -214,7 +214,7 @@ rule C.vc._MultiCppCompile_SetupFlags {
 
 	local forceIncludeHeader ;
 	if $(_pch[2]) && ! $(_nopch) {
-		forceIncludeHeader = $(_pch[2]:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)|force) ;
+		forceIncludeHeader = $(_pch[2]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|force) ;
 		BINDING on $(forceIncludeHeader) = $(_pch[3]) ;
 		SEARCH on $(forceIncludeHeader) = $(_hdrs) ;
 		objectForceIncludes = $(forceIncludeHeader) $(objectForceIncludes) ;
@@ -226,7 +226,7 @@ rule C.vc._MultiCppCompile_SetupFlags {
 		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
 		_flags += /Fp\"$(_pchDiskFilename:\\)\" /Yc\"$(_pch[2])\" /Yl\"__jp__$(TARGET)\" ;
 		# mark that it will be created by compilation through srcref
-		_pchFilename = $(_pchFilename:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+		_pchFilename = $(_pchFilename:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
 		MakeLocate $(_pchFilename) ;
 		Depends $(_pchFilename) : $(_src) ;
@@ -240,7 +240,7 @@ rule C.vc._MultiCppCompile_SetupFlags {
 		local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
 		_flags += /Fp\"$(_pchDiskFilename:\\)\" /Yu\"$(_pch[2])\" ;
 		# mark that compilation will depend on it
-		_pchFilename = $(_pchFilename:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+		_pchFilename = $(_pchFilename:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		Includes $(_src) : $(_pchFilename) ;
 	}
 
@@ -256,7 +256,7 @@ rule C.vc._MultiCppCompile_SetupFlags {
 rule C.vc._MultiCppCompile_PchDeps {
 	if $(_pch1[4]) {
 		local _pchFilename = $(_pch1[3]:LBS).pch ;
-		_pchFilename = $(_pchFilename:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+		_pchFilename = $(_pchFilename:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		Depends $(objects) : $(_pchFilename) ;
 		# add that pch as output
 		objects += $(_pchFilename) ;

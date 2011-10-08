@@ -540,7 +540,7 @@ rule C.gcc._ApplicationFromObjects_LinkFlags {
 		BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
 		MakeLocate $(_linkTargets) : $(bundlePath) ;
 
-		local bundleTarget = $(C.ACTIVE_TOOLCHAIN_SUBTARGET):bundle ;
+		local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
 		local colon = ":" ;
 		local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN)) ;
 		BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleTarget) ;
@@ -624,9 +624,9 @@ rule C.gcc._ApplicationFromObjects_PostBuild {
 	
 		if $(PLATFORM) in ipad iphone {	
 			# Copy ResourceRules.plist.
-			local sourceResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)|source) ;
+			local sourceResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
 			SEARCH on $(sourceResourceRulesPlist) = $(isysroot) ;
-			local destResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+			local destResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 			MakeLocate $(destResourceRulesPlist) : $(bundlePath) ;
 
 			Depends $(bundleTarget) : $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;	
@@ -634,9 +634,9 @@ rule C.gcc._ApplicationFromObjects_PostBuild {
 			CpResource $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;
 
 			# Create Entitlements.plist.
-			local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)|source) ;
+			local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
 			SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
-			local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+			local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 			MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destEntitlementsPlist) ;
 			Depends $(bundleTarget) : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
@@ -669,9 +669,9 @@ rule C._ApplicationTargetInfo {
 		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 		
 		# Create Entitlements.plist.
-		local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)|source) ;
+		local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
 		SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
-		local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+		local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 		Depends all : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
 		on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) ;
@@ -690,7 +690,7 @@ rule XIB PARENT : SOURCES  {
 	
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
-	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
 	
 	local targets = $(SOURCES:S=.nib) ;
@@ -764,7 +764,7 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL {
 		local archiveTarget = archive:$(TARGET) ;
 		NotFile $(archiveTarget) ;
 
-		local ipaTarget = @($(bundlePath:D=:S=).ipa:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+		local ipaTarget = @($(bundlePath:D=:S=).ipa:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		MakeLocate $(ipaTarget) : $(OUTPUT_PATH) ;
 		Depends $(archiveTarget) : $(ipaTarget) : $(linkTarget) ;
 		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(ipaTarget) ;
@@ -776,7 +776,7 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL {
 			# Stolen from BetaBuilder:
 
 			# Write manifest.plist.
-			local manifest.plist = @(manifest.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET):archive) ;
+			local manifest.plist = @(manifest.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):archive) ;
 			Echo manifest.plist - $(manifest.plist) ;
 			MakeLocate $(manifest.plist) : $(OUTPUT_PATH) ;
 			Depends $(archiveTarget) : $(manifest.plist) ;
