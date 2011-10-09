@@ -2,6 +2,7 @@ function md5zip(filename)
 	print("md5zip: Calculating " .. filename .. "...")
 
 	require 'md5'
+	require 'struct'
 	require 'ziparchive'
 
 	local archive = ziparchive.open(filename)
@@ -12,8 +13,8 @@ function md5zip(filename)
 	local md5sum = md5.new()
 	for index = 1, archive:fileentrycount() do
 		local fileEntry = archive:fileentry(index)
-		md5sum:update(string.pack('A', fileEntry.filename))
-		md5sum:update(string.pack('I', fileEntry.crc))
+		md5sum:update(struct.pack('c' .. tostring(fileEntry.filename:len()), fileEntry.filename))
+		md5sum:update(struct.pack('I4', fileEntry.crc))
 	end
 
 	archive:close()

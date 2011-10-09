@@ -331,8 +331,9 @@ for file in [ Glob $(OS:L) : *.* : 0 ]
 
 if $(LUA_BIN)
 {
-	Depends all : "lua" ;
-	NotFile "lua" ;
+	ActiveTarget "lua" ;
+	Depends all : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+	NotFile $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 
 	local LUA_SRCS ;
 	if $(OS) = NT
@@ -364,6 +365,7 @@ if $(LUA_BIN)
 				modules/lua51-lanes.debug.dll
 				modules/lxp.debug.dll
 				modules/md5.debug.dll
+				modules/struct.debug.dll
 				modules/uuid.debug.dll
 				modules/ziparchive.debug.dll
 			;
@@ -380,6 +382,7 @@ if $(LUA_BIN)
 				modules/lua51-lanes.dll
 				modules/lxp.dll
 				modules/md5.dll
+				modules/struct.dll
 				modules/uuid.dll
 				modules/ziparchive.dll
 			;
@@ -419,6 +422,7 @@ if $(LUA_BIN)
 				lib/lua/5.1/lua51-lanes.debug.$(MODULE_EXT)
 				lib/lua/5.1/lxp.debug.$(MODULE_EXT)
 				lib/lua/5.1/md5.debug.$(MODULE_EXT)
+				lib/lua/5.1/struct.debug.$(MODULE_EXT)
 				lib/lua/5.1/uuid.debug.$(MODULE_EXT)
 				lib/lua/5.1/ziparchive.debug.$(MODULE_EXT)
 			;
@@ -433,6 +437,7 @@ if $(LUA_BIN)
 				lib/lua/5.1/lua51-lanes.$(MODULE_EXT)
 				lib/lua/5.1/lxp.$(MODULE_EXT)
 				lib/lua/5.1/md5.$(MODULE_EXT)
+				lib/lua/5.1/struct.$(MODULE_EXT)
 				lib/lua/5.1/uuid.$(MODULE_EXT)
 				lib/lua/5.1/ziparchive.$(MODULE_EXT)
 			;
@@ -442,7 +447,7 @@ if $(LUA_BIN)
 	local file ;
 	for file in $(LUA_SRCS)
 	{
-		CopyFile "lua" : $(BIN_PATH)/lua/$(file) : $(LUA_BIN)/$(file) ;
+		CopyFile $(C.ACTIVE_TOOLCHAIN_TARGET) : $(BIN_PATH)/lua/$(file) : $(LUA_BIN)/$(file) ;
 	}
 }
 

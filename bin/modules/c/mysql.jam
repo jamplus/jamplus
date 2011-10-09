@@ -68,14 +68,14 @@ if $(MYSQL_INCLUDE_DIRECTORIES)  &&  $(MYSQL_LIBRARIES) {
 	}
 }
 
-rule C.UseMySQL TARGETS
+rule C.UseMySQL TARGET
 {
 	if ! $(MYSQL_FOUND) {
 		Exit * $(TARGETS) requires the use of MySQL, but it wasn't found. ;
 	}
 
-	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 
-	C.IncludeDirectories $(TARGETS) : $(MYSQL_INCLUDE_DIRECTORIES) ;
-	C.LinkPrebuiltLibraries $(TARGETS) : $(MYSQL_LIBRARIES) ;
+	C.IncludeDirectories $(TARGET) : $(MYSQL_INCLUDE_DIRECTORIES) ;
+	C.LinkPrebuiltLibraries $(TARGET) : $(MYSQL_LIBRARIES) ;
 }

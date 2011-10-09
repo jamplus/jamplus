@@ -2,23 +2,22 @@ if ! $(TARGETINFO_LOCATE)
 {
 
 rule CopyFile PARENT : TARGET : SOURCE {
-	PARENT = [ ActiveTarget $(PARENT) ] ;
-	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(TARGET) : $(SOURCE) ;
+	Depends $(PARENT) : $(TARGET) : $(SOURCE) ;
 	SearchSource $(SOURCE) : $(SEARCH_SOURCE) ;
 	on $(TARGET) if ! $(LOCATE) {
 		MakeLocate $(TARGET) : $(TARGET:D) ;
 		BINDING on $(TARGET) = $(TARGET:BS) ;
 	}
-	CopyFile1 $(TARGET) : $(SOURCE) ;
-	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(TARGET) ;
+	Copy1File $(TARGET) : $(SOURCE) ;
+	Clean $(PARENT:G)clean:$(PARENT:G=) : $(TARGET) ;
 }
 
 if $(NT) {
-	actions CopyFile1 {
+	actions Copy1File {
 		$(CP) "$(2:\\)" "$(1:\\)"
 	}
 } else {
-	actions CopyFile1 {
+	actions Copy1File {
 		$(CP) "$(2)" "$(1)"
 	}
 }

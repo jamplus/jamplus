@@ -3,47 +3,47 @@ SubDir TOP ;
 ################################
 C.Toolchain vs2008 win32 debug x86 ;
 C.ActiveTarget helloworld ;
-C.Defines MY_DEFINE ;
-C.Application main.c ;
+C.Defines : MY_DEFINE ;
+C.Application : main.c ;
 
 
 ###################################
 C.Toolchain win32custom debug ;
 C.ActiveTarget helloworld ;
-C.Defines MY_DEFINE ;
-C.Application main.c ;
+C.Defines : MY_DEFINE ;
+C.Application : main.c ;
 
 
 ###################################
 C.Toolchain tcc debug ;
 C.ActiveTarget helloworld ;
-C.Defines MY_DEFINE ;
-C.Application main.c ;
+C.Defines : MY_DEFINE ;
+C.Application : main.c ;
 
 
 ################################
 C.Toolchain win32 debug x86 ;
 C.ActiveTarget helloworld ;
-C.Defines MY_DEFINE ;
-C.Application main.c ;
+C.Defines : MY_DEFINE ;
+C.Application : main.c ;
 
 
 ################################
 C.Toolchain vs2010 win32 release x86 ;
 C.ActiveTarget helloworld ;
-C.Defines MY_DEFINE2 ;
-C.Application main.c ;
+C.Defines : MY_DEFINE2 ;
+C.Application : main.c ;
 
 
 ################################
 C.Toolchain vs2010 win32 debug x86 ;
 C.ActiveTarget helloworld ;
-C.Defines MY_DEFINE2 ;
-C.Application main.c ;
+C.Defines : MY_DEFINE2 ;
+C.Application : main.c ;
 
 
 ################################
 C.Toolchain win32 release x86 ;
 C.ActiveTarget helloworld ;
-C.Defines MY_DEFINE2 ;
-C.Application main.c ;
+C.Defines : MY_DEFINE2 ;
+C.Application : main.c ;

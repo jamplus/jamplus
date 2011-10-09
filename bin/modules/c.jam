@@ -57,6 +57,12 @@ rule C.Clean TARGET : FILES {
 }
 
 
+rule C.GristTarget TARGET {
+	C.ActiveTarget $(TARGET) ;
+	return $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+}
+
+
 rule C.GristFiles TARGET : FILES {
 	C.ActiveTarget $(TARGET) ;
 	return $(FILES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;

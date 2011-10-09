@@ -16,7 +16,7 @@ rule C.UseQt TARGETS : COMPONENTS : OPTIONS {
 	if ! $(QT_ROOT) {
 		Exit Qt not found. ;
 	}
-	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
+	TARGETS = [ ActiveTarget $(TARGETS) ] ;
 
 	QT_INCLUDE_PATH = $(QT_ROOT)/include ;
 	C.LinkDirectories $(TARGETS) : $(QT_ROOT)/lib ;
@@ -153,24 +153,22 @@ rule C.UseQt TARGETS : COMPONENTS : OPTIONS {
 
 if ! $(TARGETINFO_LOCATE) {
 
-rule C.Qt.Moc PARENTS : SOURCES {
-	PARENTS = [ _retrieveActiveTargetName $(PARENTS) ] ;
-
-	local grist = $(PARENTS) ;
+rule C.Qt.Moc PARENT : SOURCES {
+	PARENT = [ ActiveTarget $(PARENT) ] ;
 
 	local returnSources ;
 	for source in $(SOURCES) {
-		source = $(source:G=$(grist)) ;
+		source = [ C.GristFiles : $(source) ] ;
 		local ext = $(source:S) ;
 
 		local target ;
 		if $(ext) in .h .hpp {
-			target = @(moc_$(source:B).cpp:G=$(grist)) ;
+			target = [ C.GristFiles : @(moc_$(source:B).cpp) ] ;
 		} else if $(ext) = .cpp {
-			target = @($(source:B).moc:G=$(grist)) ;
-			source = $(source:G=$(grist)|source ;		# Avoid complaints of a circular dependency: file.cpp -> file.moc -> file.cpp
+			target = [ C.GristFiles : @($(source:B).moc) ] ;
+			source = $(source:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;		# Avoid complaints of a circular dependency: file.cpp -> file.moc -> file.cpp
 			ForceCare $(target) ;
-			C.ObjectIncludeDirectories $(PARENTS) : $(source) : $(LOCATE_SOURCE) ;
+			C.ObjectIncludeDirectories : $(source) : $(LOCATE_SOURCE) ;
 		}
 		SearchSource $(source) : $(SEARCH_SOURCE) ;
 		returnSources += $(target) ;
@@ -179,7 +177,7 @@ rule C.Qt.Moc PARENTS : SOURCES {
 		UseCommandLine $(target) : $(flags) ;
 		Depends $(target) : $(source) ;
 
-		Clean clean:$(PARENTS) : $(target) ;
+		C.Clean : $(target) ;
 
 		FLAGS on $(target) = $(flags) ;
 		C.Qt._Moc $(target) : $(source) ;
@@ -194,14 +192,12 @@ actions C.Qt._Moc {
 }
 
 
-rule C.Qt.Rcc PARENTS : SOURCES : NAME {
-	PARENTS = [ _retrieveActiveTargetName $(PARENTS) ] ;
-
-	local grist = $(PARENTS) ;
+rule C.Qt.Rcc PARENT : SOURCES : NAME {
+	PARENT = [ ActiveTarget $(PARENT) ] ;
 
 	SearchSource $(SOURCES) : $(SEARCH_SOURCE) ;
 
-	local targets = @(qrc_$(SOURCES:B).cpp:G=$(grist)) ;
+	local targets = [ C.GristFiles @(qrc_$(SOURCES:B).cpp) ] ;
 	MakeLocate $(targets) : $(LOCATE_SOURCE) ;
 	ForceCare $(targets) ;
 
@@ -209,7 +205,7 @@ rule C.Qt.Rcc PARENTS : SOURCES : NAME {
 
 	UseCommandLine $(targets) : $(NAME) ;
 
-	Clean clean:$(PARENTS) : $(targets) ;
+	C.Clean $(PARENTS) : $(targets) ;
 
 	RCC_NAME on $(targets) = $(NAME) ;
 	C.Qt._Rcc $(targets) : $(SOURCES) ;
@@ -223,20 +219,18 @@ actions C.Qt._Rcc {
 }
 
 
-rule C.Qt.Uic PARENTS : SOURCES {
-	PARENTS = [ _retrieveActiveTargetName $(PARENTS) ] ;
-
-	local grist = $(PARENTS) ;
+rule C.Qt.Uic PARENT : SOURCES {
+	PARENT = [ ActiveTarget $(PARENT) ] ;
 
 	SearchSource $(SOURCES) : $(SEARCH_SOURCE) ;
 
-	local targets = @(ui_$(SOURCES:B).h:G=$(grist)) ;
+	local targets = [ C.GristFiles : @(ui_$(SOURCES:B).h) ] ;
 	MakeLocate $(targets) : $(LOCATE_SOURCE) ;
 	ForceCare $(targets) ;
 
 	Depends $(targets) : $(SOURCES) ;
 
-	Clean clean:$(PARENTS) : $(targets) ;
+	C.Clean : $(targets) ;
 
 	C.Qt._Uic $(targets) : $(SOURCES) ;
 }
@@ -249,13 +243,13 @@ actions C.Qt._Uic {
 
 } else {
 
-rule C.Qt.Moc PARENTS : SOURCES {
+rule C.Qt.Moc {
 }
 
-rule C.Qt.Rcc PARENTS : SOURCES : NAME {
+rule C.Qt.Rcc {
 }
 
-rule C.Qt.Uic PARENTS : SOURCES {
+rule C.Qt.Uic {
 }
 
 }

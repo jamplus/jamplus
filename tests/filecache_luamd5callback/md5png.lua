@@ -1,4 +1,5 @@
 require 'md5'
+require 'struct'
 
 function md5png(filename)
 	print("md5png: Calculating " .. filename .. "...")
@@ -10,7 +11,7 @@ function md5png(filename)
 	local md5sum = md5.new()
 	local offset
 	while true do
-		local length = select(2, string.unpack(file:read(4), '>I'))
+		local length = struct.unpack('>I', file:read(4))
 		local chunkType = file:read(4)
 		if chunkType == 'IEND' then break end
 		file:seek('cur', length)

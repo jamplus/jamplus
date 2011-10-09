@@ -46,10 +46,10 @@ rule C.ReferenceDirectories TARGET : DIRECTORIES
 
 rule C.StrongName TARGET : SNK_NAME
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local grist = $(TARGET) ;
-	local _t = [ on $(TARGET) Var LINK_TARGET ] ;
-	local snk = $(SNK_NAME:G=$(grist)) ;
+	local _t = $(LINK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local snk = [ C.GristFiles $(SNK_NAME) ] ;
 	Depends $(_t) : $(snk) ;
 	SearchSource $(snk) : $(SEARCH_SOURCE) ;
 	StrongName1 $(_t) : $(snk) ;

@@ -130,8 +130,7 @@ rule FindVisualStudioHelper VERSION {
 rule FindVisualStudio VERSION {
 	local compiler = $(vs_versions.$(VERSION)) ;
 	local C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
-	local msvcnt ;
-	on $(C.COMPILER_SUITE_SYMBOL) msvcnt = $(MSVCNT) ;
+	local msvcnt = $(MSVCNT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	if ! $(msvcnt) {
 		compiler = [ FindVisualStudioHelper $(VERSION) ] ;
 	}

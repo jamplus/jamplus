@@ -73,7 +73,7 @@ switch $(CSC_COMPILER)
 
 rule CSharp.Assembly TARGET : SOURCES : OPTIONS
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 
 	local outputPath = [ CSharp._retrieveOutputPath $(TARGET) ] ;
 
@@ -185,7 +185,7 @@ else
 
 rule CSharp.Application TARGET : SOURCES : OPTIONS
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	Workspace $(TARGET) : $(TARGET) : all ;
 
 	Depends all : $(TARGET) ;
@@ -194,7 +194,7 @@ rule CSharp.Application TARGET : SOURCES : OPTIONS
 
 rule CSharp.Library TARGET : SOURCES : OPTIONS
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	Workspace $(TARGET) : $(TARGET) : all ;
 
 	Depends all : $(TARGET) ;
@@ -206,7 +206,7 @@ rule CSharp.Library TARGET : SOURCES : OPTIONS
 
 rule CSharp.CscDefines TARGET : DEFINES : THE_CONFIG
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	CSCDEFINES.$(THE_CONFIG) on $(TARGET) += $(DEFINES) ;
 }
@@ -214,7 +214,7 @@ rule CSharp.CscDefines TARGET : DEFINES : THE_CONFIG
 
 rule CSharp.CscFlags TARGET : FLAGS : THE_CONFIG
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	CSCFLAGS.$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
 }
@@ -222,7 +222,7 @@ rule CSharp.CscFlags TARGET : FLAGS : THE_CONFIG
 
 rule CSharp.ReferenceAssemblies TARGET : ASSEMBLIES : THE_CONFIG
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 
 	ASSEMBLIES = $(ASSEMBLIES:G=$(TARGET)) ;
@@ -232,7 +232,7 @@ rule CSharp.ReferenceAssemblies TARGET : ASSEMBLIES : THE_CONFIG
 
 rule CSharp.ReferencePaths TARGET : PATHS : THE_CONFIG
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	THE_CONFIG ?= * ;
 	REFERENCEPATHS.$(THE_CONFIG) on $(TARGET) += $(PATHS:R=$(SUBDIR)) ;
 }
@@ -290,35 +290,35 @@ rule CSharp._retrieveOutputName TARGET : SUFFIX_NAME : THE_CONFIG
 
 rule CSharp.OutputName TARGET : NAME : THE_CONFIG
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	OUTPUTNAME.$(THE_CONFIG:E=*) on $(TARGET) = $(NAME) ;
 }
 
 
 rule CSharp.OutputPath TARGET : OUTPUTPATH : THE_CONFIG
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LOCATE.$(THE_CONFIG:E=*) on $(TARGET) = $(OUTPUTPATH:R=$(SUBDIR:E="")) ;
 }
 
 
 rule CSharp.OutputPostfix TARGET : POSTFIX : THE_CONFIG
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	OUTPUTPOSTFIX.$(THE_CONFIG:E=*) on $(TARGET) = $(POSTFIX:E=*off*) ;
 }
 
 
 rule CSharp.OutputPostfixClear TARGET : THE_CONFIG
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	OUTPUTPOSTFIX.$(THE_CONFIG:E=*) on $(TARGET) = ;
 }
 
 
 rule CSharp.OutputSuffix TARGET : SUFFIX : THE_CONFIG
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local NO_DOT_SUFFIX = [ Match \\.?(.+) : $(SUFFIX) ] ;
 	SUFFIX = .$(NO_DOT_SUFFIX) ;
 	OUTPUTSUFFIX.$(THE_CONFIG:E=*) on $(TARGET) = $(SUFFIX) ;

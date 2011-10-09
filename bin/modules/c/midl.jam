@@ -33,8 +33,10 @@ switch $(C.COMPILER)
 # OPTIONS = proxy ;
 rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 {
+	ActiveTarget $(PARENT) ;
+
 	BASE_NAME = $(BASE_NAME:L) ;
-	BASE_NAME = $(BASE_NAME:G=<$(PARENT)>) ;
+	BASE_NAME = [ C.GristFiles $(BASE_NAME) ] ;
 	local tlbFile = $(BASE_NAME:S=.tlb) ;
 	local hFile ;
 	if $(C.COMPILER) = vc6 {
@@ -94,10 +96,9 @@ rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 
 rule C.MidlCompiler PARENT : SOURCE
 {
-	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
-	local grist = $(PARENT) ;
+	PARENT = [ ActiveTarget $(PARENT) ] ;
 
-	SOURCE = $(SOURCE:G=$(grist)) ;
+	SOURCE = [ C.GristFiles $(SOURCE) ] ;
 	SearchSource $(SOURCE) ;
 
 	local targets = [ C.MidlFlags $(PARENT) : $(SOURCE) ] ;
