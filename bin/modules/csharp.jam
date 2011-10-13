@@ -6,7 +6,7 @@ CSCFLAGS.debug on * += /define:DEBUG;TRACE /debug+ /debug:full /optimize- ;
 
 if $(NT)
 {
-	CSC_COMPILER ?= vs2008 ;
+	CSC_COMPILER ?= vs2010 ;
 }
 else
 {
@@ -27,6 +27,14 @@ switch $(CSC_COMPILER)
 		CSC = "\"$(windir)/Microsoft.NET/Framework/v3.5/Csc.exe\"" /nologo ;
 		REFERENCEPATHS.* on * +=
 				[ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Microsoft .NETFramework AssemblyFolders "Microsoft .NET Framework 3.5 Reference Assemblies" "" ]
+				$(windir)/Microsoft.NET/Framework/v2.0.50727
+		;
+		CSCFLAGS.* on * += /errorreport:prompt /filealign:512 ;
+		
+	case vs2010 :
+		CSC = "\"$(windir)/Microsoft.NET/Framework/v4.0.30319/Csc.exe\"" /nologo ;
+		REFERENCEPATHS.* on * +=
+				[ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Microsoft .NETFramework AssemblyFolders "Microsoft .NET Framework 4.0 Reference Assemblies" "" ]
 				$(windir)/Microsoft.NET/Framework/v2.0.50727
 		;
 		CSCFLAGS.* on * += /errorreport:prompt /filealign:512 ;
@@ -71,76 +79,68 @@ switch $(CSC_COMPILER)
 }
 
 
-rule CSharp.Assembly TARGET : SOURCES : OPTIONS
-{
+rule CSharp.Assembly TARGET : SOURCES : OPTIONS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 
 	local outputPath = [ CSharp._retrieveOutputPath $(TARGET) ] ;
 
-	local suffix = SUFEXE ;
-	if library in $(OPTIONS)
-	{
-		suffix = SUFSHAREDLIB ;
+	local suffixName = SUFEXE ;
+	if library in $(OPTIONS) {
+		suffixName = SUFSHAREDLIB ;
 	}
+	local suffix = $($(suffixName):Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local _t = [ CSharp._retrieveOutputName $(TARGET) : $(suffix) ] ;
-	_t = $(_t:G=$(TARGET)) ;
+	_t = [ C.GristFiles : $(_t) ] ;
 
-	local _s = $(SOURCES:I=\\.cs$:G=$(TARGET)) ;
+	local _s = [ C.GristFiles : $(SOURCES:I=\\.cs) ] ;
 	SEARCH on $(_s) = $(SEARCH_SOURCE) ;
 
-	Depends all : $(TARGET) ;
-	Depends $(TARGET) : $(_t) ;
-	NotFile $(TARGET) ;
-	Depends $(_t) : $(_s) ;
+	Depends all : $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t) : $(_s) ;
+	NotFile $(TARGET) $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 	MakeLocate $(_t) : $(outputPath) ;
 
-	Depends clean : clean:$(TARGET) ;
-	NotFile clean:$(TARGET) ;
-	Always clean:$(TARGET) ;
-	Clean clean:$(TARGET) : $(_t) $(_t:S=.pdb) ;
+	Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+	NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+	Always clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_t) : $(_t:S=.pdb) ;
 
 	local ALL_TYPES = $(CONFIG) * ;
 
 	local _flags ;
 
-	local REFERENCEPATHS ;
-	on $(TARGET) REFERENCEPATHS += $(REFERENCEPATHS.$(ALL_TYPES)) ;
-	on * REFERENCEPATHS += $(REFERENCEPATHS.$(ALL_TYPES)) ;
+	local REFERENCEPATHS =
+		$(REFERENCEPATHS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+		$(REFERENCEPATHS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+	;
 
-	local CSCDEFINES ;
-	on * CSCDEFINES += $(CSCDEFINES.$(ALL_TYPES)) ;
-	on $(TARGET) CSCDEFINES += $(CSCDEFINES.$(ALL_TYPES)) ;
+	local CSCDEFINES =
+		$(CSCDEFINES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+		$(CSCDEFINES:Z=$(C.ACTIVE_TOOLCHAIN_*))
+	;
 	_flags += /define:$(CSCDEFINES) ;
 
-	local CSCFLAGS ;
-	on * CSCFLAGS += $(CSCFLAGS.$(ALL_TYPES)) ;
-	on $(TARGET) CSCFLAGS += $(CSCFLAGS.$(ALL_TYPES)) ;
+	local CSCFLAGS =
+		$(CSCFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+		$(CSCFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+	;
 	_flags += $(CSCFLAGS) ;
 
-	local needassemblies ;
-	on $(TARGET) needassemblies += $(NEEDASSEMBLIES.$(ALL_TYPES)) ;
-	on * needassemblies += $(NEEDASSEMBLIES.$(ALL_TYPES)) ;
+	local needassemblies =
+		$(NEEDASSEMBLIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+		$(NEEDASSEMBLIES:Z=$(C.ACTIVE_TOOLCHAIN_*))
+	;
 	SEARCH on $(needassemblies) = $(REFERENCEPATHS) ;
 	_flags += /reference:\"$(needassemblies:T)\" ;
 
-	if console in $(OPTIONS)
-	{
+	if console in $(OPTIONS) {
 		_flags += /target:exe ;
-	}
-	else if windows in $(OPTIONS)
-	{
+	} else if windows in $(OPTIONS) {
 		_flags += /target:winexe ;
-	}
-	else if library in $(OPTIONS)
-	{
+	} else if library in $(OPTIONS) {
 		_flags += /target:library ;
-	}
-	else if module in $(OPTIONS)
-	{
+	} else if module in $(OPTIONS) {
 		_flags += /target:module ;
-	}
-	else
-	{
+	} else {
 		_flags += /target:exe ;
 	}
 
@@ -151,32 +151,24 @@ rule CSharp.Assembly TARGET : SOURCES : OPTIONS
 }
 
 
-rule CSharp.Application TARGET : SOURCES : OPTIONS
-{
-	if ! ( windows in $(OPTIONS) )  &&  ! ( console in $(OPTIONS) )
-	{
+rule CSharp.Application TARGET : SOURCES : OPTIONS {
+	if ! ( windows in $(OPTIONS) )  &&  ! ( console in $(OPTIONS) ) {
 		OPTIONS += console ;
 	}
 	CSharp.Assembly $(TARGET) : $(SOURCES) : $(OPTIONS) ;
 }
 
 
-rule CSharp.Library TARGET : SOURCES : OPTIONS
-{
+rule CSharp.Library TARGET : SOURCES : OPTIONS {
 	CSharp.Assembly $(TARGET) : $(SOURCES) : library $(OPTIONS) ;
 }
 
-if $(CSC_COMPILER) in vs2005 vs2008
-{
-	actions CSharp.Csc
-	{
+if $(CSC_COMPILER) in vs2005 vs2008 vs2010 {
+	actions CSharp.Csc {
 		$(CSC) $(MFLAGS) /out:$(1) $(2:\\)
 	}
-}
-else
-{
-	actions CSharp.Csc
-	{
+} else {
+	actions CSharp.Csc {
 		$(CSC) $(MFLAGS) /out:$(1) $(2)
 	}
 }
@@ -204,37 +196,28 @@ rule CSharp.Library TARGET : SOURCES : OPTIONS
 }
 
 
-rule CSharp.CscDefines TARGET : DEFINES : THE_CONFIG
-{
+rule CSharp.CscDefines TARGET : DEFINES {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	THE_CONFIG ?= * ;
-	CSCDEFINES.$(THE_CONFIG) on $(TARGET) += $(DEFINES) ;
+	CSCDEFINES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DEFINES) ;
 }
 
 
-rule CSharp.CscFlags TARGET : FLAGS : THE_CONFIG
-{
+rule CSharp.CscFlags TARGET : FLAGS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	THE_CONFIG ?= * ;
-	CSCFLAGS.$(THE_CONFIG) on $(TARGET) += $(FLAGS) ;
+	CSCFLAGS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
 }
 
 
-rule CSharp.ReferenceAssemblies TARGET : ASSEMBLIES : THE_CONFIG
-{
+rule CSharp.ReferenceAssemblies TARGET : ASSEMBLIES {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	THE_CONFIG ?= * ;
-
-	ASSEMBLIES = $(ASSEMBLIES:G=$(TARGET)) ;
-	NEEDASSEMBLIES.$(THE_CONFIG) on $(TARGET) += $(ASSEMBLIES) ;
+	ASSEMBLIES = $(ASSEMBLIES:G=$(TARGET)) ;  #TODO
+	NEEDASSEMBLIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(ASSEMBLIES) ;
 }
 
 
-rule CSharp.ReferencePaths TARGET : PATHS : THE_CONFIG
-{
+rule CSharp.ReferencePaths TARGET : PATHS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	THE_CONFIG ?= * ;
-	REFERENCEPATHS.$(THE_CONFIG) on $(TARGET) += $(PATHS:R=$(SUBDIR)) ;
+	REFERENCEPATHS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(PATHS:R=$(SUBDIR)) ;
 }
 
 
@@ -243,85 +226,69 @@ rule CSharp.ReferencePaths TARGET : PATHS : THE_CONFIG
 ########################################################################
 ########################################################################
 
-rule CSharp._retrieveOutputPath TARGET : THE_CONFIG
-{
-	THE_CONFIG ?= $(CONFIG) ;
-	local outputPath = [ on $(TARGET) SearchVar
-			LOCATE.$(THE_CONFIG)
-			LOCATE.* ] ;
-	if ! $(outputPath)
-	{
-		outputPath = [ on * SearchVar
-				LOCATE.$(THE_CONFIG)
-				LOCATE.* : $(LOCATE_TARGET) ] ;
-	}
+rule CSharp._retrieveOutputPath TARGET {
+	C.ActiveTarget $(TARGET) ;
+
+	local outputPath = $(LOCATE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	outputPath ?= $(LOCATE:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+	outputPath ?= $(LOCATE_TARGET) ;
 	return $(outputPath) ;
 }
 
 
-rule CSharp._retrieveOutputName TARGET : SUFFIX_NAME : THE_CONFIG
-{
-	THE_CONFIG ?= $(CONFIG) ;
-	local target = [ on $(TARGET) SearchVar
-			OUTPUTNAME.$(THE_CONFIG)
-			OUTPUTNAME.*
-			: $(TARGET) ] ;
+rule CSharp._retrieveOutputName TARGET : SUFFIX {
+	C.ActiveTarget $(TARGET) ;
 
-	local presuffix = [ on $(TARGET) SearchVar
-			OUTPUTPOSTFIX.$(THE_CONFIG)
-			OUTPUTPOSTFIX.* ] ;
-	presuffix ?= [ on * SearchVar
-			OUTPUTPOSTFIX.$(THE_CONFIG)
-			OUTPUTPOSTFIX.* ] ;
-	presuffix ?= .$(THE_CONFIG) ;
-	if $(presuffix) = *off*
-	{
+	local target = $(OUTPUTNAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	target ?= $(C.ACTIVE_TARGET) ;
+
+	local presuffix = $(OUTPUTPOSTFIX:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	presuffix ?= $(OUTPUTPOSTFIX:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+	if ! $(presuffix) {
+		presuffix = $(C.CONFIG) ;
+		if $(presuffix) {
+			presuffix = .$(presuffix) ;
+		}
+	}
+	if $(presuffix) = *off* {
 		presuffix = ;
 	}
 
-	local suffix = [ on $(TARGET) SearchVar
-			OUTPUTSUFFIX.$(THE_CONFIG)
-			OUTPUTSUFFIX.*
-			$(SUFFIX_NAME) ] ;
-
+	local suffix = $(OUTPUTSUFFIX:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	suffix ?= $(SUFFIX) ;
 	return $(target)$(presuffix:E=)$(suffix:E=) ;
 }
 
 
-rule CSharp.OutputName TARGET : NAME : THE_CONFIG
-{
+rule CSharp.OutputName TARGET : NAME {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	OUTPUTNAME.$(THE_CONFIG:E=*) on $(TARGET) = $(NAME) ;
+	OUTPUTNAME on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(NAME) ;
 }
 
 
-rule CSharp.OutputPath TARGET : OUTPUTPATH : THE_CONFIG
-{
+rule CSharp.OutputPath TARGET : OUTPUTPATH {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	LOCATE.$(THE_CONFIG:E=*) on $(TARGET) = $(OUTPUTPATH:R=$(SUBDIR:E="")) ;
+	LOCATE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(OUTPUTPATH:R=$(SUBDIR:E="")) ;
 }
 
 
-rule CSharp.OutputPostfix TARGET : POSTFIX : THE_CONFIG
-{
+rule CSharp.OutputPostfix TARGET : POSTFIX {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	OUTPUTPOSTFIX.$(THE_CONFIG:E=*) on $(TARGET) = $(POSTFIX:E=*off*) ;
+	OUTPUTPOSTFIX on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(POSTFIX:E=*off*) ;
 }
 
 
-rule CSharp.OutputPostfixClear TARGET : THE_CONFIG
-{
+rule CSharp.OutputPostfixClear TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	OUTPUTPOSTFIX.$(THE_CONFIG:E=*) on $(TARGET) = ;
+	OUTPUTPOSTFIX on $(C.ACTIVE_TOOLCHAIN_TARGET) = ;
 }
 
 
-rule CSharp.OutputSuffix TARGET : SUFFIX : THE_CONFIG
-{
+rule CSharp.OutputSuffix TARGET : SUFFIX {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local NO_DOT_SUFFIX = [ Match \\.?(.+) : $(SUFFIX) ] ;
 	SUFFIX = .$(NO_DOT_SUFFIX) ;
-	OUTPUTSUFFIX.$(THE_CONFIG:E=*) on $(TARGET) = $(SUFFIX) ;
+	OUTPUTSUFFIX on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SUFFIX) ;
 }
 
 
