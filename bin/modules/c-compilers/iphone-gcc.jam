@@ -29,6 +29,9 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 		SDK_PLATFORM = macosx ;
 	}
 
+	local CC ;
+	local C++ ;
+	local LINK ;
 	local OLD_TARGET = $(C.ACTIVE_TARGET) ;
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local developerRoot ;
@@ -41,33 +44,33 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 			SDK_VERSION ?= 10.6 ;
 			switch $(SDK_VERSION) {
 				case 10.4 :
-					C.CC	= gcc-4.0 ;
-					C.C++	= g++-4.0 ;
-					C.LINK	= g++-4.0 ;
+					CC	= gcc-4.0 ;
+					C++	= g++-4.0 ;
+					LINK	= g++-4.0 ;
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
 					defaultversionmin = 10.4 ;
 					XCODE_SDKROOT = macosx10.4 ;
 
 				case 10.4u :
-					C.CC	= gcc-4.0 ;
-					C.C++	= g++-4.0 ;
-					C.LINK	= g++-4.0 ;
+					CC	= gcc-4.0 ;
+					C++	= g++-4.0 ;
+					LINK	= g++-4.0 ;
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
 					defaultversionmin = 10.4 ;
 					XCODE_SDKROOT = macosx10.4 ;
 
 				case 10.5 :
-					C.CC	= gcc ;
-					C.C++	= g++ ;
-					C.LINK	= g++ ;
+					CC	= gcc ;
+					C++	= g++ ;
+					LINK	= g++ ;
 					isysroot = $(developerRoot)/MacOSX10.5.sdk ;
 					defaultversionmin = 10.5 ;
 					XCODE_SDKROOT = macosx10.5 ;
 
 				case 10.6 :
-					C.CC	= gcc ;
-					C.C++	= g++ ;
-					C.LINK	= g++ ;
+					CC	= gcc ;
+					C++	= g++ ;
+					LINK	= g++ ;
 					isysroot = $(developerRoot)/MacOSX10.6.sdk ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = macosx10.6 ;
@@ -103,57 +106,57 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 					XCODE_SDKROOT = iphoneos3.1 ;
 
 				case 3.1.2 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS3.1.2.sdk ;
 					flags += -arch armv6 -miphoneos-version-min=3.1.2 ;
 					XCODE_SDKROOT = iphoneos3.1.2 ;
 
 				case 3.1.3 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS3.1.3.sdk ;
 					flags += -arch armv6 -miphoneos-version-min=3.1.3 ;
 					XCODE_SDKROOT = iphoneos3.1.3 ;
 
 				case 3.2 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS3.2.sdk ;
 					flags += -arch armv6 -miphoneos-version-min=3.2 ;
 					XCODE_SDKROOT = iphoneos3.2 ;
 
 				case 4.0 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.0.sdk ;
 					flags += -arch armv6 -miphoneos-version-min=4.0 ;
 					XCODE_SDKROOT = iphoneos4.0 ;
 
 				case 4.1 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.1.sdk ;
 					flags += -arch armv6 -miphoneos-version-min=4.1 ;
 					XCODE_SDKROOT = iphoneos4.1 ;
 
 				case 4.2 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.2.sdk ;
 					flags += -arch armv6 -miphoneos-version-min=4.2 ;
 					XCODE_SDKROOT = iphoneos4.2 ;
 
 				case 4.3 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
 					flags += -arch armv6 -miphoneos-version-min=4.3 ;
 					XCODE_SDKROOT = iphoneos4.3 ;
@@ -191,81 +194,81 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 					XCODE_SDKROOT = iphoneos2.2 ;
 
 				case 3.0 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator3.0.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30000 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos3.0 ;
 
 				case 3.1 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator3.1.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30000 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos3.1 ;
 
 				case 3.1.2 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator3.1.2.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30000 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos3.1.2 ;
 
 				case 3.1.3 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator3.1.3.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30000 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos3.1.3 ;
 
 				case 3.2 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator3.2.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos3.2 ;
 
 				case 4.0 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.0.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos4.0 ;
 
 				case 4.1 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.1.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos4.1 ;
 
 				case 4.2 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.2.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos4.2 ;
 
 				case 4.3 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 ;
 					defaultversionmin = 10.6 ;
@@ -290,36 +293,36 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 			SDK_VERSION_MIN ?= 5.0 ;
 			switch $(SDK_VERSION) {
 				case 3.2 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator3.2.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 -arch i386 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos3.2 ;
 
 				case 4.0 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.0.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 -arch i386 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos4.0 ;
 
 				case 4.2 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.2.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 -arch i386 ;
 					defaultversionmin = 10.6 ;
 					XCODE_SDKROOT = iphoneos4.2 ;
 
 				case 4.3 :
-					C.CC	= $(developerRoot)/usr/bin/llvm-gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/llvm-g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/llvm-g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/llvm-gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/llvm-g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/llvm-g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 -arch i386 ;
 					defaultversionmin = 10.6 ;
@@ -344,35 +347,35 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 			SDK_VERSION_MIN ?= 5.0 ;
 			switch $(SDK_VERSION) {
 				case 3.2 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS3.2.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 -arch armv7 ; 
 					XCODE_SDKROOT = iphoneos3.2 ;
 
 				case 4.0 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.0.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 -arch armv7 ; 
 					XCODE_SDKROOT = iphoneos4.0 ;
 
 				case 4.2 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.2.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 -arch armv7 ; 
 					XCODE_SDKROOT = iphoneos4.2 ;
 
 				case 4.3 :
-					C.CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
-					C.C++	= $(developerRoot)/usr/bin/g++-4.2 ;
-					C.LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
+					CC	= $(developerRoot)/usr/bin/gcc-4.2 ;
+					C++	= $(developerRoot)/usr/bin/g++-4.2 ;
+					LINK	= $(developerRoot)/usr/bin/g++-4.2 ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
-					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 -arch armv7 ; 
+					flags += -arch armv7 ; 
 					XCODE_SDKROOT = iphoneos4.3 ;
 
 				case 5.0 :
@@ -388,6 +391,10 @@ rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 			SDK_VERSION_MIN ?= $(SDK_VERSION) ;
 			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
 	}
+
+	C.CC on $(C.COMPILER_SUITE_SYMBOL) = $(CC) ;
+	C.C++ on $(C.COMPILER_SUITE_SYMBOL) = $(C++) ;
+	C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(LINK) ;
 
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;	
 	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
@@ -563,10 +570,8 @@ rule C.GenerateDSYMFile TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local dsymBundlePath = $(bundlePath).dSYM ;
-	Echo $(dsymBundlePath) ;
 	local _t.dsym = $(_t).DSYM ;
-	BINDING on $(_t) = $(_t:BS) ;
-	BINDING on $(_t.dsym) = $(_t:BS) ;
+	BINDING on $(_t.dsym) = $(BINDING:Z=$(_t)) ;
 	OUTPUT_PATH on $(_t.dsym) = $(dsymBundlePath) ;
 	MakeLocate $(_t.dsym) : $(dsymBundlePath)/Contents/Resources/DWARF ;
 	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t.dsym) : $(_t) ;
@@ -596,7 +601,7 @@ rule C.gcc._ApplicationFromObjects_PostBuild {
 		local isysroot $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-		local pkginfo = @(PkgInfo:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+		local pkginfo = @(PkgInfo:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		MakeLocate $(pkginfo) : $(bundlePath) ;
 		local contents = APPL???? ;
 		CONTENTS on $(pkginfo) = $(contents) ;
@@ -604,7 +609,7 @@ rule C.gcc._ApplicationFromObjects_PostBuild {
 		UseCommandLine $(pkginfo) : $(contents) ;
 		Depends $(bundleTarget) : $(pkginfo) ;
 		Clean $(cleanBundleTarget) : $(pkginfo) ;
-		
+
 		local infoplistcontents = $(INFO_PLIST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		if $(infoplistcontents) {
 			infoplistcontents += "</dict>
@@ -612,7 +617,7 @@ rule C.gcc._ApplicationFromObjects_PostBuild {
 " ;
 			infoplistcontents = $(infoplistcontents:J="") ;
 
-			local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+			local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 			MakeLocate $(infoplist) : $(bundlePath) ;
 			CONTENTS on $(infoplist) = $(infoplistcontents) ;
 			WriteFile $(infoplist) ;
@@ -718,7 +723,7 @@ actions CompileXIB
 
 actions C._CodeSign
 {
-	/usr/bin/codesign -f -s "$(PROVISIONING_PROFILE)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
+	/usr/bin/codesign --force --sign "$(PROVISIONING_PROFILE)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
 }
 
 
@@ -777,7 +782,6 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL {
 
 			# Write manifest.plist.
 			local manifest.plist = @(manifest.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):archive) ;
-			Echo manifest.plist - $(manifest.plist) ;
 			MakeLocate $(manifest.plist) : $(OUTPUT_PATH) ;
 			Depends $(archiveTarget) : $(manifest.plist) ;
 			Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(manifest.plist) ;
