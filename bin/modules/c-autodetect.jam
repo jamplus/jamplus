@@ -63,7 +63,9 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 	if ! $(INITIALIZED:Z=$(gristedConfigSpec)) {
 		INITIALIZED on $(gristedConfigSpec) = 1 ;
 
-		IncludeModule c-compilers/configs/$(gristedConfigSpec) ;
+		if ! [ Match (\\*) : $(gristedConfigSpec)  ] {
+			IncludeModule c-compilers/configs/$(gristedConfigSpec) ;
+		}	
 
 		C.COMPILER_SUITE_SYMBOL on $(gristedConfigSpec) = $(C.COMPILER_SUITE_SYMBOL) ;
 		ALL_LOCATE_TARGET on $(C.COMPILER_SUITE_SYMBOL) = $(ALL_LOCATE_TARGET) ;
@@ -84,6 +86,8 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 C.COMPILER ?= $(COMPILER) ;
 
 C.Toolchain $(PLATFORM) $(CONFIG) $(ARCHITECTURE) ;
+
+COMPILER = $(C.COMPILER) ;
 
 ########################################################################
 ########################################################################

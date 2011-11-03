@@ -122,37 +122,24 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	}
 
 	local defines ;
-	local ALL_TYPES ;
-	if $(PLATFORM) = * {
-		if $(CONFIG) = * {
-			ALL_TYPES = *.* ;
-		} else {
-			ALL_TYPES =
-					*.$(CONFIG)
-					*.*
-			;
-		}
-	} else {
-		ALL_TYPES =
-				$(PLATFORM).$(CONFIG)
-				*.$(CONFIG)
-				$(PLATFORM).*
-				*.*
-		;
+	local hdrs = $(SEARCH_SOURCE) ;
+
+	on $(C.ACTIVE_TOOLCHAIN_*) {
+		defines += $(DEFINES) ;
+		hdrs += $(HDRS) ;
 	}
 
-	on C.* 			defines += $(DEFINES.$(ALL_TYPES)) ;
-	on $(TARGET)	defines += $(DEFINES.$(ALL_TYPES)) ;
-	on $(_obj)		defines += $(DEFINES.$(ALL_TYPES)) ;
+	local forceIncludes ;
+	on $(C.ACTIVE_TOOLCHAIN_TARGET) {
+		defines += $(DEFINES) ;
+		hdrs = $(HDRS) $(hdrs) ;
+		forceIncludes = $(FORCE_INCLUDES) ;
+	}
 
 	local definesString = "'$(defines)'," ;
 	definesString ?= "" ;
 	Contents += "$(project).Defines['$(PLATFORM)']['$(CONFIG)'] = { $(definesString:J= ) }$(NEWLINE)" ;
 
-	local hdrs = $(SEARCH_SOURCE) ;
-	on $(_obj)		hdrs += $(HDRS.$(ALL_TYPES)) ;
-	on $(TARGET)	hdrs += $(HDRS.$(ALL_TYPES)) ;
-	on C.* 			hdrs += $(HDRS.$(ALL_TYPES)) ;
 	hdrs += $(SUBDIRHDRS) $(STDHDRS) ;
 
 	local hdrsString = "[[$(hdrs)]]," ;
