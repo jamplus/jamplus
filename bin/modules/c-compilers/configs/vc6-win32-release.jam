@@ -1,8 +1,8 @@
 C.ToolchainSpecKeys C.COMPILER C.PLATFORM C.CONFIG C.ARCHITECTURE ;
 
 IncludeModule c-compilers/c-vc-autodetect ;
-C.AutoDetect vs2010 ;
+C.AutoDetect vc6 ;
 
 VSCONFIGMAP.debug = Debug ;
 
-C.ToolchainHelper vc!win32!debug ;
+C.ToolchainHelper vc-win32-release ;

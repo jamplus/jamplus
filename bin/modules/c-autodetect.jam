@@ -44,13 +44,13 @@ rule C.ToolchainSpecKeys TOOLCHAIN_SPEC_KEYS {
 }
 
 rule C.ToolchainHelper TOOLCHAIN_MODULE_NAME {
-	IncludeModule c-compilers/configs/!$(TOOLCHAIN_MODULE_NAME) : force ;
+	IncludeModule c-compilers/configs/_$(TOOLCHAIN_MODULE_NAME) : force ;
 }
 
 rule C.Toolchain TOOLCHAIN_SPEC {
 	local gristedConfigSpec = $(TOOLCHAIN_SPEC:J=!) ;
 	C.ACTIVE_CONFIG_SPEC = $(TOOLCHAIN_SPEC) ;
-	C.ACTIVE_TOOLCHAIN = $(TOOLCHAIN_SPEC:J=!) ;
+	C.ACTIVE_TOOLCHAIN = $(gristedConfigSpec) ;
 
 	C.ActiveTarget * ;
 
@@ -64,7 +64,7 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 		INITIALIZED on $(gristedConfigSpec) = 1 ;
 
 		if ! [ Match (\\*) : $(gristedConfigSpec)  ] {
-			IncludeModule c-compilers/configs/$(gristedConfigSpec) ;
+			IncludeModule c-compilers/configs/$(TOOLCHAIN_SPEC:J=-) ;
 		}	
 
 		C.COMPILER_SUITE_SYMBOL on $(gristedConfigSpec) = $(C.COMPILER_SUITE_SYMBOL) ;

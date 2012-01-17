@@ -5,4 +5,4 @@ C.AutoDetect vs2010 ;
 
 VSCONFIGMAP.release = Release ;
 
-C.ToolchainHelper vc!win32!release ;
+C.ToolchainHelper vc-win32-release ;

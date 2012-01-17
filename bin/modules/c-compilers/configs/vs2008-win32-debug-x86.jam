@@ -5,4 +5,4 @@ C.AutoDetect ;
 
 VSCONFIGMAP.debug = Debug ;
 
-C.ToolchainHelper vc!win32!debug ;
+C.ToolchainHelper vc-win32-debug ;
