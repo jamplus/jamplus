@@ -7,7 +7,7 @@ rule C.win64.vc.AutoDetect COMPILER {
 			MSSDK ?= $(MSVCNT) ;
 			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
 			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
-			rc_nologo = /nologo ;
+			rc_nologo = ;
 
 		case vs2008 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
