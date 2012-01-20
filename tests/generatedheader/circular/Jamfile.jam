@@ -1,17 +1,17 @@
 rule SleepThenTouch
 {
     Clean clean : $(<) ;
-    Depends all : $(<) ;
 }
 
 actions lua SleepThenTouch
 {
     require 'ex'
     os.sleep(5)
-    io.writeall([[$(<)]], '')
-    -- sleep 5
-    -- touch $(<)
+    local file = io.open([[$(<)]], 'wb')
+	print(file)
+	file:close()
 }
 
-SleepThenTouch <foo>generated.h ;
-C.Library foo : sourceA.c sourceB.c ;
+C.ActiveTarget foo ;
+SleepThenTouch [ C.GristFiles generated.h ] ;
+C.Library sourceA.c sourceB.c ;

@@ -23,45 +23,62 @@ switch $(OS)
 if $(PLATFORM) = "" { PLATFORM = ; }
 PLATFORM ?= $(VALID_PLATFORMS[1]) ;
 
-#if ! $(CONFIG) in * $(VALID_CONFIGS)
-#{
-#	Exit "* jam: CONFIG must be one of the following:" $(VALID_CONFIGS:J=$(SPACE)) ;
-#}
-
-#if ! $(PLATFORM) in * $(VALID_PLATFORMS)
-#{
-#	Exit "* jam: PLATFORM must be one of the following:" $(VALID_PLATFORMS:J=$(SPACE)) ;
-#}
-
-rule C.ToolChain THE_COMPILER : THE_PLATFORM : THE_CONFIG
-{
-	THE_COMPILER ?= $(COMPILER.$(PLATFORM)) ;
-	THE_PLATFORM ?= $(PLATFORM) ;
-	THE_CONFIG ?= $(CONFIG) ;
-
-	if $(THE_COMPILER)
-	{
-		COMPILER.$(THE_PLATFORM) = $(THE_COMPILER) ;
+rule C.ToolchainSpecKeys TOOLCHAIN_SPEC_KEYS {
+	local configKey ;
+	local configIndex = 1 ;
+	for configKey in $(TOOLCHAIN_SPEC_KEYS:Z=$(C.ACTIVE_TOOLCHAIN)) {
+		$(configKey) = ;
+		$(configKey) on $(C.ACTIVE_TOOLCHAIN) = ;
+		configIndex = [ Math $(configIndex) + 1 ] ;
 	}
 
-	if $(THE_PLATFORM) != * {
-		if $(THE_CONFIG) != * {
-			IncludeModule c-compilers/global-$(THE_CONFIG) : optional ;
-		}
-		IncludeModule c-compilers/$(THE_PLATFORM)-autodetect ;
-		if [ C.AutoDetect ] {
-			return ;
-		}
+	TOOLCHAIN_SPEC_KEYS ?= C.COMPILER ;
+	TOOLCHAIN_SPEC_KEYS on $(C.ACTIVE_TOOLCHAIN) = $(TOOLCHAIN_SPEC_KEYS) ;
 
-		echo "warning: No supported C build platform found on this computer." ;
+	configIndex = 1 ;
+	for configKey in $(TOOLCHAIN_SPEC_KEYS:Z=$(C.ACTIVE_TOOLCHAIN)) {
+		$(configKey) = $(C.ACTIVE_CONFIG_SPEC[$(configIndex)]) ;
+		$(configKey) on $(C.ACTIVE_TOOLCHAIN) = $($(configKey)) ;
+		configIndex = [ Math $(configIndex) + 1 ] ;
 	}
 }
 
-if ! $(COMPILER.$(PLATFORM))  &&  $(COMPILER) {
-	COMPILER.$(PLATFORM) = $(COMPILER) ;
+rule C.ToolchainHelper TOOLCHAIN_MODULE_NAME {
+	IncludeModule c-compilers/configs/!$(TOOLCHAIN_MODULE_NAME) : force ;
 }
 
-C.ToolChain $(COMPILER.$(PLATFORM)) : $(PLATFORM) : $(CONFIG) ;
+rule C.Toolchain TOOLCHAIN_SPEC {
+	local gristedConfigSpec = $(TOOLCHAIN_SPEC:J=!) ;
+	C.ACTIVE_CONFIG_SPEC = $(TOOLCHAIN_SPEC) ;
+	C.ACTIVE_TOOLCHAIN = $(TOOLCHAIN_SPEC:J=!) ;
+
+	C.ActiveTarget * ;
+
+	local save_ALL_LOCATE_TARGET = $(ALL_LOCATE_TARGET) ;
+	ALL_LOCATE_TARGET = $(ALL_LOCATE_TARGET)/$(C.ACTIVE_TOOLCHAIN) ;
+	if $(ALL_SUBDIR_TOKENS) {
+		SubDir ;
+	}
+	
+	if ! $(INITIALIZED:Z=$(gristedConfigSpec)) {
+		INITIALIZED on $(gristedConfigSpec) = 1 ;
+
+		IncludeModule c-compilers/configs/$(gristedConfigSpec) ;
+
+		C.COMPILER_SUITE_SYMBOL on $(gristedConfigSpec) = $(C.COMPILER_SUITE_SYMBOL) ;
+		ALL_LOCATE_TARGET on $(C.COMPILER_SUITE_SYMBOL) = $(ALL_LOCATE_TARGET) ;
+	} else {
+		C.ToolchainSpecKeys ;
+	}
+
+	ALL_LOCATE_TARGET = $(save_ALL_LOCATE_TARGET) ;
+
+	C.COMPILER_SUITE_SYMBOL = $(C.COMPILER_SUITE_SYMBOL:Z=$(gristedConfigSpec)) ;
+}
+
+C.COMPILER ?= $(COMPILER) ;
+
+C.Toolchain $(PLATFORM) $(CONFIG) $(ARCHITECTURE) ;
 
 ########################################################################
 ########################################################################
@@ -70,5 +87,3 @@ rule ActiveProject PROJECT
 {
 	ACTIVE_PROJECT = $(PROJECT) ;
 }
-
-

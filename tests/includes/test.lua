@@ -26,47 +26,53 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 27 target(s)...
-*** updating 5 target(s)...
-@ C.C++ <common>print.obj
-print.cpp
-@ C.Archive <common>common.lib
-@ C.C++ <project1>project1.obj
-project1.cpp
-@ C.C++ <project1>adefine.obj
-adefine.cpp
-@ C.LinkWithManifest <project1>project1.release.exe
-*** updated 5 target(s)...
+*** found 31 target(s)...
+*** updating 9 target(s)...
+@ C.vc.C++ <win32!release:project1>project1.obj
+!NEXT!@ C.vc.C++ <win32!release:project1>adefine.obj
+!NEXT!@ C.vc.C++ <win32!release:common>print.obj
+!NEXT!@ C.vc.Archive <win32!release:common>common.lib
+!NEXT!@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+!NEXT!*** updated 9 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
 
+		local pass1Directories = {
+			'common/',
+			'project1/',
+			'shared/',
+			'common/win32!release/',
+			'common/win32!release/common/',
+			'project1/win32!release/',
+			'project1/win32!release/project1/',
+		}
+
 		local pass1Files =
 		{
 			'Jamfile.jam',
+			'test.lua',
 			'common/common.jam',
-			'common/common.release.lib',
 			'common/print.cpp',
 			'common/print.h',
-			'common/print.obj',
-			'common/vc.pdb',
+			'common/win32!release/common/common.release.lib',
+			'common/win32!release/common/print.obj',
 			'project1/adefine.cpp',
-			'project1/adefine.obj',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/project1.obj',
-			'project1/project1.release.exe',
-			'project1/project1.release.exe.intermediate.manifest',
-			'project1/project1.release.pdb',
-			'project1/vc.pdb',
+			'project1/win32!release/project1/adefine.obj',
+			'project1/win32!release/project1/project1.obj',
+			'project1/win32!release/project1/project1.release.exe',
+			'project1/win32!release/project1/project1.release.exe.intermediate.manifest',
+			'project1/win32!release/project1/project1.release.pdb',
 			'shared/adefine.h',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
-*** found 27 target(s)...
+*** found 31 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	
@@ -74,31 +80,29 @@ adefine.cpp
 		os.touch('common/print.h')
 
 		local pattern3 = [[
-*** found 27 target(s)...
+*** found 31 target(s)...
 *** updating 2 target(s)...
-@ C.C++ <project1>project1.obj
-project1.cpp
-@ C.LinkWithManifest <project1>project1.release.exe
-*** updated 2 target(s)...
+@ C.vc.C++ <win32!release:project1>project1.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+!NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Directories)
 
 		os.sleep(1.0)
 		os.touch('shared/adefine.h')
 
 		local pattern4 = [[
-*** found 27 target(s)...
+*** found 31 target(s)...
 *** updating 2 target(s)...
-@ C.C++ <project1>adefine.obj
-adefine.cpp
-@ C.LinkWithManifest <project1>project1.release.exe
-*** updated 2 target(s)...	
+@ C.vc.C++ <win32!release:project1>adefine.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+!NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern4, RunJam())
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Directories)
 	
 	else
 

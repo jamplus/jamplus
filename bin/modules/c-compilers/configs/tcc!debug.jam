@@ -1,0 +1,5 @@
+IncludeModule c-compilers/c-tcc ;
+
+C.CFlags -g ;
+
+C.ToolchainHelper Global_DEBUG ;

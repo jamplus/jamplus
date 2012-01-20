@@ -21,11 +21,17 @@ actions CopyAction
 
 PASS_NUM ?= 1 ;
 
+C.ActiveTarget test ;
+
+local main.cpp = [ C.GristFiles main.cpp ] ;
+local foo.cpp = [ C.GristFiles foo.cpp ] ;
+local foo.h = [ C.GristFiles foo.h ] ;
+
 if $(PASS_NUM) = 1
 {
     Echo Pass 1 ;
 
-    CONTENTS on <test>main.cpp = "#include \"foo.h\"
+    CONTENTS on $(main.cpp) = "#include \"foo.h\"
 
 int main()
 {
@@ -33,23 +39,23 @@ int main()
     return 0;
 }
 " ;
-    WriteFile <test>main.cpp ;
-    MakeLocate <test>main.cpp : $(LOCATE_TARGET) ;
-    Clean clean:test : <test>main.cpp ;
+    WriteFile $(main.cpp) ;
+    MakeLocate $(main.cpp) : $(LOCATE_SOURCE) ;
+    C.Clean $(main.cpp) ;
 
-    CONTENTS on <test>foo.cpp = "#include <stdio.h>
+    CONTENTS on $(foo.cpp) = "#include <stdio.h>
 
 void foo()
 {
     printf(\"Hello, everyone!\n\");
 }
 " ;
-    WriteFile <test>foo.cpp ;
-    MakeLocate <test>foo.cpp : $(LOCATE_TARGET) ;
-    Clean clean:test : <test>foo.cpp ;
-    Depends <test>main.cpp : <test>foo.h ;
+    WriteFile $(foo.cpp) ;
+    MakeLocate $(foo.cpp) : $(LOCATE_TARGET) ;
+    C.Clean $(foo.cpp) ;
+    Depends $(main.cpp) : $(foo.h) ;
 
-    C.Application test : main.cpp foo.cpp ;
+    C.Application main.cpp foo.cpp ;
 
     QueueJamfile $(JAMFILE) ;
     PASS_NUM = 2 ;
@@ -58,9 +64,9 @@ else if $(PASS_NUM) = 2
 {
     Echo Pass 2 ;
 
-    CONTENTS on <test>foo.h = "extern void foo();" ;
-    WriteFile <test>foo.h ;
-    Clean clean:test : <test>foo.h ;
+    CONTENTS on $(foo.h) = "extern void foo();" ;
+    WriteFile $(foo.h) ;
+    C.Clean $(foo.h) ;
 
     QueueJamfile $(JAMFILE) ;
     PASS_NUM = 3 ;
@@ -68,7 +74,7 @@ else if $(PASS_NUM) = 2
 else
 {
     Echo Pass 3 ;
-	Clean clean : Foo.cpp Foo.h ;
+	C.Clean $(foo.cpp) $(foo.h) ;
 
 #    Depends Foo.cpp : Foo.h ;
 

@@ -18,38 +18,39 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 15 target(s)...
-*** updating 4 target(s)...
-@ GenerateCFile <helloworld>file.c
-!NEXT!@ C.CC <helloworld>main.obj
-main.c
-file.c
-Generating Code...
-@ C.LinkWithManifest <helloworld>helloworld.release.exe
-*** updated 4 target(s)...
+*** found 18 target(s)...
+*** updating 6 target(s)...
+@ GenerateCFile <win32!release:helloworld>file.c
+!NEXT!@ C.vc.CC <win32!release:helloworld>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!*** updated 6 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
 
-		local pass1Files =
-		{
-			'Jamfile.jam',
+		local pass1Dirs = {
+			'win32!release/',
+			'win32!release/helloworld/',
+		}
+
+		local pass1Files = {
 			'file.c',
-			'file.obj',
 			'file.txt',
-			'helloworld.release.exe',
-			'helloworld.release.exe.intermediate.manifest',
-			'helloworld.release.pdb',
+			'Jamfile.jam',
 			'main.c',
-			'main.obj',
-			'vc.pdb',
+			'test.lua',
+			'win32!release/helloworld/file.obj',
+			'win32!release/helloworld/helloworld.release.exe',
+			'win32!release/helloworld/helloworld.release.exe.intermediate.manifest',
+			'win32!release/helloworld/helloworld.release.pdb',
+			'win32!release/helloworld/main.obj',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 15 target(s)...
+*** found 18 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 
@@ -57,16 +58,16 @@ Generating Code...
 		os.touch('file.c')
 
 		local pattern3 = [[
-*** found 15 target(s)...
+*** found 18 target(s)...
 *** updating 2 target(s)...
-@ C.CC <helloworld>file.obj
+@ C.vc.CC <win32!release:helloworld>file.obj
 file.c
-@ C.LinkWithManifest <helloworld>helloworld.release.exe
-*** updated 2 target(s)...
+!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Dirs)
 
 	else
         error("Not created on non-Windows platforms yet")

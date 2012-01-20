@@ -5,7 +5,7 @@ C.LinkFlags * : /INCREMENTAL /DEBUG /MACHINE:X86 : debug : win32 ;
 
 C.Defines * : WIN32 WINDOWS : debug : win32 ;
 
-if $(COMPILER.$(PLATFORM)) != vc6 {
+if $(COMPILER) != vc6 {
 	C.CFlags * : /RTC1 : debug : win32 ;
 	C.C++Flags * : /RTC1 : debug : win32 ;
 }

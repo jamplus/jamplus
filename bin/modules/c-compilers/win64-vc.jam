@@ -1,31 +1,33 @@
-switch $(COMPILER.$(PLATFORM)) {
-	case vs2010 :
-		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
-		MSSDK = [ W32_GETREG $(key) ] ;
-		MSSDK ?= $(MSVCNT) ;
-		MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
-		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
+rule C.win64.vc.AutoDetect COMPILER {
+	switch $(COMPILER) {
+		case vs2010 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
+			MSSDK = [ W32_GETREG $(key) ] ;
+			MSSDK ?= $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
 
-	case vs2008 :
-		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
-		MSSDK = [ W32_GETREG $(key) ] ;
-		MSSDK ?= $(MSVCNT) ;
-		MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
-		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
+		case vs2008 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
+			MSSDK = [ W32_GETREG $(key) ] ;
+			MSSDK ?= $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
 
-	case * :
-		Exit ** Win64 support has not been implemented in Jam for $(COMPILER.$(PLATFORM)). ;
+		case * :
+			Exit ** Win64 support has not been implemented in Jam for $(COMPILER). ;
+	}
+
+	MSVCBIN			?= "$(MSVCNT)/bin/x86_amd64/" ;
+	C.AR			= "$(MSVCBIN)lib" ;
+	C.CC			= "$(MSVCBIN)cl" ;
+	C.C++			= "$(MSVCBIN)cl" ;
+	C.LINK			= "$(MSVCBIN)link" ;
+	C.MT			= "$(MSSDK)/bin/mt" ;
+	C.RC			= "$(MSSDK)/bin/RC" ;
+	C.STDHDRS		?= "$(MSSDK_STDHDRS)" ;
+	C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
 }
-
-MSVCBIN			?= "$(MSVCNT)/bin/x86_amd64/" ;
-C.AR			= "$(MSVCBIN)lib" ;
-C.CC			= "$(MSVCBIN)cl" ;
-C.C++			= "$(MSVCBIN)cl" ;
-C.LINK			= "$(MSVCBIN)link" ;
-C.MT			= "$(MSSDK)/bin/mt" ;
-C.RC			= "$(MSSDK)/bin/RC" ;
-C.STDHDRS		?= "$(MSSDK_STDHDRS)" ;
-C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
 
 VSPLATFORMMAP.win64 = x64 ;
 VSNATIVEPLATFORM.win64 = 1 ;

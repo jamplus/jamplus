@@ -18,36 +18,37 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 14 target(s)...
-*** updating 3 target(s)...
-@ C.CC <helloworld>main.obj
-main.c
-file.c
-Generating Code...
-@ C.LinkWithManifest <helloworld>helloworld.release.exe
-*** updated 3 target(s)...
+*** found 17 target(s)...
+*** updating 5 target(s)...
+@ C.vc.CC <win32!release:helloworld>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!*** updated 5 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
 
+		local pass1Directories = {
+			'win32!release/',
+			'win32!release/helloworld/',
+		}
+
 		local pass1Files =
 		{
-			'Jamfile.jam',
 			'file.c',
-			'file.obj',
-			'helloworld.release.exe',
-			'helloworld.release.exe.intermediate.manifest',
-			'helloworld.release.pdb',
+			'Jamfile.jam',
 			'main.c',
-			'main.obj',
-			'vc.pdb',
+			'win32!release/helloworld/file.obj',
+			'win32!release/helloworld/helloworld.release.exe',
+			'win32!release/helloworld/helloworld.release.exe.intermediate.manifest',
+			'win32!release/helloworld/helloworld.release.pdb',
+			'win32!release/helloworld/main.obj',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
-*** found 14 target(s)...
+*** found 17 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	
@@ -55,16 +56,15 @@ Generating Code...
 		os.touch('file.c')
 
 		local pattern3 = [[
-*** found 14 target(s)...
+*** found 17 target(s)...
 *** updating 2 target(s)...
-@ C.CC <helloworld>file.obj
-file.c
-@ C.LinkWithManifest <helloworld>helloworld.release.exe
-*** updated 2 target(s)...
+@ C.vc.CC <win32!release:helloworld>file.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Directories)
 
 	else
 

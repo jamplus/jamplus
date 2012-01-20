@@ -1,5 +1,6 @@
 SubDir TOP app ;
 
-C.OutputPath app : image ;
-C.LinkLibraries app : slib-a slib-b ;
-C.Application app : main.c ;
+C.ActiveTarget app ;
+C.OutputPath ../image ;
+C.LinkLibraries slib-a slib-b ;
+C.Application main.c ;

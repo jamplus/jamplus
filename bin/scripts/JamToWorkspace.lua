@@ -270,12 +270,12 @@ function CreateTargetInfoFiles(outPath)
 		end
 	end
 
-	for configName in ivalues(workspaceConfigurations) do
-		DumpConfig('*', configName)
-	end
+--	for configName in ivalues(workspaceConfigurations) do
+--		DumpConfig('*', configName)
+--	end
 
 	for platformName in ivalues(workspacePlatforms) do
-		DumpConfig(platformName, '*')
+--		DumpConfig(platformName, '*')
 		for configName in ivalues(workspaceConfigurations) do
 			DumpConfig(platformName, configName)
 		end
@@ -284,7 +284,7 @@ end
 
 function ReadTargetInfoFiles(outPath)
 	for platformName in ivalues(Config.Platforms) do
-		ReadTargetInfo(outPath, platformName, '*')
+--		ReadTargetInfo(outPath, platformName, '*')
 		for configName in ivalues(Config.Configurations) do
 			ReadTargetInfo(outPath, platformName, configName)
 		end

@@ -25,12 +25,12 @@ function Test()
 	
 	if Platform == 'win32' then
 		local pattern = [[
-*** found 19 target(s)...
-*** updating 11 target(s)...
-@ C.C++ <project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
+*** found 23 target(s)...
+*** updating 14 target(s)...
+@ C.vc.C++ <win32!release:project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
 project1.cpp
-@ C.LinkWithManifest <project1>project1.release.exe
-*** updated 11 target(s)...
+@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+*** updated 14 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
@@ -41,17 +41,20 @@ project1.cpp
 			'source/Jamfile.jam',
 			'source/project1/Jamfile.jam',
 			'source/project1/project1.cpp',
-			'source/project1/obj/win32/release/project1.release.exe',
-			'source/project1/obj/win32/release/project1.release.exe.intermediate.manifest',
-			'source/project1/obj/win32/release/project1.release.pdb',
+			'source/project1/lib/win32/release/project1.exe',
+			'source/project1/lib/win32/release/project1.pdb',
+			'source/project1/obj/win32/release/project1.exe.intermediate.manifest',
 			'source/project1/obj/win32/release/vc.pdb',
 			'source/project1/obj/win32/release/' .. cwd .. '/source/project1/project1.obj',
 		}
-	
+		
 		local pass1Directories =
 		{
 			'source/',
 			'source/project1/',
+			'source/project1/lib/',
+			'source/project1/lib/win32/',
+			'source/project1/lib/win32/release/',
 			'source/project1/obj/',
 			'source/project1/obj/win32/',
 			'source/project1/obj/win32/release/',
@@ -65,7 +68,7 @@ project1.cpp
 		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
-*** found 19 target(s)...
+*** found 23 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	
@@ -73,11 +76,11 @@ project1.cpp
 		os.touch('source/project1/project1.cpp')
 
 		local pattern3 = [[
-*** found 19 target(s)...
+*** found 23 target(s)...
 *** updating 2 target(s)...
-@ C.C++ <project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
+@ C.vc.C++ <win32!release:project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
 project1.cpp
-@ C.LinkWithManifest <project1>project1.release.exe
+@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
 *** updated 2 target(s)...
 ]]
 

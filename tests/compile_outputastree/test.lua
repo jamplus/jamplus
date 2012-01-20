@@ -168,52 +168,27 @@ function Test()
 
 		do
 			local pattern = [[
-*** found 86 target(s)...
+*** found 88 target(s)...
 *** updating 56 target(s)...
-@ C.C++ <liba>rootfile.obj
-rootfile.cpp
-@ C.C++ <liba>treea/treeb/deepfile.obj
-deepfile.cpp
-@ C.C++ <liba>../outer/outer.obj
-outer.cpp
-@ C.Archive <liba>liba.lib
-@ C.C++ <libb>filea.obj
-filea.cpp
-fileb.cpp
-filec.cpp
-Generating Code...
-@ C.C++ <libb>onelevel/oneleveldeeper.obj
-oneleveldeeper.cpp
-@ C.C++ <libb>../outerb/outer.obj
-outer.cpp
-@ C.Archive <libb>libb.lib
-@ C.C++ <libc>src/Loading/Loading.obj
-Loading.cpp
-@ C.C++ <libc>src/Saving/Saving1.obj
-Saving1.cpp
-Saving3.cpp
-SavingB.cpp
-Generating Code...
-@ C.C++ <libc>src/memory/memorya.obj
-memorya.cpp
-memoryb.cpp
-Generating Code...
-@ C.C++ <libc>src/integral/integral1.obj
-integral1.cpp
-integral2.cpp
-Generating Code...
-@ C.C++ <libc>src/win32/Loading/Loading.obj
-Loading.cpp
-@ C.C++ <libc>src/win32/Saving/Saving1.obj
-Saving1.cpp
-Saving3.cpp
-SavingB.cpp
-Generating Code...
-@ C.Archive <libc>libc.lib
-*** updated 56 target(s)...
+@ C.vc.C++ <win32!release:liba>rootfile.obj
+!NEXT!@ C.vc.C++ <win32!release:liba>treea/treeb/deepfile.obj
+!NEXT!@ C.vc.C++ <win32!release:liba>../outer/outer.obj
+!NEXT!@ C.vc.Archive <win32!release:liba>liba.lib
+!NEXT!@ C.vc.C++ <win32!release:libb>filea.obj
+!NEXT!@ C.vc.C++ <win32!release:libb>onelevel/oneleveldeeper.obj
+!NEXT!@ C.vc.C++ <win32!release:libb>../outerb/outer.obj
+!NEXT!@ C.vc.Archive <win32!release:libb>libb.lib
+!NEXT!@ C.vc.C++ <win32!release:libc>src/Loading/Loading.obj
+!NEXT!@ C.vc.C++ <win32!release:libc>src/Saving/Saving1.obj
+!NEXT!@ C.vc.C++ <win32!release:libc>src/memory/memorya.obj
+!NEXT!@ C.vc.C++ <win32!release:libc>src/integral/integral1.obj
+!NEXT!@ C.vc.C++ <win32!release:libc>src/win32/Loading/Loading.obj
+!NEXT!@ C.vc.C++ <win32!release:libc>src/win32/Saving/Saving1.obj
+!NEXT!@ C.vc.Archive <win32!release:libc>libc.lib
+*** updated 27 target(s)...
 ]]
 
-			TestPattern(pattern, RunJam{})
+			TestPattern(pattern, RunJam{ 'liba', 'libb', 'libc' })
 			TestDirectories(dirs)
 			TestFiles(files)
 		end
@@ -221,10 +196,10 @@ Generating Code...
 		---------------------------------------------------------------------------
 		do
 			local pattern = [[
-*** found 86 target(s)...
+*** found 88 target(s)...
 ]]
 
-			TestPattern(pattern, RunJam{})
+			TestPattern(pattern, RunJam{ 'liba', 'libb', 'libc' })
 			TestDirectories(dirs)
 			TestFiles(files)
 		end
@@ -364,7 +339,7 @@ Generating Code...
 *** updated 32 target(s)...
 ]]
 
-			TestPattern(pattern, RunJam{})
+			TestPattern(pattern, RunJam{ 'liba', 'libb', 'libc' })
 			TestDirectories(dirs)
 			TestFiles(files)
 		end
@@ -375,7 +350,7 @@ Generating Code...
 *** found 52 target(s)...
 ]]
 
-			TestPattern(pattern, RunJam{})
+			TestPattern(pattern, RunJam{ 'liba', 'libb', 'libc' })
 			TestDirectories(dirs)
 			TestFiles(files)
 		end

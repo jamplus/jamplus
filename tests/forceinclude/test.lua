@@ -26,18 +26,15 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 24 target(s)...
-*** updating 6 target(s)...
-@ C.C++ <common>print.obj
-print.cpp
-@ C.Archive <common>common.lib
-@ C.C++ <libA>libA.obj
-libA.cpp
-@ C.Archive <libA>libA.lib
-@ C.C++ <project1>project1.obj
-project1.cpp
-@ C.LinkWithManifest <project1>project1.release.exe
-*** updated 6 target(s)...
+*** found 29 target(s)...
+*** updating 12 target(s)...
+@ C.vc.C++ <win32!release:project1>project1.obj
+!NEXT!@ C.vc.C++ <win32!release:common>print.obj
+!NEXT!@ C.vc.Archive <win32!release:common>common.lib
+!NEXT!@ C.vc.C++ <win32!release:libA>libA.obj
+!NEXT!@ C.vc.Archive <win32!release:libA>libA.lib
+!NEXT!@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+!NEXT!*** updated 12 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
@@ -46,30 +43,39 @@ project1.cpp
 		{
 			'Jamfile.jam',
 			'common/common.jam',
-			'common/common.release.lib',
 			'common/print.cpp',
 			'common/print.h',
-			'common/print.obj',
-			'common/vc.pdb',
+			'common/win32!release/common/common.release.lib',
+			'common/win32!release/common/print.obj',
 			'libA/libA.cpp',
 			'libA/libA.jam',
-			'libA/libA.obj',
-			'libA/libA.release.lib',
-			'libA/vc.pdb',
+			'libA/win32!release/libA/libA.obj',
+			'libA/win32!release/libA/libA.release.lib',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/project1.obj',
-			'project1/project1.release.exe',
-			'project1/project1.release.exe.intermediate.manifest',
-			'project1/project1.release.pdb',
-			'project1/vc.pdb',
+			'project1/win32!release/project1/project1.obj',
+			'project1/win32!release/project1/project1.release.exe',
+			'project1/win32!release/project1/project1.release.exe.intermediate.manifest',
+			'project1/win32!release/project1/project1.release.pdb',
+		}
+
+		local pass1Directories = {
+			'common/',
+			'libA/',
+			'project1/',
+			'common/win32!release/',
+			'common/win32!release/common/',
+			'libA/win32!release/',
+			'libA/win32!release/libA/',
+			'project1/win32!release/',
+			'project1/win32!release/project1/',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
-*** found 24 target(s)...
+*** found 29 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	else
@@ -123,15 +129,13 @@ project1.cpp
 
 	if Platform == 'win32' then
 		local pattern3 = [[
-*** found 24 target(s)...
+*** found 29 target(s)...
 *** updating 4 target(s)...
-@ C.C++ <libA>libA.obj
-libA.cpp
-@ C.Archive <libA>libA.lib
-@ C.C++ <project1>project1.obj
-project1.cpp
-@ C.LinkWithManifest <project1>project1.release.exe
-*** updated 4 target(s)...
+@ C.vc.C++ <win32!release:project1>project1.obj
+!NEXT!@ C.vc.C++ <win32!release:libA>libA.obj
+!NEXT!@ C.vc.Archive <win32!release:libA>libA.lib
+!NEXT!@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+!NEXT!*** updated 4 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
 	else

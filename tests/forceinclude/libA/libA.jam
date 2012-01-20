@@ -1,4 +1,5 @@
 SubDir TOP libA ;
 
-C.ObjectForceInclude libA : libA.cpp : ../common/print.h ;
-C.Library libA : libA.cpp ;
+C.ActiveTarget libA ;
+C.ObjectForceInclude libA.cpp : ../common/print.h ;
+C.Library libA.cpp ;

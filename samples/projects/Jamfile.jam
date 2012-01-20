@@ -1,6 +1,7 @@
 SubDir TOP ;
 
-C.Application helloworld : main.c ;
+C.ActiveTarget helloworld ;
+C.Application main.c ;
 
 Project Data : data.dat ;
 Project Utility : file.txt ;

@@ -37,12 +37,11 @@ rule ProjectGroup TARGET : FOLDERNAME : PROJECTS
 }
 
 
-rule SourceGroup TARGET : FOLDERNAME : SOURCES
-{
+rule SourceGroup FOLDERNAME : SOURCES {
 #	if $(PLATFORM) != *  ||  $(CONFIG) != *  {  return ;  }
 	if ! $(FOLDERNAME)  ||  ! $(SOURCES)  {  return ;  }
 
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local TARGET = $(C.ACTIVE_TARGET) ;
 	SOURCES = [ ExpandFileList $(SOURCES) ] ;
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
@@ -58,11 +57,11 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES
 }
 
 
-rule AutoSourceGroup TARGET : SOURCES
+rule AutoSourceGroup SOURCES
 {
 	if ! $(SOURCES)  {  return ;  }
 
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+	local TARGET = $(C.ACTIVE_TARGET) ;
 	SOURCES = [ ExpandFileList $(SOURCES) ] ;
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
@@ -86,16 +85,15 @@ rule AutoSourceGroup TARGET : SOURCES
 }
 
 
-rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
-{
+rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	SOURCES = [ ExpandFileList $(SOURCES) ] ;
 
 	# Write initial Project information.
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
-	local project = "Projects['$(TARGETS[0])']" ;
+	local project = "Projects['$(TARGET)']" ;
 	Contents += "$(NEWLINE)$(NEWLINE)--------------------------------------------------------------------$(NEWLINE)" ;
 
-	Contents += "$(project).Name = '$(TARGETS[0])'$(NEWLINE)" ;
+	Contents += "$(project).Name = '$(TARGET)'$(NEWLINE)" ;
 	Contents += "$(project).Path = '$(subdir)'$(NEWLINE)" ;
 	Contents += "$(project).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'$(NEWLINE)" ;
 	Contents += "$(project).Jamfile = [[$(CURRENT_JAMFILE)]]$(NEWLINE)" ;
@@ -110,14 +108,15 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 			ext = SUFSHAREDLIB ;
 		}
 
-		local outputName = [ C._retrieveOutputName $(TARGETS) : $(ext) : $(CONFIG) : $(PLATFORM) ] ;
+		local suffix = $($(ext):Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+		local outputName = [ C._retrieveOutputName $(suffix) ] ;
 		Contents += "$(project).OutputNames['$(PLATFORM)']['$(CONFIG)'] = [[$(outputName)]]$(NEWLINE)" ;
 
-		local outputPath = [ C._retrieveOutputPath $(TARGETS) : $(CONFIG) : $(PLATFORM) ] ;
+		local outputPath = [ C._retrieveOutputPath ] ;
 		Contents += "$(project).OutputPaths['$(PLATFORM)']['$(CONFIG)'] = [[$(outputPath[1])/]]$(NEWLINE)" ;
 
 		local debuggerOutputName ;
-		on $(TARGETS) debuggerOutputName = $(DEBUGGEROUTPUTNAME.$(PLATFORM).$(CONFIG)) ;
+		on $(TARGET) debuggerOutputName = $(DEBUGGEROUTPUTNAME.$(PLATFORM).$(CONFIG)) ;
 		if $(debuggerOutputName) {
 			Contents += "$(project).DebuggerOutputNames['$(PLATFORM)']['$(CONFIG)'] = [[$(debuggerOutputName)]]$(NEWLINE)" ;
 		}
@@ -169,7 +168,6 @@ rule DumpProjectInfo TARGETS : SOURCES : OPTIONS
 
 rule Project PROJECT_NAME : SOURCES
 {
-	PROJECT_NAME = [ _retrieveActiveTargetName $(PROJECT_NAME) ] ;
 	DumpProjectInfo $(PROJECT_NAME) : $(SOURCES) ;
 }
 

@@ -22,21 +22,22 @@ function Test()
 	TestFiles(originalFiles)
 
 	---------------------------------------------------------------------------
+	local pass1Directories
 	local pass1Files
 	do
 		local pattern
 	    if Platform == 'win32' then
 			pattern = [[
-*** found 16 target(s)...
-*** updating 4 target(s)...
-@ C.CC <platform>platform.obj
-platform.c
-win32.c
-filerelease.c
-Generating Code...
-@ C.LinkWithManifest <platform>platform.release.exe
-*** updated 4 target(s)...
+*** found 19 target(s)...
+*** updating 6 target(s)...
+@ C.vc.CC <win32!release:platform>platform.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:platform>platform.exe
+!NEXT!*** updated 6 target(s)...
 ]]
+			pass1Directories = {
+				'win32!release/',
+				'win32!release/platform/',
+			}
 
 			pass1Files =
 			{
@@ -45,18 +46,16 @@ Generating Code...
 				'Jamfile.jam',
 				'filedebug.c',
 				'filerelease.c',
-				'filerelease.obj',
 				'linux.c',
 				'macosx.c',
 				'platform.c',
-				'platform.obj',
-				'platform.release.exe',
-				'platform.release.exe.intermediate.manifest',
-				'platform.release.pdb',
-				'test.lua',
-				'vc.pdb',
 				'win32.c',
-				'win32.obj',
+				'win32!release/platform/filerelease.obj',
+				'win32!release/platform/platform.obj',
+				'win32!release/platform/platform.release.exe',
+				'win32!release/platform/platform.release.exe.intermediate.manifest',
+				'win32!release/platform/platform.release.pdb',
+				'win32!release/platform/win32.obj',
 			}
 
 		else
@@ -107,7 +106,7 @@ Generating Code...
 
 		TestPattern(pattern, RunJam())
 
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Directories)
 		TestFiles(pass1Files)
 	end
 
@@ -119,10 +118,10 @@ Using win32
 This is a Win32 build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, ex.collectlines{'platform.release.exe'})
+		TestPattern(pattern2, ex.collectlines{'win32!release\\platform\\platform.release.exe'})
 
 		pattern3 = [[
-*** found 16 target(s)...
+*** found 19 target(s)...
 ]]
 
 	elseif Platform == 'macosx' then
@@ -153,7 +152,7 @@ RELEASE: What's up?!
 	
 	---------------------------------------------------------------------------
 	TestPattern(pattern3, RunJam())
-	TestDirectories(originalDirs)
+	TestDirectories(pass1Directories)
 	TestFiles(pass1Files)
 
 	---------------------------------------------------------------------------

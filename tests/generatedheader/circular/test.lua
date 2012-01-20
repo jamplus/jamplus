@@ -23,17 +23,13 @@ function Test()
 		-- First build
 		local pattern = [[
 *** found 11 target(s)...
-*** updating 4 target(s)...
-@ SleepThenTouch <foo>generated.h
-@ C.CC <foo>sourceA.obj
-sourceA.c
-sourceB.c
-Generating Code...
-@ C.Archive <foo>foo.lib
-*** updated 4 target(s)...
+@ SleepThenTouch <win32!release:foo>generated.h
+!NEXT!@ C.vc.CC <win32!release:foo>sourceA.obj
+!NEXT!@ C.vc.Archive <win32!release:foo>foo.lib
+!NEXT!*** updated 4 target(s)...
 ]]
 
-		TestPattern(pattern, RunJam())
+		TestPattern(pattern, RunJam{'foo'})
 
 		local pass1Files =
 		{
@@ -57,7 +53,7 @@ Generating Code...
 		local pattern2 = [[
 *** found 11 target(s)...
 ]]
-		TestPattern(pattern2, RunJam())
+		TestPattern(pattern2, RunJam{ 'foo' })
 	
 		os.sleep(1.0)
 		os.touch('generated.h')
@@ -65,14 +61,11 @@ Generating Code...
 		local pattern3 = [[
 *** found 11 target(s)...
 *** updating 3 target(s)...
-@ C.CC <foo>sourceA.obj
-sourceA.c
-sourceB.c
-Generating Code...
-@ C.Archive <foo>foo.lib
-*** updated 3 target(s)...
+!NEXT!@ C.vc.CC <win32!release:foo>sourceA.obj
+!NEXT!@ C.vc.Archive <win32!release:foo>foo.lib
+!NEXT!*** updated 3 target(s)...
 ]]
-		TestPattern(pattern3, RunJam())
+		TestPattern(pattern3, RunJam{ 'foo' })
 	
 	else
 		-- First build

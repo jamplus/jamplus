@@ -7,8 +7,6 @@
 
 IncludeModule copyfile ;
 
-C.RuntimeType jam libjam : static ;
-
 if $(OS) = MACOSX {
 	C.MacOSX_SDK * : macosx : 10.4u ;
 }
@@ -186,16 +184,21 @@ Option OPT_BUILTIN_LUA_SUPPORT_EXT ;
 local options = [ Join $(ALL_OPTIONS) ] ;
 LOCAL_DEFINES += JAM_OPTIONS=$(options) ;
 
-if $(OS) = NT {
-    C.Defines * : NT ;
+C.ActiveTarget * ;
+C.Defines NT ;
+C.RuntimeType static ;
 
+
+C.ActiveTarget jam ;
+
+if $(OS) = NT {
 	# Reserve 5 megs for the stack.  The default of 1 meg is too
 	# small for the pathalogically recursive make1c()<->make1d()
 	# relationship when coupled with targets with large numbers of
 	# actions (as can happen with piecemeal Clean targets).
-	C.LinkFlags jam : /STACK:5242880 ;
+	C.LinkFlags /STACK:5242880 ;
 
-	C.LinkPrebuiltLibraries jam : advapi32 ;
+	C.LinkPrebuiltLibraries advapi32 ;
 }
 else if $(UNIX)
 {
@@ -207,9 +210,9 @@ else if $(UNIX)
 #	CCFLAGS += -Wall ;
 
 	if $(OS) != LINUX {
-		C.LinkPrebuiltLibraries jam : stdc++-static ;
+		C.LinkPrebuiltLibraries stdc++-static ;
 	} else {
-		C.LinkFlags jam : -ldl ;
+		C.LinkFlags -ldl ;
 	}
 }
 else
@@ -218,22 +221,24 @@ else
 }
 if $(OS) = MACOSX
 {
-	C.LinkFlags jam : -framework CoreFoundation -framework CoreServices ;
+	C.LinkFlags -framework CoreFoundation -framework CoreServices ;
 }
+
+C.ActiveTarget * ;
 if $(CONFIG) = debug {
-    C.Defines * : DEBUG_J ;
+    C.Defines DEBUG_J ;
 }
-C.Defines * : $(LOCAL_DEFINES) ;
-C.Defines * : YYSTACKSIZE=5000 ;
+C.Defines $(LOCAL_DEFINES) ;
+C.Defines YYSTACKSIZE=5000 ;
 
 if $(UNIX) && $(PURE) {
     LOCATE_TARGET = $(LOCATE_TARGET)/pure ;
-    C.Defines * : PURE ;
+    C.Defines PURE ;
     LINK = /usr/local/bin/purify cc ;
 }
 if $(NT) && $(PURE) {
     LOCATE_TARGET = $(LOCATE_TARGET)-pure ;
-    C.Defines * : PURE ;
+    C.Defines PURE ;
 }
 #
 ### LOCAL CHANGE
@@ -272,11 +277,10 @@ code += hcache.c tmpunix.c ;
 # How to build the compiled in jambase.
 #
 
-rule GenFile PARENT : TARGET : COMMAND : DEPS
+rule GenFile TARGET : COMMAND : DEPS
 {
-	local _t = $(TARGET:G=$(PARENT)) ;
-	local _s ;
-	on $(COMMAND) _s = $(LINK_TARGET) ;
+	local _t = [ C.GristFiles $(TARGET) ] ;
+	local _s = $(COMMAND) ;
 
 	Depends $(_t) : $(_s[1]) $(COMMAND[2-]) ;
 	GenFile1 $(_t) : $(_s[1]) $(COMMAND[2-]) ;
@@ -294,9 +298,11 @@ actions GenFile1
 	"$(>[1])" "$(<)" "$(>[2-])"
 }
 
-C.OutputPostfix * : : release releaseltcg ;
+C.ActiveTarget * ;
+C.OutputPostfix ;
 
-C.Application mkjambase : mkjambase.c ;
+C.ActiveTarget mkjambase ;
+mkjambase.exe = [ C.Application mkjambase.c ] ;
 
 if $(VMS)
 {
@@ -310,13 +316,15 @@ if $(VMS)
 #
 
 local BIN_PATH = ../bin/$(PLATFORM) ;
-GenFile jam : jambase-j.c : mkjambase Jambase-j ;
-C.LinkLibraries jam : libjam ;
-C.OutputPath jam : $(BIN_PATH) ;
-C.Application jam : jam.c jambase-j.c ;
 
-C.Library libjam :
-		    buffer.c builtins.c command.c compile.c $(code) expand.c
+C.ActiveTarget jam ;
+GenFile jambase-j.c : $(mkjambase.exe) Jambase-j ;
+C.LinkLibraries libjam ;
+C.OutputPath $(BIN_PATH) ;
+C.Application jam.c jambase-j.c ;
+
+C.ActiveTarget libjam ;
+C.Library	buffer.c builtins.c command.c compile.c $(code) expand.c
 		    glob.c hash.c headers.c lists.c luagsub.c luasupport.c make.c make1.c
 		    newstr.c option.c parse.c regexp.c rules.c scan.c
 		    search.c timestamp.c variable.c ;

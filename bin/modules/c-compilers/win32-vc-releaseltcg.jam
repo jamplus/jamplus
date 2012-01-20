@@ -4,7 +4,7 @@ C.LinkFlags *	: /INCREMENTAL:NO /DEBUG /MACHINE:X86 /OPT:REF /OPT:ICF : releasel
 
 C.Defines *		: WIN32 WINDOWS : releaseltcg : win32 ;
 
-if $(COMPILER.$(PLATFORM)) != vc6 {
+if $(COMPILER) != vc6 {
 	C.CFlags * 		: /GL : releaseltcg : win32 ;
 	C.C++Flags * 	: /GL : releaseltcg : win32 ;
 	C.LibFlags *	: /LTCG : releaseltcg : win32 ;

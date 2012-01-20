@@ -1,7 +1,7 @@
 if ! $(TARGETINFO_LOCATE)
 {
 
-switch $(COMPILER.$(PLATFORM))
+switch $(COMPILER)
 {
 	case vc6 :
 		local binPath = @($(MSVCBIN)/:R=) ;
@@ -37,7 +37,7 @@ rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 	BASE_NAME = $(BASE_NAME:G=<$(PARENT)>) ;
 	local tlbFile = $(BASE_NAME:S=.tlb) ;
 	local hFile ;
-	if $(COMPILER.$(PLATFORM)) = vc6 {
+	if $(COMPILER) = vc6 {
 		hFile = @($(BASE_NAME:GDB)types:S=.h) ;
 	} else {
 		hFile = $(BASE_NAME:S=.h) ;
@@ -48,7 +48,7 @@ rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 
 	if ! ( postmidl in $(OPTIONS) )
 	{
-		if $(COMPILER.$(PLATFORM)) = vc6 {
+		if $(COMPILER) = vc6 {
 			targets += $(tlbFile) $(hFile) $(iidFile) ;
 		} else {
 			targets += $(tlbFile) $(hFile) $(iidFile) ;
@@ -63,7 +63,7 @@ rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 		on $(PARENT) flags += $(MIDLFLAGS.$(CONFIG)) $(MIDLFLAGS.*) ;
 		on C.* flags += $(MIDLFLAGS.$(CONFIG)) $(MIDLFLAGS.*) ;
 
-		if $(COMPILER.$(PLATFORM)) = vc6 {
+		if $(COMPILER) = vc6 {
 			flags += /tlb $(tlbFile:T) /h $(hFile:T) ;
 		} else {
 			flags += /tlb $(tlbFile:T) /h $(hFile:T) /iid $(iidFile:T) ;

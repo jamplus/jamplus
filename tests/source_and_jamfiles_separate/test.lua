@@ -31,19 +31,20 @@ function Test()
 		{
 			'jam/',
 			'src/',
+			'jam/win32!release/',
+			'jam/win32!release/helloworld/',
 		}
 	
 		files =
 		{
 			'jam/Jamfile.jam',
-			'jam/createprecomp.obj',
-			'jam/file.obj',
-			'jam/helloworld.release.exe',
-			'jam/helloworld.release.exe.intermediate.manifest',
-			'jam/helloworld.release.pdb',
-			'jam/main.obj',
-			'jam/precomp.h.pch',
-			'jam/vc.pdb',
+			'jam/win32!release/helloworld/createprecomp.obj',
+			'jam/win32!release/helloworld/file.obj',
+			'jam/win32!release/helloworld/helloworld.release.exe',
+			'jam/win32!release/helloworld/helloworld.release.exe.intermediate.manifest',
+			'jam/win32!release/helloworld/helloworld.release.pdb',
+			'jam/win32!release/helloworld/main.obj',
+			'jam/win32!release/helloworld/precomp.h.pch',
 			'src/createprecomp.c',
 			'src/file.c',
 			'src/main.c',
@@ -51,16 +52,12 @@ function Test()
 		}
 
 		pattern = [[
-			*** found 18 target(s)...
-			*** updating 5 target(s)...
-			@ C.CC <helloworld>precomp.h.pch
-			createprecomp.c
-			@ C.CC <helloworld>../src/file.obj
-			file.c
-			main.c
-			Generating Code...
-			@ C.LinkWithManifest <helloworld>helloworld.release.exe
-			*** updated 5 target(s)...
+*** found 21 target(s)...
+*** updating 7 target(s)...
+@ C.vc.CC <win32!release:helloworld>precomp.h.pch
+!NEXT!@ C.vc.CC <win32!release:helloworld>../src/file.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!*** updated 7 target(s)...
 ]]
 	else
 		dirs = {
@@ -105,7 +102,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 18 target(s)...
+				*** found 21 target(s)...
 ]]
 		else
 			pattern = [[
@@ -124,16 +121,12 @@ function Test()
 
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 18 target(s)...
-				*** updating 5 target(s)...
-				@ C.CC <helloworld>precomp.h.pch
-				createprecomp.c
-				@ C.CC <helloworld>../src/file.obj
-				file.c
-				main.c
-				Generating Code...
-				@ C.LinkWithManifest <helloworld>helloworld.release.exe
-				*** updated 5 target(s)...
+*** found 21 target(s)...
+*** updating 5 target(s)...
+@ C.vc.CC <win32!release:helloworld>precomp.h.pch
+!NEXT!@ C.vc.CC <win32!release:helloworld>../src/file.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!*** updated 5 target(s)...
 ]]
 		else
 			pattern = [[
@@ -157,7 +150,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 18 target(s)...
+				*** found 21 target(s)...
 ]]
 		else
 			pattern = [[
@@ -176,16 +169,12 @@ function Test()
 
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 18 target(s)...
-				*** updating 5 target(s)...
-				@ C.CC <helloworld>precomp.h.pch
-				createprecomp.c
-				@ C.CC <helloworld>../src/file.obj
-				file.c
-				main.c
-				Generating Code...
-				@ C.LinkWithManifest <helloworld>helloworld.release.exe
-				*** updated 5 target(s)...
+*** found 21 target(s)...
+*** updating 5 target(s)...
+@ C.vc.CC <win32!release:helloworld>precomp.h.pch
+!NEXT!@ C.vc.CC <win32!release:helloworld>../src/file.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!*** updated 5 target(s)...
 ]]
 		else
 			pattern = [[

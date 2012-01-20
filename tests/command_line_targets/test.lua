@@ -14,23 +14,29 @@ function Test()
 		{
 			'Building appA...',
 			'Building appB...',
-			'*** found 22 target(s)...',
-			'*** updating 4 target(s)...',
-			'@ C.C++ <appA>appA.obj',
+			'*** found 27 target(s)...',
+			'*** updating 7 target(s)...',
+			'@ C.vc.C++ <win32!release:appA>appA.obj',
 			'appA.cpp',
-			'@ C.LinkWithManifest <appA>appA.release.exe',
-			'@ C.C++ <appB>appB.obj',
+			'@ C.vc.LinkWithManifest <win32!release:appA>appA.exe',
+			'@ C.vc.C++ <win32!release:appB>appB.obj',
 			'appB.cpp',
-			'@ C.LinkWithManifest <appB>appB.release.exe',
-			'*** updated 4 target(s)...',
+			'@ C.vc.LinkWithManifest <win32!release:appB>appB.exe',
+			'*** updated 7 target(s)...',
 		}
 
 		TestPattern(run1pattern, RunJam())
 
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'appA.obj', 'appA.release.exe', 'appA.release.exe.intermediate.manifest', 'appA.release.pdb',
-			'appB.obj', 'appB.release.exe', 'appB.release.exe.intermediate.manifest', 'appB.release.pdb',
+			'win32!release/appA/appA.obj',
+			'win32!release/appA/appA.release.exe',
+			'win32!release/appA/appA.release.exe.intermediate.manifest',
+			'win32!release/appA/appA.release.pdb',
+			'win32!release/appB/appB.obj',
+			'win32!release/appB/appB.release.exe',
+			'win32!release/appB/appB.release.exe.intermediate.manifest',
+			'win32!release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
 
@@ -38,10 +44,10 @@ function Test()
 		local cleanPattern = [[
 Building appA... 
 Building appB... 
-*** found 4 target(s)...
+*** found 6 target(s)...
 *** updating 2 target(s)...
-@ Clean clean:appA 
-@ Clean clean:appB 
+@ Clean <win32!release>clean:appA 
+@ Clean <win32!release>clean:appB 
 *** updated 2 target(s)...
 ]]
 		TestPattern(cleanPattern, RunJam{ 'clean' })
@@ -50,43 +56,55 @@ Building appB...
 		---------------------------------------------------------------------------
 		local appAPattern = [[
 Building appA...
-*** found 11 target(s)...
-*** updating 2 target(s)...
-@ C.C++ <appA>appA.obj
+*** found 14 target(s)...
+*** updating 4 target(s)...
+@ C.vc.C++ <win32!release:appA>appA.obj
 appA.cpp
-@ C.LinkWithManifest <appA>appA.release.exe
-*** updated 2 target(s)...
+@ C.vc.LinkWithManifest <win32!release:appA>appA.exe
+*** updated 4 target(s)...
 ]]
 
 		TestPattern(appAPattern, RunJam{ 'appA' })
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'appA.obj', 'appA.release.exe', 'appA.release.exe.intermediate.manifest', 'appA.release.pdb',
-			'?vc.pdb'
+			'win32!release/appA/appA.obj',
+			'win32!release/appA/appA.release.exe',
+			'win32!release/appA/appA.release.exe.intermediate.manifest',
+			'win32!release/appA/appA.release.pdb',
+--			'?vc.pdb'
 		}
 
 		local appBPattern = [[
 Building appB...
-*** found 11 target(s)...
-*** updating 2 target(s)...
-@ C.C++ <appB>appB.obj
+*** found 14 target(s)...
+*** updating 3 target(s)...
+@ C.vc.C++ <win32!release:appB>appB.obj
 appB.cpp
-@ C.LinkWithManifest <appB>appB.release.exe
-*** updated 2 target(s)...
+@ C.vc.LinkWithManifest <win32!release:appB>appB.exe
+*** updated 3 target(s)...
 ]]
 
 		TestPattern(appBPattern, RunJam{ 'appB' })
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'appA.obj', 'appA.release.exe', 'appA.release.exe.intermediate.manifest', 'appA.release.pdb',
-			'appB.obj', 'appB.release.exe', 'appB.release.exe.intermediate.manifest', 'appB.release.pdb',
+			'win32!release/appA/appA.obj',
+			'win32!release/appA/appA.release.exe',
+			'win32!release/appA/appA.release.exe.intermediate.manifest',
+			'win32!release/appA/appA.release.pdb',
+			'win32!release/appB/appB.obj',
+			'win32!release/appB/appB.release.exe',
+			'win32!release/appB/appB.release.exe.intermediate.manifest',
+			'win32!release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
 
 		RunJam{ 'clean:appA' }
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'appB.obj', 'appB.release.exe', 'appB.release.exe.intermediate.manifest', 'appB.release.pdb',
+			'win32!release/appB/appB.obj',
+			'win32!release/appB/appB.release.exe',
+			'win32!release/appB/appB.release.exe.intermediate.manifest',
+			'win32!release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
 

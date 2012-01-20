@@ -69,7 +69,7 @@ if ! $(wxWidgets_ROOT)
 
 			wxWidgets_LIB_DIR = $(wxWidgets_ROOT)/lib ;
 
-			if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010
+			if $(COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010
 			{
 				if shared in $(OPTIONS)
 				{
@@ -135,7 +135,7 @@ rule C.UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 
 	TARGETS = [ _retrieveActiveTargetName $(TARGETS) ] ;
 
-	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010
+	if $(COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010
 	{
 		if shared in $(OPTIONS)
 		{

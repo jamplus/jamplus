@@ -37,12 +37,19 @@ function Test()
 		'lib-c/',
 		'slib-a/',
 		'slib-b/',
-		'app/image/',
 		'image/TOP/',
 		'image/TOP/app/',
 		'image/TOP/lib-c/',
 		'image/TOP/slib-a/',
 		'image/TOP/slib-b/',
+		'image/TOP/app/win32!release/',
+		'image/TOP/app/win32!release/app/',
+		'image/TOP/lib-c/win32!release/',
+		'image/TOP/lib-c/win32!release/lib-c/',
+		'image/TOP/slib-a/win32!release/',
+		'image/TOP/slib-a/win32!release/slib-a/',
+		'image/TOP/slib-b/win32!release/',
+		'image/TOP/slib-b/win32!release/slib-b/',
 	}
 	
 	local files
@@ -53,8 +60,8 @@ function Test()
 			'test.lua',
 			'app/Jamfile.jam',
 			'app/main.c',
-			'app/image/app.release.exe',
-			'app/image/app.release.pdb',
+			'image/app.release.exe',
+			'image/app.release.pdb',
 			'image/slib-a.release.dll',
 			'image/slib-a.release.exp',
 			'image/slib-a.release.lib',
@@ -63,21 +70,17 @@ function Test()
 			'image/slib-b.release.exp',
 			'image/slib-b.release.lib',
 			'image/slib-b.release.pdb',
-			'image/TOP/app/app.release.exe.intermediate.manifest',
-			'image/TOP/app/main.obj',
-			'image/TOP/app/vc.pdb',
-			'image/TOP/lib-c/add.obj',
-			'image/TOP/lib-c/lib-c.release.lib',
-			'image/TOP/lib-c/vc.pdb',
-			'image/TOP/slib-a/slib-a.obj',
-			'image/TOP/slib-a/slib-a.release.dll.intermediate.manifest',
-			'image/TOP/slib-a/vc.pdb',
-			'image/TOP/slib-b/slib-b.obj',
-			'image/TOP/slib-b/slib-b.release.dll.intermediate.manifest',
-			'image/TOP/slib-b/vc.pdb',
-			'lib-c/Jamfile.jam',
+			'image/TOP/app/win32!release/app/app.release.exe.intermediate.manifest',
+			'image/TOP/app/win32!release/app/main.obj',
+			'image/TOP/lib-c/win32!release/lib-c/add.obj',
+			'image/TOP/lib-c/win32!release/lib-c/lib-c.release.lib',
+			'image/TOP/slib-a/win32!release/slib-a/slib-a.obj',
+			'image/TOP/slib-a/win32!release/slib-a/slib-a.release.dll.intermediate.manifest',
+			'image/TOP/slib-b/win32!release/slib-b/slib-b.obj',
+			'image/TOP/slib-b/win32!release/slib-b/slib-b.release.dll.intermediate.manifest',
 			'lib-c/add.c',
 			'lib-c/add.h',
+			'lib-c/Jamfile.jam',
 			'slib-a/Jamfile.jam',
 			'slib-a/slib-a.c',
 			'slib-b/Jamfile.jam',
@@ -111,21 +114,17 @@ function Test()
 	do
 		if Platform == 'win32' then
 		 	pattern = [[
-*** found 44 target(s)...
-*** updating 17 target(s)...
-@ C.CC <lib-c>add.obj
-add.c
-@ C.Archive <lib-c>lib-c.lib
-@ C.CC <slib-a>slib-a.obj
-slib-a.c
-@ C.LinkWithManifest <slib-a>slib-a.release.dll
-!NEXT!@ C.CC <slib-b>slib-b.obj
-slib-b.c
-@ C.LinkWithManifest <slib-b>slib-b.release.dll
-!NEXT!@ C.CC <app>main.obj
-main.c
-@ C.LinkWithManifest <app>app.release.exe
-*** updated 17 target(s)...
+*** found 48 target(s)...
+*** updating 24 target(s)...
+@ C.vc.CC <win32!release:app>main.obj
+!NEXT!@ C.vc.CC <win32!release:slib-a>slib-a.obj
+!NEXT!@ C.vc.CC <win32!release:lib-c>add.obj
+@ C.vc.Archive <win32!release:lib-c>lib-c.lib
+@ C.vc.LinkWithManifest <win32!release:slib-a>slib-a.dll
+!NEXT!@ C.vc.CC <win32!release:slib-b>slib-b.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-b>slib-b.dll
+!NEXT!@ C.vc.LinkWithManifest <win32!release:app>app.exe
+*** updated 24 target(s)...
 ]]
 		else
 			pattern = [[
@@ -153,7 +152,7 @@ main.c
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 44 target(s)...
+*** found 48 target(s)...
 ]]
 		else
 			pattern = [[
@@ -172,15 +171,13 @@ main.c
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 44 target(s)...
+*** found 48 target(s)...
 *** updating 4 target(s)...
-@ C.CC <slib-a>slib-a.obj
-slib-a.c
-@ C.LinkWithManifest <slib-a>slib-a.release.dll
-!NEXT!@ C.CC <slib-b>slib-b.obj
-slib-b.c
-@ C.LinkWithManifest <slib-b>slib-b.release.dll
-*** updated 4 target(s)...
+@ C.vc.CC <win32!release:slib-a>slib-a.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-a>slib-a.dll
+!NEXT!@ C.vc.CC <win32!release:slib-b>slib-b.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-b>slib-b.dll
+!NEXT!*** updated 4 target(s)...
 ]]
 		else
 			pattern = [[
@@ -203,7 +200,7 @@ slib-b.c
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 44 target(s)...
+*** found 48 target(s)...
 ]]
 		else
 			pattern = [[
@@ -222,14 +219,11 @@ slib-b.c
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 44 target(s)...
-*** updating 5 target(s)...
-@ C.CC <lib-c>add.obj
-add.c
-@ C.Archive <lib-c>lib-c.lib
-@ C.LinkWithManifest <slib-a>slib-a.release.dll
-!NEXT!@ C.LinkWithManifest <slib-b>slib-b.release.dll
-*** updated 4 target(s)...
+@ C.vc.CC <win32!release:lib-c>add.obj
+!NEXT!@ C.vc.Archive <win32!release:lib-c>lib-c.lib
+!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-a>slib-a.dll
+!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-b>slib-b.dll
+!NEXT!*** updated 4 target(s)...
 ]]
 		else
 			pattern = [[
@@ -253,7 +247,7 @@ add.c
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 44 target(s)...
+*** found 48 target(s)...
 ]]
 		else
 			pattern = [[
@@ -272,12 +266,11 @@ add.c
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 44 target(s)...
+*** found 48 target(s)...
 *** updating 3 target(s)...
-@ C.CC <slib-a>slib-a.obj
-slib-a.c
-@ C.LinkWithManifest <slib-a>slib-a.release.dll
-*** updated 2 target(s)...
+@ C.vc.CC <win32!release:slib-a>slib-a.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-a>slib-a.dll
+!NEXT!*** updated 2 target(s)...
 ]]
 		else
 			pattern = [[
@@ -298,7 +291,7 @@ slib-a.c
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 44 target(s)...
+*** found 48 target(s)...
 ]]
 		else
 			pattern = [[

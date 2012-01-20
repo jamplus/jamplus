@@ -1,0 +1,309 @@
+C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+
+# C.AutoDetect will check for an Android NDK install we can use, and will setup the following three variables:
+# 1. NDKROOT			- pointing to root of NDK, e.g. c:\android\android-ndk-r5 - setup by NDK install.
+# 2. NDK_TOOLCHAIN		- toolchain version (i.e. arm-eabi-4.4.3) - optional
+# 3. NDK_PLATFORM		- toolchain platform API (i.e. android-14) - optional
+# 3. NDK_ABI			- android ARM ABI level (i.e. armeabi) - optional, only armv5 supported
+
+{
+	C.COMPILER_SUITE = androidndk ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
+
+	# 1. NDKROOT
+	NDKROOT = $(NDKROOT:J=" ") ;
+	if ! $(NDKROOT) {
+		Echo NDKROOT not set ;
+		return ;
+	}
+
+	# 2. Toolchain version
+	NDK_TOOLCHAIN = $(NDK_TOOLCHAIN:J=" ") ;
+	if ! $(NDK_TOOLCHAIN) {
+		NDK_TOOLCHAIN = [ Glob $(NDKROOT)/toolchains : arm-linux-androideabi-4.4.3/ ] ;
+		NDK_TOOLCHAIN = $(NDK_TOOLCHAIN:P) ;
+		NDK_TOOLCHAIN = $(NDK_TOOLCHAIN:D=) ;
+		if ! $(NDK_TOOLCHAIN) {
+			Echo *** Warning \: NDK_TOOLCHAIN not set, and default 'arm-eabi-4.4.3' could not be found. Please set to desired toolchain version ;
+			return ;
+		} else {
+			Echo *** Warning \: NDK_TOOLCHAIN defaults to $(NDK_TOOLCHAIN) ;
+		}
+	}
+
+	# 3. Platform (API) version
+	NDK_PLATFORM = $(NDK_PLATFORM:J=" ") ;
+	if ! $(NDK_PLATFORM) {
+		NDK_PLATFORM = [ Glob $(NDKROOT)/platforms : android-14/ ] ;
+		NDK_PLATFORM = $(NDK_PLATFORM:P) ;
+		NDK_PLATFORM = $(NDK_PLATFORM:D=) ;
+		if ! $(NDK_PLATFORM) {
+			Echo *** Warning \: NDK_PLATFORM not set, and default 'android-14' could not be found. Please set to desired platform version ;
+			return ;
+		} else {
+			Echo *** Warning \: NDK_PLATFORM defaults to $(NDK_PLATFORM) ;
+		}
+	}
+
+	# 4. ABI (API) version
+	NDK_ABI = $(NDK_ABI:J=" ") ;
+	if ! $(NDK_ABI) {
+		NDK_ABI = "armeabi" ;
+		Echo *** Warning \: NDK_ABI defaults to $(NDK_ABI) ;
+	}
+
+	switch $(OS) {
+		case NT :
+			NDK_HOST	= "windows" ;
+			HOST_SUFEXE = ".exe" ;
+		case CYGWIN :
+			NDK_HOST	= "windows" ;
+			HOST_SUFEXE = ".exe" ;
+		case MACOSX :
+			NDK_HOST	= "darwin-x86" ;
+			HOST_SUFEXE = "" ;
+		case * :
+			Echo *** Error \: Unable to detect host platform for NDK based on '$(OS)' ;
+			return ;
+	}
+
+	NDK_TOOLCHAIN_ROOT = "$(NDKROOT)/toolchains/$(NDK_TOOLCHAIN)/prebuilt/$(NDK_HOST)" ;
+}
+
+
+#IncludeModule c-compilers/c-gcc-autodetect ;
+
+#C.ToolchainHelper gcc ;
+
+####################################
+C.AR on $(C.COMPILER_SUITE_SYMBOL)		= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-linux-androideabi-ar$(HOST_SUFEXE)" ruc ;
+C.CC on $(C.COMPILER_SUITE_SYMBOL)		= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-linux-androideabi-gcc$(HOST_SUFEXE)" ;
+C.C++ on $(C.COMPILER_SUITE_SYMBOL)		= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-linux-androideabi-g++$(HOST_SUFEXE)" ;
+C.LINK on $(C.COMPILER_SUITE_SYMBOL)	= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-linux-androideabi-gcc$(HOST_SUFEXE)" ;
+C.RANLIB on $(C.COMPILER_SUITE_SYMBOL)	= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-linux-androideabi-ranlib$(HOST_SUFEXE)" ;
+C.STRIP on $(C.COMPILER_SUITE_SYMBOL)	= "$(NDK_TOOLCHAIN_ROOT)/bin/arm-linux-androideabi-strip.exe" ;
+
+######################################################################################################################
+# Our 'exe' is actually a shared lib, so make extension .so file.
+SUFEXE on $(C.COMPILER_SUITE_SYMBOL)	= .so ;
+SUFMODULE on $(C.COMPILER_SUITE_SYMBOL)	= .so ;
+
+######################################################################################################################
+
+NDK_MAIN_LIB_DIR	=  $(NDKROOT)/platforms/$(NDK_PLATFORM)/arch-arm/usr/lib ;
+NDK_SEC_LIB_DIR		=  $(NDK_TOOLCHAIN_ROOT)/lib/gcc/arm-linux-androideabi/4.4.3 ;
+
+NDK_MAIN_INC_DIR	=  $(NDKROOT)/platforms/$(NDK_PLATFORM)/arch-arm/usr/include ;
+NDK_SEC_INC_DIR		=  $(NDK_TOOLCHAIN_ROOT)/lib/gcc/arm-linux-androideabi/4.4.3/include ;
+
+STL_PORT_BASE		?= $(NDKROOT)/sources/cxx-stl/stlport ;
+STL_PORT_INCLUDE	=  $(STL_PORT_BASE)/stlport ;
+
+######################################################################################################################
+
+rule C.androidndk.FDefines { return -D$(<) ; }
+rule C.androidndk.FIncludes { return -I$(<) ; }
+rule C.androidndk.FLibraryPaths { return -L\"$(<)\" ; }
+
+######################################################################################################################
+
+COMPILE_FLAGS =
+	-march=armv5te
+	-mtune=xscale
+	-msoft-float
+	-mthumb-interwork
+	-mandroid
+	-fpic
+	-ffunction-sections
+	-fdata-sections
+	-funwind-tables
+	-fstack-protector
+	-fno-short-enums
+	-fno-strict-aliasing
+	-marm
+	-fno-omit-frame-pointer
+	-fvisibility=hidden
+	-finline-limit=64
+	-Wa,--noexecstack
+	-Wreturn-type
+	-Wa,--noexecstack
+	;
+
+COMPILE_FLAGS_DEBUG =
+	-marm
+	-fno-omit-frame-pointer
+	-g
+	;
+
+COMPILE_FLAGS_RELEASE =
+	-fomit-frame-pointer
+	;
+
+######################################################################################################################
+
+C.CFlags * :
+	$(COMPILE_FLAGS)
+	;
+
+C.CFlags * :
+	$(COMPILE_FLAGS_DEBUG)
+;
+
+#C.CFlags * :
+#	$(COMPILE_FLAGS_RELEASE)
+#: release ;
+
+######################################################################################################################
+
+C.C++Flags * :
+	$(COMPILE_FLAGS)
+	-fvisibility-inlines-hidden
+	-fno-exceptions
+	-fno-rtti
+	;
+
+C.C++Flags * :
+	$(COMPILE_FLAGS_DEBUG)
+;
+
+######################################################################################################################
+
+C.Defines * :
+	__ARM_ARCH_5__
+	__ARM_ARCH_5T__
+	__ARM_ARCH_5E__
+	__ARM_ARCH_5TE__
+	ANDROID
+	_ANDROID
+	OS_ANDROID
+	;
+
+C.Defines * : _DEBUG ;
+#C.Defines * : NDEBUG : release ;
+
+######################################################################################################################
+# Another flag, -Wl,-soname is set when linking as it contains the link target name that isn't accessible yet.
+
+C.LinkFlags * :
+	-nostdlib
+	-Wl,-shared,-Bsymbolic
+	-Wl,--whole-archive
+	-Wl,--no-whole-archive
+	-Wl,--no-undefined
+	-Wl,-rpath-link=$(NDK_MAIN_LIB_DIR)
+	-g
+	;
+
+######################################################################################################################
+
+C.LinkDirectories * :
+	$(NDK_MAIN_LIB_DIR)
+	;
+
+######################################################################################################################
+# TODO : Currently links against GLES, dl (for opening the GLES dynamic library) and log (for log messages), as well
+# as the real basics libc, libstdc++, libm, libgcc. Also links against stlport.
+
+C.LinkPrebuiltLibraries * :
+	$(NDK_MAIN_LIB_DIR)/libc.so
+	$(NDK_MAIN_LIB_DIR)/libstdc++.so
+	$(NDK_MAIN_LIB_DIR)/libm.so
+
+	$(NDK_MAIN_LIB_DIR)/libGLESv1_CM.so
+	$(NDK_MAIN_LIB_DIR)/libdl.so
+	$(NDK_MAIN_LIB_DIR)/liblog.so
+	$(STL_PORT_BASE)/libs/$(NDK_ABI)/libstlport_static.a
+
+	$(NDK_SEC_LIB_DIR)/libgcc.a
+	;
+
+######################################################################################################################
+
+C.IncludeDirectories * :
+	$(NDK_MAIN_INC_DIR)
+	$(STL_PORT_INCLUDE)
+	$(NDK_SEC_INC_DIR)
+	;
+
+######################################################################################################################
+
+VSPLATFORMMAP.androidndk = "Android NDK" ;
+
+######################################################################################################################
+# Using custom C.Link as we need to specify the exectuable name as part of the flags, and using custom rules for
+# everything else as we need to do some cygwin setup first. Ideally we'd share the actions in g-gcc and just do our
+# cygwin setup first, but I'm not sure if that is possible to do right now.
+
+actions response C.androidndk.Link
+{
+	"$(C.LINK)" -Wl,-soname,$(<[1]:CBS) @@($(LINKFLAGS) $(>:C) $(NEEDLIBS:CT) $(LINKLIBS:CT)) -o $(<[1]:C)
+}
+
+actions updated together piecemeal response C.androidndk.Archive
+{
+	"$(C.AR)" @@($(LIBFLAGS) $(<:C) $(>:C))
+}
+
+actions together C.androidndk.Ranlib
+{
+	"$(C.RANLIB)" $(<:C)
+}
+
+if $(NOARUPDATE)
+{
+	actions response C.androidndk.Archive
+	{
+		"$(C.AR)" @@($(LIBFLAGS) $(<:C)) $(>:C)
+	}
+}
+
+actions updated response C.androidndk.CC
+{
+	CD /D $(<[0]:D\\C)
+	"$(C.CC)" @@(-c $(MFLAGS)) $(>:C)
+}
+
+actions updated response C.androidndk.C++
+{
+	CD /D $(<[0]:D\\C)
+	"$(C.C++)" @@(-c $(MFLAGS)) $(>:C)
+}
+
+actions updated response C.androidndk.PCH
+{
+	"$(C.C++)" @@(-c $(MFLAGS)) $(>:C)
+}
+
+######################################################################################################################
+
+rule C.androidndk._ApplicationFromObjects_PostBuild_Platform
+{
+#	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
+#	local grist = $(TARGET) ;
+#	local _s = $(OBJECTS:G=$(grist)) ;
+#	local _t = [ C._retrieveOutputName $(TARGET) : SUFEXE ] ;
+#	_t = $(_t:G=$(grist)) ;
+
+#	# Create stripped .so
+#	local _strippedLib = $(_t).stripped ;
+#	MakeLocate $(_strippedLib) : $(outputPath) ;
+#	Depends $(TARGET) : $(_strippedLib) : $(_t) ;
+#	Clean clean:$(TARGET) : $(_strippedLib) ;
+#	C.Strip $(_strippedLib) : $(_t) ;
+}
+
+actions C.androidndk.Strip
+{
+#	$(CYGWIN_SETUP)
+	$(C.STRIP) -g -S -d -o $(1) $(2)
+}
+
+SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dylib ;
+SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a .dylib ;
+
+#C.ToolchainHelper androidndk-gcc ;
+
+#C.Flags * : CC	: -g -O0 ;
+#C.Flags * : C++	: -g -O0 ;
+#C.Flags * : M	: -g -O0 ;
+#C.Flags * : MM	: -g -O0 ;

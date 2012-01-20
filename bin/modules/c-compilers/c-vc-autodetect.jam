@@ -8,6 +8,13 @@ vs_versions.7.0 = vs2002 ;
 vs_versions.6.0 = vc6 ;
 
 rule FindVisualStudioHelper VERSION {
+	local MSVCNT ;
+	local MSVCNT_BIN_PATH ;
+	local MSVCBIN ;
+	local MSSDK ;
+	local MSSDK_STDHDRS ;
+	local MSSDK_LINKDIRECTORIES ;
+
 	local compiler ;
 
 	switch $(VERSION) {
@@ -82,13 +89,49 @@ rule FindVisualStudioHelper VERSION {
 			compiler = vc6 ;
 	}
 
+	C.COMPILER_SUITE = vc ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
+
+	local SUFOBJ = .obj ;
+	SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = .exe ;
+	SUFLIB on $(C.COMPILER_SUITE_SYMBOL) = .lib ;
+	SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .lib ;
+	SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+	SUFOBJ on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+	SUFSHAREDLIB on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+	SUFRES on $(C.COMPILER_SUITE_SYMBOL) = .res ;
+
+	NOARSCAN on $(C.COMPILER_SUITE_SYMBOL) = true ;
+	NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
+
+#	if $(C.PLATFORM) != *  &&  $(CONFIG) != * {
+#		IncludeModule c-compilers/$(PLATFORM)-vc ;
+#	}
+
+	IncludeModule c-compilers/$(C.PLATFORM)-vc ;
+
+	C.$(C.PLATFORM).vc.AutoDetect $(compiler) ;
+
+	MSVCNT on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCNT) ;
+	MSVCNT_BIN_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCNT_BIN_PATH) ;
+	MSVCBIN on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCBIN) ;
+	MSSDK on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK) ;
+	MSSDK_STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_STDHDRS) ;
+	MSSDK_LINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
+
+	C.BUILD_EXTENSIONS on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) .res ;
+	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : CC : .c .s : C.vc.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : C++ : .cc .cpp .cxx : C.vc.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+
 	return $(compiler) ;
 }
 
 
 rule FindVisualStudio VERSION {
+	local compiler = $(vs_versions.$(VERSION)) ;
+	local C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
 	local msvcnt ;
-	msvcnt = $(MSVCNT) ;
+	on $(C.COMPILER_SUITE_SYMBOL) msvcnt = $(MSVCNT) ;
 	if ! $(msvcnt) {
 		compiler = [ FindVisualStudioHelper $(VERSION) ] ;
 	}
@@ -97,46 +140,47 @@ rule FindVisualStudio VERSION {
 }
 
 
-rule C.AutoDetect {
+rule C.AutoDetect THE_COMPILER {
+	THE_COMPILER ?= $(C.COMPILER) ;
+
 	# Do we need to attempt to detect the compiler?
-	if ! $(COMPILER.$(PLATFORM)) {
-		if ! $(MSVCNT) {
-			MSVCNT_BIN_PATH = ;
-			for ver in $(VISUAL_STUDIO_FORCE_VERSION) 10.0 9.0 8.0 7.1 7.0 6.0 {
-				COMPILER.$(PLATFORM) = [ FindVisualStudio $(ver) ] ;
-				if $(COMPILER.$(PLATFORM)) {
-					break ;
-				}
-			}
-			if ! $(COMPILER.$(PLATFORM)) {
-				return ;
+	if ! $(THE_COMPILER)  ||  $(THE_COMPILER) = * {
+		for ver in $(VISUAL_STUDIO_FORCE_VERSION) 10.0 9.0 8.0 7.1 7.0 6.0 {
+			C.COMPILER = [ FindVisualStudio $(ver) ] ;
+			if $(C.COMPILER) {
+				break ;
 			}
 		}
-	}
-
-	if $(COMPILER.$(PLATFORM)) in vc6 vs2003 vs2005 vs2008 vs2010 {
-		MSVCNT = ;
-		switch $(COMPILER.$(PLATFORM))
+		if ! $(C.COMPILER) {
+			return ;
+		}
+	} else if $(C.COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 {
+		switch $(C.COMPILER)
 		{
 			case vc6 :
-				COMPILER.$(PLATFORM) = [ FindVisualStudio 6.0 ] ;
+				C.COMPILER = [ FindVisualStudio 6.0 ] ;
 			case vs2003 :
-				COMPILER.$(PLATFORM) = [ FindVisualStudio 7.1 ] ;
-				COMPILER.$(PLATFORM) ?= [ FindVisualStudio 7.0 ] ;
+				C.COMPILER = [ FindVisualStudio 7.1 ] ;
+				C.COMPILER ?= [ FindVisualStudio 7.0 ] ;
 			case vs2005 :
-				COMPILER.$(PLATFORM) = [ FindVisualStudio 8.0 ] ;
+				C.COMPILER = [ FindVisualStudio 8.0 ] ;
 			case vs2008 :
-				COMPILER.$(PLATFORM) = [ FindVisualStudio 9.0 ] ;
+				C.COMPILER = [ FindVisualStudio 9.0 ] ;
 			case vs2010 :
-				COMPILER.$(PLATFORM) = [ FindVisualStudio 10.0 ] ;
+				C.COMPILER = [ FindVisualStudio 10.0 ] ;
 		}
-
-		IncludeModule c-compilers/c-vc ;
-		if $(PLATFORM) != *  &&  $(CONFIG) != * {
-			IncludeModule c-compilers/$(PLATFORM)-vc ;
-			IncludeModule c-compilers/$(PLATFORM)-vc-$(CONFIG) ;
-		}
-
-		return $(COMPILER.$(PLATFORM)) ;
 	}
+
+	IncludeModule c-compilers/c-vc ;
+#	if $(PLATFORM) != *  &&  $(CONFIG) != * {
+#		IncludeModule c-compilers/$(PLATFORM)-vc-$(CONFIG) ;
+#	}
+
+	C.COMPILER_SUITE = vc ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
+
+	return $(C.COMPILER) ;
 }
+
+
+

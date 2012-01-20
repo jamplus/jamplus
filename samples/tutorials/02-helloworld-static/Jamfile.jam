@@ -1,6 +1,7 @@
 SubDir TOP ;
 
-C.RuntimeType * : static ;
+C.RuntimeType static ;
 
-C.Application helloworld : main.c ;
+C.ActiveTarget helloworld ;
+C.Application main.c ;
 

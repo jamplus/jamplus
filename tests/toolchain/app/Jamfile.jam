@@ -1,0 +1,22 @@
+SubDir TOP ;
+
+SubDir TOP : appA ;
+Echo Building appA with the default toolchain... ;
+C.ActiveTarget appA ;
+C.Application appA.cpp ;
+
+SubDir TOP : appB ;
+C.Toolchain vc6 win32 release ;
+
+Echo Building appB with the Visual C++ 6... ;
+C.ActiveTarget appB ;
+C.Application appB.cpp ;
+
+SubDir TOP : appC ;
+C.Toolchain vs2005 win32 release ;
+
+Echo Building appC with the Visual Studio 2005... ;
+C.ActiveTarget appC ;
+C.Application appC.cpp ;
+
+

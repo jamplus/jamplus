@@ -136,13 +136,14 @@ rule MakeLocate TARGETS : DIRECTORY
 	# so that directory path components and other
 	# targets don't conflict.
 
-	if $(DIRECTORY)
-	{
-#		DIRECTORY = $(DIRECTORY:R=$(SUBDIR:E="")) ;
-	    LOCATE on $(TARGETS) = $(DIRECTORY) ;
-	    Depends $(TARGETS) : $(DIRECTORY[1]:G=!dir!) ;
-	    MkDir $(DIRECTORY[1]:G=!dir!) ;
+	if ! $(DIRECTORY) {
+		DIRECTORY = $(LOCATE_TARGET) ;
 	}
+#		DIRECTORY = $(DIRECTORY:R=$(SUBDIR:E="")) ;
+
+	LOCATE on $(TARGETS) = $(DIRECTORY) ;
+	Depends $(TARGETS) : $(DIRECTORY[1]:G=!dir!) ;
+	MkDir $(DIRECTORY[1]:G=!dir!) ;
 }
 
 rule MkDir
@@ -412,6 +413,7 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 	LOCATE_SOURCE = $(LOCATE_SOURCE)$(target:E=) ;
 	LOCATE_TARGET = [ FDirName $(ALL_LOCATE_TARGET) $(_optionalRoot) $(SUBDIR_DOWN) ] ;
 	LOCATE_TARGET = $(LOCATE_TARGET)$(target:E=) ;
+
 	SOURCE_GRIST = [ FGrist $(ALL_SUBDIR_TOKENS) ] ;
 	SOURCE_GRIST = $(SOURCE_GRIST)$(target:E=) ;
 	## LOCAL CHANGE -- OPT_HEADER_CACHE_EXT.  With the header
@@ -714,16 +716,7 @@ actions quietly WriteFile
 
 ACTIVE_PROJECT = "" ;
 
-rule ActiveTarget TARGET
-{
-	ACTIVE_PROJECT = $(TARGET) ;
-	if $(ALL_SUBDIR_TOKENS) {
-		SubDir : $(TARGET) ;
-	}
-}
-
-
-rule AutoSourceGroup TARGET : SOURCES
+rule AutoSourceGroup SOURCES
 {
 }
 

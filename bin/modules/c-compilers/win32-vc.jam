@@ -1,55 +1,59 @@
-switch $(COMPILER.$(PLATFORM)) {
-	case vs2010 :
-		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows v7.0a InstallationFolder ;
-		MSSDK = [ W32_GETREG $(key) ] ;
-		MSSDK ?= $(MSVCNT) ;
-		MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
-		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
-		C.RC-NOLOGO = /nologo ;
+rule C.win32.vc.AutoDetect COMPILER {
+	local rc_nologo ;
+	switch $(COMPILER) {
+		case vs2010 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows v7.0a InstallationFolder ;
+			MSSDK = [ W32_GETREG $(key) ] ;
+			MSSDK ?= $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
+			rc_nologo = /nologo ;
 
-	case vs2008 :
-		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
-		MSSDK = [ W32_GETREG $(key) ] ;
-		MSSDK ?= $(MSVCNT) ;
-		MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
-		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
+		case vs2008 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
+			MSSDK = [ W32_GETREG $(key) ] ;
+			MSSDK ?= $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
 
-	case vs2005 :
-		MSSDK = $(MSVCNT) ;
-		MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
-		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+		case vs2005 :
+			MSSDK = $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
 
-	case vs2003 :
-		MSSDK = $(MSVCNT) ;
-		MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
-		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+		case vs2003 :
+			MSSDK = $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
 
-	case vs2002 :
-		MSSDK = $(MSVCNT) ;
-		MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
-		MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+		case vs2002 :
+			MSSDK = $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
 
-	case vc6 :
-		local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft MicrosoftSDK Directories "Install Dir" ;
-		MSSDK = [ W32_GETREG $(key) ] ;
-		MSSDK ?= $(MSVCNT) ;
-		MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSVCNT)/Include" ;
-		MSSDK_LINKDIRECTORIES = "$(MSSDK)/Lib" "$(MSVCNT)/Lib" ;
+		case vc6 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft MicrosoftSDK Directories "Install Dir" ;
+			MSSDK = [ W32_GETREG $(key) ] ;
+			MSSDK ?= $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSVCNT)/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSSDK)/Lib" "$(MSVCNT)/Lib" ;
+	}
+
+	MSVCBIN							?= $(MSVCNT)/bin/ ;
+	C.AR on $(C.COMPILER_SUITE_SYMBOL)		= $(MSVCBIN)lib ;
+	C.CC on $(C.COMPILER_SUITE_SYMBOL)		= $(MSVCBIN)cl ;
+	C.C++ on $(C.COMPILER_SUITE_SYMBOL)		= $(MSVCBIN)cl ;
+	C.LINK on $(C.COMPILER_SUITE_SYMBOL)	= $(MSVCBIN)link ;
+	C.MT on $(C.COMPILER_SUITE_SYMBOL)		= $(MSSDK)/bin/mt ;
+	if $(COMPILER) = vc6 {
+		C.RC on $(C.COMPILER_SUITE_SYMBOL)	= $(MSVCNT)/../Common/MSDev98/Bin/rc ;
+	} else {
+		C.RC on $(C.COMPILER_SUITE_SYMBOL)	= $(MSSDK)/bin/RC ;
+	}
+	C.RC_NOLOGO on $(C.COMPILER_SUITE_SYMBOL) = $(rc_nologo) ;
+	C.STDHDRS on $(C.COMPILER_SUITE_SYMBOL)	= $(MSSDK_STDHDRS) ;
+	C.STDLINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
 }
-
-MSVCBIN			?= "$(MSVCNT)/bin/" ;
-C.AR			= "$(MSVCBIN)lib" ;
-C.CC			= "$(MSVCBIN)cl" ;
-C.C++			= "$(MSVCBIN)cl" ;
-C.LINK			= "$(MSVCBIN)link" ;
-C.MT			= "$(MSSDK)/bin/mt" ;
-if $(COMPILER.$(PLATFORM)) = vc6 {
-	C.RC			= "$(MSVCNT)/../Common/MSDev98/Bin/rc" ;
-} else {
-	C.RC			= "$(MSSDK)/bin/RC" ;
-}
-C.STDHDRS		?= "$(MSSDK_STDHDRS)" ;
-C.STDLINKDIRECTORIES ?= "$(MSSDK_LINKDIRECTORIES)" ;
 
 VSPLATFORMMAP.win32 = Win32 ;
 VSNATIVEPLATFORM.win32 = 1 ;

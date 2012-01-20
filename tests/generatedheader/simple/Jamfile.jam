@@ -1,9 +1,11 @@
 SubDir TOP ;
 
-C.Application test : main.c test.c ;
+C.ActiveTarget test ;
 
-CONTENTS on <test>test.h = "extern void Print(const char*);" ;
+local test.h = [ C.GristFiles test.h ] ;
+CONTENTS on $(test.h) = "extern void Print(const char*);" ;
 
-WriteFile <test>test.h ;
-Depends all : <test>test.h ;
-Clean clean : <test>test.h ;
+WriteFile $(test.h) ;
+C.Clean $(test.h) ;
+
+C.Application main.c test.c ;

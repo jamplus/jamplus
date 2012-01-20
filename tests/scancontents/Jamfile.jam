@@ -7,16 +7,19 @@ SubDir TOP ;
 
 GENERATED_VERSION ?= v2 ;
 
-C.Application test : main.c test.c ;
+C.ActiveTarget test ;
 
-CONTENTS on <test>generated.h = "extern void Print(const char*);
+local generated.h = [ C.GristFiles generated.h ] ;
+CONTENTS on $(generated.h) = "extern void Print(const char*);
 " ;
-WriteFile <test>generated.h ;
-Always <test>generated.h ;
-MakeLocate <test>generated.h : . ;
-UseCommandLine <test>generated.h : $(GENERATED_VERSION) ;
-ScanContents <test>generated.h ;
+WriteFile $(generated.h) ;
+Always $(generated.h) ;
+MakeLocate $(generated.h) : . ;
+UseCommandLine $(generated.h) : $(GENERATED_VERSION) ;
+ScanContents $(generated.h) ;
 
-Depends <test>main.c : <test>generated.h ;
+Depends [ C.GristFiles main.c ] : $(generated.h) ;
 
-Clean clean : <test>generated.h ;
+C.Clean $(generated.h) ;
+
+C.Application main.c test.c ;

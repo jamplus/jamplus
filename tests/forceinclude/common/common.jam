@@ -1,3 +1,4 @@
 SubDir TOP common ;
 
-C.Library common : print.cpp print.h ;
+C.ActiveTarget common ;
+C.Library print.cpp print.h ;

@@ -1,0 +1,57 @@
+{
+	C.COMPILER_SUITE = tcc ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
+
+	local SUFOBJ = .obj ;
+	SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = .exe ;
+	SUFLIB on $(C.COMPILER_SUITE_SYMBOL) = .lib ;
+	SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .lib ;
+	SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+	SUFOBJ on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+	SUFSHAREDLIB on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+	SUFRES on $(C.COMPILER_SUITE_SYMBOL) = .res ;
+
+	NOARSCAN on $(C.COMPILER_SUITE_SYMBOL) = true ;
+	NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
+
+	local TCC_ROOT = u:/downloads/tinyc/tcc/ ;
+
+	C.AR on $(C.COMPILER_SUITE_SYMBOL)			= $(TCC_ROOT)tiny_libmaker ;
+	C.CC on $(C.COMPILER_SUITE_SYMBOL)			= $(TCC_ROOT)tcc ;
+	C.C++ on $(C.COMPILER_SUITE_SYMBOL)			= **UNIMPLEMENTED** ;
+	C.LINK on $(C.COMPILER_SUITE_SYMBOL)			= $(TCC_ROOT)tcc ;
+
+	C.BUILD_EXTENSIONS on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : CC : .c .s : C.tcc.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+}
+
+
+rule C.tcc.FDefines { return -D$(<) ; }
+rule C.tcc.FIncludes { return -I"\"$(<)\"" ; }
+rule C.tcc.FLibraryPaths { return -L"\"$(<)\"" ; }
+
+
+actions response C.tcc.Link {
+	$(C.LINK:\\C) $(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT) -o $(<[1])
+}
+
+
+actions updated response C.tcc.CC {
+	$(C.CC:\\C) $(MFLAGS) $(>:C)
+}
+
+
+actions updated response C.tcc.C++ {
+	echo C.tcc.C++ is not supported!
+}
+
+
+actions together response C.tcc.Archive {
+	PATH=$(MSVCNT_BIN_PATH:J=;);%PATH%
+	$(C.AR:C) $(<:C) @@($(>:\\C))
+}
+
+
+rule C.tcc._MultiCppCompile_SetupFlags {
+	_flags += "-c -o $(_obj:TC)" ;
+}

@@ -26,43 +26,43 @@ function Test()
 	if Platform == 'win32' and not Compiler then
 		pass1Directories = {
 			'includes/',
+			'win32!release/',
+			'win32!release/main/',
 		}
 
 		pass1Files = {
 			'Jamfile.jam',
 			'main.cpp',
-			'main.obj',
-			'main.release.exe',
-			'main.release.exe.intermediate.manifest',
-			'main.release.pdb',
 			'mypch.cpp',
-			'mypch.h.pch',
-			'mypch.obj',
-			'test.lua',
-			'vc.pdb',
 			'includes/mypch.h',
 			'includes/usefuldefine.h',
+			'win32!release/main/main.obj',
+			'win32!release/main/main.release.exe',
+			'win32!release/main/main.release.exe.intermediate.manifest',
+			'win32!release/main/main.release.pdb',
+			'win32!release/main/mypch.h.pch',
+			'win32!release/main/mypch.obj',
 		}
 
 		pass1Pattern = [[
-			*** found 17 target(s)...
-			*** updating 4 target(s)...
-			@ C.C++ <main>mypch.h.pch
+			*** found 20 target(s)...
+			*** updating 6 target(s)...
+			@ C.vc.C++ <win32!release:main>mypch.h.pch
 			mypch.cpp
-			@ C.C++ <main>main.obj
+			@ C.vc.C++ <win32!release:main>main.obj
 			main.cpp
-			@ C.LinkWithManifest <main>main.release.exe
-			*** updated 4 target(s)...
+			@ C.vc.LinkWithManifest <win32!release:main>main.exe
+			*** updated 6 target(s)...
 ]]
 
 		pass2Pattern = [[
-			*** found 17 target(s)...
+			*** found 20 target(s)...
 			*** updating 4 target(s)...
-			@ C.C++ <main>mypch.h.pch
+			@ C.vc.C++ <win32!release:main>mypch.h.pch
 			mypch.cpp
-			@ C.C++ <main>main.obj
+			@ C.vc.C++ <win32!release:main>main.obj
 			main.cpp
-			@ C.LinkWithManifest <main>main.release.exe
+			@ C.vc.LinkWithManifest <win32!release:main>main.exe
 			*** updated 4 target(s)...
 ]]
 	elseif Compiler == 'mingw' then
@@ -151,7 +151,7 @@ function Test()
 	local pattern2
 	if Platform == 'win32' and Compiler ~= 'mingw' then
 		pattern2 = [[
-*** found 17 target(s)...
+*** found 20 target(s)...
 ]]
 	else
 		pattern2 = [[

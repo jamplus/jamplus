@@ -28,6 +28,10 @@ function Test()
 	{
 		'app/',
 		'lib-a/',
+		'app/win32!release/',
+		'app/win32!release/app/',
+		'lib-a/win32!release/',
+		'lib-a/win32!release/lib-a/',
 	}
 	
 	local files
@@ -41,47 +45,42 @@ function Test()
 			'Jamfile.jam',
 			'test.lua',
 			'app/Jamfile.jam',
-			'app/app.release.exe',
-			'app/app.release.exe.intermediate.manifest',
-			'app/app.release.pdb',
 			'app/main.c',
-			'app/main.obj',
-			'app/vc.pdb',
-			'lib-a/Jamfile.jam',
+			'app/win32!release/app/app.release.exe',
+			'app/win32!release/app/app.release.exe.intermediate.manifest',
+			'app/win32!release/app/app.release.pdb',
+			'app/win32!release/app/main.obj',
 			'lib-a/add.c',
 			'lib-a/add.h',
-			'lib-a/add.obj',
-			'lib-a/lib-a.release.lib',
-			'lib-a/vc.pdb',
+			'lib-a/Jamfile.jam',
+			'lib-a/win32!release/lib-a/add.obj',
+			'lib-a/win32!release/lib-a/lib-a.release.lib',
 		}
 	
 		patternA = [[
-*** found 12 target(s)...
-*** updating 4 target(s)...
-@ C.CC <lib-a>add.obj
-add.c
-@ C.Archive <lib-a>lib-a.lib
-@ C.CC <app>main.obj
-main.c
-@ C.LinkWithManifest <app>app.release.exe
-*** updated 4 target(s)...
+*** found 16 target(s)...
+*** updating 8 target(s)...
+@ C.vc.CC <win32!release:app>main.obj
+!NEXT!@ C.vc.CC <win32!release:lib-a>add.obj
+!NEXT!@ C.vc.Archive <win32!release:lib-a>lib-a.lib
+!NEXT!@ C.vc.LinkWithManifest <win32!release:app>app.exe
+!NEXT!*** updated 8 target(s)...
 ]]
 
 		patternB = [[
-*** found 12 target(s)...
+*** found 16 target(s)...
 ]]
 
 		patternC = [[
-*** found 12 target(s)...
+*** found 16 target(s)...
 *** updating 2 target(s)...
-@ C.CC <app>main.obj
-main.c
-@ C.LinkWithManifest <app>app.release.exe
-*** updated 2 target(s)...
+@ C.vc.CC <win32!release:app>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:app>app.exe
+!NEXT!*** updated 2 target(s)...
 ]]
 
 		patternD = [[
-*** found 12 target(s)...
+*** found 16 target(s)...
 ]]
 
 	else

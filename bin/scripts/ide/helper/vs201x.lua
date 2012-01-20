@@ -113,7 +113,8 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 				if project.IncludePaths and project.IncludePaths[platformName] and project.IncludePaths[platformName][configName] then
 					configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
 				end
-				if project.OutputPaths and project.OutputPaths[platformName] and project.OutputPaths[platformName][configName] then
+				if project.OutputPaths and project.OutputPaths[platformName] and project.OutputPaths[platformName][configName] 
+					and project.OutputNames and project.OutputNames[platformName] and project.OutputNames[platformName][configName] then
 					configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
 				end
 				configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName

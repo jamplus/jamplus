@@ -22,51 +22,50 @@ function Test()
 	local patternB
 	local patternC
 	local noDepCacheFiles
+	local dirs
 	
 	if Platform == 'win32' then
+		dirs = {
+			'win32!release/',
+			'win32!release/test/',
+		}
+
 		noDepCacheFiles =
 		{
-			'Jamfile.jam',
 			'generated.h',
+			'Jamfile.jam',
 			'main.c',
 			'main.h',
-			'main.obj',
 			'test.c',
-			'test.lua',
-			'test.obj',
-			'test.release.exe',
-			'test.release.exe.intermediate.manifest',
-			'test.release.pdb',
-			'vc.pdb',
+			'win32!release/test/main.obj',
+			'win32!release/test/test.obj',
+			'win32!release/test/test.release.exe',
+			'win32!release/test/test.release.exe.intermediate.manifest',
+			'win32!release/test/test.release.pdb',
 		}
 		
 		patternA = [[
-*** found 16 target(s)...
-*** updating 4 target(s)...
-@ C.CC <test>main.obj
-main.c
-test.c
-Generating Code...
-@ C.LinkWithManifest <test>test.release.exe
-*** updated 4 target(s)...
+*** found 19 target(s)...
+*** updating 6 target(s)...
+@ C.vc.CC <win32!release:test>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+!NEXT!*** updated 6 target(s)...
 ]]
 
 		patternB = [[
-*** found 16 target(s)...
+*** found 19 target(s)...
 *** updating 3 target(s)...
-@ C.CC <test>main.obj
-main.c
-@ C.LinkWithManifest <test>test.release.exe
-*** updated 3 target(s)...
+@ C.vc.CC <win32!release:test>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+!NEXT!*** updated 3 target(s)...
 ]]
 
 		patternC = [[
-*** found 16 target(s)...
+*** found 19 target(s)...
 *** updating 3 target(s)...
-@ C.CC <test>main.obj
-main.c
-@ C.LinkWithManifest <test>test.release.exe
-*** updated 3 target(s)...
+@ C.vc.CC <win32!release:test>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+!NEXT!*** updated 3 target(s)...
 ]]
 	else
 		noDepCacheFiles = {
@@ -109,21 +108,21 @@ main.c
 
 	do
 		TestPattern(patternA, RunJam{ 'NO_DEP_CACHE=1' })
-		TestDirectories(originalDirs)
+		TestDirectories(dirs)
 		TestFiles(noDepCacheFiles)
 	end
 
 	---------------------------------------------------------------------------
 	do
 		TestPattern(patternB, RunJam{ 'NO_DEP_CACHE=1' })
-		TestDirectories(originalDirs)
+		TestDirectories(dirs)
 		TestFiles(noDepCacheFiles)
 	end
 	
 	---------------------------------------------------------------------------
 	do
 		TestPattern(patternC, RunJam{ 'NO_DEP_CACHE=1' })
-		TestDirectories(originalDirs)
+		TestDirectories(dirs)
 		TestFiles(noDepCacheFiles)
 	end
 	
@@ -143,59 +142,52 @@ main.c
 	if Platform == 'win32' then
 		depCacheFiles = {
 			'.jamcache',
-			'Jamfile.jam',
 			'generated.h',
+			'Jamfile.jam',
 			'main.c',
 			'main.h',
-			'main.obj',
 			'test.c',
-			'test.lua',
-			'test.obj',
-			'test.release.exe',
-			'test.release.exe.intermediate.manifest',
-			'test.release.pdb',
-			'vc.pdb',
+			'win32!release/test/main.obj',
+			'win32!release/test/test.obj',
+			'win32!release/test/test.release.exe',
+			'win32!release/test/test.release.exe.intermediate.manifest',
+			'win32!release/test/test.release.pdb',
 		}
 		
 		patternA = [[
-*** found 16 target(s)...
-*** updating 4 target(s)...
-@ C.CC <test>main.obj
-main.c
-test.c
-Generating Code...
-@ C.LinkWithManifest <test>test.release.exe
-*** updated 4 target(s)...
+*** found 19 target(s)...
+*** updating 6 target(s)...
+@ C.vc.CC <win32!release:test>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+!NEXT!*** updated 6 target(s)...
 ]]
 
 		patternB = [[
-*** found 16 target(s)...
+*** found 19 target(s)...
 *** updating 3 target(s)...
 *** updated 1 target(s)...
 ]]
 
 		patternC = [[
-*** found 16 target(s)...
+*** found 19 target(s)...
 *** updating 3 target(s)...
-@ C.CC <test>main.obj
-main.c
-@ C.LinkWithManifest <test>test.release.exe
-*** updated 3 target(s)...
+@ C.vc.CC <win32!release:test>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+!NEXT!*** updated 3 target(s)...
 ]]
 
 		patternD = [[
-*** found 16 target(s)...
+*** found 19 target(s)...
 *** updating 3 target(s)...
 *** updated 1 target(s)...
 ]]
 
 		patternE = [[
-*** found 16 target(s)...
+*** found 19 target(s)...
 *** updating 3 target(s)...
-@ C.CC <test>main.obj
-main.c
-@ C.LinkWithManifest <test>test.release.exe
-*** updated 3 target(s)...
+@ C.vc.CC <win32!release:test>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+!NEXT!*** updated 3 target(s)...
 ]]
 
 	else
@@ -222,7 +214,7 @@ main.c
 ]]
 
 		patternB = [[
-*** found 11 target(s)...
+*** found 19 target(s)...
 *** updating 3 target(s)...
 *** updated 1 target(s)...
 ]]
@@ -252,35 +244,35 @@ main.c
 
 	do
 		TestPattern(patternA, RunJam{})
-		TestDirectories(originalDirs)
+		TestDirectories(dirs)
 		TestFiles(depCacheFiles)
 	end
 
 	---------------------------------------------------------------------------
 	do
 		TestPattern(patternB, RunJam{})
-		TestDirectories(originalDirs)
+		TestDirectories(dirs)
 		TestFiles(depCacheFiles)
 	end
 
 	---------------------------------------------------------------------------
 	do
 		TestPattern(patternC, RunJam{ 'GENERATED_VERSION=v3' })
-		TestDirectories(originalDirs)
+		TestDirectories(dirs)
 		TestFiles(depCacheFiles)
 	end
 
 	---------------------------------------------------------------------------
 	do
 		TestPattern(patternD, RunJam{ 'GENERATED_VERSION=v3' })
-		TestDirectories(originalDirs)
+		TestDirectories(dirs)
 		TestFiles(depCacheFiles)
 	end
 
 	---------------------------------------------------------------------------
 	do
 		TestPattern(patternE, RunJam{})
-		TestDirectories(originalDirs)
+		TestDirectories(dirs)
 		TestFiles(depCacheFiles)
 	end
 

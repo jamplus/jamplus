@@ -18,37 +18,38 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 15 target(s)...
-*** updating 4 target(s)...
-@ C.CC <test>main.obj
-main.c
-test.c
-Generating Code...
-@ C.LinkWithManifest <test>test.release.exe
-*** updated 4 target(s)...
+*** found 18 target(s)...
+*** updating 6 target(s)...
+@ C.vc.CC <win32!release:test>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+*** updated 6 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
 
+		local pass1Dirs = {
+			'win32!release/',
+			'win32!release/test/',
+		}
+		
 		local pass1Files =
 		{
 			'Jamfile.jam',
 			'main.c',
-			'main.obj',
 			'test.c',
 			'test.h',
-			'test.obj',
-			'test.release.exe',
-			'test.release.exe.intermediate.manifest',
-			'test.release.pdb',
-			'vc.pdb',
+			'win32!release/test/main.obj',
+			'win32!release/test/test.obj',
+			'win32!release/test/test.release.exe',
+			'win32!release/test/test.release.exe.intermediate.manifest',
+			'win32!release/test/test.release.pdb',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 15 target(s)...
+*** found 18 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	
@@ -56,12 +57,11 @@ Generating Code...
 		os.touch('test.h')
 
 		local pattern3 = [[
-*** found 15 target(s)...
+*** found 18 target(s)...
 *** updating 2 target(s)...
-@ C.CC <test>main.obj
-main.c
-@ C.LinkWithManifest <test>test.release.exe
-*** updated 2 target(s)...
+@ C.vc.CC <win32!release:test>main.obj
+!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+!NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
 	

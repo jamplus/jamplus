@@ -5,57 +5,58 @@ if ! $(TARGETINFO_LOCATE) {
 
 # Originally from http://maillist.perforce.com/pipermail/jamming/2004-July.txt.gz
 # windows resource compiler.
-rule C.ResourceCompiler PARENT : SOURCES : OPTIONS
-{
-	PARENT = [ _retrieveActiveTargetName $(PARENT) ] ;
-	local grist = $(PARENT) ;
-
-	SOURCES = $(SOURCES:G=$(grist)) ;
+rule C.ResourceCompiler SOURCES : OPTIONS {
+	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
 	local TARGETS = $(SOURCES:S=.res) ;
+
+	local source ;
+	for source in $(SOURCES) {
+		local binding ;
+		binding = [ QuickSettingsLookup $(source) : BINDING ] ;
+		if $(binding) {
+			BINDING on $(source:S=.res) = $(binding:S=.res) ;
+		}
+	}
 
 	SearchSource $(SOURCES) ;
 	MakeLocate $(TARGETS) : $(TARGETS:DR=$(LOCATE_TARGET)) ;
-	BINDING on $(TARGETS) = $(TARGETS:BS) ;
 
 	Depends $(TARGETS) : $(SOURCES) ;
-	Clean clean:$(PARENT) : $(TARGETS) ;
+	C.Clean $(TARGETS) ;
 
-	RCDEFINES on $(TARGETS) +=
-		[ on $(PARENT) Var RCDEFINES ]
-		[ on C.* Var RCDEFINES ]
-	;
+	local rcdefines ;
+	local rcflags ;
+	local rchdrs = $(SEARCH_SOURCE) ;
+	on $(C.ACTIVE_TOOLCHAIN_TARGET) {
+		rcdefines += $(RCDEFINES) ;
+		rcflags += $(RCFLAGS) ;
+		rchdrs += $(RCHDRS) ;
+	}
+	on $(C.ACTIVE_TOOLCHAIN_*) {
+		rcdefines += $(RCDEFINES) ;
+		rcflags += $(RCFLAGS) ;
+		rchdrs += $(RCHDRS) ;
+	}
 
-	RCFLAGS on $(TARGETS) +=
-		[ on $(PARENT) Var RCFLAGS ]
-		[ on C.* Var RCFLAGS ]
-	;
-
-	RCHDRS on $(TARGETS) +=
-		$(SEARCH_SOURCE)
-		[ on $(PARENT) Var RCHDRS ]
-		[ on C.* Var RCHDRS ]
+	rchdrs +=
 		$(SUBDIRHDRS)
-		$(C.STDHDRS)
 	;
-	
+
+	RCDEFINES on $(TARGETS) = $(rcdefines) ;
+	RCFLAGS on $(TARGETS) = $(rcflags) ;
+	RCHDRS on $(TARGETS) = $(rchdrs) ;
+
 	# Resources can have #include directives which we need to be aware of.
 	HDRRULE on $(SOURCES) = C.HdrRule ;
 	HDRSCAN on $(SOURCES) = $(C.HDRPATTERN) ;
-	HDRGRIST on $(SOURCES) = $(grist) ;
+	HDRGRIST on $(SOURCES) = $(C.ACTIVE_TOOLCHAIN_SUBTARGET) ;
 
-	UseCommandLine $(TARGETS) :
-			[ on $(TARGETS) Var RCDEFINES ]
-			[ on $(TARGETS) Var RCFLAGS ]
-			[ on $(TARGETS) Var RCHDRS ]
-	;
+	UseCommandLine $(TARGETS) : $(rcdefines) $(rcflags) $(rchdrs) ;
 
-	if quiet in $(OPTIONS)
-	{
-		C.ResourceCompileQuiet $(TARGETS) : $(SOURCES) ;
-	}
-	else
-	{
-		C.ResourceCompile $(TARGETS) : $(SOURCES) ;
+	if quiet in $(OPTIONS) {
+		C.ResourceCompileQuiet $(TARGETS) : $(SOURCES) : $(C.COMPILER_SUITE_SYMBOL) ;
+	} else {
+		C.ResourceCompile $(TARGETS) : $(SOURCES) : $(C.COMPILER_SUITE_SYMBOL) ;
 	}
 
 	return $(TARGETS) ;
@@ -63,50 +64,40 @@ rule C.ResourceCompiler PARENT : SOURCES : OPTIONS
 
 actions C.ResourceCompile
 {
-	SET INCLUDE=$(RCHDRS:\\J=;)
-	"$(C.RC:\\)" /fo $(1:\\C) $(RCFLAGS) /d$(RCDEFINES) $(2:\\C)
+	SET INCLUDE=$(RCHDRS:\\J=;);$(C.STDHDRS:\\J=;)
+	"$(C.RC:\\)" $(C.RC_NOLOGO) /fo $(1:\\C) $(RCFLAGS) /d$(RCDEFINES) $(2:\\C)
 }
 
 actions quietly C.ResourceCompileQuiet
 {
-	SET INCLUDE=$(RCHDRS:\\J=;)
-	"$(C.RC:\\)" /fo $(1:\\C) $(RCFLAGS) /d$(DEFINES) $(2:\\C)
+	SET INCLUDE=$(RCHDRS:\\J=;);$(C.STDHDRS:\\J=;)
+	"$(C.RC:\\)" $(C.RC_NOLOGO) /fo $(1:\\C) $(RCFLAGS) /d$(DEFINES) $(2:\\C)
 }
 
 # Set resource compiler options
-rule C._RcOptions TARGET : VARIABLE : RESOURCE_NAME : OPTIONS
-{
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	local grist = $(TARGET) ;
-
+rule C._RcOptions VARIABLE : RESOURCE_NAME : OPTIONS {
 	local target ;
-	if $(OPTIONS)
-	{
-		target = $(RESOURCE_NAME:S=.res:G=$(grist)) ;
-	}
-	else
-	{
+	if $(OPTIONS) {
+		target = $(RESOURCE_NAME:S=.res:G=$(C.ACTIVE_TOOLCHAIN_SUBTARGET)) ;
+	} else {
 		OPTIONS = $(RESOURCE_NAME) ;
-		target = $(TARGET) ;
+		target = $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 	}
 
 	$(VARIABLE) on $(target) += $(OPTIONS) ;
 }
 
 
-rule C.RcFlags TARGET : RESOURCE_NAME : FLAGS
-{
-	C._RcOptions $(TARGET) : RCFLAGS : $(RESOURCE_NAME) : $(FLAGS) ;
+rule C.RcFlags RESOURCE_NAME : FLAGS {
+	C._RcOptions RCFLAGS : $(RESOURCE_NAME) : $(FLAGS) ;
 }
 
-rule C.RcDefines TARGET : RESOURCE_NAME : DEFINES
-{
-	C._RcOptions $(TARGET) : RCDEFINES : $(RESOURCE_NAME) : $(DEFINES) ;
+rule C.RcDefines RESOURCE_NAME : DEFINES {
+	C._RcOptions RCDEFINES : $(RESOURCE_NAME) : $(DEFINES) ;
 }
 
-rule C.RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
-{
-	C._RcOptions $(TARGET) : RCHDRS : $(RESOURCE_NAME) : $(HDRS) ;
+rule C.RcIncludeDirectories RESOURCE_NAME : HDRS {
+	C._RcOptions RCHDRS : $(RESOURCE_NAME) : $(HDRS) ;
 }
 
 
@@ -114,23 +105,19 @@ rule C.RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
 
 } else {  # TARGETINFO_LOCATE
 
-rule C.ResourceCompiler PARENT : SOURCES : OPTIONS
-{
+rule C.ResourceCompiler {
 }
 
 
-rule C.RcFlags TARGET : RESOURCE_NAME : FLAGS
-{
+rule C.RcFlags {
 }
 
 
-rule C.RcDefines TARGET : RESOURCE_NAME : DEFINES
-{
+rule C.RcDefines {
 }
 
 
-rule C.RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS
-{
+rule C.RcIncludeDirectories {
 }
 
 }
