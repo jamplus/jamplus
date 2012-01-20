@@ -75,6 +75,8 @@ typedef struct {
 #ifdef OPT_EXPAND_ESCAPE_PATH_EXT
 	char		escapepath;
 #endif
+	char		targetsetting;
+	PATHPART	targetname;
 
 } VAR_EDITS ;
 
@@ -321,7 +323,14 @@ var_expand(
 			value = lol_get( lol, 1 );
 		    else if( varname[0] >= '1' && varname[0] <= '9' && !varname[1] )
 			value = lol_get( lol, varname[0] - '1' );
-		    else
+			else if ( edits.targetsetting ) {
+				TARGET* t = bindtarget(edits.targetname.ptr);
+				SETTINGS* settings = quicksettingslookup(t, varname);
+				if (settings)
+					value = list_copy(L0, settings->value);
+				else
+					value = L0;
+			} else
 			value = var_get( varname );
 		}
 #ifdef OPT_EXPAND_LITERALS_EXT
@@ -706,6 +715,7 @@ var_edit_parse(
 #ifdef OPT_EXPAND_ESCAPE_PATH_EXT
 	    case 'C': edits->escapepath = 1; continue;
 #endif
+		case 'Z': edits->targetsetting = 1; fp = &edits->targetname; goto strval;
 	    case MAGIC_COLON: continue;
 	    default: return; /* should complain, but so what... */
 	    }
