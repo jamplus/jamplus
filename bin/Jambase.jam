@@ -97,8 +97,7 @@ JAM_MODULES_PATH ?= @($(JAM_PROCESS_PATH)/../modules:R=) ;
 rule UseModule MODULE_NAME : OPTIONS
 {
 	local include_marker = included_module_$(MODULE_NAME:J=_) ;
-	if $($(include_marker))
-	{
+	if $($(include_marker))  &&  ! ( force in $(OPTIONS) ) {
 		return ;
 	}
 	$(include_marker) = true ;
