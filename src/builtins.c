@@ -124,6 +124,7 @@ LIST* builtin_listsort( PARSE *parse, LOL *args, int *jmp );
 
 LIST *builtin_dependslist( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp);
+LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp);
 
 int glob( const char *s, const char *c );
 
@@ -285,6 +286,9 @@ load_builtins()
 
 	bindrule( "QuickSettingsLookup" )->procedure =
 		parse_make( builtin_quicksettingslookup, P0, P0, P0, C0, C0, 0 );
+
+	bindrule( "RuleExists" )->procedure =
+		parse_make( builtin_ruleexists, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -1366,5 +1370,20 @@ LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp)
 	if (settings)
 		return list_copy(L0, settings->value);
 
+	return L0;
+}
+
+
+LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp)
+{
+	RULE* r;
+	LIST* symbol;
+
+	symbol = lol_get(args, 0);
+	if (!symbol)
+		return L0;
+
+	if ( ruleexists( symbol->string ) )
+		return list_new( L0, "true", 0 );
 	return L0;
 }

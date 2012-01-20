@@ -80,6 +80,22 @@ bindrule( const char *rulename )
 }
 
 /*
+ * ruleexists() - return whether the rule exists or not
+ */
+
+int ruleexists( const char *rulename )
+{
+	RULE rule, *r = &rule;
+
+	if( !rulehash )
+	    rulehash = hashinit( sizeof( RULE ), "rules" );
+
+	r->name = rulename;
+
+	return hashcheck( rulehash, (HASHDATA **)&r );
+}
+
+/*
  * bindtarget() - return pointer to TARGET, creating it if necessary
  */
 
