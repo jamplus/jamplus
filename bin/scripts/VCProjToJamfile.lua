@@ -1,5 +1,6 @@
 require 'getopt'
 require 'xmlize'
+require 'ex'
 
 local options = Options {}
 local nonOpts, opts, errors = getopt.getOpt(arg, options)
