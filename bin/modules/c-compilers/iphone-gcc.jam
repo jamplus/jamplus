@@ -20,6 +20,12 @@ rule C.LinkFrameworks TARGET : FRAMEWORKS {
 }
 
 
+rule C.WeakLinkFrameworks TARGET : FRAMEWORKS {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	C.LinkFlags $(TARGET) : "-weak_framework $(FRAMEWORKS)" ;
+}
+
+
 rule C.MacOSX_SDK TARGET : SDK_PLATFORM : SDK_VERSION : SDK_VERSION_MIN {
 	if ! ( $(PLATFORM) in macosx32 macosx64 iphonesimulator iphone ipadsimulator ipad ) { return ; }
 
