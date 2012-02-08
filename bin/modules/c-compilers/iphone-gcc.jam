@@ -823,7 +823,7 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL {
 			WriteFile $(manifest.plist) ;
 			UseCommandLine $(manifest.plist) : $(contents) ;
 
-			local index.html = @(index.html:G=$(C.ACTIVE_TOOLCHAIN_TARGET):archive) ;
+			local index.html = @(index.html:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):archive) ;
 			MakeLocate $(index.html) : $(OUTPUT_PATH) ;
 			Depends $(archiveTarget) : $(index.html) ;
 			Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(index.html) ;
@@ -834,7 +834,7 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL {
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-<title>Pathstorm</title>
+<title>$(CFBundleDisplayName)</title>
 <style type="text/css">
 body {background:#fff;margin:0;padding:0;font-family:arial,helvetica,sans-serif;text-align:center;padding:10px;color:#333;font-size:16px;}
 #container {width:300px;margin:0 auto;}
@@ -849,7 +849,7 @@ p {font-size:13px;}
 
 <div id="container">
 
-<h1>iOS 4.0 Users:</h1>
+<h1>iOS 4.0 and 5.0 Users:</h1>
 
 <div class="link"><a href="itms-services://?action=download-manifest&url=$(URL)/manifest.plist">Tap Here to Install<br />$(CFBundleDisplayName)<br />On Your Device</a></div>
 
