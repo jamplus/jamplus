@@ -696,6 +696,12 @@ rule XIB PARENT : SOURCES  {
 	PARENT = [ ActiveTarget $(PARENT) ] ;
 	
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	if ! $(bundlePath)
+	{
+		Echo *** XIB $(PARENT) \: $(SOURCES) ;
+		Exit *** Bundle path not setup for target $(TARGET) ;
+	}
+
 
 	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
