@@ -600,7 +600,7 @@ rule C.gcc._ApplicationFromObjects_PostBuild {
 		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local isysroot $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
 		local pkginfo = @(PkgInfo:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
