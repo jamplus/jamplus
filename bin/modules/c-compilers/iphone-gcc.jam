@@ -723,6 +723,45 @@ actions CompileXIB
 }
 
 
+rule C.Provision TARGET : PROFILE_ID {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	# Find profile from GUID.
+	local _profileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
+
+	# Open each profile and search for : "<string>$(PROFILE_ID)</string>"
+	local _mobileProvisions = [ Glob $(_profileDirectory) : *.mobileprovision ] ;
+
+	local _matchingProvision ;
+
+	local _mobileProvision ;
+	for _mobileProvision in $(_mobileProvisions) {
+		local _cmd = "cat \"$(_mobileProvision)\" | grep \"<string>$(PROFILE_ID)</string>\"" ;
+		local result = [ Shell $(_cmd) ] ;
+		if $(result) != "" {
+			_matchingProvision = $(_mobileProvision) ;
+			break ;
+		}
+	}
+
+	if ! $(_matchingProvision) {
+		Exit *** No mobile provisions found that match PROFILE_ID \: $(PROFILE_ID) ;
+	}
+
+	# Get bundle path.
+	local _bundlePath ;
+	on $(C.ACTIVE_TOOLCHAIN_TARGET) _bundlePath = $(BUNDLE_PATH) ;
+
+	if ! $(_bundlePath) {
+		Echo *** C.Provision $(TARGET) \: $(PROFILE_ID) ;
+		Exit *** Bundle path not setup for target $(TARGET) ;
+	}
+
+	# Copy provision into the bundle and name it embedded.mobileprovision
+	CopyFile $(TARGET) : $(_bundlePath)/embedded.mobileprovision : $(_matchingProvision) ;
+}
+
+
 actions C._CodeSign
 {
 	/usr/bin/codesign --force --sign "$(PROVISIONING_PROFILE)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
