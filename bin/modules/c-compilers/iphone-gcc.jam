@@ -530,6 +530,19 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 		case uidevicefamily :		C._BundleInfoArray UIDeviceFamily : $(VALUE) ;
 		case uiprerenderedicon :	C._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
 		case uistatusbarhidden :	C._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
+		case uiinterfaceorientation :	
+			if $(VALUE) = portrait {
+				C._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationPortrait ;
+			}
+			if $(VALUE) = portraitupsidedown {
+				C._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationPortraitUpsideDown ;
+			}
+			if $(VALUE) = landscapeleft {
+				C._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationLandscapeLeft ;
+			}
+			if $(VALUE) = landscaperight {
+				C._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationLandscapeRight ;
+			}
 		case uisupportedinterfaceorientations :
 			local values = ;
 			if portrait in $(VALUE) {
