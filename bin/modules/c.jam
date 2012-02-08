@@ -587,6 +587,8 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 	local outputPath = [ C._retrieveOutputPath ] ;
 	MakeLocate $(_linkTargets) : $(outputPath) ;
 
+	LINK_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
+
 	Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
 	NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
 	Always clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
@@ -638,8 +640,6 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 
 	UseFileCache $(_linkTargets) : code ;
 	$(linkRule) $(_linkTargets) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
-
-	LINK_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
 
 	if [ RuleExists C.$(C.COMPILER_SUITE)._ApplicationFromObjects_PostBuild ] {
 		C.$(C.COMPILER_SUITE)._ApplicationFromObjects_PostBuild ;
