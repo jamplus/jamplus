@@ -1,4 +1,0 @@
-C.Flags CC	: * : -g -O3 : releaseltcg : ipadsimulator ;
-C.Flags C++	: *	: -g -O3 : releaseltcg : ipadsimulator ;
-C.Flags M	: *	: -g -O3 : releaseltcg : ipadsimulator ;
-C.Flags MM	: *	: -g -O3 : releaseltcg : ipadsimulator ;

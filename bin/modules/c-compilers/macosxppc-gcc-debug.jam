@@ -1,5 +1,0 @@
-C.Flags CC	: * : -g -O0 -arch ppc : debug : macosxppc ;
-C.Flags C++	: *	: -g -O0 -arch ppc : debug : macosxppc ;
-C.Flags M	: *	: -g -O0 -arch ppc : debug : macosxppc ;
-C.Flags MM	: *	: -g -O0 -arch ppc : debug : macosxppc ;
-C.LinkFlags * : -arch ppc : debug : macosxppc ;

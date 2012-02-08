@@ -1,6 +1,0 @@
-C.Flags CC	: * : -g -O3 -fomit-frame-pointer -fstrength-reduce -arch x86_64 : releaseltcg : macosx64 ;
-C.Flags C++	: *	: -g -O3 -fomit-frame-pointer -fstrength-reduce -arch x86_64 : releaseltcg : macosx64 ;
-C.Flags M	: *	: -g -O3 -fomit-frame-pointer -fstrength-reduce -arch x86_64 : releaseltcg : macosx64 ;
-C.Flags MM	: *	: -g -O3 -fomit-frame-pointer -fstrength-reduce -arch x86_64 : releaseltcg : macosx64 ;
-C.LinkFlags * : -arch x86_64 : releaseltcg : macosx64 ;
-
