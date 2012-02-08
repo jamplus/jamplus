@@ -505,6 +505,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 	switch $(TYPE:L) {
 		case info :					C._BundleInfoString CFBundleGetInfoString : $(VALUE) ;
 		case iconfile :				C._BundleInfoString CFBundleIconFile : $(VALUE) ;
+		case iconfiles :			C._BundleInfoArray CFBundleIconFiles : $(VALUE) ;
 		case longversion :			C._BundleInfoString CFBundleLongVersionString : $(VALUE) ;
 		case bundlename :
 			C._BundleInfoString CFBundleName : $(VALUE) ;
