@@ -571,6 +571,7 @@ rule C.GenerateDSYMFile TARGET {
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local dsymBundlePath = $(bundlePath).dSYM ;
 	local _t.dsym = $(_t).DSYM ;
+	DSYM_NAME on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_t.dsym) ;
 	BINDING on $(_t.dsym) = $(BINDING:Z=$(_t)) ;
 	OUTPUT_PATH on $(_t.dsym) = $(dsymBundlePath) ;
 	MakeLocate $(_t.dsym) : $(dsymBundlePath)/Contents/Resources/DWARF ;
@@ -724,6 +725,8 @@ actions CompileXIB
 actions C._CodeSign
 {
 	/usr/bin/codesign --force --sign "$(PROVISIONING_PROFILE)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
+	touch $(1:C)
+	touch $(DSYM_NAME:CT)
 }
 
 
@@ -748,7 +751,8 @@ rule C.CodeSign TARGET : PROVISIONING_PROFILE {
 		ENTITLEMENTS on $(codeResources) = $(entitlements) ;
 		PROVISIONING_PROFILE on $(codeResources) = $(PROVISIONING_PROFILE) ;
 
-		local dependsList = [ DependsList $(bundleTarget) ] $(linkTarget) $(entitlements) ;
+		local dependsList = [ DependsList $(bundleTarget) ] $(linkTarget) ;
+		DSYM_NAME on $(codeResources) = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		C._CodeSign $(codeResources) : $(dependsList) ; 
 
 		UseCommandLine $(codeResources) : $(dependsList) ;
