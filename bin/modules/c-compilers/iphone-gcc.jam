@@ -603,6 +603,11 @@ rule C.gcc._ApplicationFromObjects_PostBuild {
 		local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
+		# Get task allow value - trying target first, if not set falling back to configuration, if not set defaulting to true.
+		local getTaskAllowValue = $(GET_TASK_ALLOW:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		getTaskAllowValue ?= $(GET_TASK_ALLOW:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+		getTaskAllowValue ?= true ;
+
 		local pkginfo = @(PkgInfo:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		MakeLocate $(pkginfo) : $(bundlePath) ;
 		local contents = APPL???? ;
@@ -647,7 +652,7 @@ rule C.gcc._ApplicationFromObjects_PostBuild {
 			MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destEntitlementsPlist) ;
 			Depends $(bundleTarget) : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
-			local getTaskAllow = "<key>get-task-allow<\\/key><true\\/>" ;
+			local getTaskAllow = "<key>get-task-allow<\\/key><$(getTaskAllowValue)\\/>" ;
 			GET_TASK_ALLOW on $(destEntitlementsPlist) = $(getTaskAllow) ;
 			on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) $(getTaskAllow) ;
 			Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
@@ -659,12 +664,25 @@ rule C.gcc._ApplicationFromObjects_PostBuild {
 }
 
 
+rule C.SetTaskAllow TARGET : VALUE {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	# If true/false isn't specific, assume true, as 'setting' could be thought of enabling.
+	VALUE ?= true ;
+
+	# Save value passed, we'll later check both $(TARGET) and C.* so we can have config defaults and support overrides.
+	GET_TASK_ALLOW on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
+}
+
+
 if $(TARGETINFO_LOCATE) {
 
 rule XIB {
 
 }
 
+rule C.SetTaskAllow {
+}
 
 rule C.CodeSign {
 }
