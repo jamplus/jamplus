@@ -528,6 +528,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 		case supportedplatforms :   C._BundleInfoArray CFBundleSupportedPlatforms : $(VALUE) ;
 		case minimumosversion :		C._BundleInfoString MinimumOSVersion : $(VALUE) ;
 		case uidevicefamily :		C._BundleInfoArray UIDeviceFamily : $(VALUE) ;
+		case uiprerenderedicon :	C._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
 		case uistatusbarhidden :	C._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
 		case uisupportedinterfaceorientations :
 			local values = ;
