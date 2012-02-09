@@ -1,9 +1,0 @@
-IncludeModule c-compilers/c-vc-autodetect ;
-if [ C.AutoDetect ] != **empty** {
-	return ;
-}
-
-IncludeModule c-compilers/c-mingw-autodetect ;
-if [ C.AutoDetect ] {
-	return ;
-}
