@@ -1,0 +1,38 @@
+{
+	local SUFOBJ = .o ;
+	SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = .exe ;
+	SUFLIB on $(C.COMPILER_SUITE_SYMBOL) = .a ;
+	SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+	SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a .dll ;
+	SUFOBJ on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+	SUFSHAREDLIB on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+
+	NOARSCAN on $(C.COMPILER_SUITE_SYMBOL) = true ;
+	NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
+
+	C.BUILD_EXTENSIONS on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : CC : .c .s : C.mingw.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : C++ : .cc .cpp .cxx : C.mingw.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : M : .m : C.mingw.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : MM : .mm : C.mingw.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : PCH : .h .pch : C.mingw.PCH : "" .gch ;
+
+	PCHCCFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x c-header ;
+	PCHC++FLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x c++-header ;
+	PCHMFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x objective-c-header ;
+	PCHMMFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x objective-c++-header ;
+
+	#STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = /usr/include ;
+
+	C.Flags * : CC	: -x c ;
+	C.Flags * : C++	: -x c++ ;
+	C.Flags * : M	: -x objective-c ;
+	C.Flags * : MM	: -x objective-c++ ;
+
+    C.AR on $(C.COMPILER_SUITE_SYMBOL)   	= "$(MINGW_ROOT)/bin/ar" ru ;
+    C.CC on $(C.COMPILER_SUITE_SYMBOL)   	= "$(MINGW_ROOT)/bin/gcc" ;
+    C.C++ on $(C.COMPILER_SUITE_SYMBOL)  	= "$(MINGW_ROOT)/bin/g++" ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL) 	= "$(MINGW_ROOT)/bin/gcc" ;
+    C.RANLIB on $(C.COMPILER_SUITE_SYMBOL)  = "$(MINGW_ROOT)/bin/ranlib" ;
+}
+

@@ -1,36 +1,11 @@
-{
-	SUFEXE	?= .exe ;
-	SUFLIB	?= .a ;
-	SUFMODULE ?= .dll ;
-	SUFOBJ	?= .o ;
-	SUFRES	?= .res ;
-	SUFSHAREDLIB ?= .dll ;
-
-	C.Flags CC	: * : -x c ;
-	C.Flags C++	: * : -x c++ ;
-	C.Flags M	: * : -x objective-c ;
-	C.Flags MM	: * : -x objective-c++ ;
-
-	C.Defines * : MINGW ;
-
-	PCHCCFLAGS = -x c-header ;
-	PCHC++FLAGS = -x c++-header ;
-	PCHMFLAGS = -x objective-c-header ;
-	PCHMMFLAGS = -x objective-c++-header ;
-
-	NOARSCAN = true ;
-	NOARUPDATE = true ;
-}
-
 if ! $(TARGETINFO_LOCATE) {
 
-rule C.FDefines { return -D$(<) ; }
-rule C.FIncludes { return -I$(<) ; }
-rule C.FLibraryPaths { return -L$(<) ; }
+rule C.mingw.FDefines { return -D$(<) ; }
+rule C.mingw.FIncludes { return -I$(<) ; }
+rule C.mingw.FLibraryPaths { return -L$(<) ; }
 
 
-rule C._LinkPrebuiltLibraries
-{
+rule C.mingw._LinkPrebuiltLibraries {
 	local lib ;
 	for lib in $(gristedLibraries) {
 		if ! $(lib:D) {
@@ -42,81 +17,68 @@ rule C._LinkPrebuiltLibraries
 }
 
 
-actions updated together piecemeal C.Archive
-{
+actions updated together piecemeal C.mingw.Archive {
+    PATH=$(MINGW_ROOT)/bin;%PATH%
 	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
 }
 
-actions C.Link
-{
-	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:T)
+actions C.mingw.Link {
+    PATH=$(MINGW_ROOT)/bin;%PATH%
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:TC)
 }
 
-actions together C.Ranlib
-{
+actions together C.mingw.Ranlib {
+    PATH=$(MINGW_ROOT)/bin;%PATH%
 	"$(C.RANLIB)" $(<:C)
 }
 
-#
-# NOARUPDATE - can't update an archive
-#
-
-if $(NOARUPDATE)
-{
-	actions C.Archive
-	{
-	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
-	}
+actions C.mingw.Archive {
+    PATH=$(MINGW_ROOT)/bin;%PATH%
+    "$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
 }
 
-actions updated response C.CC
-{
+actions updated response C.mingw.CC {
+    PATH=$(MINGW_ROOT)/bin;%PATH%
 	"$(C.CC)" -c $(MFLAGS) $(>:C)
 }
 
-actions updated response C.C++
-{
+actions updated response C.mingw.C++ {
+    PATH=$(MINGW_ROOT)/bin;%PATH%
 	"$(C.C++)" -c $(MFLAGS) $(>:C)
 }
 
-actions updated response C.PCH
-{
+actions updated response C.mingw.PCH {
+    PATH=$(MINGW_ROOT)/bin;%PATH%
 	"$(C.C++)" -c $(MFLAGS) $(>:C)
 }
 
 
-rule C._C++Exceptions
-{
-	FLAGS_TO_REMOVE.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += -fno-exceptions ;
+rule C.mingw._C++Exceptions {
+	FLAGS_TO_REMOVE on $(C.ACTIVE_TOOLCHAIN_TARGET) += -fno-exceptions -fexceptions ;
 
-	if ! $(TYPE)  ||  $(TYPE) = false
-	{
-		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) -= -fno-exceptions ;
-	}
-	else if $(TYPE) = true
-	{
-		FLAGS_TO_ADD.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += -fexceptions ;
+	if ! $(TYPE)  ||  $(TYPE) = false {
+		FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) += -fno-exceptions ;
+ 		FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) -= -fexceptions ;
+	} else if $(TYPE) = true {
+		FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) += -fexceptions ;
+		FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) -= -fno-exceptions ;
 	}
 }
 
 
-rule C._RuntimeTypeHelper
-{
-	if ! $(TYPE)  ||  $(TYPE) = dynamic
-	{
-	}
-	else if $(TYPE) = static
-	{
+rule C.mingw._RuntimeTypeHelper {
+	if ! $(TYPE)  ||  $(TYPE) = dynamic {
+	} else if $(TYPE) = static {
 	}
 }
 
-rule C._MultiCppCompile_SetupFlags
-{
+
+rule C.mingw._MultiCppCompile_SetupFlags {
 	if $(_pch[1])  &&  ! $(_nopch) {
 		_flags += -Winvalid-pch ;
 
 		local md5 = [ MD5 $(_flags) ] ;
-		local _pchName = @($(_pch[3]:LBS):G=$(grist)-$(md5)) ;
+		local _pchName = @($(_pch[3]:LBS):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)-$(md5)) ;
 		BINDING on $(_pchName) = $(_pch[3]) ;
 		local _pchFilename = $(_pchName).gch ;
 
@@ -130,7 +92,7 @@ rule C._MultiCppCompile_SetupFlags
 
 			newsrcs += $(_pchName) ;
 
-			PCHFLAGS.$(PLATFORM).$(CONFIG) on $(_pchFilename) += $($($(pchBUILD_EXT).PCHFLAGS)) ;
+			PCHFLAGS on $(_pchFilename) += $($($(pchBUILD_EXT).PCHFLAGS)) ;
 			MFLAGS on $(_pchName) = $($(pchBUILD_EXT).RULE) $($(pchBUILD_EXT).SUFOBJ) $($(pchBUILD_EXT).ADD_TO_LINK) $(_flags[5-]) $($($(BUILD_EXT).PCHFLAGS)) -o \"$(_pchFilename:T)\" ;
 
 			Depends $(_pchFilename) : $(_pchName) ;
@@ -139,7 +101,7 @@ rule C._MultiCppCompile_SetupFlags
 			# source needs to be scanned for header dependencies
 			HDRRULE on $(_pchName) = C.HdrRule ;
 			HDRSCAN on $(_pchName) = $(C.HDRPATTERN) ;
-			HDRGRIST on $(_pchName) = $(grist) ;
+			HDRGRIST on $(_pchName) = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST) ;
 			HDRSEARCH on $(_pchName) = $(_hdrs) ;
 		}
 
@@ -170,20 +132,17 @@ rule C._MultiCppCompile_SetupFlags
 	}
 }
 
-rule C._SharedLibraryFromObjects_ExportLib
-{
-#			BINDING on $(_tlib) = [ _retrieveOutputName $(TARGET) : SUFLIB ] ;
-	BINDING on $(_tlib) = $(_t) ;
+rule C.mingw._SharedLibraryFromObjects_ExportLib {
+	BINDING on $(_tlib) = [ C._retrieveOutputName : $(_t:S) ] ;
 	MakeLocate $(_tlib) : $(outputPath) ;
-	Depends $(TARGET) : $(_tlib) ;
-	Depends $(_tlib) : $(_t) ;
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_tlib) : $(_t) ;
 	NotFile $(_tlib) ;		# Turn this off for export libraries.
 	_linkTargets += $(_tlib) ;
 
 #			LinkFlags $(TARGET) : -Wl,--out-implib,$(_tlib:T) ;
 }
 
-rule C._SharedLibraryFromObjects_LinkFlags
+rule C.mingw._SharedLibraryFromObjects_LinkFlags
 {
 	if module in $(OPTIONS) {
 		linkFlags += -shared -fPIC ;
@@ -193,13 +152,4 @@ rule C._SharedLibraryFromObjects_LinkFlags
 }
 
 } # TARGETINFO_LOCATE
-
-C.BUILD_EXTENSIONS = $(SUFOBJ) .res ;
-C.AddBuildExtensions CC : .c .s : C.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
-C.AddBuildExtensions C++ : .cc .cpp .cxx : C.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
-C.AddBuildExtensions M : .m : C.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
-C.AddBuildExtensions MM : .mm : C.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
-C.AddBuildExtensions PCH : .h .pch : C.PCH : "" .gch ;
-
-
 

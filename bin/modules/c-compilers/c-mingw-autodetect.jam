@@ -21,13 +21,14 @@ rule C.AutoDetect {
 		return ;
 	}
 
-	COMPILER.$(PLATFORM) = mingw ;
+    C.COMPILER = mingw ;
 
-	UseModule c-compilers/c-mingw ;
-	if $(PLATFORM) != *  &&  $(CONFIG) != * {
-		UseModule c-compilers/$(PLATFORM)-mingw ;
-		UseModule c-compilers/$(PLATFORM)-mingw-$(CONFIG) ;
-	}
+	C.COMPILER_SUITE = mingw ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
 
-	return $(COMPILER.$(PLATFORM)) ;
+	IncludeModule c-compilers/c-mingw ;
+
+	return $(C.COMPILER) ;
 }
+
+

@@ -1,0 +1,15 @@
+if $(C.COMPILER) {
+    IncludeModule c-compilers/c-$(C.COMPILER)-autodetect ;
+    C.AutoDetect ;
+    C.ToolchainHelper $(C.COMPILER)-$(C.PLATFORM)-$(C.CONFIG) ;
+} else {
+    IncludeModule c-compilers/c-vc-autodetect ;
+    if [ C.AutoDetect ] {
+        C.ToolchainHelper vc-$(C.PLATFORM)-$(C.CONFIG) ;
+    } else {
+        IncludeModule c-compilers/c-mingw-autodetect ;
+        C.AutoDetect ;
+        C.ToolchainHelper mingw-$(C.PLATFORM)-$(C.CONFIG) ;
+    }
+}
+

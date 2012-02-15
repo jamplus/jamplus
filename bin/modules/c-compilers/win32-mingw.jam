@@ -1,5 +1,0 @@
-C.AR		?= "$(MINGW_ROOT)/bin/ar" ru ;
-C.CC		?= "$(MINGW_ROOT)/bin/gcc" ;
-C.C++		?= "$(MINGW_ROOT)/bin/g++" ;
-C.LINK		?= "$(MINGW_ROOT)/bin/gcc" ;
-C.RANLIB	?= "$(MINGW_ROOT)/bin/ranlib" ;

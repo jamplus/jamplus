@@ -1,0 +1,6 @@
+C.ToolchainHelper mingw ;
+
+C.Flags * : CC	: -g -O2 ;
+C.Flags * : C++	: -g -O2 ;
+C.Flags * : M	: -g -O2 ;
+C.Flags * : MM	: -g -O2 ;
