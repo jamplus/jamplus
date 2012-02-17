@@ -122,8 +122,8 @@ rule C.gcc._SharedLibraryFromObjects_LinkFlags {
 		linkFlags += -bundle -undefined dynamic_lookup -fPIC ;
 	} else {
 		local installName =
-			$(INSTALL_NAME_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)
-			$(INSTALL_NAME_PATH:Z=$(C.ACTIVE_TOOLCHAIN_*)
+			$(INSTALL_NAME_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+			$(INSTALL_NAME_PATH:Z=$(C.ACTIVE_TOOLCHAIN_*))
 		;
 		if ! $(installName) {
 			installName = $(_t:TD) ;
