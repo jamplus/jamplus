@@ -1,13 +1,17 @@
-rule C.AutoDetect
-{
-	if $(COMPILER.$(PLATFORM))  &&  $(COMPILER.$(PLATFORM)) != xbox360 {
-		return ;
-	}
+IncludeModule c-compilers/c-vc-autodetect ;
 
+rule C.AutoDetect {
 	XEDK = $(XEDK:J=" ") ;
 
+	local MSVCNT ;
+	local MSVCNT_BIN_PATH ;
+	local MSVCBIN ;
+	local MSSDK ;
+	local MSSDK_STDHDRS ;
+	local MSSDK_LINKDIRECTORIES ;
+
 	# Do we need to attempt to detect the compiler?
-	if ! $(COMPILER.$(PLATFORM))  ||  ! $(MSVCNT)
+	if ! $(COMPILER)  ||  ! $(MSVCNT)
 	{
 		MSVCNT = $(XEDK) ;
 		if ! $(MSVCNT) {
@@ -15,18 +19,26 @@ rule C.AutoDetect
 		}
 	}
 
-	COMPILER.$(PLATFORM) = xbox360 ;
+	C.COMPILER_SUITE = vc ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
 
 	MSSDK = $(MSVCNT) ;
-	MSSDK ?= $(MSVCNT) ;
 	MSSDK_STDHDRS = "$(MSVCNT)/include/xbox" ;
 	MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/xbox" ;
 
-	IncludeModule c-compilers/c-vc ;
-	if $(PLATFORM) != *  &&  $(CONFIG) != * {
-		IncludeModule c-compilers/$(PLATFORM)-vc ;
-		IncludeModule c-compilers/$(PLATFORM)-$(CONFIG)-vc ;
-	}
+	FindVisualStudioHelper xbox360 ;
 
-	return $(COMPILER.$(PLATFORM)) ;
+	COMPILER = xbox360 ;
+
+	IncludeModule c-compilers/c-vc ;
+
+    {
+        MSVC_SUBSYSTEM_WINDOWS = ;
+        MSVC_SUBSYSTEM_CONSOLE = ;
+    }
+
+	return $(COMPILER) ;
 }
+
+C.AutoDetect ;
+

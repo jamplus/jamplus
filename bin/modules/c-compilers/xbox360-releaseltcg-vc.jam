@@ -1,8 +1,0 @@
-C.CFlags *		: /O2 /Oi /EHsc /Gy /MT /W3 /Z7 /GL : releaseltcg : xbox360 ;
-C.C++Flags * 	: /O2 /Oi /EHsc /Gy /MT /W3 /Z7 /GL : releaseltcg : xbox360 ;
-C.LibFlags *	: /LTCG : releaseltcg : win32 ;
-C.LinkFlags *	: /INCREMENTAL:NO /DEBUG /OPT:REF /OPT:ICF /LTCG : releaseltcg : xbox360 ;
-
-C.Defines * : _XBOX : releaseltcg : xbox360 ;
-
-VSCONFIGMAP.releaseltcg = "Release LTCG" ;

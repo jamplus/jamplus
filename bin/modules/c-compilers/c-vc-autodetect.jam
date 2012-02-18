@@ -8,13 +8,6 @@ vs_versions.7.0 = vs2002 ;
 vs_versions.6.0 = vc6 ;
 
 rule FindVisualStudioHelper VERSION {
-	local MSVCNT ;
-	local MSVCNT_BIN_PATH ;
-	local MSVCBIN ;
-	local MSSDK ;
-	local MSSDK_STDHDRS ;
-	local MSSDK_LINKDIRECTORIES ;
-
 	local compiler ;
 
 	switch $(VERSION) {
@@ -105,7 +98,7 @@ rule FindVisualStudioHelper VERSION {
 	NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
 
 	if $(C.PLATFORM) != *  &&  $(CONFIG) != * {
-		IncludeModule c-compilers/$(PLATFORM)-vc ;
+		IncludeModule c-compilers/$(C.PLATFORM)-vc ;
 	}
 
 	C.$(C.PLATFORM).vc.AutoDetect $(compiler) ;
@@ -131,6 +124,13 @@ rule FindVisualStudioHelper VERSION {
 
 
 rule FindVisualStudio VERSION {
+	local MSVCNT ;
+	local MSVCNT_BIN_PATH ;
+	local MSVCBIN ;
+	local MSSDK ;
+	local MSSDK_STDHDRS ;
+	local MSSDK_LINKDIRECTORIES ;
+
 	local compiler = $(vs_versions.$(VERSION)) ;
 	local C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
 	local msvcnt = $(MSVCNT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
@@ -174,9 +174,6 @@ rule C.AutoDetect THE_COMPILER {
 	}
 
 	IncludeModule c-compilers/c-vc ;
-#	if $(PLATFORM) != *  &&  $(CONFIG) != * {
-#		IncludeModule c-compilers/$(PLATFORM)-vc-$(CONFIG) ;
-#	}
 
 	C.COMPILER_SUITE = vc ;
 	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;

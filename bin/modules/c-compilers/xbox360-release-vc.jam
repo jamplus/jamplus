@@ -1,8 +1,0 @@
-C.CFlags * : /O2 /Oi /EHsc /Gy /MT /W3 /Z7 : release : xbox360 ;
-C.C++Flags * : /O2 /Oi /EHsc /Gy /MD /W3 /Z7 : release : xbox360 ;
-C.LibFlags * : : release : xbox360 ;
-C.LinkFlags * : /INCREMENTAL:NO /DEBUG /OPT:REF /OPT:ICF : release : xbox360 ;
-
-C.Defines * : _XBOX : release : xbox360 ;
-
-VSCONFIGMAP.release = Release ;
