@@ -13,6 +13,7 @@ if ! $(wxWidgets_ROOT)
 			$(registryRootPath:/J=$(SPACE))
 			c:/
 			d:/
+			e:/
 			"$(ProgramFiles:/J=$(SPACE))/"
 		;
 		local PATH_SUFFIXES =
