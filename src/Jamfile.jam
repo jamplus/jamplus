@@ -358,8 +358,7 @@ if $(LUA_BIN)
 			LUA_SRCS +=
 				lua.debug.exe
 				lua5.1.debug.dll
-				lua51.debug.dll
-				luaplus51-1202_debug.dll
+				lua51_debug.dll
 				modules/ex.debug.dll
 				modules/filefind.debug.dll
 				modules/lua51-lanes.debug.dll
@@ -376,7 +375,6 @@ if $(LUA_BIN)
 				lua.exe
 				lua5.1.dll
 				lua51.dll
-				luaplus51-1202.dll
 				modules/ex.dll
 				modules/filefind.dll
 				modules/lua51-lanes.dll
