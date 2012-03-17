@@ -54,6 +54,7 @@ void (*ls_lua_close) (ls_lua_State *L);
 int   (*ls_lua_gettop) (ls_lua_State *L);
 void  (*ls_lua_settop) (ls_lua_State *L, int idx);
 void (*ls_lua_pushvalue) (ls_lua_State *L, int idx);
+void (*ls_lua_remove) (ls_lua_State *L, int idx);
 
 #define ls_lua_isfunction(L,n)	(ls_lua_type(L, (n)) == LUA_TFUNCTION)
 #define ls_lua_istable(L,n)	(ls_lua_type(L, (n)) == LUA_TTABLE)
@@ -73,6 +74,7 @@ void  (*ls_lua_pushnil) (ls_lua_State *L);
 void  (*ls_lua_pushnumber) (ls_lua_State *L, ls_lua_Number n);
 void  (*ls_lua_pushinteger) (ls_lua_State *L, ls_lua_Integer n);
 void  (*ls_lua_pushstring) (ls_lua_State *L, const char *s);
+void  (*ls_lua_pushlstring) (ls_lua_State *L, const char *s, size_t l);
 void  (*ls_lua_pushcclosure) (ls_lua_State *L, ls_lua_CFunction fn, int n);
 void  (*ls_lua_pushboolean) (ls_lua_State *L, int b);
 
@@ -300,6 +302,10 @@ static int pmain (ls_lua_State *L)
     top = ls_lua_gettop(L);
     ret = ls_luaL_loadstring(L, "require 'lanes'");
     ls_lua_callhelper(top, ret);
+
+	ls_lua_newtable(L);
+	ls_lua_setfield(L, LUA_GLOBALSINDEX, "LineFilters");
+
     return 0;
 }
 
@@ -371,6 +377,7 @@ void ls_lua_init()
     ls_lua_gettop = (int (*)(ls_lua_State *))ls_lua_loadsymbol(handle, "lua_gettop");
     ls_lua_settop = (void (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_settop");
     ls_lua_pushvalue = (void (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_pushvalue");
+    ls_lua_remove = (void (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_remove");
 
     ls_lua_isnumber = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isnumber");
     ls_lua_isstring = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isstring");
@@ -385,6 +392,7 @@ void ls_lua_init()
     ls_lua_pushnumber = (void (*) (ls_lua_State *, ls_lua_Number))ls_lua_loadsymbol(handle, "lua_pushnumber");
     ls_lua_pushinteger = (void (*) (ls_lua_State *, ls_lua_Integer))ls_lua_loadsymbol(handle, "lua_pushinteger");
     ls_lua_pushstring = (void (*) (ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "lua_pushstring");
+    ls_lua_pushlstring = (void (*) (ls_lua_State *, const char *, size_t))ls_lua_loadsymbol(handle, "lua_pushlstring");
     ls_lua_pushcclosure = (void (*) (ls_lua_State *, ls_lua_CFunction, int))ls_lua_loadsymbol(handle, "lua_pushcclosure");
     ls_lua_pushboolean = (void (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_pushboolean");
 
@@ -567,6 +575,65 @@ void luahelper_taskcancel(int taskid)
 
     ls_lua_pop(L, 1);
 }
+
+
+static int linefilter_stack_position = -1;
+
+int luahelper_push_linefilter(const char* actionName) {
+    ls_lua_init();
+
+    ls_lua_getfield(L, LUA_GLOBALSINDEX, "LineFilters");	/* LineFilters */
+    ls_lua_getfield(L, -1, actionName);						/* LineFilters function */
+	if (!ls_lua_isfunction(L, -1)) {
+		ls_lua_pop(L, 2);
+		return 0;
+	}
+	ls_lua_remove(L, -2);
+	linefilter_stack_position = ls_lua_gettop(L);
+	return 1;
+}
+
+
+void luahelper_pop_linefilter() {
+	if (linefilter_stack_position == -1)
+		return;
+
+	ls_lua_remove(L, linefilter_stack_position);
+	linefilter_stack_position = -1;
+}
+
+
+const char* luahelper_linefilter(const char* line, size_t lineSize) {
+	int ret;
+	int top;
+	char* out;
+
+	if (linefilter_stack_position == -1) {
+		fprintf(stderr, "jam: Line filter access not enabled.\n");
+		exit(1);
+	}
+
+	ls_lua_init();
+
+	top = ls_lua_gettop(L);
+	ls_lua_pushvalue(L, linefilter_stack_position);
+	ls_lua_pushlstring(L, line, lineSize);					/* function line */
+	ret = ls_lua_pcall(L, 1, 1, 0);
+	if (ret != 0)
+	{
+		if (ls_lua_isstring(L, -1))
+			fprintf(stderr, "jam: Error running line filter.\n%s\n", ls_lua_tostring(L, -1));
+		ls_lua_settop(L, top);
+		return NULL;
+	}
+
+	out = malloc(ls_lua_objlen(L, -1) + 1);
+	strcpy(out, ls_lua_tostring(L, -1));
+	ls_lua_settop(L, top);
+
+	return out;
+}
+
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 

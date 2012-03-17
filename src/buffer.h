@@ -21,6 +21,7 @@ void buffer_initwithalloc(BUFFER* buff, buffer_Alloc alloc, void* userData);
 
 #define buffer_ptr(buff)	((buff)->buffer)
 #define buffer_size(buff)	((buff)->buffsize)
+#define buffer_sizeptr(buff)	((buff)->buffer + (buff)->buffsize)
 #define buffer_pos(buff)	((buff)->pos)
 #define buffer_posptr(buff)	((buff)->buffer + (buff)->pos)
 

@@ -24,6 +24,10 @@ void luahelper_taskcancel(int taskid);
 int luahelper_md5callback(const char *filename, MD5SUM sum, const char* callback);
 #endif
 
+int luahelper_push_linefilter(const char* actionName);
+void luahelper_pop_linefilter();
+const char* luahelper_linefilter(const char* line, size_t lineSize);
+
 #ifdef __cplusplus
 }
 #endif

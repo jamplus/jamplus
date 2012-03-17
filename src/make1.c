@@ -789,6 +789,11 @@ make1c( TARGET *t )
  * make1d() - handle command execution completion and call back make1c()
  */
 
+#ifdef OPT_LINE_FILTER_SUPPORT
+int lineBufferInitialized = 0;
+BUFFER lineBuffer;
+#endif /* OPT_LINE_FILTER_SUPPORT */
+
 static void
 make1d(
 #ifdef OPT_SERIAL_OUTPUT_EXT
@@ -876,7 +881,116 @@ make1d(
 	/* Print the output now, if there was any */
 	if( outputname )
 	{
+#ifdef OPT_LINE_FILTER_SUPPORT
 		FILE		*fp;
+		size_t		n = 1;
+
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+		LIST*		useLuaLineFilters;
+
+		useLuaLineFilters = var_get( "USE_LUA_LINE_FILTERS" );
+		if ( useLuaLineFilters )
+		{
+			if ( ( strcmp( useLuaLineFilters->string, "1" ) != 0  &&  strcmp( useLuaLineFilters->string, "true" ) != 0)
+					||  !luahelper_push_linefilter( cmd->rule->name ) )
+			{
+				useLuaLineFilters = NULL;
+			}
+		}
+#endif /* OPT_BUILTIN_LUA_SUPPORT_EXT */
+
+		if ( !lineBufferInitialized )
+		{
+			buffer_init( &lineBuffer );
+			lineBufferInitialized = 1;
+		}
+		buffer_reset( &lineBuffer );
+
+		fp = fopen( outputname, "r" );
+		if ( fp )
+		{
+			while ( n > 0 )
+			{
+				char* startPtr;
+				char* ptr;
+				n = fread( buffer_posptr( &lineBuffer ), sizeof(char), buffer_size( &lineBuffer ) - buffer_pos( &lineBuffer ), fp);
+				buffer_deltapos( &lineBuffer, n );
+				startPtr = ptr = buffer_ptr( &lineBuffer );
+				while ( 1 )
+				{
+					int count;
+					while ( ptr != buffer_posptr( &lineBuffer )  &&  *ptr != '\n' )
+					{
+						++ptr;
+					}
+					count = ptr - startPtr;
+					if ( count == 0 )
+					{
+						buffer_reset( &lineBuffer );
+						break;
+					}
+					if ( *ptr != '\n' )
+					{
+						memcpy( buffer_ptr( &lineBuffer ), startPtr, count );
+						buffer_setpos( &lineBuffer, count );
+						break;
+					}
+					else
+					{
+						++ptr;
+						++count;
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+						if ( useLuaLineFilters )
+						{
+							const char* line = luahelper_linefilter( startPtr, count );
+							if ( line )
+							{
+								fwrite( line, sizeof( char ), strlen( line ), stdout );
+								free( (void*)line );
+							}
+						}
+						else
+#endif /* OPT_BUILTIN_LUA_SUPPORT_EXT */
+						{
+							fwrite( startPtr, sizeof(char), count, stdout );
+						}
+						startPtr = ptr;
+					}
+				}
+				if ( buffer_pos( &lineBuffer ) == buffer_size( &lineBuffer ) )
+				{
+					buffer_openspace( &lineBuffer, buffer_size( &lineBuffer ) + BUFFER_STATIC_SIZE );
+				}
+			}
+			if ( buffer_pos( &lineBuffer ) > 0 )
+			{
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+				if ( useLuaLineFilters )
+				{
+					const char* line = luahelper_linefilter( buffer_ptr( &lineBuffer ), buffer_pos( &lineBuffer ) );
+					if ( line )
+					{
+						fwrite( line, sizeof( char ), strlen( line ), stdout );
+						free( (void*)line );
+					}
+				}
+				else
+#endif /* OPT_BUILTIN_LUA_SUPPORT_EXT */
+				{
+					fwrite( buffer_ptr( &lineBuffer ), sizeof(char), buffer_pos( &lineBuffer ), stdout );
+				}
+			}
+
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+			if ( useLuaLineFilters )
+			{
+				luahelper_pop_linefilter();
+			}
+#endif /* OPT_BUILTIN_LUA_SUPPORT_EXT */
+
+			fclose(fp);
+		}
+#else
 		size_t		n;
 		char		buf[4096];
 
@@ -896,6 +1010,7 @@ make1d(
 			}
 			fclose(fp);
 		}
+#endif /* OPT_LINE_FILTER_SUPPORT */
 	}
 
 	if( status == EXEC_CMD_FAIL && DEBUG_MAKE )
