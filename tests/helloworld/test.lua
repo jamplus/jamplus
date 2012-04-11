@@ -28,8 +28,8 @@ function Test()
 		TestPattern(pattern, RunJam())
 
 		local pass1Directories = {
-			'win32!release/',
-			'win32!release/helloworld/',
+			'win32-release/',
+			'win32-release/helloworld/',
 		}
 
 		local pass1Files =
@@ -37,11 +37,11 @@ function Test()
 			'file.c',
 			'Jamfile.jam',
 			'main.c',
-			'win32!release/helloworld/file.obj',
-			'win32!release/helloworld/helloworld.release.exe',
-			'win32!release/helloworld/helloworld.release.exe.intermediate.manifest',
-			'win32!release/helloworld/helloworld.release.pdb',
-			'win32!release/helloworld/main.obj',
+			'win32-release/helloworld/file.obj',
+			'win32-release/helloworld/helloworld.release.exe',
+			'win32-release/helloworld/helloworld.release.exe.intermediate.manifest',
+			'win32-release/helloworld/helloworld.release.pdb',
+			'win32-release/helloworld/main.obj',
 		}
 
 		TestFiles(pass1Files)
@@ -81,8 +81,8 @@ function Test()
 		TestPattern(pattern, RunJam())
 
 		local pass1Dirs = {
-			'macosx32!release/',
-			'macosx32!release/helloworld/',
+			'macosx32-release/',
+			'macosx32-release/helloworld/',
 		}
 
 		local pass1Files = {
@@ -90,9 +90,9 @@ function Test()
 			'Jamfile.jam',
 			'main.c',
 			'test.lua',
-			'macosx32!release/helloworld/file.o',
-			'macosx32!release/helloworld/helloworld.release',
-			'macosx32!release/helloworld/main.o',
+			'macosx32-release/helloworld/file.o',
+			'macosx32-release/helloworld/helloworld.release',
+			'macosx32-release/helloworld/main.o',
 		}
 
 		TestFiles(pass1Files)

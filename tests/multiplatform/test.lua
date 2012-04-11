@@ -35,8 +35,8 @@ function Test()
 !NEXT!*** updated 6 target(s)...
 ]]
 			pass1Directories = {
-				'win32!release/',
-				'win32!release/platform/',
+				'win32-release/',
+				'win32-release/platform/',
 			}
 
 			pass1Files =
@@ -50,12 +50,12 @@ function Test()
 				'macosx.c',
 				'platform.c',
 				'win32.c',
-				'win32!release/platform/filerelease.obj',
-				'win32!release/platform/platform.obj',
-				'win32!release/platform/platform.release.exe',
-				'win32!release/platform/platform.release.exe.intermediate.manifest',
-				'win32!release/platform/platform.release.pdb',
-				'win32!release/platform/win32.obj',
+				'win32-release/platform/filerelease.obj',
+				'win32-release/platform/platform.obj',
+				'win32-release/platform/platform.release.exe',
+				'win32-release/platform/platform.release.exe.intermediate.manifest',
+				'win32-release/platform/platform.release.pdb',
+				'win32-release/platform/win32.obj',
 			}
 
 		else
@@ -82,8 +82,8 @@ function Test()
 			end
 
 			pass1Directories = {
-				'macosx32!release/',
-				'macosx32!release/platform/',
+				'macosx32-release/',
+				'macosx32-release/platform/',
 			}
 
 			pass1Files = {
@@ -97,14 +97,14 @@ function Test()
 				'platform.c',
 				'test.lua',
 				'win32.c',
-				'macosx32!release/platform/filerelease.o',
-				'macosx32!release/platform/macosx.o',
-				'macosx32!release/platform/platform.o',
-				'macosx32!release/platform/platform.release',
+				'macosx32-release/platform/filerelease.o',
+				'macosx32-release/platform/macosx.o',
+				'macosx32-release/platform/platform.o',
+				'macosx32-release/platform/platform.release',
 			}
 
 			if Platform == 'macosx' then
-				pass1Files[#pass1Files + 1] = 'macosx32!release/platform/macosx.o'
+				pass1Files[#pass1Files + 1] = 'macosx32-release/platform/macosx.o'
 			else
 				pass1Files[#pass1Files + 1] = 'linux.o'
 			end
@@ -125,7 +125,7 @@ Using win32
 This is a Win32 build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, ex.collectlines{'win32!release\\platform\\platform.release.exe'})
+		TestPattern(pattern2, ex.collectlines{'win32-release\\platform\\platform.release.exe'})
 
 		pattern3 = [[
 *** found 19 target(s)...
@@ -137,7 +137,7 @@ Using macosx
 This is a Mac OS X build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, ex.collectlines{'./macosx32!release/platform/platform.release'})
+		TestPattern(pattern2, ex.collectlines{'./macosx32-release/platform/platform.release'})
 
 		pattern3 = [[
 *** found 12 target(s)...

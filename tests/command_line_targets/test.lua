@@ -27,14 +27,14 @@ function Test()
 
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'win32!release/appA/appA.obj',
-			'win32!release/appA/appA.release.exe',
-			'win32!release/appA/appA.release.exe.intermediate.manifest',
-			'win32!release/appA/appA.release.pdb',
-			'win32!release/appB/appB.obj',
-			'win32!release/appB/appB.release.exe',
-			'win32!release/appB/appB.release.exe.intermediate.manifest',
-			'win32!release/appB/appB.release.pdb',
+			'win32-release/appA/appA.obj',
+			'win32-release/appA/appA.release.exe',
+			'win32-release/appA/appA.release.exe.intermediate.manifest',
+			'win32-release/appA/appA.release.pdb',
+			'win32-release/appB/appB.obj',
+			'win32-release/appB/appB.release.exe',
+			'win32-release/appB/appB.release.exe.intermediate.manifest',
+			'win32-release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
 
@@ -64,10 +64,10 @@ Building appA...
 		TestPattern(appAPattern, RunJam{ 'appA' })
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'win32!release/appA/appA.obj',
-			'win32!release/appA/appA.release.exe',
-			'win32!release/appA/appA.release.exe.intermediate.manifest',
-			'win32!release/appA/appA.release.pdb',
+			'win32-release/appA/appA.obj',
+			'win32-release/appA/appA.release.exe',
+			'win32-release/appA/appA.release.exe.intermediate.manifest',
+			'win32-release/appA/appA.release.pdb',
 --			'?vc.pdb'
 		}
 
@@ -83,24 +83,24 @@ Building appB...
 		TestPattern(appBPattern, RunJam{ 'appB' })
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'win32!release/appA/appA.obj',
-			'win32!release/appA/appA.release.exe',
-			'win32!release/appA/appA.release.exe.intermediate.manifest',
-			'win32!release/appA/appA.release.pdb',
-			'win32!release/appB/appB.obj',
-			'win32!release/appB/appB.release.exe',
-			'win32!release/appB/appB.release.exe.intermediate.manifest',
-			'win32!release/appB/appB.release.pdb',
+			'win32-release/appA/appA.obj',
+			'win32-release/appA/appA.release.exe',
+			'win32-release/appA/appA.release.exe.intermediate.manifest',
+			'win32-release/appA/appA.release.pdb',
+			'win32-release/appB/appB.obj',
+			'win32-release/appB/appB.release.exe',
+			'win32-release/appB/appB.release.exe.intermediate.manifest',
+			'win32-release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
 
 		RunJam{ 'clean:appA' }
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'win32!release/appB/appB.obj',
-			'win32!release/appB/appB.release.exe',
-			'win32!release/appB/appB.release.exe.intermediate.manifest',
-			'win32!release/appB/appB.release.pdb',
+			'win32-release/appB/appB.obj',
+			'win32-release/appB/appB.release.exe',
+			'win32-release/appB/appB.release.exe.intermediate.manifest',
+			'win32-release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
 
@@ -130,10 +130,10 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32!release/appA/appA.o',
-			'macosx32!release/appA/appA.release',
-			'macosx32!release/appB/appB.o',
-			'macosx32!release/appB/appB.release',
+			'macosx32-release/appA/appA.o',
+			'macosx32-release/appA/appA.release',
+			'macosx32-release/appB/appB.o',
+			'macosx32-release/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -165,8 +165,8 @@ Building appA...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32!release/appA/appA.o',
-			'macosx32!release/appA/appA.release',
+			'macosx32-release/appA/appA.o',
+			'macosx32-release/appA/appA.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -185,10 +185,10 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32!release/appA/appA.o',
-			'macosx32!release/appA/appA.release',
-			'macosx32!release/appB/appB.o',
-			'macosx32!release/appB/appB.release',
+			'macosx32-release/appA/appA.o',
+			'macosx32-release/appA/appA.release',
+			'macosx32-release/appB/appB.o',
+			'macosx32-release/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -198,8 +198,8 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32!release/appB/appB.o',
-			'macosx32!release/appB/appB.release',
+			'macosx32-release/appB/appB.o',
+			'macosx32-release/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------

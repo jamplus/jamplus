@@ -26,8 +26,8 @@ function Test()
 	
 	if Platform == 'win32' then
 		dirs = {
-			'win32!release/',
-			'win32!release/test/',
+			'win32-release/',
+			'win32-release/test/',
 		}
 
 		noDepCacheFiles =
@@ -37,11 +37,11 @@ function Test()
 			'main.c',
 			'main.h',
 			'test.c',
-			'win32!release/test/main.obj',
-			'win32!release/test/test.obj',
-			'win32!release/test/test.release.exe',
-			'win32!release/test/test.release.exe.intermediate.manifest',
-			'win32!release/test/test.release.pdb',
+			'win32-release/test/main.obj',
+			'win32-release/test/test.obj',
+			'win32-release/test/test.release.exe',
+			'win32-release/test/test.release.exe.intermediate.manifest',
+			'win32-release/test/test.release.pdb',
 		}
 		
 		patternA = [[
@@ -69,8 +69,8 @@ function Test()
 ]]
 	else
 		dirs = {
-			'macosx32!release/',
-			'macosx32!release/test/',
+			'macosx32-release/',
+			'macosx32-release/test/',
 		}
 
 		noDepCacheFiles = {
@@ -80,9 +80,9 @@ function Test()
 			'main.h',
 			'test.c',
 			'test.lua',
-			'macosx32!release/test/main.o',
-			'macosx32!release/test/test.o',
-			'macosx32!release/test/test.release',
+			'macosx32-release/test/main.o',
+			'macosx32-release/test/test.o',
+			'macosx32-release/test/test.release',
 		}
 		
 		patternA = [[
@@ -152,11 +152,11 @@ function Test()
 			'main.c',
 			'main.h',
 			'test.c',
-			'win32!release/test/main.obj',
-			'win32!release/test/test.obj',
-			'win32!release/test/test.release.exe',
-			'win32!release/test/test.release.exe.intermediate.manifest',
-			'win32!release/test/test.release.pdb',
+			'win32-release/test/main.obj',
+			'win32-release/test/test.obj',
+			'win32-release/test/test.release.exe',
+			'win32-release/test/test.release.exe.intermediate.manifest',
+			'win32-release/test/test.release.pdb',
 		}
 		
 		patternA = [[
@@ -204,9 +204,9 @@ function Test()
 			'main.h',
 			'test.c',
 			'test.lua',
-			'macosx32!release/test/main.o',
-			'macosx32!release/test/test.o',
-			'macosx32!release/test/test.release',
+			'macosx32-release/test/main.o',
+			'macosx32-release/test/test.o',
+			'macosx32-release/test/test.release',
 		}
 		
 		patternA = [[

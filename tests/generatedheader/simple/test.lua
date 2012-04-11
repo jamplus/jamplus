@@ -28,8 +28,8 @@ function Test()
 		TestPattern(pattern, RunJam())
 
 		local pass1Dirs = {
-			'win32!release/',
-			'win32!release/test/',
+			'win32-release/',
+			'win32-release/test/',
 		}
 		
 		local pass1Files =
@@ -38,11 +38,11 @@ function Test()
 			'main.c',
 			'test.c',
 			'test.h',
-			'win32!release/test/main.obj',
-			'win32!release/test/test.obj',
-			'win32!release/test/test.release.exe',
-			'win32!release/test/test.release.exe.intermediate.manifest',
-			'win32!release/test/test.release.pdb',
+			'win32-release/test/main.obj',
+			'win32-release/test/test.obj',
+			'win32-release/test/test.release.exe',
+			'win32-release/test/test.release.exe.intermediate.manifest',
+			'win32-release/test/test.release.pdb',
 		}
 
 		TestFiles(pass1Files)
@@ -80,8 +80,8 @@ function Test()
 		TestPattern(pattern, RunJam())
 
 		local pass1Dirs = { 
-			'macosx32!release/',
-			'macosx32!release/test/',
+			'macosx32-release/',
+			'macosx32-release/test/',
 		}
 
 		local pass1Files = { 
@@ -90,9 +90,9 @@ function Test()
 			'test.c',
 			'test.h',
 			'test.lua',
-			'macosx32!release/test/main.o',
-			'macosx32!release/test/test.o',
-			'macosx32!release/test/test.release',
+			'macosx32-release/test/main.o',
+			'macosx32-release/test/test.o',
+			'macosx32-release/test/test.release',
 		}	
 
 		TestFiles(pass1Files)

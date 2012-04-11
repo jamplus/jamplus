@@ -36,10 +36,10 @@ function Test()
 		{
 			'app/',
 			'lib-a/',
-			'app/win32!release/',
-			'app/win32!release/app/',
-			'lib-a/win32!release/',
-			'lib-a/win32!release/lib-a/',
+			'app/win32-release/',
+			'app/win32-release/app/',
+			'lib-a/win32-release/',
+			'lib-a/win32-release/lib-a/',
 		}
 
 		files = {
@@ -47,15 +47,15 @@ function Test()
 			'test.lua',
 			'app/Jamfile.jam',
 			'app/main.c',
-			'app/win32!release/app/app.release.exe',
-			'app/win32!release/app/app.release.exe.intermediate.manifest',
-			'app/win32!release/app/app.release.pdb',
-			'app/win32!release/app/main.obj',
+			'app/win32-release/app/app.release.exe',
+			'app/win32-release/app/app.release.exe.intermediate.manifest',
+			'app/win32-release/app/app.release.pdb',
+			'app/win32-release/app/main.obj',
 			'lib-a/add.c',
 			'lib-a/add.h',
 			'lib-a/Jamfile.jam',
-			'lib-a/win32!release/lib-a/add.obj',
-			'lib-a/win32!release/lib-a/lib-a.release.lib',
+			'lib-a/win32-release/lib-a/add.obj',
+			'lib-a/win32-release/lib-a/lib-a.release.lib',
 		}
 	
 		patternA = [[
@@ -88,10 +88,10 @@ function Test()
 		dirs = {
 			'app/',
 			'lib-a/',
-			'app/macosx32!release/',
-			'app/macosx32!release/app/',
-			'lib-a/macosx32!release/',
-			'lib-a/macosx32!release/lib-a/',
+			'app/macosx32-release/',
+			'app/macosx32-release/app/',
+			'lib-a/macosx32-release/',
+			'lib-a/macosx32-release/lib-a/',
 		}
 
 		files = {
@@ -99,13 +99,13 @@ function Test()
 			'test.lua',
 			'app/Jamfile.jam',
 			'app/main.c',
-			'app/macosx32!release/app/app.release',
-			'app/macosx32!release/app/main.o',
+			'app/macosx32-release/app/app.release',
+			'app/macosx32-release/app/main.o',
 			'lib-a/add.c',
 			'lib-a/add.h',
 			'lib-a/Jamfile.jam',
-			'lib-a/macosx32!release/lib-a/add.o',
-			'lib-a/macosx32!release/lib-a/lib-a.release.a',
+			'lib-a/macosx32-release/lib-a/add.o',
+			'lib-a/macosx32-release/lib-a/lib-a.release.a',
 		}
 
 		patternA = [[

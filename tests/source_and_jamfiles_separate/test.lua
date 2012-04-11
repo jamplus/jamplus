@@ -31,20 +31,20 @@ function Test()
 		{
 			'jam/',
 			'src/',
-			'jam/win32!release/',
-			'jam/win32!release/helloworld/',
+			'jam/win32-release/',
+			'jam/win32-release/helloworld/',
 		}
 	
 		files =
 		{
 			'jam/Jamfile.jam',
-			'jam/win32!release/helloworld/createprecomp.obj',
-			'jam/win32!release/helloworld/file.obj',
-			'jam/win32!release/helloworld/helloworld.release.exe',
-			'jam/win32!release/helloworld/helloworld.release.exe.intermediate.manifest',
-			'jam/win32!release/helloworld/helloworld.release.pdb',
-			'jam/win32!release/helloworld/main.obj',
-			'jam/win32!release/helloworld/precomp.h.pch',
+			'jam/win32-release/helloworld/createprecomp.obj',
+			'jam/win32-release/helloworld/file.obj',
+			'jam/win32-release/helloworld/helloworld.release.exe',
+			'jam/win32-release/helloworld/helloworld.release.exe.intermediate.manifest',
+			'jam/win32-release/helloworld/helloworld.release.pdb',
+			'jam/win32-release/helloworld/main.obj',
+			'jam/win32-release/helloworld/precomp.h.pch',
 			'src/createprecomp.c',
 			'src/file.c',
 			'src/main.c',
@@ -63,9 +63,9 @@ function Test()
 		dirs = {
 			'jam/',
 			'src/',
-			'jam/macosx32!release/',
-			'jam/macosx32!release/helloworld/',
-			'jam/macosx32!release/helloworld/precomp%-%x+/',
+			'jam/macosx32-release/',
+			'jam/macosx32-release/helloworld/',
+			'jam/macosx32%-release/helloworld/precomp%-%x+/',
 		}
 
 		files = {
@@ -74,11 +74,11 @@ function Test()
 			'src/main.c',
 			'src/precomp.h',
 			'jam/Jamfile.jam',
-			'jam/macosx32!release/helloworld/createprecomp.o',
-			'jam/macosx32!release/helloworld/file.o',
-			'jam/macosx32!release/helloworld/helloworld.release',
-			'jam/macosx32!release/helloworld/main.o',
-			'jam/macosx32!release/helloworld/precomp%-%x+/precomp.h.gch',
+			'jam/macosx32-release/helloworld/createprecomp.o',
+			'jam/macosx32-release/helloworld/file.o',
+			'jam/macosx32-release/helloworld/helloworld.release',
+			'jam/macosx32-release/helloworld/main.o',
+			'jam/macosx32%-release/helloworld/precomp%-%x+/precomp.h.gch',
 			'src/createprecomp.c',
 			'src/file.c',
 			'src/main.c',

@@ -42,10 +42,10 @@ function Test()
 			'common/',
 			'project1/',
 			'shared/',
-			'common/win32!release/',
-			'common/win32!release/common/',
-			'project1/win32!release/',
-			'project1/win32!release/project1/',
+			'common/win32-release/',
+			'common/win32-release/common/',
+			'project1/win32-release/',
+			'project1/win32-release/project1/',
 		}
 
 		local pass1Files =
@@ -55,16 +55,16 @@ function Test()
 			'common/common.jam',
 			'common/print.cpp',
 			'common/print.h',
-			'common/win32!release/common/common.release.lib',
-			'common/win32!release/common/print.obj',
+			'common/win32-release/common/common.release.lib',
+			'common/win32-release/common/print.obj',
 			'project1/adefine.cpp',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/win32!release/project1/adefine.obj',
-			'project1/win32!release/project1/project1.obj',
-			'project1/win32!release/project1/project1.release.exe',
-			'project1/win32!release/project1/project1.release.exe.intermediate.manifest',
-			'project1/win32!release/project1/project1.release.pdb',
+			'project1/win32-release/project1/adefine.obj',
+			'project1/win32-release/project1/project1.obj',
+			'project1/win32-release/project1/project1.release.exe',
+			'project1/win32-release/project1/project1.release.exe.intermediate.manifest',
+			'project1/win32-release/project1/project1.release.pdb',
 			'shared/adefine.h',
 		}
 
@@ -124,10 +124,10 @@ function Test()
 			'common/',
 			'project1/',
 			'shared/',
-			'common/macosx32!release/',
-			'common/macosx32!release/common/',
-			'project1/macosx32!release/',
-			'project1/macosx32!release/project1/',
+			'common/macosx32-release/',
+			'common/macosx32-release/common/',
+			'project1/macosx32-release/',
+			'project1/macosx32-release/project1/',
 		}
 
 		local pass1Files = {
@@ -136,14 +136,14 @@ function Test()
 			'common/common.jam',
 			'common/print.cpp',
 			'common/print.h',
-			'common/macosx32!release/common/common.release.a',
-			'common/macosx32!release/common/print.o',
+			'common/macosx32-release/common/common.release.a',
+			'common/macosx32-release/common/print.o',
 			'project1/adefine.cpp',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/macosx32!release/project1/adefine.o',
-			'project1/macosx32!release/project1/project1.o',
-			'project1/macosx32!release/project1/project1.release',
+			'project1/macosx32-release/project1/adefine.o',
+			'project1/macosx32-release/project1/project1.o',
+			'project1/macosx32-release/project1/project1.release',
 			'shared/adefine.h',
 		}
 
