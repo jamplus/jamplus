@@ -3,6 +3,7 @@ C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
 IncludeModule c-compilers/c-gcc-autodetect ;
 
 C.ToolchainHelper macosx-gcc ;
+C.ToolchainHelper Global_RELEASE ;
 
 C.Flags * : CC	: -g -O2 -arch i386 ;
 C.Flags * : C++	: -g -O2 -arch i386 ;
