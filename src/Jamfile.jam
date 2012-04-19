@@ -415,7 +415,7 @@ if $(LUA_BIN)
 		{
 			LUA_SRCS +=
 				lua.debug
-				luaplus51-1202_debug.so
+				lua51_debug.so
 				lib/lua/5.1/ex.debug.$(MODULE_EXT)
 				lib/lua/5.1/filefind.debug.$(MODULE_EXT)
 				lib/lua/5.1/lua51-lanes.debug.$(MODULE_EXT)
@@ -430,7 +430,7 @@ if $(LUA_BIN)
 		{
 			LUA_SRCS +=
 				lua
-				luaplus51-1202.so
+				lua51.so
 				lib/lua/5.1/ex.$(MODULE_EXT)
 				lib/lua/5.1/filefind.$(MODULE_EXT)
 				lib/lua/5.1/lua51-lanes.$(MODULE_EXT)
