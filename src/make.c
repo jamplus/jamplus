@@ -231,7 +231,7 @@ make_fixprogress(
 	}
 }
 
-LIST *queuedjamfiles;
+NewList *queuedjamfiles = NULL;
 
 typedef struct _queuedfileinfo QUEUEDFILEINFO;
 
@@ -250,7 +250,7 @@ int compare_queuedfileinfo( const void *_left, const void *_right ) {
 
 #ifdef OPT_REMOVE_EMPTY_DIRS_EXT
 
-LIST* emptydirtargets = L0;
+NewList* emptydirtargets = NULL;
 
 typedef struct _sortedtargets SORTEDTARGETS;
 
@@ -272,29 +272,27 @@ int compare_sortedtargets( const void *_left, const void *_right ) {
 static void remove_empty_dirs()
 {
 	BUFFER lastdirbuff;
-	LIST *l;
-	LIST *origl;
+	NewListItem *l;
 	int i;
 	int count;
 	SORTEDTARGETS* sortedfiles;
 
-	if ( !emptydirtargets )
+	if ( !newlist_first(emptydirtargets) )
 		return;
 
-	l = emptydirtargets;
-	origl = l;
+	l = newlist_first(emptydirtargets);
 	i = 0;
 	count = 0;
 
-	for( ; l; l = list_next( l ) ) {
+	for( ; l; l = newlist_next( l ) ) {
 		++count;
 	}
 
 	sortedfiles = malloc( sizeof( SORTEDTARGETS ) * count );
 	i = 0;
-	for( l = origl; l; l = list_next( l ) ) {
+	for( l = newlist_first(emptydirtargets); l; l = newlist_next( l ) ) {
 		TARGET *t;
-		t = bindtarget( l->string );
+		t = bindtarget( newlist_value(l) );
 		pushsettings( t->settings );
 		t->boundname = search( t->name, &t->time );
 		popsettings( t->settings );
@@ -349,7 +347,7 @@ static void remove_empty_dirs()
 
 	free( sortedfiles );
 
-	list_free( origl );
+	newlist_free( emptydirtargets );
 }
 
 #endif /* OPT_REMOVE_EMPTY_DIRS_EXT */
@@ -422,15 +420,14 @@ pass:
 	    status |= make1( bindtarget( targets[i] ) );
 
 #ifdef OPT_MULTIPASS_EXT
-	if ( queuedjamfiles )
+	if ( newlist_first(queuedjamfiles) )
 	{
-		LIST *l = queuedjamfiles;
-		LIST *origl = l;
+		NewListItem *l = newlist_first(queuedjamfiles);
 		int i = 0;
 		int count = 0;
 		QUEUEDFILEINFO* sortedfiles;
 
-		queuedjamfiles = L0;
+		queuedjamfiles = NULL;
 
 		for( i = 0; i < n_targets; i++ )
 			make_fixprogress( bindtarget( targets[i] ) );
@@ -438,17 +435,17 @@ pass:
 		donestamps();
 		++actionpass;
 
-		for( ; l; l = list_next( l ) ) {
+		for( ; l; l = newlist_next( l ) ) {
 			++count;
 		}
 
 		sortedfiles = malloc( sizeof( QUEUEDFILEINFO ) * count );
 		i = 0;
-		for( l = origl; l; l = list_next( l ) ) {
-			char *colon = strchr( l->string, ':' );
+		for( l = newlist_first(queuedjamfiles); l; l = newlist_next( l ) ) {
+			char *colon = strchr( newlist_value(l), ':' );
 			TARGET *t;
 			*colon = 0;
-			t = bindtarget( l->string );
+			t = bindtarget(newlist_value(l));
 			*colon = ':';
 			pushsettings( t->settings );
 			t->boundname = search( t->name, &t->time );
@@ -466,7 +463,7 @@ pass:
 
 		free( sortedfiles );
 
-		list_free( origl );
+		newlist_free(queuedjamfiles);
 
 		goto pass;
 	}
@@ -505,12 +502,14 @@ int  md5matchescommandline( TARGET *t )
 	{
 		if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
 		{
-			LIST *list;
+			NewListItem *item;
 			MD5_CTX context;
 			MD5Init( &context );
 
-			for ( list = vars->value; list; list = list->next )
-				MD5Update( &context, (unsigned char*)list->string, (unsigned int)strlen( list->string ) );
+			for ( item = newlist_first(vars->value); item; item = newlist_next(item) ) {
+				char const* str = newlist_value(item);
+				MD5Update( &context, (unsigned char*)str, (unsigned int)strlen( str ) );
+			}
 
 			MD5Final( t->rulemd5sum, &context );
 			t->rulemd5sumclean = (char)hcache_getrulemd5sum( t );
@@ -612,10 +611,10 @@ make0(
 
 #ifdef OPT_SEMAPHORE
 	{
-		LIST *var = var_get( "SEMAPHORE" );
-		if( var )
+		NewList *var = var_get( "SEMAPHORE" );
+		if( newlist_first(var) )
 		{
-			TARGET *semaphore = bindtarget( var->string );
+			TARGET *semaphore = bindtarget(newlist_value(newlist_first(var)));
 
 			semaphore->progress = T_MAKE_SEMAPHORE;
 			t->semaphore = semaphore;
@@ -1285,12 +1284,13 @@ void make0calcmd5sum( TARGET *t, int source )
 		{
 			if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
 			{
-				LIST *list;
-				for ( list = vars->value; list; list = list->next )
+				NewListItem *item;
+				for ( item = newlist_first(vars->value); item; item = newlist_next(item) )
 				{
-					MD5Update( &context, (unsigned char*)list->string, (unsigned int)strlen( list->string ) );
+					char const* str = newlist_value(item);
+					MD5Update( &context, (unsigned char*)str, (unsigned int)strlen(str) );
 					if( DEBUG_MD5HASH )
-						printf( "\t\tCOMMANDLINE: %s\n", list->string );
+						printf( "\t\tCOMMANDLINE: %s\n", str );
 				}
 
 				break;

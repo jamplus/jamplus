@@ -9,14 +9,14 @@
 #include <windows.h>
 
 const char*
-w32_shortname(LIST* pathlist)
+w32_shortname(NewList* pathlist)
 {
-    LIST* savepathlist = pathlist;
     size_t buffer_size = 0;
     char* temp;
     const char* retval = 0;
-    for ( ; pathlist ; pathlist = list_next(pathlist)) {
-	const char* text = pathlist->string;
+    NewListItem* item;
+    for (item = newlist_first(pathlist) ; item ; item = newlist_next(item)) {
+	const char* text = newlist_value(item);
 	buffer_size += strlen(text) + 1;
     }
     buffer_size++;
@@ -26,11 +26,10 @@ w32_shortname(LIST* pathlist)
 
 	temp = malloc(buffer_size);
 	temp[0] = 0;
-	pathlist = savepathlist;
 
-	for ( ; pathlist ; pathlist = list_next(pathlist)) {
-	    strcat(temp, pathlist->string);
-	    if (list_next(pathlist))
+	for (item = newlist_first(pathlist); item ; item = newlist_next(item)) {
+	    strcat(temp, newlist_value(item));
+	    if (newlist_next(item))
 		strcat(temp, " ");
 	}
 	length = strlen(temp);

@@ -60,7 +60,7 @@ typedef struct {
 	char		bslash;		/* :\ -- convert all / to \ */
 #endif
 #ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT
-	LIST		*includes_excludes;
+	NewList		*includes_excludes;
 #endif
 #ifdef OPT_EXPAND_FILEGLOB_EXT
 	char		wildcard;
@@ -111,9 +111,9 @@ typedef struct
  * Returns a newly created list.
  */
 
-LIST *
+NewList *
 var_expand(
-	LIST		*l,
+	NewList		*prefix,
 	const char 	*in,
 	const char 	*end,
 	LOL		*lol,
@@ -136,11 +136,11 @@ var_expand(
 	    {
 	    case '1':
 	    case '<':
-		return list_copy( l, lol_get( lol, 0 ) );
+		return newlist_copy( prefix, lol_get( lol, 0 ) );
 
 	    case '2':
 	    case '>':
-		return list_copy( l, lol_get( lol, 1 ) );
+		return newlist_copy( prefix, lol_get( lol, 1 ) );
 	    }
 	}
 
@@ -170,12 +170,12 @@ var_expand(
 	buffer_putchar( &buff, 0 );
 
 	if( cancopyin ) {
-	    LIST *new_list = list_new( l, inp, 1 );
+	    NewList *new_list = newlist_append( prefix, inp, 1 );
 	    buffer_free( &buff );
 	    return new_list;
 	}
 	else {
-	    LIST *new_list = list_new( l, buffer_ptr( &buff ), 0 );
+	    NewList *new_list = newlist_append( prefix, buffer_ptr( &buff ), 0 );
 	    buffer_free( &buff );
 	    return new_list;
 	}
@@ -246,26 +246,27 @@ var_expand(
 	 */
 
 	{
-	    LIST *variables = 0;
-	    LIST *remainder = 0;
-	    LIST *vars;
+	    NewList *variables = 0;
+	    NewList *remainder = 0;
+	    NewListItem *vars;
 
 	    /* Recursively expand variable name & rest of input */
 
 	    if( save_buffer_pos < ov_save_buffer_pos )
-		variables = var_expand( L0, buffer_posptr( &buff ), buffer_ptr( &buff ) + ov_save_buffer_pos, lol, 0 );
+		variables = var_expand( NULL, buffer_posptr( &buff ), buffer_ptr( &buff ) + ov_save_buffer_pos, lol, 0 );
 	    if( in < end )
-		remainder = var_expand( L0, in, end, lol, 0 );
+		remainder = var_expand( NULL, in, end, lol, 0 );
 
 	    /* Now produce the result chain */
 
 	    /* For each variable name */
 
-	    for( vars = variables; vars; vars = list_next( vars ) )
+	    for( vars = newlist_first(variables); vars; vars = newlist_next( vars ) )
 	    {
-		LIST *value, *evalue = 0;
+		NewList *value, *evalue = 0;
+		NewListItem* valueSliceStart = NULL;
 #ifdef OPT_EXPAND_LITERALS_EXT
-		LIST *origvalue = 0;
+		NewList *origvalue = 0;
 #endif
 		char *colon;
 		char *bracket;
@@ -278,7 +279,7 @@ var_expand(
 		/* Must copy into varname so we can modify it */
 
 		buffer_init( &varnamebuff );
-		buffer_addstring( &varnamebuff, vars->string, strlen( vars->string ) );
+		buffer_addstring( &varnamebuff, newlist_value(vars), strlen( newlist_value(vars) ) );
 		buffer_addchar( &varnamebuff, 0 );
 
 		if( ( colon = strchr( buffer_ptr( &varnamebuff ), MAGIC_COLON ) ) )
@@ -327,15 +328,15 @@ var_expand(
 				TARGET* t = bindtarget(edits.targetname.ptr);
 				SETTINGS* settings = quicksettingslookup(t, varname);
 				if (settings)
-					value = list_copy(L0, settings->value);
+					value = newlist_copy(NULL, settings->value);
 				else
-					value = L0;
+					value = NULL;
 			} else
 			value = var_get( varname );
 		}
 #ifdef OPT_EXPAND_LITERALS_EXT
 		else {
-		    origvalue = value = list_new( L0, buffer_ptr( &varnamebuff ), 0 );
+		    origvalue = value = newlist_append( NULL, buffer_ptr( &varnamebuff ), 0 );
 		}
 #endif
 
@@ -344,69 +345,78 @@ var_expand(
 
 		if( buffer_isempty( &buff ) && !bracket && !colon && in == end )
 		{
-		    l = list_copy( l, value );
+		    prefix = newlist_copy( prefix, value );
 		    buffer_free( &buff );
 		    continue;
 		}
 
 		/* Handle start subscript */
-
-		while( sub1 > 0 && value )
-		    --sub1, value = list_next( value );
+		valueSliceStart = newlist_first(value);
+		while(sub1 > 0 && valueSliceStart)
+		{
+			sub1 -= 1;
+			valueSliceStart = newlist_next(valueSliceStart);
+		}
 
 		/* Empty w/ :E=default? */
 
-		if( !value && colon && edits.empty.ptr )
-		    evalue = value = list_new( L0, edits.empty.ptr, 0 );
+		if( !valueSliceStart && colon && edits.empty.ptr ) {
+		    evalue = value = newlist_append( NULL, edits.empty.ptr, 0 );
+		    valueSliceStart = newlist_first(value);
+		}
 
 #ifdef OPT_EXPAND_LITERALS_EXT
 		if ( colon && edits.expandliteral ) {
 		    LOL lol;
-		    LIST *newvalue = var_expand( L0, value->string, value->string + strlen( value->string ), &lol, 0 );
+		    char const* string = newlist_value(newlist_first(value));
+		    NewList *newvalue = var_expand( NULL, string, string + strlen( string ), &lol, 0 );
 		    if ( origvalue ) {
-			list_free( origvalue );
+			newlist_free( origvalue );
 			origvalue = 0;
 		    }
 		    value = newvalue;
+			valueSliceStart = newlist_first(value);
 		    sub2 = -1;
 		}
 #endif
 
 #ifdef OPT_EXPAND_FILEGLOB_EXT
 		if ( edits.wildcard ) {
-		    LIST *newl = L0;
-		    for( ; value; value = list_next( value ) ) {
-			LIST *foundfiles = L0;
-			fileglob* glob;
+		    NewList *newl = NULL;
+		    for( ; valueSliceStart; valueSliceStart = newlist_next( valueSliceStart ) ) {
+				NewList *foundfiles = NULL;
+				fileglob* glob;
 
-			/* Handle end subscript (length actually) */
-			if( sub2 >= 0 && --sub2 < 0 )
-			    break;
+				/* Handle end subscript (length actually) */
+				if( sub2 >= 0 && --sub2 < 0 )
+					break;
 
-			glob = fileglob_Create( value->string );
-			while ( fileglob_Next( glob ) ) {
-			    foundfiles = list_new( foundfiles, fileglob_FileName( glob ) + edits.wildcard_remove_prepend.len, 0 );
+				glob = fileglob_Create( newlist_value(valueSliceStart) );
+				while ( fileglob_Next( glob ) ) {
+					foundfiles = newlist_append( foundfiles, fileglob_FileName( glob ) + edits.wildcard_remove_prepend.len, 0 );
+				}
+				fileglob_Destroy( glob );
+
+				/* TODO: Efficiency: Just append to newl above? */
+				newl = newlist_copy( newl, foundfiles );
+				newlist_free( foundfiles );
 			}
-			fileglob_Destroy( glob );
-
-			newl = list_copy( newl, foundfiles );
-			list_free( foundfiles );
-		    }
-		    if ( origvalue ) {
-			list_free( origvalue );
-			origvalue = 0;
+			if ( origvalue ) {
+				newlist_free( origvalue );
+				origvalue = 0;
 		    }
 
 		    value = newl;
 		    origvalue = value;
+			valueSliceStart = newlist_first(value);
 		}
 #endif
 
 		/* For each variable value */
 
-		for( ; value; value = list_next( value ) )
+		for( ; valueSliceStart; valueSliceStart = newlist_next( valueSliceStart ) )
 		{
-		    LIST *rem;
+		    NewListItem *rem;
 		    size_t save_buffer_pos;
 		    size_t end_buffer_pos;
 		    const char *valuestring;
@@ -420,15 +430,15 @@ var_expand(
 
 		    save_buffer_pos = buffer_pos( &buff );
 
-		    valuestring = value->string;
+		    valuestring = newlist_value(valueSliceStart);
 
 #ifdef OPT_EXPAND_BINDING_EXT
 		    if( colon && edits.expandbinding ) {
 				SETTINGS *expandText;
 				TARGET *t = bindtarget( valuestring );
 				expandText = quicksettingslookup( t, "EXPAND_TEXT" );
-				if ( expandText ) {
-					valuestring = expandText->value->string;
+				if ( expandText && newlist_first(expandText->value) ) {
+					valuestring = newlist_value(newlist_first(expandText->value));
 				} else {
 					if( t->binding == T_BIND_UNBOUND ) {
 						t->boundname = search_using_target_settings( t, t->name, &t->time );
@@ -497,7 +507,7 @@ var_expand(
 		    /* rather than creating separate LIST elements. */
 
 		    if( colon && edits.join.ptr &&
-		      ( list_next( value ) || list_next( vars ) ) )
+		      ( newlist_next( valueSliceStart ) || newlist_next( vars ) ) )
 		    {
 			buffer_setpos( &buff, buffer_pos( &buff ) + strlen( buffer_posptr( &buff ) ) );
 			buffer_addstring( &buff, edits.join.ptr, strlen( edits.join.ptr ) + 1 );
@@ -509,7 +519,7 @@ var_expand(
 
 		    if( in == end )
 		    {
-			l = list_new( l, buffer_ptr( &buff ), 0 );
+			prefix = newlist_append( prefix, buffer_ptr( &buff ), 0 );
 			continue;
 		    }
 
@@ -522,11 +532,11 @@ var_expand(
 		    end_buffer_pos = strlen( buffer_ptr( &buff ) );
 		    buffer_setpos( &buff, end_buffer_pos );
 
-		    for( rem = remainder; rem; rem = list_next( rem ) )
+		    for( rem = newlist_first(remainder); rem; rem = newlist_next( rem ) )
 		    {
-			buffer_addstring( &buff, rem->string, strlen( rem->string ) + 1 );
+			buffer_addstring( &buff, newlist_value(rem), strlen( newlist_value(rem) ) + 1 );
 			buffer_setpos( &buff, end_buffer_pos );
-			l = list_new( l, buffer_ptr( &buff ), 0 );
+			prefix = newlist_append( prefix, buffer_ptr( &buff ), 0 );
 		    }
 
 		    buffer_setpos( &buff, save_buffer_pos );
@@ -535,28 +545,29 @@ var_expand(
 		/* Toss used empty */
 
 		if( evalue )
-		    list_free( evalue );
+		    newlist_free( evalue );
 
 #ifdef OPT_EXPAND_LITERALS_EXT
 		if ( origvalue )
-		    list_free( origvalue );
+		    newlist_free( origvalue );
 #endif
 
 #ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT
 		if ( edits.includes_excludes ) {
-		    LIST *newl = L0;
+		    NewList *newl = NULL;
+		    NewListItem* l;
 
-		    LIST *origl = l;
+		    NewList *origprefix = prefix;
 		    int hasInclude = 0;
 
 		    if ( !regexhash )
 			regexhash = hashinit( sizeof(regexdata), "regex" );
 
 		    {
-			LIST *inex = edits.includes_excludes;
+			NewListItem *inex = newlist_first(edits.includes_excludes);
 			while ( inex ) {
-			    char mod = inex->string[0];
-			    inex = list_next( inex );
+			    char mod = newlist_value(inex)[0];
+			    inex = newlist_next( inex );
 
 			    if ( mod == 'I' ) {
 				hasInclude = 1;
@@ -564,40 +575,41 @@ var_expand(
 			}
 		    }
 
-		    for ( ; l; l = list_next( l ) )
+		    for (l = newlist_first(prefix) ; l; l = newlist_next( l ) )
 		    {
-			LIST *inex = edits.includes_excludes;
+			NewListItem *inex = newlist_first(edits.includes_excludes);
 			int remove = hasInclude;
 
 			while ( inex ) {
-			    char mod = inex->string[0];
+			    char mod = newlist_value(inex)[0];
 			    regexp *re;
 			    regexdata data, *d = &data;
-			    inex = list_next( inex );
-			    data.name = inex->string;
+			    inex = newlist_next( inex );
+			    data.name = newlist_value(inex);
 			    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 			    {
-				d->re = jam_regcomp( inex->string );
+				d->re = jam_regcomp( newlist_value(inex) );
 				(void)hashenter( regexhash, (HASHDATA **)&d );
 			    }
 			    re = d->re;
-			    inex = list_next( inex );
+			    inex = newlist_next( inex );
 
 			    if ( mod == 'X' ) {
-				if( jam_regexec( re, l->string ) )
+				if( jam_regexec( re, newlist_value(l) ) )
 				    remove = 1;
 			    } else if ( mod == 'I' ) {
-				if( jam_regexec( re, l->string ) )
+				if( jam_regexec( re, newlist_value(l) ) )
 				    remove = 0;
 			    }
 			}
 
 			if ( !remove )
-			    newl = list_new( newl, l->string, 1 );
+			    newl = newlist_append( newl, newlist_value(l), 1 );
 		    }
 
-		    list_free( origl );
-		    l = newl;
+			/* TODO: Efficiency: Just modify prefix? */
+		    newlist_free( origprefix );
+		    prefix = newl;
 		}
 #endif
 
@@ -605,7 +617,7 @@ var_expand(
 //		buffer_free( &buff );
 //#endif
 #ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT
-		list_free( edits.includes_excludes );
+		newlist_free( edits.includes_excludes );
 #endif
 
 	    }
@@ -613,20 +625,18 @@ var_expand(
 	    /* variables & remainder were gifts from var_expand */
 	    /* and must be freed */
 
-	    if( variables )
-		list_free( variables );
-	    if( remainder)
-		list_free( remainder );
+		newlist_free( variables );
+		newlist_free( remainder );
 
 	    if( DEBUG_VAREXP )
 	    {
 		printf( "expanded to " );
-		list_print( l );
+		newlist_print( prefix );
 		printf( "\n" );
 	    }
 
 	    buffer_free( &buff );
-	    return l;
+	    return prefix;
 	}
 }
 
@@ -777,14 +787,14 @@ var_edit_parse(
 	    else if( ( p = strchr( mods, MAGIC_COLON ) ) )
 	    {
 		*p = 0;
-		edits->includes_excludes = list_new( edits->includes_excludes, mod, 0 );
-		edits->includes_excludes = list_new( edits->includes_excludes, ++mods, 0 );
+		edits->includes_excludes = newlist_append( edits->includes_excludes, mod, 0 );
+		edits->includes_excludes = newlist_append( edits->includes_excludes, ++mods, 0 );
 		mods = p + 1;
 	    }
 	    else
 	    {
-		edits->includes_excludes = list_new( edits->includes_excludes, mod, 0 );
-		edits->includes_excludes = list_new( edits->includes_excludes, ++mods, 0 );
+		edits->includes_excludes = newlist_append( edits->includes_excludes, mod, 0 );
+		edits->includes_excludes = newlist_append( edits->includes_excludes, ++mods, 0 );
 		mods += strlen( mods );
 	    }
 #endif

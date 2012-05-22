@@ -17,26 +17,26 @@
 
 void compile_builtins();
 
-LIST *compile_append( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_break( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_foreach( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_if( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_eval( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_include( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_list( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_local( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_null( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_on( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_rule( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_rules( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_set( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_setcomp( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_setexec( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_settings( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_switch( PARSE *parse, LOL *args, int *jmp );
-LIST *compile_while( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_append( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_break( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_foreach( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_if( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_eval( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_include( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_list( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_local( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_null( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_on( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_rule( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_rules( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_set( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_setcomp( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_setexec( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_settings( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_switch( PARSE *parse, LOL *args, int *jmp );
+NewList *compile_while( PARSE *parse, LOL *args, int *jmp );
 
-LIST *evaluate_rule( const char *rulename, LOL *args, LIST *result );
+NewList *evaluate_rule( const char *rulename, LOL *args, NewList *result );
 
 /* Conditions for compile_if() */
 

@@ -29,7 +29,7 @@ static struct keydef keynames[] = {
  */
 
 const char*
-w32_getreg_internal(LIST* pathlist, INT is64Bit)
+w32_getreg_internal(NewList* pathlist, INT is64Bit)
 {
     HKEY key = HKEY_LOCAL_MACHINE;
     const char* valueName = 0;
@@ -38,13 +38,14 @@ w32_getreg_internal(LIST* pathlist, INT is64Bit)
     DWORD dataSize  = 0;
     char* dataValue = 0;
 	const char* retval = 0;
+	NewListItem* curEl = newlist_first(pathlist);
 	    
-    if (!pathlist) return 0;
+    if (!curEl) return 0;
 
     while (keydefs->keyname) {
-	if (!strcmp(pathlist->string, keydefs->keyname)) {
+	if (!strcmp(newlist_value(curEl), keydefs->keyname)) {
 	    key = keydefs->keyval;
-	    pathlist = list_next(pathlist);
+	    curEl = newlist_next(curEl);
 	    break;
 	}
 	++keydefs;
@@ -52,8 +53,8 @@ w32_getreg_internal(LIST* pathlist, INT is64Bit)
 
     if (!keydefs->keyname) return 0;
 
-    for ( ; pathlist ; pathlist = list_next(pathlist)) {
-        const char* text = pathlist->string;
+    for ( ; curEl ; curEl = newlist_next(curEl)) {
+        const char* text = newlist_value(curEl);
         if (valueName) {            
             DWORD retCode = RegOpenKeyEx(key, valueName, 0,
                                          KEY_EXECUTE |
@@ -134,7 +135,7 @@ w32_getreg_internal(LIST* pathlist, INT is64Bit)
 }
 
 const char*
-w32_getreg(LIST* pathlist)
+w32_getreg(NewList* pathlist)
 {
 	const char* ret = w32_getreg_internal( pathlist, 0); 
 	if (ret == 0) ret = w32_getreg_internal( pathlist, 1);
@@ -143,7 +144,7 @@ w32_getreg(LIST* pathlist)
 
 #ifdef OPT_BUILTIN_W32_GETREG64_EXT
 const char*
-w32_getreg64(LIST* pathlist)
+w32_getreg64(NewList* pathlist)
 {
 	return w32_getreg_internal( pathlist, 1 );
 }

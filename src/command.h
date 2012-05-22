@@ -36,6 +36,7 @@
 #ifdef OPT_RESPONSE_FILES
 #include "tmpfile.h"
 
+
 typedef struct _tmplist TMPLIST;
 
 struct _tmplist
@@ -55,7 +56,7 @@ struct _cmd
 	CMD	*next;
 	CMD	*tail;		/* valid on in head */
 	RULE	*rule;		/* rule->actions contains shell script */
-	LIST	*shell;		/* $(SHELL) value */
+	NewList	*shell;		/* $(SHELL) value */
 	LOL	args;		/* LISTs for $(<), $(>) */
 #ifdef OPT_RESPONSE_FILES
 	TMPLIST *response_files;
@@ -68,9 +69,9 @@ struct _cmd
 
 CMD *cmd_new(
 	RULE	*rule,		/* rule (referenced) */
-	LIST	*targets,	/* $(<) (freed) */
-	LIST	*sources,	/* $(>) (freed) */
-	LIST	*shell,		/* $(SHELL) (freed) */
+	NewList	*targets,	/* $(<) (freed) */
+	NewList	*sources,	/* $(>) (freed) */
+	NewList	*shell,		/* $(SHELL) (freed) */
 	int	maxline );	/* max line length */
 
 void cmd_free( CMD *cmd );

@@ -71,8 +71,8 @@ bindrule( const char *rulename )
 	    r->name = newstr( rulename );	/* never freed */
 	    r->procedure = (PARSE *)0;
 	    r->actions = (char *)0;
-	    r->bindlist = L0;
-	    r->params = L0;
+	    r->bindlist = NULL;
+	    r->params = NULL;
 	    r->flags = 0;
 	}
 
@@ -166,17 +166,18 @@ TARGETS *
 targetlist(
 	TARGETS	*chain,
 #ifndef OPT_BUILTIN_NEEDS_EXT
-	LIST 	*targets )
+	NewList 	*targets )
 #else
-	LIST 	*targets,
+	NewList 	*targets,
 	char	needs)      /* marks each TARGETS with the "needs" flag */
 #endif
 {
-	for( ; targets; targets = list_next( targets ) )
+	NewListItem* item;
+	for(item = newlist_first(targets) ; item; item = newlist_next( item ) )
 #ifdef OPT_BUILTIN_NEEDS_EXT
-	    chain = targetentry( chain, bindtarget( targets->string ), needs );
+	    chain = targetentry( chain, bindtarget( newlist_value(item) ), needs );
 #else
-	    chain = targetentry( chain, bindtarget( targets->string ) );
+	    chain = targetentry( chain, bindtarget( newlist_value(item) ) );
 #endif
 
 	return chain;
@@ -197,7 +198,7 @@ targetlist_free(
 {
 	for( ; targets; ) {
 	    TARGETS *targetentrytofree = targets;
-	    targets = list_next( targets );
+	    targets = targets->next;
 #ifdef OPT_IMPROVED_MEMUSE_EXT
 	    mempool_free( targets_pool, targetentrytofree );
 #else
@@ -363,7 +364,7 @@ addsettings(
 	SETTINGS *head,
 	int	setflag,
 	const char *symbol,
-	LIST	*value )
+	NewList	*value )
 {
 	SETTINGS *v;
 
@@ -382,7 +383,7 @@ addsettings(
 #ifdef OPT_MINUS_EQUALS_EXT
 	    if (setflag == VAR_REMOVE)
 	    {
-		list_free( value );
+		newlist_free( value );
 		return head;
 	    }
 #endif
@@ -403,26 +404,26 @@ addsettings(
 	{
 	case VAR_SET:
 	    /* Toss old, set new */
-	    list_free( v->value );
+	    newlist_free( v->value );
 	    v->value = value;
 	    break;
 
 	case VAR_APPEND:
 	    /* Append new to old */
-	    v->value = list_append( v->value, value );
+	    v->value = newlist_appendList( v->value, value );
 	    break;
 
 #ifdef OPT_MINUS_EQUALS_EXT
 	case VAR_REMOVE:
 	    /* Remove value from existing */
-	    v->value = list_remove( v->value, value );
-	    list_free( value );
+	    v->value = newlist_remove( v->value, value );
+	    newlist_free( value );
 	    break;
 #endif
 
 	case VAR_DEFAULT:
 	    /* Toss new, old already set */
-	    list_free( value );
+	    newlist_free( value );
 	    break;
 	}
 
@@ -463,7 +464,7 @@ copysettings( SETTINGS *from )
 	    SETTINGS *v = (SETTINGS *)malloc( sizeof( *v ) );
 #endif
 	    v->symbol = copystr( from->symbol );
-	    v->value = list_copy( 0, from->value );
+	    v->value = newlist_copy( 0, from->value );
 	    v->next = head;
 	    head = v;
 	}
@@ -504,7 +505,7 @@ freesettings( SETTINGS *v )
 	    SETTINGS *n = v->next;
 
 	    freestr( v->symbol );
-	    list_free( v->value );
+	    newlist_free( v->value );
 #ifdef OPT_IMPROVED_MEMUSE_EXT
 	    mempool_free(settings_pool, v);
 #else

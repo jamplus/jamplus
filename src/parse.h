@@ -18,7 +18,7 @@
 typedef struct _PARSE PARSE;
 
 struct _PARSE {
-	LIST		*(*func)( PARSE *p, LOL *args, int *jmp );
+	NewList		*(*func)( PARSE *p, LOL *args, int *jmp );
 	PARSE		*left;
 	PARSE		*right;
 	PARSE		*third;
@@ -36,7 +36,7 @@ void 	parse_file( const char *f );
 void 	parse_save( PARSE *p );
 
 PARSE * parse_make( 
-	LIST 		*(*func)( PARSE *p, LOL *args, int *jmp ),
+	NewList 		*(*func)( PARSE *p, LOL *args, int *jmp ),
 	PARSE		*left,
 	PARSE		*right,
 	PARSE		*third,
@@ -46,7 +46,7 @@ PARSE * parse_make(
 
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 PARSE * parse_make3( 
-	LIST 		*(*func)( PARSE *p, LOL *args, int *jmp ),
+	NewList 		*(*func)( PARSE *p, LOL *args, int *jmp ),
 	PARSE		*left,
 	PARSE		*right,
 	PARSE		*third,

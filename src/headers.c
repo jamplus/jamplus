@@ -45,7 +45,7 @@
 #endif
 
 #ifndef OPT_HEADER_CACHE_EXT
-static LIST *headers1( const char *file, LIST *hdrscan );
+static NewList *headers1( const char *file, NewList *hdrscan );
 #endif
 
 #ifdef OPT_HDRPIPE_EXT
@@ -63,12 +63,12 @@ static LIST *headers1( const char *file, LIST *hdrscan );
 void
 headers( TARGET *t )
 {
-	LIST	*hdrscan;
-	LIST	*hdrrule;
+	NewList	*hdrscan;
+	NewList	*hdrrule;
 	LOL	lol;
 
-	if( !( hdrscan = var_get( "HDRSCAN" ) ) ||
-	    !( hdrrule = var_get( "HDRRULE" ) ) )
+	if( !newlist_first( hdrscan = var_get( "HDRSCAN" ) ) ||
+	    !newlist_first( hdrrule = var_get( "HDRRULE" ) ) )
 	        return;
 
 	/* Doctor up call to HDRRULE rule */
@@ -79,21 +79,21 @@ headers( TARGET *t )
 
 	lol_init( &lol );
 
-	lol_add( &lol, list_new( L0, t->name, 1 ) );
+	lol_add( &lol, newlist_append( NULL, t->name, 1 ) );
 #ifdef OPT_HEADER_CACHE_EXT
 	lol_add( &lol, hcache( t, hdrscan ) );
 #else
 	lol_add( &lol, headers1( t->boundname, hdrscan ) );
 #endif
 
-	if( lol_get( &lol, 1 ) )
+	if( newlist_first(lol_get( &lol, 1 )) )
 	{
 #ifdef OPT_HDRRULE_BOUNDNAME_ARG_EXT
 	    /* The third argument to HDRRULE is the bound name of
 	     * $(<) */
-	    lol_add( &lol, list_new( L0, t->boundname, 0 ) );
+	    lol_add( &lol, newlist_append( NULL, t->boundname, 0 ) );
 #endif
-	    list_free( evaluate_rule( hdrrule->string, &lol, L0 ) );
+	    newlist_free( evaluate_rule( newlist_value(newlist_first(hdrrule)), &lol, NULL ) );
 	}
 
 	/* Clean up */
@@ -117,17 +117,18 @@ typedef struct
  * headers1() - using regexp, scan a file and build include LIST
  */
 
-static LIST *headers1helper(
+static NewList *headers1helper(
 	FILE *f,
-	LIST *hdrscan )
+	NewList *hdrscan )
 {
 	int	i;
 	int	rec = 0;
-	LIST	*result = 0;
+	NewList	*result = 0;
 	regexp	*re[ MAXINC ];
 	char	buf[ 1024 ];
-	LIST	*hdrdownshift;
+	NewList	*hdrdownshift;
 	int	dodownshift = 1;
+	NewListItem* pattern;
 
 #ifdef OPT_IMPROVED_PATIENCE_EXT
 	static int count = 0;
@@ -137,26 +138,28 @@ static LIST *headers1helper(
 #endif
 
 	hdrdownshift = var_get( "HDRDOWNSHIFT" );
-	if ( hdrdownshift )
+	if ( newlist_first(hdrdownshift) )
 	{
-	    dodownshift = strcmp( hdrdownshift->string, "false" ) != 0  &&
-		    strcmp( hdrdownshift->string, "0" ) != 0;
+		char const* str = newlist_value(newlist_first(hdrdownshift));
+	    dodownshift = strcmp( str, "false" ) != 0  &&
+		    strcmp( str, "0" ) != 0;
 	}
 
 	if ( !regexhash )
 	    regexhash = hashinit( sizeof(regexdata), "regex" );
 
-	while( rec < MAXINC && hdrscan )
+	pattern = newlist_first(hdrscan);
+	while( rec < MAXINC && pattern )
 	{
 	    regexdata data, *d = &data;
-	    data.name = hdrscan->string;
+	    data.name = newlist_value(pattern);
 	    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 	    {
-		d->re = jam_regcomp( hdrscan->string );
+		d->re = jam_regcomp( newlist_value(pattern) );
 		(void)hashenter( regexhash, (HASHDATA **)&d );
 	    }
 	    re[rec++] = d->re;
-	    hdrscan = list_next( hdrscan );
+	    pattern = newlist_next( pattern );
 	}
 
 	while( fgets( buf, sizeof( buf ), f ) )
@@ -189,7 +192,7 @@ static LIST *headers1helper(
 		buf2[ l ] = 0;
 		}
 
-		result = list_new( result, buf2, 0 );
+		result = newlist_append( result, buf2, 0 );
 
 		if( DEBUG_HEADER )
 		    printf( "header found: %s\n", buf2 );
@@ -199,25 +202,25 @@ static LIST *headers1helper(
 	return result;
 }
 
-LIST *
+NewList *
 headers1(
 	const char *file,
-	LIST *hdrscan )
+	NewList *hdrscan )
 {
 	FILE	*f;
-	LIST	*result = 0;
-	LIST    *hdrpipe;
-	LIST	*hdrpipefile;
+	NewList	*result = 0;
+	NewList    *hdrpipe;
+	NewList	*hdrpipefile;
 
-	if ( ( hdrpipe = var_get( "HDRPIPE" ) ) )
+	if ( newlist_first(hdrpipe = var_get( "HDRPIPE" )) )
 	{
 		LOL args;
 		BUFFER buff;
 		lol_init( &args );
-		lol_add( &args, list_new( L0, file, 0 ) );
+		lol_add( &args, newlist_append( NULL, file, 0 ) );
 		buffer_init( &buff );
-		if ( var_string( hdrpipe->string, &buff, 0, &args, ' ') < 0 )  {
-		    printf( "Cannot expand HDRPIPE '%s' !\n", hdrpipe->string );
+		if ( var_string( newlist_value(newlist_first(hdrpipe)), &buff, 0, &args, ' ') < 0 )  {
+		    printf( "Cannot expand HDRPIPE '%s' !\n", newlist_value(newlist_first(hdrpipe)) );
 		    exit( EXITBAD );
 		}
 		buffer_addchar( &buff, 0 );
@@ -236,14 +239,14 @@ headers1(
 
 	result = headers1helper( f, hdrscan );
 
-	if ( hdrpipe )
+	if ( newlist_first(hdrpipe) )
 		file_pclose( f );
 	else
 		fclose( f );
 
-	if ( ( hdrpipefile = var_get( "HDRPIPEFILE" ) ) )
+	if ( newlist_first(hdrpipefile = var_get( "HDRPIPEFILE" )) )
 	{
-		if( !( f = fopen( hdrpipefile->string, "r" ) ) )
+		if( !( f = fopen( newlist_value(newlist_first(hdrpipefile)), "r" ) ) )
 		    return result;
 		result = headers1helper( f, hdrscan );
 		fclose( f );
@@ -265,15 +268,16 @@ typedef struct
 #ifndef OPT_HEADER_CACHE_EXT
 static	/* Needs to be global if header caching is on */
 #endif
-LIST *
+NewList *
 headers1(
 	const char *file,
-	LIST *hdrscan )
+	NewList *hdrscan )
 {
 	FILE	*f;
 	int	i;
 	int	rec = 0;
-	LIST	*result = 0;
+	NewList	*result = 0;
+	NewListItem* pattern;
 	regexp	*re[ MAXINC ];
 	char	buf[ 1024 ];
 
@@ -290,17 +294,18 @@ headers1(
 	if ( !regexhash )
 	    regexhash = hashinit( sizeof(regexdata), "regex" );
 
-	while( rec < MAXINC && hdrscan )
+	pattern = newlist_first(hdrscan);
+	while( rec < MAXINC && pattern )
 	{
 	    regexdata data, *d = &data;
-	    data.name = hdrscan->string;
+	    data.name = newlist_value(pattern);
 	    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 	    {
 		d->re = jam_regcomp( hdrscan->string );
 		(void)hashenter( regexhash, (HASHDATA **)&d );
 	    }
 	    re[rec++] = d->re;
-	    hdrscan = list_next( hdrscan );
+		pattern = newlist_next(pattern);
 	}
 
 	while( fgets( buf, sizeof( buf ), f ) )
@@ -324,7 +329,7 @@ headers1(
 		memcpy( buf2, re[i]->startp[1], l );
 		buf2[ l ] = 0;
 # endif
-		result = list_new( result, buf2, 0 );
+		result = newlist_append( result, buf2, 0 );
 
 		if( DEBUG_HEADER )
 		    printf( "header found: %s\n", buf2 );

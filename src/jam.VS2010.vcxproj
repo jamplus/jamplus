@@ -132,6 +132,7 @@
     <ClCompile Include="make1.c" />
     <ClCompile Include="md5c.c" />
     <ClCompile Include="mempool.c" />
+    <ClCompile Include="newlist.c" />
     <ClCompile Include="newstr.c" />
     <ClCompile Include="option.c" />
     <ClCompile Include="parse.c" />
@@ -172,6 +173,7 @@
     <ClInclude Include="make.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="mempool.h" />
+    <ClInclude Include="newlist.h" />
     <ClInclude Include="newstr.h" />
     <ClInclude Include="option.h" />
     <ClInclude Include="parse.h" />

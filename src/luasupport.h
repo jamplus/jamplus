@@ -4,13 +4,13 @@
 extern "C" {
 #endif
 
-LIST *
+NewList *
 builtin_luastring(
 	PARSE	*parse,
 	LOL		*args,
 	int		*jmp );
 
-LIST *
+NewList *
 builtin_luafile(
 	PARSE	*parse,
 	LOL		*args,

@@ -11,5 +11,5 @@
 void headers( TARGET *t );
 
 #ifdef OPT_HEADER_CACHE_EXT
-LIST *headers1( const char *file, LIST *hdrscan );
+NewList *headers1( const char *file, NewList *hdrscan );
 #endif

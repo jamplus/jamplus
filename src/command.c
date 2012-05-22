@@ -42,9 +42,9 @@ static int cmd_string( RULE* rule, const char *in, BUFFER *buff, int outsize,
 CMD *
 cmd_new(
 	RULE	*rule,
-	LIST	*targets,
-	LIST	*sources,
-	LIST	*shell,
+	NewList	*targets,
+	NewList	*sources,
+	NewList	*shell,
 	int	maxline )
 {
 	BUFFER buff;
@@ -133,7 +133,7 @@ void
 cmd_free( CMD *cmd )
 {
 	lol_free( &cmd->args );
-	list_free( cmd->shell );
+	newlist_free( cmd->shell );
 #ifdef OPT_RESPONSE_FILES
 	while( cmd->response_files )
 	{
@@ -365,27 +365,27 @@ cmd_string(
 	}
 
 	if (dollar) {
-	    LIST *l = var_expand(L0, buffer_ptr(buff) + lastword, buffer_posptr(buff), lol, 0);
-	    LIST *head = l;
+	    NewList *expanded = var_expand(NULL, buffer_ptr(buff) + lastword, buffer_posptr(buff), lol, 0);
+	    NewListItem *l = newlist_first(expanded);
 
 	    buffer_setpos(buff, lastword);
 
 	    while (l)
 	    {
-		size_t so = strlen(l->string);
+		size_t so = strlen(newlist_value(l));
 
 		if ((int)buffer_pos(buff) + so >= outsize)
 		    return -1;
-		buffer_addstring(buff, l->string, so);
+		buffer_addstring(buff, newlist_value(l), so);
 
 		/* Separate with space */
 
-		l = list_next(l);
+		l = newlist_next(l);
 		if (l) {
 		    buffer_addchar(buff, ' ');
 		}
 	    }
-	    list_free(head);
+	    newlist_free(expanded);
 	}
     }
 

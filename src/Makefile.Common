@@ -96,6 +96,7 @@ SOURCES = \
 	make1.c \
 	md5c.c \
 	mempool.c \
+	newlist.c \
 	newstr.c \
 	option.c \
 	parse.c \

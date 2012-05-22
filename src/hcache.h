@@ -8,7 +8,7 @@
 
 /*void hcache_init(void);*/
 void hcache_done(void);
-LIST *hcache( TARGET *t, LIST *hdrscan );
+NewList *hcache( TARGET *t, NewList *hdrscan );
 const char* hcache_filename(void);
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 int read_md5sum_string( const char* str, MD5SUM sum);
@@ -18,7 +18,7 @@ void setcachedmd5sum( TARGET *t );
 /* Get a filename in cache for given md5sum. */
 const char *filecache_getpath(TARGET *t);
 const char *filecache_getfilename(TARGET *t, MD5SUM sum, const char* extension);
-LIST *filecache_fillvalues(TARGET *t);
+NewList *filecache_fillvalues(TARGET *t);
 void filecache_disable(TARGET *t);
 int filecache_retrieve(TARGET *t, MD5SUM buildmd5sum);
 void filecache_update(TARGET* t);

@@ -35,7 +35,7 @@ typedef struct _YYSTYPE {
 	int		type;
 	const char	*string;
 	PARSE		*parse;
-	LIST		*list;
+	NewList		*list;
 	int		number;
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 	int		number2;

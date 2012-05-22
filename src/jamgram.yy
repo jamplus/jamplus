@@ -49,7 +49,7 @@
 
 # define YYMAXDEPTH 10000	/* for OSF and other less endowed yaccs */
 
-# define F0 (LIST *(*)(PARSE *, LOL *, int *))0
+# define F0 (NewList *(*)(PARSE *, LOL *, int *))0
 # define P0 (PARSE *)0
 # define S0 (char *)0
 
