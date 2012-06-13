@@ -84,7 +84,6 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 
 	table.insert(self.Contents, [[
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 ]])
 
 	-- Write Configurations.
@@ -144,6 +143,10 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 ]==], configInfo, info, _G))
 		end
 	end
+
+	table.insert(self.Contents, [[
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+]])
 
 	-- Write Files.
 	table.insert(self.Contents, [[
