@@ -177,7 +177,7 @@ Assign NoWorkspace to one of the two to prevent the conflict." ;
 	}
 	EXPORTED_WORKSPACES.$(WORKSPACE_NAME:L) = $(WORKSPACE_NAME) ;
 
-#	Depends all : $(TARGETS) ;
+	Depends all : $(TARGETS) ;
 	Depends $(TARGETS) : $(TargetInfoFile) ;
 
 	Contents += "VALID_PLATFORMS = {$(NEWLINE)" ;
