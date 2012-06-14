@@ -1120,7 +1120,6 @@ rule C.Library TARGET : SOURCES : OPTIONS {
 	TARGET = [ C.ActiveTarget $(TARGET) ] ;
 	if shared in $(OPTIONS) {
 		DumpProjectInfo $(TARGET) : $(SOURCES) : $(OPTIONS) ;
-		#Depends all : $(TARGET) ;
 	} else {
 		DumpProjectInfo $(TARGET) : $(SOURCES) : lib $(OPTIONS) ;
 	}

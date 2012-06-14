@@ -57,11 +57,11 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES {
 }
 
 
-rule AutoSourceGroup SOURCES
+rule AutoSourceGroup TARGET : SOURCES
 {
 	if ! $(SOURCES)  {  return ;  }
 
-	local TARGET = $(C.ACTIVE_TARGET) ;
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
 	SOURCES = [ ExpandFileList $(SOURCES) ] ;
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
@@ -148,7 +148,7 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 
 	DumpSources $(project) : $(SOURCES) ;
 
-	Depends $(TARGETS) : $(TargetInfoFile) ;
+	Depends $(TARGET) : $(TargetInfoFile) ;
 }
 
 
