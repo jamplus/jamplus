@@ -318,18 +318,18 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 			local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
 			local subProject = Projects[curProject.Name]
 			table.insert(self.Contents, expand([[
-			$(ShellScriptUuid) /* ShellScript */ = {
-				isa = PBXShellScriptBuildPhase;
-				buildActionMask = 2147483647;
-				files = (
-				);
-				inputPaths = (
-				);
-				outputPaths = (
-				);
-				runOnlyForDeploymentPostprocessing = 0;
-				shellPath = /bin/sh;
-				shellScript = "]], subProjectInfo))
+		$(ShellScriptUuid) /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "]], subProjectInfo))
 			if subProject.BuildCommandLine then
 				table.insert(self.Contents, subProject.BuildCommandLine[1] .. '";\n')
 			else
@@ -346,22 +346,26 @@ local function XcodeHelper_WritePBXProject(self, info, allTargets)
 	table.insert(self.Contents, '/* Begin PBXProject section */\n')
 	table.insert(self.Contents, ("\t\t%s /* Project object */ = {\n"):format(info.ProjectUuid))
 	table.insert(self.Contents, expand([[
-		isa = PBXProject;
-		buildConfigurationList = $(ProjectBuildConfigurationListUuid) /* Build configuration list for PBXProject "$(Name)" */;
-		compatibilityVersion = "Xcode 3.1";
-		hasScannedForEncodings = 1;
-		mainGroup = $(GroupUuid) /* $(Name) */;
-		projectDirPath = "";
-		projectRoot = "";
-		targets = (
+			isa = PBXProject;
+			buildConfigurationList = $(ProjectBuildConfigurationListUuid) /* Build configuration list for PBXProject "$(Name)" */;
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = $(GroupUuid) /* $(Name) */;
+]], info))
+	Projects[self.Name .. '.workspace'] = {}
+	table.insert(self.Contents, ("\t\t\tproductRefGroup = %s /* Products */;\n"):format(self.EntryUuids[self.Name .. '.workspace/' .. self.Name .. '/Products/']))
+	table.insert(self.Contents, expand([[
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
 ]], info))
 	for curProject in ivalues(allTargets) do
 		local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
-		table.insert(self.Contents, ("\t\t\t\t%s /* %s */,\n"):format(subProjectInfo.LegacyTargetUuid, subProjectInfo.Name))
+		table.insert(self.Contents, ("\t\t\t\t\t%s /* %s */,\n"):format(subProjectInfo.LegacyTargetUuid, subProjectInfo.Name))
 	end
 	table.insert(self.Contents, [[
-		);
-	};
+			);
+		};
 ]])
 	table.insert(self.Contents, '/* End PBXProject section */\n\n')
 end
