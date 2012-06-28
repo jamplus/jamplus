@@ -17,8 +17,6 @@
 	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : MM : .mm : C.gcc.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
 	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : PCH : .h .pch : C.gcc.PCH : "" .gch ;
 
-	TOOLCHAIN_COMPILER_KEYS on $(C.COMPILER_SUITE_SYMBOL) += MSVCNT ;
-
 	PCHCCFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x c-header ;
 	PCHC++FLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x c++-header ;
 	PCHMFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x objective-c-header ;
