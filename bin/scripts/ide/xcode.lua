@@ -62,7 +62,10 @@ end
 function XcodeHelper_WritePBXGroups(contents, entryUuids, folder, fullPath)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
-			local fullFolderName = fullPath .. entry.folder .. '/'
+			local fullFolderName = fullPath
+			if entry.folder ~= '' then
+				fullFolderName = fullFolderName .. entry.folder .. '/'
+			end
 			XcodeHelper_WritePBXGroup(contents, entryUuids, entryUuids[fullFolderName], entry.folder, entry, fullFolderName)
 			XcodeHelper_WritePBXGroups(contents, entryUuids, entry, fullFolderName)
 		end
@@ -290,7 +293,10 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 				table.insert(self.Contents, '\t\t\tproductName = "' .. subProjectInfo.Name .. '";\n')
 
 				if subProjectInfo.ExecutablePath then
-					table.insert(self.Contents, '\t\t\tproductReference = ' .. info.EntryUuids['app>' .. subProjectInfo.ExecutablePath] .. '; /* ' .. subProjectInfo.ExecutablePath .. ' */\n')
+					local entryUuid = info.EntryUuids['app>' .. subProjectInfo.ExecutablePath]
+					if entryUuid then
+						table.insert(self.Contents, '\t\t\tproductReference = ' .. entryUuid .. '; /* ' .. subProjectInfo.ExecutablePath .. ' */\n')
+					end
 				end
 				if subProject.Options then
 					if subProject.Options.bundle then
@@ -352,8 +358,10 @@ local function XcodeHelper_WritePBXProject(self, info, allTargets)
 			hasScannedForEncodings = 0;
 			mainGroup = $(GroupUuid) /* $(Name) */;
 ]], info))
-	Projects[self.Name .. '.workspace'] = {}
-	table.insert(self.Contents, ("\t\t\tproductRefGroup = %s /* Products */;\n"):format(self.EntryUuids[self.Name .. '.workspace/' .. self.Name .. '/Products/']))
+	local productsEntryUuid = self.EntryUuids[self.ProjectName .. '/Products/']
+	if productsEntryUuid then
+		table.insert(self.Contents, ("\t\t\tproductRefGroup = %s /* Products */;\n"):format(self.EntryUuids[self.ProjectName .. '/Products/']))
+	end
 	table.insert(self.Contents, expand([[
 			projectDirPath = "";
 			projectRoot = "";
@@ -515,6 +523,87 @@ end
 local XcodeProjectMetaTable = {  __index = XcodeProjectMetaTable  }
 
 function XcodeProjectMetaTable:Write(outputPath)
+	local projectsPath = os.path.combine(outputPath, self.ProjectName .. '.xcodeproj/')
+	local filename = os.path.combine(outputPath, projectsPath .. 'project.pbxproj')
+
+	local info = XcodeHelper_GetProjectExportInfo(self.ProjectName)
+	info.Filename = filename
+
+	local project = Projects[self.ProjectName]
+
+	--project._insertedapp = nil
+
+	-- Write header.
+	table.insert(self.Contents, [[
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+]])
+
+	-- Build all targets
+	local allTargets = { project }
+	if project.Name ~= buildWorkspaceName  and  project.Name ~= updateWorkspaceName then
+		local jamProject = deepcopy(project)
+		jamProject.Name = '!clean:' .. project.Name
+		Projects[jamProject.Name] = project
+		jamProject.TargetName = 'clean:' .. project.Name
+		jamProject.Options = nil
+		jamProject.SourcesTree = nil
+		jamProject.XcodeProjectType = 'legacy'
+		allTargets[#allTargets + 1] = jamProject
+	end
+
+	table.sort(allTargets, function(left, right) return left.Name:lower() < right.Name:lower() end)
+
+	--self:_AppendXcodeproj(workspace.ProjectTree)
+	--workspace.ProjectTree.folder = self.Name .. '.workspace'
+	--local workspaceTree = { workspace.ProjectTree }
+	--XcodeHelper_AssignEntryUuids(info.EntryUuids, workspaceTree, '')
+	project.SourcesTree.folder = project.Name
+	local projectTree = { project.SourcesTree }
+	XcodeHelper_AssignEntryUuids(info.EntryUuids, projectTree, '')
+	info.GroupUuid = info.EntryUuids[project.Name .. '/']
+	self.EntryUuids = info.EntryUuids
+
+	-- Write PBXFileReferences.
+	table.insert(self.Contents, [[
+/* Begin PBXFileReference section */
+]])
+	XcodeHelper_WritePBXFileReferences(self, project.SourcesTree)
+	table.insert(self.Contents, [[
+/* End PBXFileReference section */
+
+]])
+
+	-- Write PBXGroups.
+	table.insert(self.Contents, '/* Begin PBXGroup section */\n')
+	XcodeHelper_WritePBXGroups(self.Contents, self.EntryUuids, projectTree, '')
+	table.insert(self.Contents, '/* End PBXGroup section */\n\n')
+
+	-- Write PBXLegacyTarget.
+	local projectsPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_')
+	XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projectsPath)
+
+	-- Write PBXProject.
+	XcodeHelper_WritePBXProject(self, info, allTargets)
+
+	for curProject in ivalues(allTargets) do
+		XcodeHelper_WriteXCBuildConfigurations(self, info, curProject.Name)
+		XcodeHelper_WriteXCConfigurationLists(self, info, curProject.Name)
+	end
+
+	table.insert(self.Contents, "\t};\n")
+	table.insert(self.Contents, "\trootObject = " .. info.ProjectUuid .. " /* Project object */;\n")
+	table.insert(self.Contents, "}\n")
+
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
+	WriteFileIfModified(filename, self.Contents)
+
 	return
 	---------------------------------------------------------------------------
 	-- Write username.pbxuser with the executable settings
@@ -659,6 +748,34 @@ end
 
 local XcodeWorkspaceMetaTable = {  __index = XcodeWorkspaceMetaTable  }
 
+function XcodeWorkspaceMetaTable:_GatherWorkspaceFolders(folder, folderList, fullPath)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			local workspaceFolder = fullPath .. '\\' .. entry.folder
+			folderList[#folderList + 1] = workspaceFolder
+			self:_GatherWorkspaceFolders(entry, folderList, workspaceFolder)
+		end
+	end
+end
+
+
+function XcodeWorkspaceMetaTable:_WriteNestedProjects(folder, tabs)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			self.Contents[#self.Contents + 1] = tabs .. '<Group\n'
+			self.Contents[#self.Contents + 1] = tabs .. '   location = "container:"\n'
+			self.Contents[#self.Contents + 1] = tabs .. '   name = "' .. entry.folder .. '">\n'
+			self:_WriteNestedProjects(entry, tabs .. '   ')
+			self.Contents[#self.Contents + 1] = tabs .. '</Group>\n'
+		else
+			self.Contents[#self.Contents + 1] = tabs .. '<FileRef\n'
+			self.Contents[#self.Contents + 1] = tabs .. '   location = "absolute:' .. ProjectExportInfo[entry:lower()].Filename:gsub('/project.pbxproj', '') .. '">\n'
+			self.Contents[#self.Contents + 1] = tabs .. '</FileRef>\n'
+		end
+	end
+end
+
+
 function XcodeWorkspaceMetaTable:_AppendXcodeproj(folder)
 	for index = 1, #folder do
 		local entry = folder[index]
@@ -678,12 +795,58 @@ end
 
 
 function XcodeWorkspaceMetaTable:Write(outputPath)
-	local projectsPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_')
+	--local projectsPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_')
+
+	local filename = os.path.combine(outputPath, self.Name .. '.xcworkspace/contents.xcworkspacedata')
+
+	local workspace = Workspaces[self.Name]
+
+	--os.mkdir(filename)
+
+	self.Contents[#self.Contents + 1] = [[
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+]]
+
+	-- Write the folders we use.
+	local folderList = {}
+	self:_GatherWorkspaceFolders(workspace.ProjectTree, folderList, '')
+	self:_WriteNestedProjects(workspace.ProjectTree, '   ')
+
+	self.Contents[#self.Contents + 1] = [[
+</Workspace>
+]]
+
+	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
+	WriteFileIfModified(filename, self.Contents)
+	if true then return end
+--[==[
+	for solutionFolderName in ivalues(folderList) do
+		local info = ProjectExportInfo[solutionFolderName]
+		if not info then
+			info =
+			{
+				Name = solutionFolderName:match('.*\\(.+)'),
+				Filename = solutionFolderName,
+				Uuid = '{' .. uuid.new():upper() .. '}'
+			}
+			ProjectExportInfo[solutionFolderName] = info
+		end
+
+		table.insert(self.Contents, expand([[
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "$(Name)", "$(Name)", "$(Uuid)"
+EndProject
+]], info))
+	end
+--]==]
+	contents[#contents + 1] = [[
+</Workspace>
+]]
 
 	local filename = os.path.combine(outputPath, self.Name .. '.workspace.xcodeproj/project.pbxproj')
 	os.mkdir(filename)
 
-	local workspace = Workspaces[self.Name]
 	local workspaceName = self.Name .. '.workspace'
 
 	for projectName, project in pairs(Projects) do

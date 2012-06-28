@@ -11,7 +11,9 @@ if not OS  or  not OSPLAT  or  not JAM_EXECUTABLE then
 end
 
 require 'list'
+local savePrint = print
 require 'getopt'
+print = savePrint
 require 'ex'
 require 'md5'
 require 'uuid'
