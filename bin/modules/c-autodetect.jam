@@ -43,8 +43,11 @@ rule C.ToolchainSpecKeys TOOLCHAIN_SPEC_KEYS {
 	}
 }
 
-rule C.ToolchainHelper TOOLCHAIN_MODULE_NAME {
-	IncludeModule c-compilers/configs/_$(TOOLCHAIN_MODULE_NAME) : force ;
+rule C.ToolchainHelper TOOLCHAIN_MODULE_NAME_LIST {
+	local module ;
+	for module in $(TOOLCHAIN_MODULE_NAME_LIST) {
+		IncludeModule c-compilers/configs/_$(module) : force ;
+	}
 }
 
 rule C.Toolchain TOOLCHAIN_SPEC {
