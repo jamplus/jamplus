@@ -1,4 +1,0 @@
-IncludeModule c-compilers/c-gcc-autodetect ;
-if [ C.AutoDetect ] {
-	return ;
-}

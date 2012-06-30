@@ -1,1 +1,1 @@
-IncludeModule c-compilers/iphone-gcc ;
+IncludeModule c-compilers/macosx-gcc ;

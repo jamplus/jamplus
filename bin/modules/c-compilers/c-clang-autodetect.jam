@@ -1,39 +1,39 @@
-if ! [ RuleExists FindGCC ] {
-	rule FindGCC {
+if ! [ RuleExists FindClang ] {
+	rule FindClang {
 		local PATHS =
 			$(PATH)
 		;
 
-		local gcc = [ Glob $(PATHS) : gcc ] ;
-		if ! $(gcc)
-		{
+		local clang = [ Glob $(PATHS) : clang ] ;
+		if ! $(clang) {
 			return ;
 		}
-		return [ Match (.+)/ : $(gcc[1]) ] ;
+
+		return [ Match (.+)/ : $(clang[1]) ] ;
 	}
 }
 
 rule C.AutoDetect {
-	local COMPILER_BIN_PATH = [ FindGCC ] ;
+	local COMPILER_BIN_PATH = [ FindClang ] ;
 
 	if ! $(COMPILER_BIN_PATH) {
 		return ;
 	}
 
-	C.COMPILER = gcc ;
+	C.COMPILER = clang ;
 
-	C.COMPILER_SUITE = gcc ;
+	C.COMPILER_SUITE = clang ;
 	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
 
 	COMPILER_BIN_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH) ;
 
-	IncludeModule c-compilers/c-gcc ;
+	IncludeModule c-compilers/c-clang ;
 
 	if $(PLATFORM) != *  &&  $(CONFIG) != * {
-		IncludeModule c-compilers/$(PLATFORM)-gcc ;
+		IncludeModule c-compilers/$(PLATFORM)-clang ;
 	}
 
-	C.COMPILER_SUITE = gcc ;
+	C.COMPILER_SUITE = clang ;
 	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
 
 	return $(C.COMPILER) ;

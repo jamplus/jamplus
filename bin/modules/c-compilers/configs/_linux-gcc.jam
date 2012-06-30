@@ -1,2 +1,6 @@
+IncludeModule c-compilers/c-gcc-autodetect ;
+
+C.AutoDetect ;
+
 C.ToolchainHelper gcc ;
 

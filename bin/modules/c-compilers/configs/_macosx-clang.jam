@@ -1,4 +1,4 @@
-C.ToolchainHelper gcc ;
+C.ToolchainHelper clang ;
 
 SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dylib ;
 SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a .dylib ;

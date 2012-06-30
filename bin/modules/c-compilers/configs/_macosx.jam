@@ -1,0 +1,31 @@
+if ! [ RuleExists FindClang ] {
+	rule FindClang {
+		local PATHS =
+			/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+			$(PATH)
+		;
+
+		local clang = [ Glob $(PATHS) : clang ] ;
+		if ! $(clang) {
+			return ;
+		}
+
+		return [ Match (.+)/ : $(clang[1]) ] ;
+	}
+}
+
+IncludeModule c-compilers/c-clang-autodetect ;
+if ! [ C.AutoDetect ] {
+	Exit * Unable to detect clang compiler. ;
+}
+
+C.ToolchainHelper clang ;
+
+local COMPILER_BIN_PATH = $(COMPILER_BIN_PATH:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/libtool ;
+USE_ARCHIVE2 on $(C.COMPILER_SUITE_SYMBOL) = true ;
+SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dylib ;
+SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a .dylib ;
+
+C.MacOSX_SDK $(SDK_VERSION) ;
+

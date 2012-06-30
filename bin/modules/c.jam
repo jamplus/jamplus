@@ -753,7 +753,11 @@ rule C._LibraryFromObjects OBJECTS {
 	UseCommandLine $(_l) : $(libFlags) $(_s) ;
 
 	UseFileCache $(_l) : code ;
-	C.$(C.COMPILER_SUITE).Archive $(_l) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
+	if $(USE_ARCHIVE2:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+		C.$(C.COMPILER_SUITE).Archive2 $(_l) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
+	} else {
+		C.$(C.COMPILER_SUITE).Archive $(_l) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
+	}
 
 	if $(C.RANLIB) { C.$(C.COMPILER_SUITE).Ranlib $(_l) : : $(C.COMPILER_SUITE_SYMBOL) ; }
 

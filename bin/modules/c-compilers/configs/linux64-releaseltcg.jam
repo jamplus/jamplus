@@ -1,6 +1,5 @@
 C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
-IncludeModule c-compilers/c-gcc-autodetect ;
-C.ToolchainHelper linux-gcc ;
+C.ToolchainHelper linux-gcc Global_RELEASE ;
 
 C.Flags * : CC	: -g -O3 -fomit-frame-pointer -fstrength-reduce -m64 ;
 C.Flags * : C++	: -g -O3 -fomit-frame-pointer -fstrength-reduce -m64 ;
