@@ -7,10 +7,6 @@
 
 IncludeModule copyfile ;
 
-if $(OS) = MACOSX {
-	C.MacOSX_SDK * : macosx : 10.6 ;
-}
-
 if $(VMS) 		{ LOCATE_TARGET ?= [.binvms] ; }
 else if $(MAC) 	{ LOCATE_TARGET ?= ":bin.mac" ; }
 else 			{ LOCATE_TARGET ?= bin.$(OSFULL[1]:L)/$(CONFIG) ; }
@@ -207,9 +203,7 @@ else if $(UNIX)
 #	}
 #	CCFLAGS += -Wall ;
 
-	if $(OS) != LINUX {
-		C.LinkPrebuiltLibraries jam : stdc++-static ;
-	} else {
+	if $(OS) = LINUX {
 		C.LinkFlags jam : -ldl ;
 	}
 }
