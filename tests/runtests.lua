@@ -273,6 +273,7 @@ function TestFiles(expectedFiles)
 	local expectedFilesMap = {}
 	for _, fileName in ipairs(expectedFiles) do
 		fileName = fileName:gsub('$PlatformDir', PlatformDir):gsub('$%(SUFEXE%)', SUFEXE)
+		fileName = fileName:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '-release')
 		if fileName:match('vc.pdb$') then fileName = '?' .. fileName end
 		if fileName:sub(1, 1) == '?' then
 			expectedFilesMap[fileName:sub(2)] = '?'

@@ -314,30 +314,30 @@ function Test()
 			local pattern = [[
 *** found 54 target(s)...
 *** updating 32 target(s)...
-@ C.gcc.C++ <macosx32!release:liba>rootfile.o 
-@ C.gcc.C++ <macosx32!release:liba>treea/treeb/deepfile.o 
-@ C.gcc.C++ <macosx32!release:liba>../outer/outer.o 
-@ C.gcc.Archive <macosx32!release:liba>liba.a 
-!NEXT!@ C.gcc.Ranlib <macosx32!release:liba>liba.a 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):liba>rootfile.o 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):liba>treea/treeb/deepfile.o 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):liba>../outer/outer.o 
+@ C.gcc.Archive <$(PLATFORM_CONFIG):liba>liba.a 
+!NEXT!@ C.gcc.Ranlib <$(PLATFORM_CONFIG):liba>liba.a 
 *** updated 8 target(s)...
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libb>filea.o 
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libb>fileb.o 
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libb>filec.o 
-@ C.gcc.C++ <macosx32!release:libb>onelevel/oneleveldeeper.o 
-@ C.gcc.C++ <macosx32!release:libb>../outerb/outer.o 
-@ C.gcc.Archive <macosx32!release:libb>libb.a 
-!NEXT!@ C.gcc.Ranlib <macosx32!release:libb>libb.a 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libb>filea.o 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libb>fileb.o 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libb>filec.o 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):libb>onelevel/oneleveldeeper.o 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):libb>../outerb/outer.o 
+@ C.gcc.Archive <$(PLATFORM_CONFIG):libb>libb.a 
+!NEXT!@ C.gcc.Ranlib <$(PLATFORM_CONFIG):libb>libb.a 
 *** updated 10 target(s)...
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/Saving/Saving1.o 
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/Saving/Saving3.o 
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/Saving/SavingB.o 
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/memory/memorya.o 
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/memory/memoryb.o 
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/integral/integral2.o 
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/integral/integral1.o 
-!OOOGROUP!@ C.gcc.C++ <macosx32!release:libc>src/Loading/Loading.o 
-@ C.gcc.Archive <macosx32!release:libc>libc.a 
-!NEXT!@ C.gcc.Ranlib <macosx32!release:libc>libc.a 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libc>src/Saving/Saving1.o 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libc>src/Saving/Saving3.o 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libc>src/Saving/SavingB.o 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libc>src/memory/memorya.o 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libc>src/memory/memoryb.o 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libc>src/integral/integral2.o 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libc>src/integral/integral1.o 
+!OOOGROUP!@ C.gcc.C++ <$(PLATFORM_CONFIG):libc>src/Loading/Loading.o 
+@ C.gcc.Archive <$(PLATFORM_CONFIG):libc>libc.a 
+!NEXT!@ C.gcc.Ranlib <$(PLATFORM_CONFIG):libc>libc.a 
 *** updated 14 target(s)...
 ]]
 

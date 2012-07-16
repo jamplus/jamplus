@@ -110,10 +110,10 @@ Building appA...
 Building appB... 
 *** found 15 target(s)...
 *** updating 6 target(s)...
-@ C.gcc.C++ <macosx32!release:appA>appA.o 
-@ C.gcc.Link <macosx32!release:appA>appA$(SUFEXE) 
-@ C.gcc.C++ <macosx32!release:appB>appB.o 
-@ C.gcc.Link <macosx32!release:appB>appB$(SUFEXE) 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):appA>appA.o 
+@ C.gcc.Link <$(PLATFORM_CONFIG):appA>appA$(SUFEXE) 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):appB>appB.o 
+@ C.gcc.Link <$(PLATFORM_CONFIG):appB>appB$(SUFEXE) 
 *** updated 6 target(s)...
 ]]
 
@@ -124,10 +124,10 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32-release/appA/appA.o',
-			'macosx32-release/appA/appA.release',
-			'macosx32-release/appB/appB.o',
-			'macosx32-release/appB/appB.release',
+			'$(PLATFORM_CONFIG)/appA/appA.o',
+			'$(PLATFORM_CONFIG)/appA/appA.release',
+			'$(PLATFORM_CONFIG)/appB/appB.o',
+			'$(PLATFORM_CONFIG)/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -136,8 +136,8 @@ Building appA...
 Building appB... 
 *** found 6 target(s)...
 *** updating 2 target(s)...
-@ Clean <macosx32!release>clean:appA 
-@ Clean <macosx32!release>clean:appB 
+@ Clean <$(PLATFORM_CONFIG)>clean:appA 
+@ Clean <$(PLATFORM_CONFIG)>clean:appB 
 *** updated 2 target(s)...
 ]]
 		TestPattern(cleanPattern, RunJam{ 'clean' })
@@ -148,8 +148,8 @@ Building appB...
 Building appA... 
 *** found 7 target(s)...
 *** updating 3 target(s)...
-@ C.gcc.C++ <macosx32!release:appA>appA.o 
-@ C.gcc.Link <macosx32!release:appA>appA$(SUFEXE) 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):appA>appA.o 
+@ C.gcc.Link <$(PLATFORM_CONFIG):appA>appA$(SUFEXE) 
 *** updated 3 target(s)...
 ]]
 
@@ -159,8 +159,8 @@ Building appA...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32-release/appA/appA.o',
-			'macosx32-release/appA/appA.release',
+			'$(PLATFORM_CONFIG)/appA/appA.o',
+			'$(PLATFORM_CONFIG)/appA/appA.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -168,8 +168,8 @@ Building appA...
 Building appB... 
 *** found 7 target(s)...
 *** updating 3 target(s)...
-@ C.gcc.C++ <macosx32!release:appB>appB.o 
-@ C.gcc.Link <macosx32!release:appB>appB$(SUFEXE)
+@ C.gcc.C++ <$(PLATFORM_CONFIG):appB>appB.o 
+@ C.gcc.Link <$(PLATFORM_CONFIG):appB>appB$(SUFEXE)
 *** updated 3 target(s)...
 ]]
 
@@ -179,10 +179,10 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32-release/appA/appA.o',
-			'macosx32-release/appA/appA.release',
-			'macosx32-release/appB/appB.o',
-			'macosx32-release/appB/appB.release',
+			'$(PLATFORM_CONFIG)/appA/appA.o',
+			'$(PLATFORM_CONFIG)/appA/appA.release',
+			'$(PLATFORM_CONFIG)/appB/appB.o',
+			'$(PLATFORM_CONFIG)/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -192,8 +192,8 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32-release/appB/appB.o',
-			'macosx32-release/appB/appB.release',
+			'$(PLATFORM_CONFIG)/appB/appB.o',
+			'$(PLATFORM_CONFIG)/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
