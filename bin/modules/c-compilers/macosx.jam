@@ -33,6 +33,7 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 	local isysroot ;
 	local flags ;
 	local defaultversionmin ;
+	local sdkroot ;
 	switch $(SDK_PLATFORM) {
 		case macosx :
 			developerRoot = /Developer/SDKs ;
@@ -41,27 +42,27 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 				case 10.4 :
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
 					defaultversionmin = 10.4 ;
-					XCODE_SDKROOT = macosx10.4 ;
+					sdkroot = macosx10.4 ;
 
 				case 10.4u :
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
 					defaultversionmin = 10.4 ;
-					XCODE_SDKROOT = macosx10.4 ;
+					sdkroot = macosx10.4 ;
 
 				case 10.5 :
 					isysroot = $(developerRoot)/MacOSX10.5.sdk ;
 					defaultversionmin = 10.5 ;
-					XCODE_SDKROOT = macosx10.5 ;
+					sdkroot = macosx10.5 ;
 
 				case 10.6 :
 					isysroot = $(developerRoot)/MacOSX10.6.sdk ;
 					defaultversionmin = 10.6 ;
-					XCODE_SDKROOT = macosx10.6 ;
+					sdkroot = macosx10.6 ;
 				
 				case 10.7 :
 					isysroot = $(developerRoot)/MacOSX10.7.sdk ;
 					defaultversionmin = 10.7 ;
-					XCODE_SDKROOT = macosx10.7 ;
+					sdkroot = macosx10.7 ;
 				
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -77,17 +78,17 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
 					flags += -arch armv6 ;
-					XCODE_SDKROOT = iphoneos4.3 ;
+					sdkroot = iphoneos4.3 ;
 
 				case 5.0 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS5.0.sdk ;
 					flags += -arch armv6 ; 
-					XCODE_SDKROOT = iphoneos5.0 ;
+					sdkroot = iphoneos5.0 ;
 
 				case 5.1 :
 					isysroot = @(../../SDKs/iPhoneOS5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
 					flags += -arch armv6 ; 
-					XCODE_SDKROOT = iphoneos5.1 ;
+					sdkroot = iphoneos5.1 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -103,15 +104,15 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 ;
 					defaultversionmin = 10.6 ;
-					XCODE_SDKROOT = iphoneos4.3 ;
+					sdkroot = iphoneos4.3 ;
 
 				case 5.0 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator5.0.sdk ;
-					XCODE_SDKROOT = iphoneos5.0 ;
+					sdkroot = iphoneos5.0 ;
 
 				case 5.1 :
 					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
-					XCODE_SDKROOT = iphoneos5.1 ;
+					sdkroot = iphoneos5.1 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -128,15 +129,15 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
 					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 -arch i386 ;
-					XCODE_SDKROOT = iphoneos4.3 ;
+					sdkroot = iphoneos4.3 ;
 
 				case 5.0 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator5.0.sdk ;
-					XCODE_SDKROOT = iphoneos5.0 ;
+					sdkroot = iphoneos5.0 ;
 
 				case 5.1 :
 					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
-					XCODE_SDKROOT = iphoneos5.1 ;
+					sdkroot = iphoneos5.1 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -151,15 +152,15 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
-					XCODE_SDKROOT = iphoneos4.3 ;
+					sdkroot = iphoneos4.3 ;
 
 				case 5.0 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS5.0.sdk ;
-					XCODE_SDKROOT = iphoneos5.0 ;
+					sdkroot = iphoneos5.0 ;
 
 				case 5.1 :
 					isysroot = @(../../SDKs/iPhoneOS5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
-					XCODE_SDKROOT = iphoneos5.1 ;
+					sdkroot = iphoneos5.1 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -177,6 +178,7 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;	
 	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION_MIN) ;
+	XCODE_SDKROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sdkroot) ;
 
 	flags += -gdwarf-2 ;
 
@@ -188,7 +190,7 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 	C.LinkFlags * : -isysroot $(isysroot) $(flags) ;
 
 	if $(TARGETINFO_LOCATE) {
-		Contents += "Projects[ [[$(TARGET)]] ].XCODE_SDKROOT[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(XCODE_SDKROOT)]]
+		Contents += "Projects[ [[C.*]] ].XCODE_SDKROOT[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(sdkroot)]]
 
 " ;
 	}
