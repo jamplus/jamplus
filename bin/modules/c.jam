@@ -1385,8 +1385,7 @@ rule C.OutputSuffix TARGET : SUFFIX {
 	C.ActiveTarget $(TARGET) ;
 	local NO_DOT_SUFFIX = [ Match \\.?(.+) : $(SUFFIX) ] ;
 	SUFFIX = .$(NO_DOT_SUFFIX) ;
-	local gristedTarget = $(TARGET:G=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-	OUTPUTSUFFIX on $(gristedTarget) = $(SUFFIX) ;
+	OUTPUTSUFFIX on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SUFFIX) ;
 }
 
 
