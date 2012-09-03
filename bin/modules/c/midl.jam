@@ -1,42 +1,13 @@
 if ! $(TARGETINFO_LOCATE)
 {
 
-switch $(C.COMPILER)
-{
-	case vc6 :
-		local binPath = @($(MSVCBIN)/:R=) ;
-		LINK_PATHS += $(binPath) ;
-		MIDL = "$(binPath)/MIDL" ;
-		MIDLFLAGS.debug on * = /nologo /D "_DEBUG" /mktyplib203 /env win32 ;
-		MIDLFLAGS.release on * = /nologo /D "NDEBUG" /mktyplib203 /env win32 ;
-
-	case vs2005 :
-		local binPath = @($(MSVCNT)/../Common7/Tools/Bin:R=) ;
-		LINK_PATHS += $(binPath) ;
-		MIDL = "$(binPath)/Midl" ;
-		MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
-		MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
-
-	case vs2008 :
-		LINK_PATHS += $(MSSDK)/bin ;
-		MIDL = "$(MSSDK)/bin/midl" ;
-		MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
-		MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
-
-	case vs2010 :
-		LINK_PATHS += $(MSSDK)/bin ;
-		MIDL = "$(MSSDK)/bin/midl" ;
-		MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
-		MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
-}
-
 # OPTIONS = proxy ;
 rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 {
 	ActiveTarget $(PARENT) ;
 
 	BASE_NAME = $(BASE_NAME:L) ;
-	BASE_NAME = [ C.GristFiles $(BASE_NAME) ] ;
+	BASE_NAME = [ C.GristFiles $(PARENT) : $(BASE_NAME) ] ;
 	local tlbFile = $(BASE_NAME:S=.tlb) ;
 	local hFile ;
 	if $(C.COMPILER) = vc6 {
@@ -62,8 +33,9 @@ rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 		MakeLocate $(targets) : $(LOCATE_TARGET) ;
 
 		local flags ;
-		on $(PARENT) flags += $(MIDLFLAGS.$(CONFIG)) $(MIDLFLAGS.*) ;
-		on C.* flags += $(MIDLFLAGS.$(CONFIG)) $(MIDLFLAGS.*) ;
+#		on $(PARENT) flags += $(MIDLFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+flags += $(MIDLFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+#		on C.* flags += $(MIDLFLAGS.$(CONFIG)) $(MIDLFLAGS.*) ;
 
 		if $(C.COMPILER) = vc6 {
 			flags += /tlb $(tlbFile:T) /h $(hFile:T) ;
@@ -75,6 +47,7 @@ rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 			}
 		}
 
+		MIDLINCLUDE on $(targets) = $(tlbFile:TD) ;
 		FLAGS on $(targets) = $(flags) ;
 	}
 	else
@@ -98,14 +71,61 @@ rule C.MidlCompiler PARENT : SOURCE
 {
 	PARENT = [ ActiveTarget $(PARENT) ] ;
 
-	SOURCE = [ C.GristFiles $(SOURCE) ] ;
+	SOURCE = [ C.GristFiles $(PARENT) : $(SOURCE) ] ;
 	SearchSource $(SOURCE) ;
 
 	local targets = [ C.MidlFlags $(PARENT) : $(SOURCE) ] ;
-
 	Depends $(targets) : $(SOURCE) ;
 
-	C.Midl $(targets) : $(SOURCE) ;
+	local MIDL ;
+	local MIDLFLAGS ;
+
+	switch $(C.COMPILER)
+	{
+		case vc6 :
+			local binPath = @($(MSVCBIN)/:R=) ;
+			LINK_PATHS += $(binPath) ;
+			MIDL = "$(binPath)/MIDL" ;
+			MIDLFLAGS.debug on * = /nologo /D "_DEBUG" /mktyplib203 /env win32 ;
+			MIDLFLAGS.release on * = /nologo /D "NDEBUG" /mktyplib203 /env win32 ;
+
+		case vs2005 :
+			local binPath = @($(MSVCNT)/../Common7/Tools/Bin:R=) ;
+			LINK_PATHS += $(binPath) ;
+			MIDL = "$(binPath)/Midl" ;
+			MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
+			MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
+
+		case vs2008 :
+			LINK_PATHS += $(MSSDK)/bin ;
+			MIDL = "$(MSSDK)/bin/midl" ;
+			MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
+			MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
+
+		case vs2010 :
+			LINK_PATHS += $(MSSDK)/bin ;
+			MIDL = "$(MSSDK:Z=$(C.COMPILER_SUITE_SYMBOL))/bin/midl" ;
+			switch $(CONFIG) {
+				case debug :
+					MIDLFLAGS = /D "_DEBUG" /char signed /env win32 /Oicf ;
+				case release :
+					MIDLFLAGS = /D "NDEBUG" /char signed /env win32 ;
+			}
+
+		case vs2012 :
+			LINK_PATHS += $(MSSDK)/bin ;
+			MIDL = "$(MSSDK:Z=$(C.COMPILER_SUITE_SYMBOL))/bin/x86/midl" ;
+			switch $(CONFIG) {
+				case debug :
+					MIDLFLAGS = /D "_DEBUG" /char signed /env win32 /Oicf ;
+				case release :
+					MIDLFLAGS = /D "NDEBUG" /char signed /env win32 ;
+			}
+	}
+
+	MIDL on $(C.COMPILER_SUITE_SYMBOL) = $(MIDL) ;
+	MIDLFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(MIDLFLAGS) ;
+	C.Midl $(targets) : $(SOURCE) : $(C.COMPILER_SUITE_SYMBOL) ;
 
 	return $(targets) ;
 }
