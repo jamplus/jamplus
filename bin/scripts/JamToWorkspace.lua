@@ -27,6 +27,7 @@ jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
 
 Compilers =
 {
+	{ 'vs2012', 'Visual Studio 2012' },
 	{ 'vs2010', 'Visual Studio 2010' },
 	{ 'vs2008', 'Visual Studio 2008' },
 	{ 'vs2005', 'Visual Studio 2005' },
@@ -303,6 +304,7 @@ require 'ide/vs2003'
 require 'ide/vs2005'
 require 'ide/vs2008'
 require 'ide/vs2010'
+require 'ide/vs2012'
 require 'ide/codeblocks'
 require 'ide/xcode'
 
@@ -379,6 +381,19 @@ Exporters =
 		Options =
 		{
 			vs2010 = true,
+		}
+	},
+
+	vs2012 =
+	{
+		Initialize = VisualStudio201xInitialize,
+		ProjectExporter = VisualStudio201xProject,
+		WorkspaceExporter = VisualStudio201xSolution,
+		Shutdown = VisualStudio201xShutdown,
+		Description = 'Generate Visual Studio 2012 solutions and projects.',
+		Options =
+		{
+			vs2012 = true,
 		}
 	},
 

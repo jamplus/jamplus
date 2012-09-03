@@ -1,5 +1,6 @@
-VISUAL_STUDIO_FORCE_VERSION = 10.0 ;
+#VISUAL_STUDIO_FORCE_VERSION = 10.0 ;
 
+vs_versions.11.0 = vs2012 ;
 vs_versions.10.0 = vs2010 ;
 vs_versions.9.0 = vs2008 ;
 vs_versions.8.0 = vs2005 ;
@@ -11,6 +12,20 @@ rule FindVisualStudioHelper VERSION {
 	local compiler ;
 
 	switch $(VERSION) {
+		case 11.0 :
+			local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+			MSVCNT ?= [ W32_GETREG $(key) ] ;
+
+			VS110COMNTOOLS = $(VS110COMNTOOLS:J=" ") ;
+			if ! $(MSVCNT) && $(VS110COMNTOOLS) {
+				MSVCNT = $(VS110COMNTOOLS) ;
+			}
+			if $(MSVCNT) {
+				MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+				MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+				compiler = vs2012 ;
+			}
+
 		case 10.0 :
 			local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
 			MSVCNT ?= [ W32_GETREG $(key) ] ;
@@ -147,7 +162,7 @@ rule C.AutoDetect THE_COMPILER {
 
 	# Do we need to attempt to detect the compiler?
 	if ! $(THE_COMPILER)  ||  $(THE_COMPILER) = * {
-		for ver in $(VISUAL_STUDIO_FORCE_VERSION) 10.0 9.0 8.0 7.1 7.0 6.0 {
+		for ver in $(VISUAL_STUDIO_FORCE_VERSION) 11.0 10.0 9.0 8.0 7.1 7.0 6.0 {
 			C.COMPILER = [ FindVisualStudio $(ver) ] ;
 			if $(C.COMPILER) {
 				break ;
@@ -156,7 +171,7 @@ rule C.AutoDetect THE_COMPILER {
 		if ! $(C.COMPILER) {
 			return ;
 		}
-	} else if $(C.COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 {
+	} else if $(C.COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 vs2012 {
 		switch $(C.COMPILER)
 		{
 			case vc6 :
@@ -170,6 +185,8 @@ rule C.AutoDetect THE_COMPILER {
 				C.COMPILER = [ FindVisualStudio 9.0 ] ;
 			case vs2010 :
 				C.COMPILER = [ FindVisualStudio 10.0 ] ;
+			case vs2012 :
+				C.COMPILER = [ FindVisualStudio 11.0 ] ;
 		}
 	}
 

@@ -1,6 +1,14 @@
 rule C.win64.vc.AutoDetect COMPILER {
 	local rc_nologo ;
 	switch $(COMPILER) {
+		case vs2012 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
+			MSSDK = [ W32_GETREG $(key) ] ;
+			MSSDK ?= $(MSVCNT) ;
+			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/Lib/x64" ;
+			rc_nologo = ;
+
 		case vs2010 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Microsoft SDKs" Windows CurrentInstallFolder ;
 			MSSDK = [ W32_GETREG $(key) ] ;

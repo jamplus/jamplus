@@ -73,14 +73,22 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 ]])
 
 	-- Write Globals
-	table.insert(self.Contents, expand([[
+	do
+		local extraInfo = {}
+		if self.Options.vs2010 then
+			extraInfo.TargetFrameworkVersion = "v4.0"
+		elseif self.Options.vs2012 then
+			extraInfo.TargetFrameworkVersion = "v4.5"
+		end
+		table.insert(self.Contents, expand([[
   <PropertyGroup Label="Globals">
     <ProjectGUID>$(Uuid)</ProjectGUID>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>$(TargetFrameworkVersion)</TargetFrameworkVersion>
     <Keyword>MakeFileProj</Keyword>
     <ProjectName>$(Name)</ProjectName>
   </PropertyGroup>
-]], info))
+]], extraInfo, info))
+	end
 
 	table.insert(self.Contents, [[
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -139,8 +147,15 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
     <NMakeReBuildCommandLine>$(RebuildCommandLine)</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>$(Defines)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(Includes)</NMakeIncludeSearchPath>
-  </PropertyGroup>
 ]==], configInfo, info, _G))
+			if self.Options.vs2012 then
+				self.Contents[#self.Contents + 1] = [[
+    <PlatformToolset>v110</PlatformToolset>
+]]
+			end
+			self.Contents[#self.Contents + 1] = [[
+  </PropertyGroup>
+]]
 		end
 	end
 
@@ -319,10 +334,17 @@ function VisualStudio201xSolutionMetaTable:Write(outputPath)
 	-- Write header.
 	table.insert(self.Contents, '\xef\xbb\xbf\n')
 
-	table.insert(self.Contents, [[
+	if self.Options.vs2010 then
+		table.insert(self.Contents, [[
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 ]])
+	elseif self.Options.vs2012 then
+		table.insert(self.Contents, [[
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+]])
+	end
 
 	-- Write projects.
 	for projectName in ivalues(workspace.Projects) do
