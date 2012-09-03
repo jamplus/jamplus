@@ -356,7 +356,7 @@ if $(LUA_BIN)
 				lua51_debug.dll
 				modules/ex.debug.dll
 				modules/filefind.debug.dll
-				modules/lua51-lanes.debug.dll
+				modules/lanes/core.debug.dll
 				modules/lxp.debug.dll
 				modules/md5.debug.dll
 				modules/struct.debug.dll
@@ -372,7 +372,7 @@ if $(LUA_BIN)
 				lua51.dll
 				modules/ex.dll
 				modules/filefind.dll
-				modules/lua51-lanes.dll
+				modules/lanes/core.dll
 				modules/lxp.dll
 				modules/md5.dll
 				modules/struct.dll
@@ -412,7 +412,7 @@ if $(LUA_BIN)
 				lua51_debug.so
 				lib/lua/5.1/ex.debug.$(MODULE_EXT)
 				lib/lua/5.1/filefind.debug.$(MODULE_EXT)
-				lib/lua/5.1/lua51-lanes.debug.$(MODULE_EXT)
+				lib/lua/5.1/lanes/core.debug.$(MODULE_EXT)
 				lib/lua/5.1/lxp.debug.$(MODULE_EXT)
 				lib/lua/5.1/md5.debug.$(MODULE_EXT)
 				lib/lua/5.1/struct.debug.$(MODULE_EXT)
@@ -427,7 +427,7 @@ if $(LUA_BIN)
 				lua51.so
 				lib/lua/5.1/ex.$(MODULE_EXT)
 				lib/lua/5.1/filefind.$(MODULE_EXT)
-				lib/lua/5.1/lua51-lanes.$(MODULE_EXT)
+				lib/lua/5.1/lanes/core.$(MODULE_EXT)
 				lib/lua/5.1/lxp.$(MODULE_EXT)
 				lib/lua/5.1/md5.$(MODULE_EXT)
 				lib/lua/5.1/struct.$(MODULE_EXT)

@@ -302,6 +302,8 @@ static int pmain (ls_lua_State *L)
     top = ls_lua_gettop(L);
     ret = ls_luaL_loadstring(L, "require 'lanes'");
     ls_lua_callhelper(top, ret);
+    ret = ls_luaL_loadstring(L, "lanes.configure()");
+    ls_lua_callhelper(top, ret);
 
 	ls_lua_newtable(L);
 	ls_lua_setfield(L, LUA_GLOBALSINDEX, "LineFilters");
