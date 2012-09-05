@@ -62,9 +62,10 @@ if ! $(wxWidgets_ROOT)
 
 			wxWidgets_HDRS.* = $(wxWidgets_ROOT)/include ;
 
-			wxWidgets_COMMON_LIBRARIES = png tiff jpeg zlib regex expat ;
+			wxWidgets_COMMON_LIBRARIES = png tiff jpeg zlib expat scintilla ;
+			wxWidgets_COMMON_LIBRARIES_U = regex ;
 			wxWidgets_BASE_LIBRARIES = net odbc xml ;
-			wxWidgets_PLATFORM_LIBRARIES = adv aui core dbgrid html media qa richtext xrc ;
+			wxWidgets_PLATFORM_LIBRARIES = adv aui core dbgrid gl html media qa richtext xrc ;
 			wxWidgets_PLATFORM_PREFIX = msw ;
 			wxWidgets_CONTRIB_LIBRARIES = stc ;
 
@@ -87,14 +88,32 @@ if ! $(wxWidgets_ROOT)
 					wxWidgets_VERSION = [ Match $(wxWidgets_LIB_DIR)/wxbase([0-9][0-9]) : $(wxbase.lib[1]) ] ;
 				}
 
-				wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswd ;
-				wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/msw ;
-				wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/msw ;
+				if $(wxWidgets_VERSION) = 29 {
+					wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswud ;
+					wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/mswu ;
+					wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/mswu ;
+				} else {
+					wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswd ;
+					wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/msw ;
+					wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/msw ;
+				}
 			}
 
-			wxWidgets_POSTFIX.debug = d ;
-			wxWidgets_POSTFIX.release = "" ;
-			wxWidgets_POSTFIX.releaseltcg = "" ;
+			if $(wxWidgets_VERSION) = 29 {
+				wxWidgets_COMMON_LIBRARIES += scintilla ;
+
+				wxWidgets_POSTFIX.debug = ud ;
+				wxWidgets_POSTFIX.release = "u" ;
+				wxWidgets_POSTFIX.releaseltcg = "u" ;
+			} else {
+				wxWidgets_POSTFIX.debug = d ;
+				wxWidgets_POSTFIX.release = "" ;
+				wxWidgets_POSTFIX.releaseltcg = "" ;
+			}
+
+			wxWidgets_POSTFIX_SIMPLE.debug = "d" ;
+			wxWidgets_POSTFIX_SIMPLE.release = "" ;
+			wxWidgets_POSTFIX_SIMPLE.releaseltcg = "" ;
 
 			wxComponents_ROOT_DIR ?= @(../wxComponents:R=$(wxWidgets_ROOT)) ;
 
@@ -144,46 +163,51 @@ rule C.UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 		}
 	}
 
-	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.*) : * ;
-	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.$(CONFIG)) : $(CONFIG) ;
+	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.*) ;
+	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.$(CONFIG)) ;
 	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) : * ;
 	if $(MSVCNT) {
 		C.RcIncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) ;
 	}
-	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.$(CONFIG)) : $(CONFIG) ;
+	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.$(CONFIG)) ;
 
 	if linklibs in $(OPTIONS)
 	{
 		if $(NT) {
 			local postfix = $(wxWidgets_POSTFIX.$(CONFIG)) ;
+			local postfix_simple = $(wxWidgets_POSTFIX_SIMPLE.$(CONFIG)) ;
 
 			local component ;
-			for component in $(COMPONENTS) $(wxWidgets_COMMON_LIBRARIES)
+			for component in $(COMPONENTS) $(wxWidgets_COMMON_LIBRARIES) $(wxWidgets_COMMON_LIBRARIES_U)
 			{
 				if $(component) = base
 				{
-					C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix) : $(CONFIG) ;
+					C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix) ;
 				}
 				else if $(component) in $(wxWidgets_BASE_LIBRARIES)
 				{
-					C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
+					C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix)_$(component) ;
 				}
 				else if $(component) in $(wxWidgets_COMMON_LIBRARIES)
 				{
-					C.LinkPrebuiltLibraries $(TARGETS) : wx$(component)$(postfix) : $(CONFIG) ;
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(component)$(postfix_simple) ;
+				}
+				else if $(component) in $(wxWidgets_COMMON_LIBRARIES_U)
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(component)$(postfix) ;
 				}
 				else if $(component) in $(wxWidgets_PLATFORM_LIBRARIES)
 				{
-					C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) ;
 				}
 				else if $(component) in $(wxWidgets_CONTRIB_LIBRARIES)
 				{
-					C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) : $(CONFIG) ;
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) ;
 				}
 			}
 
 			C.LinkDirectories $(TARGETS) : $(wxWidgets_LIB_DIR) ;
-			C.LinkPrebuiltLibraries $(TARGETS) : advapi32 comdlg32 comctl32 dbghelp gdi32 ole32 oleaut32 Rpcrt4 shell32 user32 uuid wsock32 : * ;
+			C.LinkPrebuiltLibraries $(TARGETS) : advapi32 comdlg32 comctl32 dbghelp gdi32 ole32 oleaut32 Rpcrt4 shell32 user32 uuid winspool wsock32 ;
 		} else {
 			local linkFlags = [ Split [ Subst [ Shell "wx-config $(wx-config--debug) --libs $(COMPONENTS:J=$(SPACE))" ] : $(NEWLINE) : ] : $(SPACE) ] ;
 			C.LinkFlags $(TARGETS) : $(linkFlags) ;
