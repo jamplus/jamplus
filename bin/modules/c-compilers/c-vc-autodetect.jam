@@ -1,18 +1,10 @@
 #VISUAL_STUDIO_FORCE_VERSION = 10.0 ;
 
-vs_versions.11.0 = vs2012 ;
-vs_versions.10.0 = vs2010 ;
-vs_versions.9.0 = vs2008 ;
-vs_versions.8.0 = vs2005 ;
-vs_versions.7.1 = vs2003 ;
-vs_versions.7.0 = vs2002 ;
-vs_versions.6.0 = vc6 ;
-
 rule FindVisualStudioHelper VERSION {
 	local compiler ;
 
 	switch $(VERSION) {
-		case 11.0 :
+		case vs2012 :
 			local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
 			MSVCNT ?= [ W32_GETREG $(key) ] ;
 
@@ -26,7 +18,7 @@ rule FindVisualStudioHelper VERSION {
 				compiler = vs2012 ;
 			}
 
-		case 10.0 :
+		case vs2010 :
 			local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
 			MSVCNT ?= [ W32_GETREG $(key) ] ;
 
@@ -40,7 +32,7 @@ rule FindVisualStudioHelper VERSION {
 				compiler = vs2010 ;
 			}
 
-		case 9.0 :
+		case vs2008 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
 			MSVCNT ?= [ W32_GETREG $(key) ] ;
 			VS90COMNTOOLS = $(VS90COMNTOOLS:J=" ") ;
@@ -53,7 +45,7 @@ rule FindVisualStudioHelper VERSION {
 				compiler = vs2008 ;
 			}
 
-		case 8.0 :
+		case vs2005 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
 			MSVCNT ?= [ W32_GETREG $(key) ] ;
 			if ! $(MSVCNT) && $(VS80COMNTOOLS) {
@@ -65,7 +57,7 @@ rule FindVisualStudioHelper VERSION {
 				compiler = vs2005 ;
 			}
 
-		case 7.1 :
+		case vs2003 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
 			MSVCNT ?= [ W32_GETREG $(key) ] ;
 			if ! $(MSVCNT) && $(VS71COMNTOOLS) {
@@ -77,7 +69,7 @@ rule FindVisualStudioHelper VERSION {
 				compiler = vs2003 ;
 			}
 
-		case 7.0 :
+		case vs2002 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft
 				VisualStudio $(VERSION) InstallDir ;
 			MSVCNT ?= [ W32_GETREG $(key) ] ;
@@ -90,11 +82,17 @@ rule FindVisualStudioHelper VERSION {
 				compiler = vs2002 ;
 			}
 
-		case 6.0 :
+		case vc6 :
 		    local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft DevStudio $(VERSION) Products "Microsoft Visual C++" ProductDir ;
 		    MSVCNT ?= [ W32_GETREG $(key) ] ;
-			MSVCNT_BIN_PATH = "$(MSVCNT)/../Common/MSDev98/Bin" ;
-			compiler = vc6 ;
+		    if $(MSVCNT) {
+				MSVCNT_BIN_PATH = "$(MSVCNT)/../Common/MSDev98/Bin" ;
+				compiler = vc6 ;
+			}
+	}
+
+	if ! (compiler) {
+		return ;
 	}
 
 	C.COMPILER_SUITE = vc ;
@@ -146,7 +144,7 @@ rule FindVisualStudio VERSION {
 	local MSSDK_STDHDRS ;
 	local MSSDK_LINKDIRECTORIES ;
 
-	local compiler = $(vs_versions.$(VERSION)) ;
+	local compiler = $(VERSION) ;
 	local C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN).info! ;
 	local msvcnt = $(MSVCNT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	if ! $(msvcnt) {
@@ -162,7 +160,7 @@ rule C.AutoDetect THE_COMPILER {
 
 	# Do we need to attempt to detect the compiler?
 	if ! $(THE_COMPILER)  ||  $(THE_COMPILER) = * {
-		for ver in $(VISUAL_STUDIO_FORCE_VERSION) 11.0 10.0 9.0 8.0 7.1 7.0 6.0 {
+		for ver in $(VISUAL_STUDIO_FORCE_VERSION) vs2012 vs2010 vs2008 vs2005 vs2003 vs2002 vc6 {
 			C.COMPILER = [ FindVisualStudio $(ver) ] ;
 			if $(C.COMPILER) {
 				break ;
@@ -171,22 +169,11 @@ rule C.AutoDetect THE_COMPILER {
 		if ! $(C.COMPILER) {
 			return ;
 		}
-	} else if $(C.COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 vs2012 {
-		switch $(C.COMPILER)
-		{
-			case vc6 :
-				C.COMPILER = [ FindVisualStudio 6.0 ] ;
-			case vs2003 :
-				C.COMPILER = [ FindVisualStudio 7.1 ] ;
-				C.COMPILER ?= [ FindVisualStudio 7.0 ] ;
-			case vs2005 :
-				C.COMPILER = [ FindVisualStudio 8.0 ] ;
-			case vs2008 :
-				C.COMPILER = [ FindVisualStudio 9.0 ] ;
-			case vs2010 :
-				C.COMPILER = [ FindVisualStudio 10.0 ] ;
-			case vs2012 :
-				C.COMPILER = [ FindVisualStudio 11.0 ] ;
+	} else {
+		C.COMPILER = [ FindVisualStudio $(THE_COMPILER) ] ;
+		if ! $(C.COMPILER) {
+			Exit ** The requested Visual Studio version ($(THE_COMPILER)) was not found. ;
+			return ;
 		}
 	}
 
