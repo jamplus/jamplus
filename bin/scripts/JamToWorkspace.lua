@@ -601,7 +601,8 @@ function BuildProject()
 	os.mkdir(destinationRootPath)
 
 	local exporter = Exporters[opts.gen]
-	exporter.Options.compiler = opts.compiler or opts.gen
+	opts.compiler = opts.compiler  or  opts.gen
+	exporter.Options.compiler = opts.compiler
 
 	locateTargetText =
 	{
