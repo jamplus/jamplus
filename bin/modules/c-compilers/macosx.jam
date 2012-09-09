@@ -360,8 +360,9 @@ rule C.macosx._ApplicationFromObjects_LinkFlags {
 }
 
 
+	#/Developer/usr/bin/dsymutil $(2:C) -o $(OUTPUT_PATH:C)
 actions C._GenerateDSYMFile {
-	/Developer/usr/bin/dsymutil $(2:C) -o $(OUTPUT_PATH:C)
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil $(2:C) -o $(OUTPUT_PATH:C)
 }
 
 
