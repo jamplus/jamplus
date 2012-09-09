@@ -382,7 +382,7 @@ rule C.GenerateDSYMFile TARGET {
 
 actions CpResource
 {
-	/Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -strip-debug-symbols -resolve-src-symlinks $(2) $(1:D)
+	ditto $(2) $(1:D)
 }
 
 C.__DOLLAR = \\$ ;
