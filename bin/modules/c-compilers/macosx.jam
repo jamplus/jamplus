@@ -669,7 +669,7 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL {
 		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(ipaTarget) ;
 		BUNDLE_PATH on $(ipaTarget) = $(bundlePath) ;
 		PROVISIONING_PROFILE on $(ipaTarget) = $(PROVISIONING_PROFILE) ;
-		C._BundleArchive $(ipaTarget) : $(linkTarget) ;
+		C._BundleArchive $(ipaTarget) : $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
 
 		if $(URL) {
 			# Stolen from BetaBuilder:
@@ -765,6 +765,7 @@ Make sure you're visiting this page on your device, not your computer.</p>
 
 actions C._BundleArchive
 {
+	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
 	/usr/bin/xcrun -sdk iphoneos PackageApplication -v "$(BUNDLE_PATH)" -o "$(1)" --sign "$(PROVISIONING_PROFILE)" --embed "$(BUNDLE_PATH)/embedded.mobileprovision"
 }
 
