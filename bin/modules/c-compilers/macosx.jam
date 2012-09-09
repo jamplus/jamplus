@@ -613,6 +613,7 @@ rule C.Provision TARGET : PROFILE_ID {
 
 actions C._CodeSign
 {
+	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
 	/usr/bin/codesign --force --sign "$(PROVISIONING_PROFILE)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
 	touch $(1:C)
 	touch $(DSYM_NAME:CT)
@@ -642,7 +643,7 @@ rule C.CodeSign TARGET : PROVISIONING_PROFILE {
 
 		local dependsList = [ DependsList $(bundleTarget) ] $(linkTarget) ;
 		DSYM_NAME on $(codeResources) = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		C._CodeSign $(codeResources) : $(dependsList) ; 
+		C._CodeSign $(codeResources) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
 
 		UseCommandLine $(codeResources) : $(dependsList) ;
 		Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(codeResources) : $(dependsList) ;
