@@ -606,6 +606,7 @@ rule C.Provision TARGET : PROFILE_ID {
 	}
 
 	# Copy provision into the bundle and name it embedded.mobileprovision
+	IncludeModule copyfile ;
 	CopyFile $(TARGET) : $(_bundlePath)/embedded.mobileprovision : $(_matchingProvision) ;
 }
 
