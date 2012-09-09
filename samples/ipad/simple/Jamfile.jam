@@ -1,8 +1,8 @@
 SubDir TOP ;
 
-ActiveTarget simple ;
+C.ActiveTarget simple ;
 
-C.MacOSX_SDK : $(PLATFORM) ;
+#C.MacOSX_SDK : $(PLATFORM) ;
 
 C.OutputPostfixClear : debug ;
 
