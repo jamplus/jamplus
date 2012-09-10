@@ -296,7 +296,7 @@ rule C._MultiCppCompile SOURCES {
 		MkDir $(LOCATE_TARGET[1]:G=!dir!) ;
 	}
 
-	local FIncludes_dot = [ C.$(C.COMPILER_SUITE).FIncludes . ] ;
+	local FIncludes_dot = ; # [ C.$(C.COMPILER_SUITE).FIncludes . ] ;
 
 	for _src in $(sources) {
 		local forceFileType ;
@@ -334,7 +334,7 @@ rule C._MultiCppCompile SOURCES {
 
 		$(makeobj_pass1) ;
 
-		local _hdrs = $(SEARCH_SOURCE) ;
+		local _hdrs = ; # $(SEARCH_SOURCE) ;
 		local objectForceIncludes = $(forceIncludes) ;
 
 		local objflags ;
