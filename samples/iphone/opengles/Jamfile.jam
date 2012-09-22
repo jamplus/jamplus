@@ -1,8 +1,8 @@
 SubDir TOP ;
 
-ActiveProject opengles ;
+C.ActiveTarget opengles ;
 
-C.MacOSX_SDK : $(PLATFORM) ;
+#C.MacOSX_SDK : $(PLATFORM) ;
 
 IncludeModule CopyFile ;
 
