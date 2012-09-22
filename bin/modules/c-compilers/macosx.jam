@@ -72,8 +72,8 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 
 		case iphone :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 5.1 ;
-			SDK_VERSION_MIN ?= 5.1 ;
+			SDK_VERSION ?= 6.0 ;
+			SDK_VERSION_MIN ?= 6.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -90,6 +90,11 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 					flags += -arch armv6 ; 
 					sdkroot = iphoneos5.1 ;
 
+				case 6.0 :
+					isysroot = @(../../../../Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk:R=$(COMPILER_BIN_PATH)) ;
+					sdkroot = iphoneos6.0 ;
+					flags += -arch armv7 ;
+
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
@@ -97,8 +102,8 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 
 		case iphonesimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 5.1 ;
-			SDK_VERSION_MIN ?= 5.1 ;
+			SDK_VERSION ?= 6.0 ;
+			SDK_VERSION_MIN ?= 6.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -114,16 +119,21 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
 					sdkroot = iphoneos5.1 ;
 
+				case 6.0 :
+					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk:R=$(COMPILER_BIN_PATH)) ;
+					sdkroot = iphoneos6.0 ;
+
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -arch i386 ;
-			flags += -mmacosx-version-min=$(defaultversionmin) ;
+			flags += -mios-simulator-version-min=$(SDK_VERSION_MIN) ;
+			#flags += -mmacosx-version-min=$(defaultversionmin) ;
 			flags += -fvisibility=hidden ;
 
 		case ipadsimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 5.1 ;
-			SDK_VERSION_MIN ?= 5.1 ;
+			SDK_VERSION ?= 6.0 ;
+			SDK_VERSION_MIN ?= 6.0 ;
 			defaultversionmin = 10.6 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
@@ -139,16 +149,21 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
 					sdkroot = iphoneos5.1 ;
 
+				case 6.0 :
+					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk:R=$(COMPILER_BIN_PATH)) ;
+					sdkroot = iphoneos6.0 ;
+
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -arch i386 ;
-			flags += -mmacosx-version-min=$(defaultversionmin) ;
+			#flags += -mmacosx-version-min=$(defaultversionmin) ;
+			flags += -mios-simulator-version-min=$(SDK_VERSION_MIN) ;
 			flags += -fvisibility=hidden ;
 
 		case ipad :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 5.1 ;
-			SDK_VERSION_MIN ?= 5.1 ;
+			SDK_VERSION ?= 6.0 ;
+			SDK_VERSION_MIN ?= 6.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -161,6 +176,10 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 				case 5.1 :
 					isysroot = @(../../SDKs/iPhoneOS5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
 					sdkroot = iphoneos5.1 ;
+
+				case 6.0 :
+					isysroot = @(../../../../Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk:R=$(COMPILER_BIN_PATH)) ;
+					sdkroot = iphoneos6.0 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -390,8 +409,9 @@ C.__DOLLAR = \\$ ;
 
 actions ProcessEntitlements
 {
-	cp $(2) $(1)
+	plutil -convert xml1 -o $(1) $(2)
 	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" -e "s/<key>keychain-access-groups/$(GET_TASK_ALLOW:E="")<key>keychain-access-groups/g" $(1)
+	plutil -convert binary1 $(1)
 }
 
 rule C.macosx._ApplicationFromObjects_PostBuild {
@@ -560,15 +580,16 @@ rule XIB PARENT : SOURCES  {
 		local target = $(source:S=.nib) ;
 		Depends $(target) : $(source) ;
 	
-		CompileXIB $(target) : $(source) ;
+		CompileXIB $(target) : $(source) : $(C.COMPILER_SUITE_SYMBOL) ;
 	}
 }
 
 
+	#/Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile $(1:C) $(2:C)
 actions CompileXIB
 {
 	PATH=$(MACOSX_SDK_DEVELOPER_ROOT)/usr/bin:$PATH
-	/Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile $(1:C) $(2:C)
+	/Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile $(1:C) $(2:C)
 }
 
 
