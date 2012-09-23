@@ -15,5 +15,7 @@ jbin.*/*
 LuaPlus
 jam.xcodeproj/*.mode1v3
 jam.xcodeproj/*.pbxuser
+jam.xcodeproj/project.xcworkspace/
+jam.xcodeproj/xcuserdata/
 jam0
 ipch/
