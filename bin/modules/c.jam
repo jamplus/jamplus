@@ -351,7 +351,7 @@ rule C._MultiCppCompile SOURCES {
 		}
 		_hdrs += $(postHDRS) $(C.STDHDRS) ;
 
-		HDRSEARCH on $(_src) = $(_hdrs) ;
+		HDRSEARCH on $(_src) = $(SEARCH_SOURCE) $(_hdrs) ;
 
 		# Rest
 		Depends $(_obj) : $(_src) ;
@@ -376,6 +376,7 @@ rule C._MultiCppCompile SOURCES {
 		}
 
 		_flags += $(FIncludes_dot) [ C.$(C.COMPILER_SUITE).FIncludes $(_hdrs) ] ;
+		_hdrs = $(SEARCH_SOURCE) $(_hdrs) ;
 
 		_flags += $(preDEFINES) ;
 		if $(objdefines[1]) {
