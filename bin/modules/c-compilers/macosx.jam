@@ -692,7 +692,7 @@ rule C.CodeSign TARGET : PROVISIONING_PROFILE {
 		C._CodeSign $(codeResources) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
 
 		UseCommandLine $(codeResources) : $(dependsList) ;
-		Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(codeResources) : $(dependsList) ;
+		Depends $(bundleTarget) : $(codeResources) : $(dependsList) ;
 		Clean $(cleanBundleTarget) : $(codeResources) $(codeResourcesSymbolicLink) ;
 	}
 }
