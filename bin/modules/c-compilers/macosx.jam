@@ -435,8 +435,8 @@ actions ProcessEntitlements
 {
 	plutil -convert xml1 -o $(1) $(2)
 	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" -e "s/<key>keychain-access-groups/$(GET_TASK_ALLOW:E="")<key>keychain-access-groups/g" $(1)
-	plutil -convert binary1 $(1)
 }
+	#plutil -convert binary1 $(1)
 
 rule C.macosx._ApplicationFromObjects_PostBuild {
 	if bundle in $(OPTIONS) {
