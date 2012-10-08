@@ -123,7 +123,7 @@ donestr()
 #ifdef OPT_DEBUG_MEM_TOTALS_EXT
 	if (!DEBUG_MEM && DEBUG_MEM_TOTALS) {
 	    printf("%dK in strings (%ld allocs)\n",
-		   strtotal / 1024, str_allocs);
+		   (int)(strtotal / 1024), str_allocs);
 	}
 #else
 	if( DEBUG_MEM )

@@ -209,7 +209,7 @@ headers1(
 	LIST    *hdrpipe;
 	LIST	*hdrpipefile;
 
-	if ( hdrpipe = var_get( "HDRPIPE" ) )
+	if ( ( hdrpipe = var_get( "HDRPIPE" ) ) )
 	{
 		LOL args;
 		BUFFER buff;
@@ -241,7 +241,7 @@ headers1(
 	else
 		fclose( f );
 
-	if ( hdrpipefile = var_get( "HDRPIPEFILE" ) )
+	if ( ( hdrpipefile = var_get( "HDRPIPEFILE" ) ) )
 	{
 		if( !( f = fopen( hdrpipefile->string, "r" ) ) )
 		    return result;

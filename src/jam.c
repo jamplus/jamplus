@@ -502,7 +502,7 @@ int main( int argc, char **argv, char **arg_environ )
 
 	/* Turn on/off debugging */
 
-	for( n = 0; s = getoptval( optv, 'd', n ); n++ )
+	for( n = 0; (s = getoptval( optv, 'd', n )); n++ )
 	{
 	    int i = atoi( s );
 
@@ -636,7 +636,7 @@ int main( int argc, char **argv, char **arg_environ )
 
 	/* Load up variables set on command line. */
 
-	for( n = 0; s = getoptval( optv, 's', n ); n++ )
+	for( n = 0; (s = getoptval( optv, 's', n )); n++ )
 	{
 	    const char *symv[2];
 	    symv[0] = s;
@@ -708,7 +708,7 @@ int main( int argc, char **argv, char **arg_environ )
 
 	/* Parse ruleset */
 
-	for( n = 0; s = getoptval( optv, 'f', n ); n++ )
+	for( n = 0; (s = getoptval( optv, 'f', n )); n++ )
 	    parse_file( s );
 
 	if( !n )
@@ -718,12 +718,12 @@ int main( int argc, char **argv, char **arg_environ )
 
 	/* Manually touch -t targets */
 
-	for( n = 0; s = getoptval( optv, 't', n ); n++ )
+	for( n = 0; (s = getoptval( optv, 't', n )); n++ )
 	    touchtarget( s );
 
 	/* If an output file is specified, set globs.cmdout to that */
 
-	if( s = getoptval( optv, 'o', 0 ) )
+	if( (s = getoptval( optv, 'o', 0 )) )
 	{
 	    if( !( globs.cmdout = fopen( s, "w" ) ) )
 	    {

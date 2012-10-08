@@ -44,7 +44,7 @@ search_helper(
 	f->f_grist.len = 0;
 	
 #ifdef OPT_PATH_BINDING_EXT
-	if ( varlist = varget( "BINDING", userData ) )
+	if ( ( varlist = varget( "BINDING", userData ) ) )
 	{
 		path_parse( varlist->string, bf );
 		
@@ -54,7 +54,7 @@ search_helper(
 	}
 #endif
 	
-	if( varlist = varget( "LOCATE", userData ) )
+	if( ( varlist = varget( "LOCATE", userData ) ) )
 	{
 		f->f_root.ptr = varlist->string;
 		f->f_root.len = (int)(strlen( varlist->string ));
@@ -68,7 +68,7 @@ search_helper(
 		
 		return newstr( buf );
 	}
-	else if( varlist = varget( "SEARCH", userData ) )
+	else if( ( varlist = varget( "SEARCH", userData ) ) )
 	{
 		LIST *searchextensionslist;
 		LIST *savevarlist = varlist;

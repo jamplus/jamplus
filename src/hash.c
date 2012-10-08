@@ -240,7 +240,7 @@ hashstat( struct hash *hp )
 
 	for( i = nel; i > 0; i-- )
 	{
-		if( here = ( *tab++ != (ITEM *)0 ) )
+		if( ( here = ( *tab++ != (ITEM *)0 ) ) )
 			count++;
 		if( here && !run )
 			sets++;
@@ -253,6 +253,6 @@ hashstat( struct hash *hp )
 		hp->items.nel,
 		hp->tab.nel,
 		hp->items.nel * hp->items.size / 1024,
-		hp->tab.nel * sizeof( ITEM ** ) / 1024,
+		(int)(hp->tab.nel * sizeof( ITEM ** ) / 1024),
 		(float)count / (float)sets );
 }

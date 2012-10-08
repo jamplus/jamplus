@@ -881,8 +881,8 @@ make1d(
 	/* Print the output now, if there was any */
 	if( outputname )
 	{
-#ifdef OPT_LINE_FILTER_SUPPORT
 		FILE		*fp;
+#ifdef OPT_LINE_FILTER_SUPPORT
 		size_t		n = 1;
 
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT

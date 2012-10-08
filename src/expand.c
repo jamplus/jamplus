@@ -281,7 +281,7 @@ var_expand(
 		buffer_addstring( &varnamebuff, vars->string, strlen( vars->string ) );
 		buffer_addchar( &varnamebuff, 0 );
 
-		if( colon = strchr( buffer_ptr( &varnamebuff ), MAGIC_COLON ) )
+		if( ( colon = strchr( buffer_ptr( &varnamebuff ), MAGIC_COLON ) ) )
 		{
 		    *colon = '\0';
 		    var_edit_parse( colon + 1, &edits );
@@ -291,11 +291,11 @@ var_expand(
 		/* sub1 is x (0 default) */
 		/* sub2 is length (-1 means forever) */
 
-		if( bracket = strchr( buffer_ptr( &varnamebuff ), MAGIC_LEFT ) )
+		if( ( bracket = strchr( buffer_ptr( &varnamebuff ), MAGIC_LEFT ) ) )
 		{
 		    char *dash;
 
-		    if( dash = strchr( bracket + 1, '-' ) )
+		    if( ( dash = strchr( bracket + 1, '-' ) ) )
 			*dash = '\0';
 
 		    sub1 = atoi( bracket + 1 ) - 1;
@@ -753,7 +753,7 @@ var_edit_parse(
 		fp->ptr = "";
 		fp->len = 0;
 	    }
-	    else if( p = strchr( mods, MAGIC_COLON ) )
+	    else if( ( p = strchr( mods, MAGIC_COLON ) ) )
 	    {
 		*p = 0;
 		fp->ptr = ++mods;
@@ -774,7 +774,7 @@ var_edit_parse(
 	    if( *mods != '=' )
 	    {
 	    }
-	    else if( p = strchr( mods, MAGIC_COLON ) )
+	    else if( ( p = strchr( mods, MAGIC_COLON ) ) )
 	    {
 		*p = 0;
 		edits->includes_excludes = list_new( edits->includes_excludes, mod, 0 );

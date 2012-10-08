@@ -237,7 +237,7 @@ list_printq( FILE *out, LIST *l )
 
 	    /* Any embedded "'s?  Escape them */
 
-	    while( p = (char *)memchr( op, '"',  ep - op ) )
+	    while( (p = (char *)memchr( op, '"',  ep - op )) )
 	    {
 		fwrite( op, p - op, 1, out );
 		fputc( '\\', out );
@@ -386,7 +386,7 @@ static int compare_case_insensitive_strings(LIST *p, LIST *q, void *pointer)
  */
 LIST *list_sort( LIST *l, int case_sensitive )
 {
-	LIST *nl = list_sort_helper( l, 0, case_sensitive ? compare_case_sensitive_strings : compare_case_insensitive_strings, NULL, NULL );
+	LIST *nl = list_sort_helper( l, 0, case_sensitive ? (int (*)(void*, void*, void*))compare_case_sensitive_strings : (int (*)(void*, void*, void*))compare_case_insensitive_strings, NULL, NULL );
 	LIST *tail = nl;
 	while ( tail->next )
 		tail = tail->next;

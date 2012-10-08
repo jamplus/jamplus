@@ -998,14 +998,20 @@ make0(
 	}
 #ifdef OPT_GRAPH_DEBUG_EXT
 	if( DEBUG_FATE && fate != savedFate )
+	{
 		if( savedFate == T_FATE_STABLE )
+		{
 			printf( "fate change  %s set to %s%s\n",
 				t->name, target_fate[fate],
 				oldTimeStamp ? " (by timestamp)" : "" );
+		}
 		else
+		{
 			printf( "fate change  %s adjusted from %s to %s%s\n",
 				t->name, target_fate[savedFate], target_fate[fate],
 				oldTimeStamp ? " (by timestamp)" : "" );
+		}
+	}
 #endif
 
 	/* Step 4e: handle missing files */

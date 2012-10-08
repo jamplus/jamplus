@@ -155,7 +155,7 @@ file_dirscan(
 	if( DEBUG_BINDSCAN )
 	    printf( "scan directory %s\n", dir );
 
-	while( dirent = readdir( d ) )
+	while( ( dirent = readdir( d ) ) )
 	{
 #ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
 /*	    struct stat attr;*/
@@ -462,7 +462,7 @@ int file_mkdir(const char *inPath)
 		*pathPtr++ = '/';
 	}
 	
-	while (ch = *inPath++)
+	while ((ch = *inPath++))
 	{
 		if (ch == '/')
 		{

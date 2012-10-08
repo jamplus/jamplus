@@ -1207,7 +1207,7 @@ void filecache_update(TARGET *t)
 				if (copyfile(blobpartialname, t->boundname, &blobmd5sum) == 0  ||
 					rename(blobpartialname, blobname) != 0)
 				{
-					printf("** Unable to write %s to cache.\n", t->name, cachedname);
+					printf("** Unable to write %s to cache.\n", t->name);
 					filecache_disable(t);
 					return;
 				}
