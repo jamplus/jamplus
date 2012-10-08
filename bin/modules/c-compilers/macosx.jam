@@ -20,7 +20,7 @@ rule C.WeakLinkFrameworks TARGET : FRAMEWORKS {
 }
 
 
-rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
+rule C.MacOSX_SDK SDK_VERSION {
 	local SDK_PLATFORM ;
 	SDK_PLATFORM ?= $(PLATFORM) ;
 
@@ -32,7 +32,6 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 	local developerRoot ;
 	local isysroot ;
 	local flags ;
-	local defaultversionmin ;
 	local sdkroot ;
 	switch $(SDK_PLATFORM) {
 		case macosx :
@@ -41,39 +40,31 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 			switch $(SDK_VERSION) {
 				case 10.4 :
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
-					defaultversionmin = 10.4 ;
 					sdkroot = macosx10.4 ;
 
 				case 10.4u :
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
-					defaultversionmin = 10.4 ;
 					sdkroot = macosx10.4 ;
 
 				case 10.5 :
 					isysroot = $(developerRoot)/MacOSX10.5.sdk ;
-					defaultversionmin = 10.5 ;
 					sdkroot = macosx10.5 ;
 
 				case 10.6 :
 					isysroot = $(developerRoot)/MacOSX10.6.sdk ;
-					defaultversionmin = 10.6 ;
 					sdkroot = macosx10.6 ;
 				
 				case 10.7 :
 					isysroot = $(developerRoot)/MacOSX10.7.sdk ;
-					defaultversionmin = 10.7 ;
 					sdkroot = macosx10.7 ;
 				
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
-			SDK_VERSION_MIN ?= $(defaultversionmin) ;
-			flags += -mmacosx-version-min=$(SDK_VERSION_MIN) ;
 			developerRoot = $(isysroot) ;
 
 		case iphone :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
 			SDK_VERSION ?= 6.0 ;
-			SDK_VERSION_MIN ?= 6.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -97,18 +88,15 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
-			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
 			flags += -fvisibility=hidden ;
 
 		case iphonesimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
 			SDK_VERSION ?= 6.0 ;
-			SDK_VERSION_MIN ?= 6.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
-					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 ;
-					defaultversionmin = 10.6 ;
+					#flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 ;
 					sdkroot = iphoneos4.3 ;
 
 				case 5.0 :
@@ -126,19 +114,16 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -arch i386 ;
-			flags += -mios-simulator-version-min=$(SDK_VERSION_MIN) ;
-			#flags += -mmacosx-version-min=$(defaultversionmin) ;
 			flags += -fvisibility=hidden ;
 
 		case ipadsimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
 			SDK_VERSION ?= 6.0 ;
-			SDK_VERSION_MIN ?= 6.0 ;
-			defaultversionmin = 10.6 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
-					flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 -arch i386 ;
+					#flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 ;
+					flags += -arch i386 ;
 					sdkroot = iphoneos4.3 ;
 
 				case 5.0 :
@@ -156,14 +141,11 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -arch i386 ;
-			#flags += -mmacosx-version-min=$(defaultversionmin) ;
-			flags += -mios-simulator-version-min=$(SDK_VERSION_MIN) ;
 			flags += -fvisibility=hidden ;
 
 		case ipad :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
 			SDK_VERSION ?= 6.0 ;
-			SDK_VERSION_MIN ?= 6.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -184,7 +166,6 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -arch armv7 ; 
-			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
 			flags += -fvisibility=hidden ;
 	}
 
@@ -196,7 +177,7 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;	
 	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
-	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION_MIN) ;
+	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
 	XCODE_SDKROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sdkroot) ;
 
 	flags += -gdwarf-2 ;
@@ -213,6 +194,49 @@ rule C.MacOSX_SDK SDK_VERSION : SDK_VERSION_MIN {
 
 " ;
 	}
+}
+
+
+rule C.MinimumOSVersion TARGET : SDK_VERSION_MIN {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	local SDK_PLATFORM ;
+	SDK_PLATFORM ?= $(PLATFORM) ;
+
+	if $(SDK_PLATFORM) in macosx32 macosx64 {
+		SDK_PLATFORM = macosx ;
+	}
+
+	local flags ;
+	switch $(SDK_PLATFORM) {
+		case macosx :
+			# 10.4, 10.5, 10.6, 10.7, 10.8
+			flags += -mmacosx-version-min=$(SDK_VERSION_MIN) ;
+
+		case iphone :
+			# 4.3, 5.0, 5.1, 6.0
+			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
+
+		case iphonesimulator :
+			# 4.3, 5.0, 5.1, 6.0
+			flags += -mios-simulator-version-min=$(SDK_VERSION_MIN) ;
+
+		case ipadsimulator :
+			# 4.3, 5.0, 5.1, 6.0
+			flags += -mios-simulator-version-min=$(SDK_VERSION_MIN) ;
+
+		case ipad :
+			# 4.3, 5.0, 5.1, 6.0
+			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
+	}
+
+	C.Flags $(TARGET) : CC	: $(flags) ;
+	C.Flags $(TARGET) : C++	: $(flags) ;
+	C.Flags $(TARGET) : M	: $(flags) ;
+	C.Flags $(TARGET) : MM	: $(flags) ;
+	C.LinkFlags $(TARGET) : $(flags) ;
+
+	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION_MIN) ;
 }
 
 
