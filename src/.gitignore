@@ -5,6 +5,8 @@
 *.sdf
 *.suo
 *.user
+*.opensdf
+*.sdf
 *.wwdb
 *.obj
 *.exe
