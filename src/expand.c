@@ -253,9 +253,9 @@ var_expand(
 	    /* Recursively expand variable name & rest of input */
 
 	    if( save_buffer_pos < ov_save_buffer_pos )
-		variables = var_expand( NULL, buffer_posptr( &buff ), buffer_ptr( &buff ) + ov_save_buffer_pos, lol, 0 );
+		variables = var_expand( L0, buffer_posptr( &buff ), buffer_ptr( &buff ) + ov_save_buffer_pos, lol, 0 );
 	    if( in < end )
-		remainder = var_expand( NULL, in, end, lol, 0 );
+		remainder = var_expand( L0, in, end, lol, 0 );
 
 	    /* Now produce the result chain */
 
@@ -328,15 +328,15 @@ var_expand(
 				TARGET* t = bindtarget(edits.targetname.ptr);
 				SETTINGS* settings = quicksettingslookup(t, varname);
 				if (settings)
-					value = list_copy(NULL, settings->value);
+					value = list_copy(L0, settings->value);
 				else
-					value = NULL;
+					value = L0;
 			} else
 			value = var_get( varname );
 		}
 #ifdef OPT_EXPAND_LITERALS_EXT
 		else {
-		    origvalue = value = list_append( NULL, buffer_ptr( &varnamebuff ), 0 );
+		    origvalue = value = list_append( L0, buffer_ptr( &varnamebuff ), 0 );
 		}
 #endif
 
@@ -361,7 +361,7 @@ var_expand(
 		/* Empty w/ :E=default? */
 
 		if( !valueSliceStart && colon && edits.empty.ptr ) {
-		    evalue = value = list_append( NULL, edits.empty.ptr, 0 );
+		    evalue = value = list_append( L0, edits.empty.ptr, 0 );
 		    valueSliceStart = list_first(value);
 		}
 
@@ -369,7 +369,7 @@ var_expand(
 		if ( colon && edits.expandliteral ) {
 		    LOL lol;
 		    char const* string = list_value(list_first(value));
-		    LIST *newvalue = var_expand( NULL, string, string + strlen( string ), &lol, 0 );
+		    LIST *newvalue = var_expand( L0, string, string + strlen( string ), &lol, 0 );
 		    if ( origvalue ) {
 			list_free( origvalue );
 			origvalue = 0;
@@ -382,9 +382,9 @@ var_expand(
 
 #ifdef OPT_EXPAND_FILEGLOB_EXT
 		if ( edits.wildcard ) {
-		    LIST *newl = NULL;
+		    LIST *newl = L0;
 		    for( ; valueSliceStart; valueSliceStart = list_next( valueSliceStart ) ) {
-				LIST *foundfiles = NULL;
+				LIST *foundfiles = L0;
 				fileglob* glob;
 
 				/* Handle end subscript (length actually) */
@@ -554,7 +554,7 @@ var_expand(
 
 #ifdef OPT_EXPAND_INCLUDES_EXCLUDES_EXT
 		if ( edits.includes_excludes ) {
-		    LIST *newl = NULL;
+		    LIST *newl = L0;
 		    LISTITEM* l;
 
 		    LIST *origprefix = prefix;

@@ -653,9 +653,9 @@ LIST *
 					{
 						LOL lol;
 						lol_init( &lol );
-						lol_add( &lol, list_append( NULL, t->name, 1 ) );
+						lol_add( &lol, list_append( L0, t->name, 1 ) );
 						lol_add( &lol, l );
-						lol_add( &lol, list_append( NULL, t->boundname, 0 ) );
+						lol_add( &lol, list_append( L0, t->boundname, 0 ) );
 						l = evaluate_rule( list_value(list_first(hdrfilter)), &lol, NULL );
 						lol_free( &lol );
 					}
@@ -702,9 +702,9 @@ LIST *
 		{
 			LOL lol;
 			lol_init( &lol );
-			lol_add( &lol, list_append( NULL, t->name, 1 ) );
+			lol_add( &lol, list_append( L0, t->name, 1 ) );
 			lol_add( &lol, l );
-			lol_add( &lol, list_append( NULL, t->boundname, 0 ) );
+			lol_add( &lol, list_append( L0, t->boundname, 0 ) );
 			l = evaluate_rule( list_value(list_first(hdrfilter)), &lol, NULL );
 			lol_free( &lol );
 		}
@@ -1027,14 +1027,14 @@ void filecache_disable(TARGET *t)
 	buffer_addstring(&buff, filecacheStr, strlen(filecacheStr));
 	buffer_addstring(&buff, ".USE", 4);
 	buffer_addchar(&buff, 0);
-	var_set(buffer_ptr(&buff), list_append(NULL, "0", 0), VAR_SET);
+	var_set(buffer_ptr(&buff), list_append(L0, "0", 0), VAR_SET);
 	buffer_free(&buff);
 
 	buffer_init(&buff);
 	buffer_addstring(&buff, filecacheStr, strlen(filecacheStr));
 	buffer_addstring(&buff, ".GENERATE", 9);
 	buffer_addchar(&buff, 0);
-	var_set(buffer_ptr(&buff), list_append(NULL, "0", 0), VAR_SET);
+	var_set(buffer_ptr(&buff), list_append(L0, "0", 0), VAR_SET);
 	buffer_free(&buff);
 }
 

@@ -344,7 +344,7 @@ builtin_depends(
 	++curindex;
     }
 
-    return NULL;
+    return L0;
 }
 
 /*
@@ -362,7 +362,7 @@ builtin_echo(
 {
 	list_print( lol_get( args, 0 ) );
 	printf( "\n" );
-	return NULL;
+	return L0;
 }
 
 /*
@@ -381,7 +381,7 @@ builtin_exit(
 	list_print( lol_get( args, 0 ) );
 	printf( "\n" );
 	exit( EXITBAD ); /* yeech */
-	return NULL;
+	return L0;
 }
 
 /*
@@ -403,7 +403,7 @@ builtin_flags(
 	for(flag = list_first(flags) ; flag; flag = list_next( flag ) )
 	    bindtarget( list_value(flag) )->flags |= parse->num;
 
-	return NULL;
+	return L0;
 }
 
 /*
@@ -425,7 +425,7 @@ builtin_flags_forcecare(
 		t->flags &= ~T_FLAG_NOCARE;
 	}
 
-	return NULL;
+	return L0;
 }
 
 /*
@@ -445,7 +445,7 @@ builtin_flags_nocare(
 			t->flags |= T_FLAG_NOCARE;
 	}
 
-	return NULL;
+	return L0;
 }
 
 /*
@@ -534,7 +534,7 @@ builtin_glob(
 
 	struct globbing globbing;
 
-	globbing.results = NULL;
+	globbing.results = L0;
 	globbing.patterns = lol_get(args, 1);
 #ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
 	globbing.prependdir = 1;
@@ -662,7 +662,7 @@ builtin_subst(
 
 LIST *builtin_subst_literalize( PARSE	*parse, LOL	*args, int	*jmp )
 {
-	LIST *result = NULL;
+	LIST *result = L0;
 
 	LISTITEM* pattern;
 	for(pattern = list_first(lol_get( args, 0 )); pattern; pattern = list_next(pattern) )
@@ -732,7 +732,7 @@ builtin_queuejamfile(
 		free( filename );
 	}
 
-	return NULL;
+	return L0;
 }
 
 #endif
@@ -759,13 +759,13 @@ builtin_usedepcache(
 	for(l = list_first(targets) ; l; l = list_next( l ) ) {
 	    TARGET *t = bindtarget( list_value(l) );
 	    if ( list_first(l2) )
-		t->settings = addsettings( t->settings, VAR_SET, "DEPCACHE", list_copy( NULL, l2 ) );
+		t->settings = addsettings( t->settings, VAR_SET, "DEPCACHE", list_copy( L0, l2 ) );
 	    else
-		t->settings = addsettings( t->settings, VAR_SET, "DEPCACHE", NULL );
+		t->settings = addsettings( t->settings, VAR_SET, "DEPCACHE", L0 );
 	    t->flags |= parse->num;
 	}
 
-	return NULL;
+	return L0;
 }
 
 #endif
@@ -796,13 +796,13 @@ builtin_usefilecache(
 
 	for(l = list_first(targets) ; l; l = list_next( l ) ) {
 	    TARGET *t = bindtarget(list_value(l));
-	    t->settings = addsettings( t->settings, VAR_SET, "FILECACHE", list_append( NULL, buffer_ptr( &buff ), 0 ) );
+	    t->settings = addsettings( t->settings, VAR_SET, "FILECACHE", list_append( L0, buffer_ptr( &buff ), 0 ) );
 	    t->flags |= parse->num;
 	}
 
 	buffer_free( &buff );
 
-	return NULL;
+	return L0;
 }
 
 /*
@@ -824,11 +824,11 @@ builtin_usecommandline(
 
 	for(l = list_first(targets) ; l; l = list_next( l ) ) {
 	    TARGET *t = bindtarget( list_value(l) );
-	    t->settings = addsettings( t->settings, VAR_SET, "COMMANDLINE", list_copy( NULL, cmdLine ) );
+	    t->settings = addsettings( t->settings, VAR_SET, "COMMANDLINE", list_copy( L0, cmdLine ) );
 	    t->flags |= parse->num;
 	}
 
-	return NULL;
+	return L0;
 }
 
 /*
@@ -884,7 +884,7 @@ builtin_md5(
 	}
 	*p = 0;
 
-	return list_append(NULL, (char const*)digest_string, 0);
+	return list_append(L0, (char const*)digest_string, 0);
 }
 
 LIST *
@@ -941,7 +941,7 @@ builtin_md5file(
 	}
 	*p = 0;
 
-	return list_append(NULL, (char const*)digest_string, 0);
+	return list_append(L0, (char const*)digest_string, 0);
 }
 #endif /* OPT_BUILTIN_MD5_EXT */
 
@@ -989,7 +989,7 @@ builtin_math(
 
 	sprintf(buffer, "%d", result);
 
-    return list_append(NULL, buffer, 0);
+    return list_append(L0, buffer, 0);
 }
 #endif
 
@@ -1008,8 +1008,8 @@ builtin_w32_getreg( PARSE *parse, LOL *args, int *jmp )
 {
 	const char* result = w32_getreg(lol_get(args, 0));
 	if (result)
-		return list_append(NULL, result, 0);
-	return NULL;
+		return list_append(L0, result, 0);
+	return L0;
 }
 
 #ifdef OPT_BUILTIN_W32_GETREG64_EXT
@@ -1024,8 +1024,8 @@ builtin_w32_getreg64( PARSE *parse, LOL *args, int *jmp )
 {
 	const char* result = w32_getreg64(lol_get(args, 0));
 	if (result)
-		return list_append(NULL, result, 0);
-	return NULL;
+		return list_append(L0, result, 0);
+	return L0;
 }
 #endif
 
@@ -1045,8 +1045,8 @@ builtin_w32_shortname( PARSE *parse, LOL *args, int *jmp )
 {
 	LIST* arg = lol_get(args, 0);
 	if (list_first(arg))
-		return list_append(NULL, w32_shortname(arg), 0);
-	return NULL;
+		return list_append(L0, w32_shortname(arg), 0);
+	return L0;
 }
 #endif
 #endif
@@ -1071,10 +1071,10 @@ builtin_usemd5callback(
 
 	for(l = list_first(targets) ; l; l = list_next( l ) ) {
 	    TARGET *t = bindtarget( list_value(l) );
-	    t->settings = addsettings( t->settings, VAR_SET, "MD5CALLBACK", list_copy( NULL, l2 ) );
+	    t->settings = addsettings( t->settings, VAR_SET, "MD5CALLBACK", list_copy( L0, l2 ) );
 	}
 
-	return NULL;
+	return L0;
 }
 #endif
 
@@ -1126,14 +1126,14 @@ builtin_shell(
 	LOL	*args,
 	int	*jmp )
 {
-	LISTITEM* l;
     LIST *cmds = lol_get( args, 0 );
+    LISTITEM* l;
     LIST *shell = var_get( "JAMSHELL" );	/* shell is per-target */
 
-	LIST *output = NULL;
+    LIST *output = L0;
 
     exec_init();
-    for(l = list_first(cmds) ; l; l = list_next( l ) ) {
+    for( l = list_first(cmds); l; l = list_next( l ) ) {
         execcmd( list_value(l), shell_done, &output, shell, 1 );
 	execwait();
     }
@@ -1153,8 +1153,8 @@ builtin_groupbyvar(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST* group1 = NULL;
-	LIST* rest = NULL;
+	LIST* group1 = L0;
+	LIST* rest = L0;
 	LISTITEM* f;
 
 	LIST* filelist;
@@ -1170,7 +1170,7 @@ builtin_groupbyvar(
 
 	filelist = lol_get( args, 0 );
 	if ( !list_first(filelist) )
-		return NULL;
+		return L0;
 
 	varnameList = lol_get( args, 1 );
 	if ( !list_first(varnameList) )
@@ -1190,7 +1190,7 @@ builtin_groupbyvar(
 	/* */
 	vars = quicksettingslookup( bindtarget( list_value(list_first(all)) ), varname );
 	if ( !vars )
-		return NULL;
+		return L0;
 	matchVars = vars->value;
 
 	for (f = list_first(all); f; f = list_next( f ) ) {
@@ -1228,7 +1228,7 @@ builtin_split(
 	int	*jmp )
 {
     LIST* inputList = lol_get( args, 0 );
-    LIST* result = NULL;
+    LIST* result = L0;
     LISTITEM* input;
 
 	char	token[256];
@@ -1287,7 +1287,7 @@ builtin_expandfilelist(
 {
 	LIST* files = lol_get( args, 0 );
 	LISTITEM* file;
-	LIST* result = NULL;
+	LIST* result = L0;
 	LIST* searchSource = var_get( "SEARCH_SOURCE" );
 	size_t searchSourceLen;
 	int searchSourceExtraLen = 0;
@@ -1348,7 +1348,7 @@ builtin_expandfilelist(
 
 LIST *builtin_listsort( PARSE *parse, LOL *args, int *jmp )
 {
-	LIST *l = list_copy( NULL, lol_get( args, 0 ) );
+	LIST *l = list_copy( L0, lol_get( args, 0 ) );
     LIST *caseSensitiveList = lol_get( args, 1 );
 	int caseSensitive = 1;
 	if ( list_first(caseSensitiveList) )
@@ -1361,7 +1361,7 @@ LIST *builtin_listsort( PARSE *parse, LOL *args, int *jmp )
 
 LIST *builtin_dependslist(PARSE *parse, LOL *args, int *jmp)
 {
-	LIST *result = NULL;
+	LIST *result = L0;
 	LIST *parents = lol_get(args, 0);
 	LISTITEM* parent;
 	
@@ -1387,18 +1387,18 @@ LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp)
 
 	LIST *target = lol_get(args, 0);
 	if (!list_first(target))
-		return NULL;
+		return L0;
 
 	symbol = lol_get(args, 1);
 	if (!list_first(symbol))
-		return NULL;
+		return L0;
 
 	t = bindtarget(list_value(list_first(target)));
 	settings = quicksettingslookup(t, list_value(list_first(symbol)));
 	if (settings)
-		return list_copy(NULL, settings->value);
+		return list_copy(L0, settings->value);
 
-	return NULL;
+	return L0;
 }
 
 
@@ -1408,9 +1408,9 @@ LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp)
 
 	symbol = lol_get(args, 0);
 	if (!list_first(symbol))
-		return NULL;
+		return L0;
 
 	if ( ruleexists(list_value(list_first(symbol))) )
-		return list_append( NULL, "true", 0 );
-	return NULL;
+		return list_append( L0, "true", 0 );
+	return L0;
 }

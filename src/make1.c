@@ -1174,12 +1174,12 @@ make1cmds( ACTIONS *a0 )
 	    /* on sources from each instance of this rule for this target. */
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
 	    if (DEBUG_MAKE1) {
-		LIST *list = make1list(NULL, a0->action->targets, 0);
+		LIST *list = make1list(L0, a0->action->targets, 0);
 		printf("make1cmds\t--\ttargets: ");
 		list_print(list);
 		list_free(list);
 		printf("\n");
-		list = make1list(NULL, a0->action->sources, 0);
+		list = make1list(L0, a0->action->sources, 0);
 		printf("make1cmds\t--\tsources: ");
 		list_print(list);
 		list_free(list);
@@ -1190,11 +1190,11 @@ make1cmds( ACTIONS *a0 )
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 	    if (t->filecache_generate  ||  t->filecache_use)
 	    {
-		LIST* targets = make1list_unbound( NULL, a0->action->targets, 0 );
-		LIST* sources = make1list_unbound( NULL, a0->action->sources, rule->flags );
+		LIST* targets = make1list_unbound( L0, a0->action->targets, 0 );
+		LIST* sources = make1list_unbound( L0, a0->action->sources, rule->flags );
 
-		nt = NULL;
-		ns = NULL;
+		nt = L0;
+		ns = L0;
 
 		if ( strncmp( rule->name, "batched_", 8 ) == 0 )
 		{
@@ -1259,8 +1259,8 @@ make1cmds( ACTIONS *a0 )
 		    }
 
 		    if ( !anycacheable ) {
-			nt = make1list( NULL, a0->action->targets, 0 );
-			ns = make1list( NULL, a0->action->sources, rule->flags );
+			nt = make1list( L0, a0->action->targets, 0 );
+			ns = make1list( L0, a0->action->sources, rule->flags );
 		    }
 		}
 		else
@@ -1345,7 +1345,7 @@ make1cmds( ACTIONS *a0 )
 			    outt->flags |= T_FLAG_USEFILECACHE;
 			    outt->filecache_generate = t->filecache_generate;
 			    outt->filecache_use = t->filecache_use;
-			    outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_append( NULL, list_value(list_first(filecache)), 1 ) );
+			    outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_append( L0, list_value(list_first(filecache)), 1 ) );
 			    MD5Final( outt->buildmd5sum, &context );
 			    if (DEBUG_MD5HASH)
 			    {
@@ -1370,8 +1370,8 @@ make1cmds( ACTIONS *a0 )
 		    pushsettings( t->settings );
 
 		    if ( !allcached ) {
-			nt = make1list( NULL, a0->action->targets, 0 );
-			ns = make1list( NULL, a0->action->sources, rule->flags );
+			nt = make1list( L0, a0->action->targets, 0 );
+			ns = make1list( L0, a0->action->sources, rule->flags );
 		    }
 		}
 		list_free( targets );
@@ -1443,15 +1443,15 @@ make1cmds( ACTIONS *a0 )
 
 		} else {
 #endif
-			nt = make1list( NULL, a0->action->targets, 0 );
-			ns = make1list( NULL, a0->action->sources, rule->flags );
+			nt = make1list( L0, a0->action->targets, 0 );
+			ns = make1list( L0, a0->action->sources, rule->flags );
 #if 0
 	    }
 #endif
 		}
 #else
-	    nt = make1list( NULL, a0->action->targets, 0 );
-	    ns = make1list( NULL, a0->action->sources, rule->flags );
+	    nt = make1list( L0, a0->action->targets, 0 );
+	    ns = make1list( L0, a0->action->sources, rule->flags );
 #endif
 
 	    if( rule->flags & RULE_TOGETHER )
@@ -1543,9 +1543,9 @@ make1cmds( ACTIONS *a0 )
 		int thischunk = rule->maxtargets != 0 ? (chunk < rule->maxtargets ? chunk : rule->maxtargets) : chunk;
 
 		CMD *cmd = cmd_new( rule,
-			list_copy( NULL, nt ),
+			list_copy( L0, nt ),
 			list_sublist( ns, start, thischunk ),
-			list_copy( NULL, shell ),
+			list_copy( L0, shell ),
 			maxline );
 /* commented so jamgram.y can compile #else
 		CMD *cmd = cmd_new( rule,

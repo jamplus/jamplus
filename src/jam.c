@@ -564,7 +564,7 @@ int main( int argc, char **argv, char **arg_environ )
 	    if( strlen( buf ) == 25 )
 		buf[ 24 ] = 0;
 
-	    var_set( "JAMDATE", list_append( NULL, buf, 0 ), VAR_SET );
+	    var_set( "JAMDATE", list_append( L0, buf, 0 ), VAR_SET );
 	}
 
 	/* And JAMUNAME */
@@ -574,7 +574,7 @@ int main( int argc, char **argv, char **arg_environ )
 
 	    if( uname( &u ) >= 0 )
 	    {
-		LIST *l = NULL;
+		LIST *l = L0;
 		l = list_append( l, u.machine, 0 );
 		l = list_append( l, u.version, 0 );
 		l = list_append( l, u.release, 0 );
@@ -590,7 +590,7 @@ int main( int argc, char **argv, char **arg_environ )
         {
             char filebuf[4096];
             if (getcwd(filebuf, sizeof(filebuf))) {
-                var_set( "CWD", list_append( NULL, filebuf, 0 ),
+                var_set( "CWD", list_append( L0, filebuf, 0 ),
 			 VAR_SET );
             }
         }
@@ -600,7 +600,7 @@ int main( int argc, char **argv, char **arg_environ )
 	{
 	    char fileName[4096];
 	    getprocesspath(fileName, 4096);
-	    var_set( "JAM_PROCESS_PATH", list_append( NULL, fileName, 0 ), VAR_SET );
+	    var_set( "JAM_PROCESS_PATH", list_append( L0, fileName, 0 ), VAR_SET );
 	}
 #endif
 
@@ -618,12 +618,12 @@ int main( int argc, char **argv, char **arg_environ )
 	    strcpy(options, QUOTE(JAM_OPTIONS));
 
 	    var_set("PATCHED_JAM_VERSION",
-		    list_append(list_append(NULL, PATCHED_VERSION_MAJOR, 0),
+		    list_append(list_append(L0, PATCHED_VERSION_MAJOR, 0),
 			     PATCHED_VERSION_MINOR, 0),
 		    VAR_SET);
 
 	    for (s = strtok(options, ":"); s; s = strtok(NULL, ":")) {
-		var_set("PATCHED_JAM_VERSION", list_append(NULL, s, 0),
+		var_set("PATCHED_JAM_VERSION", list_append(L0, s, 0),
 			VAR_APPEND);
 	    }
 	}
@@ -685,13 +685,13 @@ int main( int argc, char **argv, char **arg_environ )
 	}
 #endif
 
-    var_set( "DEPCACHE", list_append( NULL, "standard", 0 ), VAR_SET );
+    var_set( "DEPCACHE", list_append( L0, "standard", 0 ), VAR_SET );
 
 #ifdef OPT_SET_JAMCOMMANDLINETARGETS_EXT
 	{
 		/* Go through the list of targets specified on the command line, */
 		/* and add them to a variable called JAM_COMMAND_LINE_TARGETS. */
-		LIST* l = NULL;
+		LIST* l = L0;
 		int n_targets = num_targets ? num_targets : 1;
 		const char** actual_targets = num_targets ? targets : &all;
 		int i;

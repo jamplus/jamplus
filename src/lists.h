@@ -89,6 +89,8 @@ void list_printq(FILE* out, LIST* list);
 
 void list_done(void);
 
+# define L0 ((LIST* )0)
+
 void	lol_add( LOL *lol, LIST *l );
 void	lol_init( LOL *lol );
 void	lol_free( LOL *lol );

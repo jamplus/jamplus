@@ -87,7 +87,7 @@ var_defines( const char **e )
 	    if( ( val = strchr( *e, '=' ) ) )
 # endif
 	    {
-		LIST *l = NULL;
+		LIST *l = L0;
 		const char *pp, *p;
 # ifdef OS_MAC
 		char split = ',';
@@ -188,7 +188,7 @@ var_string(
 	    if( dollar )
 	    {
 		LISTITEM* l;
-		LIST *expanded = var_expand( NULL, buffer_ptr( buff ) + lastword, buffer_posptr( buff ), lol, 0 );
+		LIST *expanded = var_expand( L0, buffer_ptr( buff ) + lastword, buffer_posptr( buff ), lol, 0 );
 
 		buffer_setpos( buff, lastword );
 

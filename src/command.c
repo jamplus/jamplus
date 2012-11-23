@@ -365,7 +365,7 @@ cmd_string(
 	}
 
 	if (dollar) {
-	    LIST *expanded = var_expand(NULL, buffer_ptr(buff) + lastword, buffer_posptr(buff), lol, 0);
+	    LIST *expanded = var_expand(L0, buffer_ptr(buff) + lastword, buffer_posptr(buff), lol, 0);
 	    LISTITEM *l = list_first(expanded);
 
 	    buffer_setpos(buff, lastword);

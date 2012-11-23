@@ -144,7 +144,7 @@ int LS_jam_setvar(ls_lua_State *L)
 
     if (numParams == 2)
     {
-	var_set(ls_lua_tostring(L, 1), luahelper_addtolist(L, NULL, 2), VAR_SET);
+	var_set(ls_lua_tostring(L, 1), luahelper_addtolist(L, L0, 2), VAR_SET);
     }
     else
     {
@@ -155,7 +155,7 @@ int LS_jam_setvar(ls_lua_State *L)
 
 	t = bindtarget(ls_lua_tostring(L, 1));
 	pushsettings(t->settings);
-	var_set(ls_lua_tostring(L, 2), luahelper_addtolist(L, NULL, 3), VAR_SET);
+	var_set(ls_lua_tostring(L, 2), luahelper_addtolist(L, L0, 3), VAR_SET);
 	popsettings(t->settings);
     }
 
@@ -225,9 +225,9 @@ int LS_jam_evaluaterule(ls_lua_State *L)
 
     for (i = 0; i < numParams - 1; ++i)
     {
-	lol_add(&lol, luahelper_addtolist(L, NULL, 2 + i));
+	lol_add(&lol, luahelper_addtolist(L, L0, 2 + i));
     }
-    list = evaluate_rule(ls_lua_tostring(L, 1), &lol, NULL);
+    list = evaluate_rule(ls_lua_tostring(L, 1), &lol, L0);
     lol_free(&lol);
 
     ls_lua_newtable(L);
@@ -260,7 +260,7 @@ static LIST *ls_lua_callhelper(int top, int ret)
 	    exit(EXITBAD);
 	}
 	ls_lua_pop(L, 1);
-	return NULL;
+	return L0;
     }
 
     ret = ls_lua_pcall(L, 0, -1, 0);
@@ -272,10 +272,10 @@ static LIST *ls_lua_callhelper(int top, int ret)
 	    exit(EXITBAD);
 	}
 	ls_lua_pop(L, 1);
-	return NULL;
+	return L0;
     }
 
-    retList = NULL;
+    retList = L0;
 
     numParams = ls_lua_gettop(L) - top;
     for (i = 1; i <= numParams; ++i)

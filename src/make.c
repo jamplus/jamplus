@@ -250,7 +250,7 @@ int compare_queuedfileinfo( const void *_left, const void *_right ) {
 
 #ifdef OPT_REMOVE_EMPTY_DIRS_EXT
 
-LIST* emptydirtargets = NULL;
+LIST* emptydirtargets = L0;
 
 typedef struct _sortedtargets SORTEDTARGETS;
 
@@ -427,7 +427,7 @@ pass:
 		int count = 0;
 		QUEUEDFILEINFO* sortedfiles;
 
-		queuedjamfiles = NULL;
+		queuedjamfiles = L0;
 
 		for( i = 0; i < n_targets; i++ )
 			make_fixprogress( bindtarget( targets[i] ) );

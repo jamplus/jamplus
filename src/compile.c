@@ -92,6 +92,8 @@ static const char *set_names[] = { "=", "+=", "?=" };
 static void debug_compile( int which, const char *s );
 int glob( const char *s, const char *c );
 
+
+
 /*
  * compile_append() - append list results of two statements
  *
@@ -205,7 +207,7 @@ compile_eval(
 
 		break;
 
-	case EXPR_EXISTS:       if( lcmp( ll, NULL ) != 0 ) status = 1; break;
+	case EXPR_EXISTS:       if( lcmp( ll, L0 ) != 0 ) status = 1; break;
 	case EXPR_EQUALS:	if( lcmp( ll, lr ) == 0 ) status = 1; break;
 	case EXPR_NOTEQ:	if( lcmp( ll, lr ) != 0 ) status = 1; break;
 	case EXPR_LESS:		if( lcmp( ll, lr ) < 0  ) status = 1; break;
@@ -231,7 +233,7 @@ compile_eval(
 	if( !status ) t = 0;
 	else if( ll ) t = ll, ll = 0;
 	else if( lr ) t = lr, lr = 0;
-	else t = list_append( NULL, "1", 0 );
+	else t = list_append( L0, "1", 0 );
 
 	if( ll ) list_free( ll );
 	if( lr ) list_free( lr );
@@ -267,7 +269,7 @@ compile_foreach(
 	{
 	    /* Reset $(p->string) for each val. */
 
-	    var_set( p->string, list_append( NULL, list_value(l), 1 ), VAR_SET );
+	    var_set( p->string, list_append( L0, list_value(l), 1 ), VAR_SET );
 
 	    /* Keep only last result. */
 
@@ -357,7 +359,7 @@ compile_include(
 
 	list_free( nt );
 
-	return NULL;
+	return L0;
 }
 
 /*
@@ -374,7 +376,7 @@ compile_list(
 {
 	/* voodoo 1 means: s is a copyable string */
 	const char *s = parse->string;
-	return var_expand( NULL, s, s + strlen( s ), args, 1 );
+	return var_expand( L0, s, s + strlen( s ), args, 1 );
 }
 
 /*
@@ -435,7 +437,7 @@ compile_null(
 	LOL	*args,
 	int	*jmp )
 {
-	return NULL;
+	return L0;
 }
 
 /*
@@ -639,7 +641,7 @@ evaluate_rule(
 	    /* build parameters as local vars */
 	    for( l = list_first(rule->params), i = 0; l; l = list_next(l), i++ )
 		s = addsettings( s, 0, list_value(l), 
-		    list_copy( NULL, lol_get( args, i ) ) );
+		    list_copy( L0, lol_get( args, i ) ) );
 
 	    /* Run rule. */
 	    /* Bring in local params. */
@@ -730,7 +732,7 @@ compile_set(
 	/* var_set keeps ns, so need to copy it */
 
 	for( l = list_first(nt); l; l = list_next( l ) )
-	    var_set( list_value(l), list_copy( NULL, ns ), parse->num );
+	    var_set( list_value(l), list_copy( L0, ns ), parse->num );
 
 	list_free( nt );
 
@@ -784,7 +786,7 @@ compile_setcomp(
 
 	parse_refer( parse->right );
 
-	return NULL;
+	return L0;
 }
 
 /*
@@ -824,7 +826,7 @@ compile_setexec(
 	rule->maxtargets = parse->num3;
 /* commented out so jamgram.y can compile #endif */
 
-	return NULL;
+	return L0;
 }
 
 /*

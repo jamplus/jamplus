@@ -79,7 +79,7 @@ headers( TARGET *t )
 
 	lol_init( &lol );
 
-	lol_add( &lol, list_append( NULL, t->name, 1 ) );
+	lol_add( &lol, list_append( L0, t->name, 1 ) );
 #ifdef OPT_HEADER_CACHE_EXT
 	lol_add( &lol, hcache( t, hdrscan ) );
 #else
@@ -91,9 +91,9 @@ headers( TARGET *t )
 #ifdef OPT_HDRRULE_BOUNDNAME_ARG_EXT
 	    /* The third argument to HDRRULE is the bound name of
 	     * $(<) */
-	    lol_add( &lol, list_append( NULL, t->boundname, 0 ) );
+	    lol_add( &lol, list_append( L0, t->boundname, 0 ) );
 #endif
-	    list_free( evaluate_rule( list_value(list_first(hdrrule)), &lol, NULL ) );
+	    list_free( evaluate_rule( list_value(list_first(hdrrule)), &lol, L0 ) );
 	}
 
 	/* Clean up */
@@ -217,7 +217,7 @@ headers1(
 		LOL args;
 		BUFFER buff;
 		lol_init( &args );
-		lol_add( &args, list_append( NULL, file, 0 ) );
+		lol_add( &args, list_append( L0, file, 0 ) );
 		buffer_init( &buff );
 		if ( var_string( list_value(list_first(hdrpipe)), &buff, 0, &args, ' ') < 0 )  {
 		    printf( "Cannot expand HDRPIPE '%s' !\n", list_value(list_first(hdrpipe)) );
