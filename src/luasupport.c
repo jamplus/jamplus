@@ -62,6 +62,7 @@ void (*ls_lua_remove) (ls_lua_State *L, int idx);
 #define ls_lua_isboolean(L,n)	(ls_lua_type(L, (n)) == LUA_TBOOLEAN)
 int             (*ls_lua_isnumber) (ls_lua_State *L, int idx);
 int             (*ls_lua_isstring) (ls_lua_State *L, int idx);
+int             (*ls_lua_isuserdata) (ls_lua_State *L, int idx);
 int             (*ls_lua_type) (ls_lua_State *L, int idx);
 
 ls_lua_Number      (*ls_lua_tonumber) (ls_lua_State *L, int idx);
@@ -302,7 +303,7 @@ static int pmain (ls_lua_State *L)
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_evaluaterule");
 
     top = ls_lua_gettop(L);
-    ret = ls_luaL_loadstring(L, "require 'lanes'");
+    ret = ls_luaL_loadstring(L, "lanes = require 'lanes'");
     ls_lua_callhelper(top, ret);
     ret = ls_luaL_loadstring(L, "lanes.configure()");
     ls_lua_callhelper(top, ret);
@@ -385,6 +386,7 @@ void ls_lua_init()
 
     ls_lua_isnumber = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isnumber");
     ls_lua_isstring = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isstring");
+    ls_lua_isuserdata = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isuserdata");
     ls_lua_type = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_type");
 
     ls_lua_tonumber = (ls_lua_Number (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_tonumber");
@@ -490,7 +492,7 @@ int luahelper_taskisrunning(int taskid, int* returnValue)
 	ls_lua_init();
 
 	ls_lua_rawgeti(L, LUA_REGISTRYINDEX, taskid);		/* lane_h */
-	if (!ls_lua_istable(L, -1))
+	if (!ls_lua_isuserdata(L, -1))
 	{
 		*returnValue = 1;
 		ls_lua_pop(L, 1);
