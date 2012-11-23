@@ -12,6 +12,26 @@
  *
  * External routines:
  *
+ *	list_first() - return the first list item in a list
+ *	list_next() - return the next item in the list (or NULL if at end)
+ *	list_value() - return the string stored in a list item
+ *	list_new() - create a new, empty, list
+ *	list_free() - free a list (includes freeing all the list items)
+ *	list_length() - return the number of items in a list
+ *	list_empty() - check if a list contains zero items
+ *	list_equal() - check that two lists contain exactly the same items in the
+ *	same order.
+ *	list_in() - checks that a list is a subset of another
+ *	list_append() - appends a string to a list
+ *	list_appendList() - joins two lists together into one
+ *	list_copy() - create a copy of a list
+ *	list_copytail() - create a copy of a subsection of a list
+ *	list_sublist() - create a copy of a subsection of a list
+ *	list_remove() - remove a set of items from a list
+ *	list_sort() - sort a list according to the item values
+ *	list_print() - print the strings in a list to stdout
+ *	list_printq() - print the strings in a list to a file, safely quoted
+ *
  *	lol_init() - initialize a LOL (list of lists)
  *	lol_add() - append a LIST onto an LOL
  *	lol_free() - free the LOL and its LISTs
