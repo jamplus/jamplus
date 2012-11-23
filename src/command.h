@@ -56,7 +56,7 @@ struct _cmd
 	CMD	*next;
 	CMD	*tail;		/* valid on in head */
 	RULE	*rule;		/* rule->actions contains shell script */
-	NewList	*shell;		/* $(SHELL) value */
+	LIST	*shell;		/* $(SHELL) value */
 	LOL	args;		/* LISTs for $(<), $(>) */
 #ifdef OPT_RESPONSE_FILES
 	TMPLIST *response_files;
@@ -69,9 +69,9 @@ struct _cmd
 
 CMD *cmd_new(
 	RULE	*rule,		/* rule (referenced) */
-	NewList	*targets,	/* $(<) (freed) */
-	NewList	*sources,	/* $(>) (freed) */
-	NewList	*shell,		/* $(SHELL) (freed) */
+	LIST	*targets,	/* $(<) (freed) */
+	LIST	*sources,	/* $(>) (freed) */
+	LIST	*shell,		/* $(SHELL) (freed) */
 	int	maxline );	/* max line length */
 
 void cmd_free( CMD *cmd );

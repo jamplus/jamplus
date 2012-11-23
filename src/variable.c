@@ -50,11 +50,11 @@ typedef struct _variable VARIABLE ;
 
 struct _variable {
 	const char	*symbol;
-	NewList		*value;
+	LIST		*value;
 } ;
 
 static VARIABLE *var_enter( const char *symbol );
-static void var_dump( const char *symbol, NewList *value, const char *what );
+static void var_dump( const char *symbol, LIST *value, const char *what );
 
 
 
@@ -87,7 +87,7 @@ var_defines( const char **e )
 	    if( ( val = strchr( *e, '=' ) ) )
 # endif
 	    {
-		NewList *l = NULL;
+		LIST *l = NULL;
 		const char *pp, *p;
 # ifdef OS_MAC
 		char split = ',';
@@ -116,14 +116,14 @@ var_defines( const char **e )
 			/* Avoid trailing spaces, but allow single element list */
 			if( !l || strlen( buf ) > 0 )
 #endif
-		    l = newlist_append( l, buf, 0 );
+		    l = list_append( l, buf, 0 );
 		}
 
 #ifdef OPT_ENVIRONMENT_FIX
 		/* Avoid trailing spaces, but allow single element list */
-		if( !newlist_first(l) || strlen( pp ) > 0 )
+		if( !list_first(l) || strlen( pp ) > 0 )
 #endif
-		l = newlist_append( l, pp, 0 );
+		l = list_append( l, pp, 0 );
 
 		/* Get name */
 
@@ -187,28 +187,28 @@ var_string(
 
 	    if( dollar )
 	    {
-		NewListItem* l;
-		NewList *expanded = var_expand( NULL, buffer_ptr( buff ) + lastword, buffer_posptr( buff ), lol, 0 );
+		LISTITEM* l;
+		LIST *expanded = var_expand( NULL, buffer_ptr( buff ) + lastword, buffer_posptr( buff ), lol, 0 );
 
 		buffer_setpos( buff, lastword );
 
-		l = newlist_first(expanded);
+		l = list_first(expanded);
 		while( l )
 		{
-		    int so = (int)strlen(newlist_value(l));
+		    int so = (int)strlen(list_value(l));
 
 		    if ( (int)buffer_pos(buff) + so >= outsize)
 			return -1;
 
-		    buffer_addstring( buff, newlist_value(l), so );
+		    buffer_addstring( buff, list_value(l), so );
 
 		    /* Separate with space */
 
-		    if( ( l = newlist_next( l ) ) )
+		    if( ( l = list_next( l ) ) )
 			buffer_addchar( buff, separator );
 		}
 
-		newlist_free( expanded );
+		list_free( expanded );
 	    }
 	}
 
@@ -226,7 +226,7 @@ var_string(
  * Returns NULL if symbol unset.
  */
 
-NewList *
+LIST *
 var_get( const char *symbol )
 {
 	VARIABLE var, *v = &var;
@@ -257,7 +257,7 @@ var_get( const char *symbol )
 void
 var_set(
 	const char *symbol,
-	NewList	*value,
+	LIST	*value,
 	int	flag )
 {
 	VARIABLE *v = var_enter( symbol );
@@ -269,20 +269,20 @@ var_set(
 	{
 	case VAR_SET:
 	    /* Replace value */
-	    newlist_free( v->value );
+	    list_free( v->value );
 	    v->value = value;
 	    break;
 
 	case VAR_APPEND:
 	    /* Append value */
-	    v->value = newlist_appendList( v->value, value );
+	    v->value = list_appendList( v->value, value );
 	    break;
 
 #ifdef OPT_MINUS_EQUALS_EXT
 	case VAR_REMOVE:
 	    /* Remove values */
-	    v->value = newlist_remove( v->value, value );
-	    newlist_free( value );
+	    v->value = list_remove( v->value, value );
+	    list_free( value );
 	    break;
 #endif
 
@@ -291,7 +291,7 @@ var_set(
 	    if( !v->value )
 		v->value = value;
 	    else
-		newlist_free( value );
+		list_free( value );
 	    break;
 	}
 }
@@ -300,13 +300,13 @@ var_set(
  * var_swap() - swap a variable's value with the given one
  */
 
-NewList *
+LIST *
 var_swap(
 	const char *symbol,
-	NewList	*value )
+	LIST	*value )
 {
 	VARIABLE *v = var_enter( symbol );
-	NewList 	 *oldvalue = v->value;
+	LIST 	 *oldvalue = v->value;
 
 	if( DEBUG_VARSET )
 	    var_dump( symbol, value, "set" );
@@ -344,11 +344,11 @@ var_enter( const char *symbol )
 static void
 var_dump(
 	const char	*symbol,
-	NewList		*value,
+	LIST		*value,
 	const char	*what )
 {
 	printf( "%s %s = ", what, symbol );
-	newlist_print( value );
+	list_print( value );
 	printf( "\n" );
 }
 

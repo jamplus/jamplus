@@ -68,8 +68,8 @@
 struct hcachedata {
 	const char		*boundname;
 	time_t		time;
-	NewList		*includes;
-	NewList		*hdrscan; /* the HDRSCAN value for this target */
+	LIST		*includes;
+	LIST		*hdrscan; /* the HDRSCAN value for this target */
 	int			age;	  /* if too old, we'll remove it from cache */
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 	time_t      mtime;    /* when md5sum was cached  */
@@ -144,10 +144,10 @@ static int
 cache_maxage(void)
 {
 	int age = 0;
-	NewList *var = var_get( "DEPCACHEMAXAGE" );
+	LIST *var = var_get( "DEPCACHEMAXAGE" );
 
-	if( newlist_first(var) ) {
-		age = atoi( newlist_value(newlist_first(var)) );
+	if( list_first(var) ) {
+		age = atoi( list_value(list_first(var)) );
 		if( age < 0 )
 			age = 0;
 	}
@@ -371,7 +371,7 @@ hcache_readfile(HCACHEFILE *file)
 
 	for(;;) {
 		int i, count, ch;
-		NewList *l;
+		LIST *l;
 
 		c = &cachedata;
 
@@ -399,7 +399,7 @@ hcache_readfile(HCACHEFILE *file)
 			const char *s = read_string( &buff );
 			if( !s )
 				goto bail;
-			l = newlist_append( l, s, 0 );
+			l = list_append( l, s, 0 );
 		}
 		c->includes = l;
 
@@ -409,7 +409,7 @@ hcache_readfile(HCACHEFILE *file)
 			const char *s = read_string( &buff );
 			if( !s )
 				goto bail;
-			l = newlist_append( l, s, 0 );
+			l = list_append( l, s, 0 );
 		}
 		c->hdrscan = l;
 
@@ -460,7 +460,7 @@ static HCACHEFILE* hcachefile_get(TARGET *t)
 		{
 			if ( vars->symbol[0] == 'D'  &&  strcmp( vars->symbol, "DEPCACHE" ) == 0 )
 			{
-				hcachename = newlist_value(newlist_first(vars->value));
+				hcachename = list_value(list_first(vars->value));
 				break;
 			}
 		}
@@ -468,9 +468,9 @@ static HCACHEFILE* hcachefile_get(TARGET *t)
 
 	if ( !hcachename )
 	{
-		NewList *hcache = var_get( "DEPCACHE" );
-		if ( newlist_first(hcache) )
-			hcachename = newlist_value(newlist_first(hcache));
+		LIST *hcache = var_get( "DEPCACHE" );
+		if ( list_first(hcache) )
+			hcachename = list_value(list_first(hcache));
 	}
 
 	if ( !hcachename )
@@ -490,7 +490,7 @@ static HCACHEFILE* hcachefile_get(TARGET *t)
 	if( !hashcheck( hcachefilehash, (HASHDATA **) &file ) ) {
 		if( hashenter( hcachefilehash, (HASHDATA **)&file ) ) {
 			char varBuffer[ MAXJPATH ];
-			NewList *hcachevar;
+			LIST *hcachevar;
 
 			file->cachefilename = 0;
 			file->hcachehash = hashinit( sizeof( HCACHEDATA ), "hcache" );
@@ -503,8 +503,8 @@ static HCACHEFILE* hcachefile_get(TARGET *t)
 			strcat( varBuffer, hcachename );
 
 			hcachevar = var_get( varBuffer );
-			if( newlist_first(hcachevar) ) {
-				TARGET *t = bindtarget(newlist_value(newlist_first(hcachevar)));
+			if( list_first(hcachevar) ) {
+				TARGET *t = bindtarget(list_value(list_first(hcachevar)));
 				t->boundname = search_using_target_settings( t, t->name, &t->time );
 
 				file->cachefilename = copystr( t->boundname );
@@ -542,7 +542,7 @@ void
 	fprintf( f, "@%s@\n", CACHE_FILE_VERSION );
 
 	for( c = file->hcachelist; c; c = c->next ) {
-		NewListItem	*l;
+		LISTITEM	*l;
 
 		if( maxage == 0 )
 			c->age = 0;
@@ -559,14 +559,14 @@ void
 		write_md5sum( f, c->contentmd5sum );
 #endif
 
-		write_int( f, newlist_length( c->includes ) );
-		for( l = newlist_first(c->includes); l; l = newlist_next( l ) ) {
-			write_string( f, newlist_value(l) );
+		write_int( f, list_length( c->includes ) );
+		for( l = list_first(c->includes); l; l = list_next( l ) ) {
+			write_string( f, list_value(l) );
 		}
 
-		write_int( f, newlist_length( c->hdrscan ) );
-		for( l = newlist_first(c->hdrscan); l; l = newlist_next( l ) ) {
-			write_string( f, newlist_value(l) );
+		write_int( f, list_length( c->hdrscan ) );
+		for( l = list_first(c->hdrscan); l; l = list_next( l ) ) {
+			write_string( f, list_value(l) );
 		}
 
 		fputc( '!', f );
@@ -596,12 +596,12 @@ void hcache_done()
 int  md5matchescommandline( TARGET *t );
 #endif
 
-NewList *
-	hcache( TARGET *t, NewList *hdrscan )
+LIST *
+	hcache( TARGET *t, LIST *hdrscan )
 {
 	HCACHEDATA	cachedata, *c = &cachedata;
 	HCACHEFILE	*file;
-	NewList	*l = 0;
+	LIST	*l = 0;
 	int		use_cache = 1;
 	const char *target;
 # ifdef DOWNSHIFT_PATHS
@@ -635,7 +635,7 @@ NewList *
 			if( c->time == t->time )
 #endif
 			{
-				if( !newlist_equal(hdrscan, c->hdrscan) )
+				if( !list_equal(hdrscan, c->hdrscan) )
 					use_cache = 0;
 			}
 			else
@@ -646,17 +646,17 @@ NewList *
 					printf( "using header cache for %s\n", t->boundname );
 				c->age = 0; /* The entry has been used, its young again */
 				++hits;
-				l = newlist_copy( 0, c->includes );
+				l = list_copy( 0, c->includes );
 				{
-					NewList *hdrfilter = var_get( "HDRFILTER" );
-					if ( newlist_first(hdrfilter) )
+					LIST *hdrfilter = var_get( "HDRFILTER" );
+					if ( list_first(hdrfilter) )
 					{
 						LOL lol;
 						lol_init( &lol );
-						lol_add( &lol, newlist_append( NULL, t->name, 1 ) );
+						lol_add( &lol, list_append( NULL, t->name, 1 ) );
 						lol_add( &lol, l );
-						lol_add( &lol, newlist_append( NULL, t->boundname, 0 ) );
-						l = evaluate_rule( newlist_value(newlist_first(hdrfilter)), &lol, NULL );
+						lol_add( &lol, list_append( NULL, t->boundname, 0 ) );
+						l = evaluate_rule( list_value(list_first(hdrfilter)), &lol, NULL );
 						lol_free( &lol );
 					}
 				}
@@ -665,8 +665,8 @@ NewList *
 			else {
 				if( DEBUG_HEADER )
 					printf( "header cache out of date for %s\n", t->boundname );
-				newlist_free( c->includes );
-				newlist_free( c->hdrscan );
+				list_free( c->includes );
+				list_free( c->hdrscan );
 				c->includes = 0;
 				c->hdrscan = 0;
 			}
@@ -692,20 +692,20 @@ NewList *
 
 	l = headers1( c->boundname, hdrscan );
 
-	l = newlist_appendList( newlist_copy( 0, var_get( "HDREXTRA" ) ), l );
+	l = list_appendList( list_copy( 0, var_get( "HDREXTRA" ) ), l );
 
-	c->includes = newlist_copy( 0, l );
+	c->includes = list_copy( 0, l );
 
 	{
-		NewList *hdrfilter = var_get( "HDRFILTER" );
-		if (newlist_first(hdrfilter))
+		LIST *hdrfilter = var_get( "HDRFILTER" );
+		if (list_first(hdrfilter))
 		{
 			LOL lol;
 			lol_init( &lol );
-			lol_add( &lol, newlist_append( NULL, t->name, 1 ) );
+			lol_add( &lol, list_append( NULL, t->name, 1 ) );
 			lol_add( &lol, l );
-			lol_add( &lol, newlist_append( NULL, t->boundname, 0 ) );
-			l = evaluate_rule( newlist_value(newlist_first(hdrfilter)), &lol, NULL );
+			lol_add( &lol, list_append( NULL, t->boundname, 0 ) );
+			l = evaluate_rule( list_value(list_first(hdrfilter)), &lol, NULL );
 			lol_free( &lol );
 		}
 	}
@@ -713,7 +713,7 @@ NewList *
 	c->time = t->time;
 	c->age = 0;
 
-	c->hdrscan = newlist_copy( 0, hdrscan );
+	c->hdrscan = list_copy( 0, hdrscan );
 
 	return l;
 }
@@ -811,7 +811,7 @@ int getcachedmd5sum( TARGET *t, int source )
 	{
 		MD5SUM origmd5sum;
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-		NewList *md5callback;
+		LIST *md5callback;
 #endif
 
 		memcpy( &origmd5sum, &c->contentmd5sum, sizeof( MD5SUM ) );
@@ -820,9 +820,9 @@ int getcachedmd5sum( TARGET *t, int source )
 		md5callback = var_get( "MD5CALLBACK" );
 		popsettings( t->settings );
 
-		if ( newlist_first(md5callback) )
+		if ( list_first(md5callback) )
 		{
-			luahelper_md5callback(t->boundname, c->contentmd5sum, newlist_value(newlist_first(md5callback)));
+			luahelper_md5callback(t->boundname, c->contentmd5sum, list_value(list_first(md5callback)));
 		}
 		else
 		{
@@ -905,23 +905,23 @@ void setcachedmd5sum( TARGET *t )
 const char *filecache_getpath(TARGET *t)
 {
 	char buffer[1024];
-	NewList *filecache;
+	LIST *filecache;
 	const char *cachedir = NULL;
-	NewList *cachevar;
+	LIST *cachevar;
 
 	pushsettings( t->settings );
 	filecache = var_get( "FILECACHE" );
-	if ( !newlist_first(filecache) ) {
+	if ( !list_first(filecache) ) {
 		popsettings( t->settings );
 		return NULL;
 	}
 
 	/* get directory where objcache should reside */
-	strcpy( buffer, newlist_value(newlist_first(filecache)) );
+	strcpy( buffer, list_value(list_first(filecache)) );
 	strcat( buffer, ".PATH" );
 	cachevar = var_get( buffer );
-	if( newlist_first(cachevar) ) {
-		TARGET *t = bindtarget(newlist_value(newlist_first(cachevar)));
+	if( list_first(cachevar) ) {
+		TARGET *t = bindtarget(list_value(list_first(cachevar)));
 		t->boundname = search( t->name, &t->time );
 		cachedir = copystr( t->boundname );
 	}
@@ -971,25 +971,25 @@ const char *filecache_getfilename(TARGET *t, MD5SUM sum, const char* extension)
 }
 
 
-NewList *filecache_fillvalues(TARGET *t)
+LIST *filecache_fillvalues(TARGET *t)
 {
-	NewList *filecache;
+	LIST *filecache;
 
 	if ( !( t->flags & T_FLAG_USEFILECACHE ) )
 		return 0;
 
 	filecache = var_get( "FILECACHE" );
-	if ( newlist_first(filecache) ) {
-		NewList *l;
+	if ( list_first(filecache) ) {
+		LIST *l;
 		BUFFER buff;
-		char const* filecacheStr = newlist_value(newlist_first(filecache));
+		char const* filecacheStr = list_value(list_first(filecache));
 
 		buffer_init(&buff);
 		buffer_addstring(&buff, filecacheStr, strlen(filecacheStr));
 		buffer_addstring(&buff, ".USE", 4);
 		buffer_addchar(&buff, 0);
 		l = var_get( buffer_ptr( &buff ) );
-		if ( newlist_first(l)  &&  atoi( newlist_value(newlist_first(l)) ) != 0) {
+		if ( list_first(l)  &&  atoi( list_value(list_first(l)) ) != 0) {
 			t->filecache_use = 1;
 		}
 		buffer_free(&buff);
@@ -999,7 +999,7 @@ NewList *filecache_fillvalues(TARGET *t)
 		buffer_addstring(&buff, ".GENERATE", 9);
 		buffer_addchar(&buff, 0);
 		l = var_get( buffer_ptr( &buff ) );
-		if ( newlist_first(l)  &&  atoi(newlist_value(newlist_first(l))) != 0) {
+		if ( list_first(l)  &&  atoi(list_value(list_first(l))) != 0) {
 			t->filecache_generate = 1;
 		}
 		buffer_free(&buff);
@@ -1012,29 +1012,29 @@ NewList *filecache_fillvalues(TARGET *t)
 void filecache_disable(TARGET *t)
 {
 	BUFFER buff;
-	NewList *filecache;
+	LIST *filecache;
 	char const* filecacheStr;
 	pushsettings( t->settings );
 	filecache = var_get( "FILECACHE" );
-	if ( !newlist_first(filecache) ) {
+	if ( !list_first(filecache) ) {
 		popsettings( t->settings );
 		return;
 	}
 
-	filecacheStr = newlist_value(newlist_first(filecache));
+	filecacheStr = list_value(list_first(filecache));
 
 	buffer_init(&buff);
 	buffer_addstring(&buff, filecacheStr, strlen(filecacheStr));
 	buffer_addstring(&buff, ".USE", 4);
 	buffer_addchar(&buff, 0);
-	var_set(buffer_ptr(&buff), newlist_append(NULL, "0", 0), VAR_SET);
+	var_set(buffer_ptr(&buff), list_append(NULL, "0", 0), VAR_SET);
 	buffer_free(&buff);
 
 	buffer_init(&buff);
 	buffer_addstring(&buff, filecacheStr, strlen(filecacheStr));
 	buffer_addstring(&buff, ".GENERATE", 9);
 	buffer_addchar(&buff, 0);
-	var_set(buffer_ptr(&buff), newlist_append(NULL, "0", 0), VAR_SET);
+	var_set(buffer_ptr(&buff), list_append(NULL, "0", 0), VAR_SET);
 	buffer_free(&buff);
 }
 
@@ -1160,15 +1160,15 @@ void filecache_update(TARGET *t)
 	if (!haveblobmd5sum)
 	{
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-		NewList *md5callback;
+		LIST *md5callback;
 
 		pushsettings( t->settings );
 		md5callback = var_get( "MD5CALLBACK" );
 		popsettings( t->settings );
 
-		if ( newlist_first(md5callback) )
+		if ( list_first(md5callback) )
 		{
-			luahelper_md5callback(t->boundname, blobmd5sum, newlist_value(newlist_first(md5callback)));
+			luahelper_md5callback(t->boundname, blobmd5sum, list_value(list_first(md5callback)));
 		}
 		else
 		{

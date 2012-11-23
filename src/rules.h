@@ -49,8 +49,8 @@ struct _rule {
 	const char	*name;
 	PARSE		*procedure;	/* parse tree from RULE */
 	const char	*actions;	/* command string from ACTIONS */
-	NewList		*bindlist;	/* variable to bind for actions */
-	NewList		*params;	/* bind args to local vars */
+	LIST		*bindlist;	/* variable to bind for actions */
+	LIST		*params;	/* bind args to local vars */
 	int		flags;		/* modifiers on ACTIONS */
 
 # define	RULE_UPDATED	0x01	/* $(>) is updated sources only */
@@ -114,7 +114,7 @@ struct _action {
 struct _settings {
 	SETTINGS 	*next;
 	const char	*symbol;	/* symbol name for var_set() */
-	NewList		*value;		/* symbol value for var_set() */
+	LIST		*value;		/* symbol value for var_set() */
 } ;
 
 /* TARGETS - a chain of TARGETs */
@@ -245,11 +245,11 @@ TARGET *bindtarget( const char *targetname );
 TARGET *copytarget( const TARGET *t );
 void 	touchtarget( const char *t );
 #ifdef OPT_BUILTIN_NEEDS_EXT
-TARGETS *targetlist( TARGETS *chain, NewList  *targets, char needs );
+TARGETS *targetlist( TARGETS *chain, LIST  *targets, char needs );
 TARGETS *targetentry( TARGETS *chain, TARGET *target, char needs );
 TARGETS *targetentryhead( TARGETS *chain, TARGET *target, char needs );
 #else
-TARGETS *targetlist( TARGETS *chain, NewList  *targets );
+TARGETS *targetlist( TARGETS *chain, LIST  *targets );
 TARGETS *targetentry( TARGETS *chain, TARGET *target );
 #endif
 #ifdef OPT_MULTIPASS_EXT
@@ -257,7 +257,7 @@ void	targetlist_free( TARGETS *targets );
 #endif
 TARGETS *targetchain( TARGETS *chain, TARGETS *targets );
 ACTIONS *actionlist( ACTIONS *chain, ACTION *action );
-SETTINGS *addsettings( SETTINGS *v, int setflag, const char *sym, NewList *val );
+SETTINGS *addsettings( SETTINGS *v, int setflag, const char *sym, LIST *val );
 SETTINGS *copysettings( SETTINGS *v );
 void 	pushsettings( SETTINGS *v );
 void 	popsettings( SETTINGS *v );

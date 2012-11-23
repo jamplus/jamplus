@@ -91,11 +91,11 @@ static CMD *make1cmds( TARGET *t, ACTIONS *a0 );
 #else
 static CMD *make1cmds( ACTIONS *a0 );
 #endif
-static NewList *make1list( NewList *l, TARGETS *targets, int flags );
+static LIST *make1list( LIST *l, TARGETS *targets, int flags );
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-static NewList *make1list_unbound( NewList *l, TARGETS *targets, int flags );
+static LIST *make1list_unbound( LIST *l, TARGETS *targets, int flags );
 #endif
-static SETTINGS *make1settings( NewList *vars );
+static SETTINGS *make1settings( LIST *vars );
 static void make1bind( TARGET *t, int warn );
 #ifdef OPT_ACTIONS_WAIT_FIX
 static void make1wait( TARGET *t );
@@ -108,7 +108,7 @@ static void printResponseFiles(CMD *cmd);
 #endif
 
 #ifdef OPT_MULTIPASS_EXT
-extern NewList *queuedjamfiles;
+extern LIST *queuedjamfiles;
 #endif
 
 /* Ugly static - it's too hard to carry it through the callbacks. */
@@ -861,10 +861,10 @@ make1d(
 		if (globs.printtarget) {
 		    printf("%s ", t->name);
 		} else {
-		    newlist_print( lol_get( &cmd->args, 0 ) );
+		    list_print( lol_get( &cmd->args, 0 ) );
 		}
 #else
-		newlist_print( lol_get( &cmd->args, 0 ) );
+		list_print( lol_get( &cmd->args, 0 ) );
 #endif
 		printf( "\n" );
 	    }
@@ -886,12 +886,12 @@ make1d(
 		size_t		n = 1;
 
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-		NewList*		useLuaLineFilters;
+		LIST*		useLuaLineFilters;
 
 		useLuaLineFilters = var_get( "USE_LUA_LINE_FILTERS" );
-		if ( newlist_first(useLuaLineFilters) )
+		if ( list_first(useLuaLineFilters) )
 		{
-			if ( ( strcmp( newlist_value(newlist_first(useLuaLineFilters)), "1" ) != 0  &&  strcmp( newlist_value(newlist_first(useLuaLineFilters)), "true" ) != 0)
+			if ( ( strcmp( list_value(list_first(useLuaLineFilters)), "1" ) != 0  &&  strcmp( list_value(list_first(useLuaLineFilters)), "true" ) != 0)
 					||  !luahelper_push_linefilter( cmd->rule->name ) )
 			{
 				useLuaLineFilters = NULL;
@@ -1020,10 +1020,10 @@ make1d(
 	    if (globs.printtarget) {
 		printf("%s ", t->name);
 	    } else {
-		newlist_print( lol_get( &cmd->args, 0 ) );
+		list_print( lol_get( &cmd->args, 0 ) );
 	    }
 #else
-	    newlist_print( lol_get( &cmd->args, 0 ) );
+	    list_print( lol_get( &cmd->args, 0 ) );
 #endif
 	    printf( "...\n" );
 
@@ -1041,30 +1041,30 @@ make1d(
 	if( status != EXEC_CMD_OK )
 	{
 		if ( !( cmd->rule->flags & RULE_UPDATED ) ) {
-	    NewList *targets = lol_get( &cmd->args, 0 );
-	    NewListItem* target;
+	    LIST *targets = lol_get( &cmd->args, 0 );
+	    LISTITEM* target;
 
 #ifdef OPT_NODELETE_READONLY
-	    for(target = newlist_first(targets) ; target; target = newlist_next(target) )
-		if( file_writeable(newlist_value(target)) &&
-		    !unlink(newlist_value(target)) )
-		    printf( "*** removing %s\n", newlist_value(target) );
+	    for(target = list_first(targets) ; target; target = list_next(target) )
+		if( file_writeable(list_value(target)) &&
+		    !unlink(list_value(target)) )
+		    printf( "*** removing %s\n", list_value(target) );
 #else
-	    for(target = newlist_first(targets) ; target; target = newlist_next( target ) )
-		if( !unlink( newlist_value(target) ) )
-		    printf( "*** removing %s\n", newlist_value(target) );
+	    for(target = list_first(targets) ; target; target = list_next( target ) )
+		if( !unlink( list_value(target) ) )
+		    printf( "*** removing %s\n", list_value(target) );
 #endif
 	}
 	}
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 	else
 	{
-		NewListItem* target;
-	    NewList *targets = lol_get( &cmd->args, 0 );
+		LISTITEM* target;
+	    LIST *targets = lol_get( &cmd->args, 0 );
 
-	    for(target = newlist_first(targets) ; target; target = newlist_next( target ) )
+	    for(target = list_first(targets) ; target; target = list_next( target ) )
 	    {
-		TARGET *t = bindtarget( newlist_value(target) );
+		TARGET *t = bindtarget( list_value(target) );
 		filecache_update( t );
 	    }
 	}
@@ -1099,7 +1099,7 @@ void make0calcmd5sum( TARGET *t, int source );
 
 
 #ifdef OPT_REMOVE_EMPTY_DIRS_EXT
-extern NewList* emptydirtargets;
+extern LIST* emptydirtargets;
 #endif
 
 
@@ -1112,7 +1112,7 @@ make1cmds( ACTIONS *a0 )
 #endif
 {
 	CMD *cmds = 0;
-	NewList *shell = var_get( "JAMSHELL" );	/* shell is per-target */
+	LIST *shell = var_get( "JAMSHELL" );	/* shell is per-target */
 
 	/* Step through actions */
 	/* Actions may be shared with other targets or grouped with */
@@ -1122,7 +1122,7 @@ make1cmds( ACTIONS *a0 )
 	{
 	    RULE    *rule = a0->action->rule;
 	    SETTINGS *boundvars;
-	    NewList    *nt, *ns;
+	    LIST    *nt, *ns;
 	    ACTIONS *a1;
 	    int	    start, chunk, length, maxline;
 		TARGETS *autosettingsreverse = 0;
@@ -1152,7 +1152,7 @@ make1cmds( ACTIONS *a0 )
 			for( a1 = a0; a1; a1 = a1->next ) {
 				TARGETS* sources;
 				for ( sources = a1->action->sources; sources; sources = sources->next ) {
-					emptydirtargets = newlist_append( emptydirtargets, sources->target->name, 1 );
+					emptydirtargets = list_append( emptydirtargets, sources->target->name, 1 );
 				}
 			}
 		}
@@ -1174,15 +1174,15 @@ make1cmds( ACTIONS *a0 )
 	    /* on sources from each instance of this rule for this target. */
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
 	    if (DEBUG_MAKE1) {
-		NewList *list = make1list(NULL, a0->action->targets, 0);
+		LIST *list = make1list(NULL, a0->action->targets, 0);
 		printf("make1cmds\t--\ttargets: ");
-		newlist_print(list);
-		newlist_free(list);
+		list_print(list);
+		list_free(list);
 		printf("\n");
 		list = make1list(NULL, a0->action->sources, 0);
 		printf("make1cmds\t--\tsources: ");
-		newlist_print(list);
-		newlist_free(list);
+		list_print(list);
+		list_free(list);
 		printf("\n");
 	    }
 #endif
@@ -1190,8 +1190,8 @@ make1cmds( ACTIONS *a0 )
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 	    if (t->filecache_generate  ||  t->filecache_use)
 	    {
-		NewList* targets = make1list_unbound( NULL, a0->action->targets, 0 );
-		NewList* sources = make1list_unbound( NULL, a0->action->sources, rule->flags );
+		LIST* targets = make1list_unbound( NULL, a0->action->targets, 0 );
+		LIST* sources = make1list_unbound( NULL, a0->action->sources, rule->flags );
 
 		nt = NULL;
 		ns = NULL;
@@ -1199,12 +1199,12 @@ make1cmds( ACTIONS *a0 )
 		if ( strncmp( rule->name, "batched_", 8 ) == 0 )
 		{
 		    int anycacheable = 0;
-			NewListItem* target = newlist_first(targets);
-			NewListItem* source = newlist_first(sources);
-		    for( ; target; target = newlist_next(target), source = ( source == NULL ? source : newlist_next(source) ) )
+			LISTITEM* target = list_first(targets);
+			LISTITEM* source = list_first(sources);
+		    for( ; target; target = list_next(target), source = ( source == NULL ? source : list_next(source) ) )
 		    {
-			TARGET *t = bindtarget(newlist_value(target));
-			TARGET *s = source!=NULL ? bindtarget(newlist_value(source)) : NULL;
+			TARGET *t = bindtarget(list_value(target));
+			TARGET *s = source!=NULL ? bindtarget(list_value(source)) : NULL;
 
 			/* if this target could be cacheable */
 			if ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) {
@@ -1252,9 +1252,9 @@ make1cmds( ACTIONS *a0 )
 			    }
 			    /* Build new lists */
 
-			    nt = newlist_append( nt, t->boundname, 1 );
+			    nt = list_append( nt, t->boundname, 1 );
 			    if (s)
-				ns = newlist_append( ns, s->boundname, 1 );
+				ns = list_append( ns, s->boundname, 1 );
 			}
 		    }
 
@@ -1266,15 +1266,15 @@ make1cmds( ACTIONS *a0 )
 		else
 		{
 		    int allcached = 1;
-		    NewListItem* target;
+		    LISTITEM* target;
 		    popsettings( t->settings );
-		    for(target = newlist_first(targets) ; target; target = newlist_next(target) )
+		    for(target = list_first(targets) ; target; target = list_next(target) )
 		    {
-			TARGET *t = bindtarget(newlist_value(target));
+			TARGET *t = bindtarget(list_value(target));
 //			TARGET *s = sources!=NULL ? bindtarget(sources->string) : NULL;
 			TARGETS *c;
 			TARGET *outt;
-			NewList *filecache = 0;
+			LIST *filecache = 0;
 
 			if ( t->flags & T_FLAG_USEFILECACHE )
 			{
@@ -1310,12 +1310,12 @@ make1cmds( ACTIONS *a0 )
 				{
 				    if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
 				    {
-					NewListItem *list;
-					for ( list = newlist_first(vars->value); list; list = newlist_next(list) )
+					LISTITEM *list;
+					for ( list = list_first(vars->value); list; list = list_next(list) )
 					{
-					    MD5Update( &context, (unsigned char*)newlist_value(list), (unsigned int)strlen( newlist_value(list) ) );
+					    MD5Update( &context, (unsigned char*)list_value(list), (unsigned int)strlen( list_value(list) ) );
 					    if( DEBUG_MD5HASH )
-						printf( "\t\tCOMMANDLINE: %s\n", newlist_value(list) );
+						printf( "\t\tCOMMANDLINE: %s\n", list_value(list) );
 					}
 
 					break;
@@ -1345,7 +1345,7 @@ make1cmds( ACTIONS *a0 )
 			    outt->flags |= T_FLAG_USEFILECACHE;
 			    outt->filecache_generate = t->filecache_generate;
 			    outt->filecache_use = t->filecache_use;
-			    outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", newlist_append( NULL, newlist_value(newlist_first(filecache)), 1 ) );
+			    outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_append( NULL, list_value(list_first(filecache)), 1 ) );
 			    MD5Final( outt->buildmd5sum, &context );
 			    if (DEBUG_MD5HASH)
 			    {
@@ -1374,14 +1374,14 @@ make1cmds( ACTIONS *a0 )
 			ns = make1list( NULL, a0->action->sources, rule->flags );
 		    }
 		}
-		newlist_free( targets );
-		newlist_free( sources );
+		list_free( targets );
+		list_free( sources );
 
 		/* if no targets survived (all were retrieved from the cache)
 		or no sources survived (all are up to date) */
 		if (nt==NULL) { // || ns==NULL) {
 		    /* skip this action */
-		    newlist_free(ns);
+		    list_free(ns);
 			popsettings( t->settings );
 			for ( autot = autosettingsreverse; autot; autot = autot->next ) {
 				if ( autot->target != t )
@@ -1474,7 +1474,7 @@ make1cmds( ACTIONS *a0 )
 
 	    if( !ns && ( rule->flags & ( RULE_UPDATED | RULE_EXISTING ) ) )
 	    {
-		newlist_free( nt );
+		list_free( nt );
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
 		if (DEBUG_MAKE1) {
 		    const char* desc = 0;
@@ -1524,7 +1524,7 @@ make1cmds( ACTIONS *a0 )
 	     */
 
 	    start = 0;
-	    chunk = length = newlist_length( ns );
+	    chunk = length = list_length( ns );
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 	    maxline = rule->maxline;
 /* commented so jamgram.y can compile #else
@@ -1543,9 +1543,9 @@ make1cmds( ACTIONS *a0 )
 		int thischunk = rule->maxtargets != 0 ? (chunk < rule->maxtargets ? chunk : rule->maxtargets) : chunk;
 
 		CMD *cmd = cmd_new( rule,
-			newlist_copy( NULL, nt ),
-			newlist_sublist( ns, start, thischunk ),
-			newlist_copy( NULL, shell ),
+			list_copy( NULL, nt ),
+			list_sublist( ns, start, thischunk ),
+			list_copy( NULL, shell ),
 			maxline );
 /* commented so jamgram.y can compile #else
 		CMD *cmd = cmd_new( rule,
@@ -1593,8 +1593,8 @@ make1cmds( ACTIONS *a0 )
 
 	    /* These were always copied when used. */
 
-	    newlist_free( nt );
-	    newlist_free( ns );
+	    list_free( nt );
+	    list_free( ns );
 
 	    /* Free the variables whose values were bound by */
 	    /* 'actions xxx bind vars' */
@@ -1616,9 +1616,9 @@ make1cmds( ACTIONS *a0 )
  * make1list() - turn a list of targets into a LIST, for $(<) and $(>)
  */
 
-static NewList *
+static LIST *
 make1list(
-	NewList	*l,
+	LIST	*l,
 	TARGETS	*targets,
 	int	flags )
 {
@@ -1648,10 +1648,10 @@ make1list(
 
 	if( flags & RULE_TOGETHER )
 	{
-	    NewListItem *m = newlist_first(l);
+	    LISTITEM *m = list_first(l);
 
-	    for( m; m; m = newlist_next(m) )
-		if( !strcmp( newlist_value(m), t->boundname ) )
+	    for( m; m; m = list_next(m) )
+		if( !strcmp( list_value(m), t->boundname ) )
 		    break;
 
 	    if( m )
@@ -1660,7 +1660,7 @@ make1list(
 
 	/* Build new list */
 
-	l = newlist_append( l, t->boundname, 1 );
+	l = list_append( l, t->boundname, 1 );
     }
 
     return l;
@@ -1672,9 +1672,9 @@ make1list(
  * make1list_unbound() - turn a list of targets into a LIST, for $(<) and $(>)
  */
 
-static NewList *
+static LIST *
 make1list_unbound(
-	NewList	*l,
+	LIST	*l,
 	TARGETS	*targets,
 	int	flags )
 {
@@ -1700,10 +1700,10 @@ make1list_unbound(
 
 	if( flags & RULE_TOGETHER )
 	{
-	    NewListItem *m = newlist_first(l);
+	    LISTITEM *m = list_first(l);
 
-	    for( m; m; m = newlist_next(m) )
-		if( !strcmp( newlist_value(m), t->boundname ) )
+	    for( m; m; m = list_next(m) )
+		if( !strcmp( list_value(m), t->boundname ) )
 		    break;
 
 	    if( m )
@@ -1712,7 +1712,7 @@ make1list_unbound(
 
 	/* Build new list */
 
-	l = newlist_append( l, t->name, 1 );
+	l = list_append( l, t->name, 1 );
     }
 
     return l;
@@ -1910,19 +1910,19 @@ make1list_batched(
  */
 
 static SETTINGS *
-make1settings( NewList *vars )
+make1settings( LIST *vars )
 {
 	SETTINGS *settings = 0;
-	NewListItem* var;
+	LISTITEM* var;
 
-	for(var = newlist_first(vars) ; var; var = newlist_next( var ) )
+	for(var = list_first(vars) ; var; var = list_next( var ) )
 	{
-	    NewListItem *l = newlist_first(var_get(newlist_value(var)));
-	    NewList *nl = 0;
+	    LISTITEM *l = list_first(var_get(list_value(var)));
+	    LIST *nl = 0;
 
-	    for( ; l; l = newlist_next( l ) )
+	    for( ; l; l = list_next( l ) )
 	    {
-		TARGET *t = bindtarget(newlist_value(l));
+		TARGET *t = bindtarget(list_value(l));
 
 		/* Make sure the target is bound, warning if it is not in the */
 		/* dependency graph. */
@@ -1932,12 +1932,12 @@ make1settings( NewList *vars )
 
 		/* Build new list */
 
-		nl = newlist_append( nl, t->boundname, 1 );
+		nl = list_append( nl, t->boundname, 1 );
 	    }
 
 	    /* Add to settings chain */
 
-	    settings = addsettings( settings, 0, newlist_value(var), nl );
+	    settings = addsettings( settings, 0, list_value(var), nl );
 	}
 
 	return settings;

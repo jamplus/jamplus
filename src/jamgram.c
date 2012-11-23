@@ -2,20 +2,20 @@
 /* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
-   
+
       Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-   
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -28,7 +28,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -82,7 +82,7 @@
 
 # define YYMAXDEPTH 10000	/* for OSF and other less endowed yaccs */
 
-# define F0 (NewList *(*)(PARSE *, LOL *, int *))0
+# define F0 (LIST *(*)(PARSE *, LOL *, int *))0
 # define P0 (PARSE *)0
 # define S0 (char *)0
 
@@ -132,83 +132,11 @@
 #endif
 
 
-/* Tokens.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     _BANG_t = 258,
-     _BANG_EQUALS_t = 259,
-     _AMPER_t = 260,
-     _AMPERAMPER_t = 261,
-     _LPAREN_t = 262,
-     _RPAREN_t = 263,
-     _PLUS_EQUALS_t = 264,
-     _MINUS_EQUALS_t = 265,
-     _COLON_t = 266,
-     _SEMIC_t = 267,
-     _LANGLE_t = 268,
-     _LANGLE_EQUALS_t = 269,
-     _EQUALS_t = 270,
-     _RANGLE_t = 271,
-     _RANGLE_EQUALS_t = 272,
-     _QUESTION_EQUALS_t = 273,
-     _LBRACKET_t = 274,
-     _RBRACKET_t = 275,
-     ACTIONS_t = 276,
-     BIND_t = 277,
-     BREAK_t = 278,
-     CASE_t = 279,
-     CONTINUE_t = 280,
-     DEFAULT_t = 281,
-     ELSE_t = 282,
-     EXISTING_t = 283,
-     FOR_t = 284,
-     IF_t = 285,
-     IGNORE_t = 286,
-     IN_t = 287,
-     INCLUDE_t = 288,
-     LOCAL_t = 289,
-     LUA_t = 290,
-     MAXLINE_t = 291,
-     MAXTARGETS_t = 292,
-     ON_t = 293,
-     PIECEMEAL_t = 294,
-     QUIETLY_t = 295,
-     REMOVEEMPTYDIRS_t = 296,
-     RESPONSE_t = 297,
-     RETURN_t = 298,
-     RULE_t = 299,
-     SCREENOUTPUT_t = 300,
-     SWITCH_t = 301,
-     TOGETHER_t = 302,
-     UPDATED_t = 303,
-     WHILE_t = 304,
-     _LBRACE_t = 305,
-     _BAR_t = 306,
-     _BARBAR_t = 307,
-     _RBRACE_t = 308,
-     ARG = 309,
-     STRING = 310
-   };
-#endif
-
-
-
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
-# define YYSTYPE_IS_DECLARED 1
-#endif
-
-
 /* Copy the second part of user declarations.  */
 
 
 /* Line 264 of yacc.c  */
-#line 212 "jamgram.c"
+#line 267 "jamgram.c"
 
 #ifdef short
 # undef short
@@ -1567,545 +1495,545 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 136 "jamgram.y"
-    { parse_save( (yyvsp[(1) - (1)]).parse ); ;}
+    { parse_save( (yyvsp[(1) - (1)]).parse ); }
     break;
 
   case 4:
 
 /* Line 1455 of yacc.c  */
 #line 147 "jamgram.y"
-    { (yyval).parse = pnull(); ;}
+    { (yyval).parse = pnull(); }
     break;
 
   case 5:
 
 /* Line 1455 of yacc.c  */
 #line 149 "jamgram.y"
-    { (yyval).parse = (yyvsp[(1) - (1)]).parse; ;}
+    { (yyval).parse = (yyvsp[(1) - (1)]).parse; }
     break;
 
   case 6:
 
 /* Line 1455 of yacc.c  */
 #line 153 "jamgram.y"
-    { (yyval).parse = (yyvsp[(1) - (1)]).parse; ;}
+    { (yyval).parse = (yyvsp[(1) - (1)]).parse; }
     break;
 
   case 7:
 
 /* Line 1455 of yacc.c  */
 #line 155 "jamgram.y"
-    { (yyval).parse = prules( (yyvsp[(1) - (2)]).parse, (yyvsp[(2) - (2)]).parse ); ;}
+    { (yyval).parse = prules( (yyvsp[(1) - (2)]).parse, (yyvsp[(2) - (2)]).parse ); }
     break;
 
   case 8:
 
 /* Line 1455 of yacc.c  */
 #line 157 "jamgram.y"
-    { (yyval).parse = plocal( (yyvsp[(2) - (4)]).parse, pnull(), (yyvsp[(4) - (4)]).parse ); ;}
+    { (yyval).parse = plocal( (yyvsp[(2) - (4)]).parse, pnull(), (yyvsp[(4) - (4)]).parse ); }
     break;
 
   case 9:
 
 /* Line 1455 of yacc.c  */
 #line 159 "jamgram.y"
-    { (yyval).parse = plocal( (yyvsp[(2) - (6)]).parse, (yyvsp[(4) - (6)]).parse, (yyvsp[(6) - (6)]).parse ); ;}
+    { (yyval).parse = plocal( (yyvsp[(2) - (6)]).parse, (yyvsp[(4) - (6)]).parse, (yyvsp[(6) - (6)]).parse ); }
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
 #line 163 "jamgram.y"
-    { (yyval).parse = (yyvsp[(2) - (3)]).parse; ;}
+    { (yyval).parse = (yyvsp[(2) - (3)]).parse; }
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
 #line 165 "jamgram.y"
-    { (yyval).parse = pincl( (yyvsp[(2) - (3)]).parse ); ;}
+    { (yyval).parse = pincl( (yyvsp[(2) - (3)]).parse ); }
     break;
 
   case 12:
 
 /* Line 1455 of yacc.c  */
 #line 167 "jamgram.y"
-    { (yyval).parse = prule( (yyvsp[(1) - (3)]).parse, (yyvsp[(2) - (3)]).parse ); ;}
+    { (yyval).parse = prule( (yyvsp[(1) - (3)]).parse, (yyvsp[(2) - (3)]).parse ); }
     break;
 
   case 13:
 
 /* Line 1455 of yacc.c  */
 #line 169 "jamgram.y"
-    { (yyval).parse = pset( (yyvsp[(1) - (4)]).parse, (yyvsp[(3) - (4)]).parse, (yyvsp[(2) - (4)]).number ); ;}
+    { (yyval).parse = pset( (yyvsp[(1) - (4)]).parse, (yyvsp[(3) - (4)]).parse, (yyvsp[(2) - (4)]).number ); }
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
 #line 171 "jamgram.y"
-    { (yyval).parse = pset1( (yyvsp[(1) - (6)]).parse, (yyvsp[(3) - (6)]).parse, (yyvsp[(5) - (6)]).parse, (yyvsp[(4) - (6)]).number ); ;}
+    { (yyval).parse = pset1( (yyvsp[(1) - (6)]).parse, (yyvsp[(3) - (6)]).parse, (yyvsp[(5) - (6)]).parse, (yyvsp[(4) - (6)]).number ); }
     break;
 
   case 15:
 
 /* Line 1455 of yacc.c  */
 #line 173 "jamgram.y"
-    { (yyval).parse = pbreak( (yyvsp[(2) - (3)]).parse, JMP_BREAK ); ;}
+    { (yyval).parse = pbreak( (yyvsp[(2) - (3)]).parse, JMP_BREAK ); }
     break;
 
   case 16:
 
 /* Line 1455 of yacc.c  */
 #line 175 "jamgram.y"
-    { (yyval).parse = pbreak( (yyvsp[(2) - (3)]).parse, JMP_CONTINUE ); ;}
+    { (yyval).parse = pbreak( (yyvsp[(2) - (3)]).parse, JMP_CONTINUE ); }
     break;
 
   case 17:
 
 /* Line 1455 of yacc.c  */
 #line 177 "jamgram.y"
-    { (yyval).parse = pbreak( (yyvsp[(2) - (3)]).parse, JMP_RETURN ); ;}
+    { (yyval).parse = pbreak( (yyvsp[(2) - (3)]).parse, JMP_RETURN ); }
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
 #line 179 "jamgram.y"
-    { (yyval).parse = pfor( (yyvsp[(2) - (7)]).string, (yyvsp[(4) - (7)]).parse, (yyvsp[(6) - (7)]).parse ); ;}
+    { (yyval).parse = pfor( (yyvsp[(2) - (7)]).string, (yyvsp[(4) - (7)]).parse, (yyvsp[(6) - (7)]).parse ); }
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
 #line 181 "jamgram.y"
-    { (yyval).parse = pswitch( (yyvsp[(2) - (5)]).parse, (yyvsp[(4) - (5)]).parse ); ;}
+    { (yyval).parse = pswitch( (yyvsp[(2) - (5)]).parse, (yyvsp[(4) - (5)]).parse ); }
     break;
 
   case 20:
 
 /* Line 1455 of yacc.c  */
 #line 183 "jamgram.y"
-    { (yyval).parse = pif( (yyvsp[(2) - (5)]).parse, (yyvsp[(4) - (5)]).parse, pnull() ); ;}
+    { (yyval).parse = pif( (yyvsp[(2) - (5)]).parse, (yyvsp[(4) - (5)]).parse, pnull() ); }
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
 #line 185 "jamgram.y"
-    { (yyval).parse = pif( (yyvsp[(2) - (7)]).parse, (yyvsp[(4) - (7)]).parse, (yyvsp[(7) - (7)]).parse ); ;}
+    { (yyval).parse = pif( (yyvsp[(2) - (7)]).parse, (yyvsp[(4) - (7)]).parse, (yyvsp[(7) - (7)]).parse ); }
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
 #line 187 "jamgram.y"
-    { (yyval).parse = pwhile( (yyvsp[(2) - (5)]).parse, (yyvsp[(4) - (5)]).parse ); ;}
+    { (yyval).parse = pwhile( (yyvsp[(2) - (5)]).parse, (yyvsp[(4) - (5)]).parse ); }
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
 #line 189 "jamgram.y"
-    { (yyval).parse = psetc( (yyvsp[(2) - (6)]).string, (yyvsp[(3) - (6)]).parse, (yyvsp[(5) - (6)]).parse ); ;}
+    { (yyval).parse = psetc( (yyvsp[(2) - (6)]).string, (yyvsp[(3) - (6)]).parse, (yyvsp[(5) - (6)]).parse ); }
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
 #line 191 "jamgram.y"
-    { (yyval).parse = pon( (yyvsp[(2) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = pon( (yyvsp[(2) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
 #line 193 "jamgram.y"
-    { yymode( SCAN_STRING ); ;}
+    { yymode( SCAN_STRING ); }
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
 #line 195 "jamgram.y"
-    { yymode( SCAN_NORMAL ); ;}
+    { yymode( SCAN_NORMAL ); }
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
 #line 197 "jamgram.y"
-    { (yyval).parse = psete( (yyvsp[(3) - (9)]).string,(yyvsp[(4) - (9)]).parse,(yyvsp[(7) - (9)]).string,(yyvsp[(2) - (9)]).number,(yyvsp[(2) - (9)]).number2,(yyvsp[(2) - (9)]).number3 ); ;}
+    { (yyval).parse = psete( (yyvsp[(3) - (9)]).string,(yyvsp[(4) - (9)]).parse,(yyvsp[(7) - (9)]).string,(yyvsp[(2) - (9)]).number,(yyvsp[(2) - (9)]).number2,(yyvsp[(2) - (9)]).number3 ); }
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
 #line 205 "jamgram.y"
-    { (yyval).number = VAR_SET; ;}
+    { (yyval).number = VAR_SET; }
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
 #line 207 "jamgram.y"
-    { (yyval).number = VAR_APPEND; ;}
+    { (yyval).number = VAR_APPEND; }
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
 #line 209 "jamgram.y"
-    { (yyval).number = VAR_REMOVE; ;}
+    { (yyval).number = VAR_REMOVE; }
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
 #line 211 "jamgram.y"
-    { (yyval).number = VAR_DEFAULT; ;}
+    { (yyval).number = VAR_DEFAULT; }
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
 #line 213 "jamgram.y"
-    { (yyval).number = VAR_DEFAULT; ;}
+    { (yyval).number = VAR_DEFAULT; }
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
 #line 221 "jamgram.y"
-    { (yyval).parse = peval( EXPR_EXISTS, (yyvsp[(1) - (1)]).parse, pnull() ); ;}
+    { (yyval).parse = peval( EXPR_EXISTS, (yyvsp[(1) - (1)]).parse, pnull() ); }
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
 #line 223 "jamgram.y"
-    { (yyval).parse = peval( EXPR_EQUALS, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_EQUALS, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
 #line 225 "jamgram.y"
-    { (yyval).parse = peval( EXPR_NOTEQ, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_NOTEQ, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
 #line 227 "jamgram.y"
-    { (yyval).parse = peval( EXPR_LESS, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_LESS, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
 #line 229 "jamgram.y"
-    { (yyval).parse = peval( EXPR_LESSEQ, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_LESSEQ, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
 #line 231 "jamgram.y"
-    { (yyval).parse = peval( EXPR_MORE, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_MORE, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
 #line 233 "jamgram.y"
-    { (yyval).parse = peval( EXPR_MOREEQ, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_MOREEQ, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
 #line 235 "jamgram.y"
-    { (yyval).parse = peval( EXPR_AND, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_AND, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
 #line 237 "jamgram.y"
-    { (yyval).parse = peval( EXPR_AND, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_AND, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
 #line 239 "jamgram.y"
-    { (yyval).parse = peval( EXPR_OR, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_OR, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
 #line 241 "jamgram.y"
-    { (yyval).parse = peval( EXPR_OR, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_OR, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
 #line 243 "jamgram.y"
-    { (yyval).parse = peval( EXPR_IN, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = peval( EXPR_IN, (yyvsp[(1) - (3)]).parse, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
 #line 245 "jamgram.y"
-    { (yyval).parse = peval( EXPR_NOT, (yyvsp[(2) - (2)]).parse, pnull() ); ;}
+    { (yyval).parse = peval( EXPR_NOT, (yyvsp[(2) - (2)]).parse, pnull() ); }
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
 #line 247 "jamgram.y"
-    { (yyval).parse = (yyvsp[(2) - (3)]).parse; ;}
+    { (yyval).parse = (yyvsp[(2) - (3)]).parse; }
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
 #line 257 "jamgram.y"
-    { (yyval).parse = P0; ;}
+    { (yyval).parse = P0; }
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
 #line 259 "jamgram.y"
-    { (yyval).parse = pnode( (yyvsp[(1) - (2)]).parse, (yyvsp[(2) - (2)]).parse ); ;}
+    { (yyval).parse = pnode( (yyvsp[(1) - (2)]).parse, (yyvsp[(2) - (2)]).parse ); }
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
 #line 263 "jamgram.y"
-    { (yyval).parse = psnode( (yyvsp[(2) - (4)]).string, (yyvsp[(4) - (4)]).parse ); ;}
+    { (yyval).parse = psnode( (yyvsp[(2) - (4)]).string, (yyvsp[(4) - (4)]).parse ); }
     break;
 
   case 50:
 
 /* Line 1455 of yacc.c  */
 #line 272 "jamgram.y"
-    { (yyval).parse = P0; ;}
+    { (yyval).parse = P0; }
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
 #line 274 "jamgram.y"
-    { (yyval).parse = psnode( (yyvsp[(1) - (3)]).string, (yyvsp[(3) - (3)]).parse ); ;}
+    { (yyval).parse = psnode( (yyvsp[(1) - (3)]).string, (yyvsp[(3) - (3)]).parse ); }
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
 #line 276 "jamgram.y"
-    { (yyval).parse = psnode( (yyvsp[(1) - (1)]).string, P0 ); ;}
+    { (yyval).parse = psnode( (yyvsp[(1) - (1)]).string, P0 ); }
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
 #line 285 "jamgram.y"
-    { (yyval).parse = pnode( P0, (yyvsp[(1) - (1)]).parse ); ;}
+    { (yyval).parse = pnode( P0, (yyvsp[(1) - (1)]).parse ); }
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
 #line 287 "jamgram.y"
-    { (yyval).parse = pnode( (yyvsp[(3) - (3)]).parse, (yyvsp[(1) - (3)]).parse ); ;}
+    { (yyval).parse = pnode( (yyvsp[(3) - (3)]).parse, (yyvsp[(1) - (3)]).parse ); }
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
 #line 297 "jamgram.y"
-    { (yyval).parse = (yyvsp[(1) - (1)]).parse; yymode( SCAN_NORMAL ); ;}
+    { (yyval).parse = (yyvsp[(1) - (1)]).parse; yymode( SCAN_NORMAL ); }
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
 #line 301 "jamgram.y"
-    { (yyval).parse = pnull(); yymode( SCAN_PUNCT ); ;}
+    { (yyval).parse = pnull(); yymode( SCAN_PUNCT ); }
     break;
 
   case 57:
 
 /* Line 1455 of yacc.c  */
 #line 303 "jamgram.y"
-    { (yyval).parse = pappend( (yyvsp[(1) - (2)]).parse, (yyvsp[(2) - (2)]).parse ); ;}
+    { (yyval).parse = pappend( (yyvsp[(1) - (2)]).parse, (yyvsp[(2) - (2)]).parse ); }
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
 #line 307 "jamgram.y"
-    { (yyval).parse = plist( (yyvsp[(1) - (1)]).string ); ;}
+    { (yyval).parse = plist( (yyvsp[(1) - (1)]).string ); }
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
 #line 308 "jamgram.y"
-    { yymode( SCAN_NORMAL ); ;}
+    { yymode( SCAN_NORMAL ); }
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
 #line 309 "jamgram.y"
-    { (yyval).parse = (yyvsp[(3) - (4)]).parse; ;}
+    { (yyval).parse = (yyvsp[(3) - (4)]).parse; }
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
 #line 318 "jamgram.y"
-    { (yyval).parse = prule( (yyvsp[(1) - (2)]).parse, (yyvsp[(2) - (2)]).parse ); ;}
+    { (yyval).parse = prule( (yyvsp[(1) - (2)]).parse, (yyvsp[(2) - (2)]).parse ); }
     break;
 
   case 62:
 
 /* Line 1455 of yacc.c  */
 #line 320 "jamgram.y"
-    { (yyval).parse = pon( (yyvsp[(2) - (4)]).parse, prule( (yyvsp[(3) - (4)]).parse, (yyvsp[(4) - (4)]).parse ) ); ;}
+    { (yyval).parse = pon( (yyvsp[(2) - (4)]).parse, prule( (yyvsp[(3) - (4)]).parse, (yyvsp[(4) - (4)]).parse ) ); }
     break;
 
   case 63:
 
 /* Line 1455 of yacc.c  */
 #line 322 "jamgram.y"
-    { (yyval).parse = pon( (yyvsp[(2) - (4)]).parse, (yyvsp[(4) - (4)]).parse ); ;}
+    { (yyval).parse = pon( (yyvsp[(2) - (4)]).parse, (yyvsp[(4) - (4)]).parse ); }
     break;
 
   case 64:
 
 /* Line 1455 of yacc.c  */
 #line 331 "jamgram.y"
-    { (yyval).number = (yyval).number2 = (yyval).number3 = 0; ;}
+    { (yyval).number = (yyval).number2 = (yyval).number3 = 0; }
     break;
 
   case 65:
 
 /* Line 1455 of yacc.c  */
 #line 333 "jamgram.y"
-    { (yyval).number = (yyvsp[(1) - (2)]).number | (yyvsp[(2) - (2)]).number; if ((yyvsp[(2) - (2)]).number2 != 0) (yyval).number2 = (yyvsp[(2) - (2)]).number2; if ((yyvsp[(2) - (2)]).number3 != 0) (yyval).number3 = (yyvsp[(2) - (2)]).number3; ;}
+    { (yyval).number = (yyvsp[(1) - (2)]).number | (yyvsp[(2) - (2)]).number; if ((yyvsp[(2) - (2)]).number2 != 0) (yyval).number2 = (yyvsp[(2) - (2)]).number2; if ((yyvsp[(2) - (2)]).number3 != 0) (yyval).number3 = (yyvsp[(2) - (2)]).number3; }
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
 #line 337 "jamgram.y"
-    { (yyval).number = RULE_UPDATED; ;}
+    { (yyval).number = RULE_UPDATED; }
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
 #line 339 "jamgram.y"
-    { (yyval).number = RULE_TOGETHER; ;}
+    { (yyval).number = RULE_TOGETHER; }
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
 #line 341 "jamgram.y"
-    { (yyval).number = RULE_IGNORE; ;}
+    { (yyval).number = RULE_IGNORE; }
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
 #line 343 "jamgram.y"
-    { (yyval).number = RULE_QUIETLY; ;}
+    { (yyval).number = RULE_QUIETLY; }
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
 #line 345 "jamgram.y"
-    { (yyval).number = RULE_PIECEMEAL; ;}
+    { (yyval).number = RULE_PIECEMEAL; }
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
 #line 347 "jamgram.y"
-    { (yyval).number = RULE_EXISTING; ;}
+    { (yyval).number = RULE_EXISTING; }
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
 #line 349 "jamgram.y"
-    { (yyval).number = RULE_MAXLINE;  (yyval).number2 = atoi( (yyvsp[(2) - (2)]).string ); ;}
+    { (yyval).number = RULE_MAXLINE;  (yyval).number2 = atoi( (yyvsp[(2) - (2)]).string ); }
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
 #line 351 "jamgram.y"
-    { (yyval).number = RULE_RESPONSE; ;}
+    { (yyval).number = RULE_RESPONSE; }
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
 #line 353 "jamgram.y"
-    { (yyval).number = RULE_LUA; ;}
+    { (yyval).number = RULE_LUA; }
     break;
 
   case 75:
 
 /* Line 1455 of yacc.c  */
 #line 355 "jamgram.y"
-    { (yyval).number = RULE_MAXTARGETS; (yyval).number3 = atoi( (yyvsp[(2) - (2)]).string ); ;}
+    { (yyval).number = RULE_MAXTARGETS; (yyval).number3 = atoi( (yyvsp[(2) - (2)]).string ); }
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
 #line 357 "jamgram.y"
-    { (yyval).number = RULE_SCREENOUTPUT; ;}
+    { (yyval).number = RULE_SCREENOUTPUT; }
     break;
 
   case 77:
 
 /* Line 1455 of yacc.c  */
 #line 359 "jamgram.y"
-    { (yyval).number = RULE_REMOVEEMPTYDIRS; ;}
+    { (yyval).number = RULE_REMOVEEMPTYDIRS; }
     break;
 
   case 78:
 
 /* Line 1455 of yacc.c  */
 #line 368 "jamgram.y"
-    { (yyval).parse = pnull(); ;}
+    { (yyval).parse = pnull(); }
     break;
 
   case 79:
 
 /* Line 1455 of yacc.c  */
 #line 370 "jamgram.y"
-    { (yyval).parse = (yyvsp[(2) - (2)]).parse; ;}
+    { (yyval).parse = (yyvsp[(2) - (2)]).parse; }
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2109 "jamgram.c"
+#line 2164 "jamgram.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);

@@ -50,7 +50,7 @@ execcmd(
 	const char *string,
 	void (*func)( void *closure, int status ),
 	void *closure,
-	NewList *shell )
+	LIST *shell )
 {
 	
 	printf( "%s", string );

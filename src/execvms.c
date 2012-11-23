@@ -52,7 +52,7 @@ execcmd(
 	const char *string,
 	void (*func)( void *closure, int status ),
 	void *closure,
-	NewList *shell )
+	LIST *shell )
 {
 	char *s, *e, *p;
 	int rstat = EXEC_CMD_OK;

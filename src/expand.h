@@ -10,8 +10,8 @@
  * 11/04/02 (seiwald) - const-ing for string literals
  */
 
-NewList *var_expand( 
-	NewList		*l,
+LIST *var_expand( 
+	LIST		*l,
 	const char	*in,
 	const char	*end,
 	LOL 		*lol,

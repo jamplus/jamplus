@@ -7,6 +7,7 @@
 /*
  * Structures defined:
  *
+ *	LIST - list of strings
  *	LOL - list of LISTs
  *
  * External routines:
@@ -19,10 +20,18 @@
  */
 
 /*
- * LOL - list of LISTs
+ * LIST - list of strings
  */
 
-#include "newlist.h"
+struct LIST;
+struct LISTITEM;
+
+typedef struct LIST LIST;
+typedef struct LISTITEM LISTITEM;
+
+/*
+ * LOL - list of LISTs
+ */
 
 typedef struct _lol LOL;
 
@@ -30,11 +39,38 @@ typedef struct _lol LOL;
 
 struct _lol {
 	int	count;
-	NewList	*list[ LOL_MAX ];
+	LIST	*list[ LOL_MAX ];
 } ;
 
-void	lol_add( LOL *lol, NewList *l );
+LISTITEM* list_first(LIST* list);
+LISTITEM* list_next(LISTITEM* item);
+char const* list_value(LISTITEM* item);
+
+LIST* list_new(void);
+void list_free(LIST* list);
+
+int list_length(LIST* list);
+int list_empty(LIST* list);
+int list_equal(LIST* a, LIST* b);
+/* Everything in l0 is in l1 */
+int list_in(LIST* l0, LIST* l1);
+
+LIST* list_append(LIST* list, char const* value, int copy);
+/* Takes ownership of tail */
+LIST* list_appendList(LIST* list, LIST* tail);
+LIST* list_copy(LIST* head, LIST* list);
+LIST* list_copytail(LIST* head, LISTITEM* first, int maxNumToCopy);
+LIST* list_sublist(LIST* list, int start, int count);
+LIST* list_remove(LIST* list, LIST* removeItems);
+LIST* list_sort(LIST* list, int caseSensitive);
+
+void list_print(LIST* list);
+void list_printq(FILE* out, LIST* list);
+
+void list_done(void);
+
+void	lol_add( LOL *lol, LIST *l );
 void	lol_init( LOL *lol );
 void	lol_free( LOL *lol );
-NewList *	lol_get( LOL *lol, int i );
+LIST *	lol_get( LOL *lol, int i );
 void	lol_print( LOL *lol );

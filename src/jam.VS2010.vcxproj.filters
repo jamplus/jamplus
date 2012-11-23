@@ -147,9 +147,6 @@
     <ClCompile Include="w32_shortname.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="newlist.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.h">
@@ -261,9 +258,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="w32_shortname.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="newlist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

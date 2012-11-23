@@ -147,9 +147,9 @@ path_build(
 	char pathdelim = '/';
 	if ( pathdelim_oldstyle == -1 )
 	{
-		NewList *oldstyle = var_get( "PATHDELIM_OLDSTYLE" );
-		if ( newlist_first(oldstyle) ) {
-			char const* str = newlist_value(newlist_first(oldstyle));
+		LIST *oldstyle = var_get( "PATHDELIM_OLDSTYLE" );
+		if ( list_first(oldstyle) ) {
+			char const* str = list_value(list_first(oldstyle));
 			pathdelim_oldstyle = strcmp( str, "1" ) == 0  ||  strcmp( str, "true" ) == 0;
 		} else {
 			pathdelim_oldstyle = 0;

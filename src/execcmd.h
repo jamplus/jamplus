@@ -18,7 +18,7 @@ void execcmd(
 	void (*func)( void *closure, int status ),
 #endif
 	void *closure,
-	NewList *shell,
+	LIST *shell,
 #ifdef OPT_SERIAL_OUTPUT_EXT
     int serialOutput
 #endif

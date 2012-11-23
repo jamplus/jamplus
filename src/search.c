@@ -26,11 +26,11 @@ static const char *
 search_helper( 
 	   const char *target,
 	   time_t	*time,
-	   NewList *(*varget)( const char*, void* ),
+	   LIST *(*varget)( const char*, void* ),
 	   void *userData )
 {
 	PATHNAME f[1];
-	NewList	*varlist;
+	LIST	*varlist;
 	char	buf[ MAXJPATH ];
 #ifdef OPT_PATH_BINDING_EXT
 	PATHNAME bf[1];
@@ -44,9 +44,9 @@ search_helper(
 	f->f_grist.len = 0;
 	
 #ifdef OPT_PATH_BINDING_EXT
-	if ( newlist_first(varlist = varget( "BINDING", userData )) )
+	if ( list_first(varlist = varget( "BINDING", userData )) )
 	{
-		path_parse( newlist_value(newlist_first(varlist)), bf );
+		path_parse( list_value(list_first(varlist)), bf );
 		
 		f->f_dir = bf->f_dir;
 		f->f_base = bf->f_base;
@@ -54,10 +54,10 @@ search_helper(
 	}
 #endif
 	
-	if( newlist_first(varlist = varget( "LOCATE", userData )) )
+	if( list_first(varlist = varget( "LOCATE", userData )) )
 	{
-		f->f_root.ptr = newlist_value(newlist_first(varlist));
-		f->f_root.len = (int)(strlen( newlist_value(newlist_first(varlist)) ));
+		f->f_root.ptr = list_value(list_first(varlist));
+		f->f_root.len = (int)(strlen( list_value(list_first(varlist)) ));
 		
 		path_build( f, buf, 1 );
 		
@@ -68,14 +68,14 @@ search_helper(
 		
 		return newstr( buf );
 	}
-	else if( newlist_first(varlist = varget( "SEARCH", userData )) )
+	else if( list_first(varlist = varget( "SEARCH", userData )) )
 	{
-		NewList *searchextensionslist;
-		NewListItem* var = newlist_first(varlist);
+		LIST *searchextensionslist;
+		LISTITEM* var = list_first(varlist);
 		while( var )
 		{
-			f->f_root.ptr = newlist_value(var);
-			f->f_root.len = (int)(strlen( newlist_value(var) ));
+			f->f_root.ptr = list_value(var);
+			f->f_root.len = (int)(strlen( list_value(var) ));
 			
 			path_build( f, buf, 1 );
 			
@@ -87,22 +87,22 @@ search_helper(
 			if( *time )
 				return newstr( buf );
 			
-			var = newlist_next( var );
+			var = list_next( var );
 		}
 		
 		searchextensionslist = varget( "SEARCH_EXTENSIONS", userData );
-		if ( newlist_first(searchextensionslist) )
+		if ( list_first(searchextensionslist) )
 		{
-			NewListItem* ext = newlist_first(searchextensionslist);
-			for ( ; ext; ext = newlist_next(ext) )
+			LISTITEM* ext = list_first(searchextensionslist);
+			for ( ; ext; ext = list_next(ext) )
 			{
-				NewListItem* var = newlist_first(varlist);
+				LISTITEM* var = list_first(varlist);
 				while( var )
 				{
-					f->f_root.ptr = newlist_value(var);
-					f->f_root.len = (int)(strlen( newlist_value(var) ));
+					f->f_root.ptr = list_value(var);
+					f->f_root.len = (int)(strlen( list_value(var) ));
 					
-					strcpy( path_build( f, buf, 1 ), newlist_value(ext) );
+					strcpy( path_build( f, buf, 1 ), list_value(ext) );
 					
 					if( DEBUG_SEARCH )
 						printf( "search %s: %s\n", target, buf );
@@ -112,7 +112,7 @@ search_helper(
 					if( *time )
 						return newstr( buf );
 					
-					var = newlist_next( var );
+					var = list_next( var );
 				}
 			}
 		}			
@@ -136,7 +136,7 @@ search_helper(
 }
 
 
-static NewList *standard_search_var_get( const char *symbol, void *userData ) {
+static LIST *standard_search_var_get( const char *symbol, void *userData ) {
 	return var_get( symbol );
 }
 
@@ -144,7 +144,7 @@ const char *search( const char *target, time_t	*time ) {
 	return search_helper( target, time, standard_search_var_get, NULL );
 }
 
-static NewList *search_using_target_settings_var_get( const char *symbol, void *userData ) {
+static LIST *search_using_target_settings_var_get( const char *symbol, void *userData ) {
 	SETTINGS* settings = quicksettingslookup( (TARGET*)userData, symbol );
 	return settings ? settings->value : NULL;
 }

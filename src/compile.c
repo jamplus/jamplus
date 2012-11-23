@@ -99,7 +99,7 @@ int glob( const char *s, const char *c );
  *	parse->right	single rule
  */
 
-NewList *
+LIST *
 compile_append(
 	PARSE	*parse,
 	LOL	*args,
@@ -107,7 +107,7 @@ compile_append(
 {
 	/* Append right to left. */
 
-	return newlist_appendList( 
+	return list_appendList( 
 		(*parse->left->func)( parse->left, args, jmp ),
 		(*parse->right->func)( parse->right, args, jmp ) );
 }
@@ -119,13 +119,13 @@ compile_append(
  *	parse->num	JMP_BREAK/CONTINUE/RETURN
  */
 
-NewList *
+LIST *
 compile_break(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
-	NewList *lv = (*parse->left->func)( parse->left, args, jmp );
+	LIST *lv = (*parse->left->func)( parse->left, args, jmp );
 	*jmp = parse->num;
 	return lv;
 }
@@ -139,34 +139,34 @@ compile_break(
  */
 
 static int
-lcmp( NewList *t, NewList *s )
+lcmp( LIST *t, LIST *s )
 {
 	int status = 0;
 
-	NewListItem* ti = newlist_first(t);
-	NewListItem* si = newlist_first(s);
+	LISTITEM* ti = list_first(t);
+	LISTITEM* si = list_first(s);
 
 	while( !status && ( ti || si ) )
 	{
-	    const char *st = ti ? newlist_value(ti) : "";
-	    const char *ss = si ? newlist_value(si) : "";
+	    const char *st = ti ? list_value(ti) : "";
+	    const char *ss = si ? list_value(si) : "";
 
 	    status = strcmp( st, ss );
 
-	    ti = ti ? newlist_next( ti ) : ti;
-	    si = si ? newlist_next( si ) : si;
+	    ti = ti ? list_next( ti ) : ti;
+	    si = si ? list_next( si ) : si;
 	}
 
 	return status;
 }
 
-NewList *
+LIST *
 compile_eval(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
-	NewList *ll, *lr, *t;
+	LIST *ll, *lr, *t;
 	int status = 0;
 
 	/* Short circuit lr eval for &&, ||, and 'in' */
@@ -201,7 +201,7 @@ compile_eval(
 	case EXPR_IN:
 		/* "a in b": make sure each of */
 		/* ll is equal to something in lr. */
-		status = newlist_in(ll, lr);
+		status = list_in(ll, lr);
 
 		break;
 
@@ -218,9 +218,9 @@ compile_eval(
 	if( DEBUG_IF )
 	{
 	    debug_compile( 0, "if" );
-	    newlist_print( ll );
+	    list_print( ll );
 	    printf( "(%d) ", status );
-	    newlist_print( lr );
+	    list_print( lr );
 	    printf( "\n" );
 	}
 
@@ -231,10 +231,10 @@ compile_eval(
 	if( !status ) t = 0;
 	else if( ll ) t = ll, ll = 0;
 	else if( lr ) t = lr, lr = 0;
-	else t = newlist_append( NULL, "1", 0 );
+	else t = list_append( NULL, "1", 0 );
 
-	if( ll ) newlist_free( ll );
-	if( lr ) newlist_free( lr );
+	if( ll ) list_free( ll );
+	if( lr ) list_free( lr );
 	return t;
 }
 
@@ -249,29 +249,29 @@ compile_eval(
  *	parse->right	rule to compile
  */
 
-NewList *
+LIST *
 compile_foreach(
 	PARSE	*p,
 	LOL	*args,
 	int	*jmp )
 {
-	NewList	*nv = (*p->left->func)( p->left, args, jmp );
-	NewList	*result = 0;
-	NewListItem *l;
+	LIST	*nv = (*p->left->func)( p->left, args, jmp );
+	LIST	*result = 0;
+	LISTITEM *l;
 
 	/* TODO: Efficiency: nv could be split apart and reused during the traversal */
 
 	/* for each value for var */
 
-	for( l = newlist_first(nv); l && *jmp == JMP_NONE; l = newlist_next( l ) )
+	for( l = list_first(nv); l && *jmp == JMP_NONE; l = list_next( l ) )
 	{
 	    /* Reset $(p->string) for each val. */
 
-	    var_set( p->string, newlist_append( NULL, newlist_value(l), 1 ), VAR_SET );
+	    var_set( p->string, list_append( NULL, list_value(l), 1 ), VAR_SET );
 
 	    /* Keep only last result. */
 
-	    newlist_free( result );
+	    list_free( result );
 	    result = (*p->right->func)( p->right, args, jmp );
 
 	    /* continue loop? */
@@ -285,7 +285,7 @@ compile_foreach(
 	if( *jmp == JMP_BREAK || *jmp == JMP_CONTINUE )
 	    *jmp = JMP_NONE;
 
-	newlist_free( nv );
+	list_free( nv );
 
 	/* Returns result of last loop */
 
@@ -300,17 +300,17 @@ compile_foreach(
  *	parse->third		else tree
  */
 
-NewList *
+LIST *
 compile_if(
 	PARSE	*p,
 	LOL	*args,
 	int	*jmp )
 {
-	NewList *l = (*p->left->func)( p->left, args, jmp );
+	LIST *l = (*p->left->func)( p->left, args, jmp );
 
 	p = l ? p->right : p->third;
 
-	newlist_free( l );
+	list_free( l );
 
 	return (*p->func)( p, args, jmp );
 }
@@ -321,24 +321,24 @@ compile_if(
  * 	parse->left	list of files to include (can only do 1)
  */
 
-NewList *
+LIST *
 compile_include(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
-	NewList	*nt = (*parse->left->func)( parse->left, args, jmp );
+	LIST	*nt = (*parse->left->func)( parse->left, args, jmp );
 
 	if( DEBUG_COMPILE )
 	{
 	    debug_compile( 0, "include" );
-	    newlist_print( nt );
+	    list_print( nt );
 	    printf( "\n" );
 	}
 
-	if( nt && newlist_first(nt) )
+	if( nt && list_first(nt) )
 	{
-	    TARGET *t = bindtarget( newlist_value(newlist_first(nt)) );
+	    TARGET *t = bindtarget( list_value(list_first(nt)) );
 
 	    /* Bind the include file under the influence of */
 	    /* "on-target" variables.  Though they are targets, */
@@ -355,7 +355,7 @@ compile_include(
 		parse_file( t->boundname );
 	}
 
-	newlist_free( nt );
+	list_free( nt );
 
 	return NULL;
 }
@@ -366,7 +366,7 @@ compile_include(
  * 	parse->string - character string to expand
  */
 
-NewList *
+LIST *
 compile_list(
 	PARSE	*parse,
 	LOL	*args,
@@ -385,34 +385,34 @@ compile_list(
  *	parse->third	rules to execute
  */
 
-NewList *
+LIST *
 compile_local(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
-	NewListItem *l;
+	LISTITEM *l;
 	SETTINGS *s = 0;
-	NewList	*nt = (*parse->left->func)( parse->left, args, jmp );
-	NewList	*ns = (*parse->right->func)( parse->right, args, jmp );
-	NewList	*result;
+	LIST	*nt = (*parse->left->func)( parse->left, args, jmp );
+	LIST	*ns = (*parse->right->func)( parse->right, args, jmp );
+	LIST	*result;
 
 	if( DEBUG_COMPILE )
 	{
 	    debug_compile( 0, "local" );
-	    newlist_print( nt );
+	    list_print( nt );
 	    printf( " = " );
-	    newlist_print( ns );
+	    list_print( ns );
 	    printf( "\n" );
 	}
 
 	/* Initial value is ns */
 
-	for( l = newlist_first(nt); l; l = newlist_next( l ) )
-	    s = addsettings( s, 0, newlist_value(l), newlist_copy( NULL, ns ) );
+	for( l = list_first(nt); l; l = list_next( l ) )
+	    s = addsettings( s, 0, list_value(l), list_copy( NULL, ns ) );
 
-	newlist_free( ns );
-	newlist_free( nt );
+	list_free( ns );
+	list_free( nt );
 
 	/* Note that callees of the current context get this "local" */
 	/* variable, making it not so much local as layered. */
@@ -429,7 +429,7 @@ compile_local(
  * compile_null() - do nothing -- a stub for parsing
  */
 
-NewList *
+LIST *
 compile_null(
 	PARSE	*parse,
 	LOL	*args,
@@ -445,19 +445,19 @@ compile_null(
  *	parse->right	rule to run
  */
 
-NewList *
+LIST *
 compile_on(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
-	NewList	*nt = (*parse->left->func)( parse->left, args, jmp );
-	NewList	*result = 0;
+	LIST	*nt = (*parse->left->func)( parse->left, args, jmp );
+	LIST	*result = 0;
 
 	if( DEBUG_COMPILE )
 	{
 	    debug_compile( 0, "on" );
-	    newlist_print( nt );
+	    list_print( nt );
 	    printf( "\n" );
 	}
 
@@ -466,9 +466,9 @@ compile_on(
 	 * doesn't set var globally.
 	 */
 
-	if( nt && newlist_first(nt) )
+	if( nt && list_first(nt) )
 	{
-	    TARGET *t = bindtarget( newlist_value(newlist_first(nt)) );
+	    TARGET *t = bindtarget( list_value(list_first(nt)) );
 	    SETTINGS *s = copysettings( t->settings );
 
 	    pushsettings( s );
@@ -477,7 +477,7 @@ compile_on(
 	    freesettings( s );
 	}
 
-	newlist_free( nt );
+	list_free( nt );
 
 	return result;
 }
@@ -491,16 +491,16 @@ compile_on(
  * Wrapped around evaluate_rule() so that headers() can share it.
  */
 
-NewList *
+LIST *
 compile_rule(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
 	LOL	nargs[1];
-	NewList	*result = 0;
-	NewList	*ll;
-	NewListItem *l;
+	LIST	*result = 0;
+	LIST	*ll;
+	LISTITEM *l;
 	PARSE	*p;
 
 	/* list of rules to run -- normally 1! */
@@ -516,12 +516,12 @@ compile_rule(
 
 	/* Run rules, appending results from each */
 
-	for( l = newlist_first(ll); l; l = newlist_next( l ) ) {
-	    newlist_free(result); /* Keep only last result */
-	    result = evaluate_rule( newlist_value(l), nargs, result );
+	for( l = list_first(ll); l; l = list_next( l ) ) {
+	    list_free(result); /* Keep only last result */
+	    result = evaluate_rule( list_value(l), nargs, result );
 	}
 
-	newlist_free( ll );
+	list_free( ll );
 	lol_free( nargs );
 
 	return result;
@@ -531,11 +531,11 @@ compile_rule(
  * evaluate_rule() - execute a rule invocation
  */
 
-NewList *
+LIST *
 evaluate_rule(
 	const char *rulename,
 	LOL	*args, 
-	NewList	*result )
+	LIST	*result )
 {
 #ifdef OPT_EXPAND_RULE_NAMES_EXT
 	RULE	*rule;
@@ -633,13 +633,13 @@ evaluate_rule(
 	    PARSE *parse = rule->procedure;
 	    SETTINGS *s = 0;
 	    int jmp = JMP_NONE;
-	    NewListItem *l;
+	    LISTITEM *l;
 	    int i;
 
 	    /* build parameters as local vars */
-	    for( l = newlist_first(rule->params), i = 0; l; l = newlist_next(l), i++ )
-		s = addsettings( s, 0, newlist_value(l), 
-		    newlist_copy( NULL, lol_get( args, i ) ) );
+	    for( l = list_first(rule->params), i = 0; l; l = list_next(l), i++ )
+		s = addsettings( s, 0, list_value(l), 
+		    list_copy( NULL, lol_get( args, i ) ) );
 
 	    /* Run rule. */
 	    /* Bring in local params. */
@@ -648,7 +648,7 @@ evaluate_rule(
 	    parse_refer( parse );
 
 	    pushsettings( s );
-	    result = newlist_appendList( result, (*parse->func)( parse, args, &jmp ) );
+	    result = list_appendList( result, (*parse->func)( parse, args, &jmp ) );
 	    popsettings( s );
 	    freesettings( s );
 
@@ -672,7 +672,7 @@ evaluate_rule(
  *	parse->right	more compile_rules() by right-recursion
  */
 
-NewList *
+LIST *
 compile_rules(
 	PARSE	*parse,
 	LOL	*args,
@@ -681,18 +681,18 @@ compile_rules(
 	/* Ignore result from first statement; return the 2nd. */
 	/* Optimize recursion on the right by looping. */
 
-	NewList 	*result = 0;
+	LIST 	*result = 0;
 
 	while( *jmp == JMP_NONE && parse->func == compile_rules )
 	{
-	    newlist_free( result );
+	    list_free( result );
 	    result = (*parse->left->func)( parse->left, args, jmp );
 	    parse = parse->right;
 	}
 
 	if( *jmp == JMP_NONE )
 	{
-	    newlist_free( result );
+	    list_free( result );
 	    result = (*parse->func)( parse, args, jmp );
 	}
 
@@ -707,32 +707,32 @@ compile_rules(
  *	parse->num	VAR_SET/APPEND/DEFAULT
  */
 
-NewList *
+LIST *
 compile_set(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
-	NewList	*nt = (*parse->left->func)( parse->left, args, jmp );
-	NewList	*ns = (*parse->right->func)( parse->right, args, jmp );
-	NewListItem	*l;
+	LIST	*nt = (*parse->left->func)( parse->left, args, jmp );
+	LIST	*ns = (*parse->right->func)( parse->right, args, jmp );
+	LISTITEM	*l;
 
 	if( DEBUG_COMPILE )
 	{
 	    debug_compile( 0, "set" );
-	    newlist_print( nt );
+	    list_print( nt );
 	    printf( " %s ", set_names[ parse->num ] );
-	    newlist_print( ns );
+	    list_print( ns );
 	    printf( "\n" );
 	}
 
 	/* Call var_set to set variable */
 	/* var_set keeps ns, so need to copy it */
 
-	for( l = newlist_first(nt); l; l = newlist_next( l ) )
-	    var_set( newlist_value(l), newlist_copy( NULL, ns ), parse->num );
+	for( l = list_first(nt); l; l = list_next( l ) )
+	    var_set( list_value(l), list_copy( NULL, ns ), parse->num );
 
-	newlist_free( nt );
+	list_free( nt );
 
 	return ns;
 }
@@ -745,26 +745,26 @@ compile_set(
  *	parse->right	rules for rule
  */
 
-NewList *
+LIST *
 compile_setcomp(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
 	RULE	*rule = bindrule( parse->string );
-	NewList	*params = 0;
+	LIST	*params = 0;
 	PARSE	*p;
 
 	/* Build param list */
 
 	for( p = parse->left; p; p = p->left )
-	    params = newlist_append( params, p->string, 1 );
+	    params = list_append( params, p->string, 1 );
 
 	if( DEBUG_COMPILE )
 	{
 	    debug_compile( 0, "rule" );
 	    printf( "%s ", parse->string );
-	    newlist_print( params );
+	    list_print( params );
 	    printf( "\n" );
 	}
 
@@ -774,7 +774,7 @@ compile_setcomp(
 	    parse_free( rule->procedure );
 
 	if( rule->params )
-	    newlist_free( rule->params );
+	    list_free( rule->params );
 
 	rule->procedure = parse->right;
 	rule->params = params;
@@ -799,21 +799,21 @@ compile_setcomp(
  * directly to the rule flags (as defined in rules.h).
  */
 
-NewList *
+LIST *
 compile_setexec(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
 	RULE	*rule = bindrule( parse->string );
-	NewList	*bindlist = (*parse->left->func)( parse->left, args, jmp );
+	LIST	*bindlist = (*parse->left->func)( parse->left, args, jmp );
 	
 	/* Free old one, if present */
 
 	if( rule->actions )
 	{
 	    freestr( rule->actions );
-	    newlist_free( rule->bindlist );
+	    list_free( rule->bindlist );
 	}
 
 	rule->actions = copystr( parse->string1 );
@@ -836,25 +836,25 @@ compile_setexec(
  *	parse->num	VAR_SET/APPEND/DEFAULT
  */
 
-NewList *
+LIST *
 compile_settings(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
-	NewList	*nt = (*parse->left->func)( parse->left, args, jmp );
-	NewList	*ns = (*parse->third->func)( parse->third, args, jmp );
-	NewList	*targets = (*parse->right->func)( parse->right, args, jmp );
-	NewListItem	*ts;
+	LIST	*nt = (*parse->left->func)( parse->left, args, jmp );
+	LIST	*ns = (*parse->third->func)( parse->third, args, jmp );
+	LIST	*targets = (*parse->right->func)( parse->right, args, jmp );
+	LISTITEM	*ts;
 
 	if( DEBUG_COMPILE )
 	{
 	    debug_compile( 0, "set" );
-	    newlist_print( nt );
+	    list_print( nt );
 	    printf( "on " );
-	    newlist_print( targets );
+	    list_print( targets );
 	    printf( " %s ", set_names[ parse->num ] );
-	    newlist_print( ns );
+	    list_print( ns );
 	    printf( "\n" );
 	}
 
@@ -862,18 +862,18 @@ compile_settings(
 	/* addsettings keeps ns, so need to copy it */
 	/* Pass append flag to addsettings() */
 
-	for( ts = newlist_first(targets); ts; ts = newlist_next( ts ) )
+	for( ts = list_first(targets); ts; ts = list_next( ts ) )
 	{
-	    TARGET 	*t = bindtarget( newlist_value(ts) );
-	    NewListItem	*l;
+	    TARGET 	*t = bindtarget( list_value(ts) );
+	    LISTITEM	*l;
 
-	    for( l = newlist_first(nt); l; l = newlist_next( l ) )
+	    for( l = list_first(nt); l; l = list_next( l ) )
 		t->settings = addsettings( t->settings, parse->num,
-				newlist_value(l), newlist_copy( NULL, ns ) );
+				list_value(l), list_copy( NULL, ns ) );
 	}
 
-	newlist_free( nt );
-	newlist_free( targets );
+	list_free( nt );
+	list_free( targets );
 
 	return ns;
 }
@@ -891,19 +891,19 @@ compile_settings(
  *	case->left	parse tree to execute
  */
 
-NewList *
+LIST *
 compile_switch(
 	PARSE	*parse,
 	LOL	*args,
 	int	*jmp )
 {
-	NewList	*nt = (*parse->left->func)( parse->left, args, jmp );
-	NewList	*result = 0;
+	LIST	*nt = (*parse->left->func)( parse->left, args, jmp );
+	LIST	*result = 0;
 
 	if( DEBUG_COMPILE )
 	{
 	    debug_compile( 0, "switch" );
-	    newlist_print( nt );
+	    list_print( nt );
 	    printf( "\n" );
 	}
 
@@ -911,7 +911,7 @@ compile_switch(
 
 	for( parse = parse->right; parse; parse = parse->right )
 	{
-	    if( !glob( parse->left->string, newlist_first(nt) ? newlist_value(newlist_first(nt)) : "" ) )
+	    if( !glob( parse->left->string, list_first(nt) ? list_value(list_first(nt)) : "" ) )
 	    {
 		/* Get & exec parse tree for this case */
 		parse = parse->left->left;
@@ -920,7 +920,7 @@ compile_switch(
 	    }
 	}
 
-	newlist_free( nt );
+	list_free( nt );
 
 	return result;
 }
@@ -932,14 +932,14 @@ compile_switch(
  *	parse->right		execution tree
  */
 
-NewList *
+LIST *
 compile_while(
 	PARSE	*p,
 	LOL	*args,
 	int	*jmp )
 {
-	NewList *result = 0;
-	NewList *l;
+	LIST *result = 0;
+	LIST *l;
 
 	/* Returns the value from the last execution of the block */
 
@@ -948,11 +948,11 @@ compile_while(
 	{
 	    /* Always toss while's expression */
 
-	    newlist_free( l );
+	    list_free( l );
 
 	    /* Keep only last result. */
 
-	    newlist_free( result );
+	    list_free( result );
 	    result = (*p->right->func)( p->right, args, jmp );
 
 	    /* continue loop? */

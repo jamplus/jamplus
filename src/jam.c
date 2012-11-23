@@ -564,7 +564,7 @@ int main( int argc, char **argv, char **arg_environ )
 	    if( strlen( buf ) == 25 )
 		buf[ 24 ] = 0;
 
-	    var_set( "JAMDATE", newlist_append( NULL, buf, 0 ), VAR_SET );
+	    var_set( "JAMDATE", list_append( NULL, buf, 0 ), VAR_SET );
 	}
 
 	/* And JAMUNAME */
@@ -574,12 +574,12 @@ int main( int argc, char **argv, char **arg_environ )
 
 	    if( uname( &u ) >= 0 )
 	    {
-		NewList *l = NULL;
-		l = newlist_append( l, u.machine, 0 );
-		l = newlist_append( l, u.version, 0 );
-		l = newlist_append( l, u.release, 0 );
-		l = newlist_append( l, u.nodename, 0 );
-		l = newlist_append( l, u.sysname, 0 );
+		LIST *l = NULL;
+		l = list_append( l, u.machine, 0 );
+		l = list_append( l, u.version, 0 );
+		l = list_append( l, u.release, 0 );
+		l = list_append( l, u.nodename, 0 );
+		l = list_append( l, u.sysname, 0 );
 		var_set( "JAMUNAME", l, VAR_SET );
 	    }
 	}
@@ -590,7 +590,7 @@ int main( int argc, char **argv, char **arg_environ )
         {
             char filebuf[4096];
             if (getcwd(filebuf, sizeof(filebuf))) {
-                var_set( "CWD", newlist_append( NULL, filebuf, 0 ),
+                var_set( "CWD", list_append( NULL, filebuf, 0 ),
 			 VAR_SET );
             }
         }
@@ -600,7 +600,7 @@ int main( int argc, char **argv, char **arg_environ )
 	{
 	    char fileName[4096];
 	    getprocesspath(fileName, 4096);
-	    var_set( "JAM_PROCESS_PATH", newlist_append( NULL, fileName, 0 ), VAR_SET );
+	    var_set( "JAM_PROCESS_PATH", list_append( NULL, fileName, 0 ), VAR_SET );
 	}
 #endif
 
@@ -618,12 +618,12 @@ int main( int argc, char **argv, char **arg_environ )
 	    strcpy(options, QUOTE(JAM_OPTIONS));
 
 	    var_set("PATCHED_JAM_VERSION",
-		    newlist_append(newlist_append(NULL, PATCHED_VERSION_MAJOR, 0),
+		    list_append(list_append(NULL, PATCHED_VERSION_MAJOR, 0),
 			     PATCHED_VERSION_MINOR, 0),
 		    VAR_SET);
 
 	    for (s = strtok(options, ":"); s; s = strtok(NULL, ":")) {
-		var_set("PATCHED_JAM_VERSION", newlist_append(NULL, s, 0),
+		var_set("PATCHED_JAM_VERSION", list_append(NULL, s, 0),
 			VAR_APPEND);
 	    }
 	}
@@ -658,7 +658,7 @@ int main( int argc, char **argv, char **arg_environ )
 
 #ifdef OPT_EXPORT_JOBNUM_EXT
 	{
-	    NewList *l = 0;
+	    LIST *l = 0;
 	    int i;
 	    char num[3];
 
@@ -668,37 +668,37 @@ int main( int argc, char **argv, char **arg_environ )
 
 	    /* How many jobs are we allowed to spawn? */
 	    sprintf( num, "%d", globs.jobs );
-	    var_set( "JAM_NUM_JOBS", newlist_append( 0, newstr( num ), 0 ), VAR_SET );
+	    var_set( "JAM_NUM_JOBS", list_append( 0, newstr( num ), 0 ), VAR_SET );
 
 	    /* An easy test to see if there are multiple jobs */
 	    if( globs.jobs > 1 )
-		var_set( "JAM_MULTI_JOBS", newlist_append( 0, newstr( num ), 0 ),
+		var_set( "JAM_MULTI_JOBS", list_append( 0, newstr( num ), 0 ),
 			VAR_SET );
 
 	    /* Create a list of the job nums. ie, -j4 -> 0 1 2 3 */
 	    for( i = 0; i < globs.jobs; ++i )
 	    {
 		sprintf( num, "%d", i );
-		l = newlist_append( l, newstr( num ), 0 );
+		l = list_append( l, newstr( num ), 0 );
 	    }
 	    var_set( "JAM_JOB_LIST", l, VAR_SET );
 	}
 #endif
 
-    var_set( "DEPCACHE", newlist_append( NULL, "standard", 0 ), VAR_SET );
+    var_set( "DEPCACHE", list_append( NULL, "standard", 0 ), VAR_SET );
 
 #ifdef OPT_SET_JAMCOMMANDLINETARGETS_EXT
 	{
 		/* Go through the list of targets specified on the command line, */
 		/* and add them to a variable called JAM_COMMAND_LINE_TARGETS. */
-		NewList* l = NULL;
+		LIST* l = NULL;
 		int n_targets = num_targets ? num_targets : 1;
 		const char** actual_targets = num_targets ? targets : &all;
 		int i;
 
 		for ( i = 0; i < n_targets; ++i )
 		{
-			l = newlist_append( l, actual_targets[ i ], 0 );
+			l = list_append( l, actual_targets[ i ], 0 );
 		}
 
 		var_set( "JAM_COMMAND_LINE_TARGETS", l, VAR_SET );
@@ -746,7 +746,7 @@ int main( int argc, char **argv, char **arg_environ )
 	donestamps();
 	donestr();
 #ifdef OPT_DEBUG_MEM_TOTALS_EXT
-	newlist_done();
+	list_done();
 	parse_done();
 	if (DEBUG_MEM || DEBUG_MEM_TOTALS) {
 	    printf("%dK total malloc()\n", malloc_bytes / 1024);

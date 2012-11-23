@@ -14,9 +14,9 @@
 
 void 	var_defines( const char **e );
 int	var_string( const char *in, BUFFER *buff, int outsize, LOL *lol, char separator );
-NewList * 	var_get( const char *symbol );
-void 	var_set( const char *symbol, NewList *value, int flag );
-NewList * 	var_swap( const char *symbol, NewList *value );
+LIST * 	var_get( const char *symbol );
+void 	var_set( const char *symbol, LIST *value, int flag );
+LIST * 	var_swap( const char *symbol, LIST *value );
 void 	var_done();
 
 /*

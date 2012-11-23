@@ -108,16 +108,16 @@ void (*ls_luaL_unref) (ls_lua_State *L, int t, int ref);
 /*****************************************************************************/
 static ls_lua_State *L;
 
-static NewList *luahelper_addtolist(ls_lua_State *L, NewList *list, int index)
+static LIST *luahelper_addtolist(ls_lua_State *L, LIST *list, int index)
 {
     if (ls_lua_isboolean(L, index))
-	return newlist_append(list, ls_lua_toboolean(L, index) ? "true" : "false", 0);
+	return list_append(list, ls_lua_toboolean(L, index) ? "true" : "false", 0);
 
     if (ls_lua_isnumber(L, index))
-	return newlist_append(list, ls_lua_tostring(L, index), 0);
+	return list_append(list, ls_lua_tostring(L, index), 0);
 
     if (ls_lua_isstring(L, index))
-	return newlist_append(list, ls_lua_tostring(L, index), 0);
+	return list_append(list, ls_lua_tostring(L, index), 0);
 
     else if (ls_lua_istable(L, index))
     {
@@ -165,8 +165,8 @@ int LS_jam_setvar(ls_lua_State *L)
 
 int LS_jam_getvar(ls_lua_State *L)
 {
-    NewList *list;
-    NewListItem* item;
+    LIST *list;
+    LISTITEM* item;
     int index;
 
     int numParams = ls_lua_gettop(L);
@@ -195,10 +195,10 @@ int LS_jam_getvar(ls_lua_State *L)
 
     ls_lua_newtable(L);
     index = 1;
-    for (item = newlist_first(list); item; item = newlist_next(item), ++index)
+    for (item = list_first(list); item; item = list_next(item), ++index)
     {
 	ls_lua_pushnumber(L, index);
-	ls_lua_pushstring(L, newlist_value(item));
+	ls_lua_pushstring(L, list_value(item));
 	ls_lua_settable(L, -3);
     }
 
@@ -210,8 +210,8 @@ int LS_jam_evaluaterule(ls_lua_State *L)
 {
     LOL lol;
     int i;
-    NewList *list;
-    NewListItem* item;
+    LIST *list;
+    LISTITEM* item;
     int index;
 
     int numParams = ls_lua_gettop(L);
@@ -232,10 +232,10 @@ int LS_jam_evaluaterule(ls_lua_State *L)
 
     ls_lua_newtable(L);
     index = 1;
-    for (item = newlist_first(list); item; item = newlist_next(item), ++index)
+    for (item = list_first(list); item; item = list_next(item), ++index)
     {
 	ls_lua_pushnumber(L, index);
-	ls_lua_pushstring(L, newlist_value(item));
+	ls_lua_pushstring(L, list_value(item));
 	ls_lua_settable(L, -3);
     }
 
@@ -246,9 +246,9 @@ int LS_jam_evaluaterule(ls_lua_State *L)
 /*
 */
 
-static NewList *ls_lua_callhelper(int top, int ret)
+static LIST *ls_lua_callhelper(int top, int ret)
 {
-    NewList *retList;
+    LIST *retList;
     int numParams;
     int i;
 
@@ -326,7 +326,7 @@ static void* ls_lua_loadsymbol(void* handle, const char* symbol)
 
 void ls_lua_init()
 {
-    NewList *luaSharedLibrary;
+    LIST *luaSharedLibrary;
 #ifdef OS_NT
     HINSTANCE handle = NULL;
 #else
@@ -341,12 +341,12 @@ void ls_lua_init()
 #else
     luaSharedLibrary = var_get("LUA_SHARED_LIBRARY.RELEASE");
 #endif
-    if (newlist_first(luaSharedLibrary))
+    if (list_first(luaSharedLibrary))
     {
 #ifdef OS_NT
-	handle = LoadLibrary(newlist_value(newlist_first(luaSharedLibrary)));
+	handle = LoadLibrary(list_value(list_first(luaSharedLibrary)));
 #else
-	handle = dlopen(newlist_value(newlist_first(luaSharedLibrary)), RTLD_LAZY | RTLD_GLOBAL);
+	handle = dlopen(list_value(list_first(luaSharedLibrary)), RTLD_LAZY | RTLD_GLOBAL);
 #endif
     }
     if (!handle)
@@ -690,7 +690,7 @@ int luahelper_md5callback(const char *filename, MD5SUM sum, const char* callback
 #endif
 
 
-NewList *
+LIST *
 builtin_luastring(
 		  PARSE	*parse,
 		  LOL		*args,
@@ -699,20 +699,20 @@ builtin_luastring(
     int top;
     int ret;
 
-    NewList *l = lol_get(args, 0);
-    if (!newlist_first(l))
+    LIST *l = lol_get(args, 0);
+    if (!list_first(l))
     {
 	printf("jam: No argument passed to LuaString\n");
 	exit(EXITBAD);
     }
     ls_lua_init();
     top = ls_lua_gettop(L);
-    ret = ls_luaL_loadstring(L, newlist_value(newlist_first(l)));
+    ret = ls_luaL_loadstring(L, list_value(list_first(l)));
     return ls_lua_callhelper(top, ret);
 }
 
 
-NewList *
+LIST *
 builtin_luafile(
 		PARSE	*parse,
 		LOL		*args,
@@ -720,23 +720,23 @@ builtin_luafile(
 {
     int top;
     int ret;
-    NewListItem *l2;
+    LISTITEM *l2;
     int index = 0;
 
-    NewList *l = lol_get(args, 0);
-    if (!newlist_first(l)) {
+    LIST *l = lol_get(args, 0);
+    if (!list_first(l)) {
 	printf("jam: No argument passed to LuaFile\n");
 	exit(EXITBAD);
     }
     ls_lua_init();
     top = ls_lua_gettop(L);
     ls_lua_newtable(L);
-    for (l2 = newlist_first(lol_get(args, 1)); l2; l2 = newlist_next(l2)) {
-	ls_lua_pushstring(L, newlist_value(l2));
+    for (l2 = list_first(lol_get(args, 1)); l2; l2 = list_next(l2)) {
+	ls_lua_pushstring(L, list_value(l2));
 	ls_lua_rawseti(L, -2, ++index);
     }
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "arg");
-    ret = ls_luaL_loadfile(L, newlist_value(newlist_first(l)));
+    ret = ls_luaL_loadfile(L, list_value(list_first(l)));
     return ls_lua_callhelper(top, ret);
 }
 
