@@ -206,7 +206,6 @@ function ProcessCommandLine()
 	end
 	opts.jamexepath = opts.jamexepath and opts.jamexepath[#opts.jamexepath]
 
-	print(#errors, #nonOpts, opts, Exporters[opts.gen])
 	if #errors > 0  or
 		(#nonOpts ~= 1  and  #nonOpts ~= 2) or
 		not Exporters[opts.gen]
