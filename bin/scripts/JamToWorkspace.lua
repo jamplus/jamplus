@@ -10,10 +10,7 @@ if not OS  or  not OSPLAT  or  not JAM_EXECUTABLE then
 	os.exit(-1)
 end
 
-require 'list'
-local savePrint = print
-require 'getopt'
-print = savePrint
+local getopt = require 'getopt'
 require 'ex'
 require 'md5'
 require 'uuid'
@@ -86,6 +83,17 @@ function list_find(searchList, value)
 	end
 end
 
+--- Merge one table into another. <code>u</code> is merged into <code>t</code>.
+-- @param t first table
+-- @param u second table
+-- @return first table
+function table_merge (t, u)
+  for i, v in pairs (u) do
+    t[i] = v
+  end
+  return t
+end
+
 function ErrorHandler(inMessage)
 	message = {}
 	table.insert(message, [[
@@ -148,14 +156,14 @@ function ProcessCommandLine()
 		JamFlags[#JamFlags + 1] = { Key = key, Value = value }
 	end
 
-	local options = Options {
-		Option {{"gen"}, "Set a project generator", "Req", 'GENERATOR'},
-		Option {{"gui"}, "Pop up a GUI to set options"},
-		Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
-		Option {{"postfix"}, "Extra text for the IDE project name"},
-		Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
-		Option {{"jamflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
-		Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMEXEPATH' },
+	local options = getopt.makeOptions{
+		getopt.Option {{"gen"}, "Set a project generator", "Req", 'GENERATOR'},
+		getopt.Option {{"gui"}, "Pop up a GUI to set options"},
+		getopt.Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
+		getopt.Option {{"postfix"}, "Extra text for the IDE project name"},
+		getopt.Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
+		getopt.Option {{"jamflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
+		getopt.Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMEXEPATH' },
 	}
 
 	function Usage()
@@ -172,26 +180,33 @@ function ProcessCommandLine()
 		local genOptions = {}
 		for exporterName in ivalues(sortedExporters) do
 			genOptions[#genOptions + 1] =
-				Option{ { exporterName }, Exporters[exporterName].Description }
+				getopt.Option{ { exporterName }, Exporters[exporterName].Description }
 		end
-		genOptions = Options(genOptions)
 
-		print(getopt.usageInfo("\nAvailable workspace generators:", genOptions))
+		print(getopt.usageInfo("\nAvailable workspace generators:", getopt.makeOptions(genOptions)))
 
 		local compilerOptions = {}
 		for compilerInfo in ivalues(Compilers) do
 			compilerOptions[#compilerOptions + 1] =
-				Option{ { compilerInfo[1] }, compilerInfo[2] }
+				getopt.Option{ { compilerInfo[1] }, compilerInfo[2] }
 		end
-		compilerOptions = Options(compilerOptions)
 
-		print(getopt.usageInfo("\nAvailable compilers:", compilerOptions))
+		print(getopt.usageInfo("\nAvailable compilers:", getopt.makeOptions(compilerOptions)))
 
 		os.exit(-1)
 	end
 
 	nonOpts, opts, errors = getopt.getOpt (arg, options)
-	opts.gen = opts.gen or 'none'
+	opts.gen = opts.gen and opts.gen[#opts.gen] or 'none'
+	opts.compiler = opts.compiler and opts.compiler[#opts.compiler]
+	opts.config = opts.config and opts.config[#opts.config]
+	opts.jamflags = opts.jamflags and opts.jamflags[#opts.jamflags]
+	if opts.jamflags then
+		opts.jamflags = ProcessJamFlags(opts.jamflags)
+	end
+	opts.jamexepath = opts.jamexepath and opts.jamexepath[#opts.jamexepath]
+
+	print(#errors, #nonOpts, opts, Exporters[opts.gen])
 	if #errors > 0  or
 		(#nonOpts ~= 1  and  #nonOpts ~= 2) or
 		not Exporters[opts.gen]
@@ -942,7 +957,7 @@ if opts.config then
 		os.exit(-1)
 	end
 
-	Config = table.merge(Config, configFile.Config)
+	Config = table_merge(Config, configFile.Config)
 end
 
 local result, message = xpcall(BuildProject, ErrorHandler)
