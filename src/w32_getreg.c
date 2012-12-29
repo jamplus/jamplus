@@ -38,13 +38,14 @@ w32_getreg_internal(LIST* pathlist, INT is64Bit)
     DWORD dataSize  = 0;
     char* dataValue = 0;
 	const char* retval = 0;
+	LISTITEM* curEl = list_first(pathlist);
 	    
-    if (!pathlist) return 0;
+    if (!curEl) return 0;
 
     while (keydefs->keyname) {
-	if (!strcmp(pathlist->string, keydefs->keyname)) {
+	if (!strcmp(list_value(curEl), keydefs->keyname)) {
 	    key = keydefs->keyval;
-	    pathlist = list_next(pathlist);
+	    curEl = list_next(curEl);
 	    break;
 	}
 	++keydefs;
@@ -52,8 +53,8 @@ w32_getreg_internal(LIST* pathlist, INT is64Bit)
 
     if (!keydefs->keyname) return 0;
 
-    for ( ; pathlist ; pathlist = list_next(pathlist)) {
-        const char* text = pathlist->string;
+    for ( ; curEl ; curEl = list_next(curEl)) {
+        const char* text = list_value(curEl);
         if (valueName) {            
             DWORD retCode = RegOpenKeyEx(key, valueName, 0,
                                          KEY_EXECUTE |

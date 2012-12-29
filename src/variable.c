@@ -116,14 +116,14 @@ var_defines( const char **e )
 			/* Avoid trailing spaces, but allow single element list */
 			if( !l || strlen( buf ) > 0 )
 #endif
-		    l = list_new( l, buf, 0 );
+		    l = list_append( l, buf, 0 );
 		}
 
 #ifdef OPT_ENVIRONMENT_FIX
 		/* Avoid trailing spaces, but allow single element list */
-		if( !l || strlen( pp ) > 0 )
+		if( !list_first(l) || strlen( pp ) > 0 )
 #endif
-		l = list_new( l, pp, 0 );
+		l = list_append( l, pp, 0 );
 
 		/* Get name */
 
@@ -187,18 +187,20 @@ var_string(
 
 	    if( dollar )
 	    {
-		LIST *l = var_expand( L0, buffer_ptr( buff ) + lastword, buffer_posptr( buff ), lol, 0 );
+		LISTITEM* l;
+		LIST *expanded = var_expand( L0, buffer_ptr( buff ) + lastword, buffer_posptr( buff ), lol, 0 );
 
 		buffer_setpos( buff, lastword );
 
+		l = list_first(expanded);
 		while( l )
 		{
-		    int so = (int)strlen( l->string );
+		    int so = (int)strlen(list_value(l));
 
 		    if ( (int)buffer_pos(buff) + so >= outsize)
 			return -1;
 
-		    buffer_addstring( buff, l->string, so );
+		    buffer_addstring( buff, list_value(l), so );
 
 		    /* Separate with space */
 
@@ -206,7 +208,7 @@ var_string(
 			buffer_addchar( buff, separator );
 		}
 
-		list_free( l );
+		list_free( expanded );
 	    }
 	}
 
@@ -273,7 +275,7 @@ var_set(
 
 	case VAR_APPEND:
 	    /* Append value */
-	    v->value = list_append( v->value, value );
+	    v->value = list_appendList( v->value, value );
 	    break;
 
 #ifdef OPT_MINUS_EQUALS_EXT
@@ -313,8 +315,6 @@ var_swap(
 
 	return oldvalue;
 }
-
-
 
 /*
  * var_enter() - make new var symbol table entry, returning var ptr

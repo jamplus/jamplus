@@ -138,9 +138,9 @@ exec_init()
 
 	{
 		LIST *jobsList = var_get( "JAM_NUM_JOBS" );
-		if ( jobsList )
+		if ( list_first(jobsList) )
 		{
-			int jobs = atoi( jobsList->string );
+			int jobs = atoi(list_value(list_first(jobsList)));
 			if ( jobs > 0 )
 				globs.jobs = jobs;
 		}
@@ -377,9 +377,9 @@ execcmd(
 	/* Frankly, if it is a single long line I don't think the */
 	/* command interpreter will do any better -- it will fail. */
 
-	if( p && *p || strlen( string ) > MAXLINE || shell || quote )
+	if( p && *p || strlen( string ) > MAXLINE || list_first(shell) || quote )
 # else
-	if( shell )
+	if( list_first(shell) )
 # endif
 	{
 		FILE *f;
@@ -407,21 +407,22 @@ execcmd(
 	/* If shell was defined, be prepared for % and ! subs. */
 	/* Otherwise, use stock /bin/sh (on unix) or cmd.exe (on NT). */
 
-	if( shell )
+	if(list_first(shell))
 	{
 		int i;
 		char jobno[4];
 		int gotpercent = 0;
+		LISTITEM* item = list_first(shell);
 
 		sprintf( jobno, "%d", slot + 1 );
 
-		for( i = 0; shell && i < MAXARGC; i++, shell = list_next( shell ) )
+		for( i = 0; item && i < MAXARGC; i++, item = list_next( item ) )
 		{
-			switch( shell->string[0] )
+			switch( list_value(item)[0] )
 			{
 			case '%':	argv[i] = string; gotpercent++; break;
 			case '!':	argv[i] = jobno; break;
-			default:	argv[i] = shell->string;
+			default:	argv[i] = list_value(item);
 			}
 			if( DEBUG_EXECCMD )
 				printf( "argv[%d] = '%s'\n", i, argv[i] );

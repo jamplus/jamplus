@@ -11,12 +11,12 @@
 const char*
 w32_shortname(LIST* pathlist)
 {
-    LIST* savepathlist = pathlist;
     size_t buffer_size = 0;
     char* temp;
     const char* retval = 0;
-    for ( ; pathlist ; pathlist = list_next(pathlist)) {
-	const char* text = pathlist->string;
+    LISTITEM* item;
+    for (item = list_first(pathlist) ; item ; item = list_next(item)) {
+	const char* text = list_value(item);
 	buffer_size += strlen(text) + 1;
     }
     buffer_size++;
@@ -26,11 +26,10 @@ w32_shortname(LIST* pathlist)
 
 	temp = malloc(buffer_size);
 	temp[0] = 0;
-	pathlist = savepathlist;
 
-	for ( ; pathlist ; pathlist = list_next(pathlist)) {
-	    strcat(temp, pathlist->string);
-	    if (list_next(pathlist))
+	for (item = list_first(pathlist); item ; item = list_next(item)) {
+	    strcat(temp, list_value(item));
+	    if (list_next(item))
 		strcat(temp, " ");
 	}
 	length = strlen(temp);
