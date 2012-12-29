@@ -5,12 +5,6 @@
  */
 
 /*
- * lists.h - the LIST structure and routines to manipulate them
- *
- * The whole of jam relies on lists of strings as a datatype.  This
- * module, in conjunction with newstr.c, handles these relatively
- * efficiently.
- *
  * Structures defined:
  *
  *	LIST - list of strings
@@ -18,39 +12,42 @@
  *
  * External routines:
  *
- *	list_append() - append a list onto another one, returning total
- *	list_new() - tack a string onto the end of a list of strings
- * 	list_copy() - copy a whole list of strings
- *	list_sublist() - copy a subset of a list of strings
- *	list_free() - free a list of strings
- *	list_print() - print a list of strings to stdout
- *	list_printq() - print a list of safely quoted strings to a file
- *	list_length() - return the number of items in the list
+ *	list_first() - return the first list item in a list
+ *	list_next() - return the next item in the list (or NULL if at end)
+ *	list_value() - return the string stored in a list item
+ *	list_new() - create a new, empty, list
+ *	list_free() - free a list (includes freeing all the list items)
+ *	list_length() - return the number of items in a list
+ *	list_empty() - check if a list contains zero items
+ *	list_equal() - check that two lists contain exactly the same items in the
+ *	same order.
+ *	list_in() - checks that a list is a subset of another
+ *	list_append() - appends a string to a list
+ *	list_appendList() - joins two lists together into one
+ *	list_copy() - create a copy of a list
+ *	list_copytail() - create a copy of a subsection of a list
+ *	list_sublist() - create a copy of a subsection of a list
+ *	list_remove() - remove a set of items from a list
+ *	list_sort() - sort a list according to the item values
+ *	list_print() - print the strings in a list to stdout
+ *	list_printq() - print the strings in a list to a file, safely quoted
  *
  *	lol_init() - initialize a LOL (list of lists)
  *	lol_add() - append a LIST onto an LOL
  *	lol_free() - free the LOL and its LISTs
  *	lol_get() - return one of the LISTs in the LOL
  *	lol_print() - debug print LISTS separated by ":"
- *
- * 04/13/94 (seiwald) - added shorthand L0 for null list pointer
- * 08/23/94 (seiwald) - new list_append()
- * 10/22/02 (seiwald) - list_new() now does its own newstr()/copystr()
- * 11/04/02 (seiwald) - const-ing for string literals
- * 12/09/02 (seiwald) - new list_printq() for writing lists to Jambase
  */
 
 /*
  * LIST - list of strings
  */
 
-typedef struct _list LIST;
+struct LIST;
+struct LISTITEM;
 
-struct _list {
-	LIST		*next;
-	LIST		*tail;		/* only valid in head node */
-	const char	*string;	/* private copy */
-} ;
+typedef struct LIST LIST;
+typedef struct LISTITEM LISTITEM;
 
 /*
  * LOL - list of LISTs
@@ -65,25 +62,34 @@ struct _lol {
 	LIST	*list[ LOL_MAX ];
 } ;
 
-LIST *	list_append( LIST *l, LIST *nl );
-#ifdef OPT_MINUS_EQUALS_EXT
-LIST *	list_remove( LIST *l, LIST *nl );
-#endif
-LIST *	list_copy( LIST *l, LIST  *nl );
-void	list_free( LIST *head );
-LIST *	list_new( LIST *head, const char *string, int copy );
-void	list_print( LIST *l );
-int	list_length( LIST *l );
-LIST *	list_sublist( LIST *l, int start, int count );
-#ifdef OPT_DEBUG_MEM_TOTALS_EXT
-void	list_done(void);
-#endif
-LIST *	list_sort( LIST *l, int case_sensitive );
+LISTITEM* list_first(LIST* list);
+LISTITEM* list_next(LISTITEM* item);
+char const* list_value(LISTITEM* item);
 
-# define list_next( l ) ((l)->next)
+LIST* list_new(void);
+void list_free(LIST* list);
 
+int list_length(LIST* list);
+int list_empty(LIST* list);
+int list_equal(LIST* a, LIST* b);
+/* Everything in l0 is in l1 */
+int list_in(LIST* l0, LIST* l1);
 
-# define L0 ((LIST *)0)
+LIST* list_append(LIST* list, char const* value, int copy);
+/* Takes ownership of tail */
+LIST* list_appendList(LIST* list, LIST* tail);
+LIST* list_copy(LIST* head, LIST* list);
+LIST* list_copytail(LIST* head, LISTITEM* first, int maxNumToCopy);
+LIST* list_sublist(LIST* list, int start, int count);
+LIST* list_remove(LIST* list, LIST* removeItems);
+LIST* list_sort(LIST* list, int caseSensitive);
+
+void list_print(LIST* list);
+void list_printq(FILE* out, LIST* list);
+
+void list_done(void);
+
+# define L0 ((LIST* )0)
 
 void	lol_add( LOL *lol, LIST *l );
 void	lol_init( LOL *lol );

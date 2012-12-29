@@ -109,7 +109,7 @@ compile_append(
 {
 	/* Append right to left. */
 
-	return list_append( 
+	return list_appendList( 
 		(*parse->left->func)( parse->left, args, jmp ),
 		(*parse->right->func)( parse->right, args, jmp ) );
 }
@@ -145,15 +145,18 @@ lcmp( LIST *t, LIST *s )
 {
 	int status = 0;
 
-	while( !status && ( t || s ) )
+	LISTITEM* ti = list_first(t);
+	LISTITEM* si = list_first(s);
+
+	while( !status && ( ti || si ) )
 	{
-	    const char *st = t ? t->string : "";
-	    const char *ss = s ? s->string : "";
+	    const char *st = ti ? list_value(ti) : "";
+	    const char *ss = si ? list_value(si) : "";
 
 	    status = strcmp( st, ss );
 
-	    t = t ? list_next( t ) : t;
-	    s = s ? list_next( s ) : s;
+	    ti = ti ? list_next( ti ) : ti;
+	    si = si ? list_next( si ) : si;
 	}
 
 	return status;
@@ -165,7 +168,7 @@ compile_eval(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *ll, *lr, *s, *t;
+	LIST *ll, *lr, *t;
 	int status = 0;
 
 	/* Short circuit lr eval for &&, ||, and 'in' */
@@ -200,18 +203,7 @@ compile_eval(
 	case EXPR_IN:
 		/* "a in b": make sure each of */
 		/* ll is equal to something in lr. */
-
-		for( t = ll; t; t = list_next( t ) )
-		{
-		    for( s = lr; s; s = list_next( s ) )
-			if( !strcmp( t->string, s->string ) )
-			    break;
-		    if( !s ) break;
-		}
-
-		/* No more ll? Success */
-
-		if( !t ) status = 1;
+		status = list_in(ll, lr);
 
 		break;
 
@@ -241,7 +233,7 @@ compile_eval(
 	if( !status ) t = 0;
 	else if( ll ) t = ll, ll = 0;
 	else if( lr ) t = lr, lr = 0;
-	else t = list_new( L0, "1", 0 );
+	else t = list_append( L0, "1", 0 );
 
 	if( ll ) list_free( ll );
 	if( lr ) list_free( lr );
@@ -267,15 +259,17 @@ compile_foreach(
 {
 	LIST	*nv = (*p->left->func)( p->left, args, jmp );
 	LIST	*result = 0;
-	LIST	*l;
+	LISTITEM *l;
+
+	/* TODO: Efficiency: nv could be split apart and reused during the traversal */
 
 	/* for each value for var */
 
-	for( l = nv; l && *jmp == JMP_NONE; l = list_next( l ) )
+	for( l = list_first(nv); l && *jmp == JMP_NONE; l = list_next( l ) )
 	{
 	    /* Reset $(p->string) for each val. */
 
-	    var_set( p->string, list_new( L0, l->string, 1 ), VAR_SET );
+	    var_set( p->string, list_append( L0, list_value(l), 1 ), VAR_SET );
 
 	    /* Keep only last result. */
 
@@ -344,9 +338,9 @@ compile_include(
 	    printf( "\n" );
 	}
 
-	if( nt )
+	if( nt && list_first(nt) )
 	{
-	    TARGET *t = bindtarget( nt->string );
+	    TARGET *t = bindtarget( list_value(list_first(nt)) );
 
 	    /* Bind the include file under the influence of */
 	    /* "on-target" variables.  Though they are targets, */
@@ -399,7 +393,7 @@ compile_local(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l;
+	LISTITEM *l;
 	SETTINGS *s = 0;
 	LIST	*nt = (*parse->left->func)( parse->left, args, jmp );
 	LIST	*ns = (*parse->right->func)( parse->right, args, jmp );
@@ -416,8 +410,8 @@ compile_local(
 
 	/* Initial value is ns */
 
-	for( l = nt; l; l = list_next( l ) )
-	    s = addsettings( s, 0, l->string, list_copy( (LIST*)0, ns ) );
+	for( l = list_first(nt); l; l = list_next( l ) )
+	    s = addsettings( s, 0, list_value(l), list_copy( NULL, ns ) );
 
 	list_free( ns );
 	list_free( nt );
@@ -474,9 +468,9 @@ compile_on(
 	 * doesn't set var globally.
 	 */
 
-	if( nt )
+	if( nt && list_first(nt) )
 	{
-	    TARGET *t = bindtarget( nt->string );
+	    TARGET *t = bindtarget( list_value(list_first(nt)) );
 	    SETTINGS *s = copysettings( t->settings );
 
 	    pushsettings( s );
@@ -507,7 +501,8 @@ compile_rule(
 {
 	LOL	nargs[1];
 	LIST	*result = 0;
-	LIST	*ll, *l;
+	LIST	*ll;
+	LISTITEM *l;
 	PARSE	*p;
 
 	/* list of rules to run -- normally 1! */
@@ -523,8 +518,10 @@ compile_rule(
 
 	/* Run rules, appending results from each */
 
-	for( l = ll; l; l = list_next( l ) )
-	    result = evaluate_rule( l->string, nargs, result );
+	for( l = list_first(ll); l; l = list_next( l ) ) {
+	    list_free(result); /* Keep only last result */
+	    result = evaluate_rule( list_value(l), nargs, result );
+	}
 
 	list_free( ll );
 	lol_free( nargs );
@@ -638,13 +635,12 @@ evaluate_rule(
 	    PARSE *parse = rule->procedure;
 	    SETTINGS *s = 0;
 	    int jmp = JMP_NONE;
-	    LIST *l;
+	    LISTITEM *l;
 	    int i;
 
 	    /* build parameters as local vars */
-
-	    for( l = rule->params, i = 0; l; l = l->next, i++ )
-		s = addsettings( s, 0, l->string, 
+	    for( l = list_first(rule->params), i = 0; l; l = list_next(l), i++ )
+		s = addsettings( s, 0, list_value(l), 
 		    list_copy( L0, lol_get( args, i ) ) );
 
 	    /* Run rule. */
@@ -654,7 +650,7 @@ evaluate_rule(
 	    parse_refer( parse );
 
 	    pushsettings( s );
-	    result = list_append( result, (*parse->func)( parse, args, &jmp ) );
+	    result = list_appendList( result, (*parse->func)( parse, args, &jmp ) );
 	    popsettings( s );
 	    freesettings( s );
 
@@ -721,7 +717,7 @@ compile_set(
 {
 	LIST	*nt = (*parse->left->func)( parse->left, args, jmp );
 	LIST	*ns = (*parse->right->func)( parse->right, args, jmp );
-	LIST	*l;
+	LISTITEM	*l;
 
 	if( DEBUG_COMPILE )
 	{
@@ -735,8 +731,8 @@ compile_set(
 	/* Call var_set to set variable */
 	/* var_set keeps ns, so need to copy it */
 
-	for( l = nt; l; l = list_next( l ) )
-	    var_set( l->string, list_copy( L0, ns ), parse->num );
+	for( l = list_first(nt); l; l = list_next( l ) )
+	    var_set( list_value(l), list_copy( L0, ns ), parse->num );
 
 	list_free( nt );
 
@@ -764,7 +760,7 @@ compile_setcomp(
 	/* Build param list */
 
 	for( p = parse->left; p; p = p->left )
-	    params = list_new( params, p->string, 1 );
+	    params = list_append( params, p->string, 1 );
 
 	if( DEBUG_COMPILE )
 	{
@@ -851,7 +847,7 @@ compile_settings(
 	LIST	*nt = (*parse->left->func)( parse->left, args, jmp );
 	LIST	*ns = (*parse->third->func)( parse->third, args, jmp );
 	LIST	*targets = (*parse->right->func)( parse->right, args, jmp );
-	LIST	*ts;
+	LISTITEM	*ts;
 
 	if( DEBUG_COMPILE )
 	{
@@ -868,14 +864,14 @@ compile_settings(
 	/* addsettings keeps ns, so need to copy it */
 	/* Pass append flag to addsettings() */
 
-	for( ts = targets; ts; ts = list_next( ts ) )
+	for( ts = list_first(targets); ts; ts = list_next( ts ) )
 	{
-	    TARGET 	*t = bindtarget( ts->string );
-	    LIST	*l;
+	    TARGET 	*t = bindtarget( list_value(ts) );
+	    LISTITEM	*l;
 
-	    for( l = nt; l; l = list_next( l ) )
+	    for( l = list_first(nt); l; l = list_next( l ) )
 		t->settings = addsettings( t->settings, parse->num,
-				l->string, list_copy( (LIST*)0, ns ) );
+				list_value(l), list_copy( NULL, ns ) );
 	}
 
 	list_free( nt );
@@ -917,7 +913,7 @@ compile_switch(
 
 	for( parse = parse->right; parse; parse = parse->right )
 	{
-	    if( !glob( parse->left->string, nt ? nt->string : "" ) )
+	    if( !glob( parse->left->string, list_first(nt) ? list_value(list_first(nt)) : "" ) )
 	    {
 		/* Get & exec parse tree for this case */
 		parse = parse->left->left;

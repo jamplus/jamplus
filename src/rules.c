@@ -172,11 +172,12 @@ targetlist(
 	char	needs)      /* marks each TARGETS with the "needs" flag */
 #endif
 {
-	for( ; targets; targets = list_next( targets ) )
+	LISTITEM* item;
+	for(item = list_first(targets) ; item; item = list_next( item ) )
 #ifdef OPT_BUILTIN_NEEDS_EXT
-	    chain = targetentry( chain, bindtarget( targets->string ), needs );
+	    chain = targetentry( chain, bindtarget( list_value(item) ), needs );
 #else
-	    chain = targetentry( chain, bindtarget( targets->string ) );
+	    chain = targetentry( chain, bindtarget( list_value(item) ) );
 #endif
 
 	return chain;
@@ -197,7 +198,7 @@ targetlist_free(
 {
 	for( ; targets; ) {
 	    TARGETS *targetentrytofree = targets;
-	    targets = list_next( targets );
+	    targets = targets->next;
 #ifdef OPT_IMPROVED_MEMUSE_EXT
 	    mempool_free( targets_pool, targetentrytofree );
 #else
@@ -409,7 +410,7 @@ addsettings(
 
 	case VAR_APPEND:
 	    /* Append new to old */
-	    v->value = list_append( v->value, value );
+	    v->value = list_appendList( v->value, value );
 	    break;
 
 #ifdef OPT_MINUS_EQUALS_EXT

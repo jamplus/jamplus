@@ -148,10 +148,12 @@ path_build(
 	if ( pathdelim_oldstyle == -1 )
 	{
 		LIST *oldstyle = var_get( "PATHDELIM_OLDSTYLE" );
-		if ( oldstyle )
-			pathdelim_oldstyle = strcmp( oldstyle->string, "1" ) == 0  ||  strcmp( oldstyle->string, "true" ) == 0;
-		else
+		if ( list_first(oldstyle) ) {
+			char const* str = list_value(list_first(oldstyle));
+			pathdelim_oldstyle = strcmp( str, "1" ) == 0  ||  strcmp( str, "true" ) == 0;
+		} else {
 			pathdelim_oldstyle = 0;
+		}
 	}
 	if ( pathdelim_oldstyle )
 		pathdelim = PATH_DELIM;
