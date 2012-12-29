@@ -1,5 +1,7 @@
 rule C.win32.vc.AutoDetect COMPILER {
 	local rc_nologo ;
+	local RC ;
+
 	switch $(COMPILER) {
 		case vs2012 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot ;
@@ -7,6 +9,7 @@ rule C.win32.vc.AutoDetect COMPILER {
 			MSSDK ?= $(MSVCNT) ;
 			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/include/shared" "$(MSSDK)/include/um" "$(MSSDK)/include/winrt" ;
 			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/lib/win8/um/x86" ;
+			RC = $(MSSDK)/bin/x86/rc ;
 			rc_nologo = /nologo ;
 
 		case vs2010 :
@@ -15,6 +18,7 @@ rule C.win32.vc.AutoDetect COMPILER {
 			MSSDK ?= $(MSVCNT) ;
 			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
 			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
+			RC = $(MSSDK)/bin/RC ;
 			rc_nologo = /nologo ;
 
 		case vs2008 :
@@ -23,21 +27,25 @@ rule C.win32.vc.AutoDetect COMPILER {
 			MSSDK ?= $(MSVCNT) ;
 			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include" ;
 			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/Lib" ;
+			RC = $(MSSDK)/bin/RC ;
 
 		case vs2005 :
 			MSSDK = $(MSVCNT) ;
 			MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
 			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+			RC = $(MSSDK)/bin/RC ;
 
 		case vs2003 :
 			MSSDK = $(MSVCNT) ;
 			MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
 			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+			RC = $(MSSDK)/bin/RC ;
 
 		case vs2002 :
 			MSSDK = $(MSVCNT) ;
 			MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSSDK)/PlatformSDK/Include" ;
 			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSVCNT)/PlatformSDK/lib" ;
+			RC = $(MSSDK)/bin/RC ;
 
 		case vc6 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft MicrosoftSDK Directories "Install Dir" ;
@@ -45,6 +53,7 @@ rule C.win32.vc.AutoDetect COMPILER {
 			MSSDK ?= $(MSVCNT) ;
 			MSSDK_STDHDRS = "$(MSSDK)/include" "$(MSVCNT)/Include" ;
 			MSSDK_LINKDIRECTORIES = "$(MSSDK)/Lib" "$(MSVCNT)/Lib" ;
+			RC = $(MSVCNT)/../Common/MSDev98/Bin/rc ;
 	}
 
 	MSVCBIN							?= $(MSVCNT)/bin/ ;
@@ -53,11 +62,7 @@ rule C.win32.vc.AutoDetect COMPILER {
 	C.C++ on $(C.COMPILER_SUITE_SYMBOL)		= $(MSVCBIN)cl ;
 	C.LINK on $(C.COMPILER_SUITE_SYMBOL)	= $(MSVCBIN)link ;
 	C.MT on $(C.COMPILER_SUITE_SYMBOL)		= $(MSSDK)/bin/mt ;
-	if $(COMPILER) = vc6 {
-		C.RC on $(C.COMPILER_SUITE_SYMBOL)	= $(MSVCNT)/../Common/MSDev98/Bin/rc ;
-	} else {
-		C.RC on $(C.COMPILER_SUITE_SYMBOL)	= $(MSSDK)/bin/RC ;
-	}
+	C.RC on $(C.COMPILER_SUITE_SYMBOL)		= $(RC) ;
 	C.RC_NOLOGO on $(C.COMPILER_SUITE_SYMBOL) = $(rc_nologo) ;
 	C.STDHDRS on $(C.COMPILER_SUITE_SYMBOL)	= $(MSSDK_STDHDRS) ;
 	C.STDLINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
