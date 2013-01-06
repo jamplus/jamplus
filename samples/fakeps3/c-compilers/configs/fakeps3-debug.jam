@@ -1,0 +1,2 @@
+C.ToolchainSpecKeys C.PLATFORM C.CONFIG C.ARCHITECTURE ;
+C.ToolchainHelper $(C.PLATFORM)-$(C.ARCHITECTURE) ;

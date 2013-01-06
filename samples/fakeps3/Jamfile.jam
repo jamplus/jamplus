@@ -1,0 +1,9 @@
+SubDir TOP ;
+
+C.Toolchain $(C.PLATFORM) $(C.CONFIG) spu ;
+local sputhing_library = [ C.Library sputhing : sputhing.c ] ;
+
+C.Toolchain $(C.PLATFORM) $(C.CONFIG) ppu ;
+C.LinkLibraries pputhing : $(sputhing_library) ;
+C.Application pputhing : pputhing.c ;
+
