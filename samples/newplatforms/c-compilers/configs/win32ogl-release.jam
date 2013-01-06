@@ -1,0 +1,2 @@
+C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+C.ToolchainHelper win32ogl ;
