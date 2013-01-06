@@ -1009,7 +1009,11 @@ rule C.LinkLibraries TARGET : LIBRARIES {
 	local lib ;
 	for lib in $(LIBRARIES) {
 		local grist = $(C.ACTIVE_TOOLCHAIN):$(lib) ;
-		gristLibraries += $(lib:G=$(grist))$(suflib) ;
+		if $(lib:G) {
+			gristLibraries += $(lib) ;
+		} else {
+			gristLibraries += $(lib:G=$(grist))$(suflib) ;
+		}
 	}
 	NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristLibraries) ;
 }
