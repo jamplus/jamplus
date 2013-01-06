@@ -4,9 +4,9 @@
 
 JamPlus comes with some simple makefiles to bootstrap the initial build of the JamPlus executable.  A good portion of the makefile contents in <tt>Makefile.Common</tt> are shared between the Visual C++ NMake-based build and the GCC-based make build.
 
-Binaries are built into a platform specific directory under the <tt>bin/</tt> directory, such as <tt>bin/ntx86/</tt> or <tt>bin/macosx/</tt>.  All associated scripts and Lua binaries are also within this platform directory.  In doing this, multiple JamPlus platform binaries can be deployed within the same directory tree, making it easy to check into your source control system.
+Binaries are built into a platform specific directory under the <tt>bin/</tt> directory, such as <tt>bin/win32/</tt> or <tt>bin/macosx32/</tt>.  All associated scripts and optional Lua binaries are also within this platform directory.  In doing this, multiple JamPlus platform binaries can be deployed within the same directory tree, making it easy to check into your source control system.
 
-In order to build a fully working JamPlus directory, certain LuaPlus binaries are required.  By setting the environment variable <tt>LUA_BIN</tt> to the directory containing the LuaPlus binaries, the build processes described below will automatically populate the JamPlus bin/ directory with the LuaPlus binaries.
+In order to build a fully working JamPlus directory, certain Lua binaries are required.  By setting the environment variable <tt>LUA_BIN</tt> to the directory containing the appropriate LuaPlus binaries, the build processes described below will automatically populate the JamPlus bin/ directory with the Lua binaries.
 
 
 
@@ -21,9 +21,9 @@ In order to build JamPlus using the Visual C++ compiler, do the following:
     jmake
 \endcode
 
-When finished, the Jam executable will have been built as <tt>bin/ntx86/jam.exe</tt>
+When finished, the Jam executable will have been built as <tt>bin/win32/jam.exe</tt>
 
-Alternatively, a Visual Studio 2008 solution and project file is maintained.  Open <tt>src/jam.VS2008.sln</tt> to build within the IDE.  Note: When using the standard Visual Studio 2008 Release build, the Jam executable is nowhere near as fast as the command-line generated Link Time Code Generated version.
+Alternatively, a Visual Studio 2012/2010/2008 solution and project file is maintained.  Open <tt>src/jam.VS2012.sln</tt> to build within the IDE.  Note: When using the standard Visual Studio 2012 Release build, the Jam executable is nowhere near as fast as the command-line generated Link Time Code Generated version.
 
 To clean the Visual C++ build, run:
 
@@ -42,10 +42,10 @@ In order to build JamPlus on Mac OS X, do the following:
 
 \code
     cd src
-    make macosx
+    make macosx32
 \endcode
 
-When finished, the Jam executable will have been built as <tt>bin/macosxx64/jam</tt>.
+When finished, the Jam executable will have been built as <tt>bin/macosx32/jam</tt>.
 
 Alternatively, an Xcode project for debugging Jam is maintained.  Open <tt>src/jam.xcodeproj</tt> to build within Xcode.  Please note that the Release build does not currently work.  Build a Release build using the makefile instructions above.
 
@@ -59,10 +59,10 @@ In order to build JamPlus on Linux, do the following:
 
 \code
     cd src
-    make linux
+    make linux32
 \endcode
 
-When finished, the Jam executable will have been built as <tt>bin/linuxx86/jam</tt>.
+When finished, the Jam executable will have been built as <tt>bin/linux32/jam</tt>.
 
 
 
@@ -94,5 +94,5 @@ In a Bash shell under Linux or Mac OS X, you would export:
     export LUA_BIN=~/luaplus51-all/bin.gcc.linux32
 \endcode
 
-Change directories back to the <tt>JamPlus/src/</tt> directory.  Run the appropriate <tt>jmake</tt>/<tt>make</tt> command again, and the LuaPlus binaries will be copied to the appropriate <tt>JamPlus/bin/</tt> directory.
+Change directories back to the <tt>jamplus/src/</tt> directory.  Run the appropriate <tt>jmake</tt>/<tt>make</tt> command again, and the LuaPlus binaries will be copied to the appropriate <tt>jamplus/bin/</tt> directory.
 */
