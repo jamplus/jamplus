@@ -20,7 +20,7 @@ function FindFolder(currentFolder, fullFolderPath)
 	end
 
 	-- Split each component.
-	for folderName in (fullFolderPath .. '\\'):gmatch('(.-)\\') do
+	for folderName in fullFolderPath:gmatch('[^\\]+') do
 		local foundFolder
 		for _, entry in ipairs(currentFolder) do
 			if type(entry) == 'table'  and entry.folder:lower() == folderName:lower() then

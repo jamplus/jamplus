@@ -1,26 +1,28 @@
-require 'getopt'
-require 'filefind'
+local getopt = require 'getopt'
+local filefind = require 'filefind'
+require 'ex'
 
 package.path = (debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. "/?.lua;" .. package.path
 require 'FolderTree'
-require 'WriteJamfileHelper'
+local WriteJamfileHelper = require 'WriteJamfileHelper'
 
-local options = Options {}
+local options = getopt.makeOptions{}
 local nonOpts, opts, errors = getopt.getOpt(arg, options)
-if #errors > 0  or  #nonOpts ~= 1 then
+if #errors > 0  or  #nonOpts ~= 2 then
 	print(table.concat (errors, "\n") .. "\n" ..
-			getopt.usageInfo ("Usage: jam --folderstojamfile [options] <destination-jamfile>",
+			getopt.usageInfo ("Usage: jam --folderstojamfile [options] <start-path> <destination-jamfile>",
 			options))
 	os.exit(-1)
 end
 
 local files = {}
 
-local sources = filefind.glob('**')
-for _, source in ipairs(sources) do
-	local path, filename = source:match('(.+)/(.*)')
+local rootPath = os.path.add_slash(nonOpts[1])
+for entry in filefind.glob(os.path.combine(rootPath, '**')) do
+	local relativePath = entry.filename:sub(#rootPath + 1)
+	local path, filename = relativePath:match('(.+)/(.*)')
 	if not path then
-		path, filename = '', source
+		path, filename = '', relativePath
 	end
 	FolderTree.InsertName(files, path:gsub('/', '\\'), filename)
 end
@@ -32,16 +34,16 @@ local function RecurseFilters(filters, folderPath)
 	local groups = {}
 	for _, filter in ipairs(filters) do
 		if type(filter) == 'table' then
-			local files = {}
-			for _, file in ipairs(filter) do
-				if type(file) ~= 'table' then
-					files[#files + 1] = folderPath:gsub('\\', '/') .. file
-				end
-			end
-
 			local fullFolderPath = folderPath
 			if filter.folder ~= '' then
 				fullFolderPath = fullFolderPath .. filter.folder .. '\\'
+			end
+
+			local files = {}
+			for _, file in ipairs(filter) do
+				if type(file) ~= 'table' then
+					files[#files + 1] = fullFolderPath:gsub('\\', '/') .. file
+				end
 			end
 
 			groups[#groups + 1] =
@@ -63,7 +65,7 @@ SourceGroups = RecurseFilters({ files } , '')
 
 local target = "***FILL_ME_IN***"
 
-if not WriteJamfileHelper.Write(nonOpts[1], target) then
-	print('VCProjToJamfile: * Error: Unable to write ' .. nonOpts[2] .. '.')
+if not WriteJamfileHelper.Write(nonOpts[2], target) then
+	print('VCProjToJamfile: * Error: Unable to write ' .. nonOpts[1] .. '.')
 	os.exit(-1)
 end

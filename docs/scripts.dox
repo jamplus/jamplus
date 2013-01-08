@@ -6,12 +6,12 @@ JamPlus ships with useful scripts for the generation of Jamfiles from various so
 
 \section folderstojamfile FoldersToJamfile
 
-From the current working directory, \b FoldersToJamfile recurses the directory structure and creates a Jamfile with all found files.  A source group is generated automatically for every directory.
+From the specified directory, \b FoldersToJamfile recurses the directory structure and creates a Jamfile with all found files.  A source group is generated automatically for every directory.
 
-\b FoldersToJamfile currently accepts just one argument, the destination Jamfile.  It is run like so:
+\b FoldersToJamfile accepts two arguments, the start path and the destination Jamfile.  It is run like so:
 
 \code
-FoldersToJamfile Jamfile.jam
+FoldersToJamfile c:/path/to/start/at Jamfile.jam
 \endcode
 
 The generated Jamfile will need some basic clean up, and until the clean up has occurred, it will not run.

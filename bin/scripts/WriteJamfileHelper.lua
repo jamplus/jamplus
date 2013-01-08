@@ -1,11 +1,11 @@
-module(..., package.seeall)
+local M = {}
 
 local function Quote(textToQuote)
 	textToQuote = textToQuote:gsub('"', '\\"'):gsub('\\', '\\\\')
 	return textToQuote:find('[ \\]') and ('"' .. textToQuote .. '"') or textToQuote
 end
 
-function Write(filename, target)
+function M.Write(filename, target)
 	local text = {}
 	text[#text + 1] = [[
 {
@@ -46,5 +46,16 @@ SubDir TOP *** ;
 
 	text[#text + 1] = '\nC.Library ' .. target .. ' : $(SRCS) ;\n'
 	text[#text + 1] = '\n}\n'
-	return io.writeall(filename, table.concat(text))
+
+	local file = io.open(filename, 'wb')
+	if not file then
+		return false
+	end
+	file:write(table.concat(text))
+	file:close()
+
+	return true
 end
+
+return M
+
