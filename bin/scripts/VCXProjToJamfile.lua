@@ -22,7 +22,6 @@ if not vcxproj then
 end
 
 local xml = xmlize.luaize(vcxproj)
-LuaDumpObject('s:/out.lua', 'out', xml)
 
 local function RecurseItemGroup(files, itemGroupRoot)
 	for _, entry in ipairs(itemGroupRoot) do
