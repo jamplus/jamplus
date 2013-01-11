@@ -1305,6 +1305,12 @@ rule C.IncludeDirectories TARGET : INCLUDEPATHS {
 }
 
 
+rule C.IncludeInBuild TARGET : SOURCES {
+	C.ActiveTarget $(TARGET) ;
+	EXCLUDED_FROM_BUILD on $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) = false ;
+}
+
+
 rule C.ObjectAddFlags TARGET : SOURCES : FLAGS {
 	C.ActiveTarget $(TARGET) ;
 	SOURCES = [ C._FilterSourcesForCompilableOnly ] ;
