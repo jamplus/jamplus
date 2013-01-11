@@ -5,7 +5,7 @@ local function Quote(textToQuote)
 	return textToQuote:find('[ \\]') and ('"' .. textToQuote .. '"') or textToQuote
 end
 
-function M.Write(filename, target)
+function M.Write(filename, target, SourceGroups)
 	local text = {}
 	text[#text + 1] = [[
 {

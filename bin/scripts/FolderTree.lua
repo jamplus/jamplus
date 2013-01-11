@@ -1,5 +1,3 @@
-module(..., package.seeall)
-
 --[[
 	files =
 	{
@@ -14,7 +12,9 @@ module(..., package.seeall)
 	}
 ]]
 
-function FindFolder(currentFolder, fullFolderPath)
+local M = {}
+
+function M.FindFolder(currentFolder, fullFolderPath)
 	if fullFolderPath == '' then
 		return currentFolder
 	end
@@ -42,8 +42,8 @@ function FindFolder(currentFolder, fullFolderPath)
 end
 
 
-function InsertName(rootFolder, fullFolderPath, name)
-	local folder = FindFolder(rootFolder, fullFolderPath)
+function M.InsertName(rootFolder, fullFolderPath, name)
+	local folder = M.FindFolder(rootFolder, fullFolderPath)
 
 	local foundEntry
 	for _, entry in ipairs(folder) do
@@ -72,11 +72,14 @@ local function SortEntry(left, right)
 end
 
 
-function Sort(currentFolder)
+function M.Sort(currentFolder)
 	table.sort(currentFolder, SortEntry)
 	for _, entry in ipairs(currentFolder) do
 		if type(entry) == 'table' then
-			Sort(entry)
+			M.Sort(entry)
 		end
 	end
 end
+
+return M
+

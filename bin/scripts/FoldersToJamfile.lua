@@ -3,7 +3,7 @@ local filefind = require 'filefind'
 require 'ex'
 
 package.path = (debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. "/?.lua;" .. package.path
-require 'FolderTree'
+local foldertree = require 'FolderTree'
 local WriteJamfileHelper = require 'WriteJamfileHelper'
 
 local options = getopt.makeOptions{}
@@ -24,10 +24,10 @@ for entry in filefind.glob(os.path.combine(rootPath, '**')) do
 	if not path then
 		path, filename = '', relativePath
 	end
-	FolderTree.InsertName(files, path:gsub('/', '\\'), filename)
+	foldertree.InsertName(files, path:gsub('/', '\\'), filename)
 end
 
-FolderTree.Sort(files)
+foldertree.Sort(files)
 
 
 local function RecurseFilters(filters, folderPath)
@@ -65,7 +65,7 @@ SourceGroups = RecurseFilters({ files } , '')
 
 local target = "***FILL_ME_IN***"
 
-if not WriteJamfileHelper.Write(nonOpts[2], target) then
+if not WriteJamfileHelper.Write(nonOpts[2], target, SourceGroups) then
 	print('VCProjToJamfile: * Error: Unable to write ' .. nonOpts[1] .. '.')
 	os.exit(-1)
 end
