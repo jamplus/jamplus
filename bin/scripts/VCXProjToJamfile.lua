@@ -15,7 +15,7 @@ package.path = (debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. "/?.
 local foldertree = require 'FolderTree'
 local WriteJamfileHelper = require 'WriteJamfileHelper'
 
-local vcxproj = io.readall(nonOpts[1] .. '.filters')
+local vcxproj = io.readall(nonOpts[1])
 if not vcxproj then
 	print('VCXProjToJamfile: * Error: Unable to read ' .. nonOpts[1] .. '.')
 	os.exit(-1)
