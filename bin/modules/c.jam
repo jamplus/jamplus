@@ -234,6 +234,7 @@ rule C._MultiCppCompile SOURCES {
 
 	postHDRS += $(SUBDIRHDRS) ;
 
+	local forceIncludes ;
 	on $(C.ACTIVE_TOOLCHAIN_*) {
 		postHDRS += $(HDRS) ;
 		if $(MSVCNT) {
@@ -247,9 +248,9 @@ rule C._MultiCppCompile SOURCES {
 		preMMFLAGS += $(MMFLAGS) ;
 		flagsToRemove += $(FLAGS_TO_REMOVE) ;
 		flagsToAdd += $(FLAGS_TO_ADD) ;
+		forceIncludes = $(FORCE_INCLUDES) ;
 	}
 
-	local forceIncludes ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) {
 		postHDRS = $(HDRS) $(postHDRS) ;
 		if $(MSVCNT) {
@@ -263,7 +264,7 @@ rule C._MultiCppCompile SOURCES {
 		preMMFLAGS += $(MMFLAGS) ;
 		flagsToRemove += $(FLAGS_TO_REMOVE) ;
 		flagsToAdd += $(FLAGS_TO_ADD) ;
-		forceIncludes = $(FORCE_INCLUDES) ;
+		forceIncludes = $(FORCE_INCLUDES) $(forceIncludes) ;
 	}
 
 	preDEFINES = [ C.$(C.COMPILER_SUITE).FDefines $(preDEFINES) ] ;
@@ -335,7 +336,7 @@ rule C._MultiCppCompile SOURCES {
 		$(makeobj_pass1) ;
 
 		local _hdrs = ; # $(SEARCH_SOURCE) ;
-		local objectForceIncludes = $(forceIncludes) ;
+		local objectForceIncludes ;
 
 		local objflags ;
 		local objdefines ;
@@ -343,13 +344,14 @@ rule C._MultiCppCompile SOURCES {
 		local objectFlagsToAdd ;
 		on $(_obj) {
 			_hdrs += $(HDRS) ;
-			objectForceIncludes += $(FORCE_INCLUDES) ;
+			objectForceIncludes = $(FORCE_INCLUDES) ;
 			objflags = $($($(BUILD_EXT).FLAGS)) ;
 			objdefines = $(DEFINES) ;
 			objectFlagsToRemove = $(FLAGS_TO_REMOVE) ;
 			objectFlagsToAdd = $(FLAGS_TO_ADD) ;
 		}
 		_hdrs += $(postHDRS) $(C.STDHDRS) ;
+		objectForceIncludes += $(forceIncludes) ;
 
 		HDRSEARCH on $(_src) = $(SEARCH_SOURCE) $(_hdrs) ;
 
