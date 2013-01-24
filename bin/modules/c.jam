@@ -1039,7 +1039,7 @@ rule C.ObjectCFlags TARGET : SOURCES : FLAGS {
 	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST) ;
 	local dollar = "$" ;
 	local colon = ":" ;
-	local list = @(I=\\$(C.C_STYLE_BUILD_EXTENSIONS)$:J=$(colon)) ;
+	local list = @(I=\\$(C.C_STYLE_BUILD_EXTENSIONS:Z=$(C.COMPILER_SUITE_SYMBOL))$:J=$(colon)) ;
 	local sources = @($(dollar)(SOURCES$(colon)$(list)):A) ;
 	local sufobj = $(SUFOBJ:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local objTargets = $(sources:S=$(sufobj):G=$(grist)) ;
@@ -1052,7 +1052,7 @@ rule C.ObjectC++Flags TARGET : SOURCES : FLAGS {
 	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST) ;
 	local dollar = "$" ;
 	local colon = ":" ;
-	local list = @(I=\\$(C.CPP_STYLE_BUILD_EXTENSIONS)$:J=$(colon)) ;
+	local list = @(I=\\$(C.CPP_STYLE_BUILD_EXTENSIONS:Z=$(C.COMPILER_SUITE_SYMBOL))$:J=$(colon)) ;
 	local sources = @($(dollar)(SOURCES$(colon)$(list)):A) ;
 	local sufobj = $(SUFOBJ:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local objTargets = $(sources:S=$(sufobj):G=$(grist)) ;
