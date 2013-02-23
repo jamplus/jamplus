@@ -232,6 +232,7 @@ $(solutionInfo).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'
 
 rule WriteTargetInfoFile FILENAME
 {
+	Depends all : $(FILENAME) ;
 	Always $(FILENAME) ;
 	WriteTargetInfoFileHelper $(FILENAME) ;
 }
