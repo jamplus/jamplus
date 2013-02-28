@@ -107,7 +107,7 @@ actions response C.Link
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
+	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:CT) $(LINKLIBS:CT)) /out:$(<[1])
 }
 
 } else {
@@ -116,7 +116,7 @@ actions response C.Link
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
+	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:CT) $(LINKLIBS:CT)) /out:$(<[1])
 }
 
 actions response C.DebugLinkWithManifest
@@ -124,18 +124,18 @@ actions response C.DebugLinkWithManifest
 	REM http://msdn.microsoft.com/en-us/library/ms235591%28VS.80%29.aspx
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT)) /out:$(<[1])
+	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:CT) $(LINKLIBS:CT)) /out:$(<[1])
 	if exist $(MANIFEST).intermediate.manifest "$(C.MT:\\)" -nologo -notify_update -manifest $(MANIFEST).intermediate.manifest -out:$(MANIFEST).embed.manifest &
 	if "%ERRORLEVEL%" == "1090650113" echo $(MANIFEST_TYPE) 24 "$(MANIFEST).embed.manifest" > "$(MANIFEST).embed.rc" &
 	"$(C.RC:\\)" $(C.RC-NOLOGO) /fo $(MANIFEST).embed.res $(MANIFEST).embed.rc &
-	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:CT)) /out:$(<[1])
+	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:CT) $(LINKLIBS:CT)) /out:$(<[1])
 }
 
 actions response C.LinkWithManifest
 {
 	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);$(LINK_PATHS:E);%PATH%
 	SET INCLUDE=$(C.STDHDRS:\\J=;)
-	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:TC) $(LINKLIBS:CT)) /out:$(<[1])
+	"$(C.LINK:\\)" /nologo @@($(LINKFLAGS) $(>) $(NEEDLIBS:CT) $(LINKLIBS:CT)) /out:$(<[1])
 	"$(C.MT:\\)" -nologo -manifest $(MANIFEST).intermediate.manifest -outputresource:$(<[1]);$(MANIFEST_TYPE)
 }
 
