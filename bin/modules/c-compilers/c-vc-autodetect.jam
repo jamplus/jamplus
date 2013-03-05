@@ -91,7 +91,7 @@ rule FindVisualStudioHelper VERSION {
 			}
 	}
 
-	if ! (compiler) {
+	if ! $(compiler) {
 		return ;
 	}
 
