@@ -18,7 +18,7 @@ expand = require 'expand'
 
 scriptPath = os.path.simplify(os.path.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()))
 package.path = scriptPath .. "?.lua;" .. package.path
-local FolderTree = require 'FolderTree'
+FolderTree = require 'FolderTree'
 
 jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
 
