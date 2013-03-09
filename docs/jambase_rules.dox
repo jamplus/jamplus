@@ -25,7 +25,6 @@ documentation:
 \refitem rule_RmTemps RmTemps
 \refitem rule_SearchSource SearchSource
 \refitem rule_SourceGroup SourceGroup
-\refitem rule_Split Split
 \refitem rule_SubDir SubDir
 \refitem rule_SubInclude SubInclude
 \refitem rule_Workspace Workspace
@@ -333,32 +332,6 @@ For workspace projects that support grouping of files into folders, the \c Sourc
 	SourceGroup Misc : "string\\trio" : $(TRIO_SRCS) ;
 \endcode
 
-
-
-
-
-
-
-<hr>
-\section rule_Split rule Split STRINGS : SPLIT_CHARACTERS
-\addindex rule_Split
-
-Splits each of the \c STRINGS at \c SPLIT_CHARACTERS.  All splits are returned as a string list.
-
-\param STRINGS The list of strings to split at the points specified by \c SPLIT_CHARACTERS.
-\param SPLIT_CHARACTERS One or more characters to split the list of \c STRINGS at.
-\return Returns a list of strings split at the points specified by \c SPLIT_CHARACTERS.
-
-\code
-    # Prints:
-    #
-    # **I** **like** **peas.**
-    # No splits here
-    local list = [ Split I like peas. : " " ] ;
-    Echo **$(list)** ;
-
-    Echo [ Split No splits here : "|" ] ;
-\endcode
 
 
 
