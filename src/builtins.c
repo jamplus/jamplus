@@ -1289,7 +1289,7 @@ builtin_expandfilelist(
 	LISTITEM* file;
 	LIST* result = L0;
 	LIST* searchSource = var_get( "SEARCH_SOURCE" );
-	size_t searchSourceLen;
+	size_t searchSourceLen = 0;
 	int searchSourceExtraLen = 0;
 	char const* searchSourceStr = "";
 
