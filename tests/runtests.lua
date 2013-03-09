@@ -1,5 +1,5 @@
 require 'ex'
-require 'filefind'
+local filefind = require 'filefind'
 
 rotatingCharacters = { '|', '/', '-', '\\' }
 
