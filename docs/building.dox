@@ -21,9 +21,9 @@ In order to build JamPlus using the Visual C++ compiler, do the following:
     jmake
 \endcode
 
-When finished, the Jam executable will have been built as <tt>bin/win32/jam.exe</tt>
+<tt>jmake</tt> selects the most recent Visual Studio version available and uses that compiler to build the Jam executable.  When finished, the Jam executable will have been built as <tt>bin/win32/jam.exe</tt>
 
-Alternatively, a Visual Studio 2012/2010/2008 solution and project file is maintained.  Open <tt>src/jam.VS2012.sln</tt> to build within the IDE.  Note: When using the standard Visual Studio 2012 Release build, the Jam executable is nowhere near as fast as the command-line generated Link Time Code Generated version.
+Alternatively, Visual Studio 2012 and Visual Studio 2010 solutions are maintained.  Open <tt>src/jam.VS2012.sln</tt> to build within the IDE.  Note: When using the standard Visual Studio 2012 Release build, the Jam executable is nowhere near as fast as the command-line generated Link Time Code Generated version.
 
 To clean the Visual C++ build, run:
 
@@ -74,7 +74,15 @@ Grab the LuaPlus source code.  One way of doing so is by cloning the LuaPlus Git
     git clone http://git.luaplus.org/luaplus51-all.git
 \endcode
 
-Change directories into <tt>luaplus51-all</tt>.  Build LuaPlus by running:
+Change directories into <tt>luaplus51-all</tt>.
+
+If you are building the JamPlus nextgen version, be sure to checkout the LuaPlus nextgen branch:
+
+\code
+    git checkout nextgen
+\endcode
+
+Build LuaPlus by running:
 
 \code
     jam
