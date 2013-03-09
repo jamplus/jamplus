@@ -422,6 +422,7 @@ pass:
 #ifdef OPT_MULTIPASS_EXT
 	if ( list_first(queuedjamfiles) )
 	{
+		LIST *origqueuedjamfiles = queuedjamfiles;
 		LISTITEM *l = list_first(queuedjamfiles);
 		int i = 0;
 		int count = 0;
@@ -441,7 +442,7 @@ pass:
 
 		sortedfiles = malloc( sizeof( QUEUEDFILEINFO ) * count );
 		i = 0;
-		for( l = list_first(queuedjamfiles); l; l = list_next( l ) ) {
+		for( l = list_first( origqueuedjamfiles ); l; l = list_next( l ) ) {
 			char *colon = strchr( list_value(l), ':' );
 			TARGET *t;
 			*colon = 0;
@@ -463,7 +464,7 @@ pass:
 
 		free( sortedfiles );
 
-		list_free(queuedjamfiles);
+		list_free( origqueuedjamfiles );
 
 		goto pass;
 	}
