@@ -55,10 +55,11 @@ As a simplification when specifying multi-level dependencies, <i>targets2</i> de
 \section language_built_in_rules_modifying_binding Modifying Binding
 \htmlonly </center> \endhtmlonly
 
-The rules \ref rule_Always "Always", \ref rule_Leaves "Leaves", \ref rule_MightNotUpdate "MightNotUpdate", \ref rule_NoCare "NoCare", \ref rule_NotFile "NotFile", \ref rule_NoUpdate "NoUpdate", and \ref rule_Temporary "Temporary" modify the dependency graph so that \b Jam treats the targets differently during its target binding phase.  See \ref operation_binding above.  Normally, \b Jam updates a target if it is missing, if its filesystem modification time is older than any of its dependencies (recursively), or if any of its dependencies are being updated.  This basic behavior can be changed by invoking the following rules:
+The rules \ref rule_Always "Always", \ref rule_ForceCare "ForceCare", \ref rule_Leaves "Leaves", \ref rule_MightNotUpdate "MightNotUpdate", \ref rule_NoCare "NoCare", \ref rule_NotFile "NotFile", \ref rule_NoUpdate "NoUpdate", and \ref rule_Temporary "Temporary" modify the dependency graph so that \b Jam treats the targets differently during its target binding phase.  See \ref operation_binding above.  Normally, \b Jam updates a target if it is missing, if its filesystem modification time is older than any of its dependencies (recursively), or if any of its dependencies are being updated.  This basic behavior can be changed by invoking the following rules:
 
 \secreflist
 \refitem rule_Always Always
+\refitem rule_ForceCare ForceCare
 \refitem rule_Leaves Leaves
 \refitem rule_MightNotUpdate MightNotUpdate
 \refitem rule_NoCare NoCare
@@ -74,6 +75,21 @@ The rules \ref rule_Always "Always", \ref rule_Leaves "Leaves", \ref rule_MightN
 \addindex rule_Always
 
 Causes <i>targets</i> to be rebuilt regardless of whether they are up-to-date (they must still be in the dependency graph).  This is used for the clean and uninstall targets, as they have no dependencies and would otherwise appear never to need building.  It is best applied to targets that are also NotFile targets, but it can also be used to force a real file to be updated as well.
+
+
+
+
+
+
+
+<hr>
+\section rule_ForceCare rule ForceCare targets ;
+\addindex rule_ForceCare
+
+Causes \b Jam to care again about <i>targets</i> that neither can be found nor have updating actions to build them.  Standard \b Jam behavior applies here, a warning will be issues and other targets depending on the missing targets will be skipped.
+
+ForceCare is needed to override a NoCare flag applied to a target.  Note that once ForceCare has been applied to a given target, that target can never be a NoCare target again.
+
 
 
 
@@ -217,22 +233,49 @@ UseCommandLine $(TARGETS) : version2 ;
 The remaining rules are utility rules.
 
 \secreflist
+\refitem rule_DependsList DependsList
 \refitem rule_Echo Echo
 \refitem rule_Exit Exit
+\refitem rule_ExpandFileList ExpandFileList
 \refitem rule_Glob Glob
 \refitem rule_GroupByVar GroupByVar
+\refitem rule_ListSort ListSort
 \refitem rule_Match Match
 \refitem rule_Math Math
 \refitem rule_MD5 MD5
 \refitem rule_MD5File MD5File
 \refitem rule_OptionalFileCache OptionalFileCache
 \refitem rule_QueueJamfile QueueJamfile
+\refitem rule_QuickSettingsLookup QuickSettingsLookup
+\refitem rule_Split Split
 \refitem rule_Subst Subst
+\refitem rule_SubstLiteralize SubstLiteralize
 \refitem rule_UseDepCache UseDepCache
 \refitem rule_UseFileCache UseFileCache
 \refitem rule_UseMD5Callback UseMD5Callback
 \refitem rule_W32_GETREG W32_GETREG
 \endsecreflist
+
+<hr>
+\section rule_DependsList rule DependsList PARENT_TARGETS ;
+\addindex rule_DependsList
+
+\c DependsList takes the list of \c PARENT_TARGETS and returns all of the direct child dependency target names.
+
+\param PARENT_TARGETS A list of parent targets to derive child dependencies from.  There is generally only one parent in this list.
+\return Returns the child dependencies.
+
+\code
+    Depends all : abc def ghi ;
+	Echo [ DependsList all ] ;
+	# abc def ghi
+\endcode
+
+
+
+
+
+
 
 <hr>
 \section rule_Echo rule Echo ARGS ;
@@ -250,7 +293,30 @@ Prints out the message \c ARGS to stdout.
 \section rule_Exit rule Exit ARGS ;
 \addindex rule_Exit
 
-Blurts out the message \c ARGS to stdout and then exits with a failure status.
+Prints out the message \c ARGS to stdout and then exits with a failure status.
+
+
+
+
+
+
+<hr>
+\section rule_ExpandFileList rule ExpandFileList WILDCARDS ;
+\addindex rule_ExpandFileList
+
+\c ExpandFileList takes a list of files or including glob-capable wildcards and expands them.  The result of the expansion is returned to the user.
+
+If \c SEARCH_SOURCE is defined (generally through the \c SubDir rule), then it is removed from the beginning of each expansion.
+
+\param WILDCARDS A list of files or \ref rule_Glob "Glob"-capable wildcards.
+\return Returns the wildcard expanded file list.
+
+\code
+	Echo [ ExpandFileList myfile.cpp **.cpp **.h ] ;
+	# myfile.cpp
+	# All *.cpp files recursively
+	# All *.h files recursively
+\endcode
 
 
 
@@ -336,6 +402,27 @@ The matched grouping is limited to the maximum number of targets specified via \
     Echo (2 max) - [ GroupByVar files : FLAGS : 2 ] ;
 \endcode
 
+
+
+
+
+
+
+<hr>
+\section rule_ListSort rule ListSort LIST : CASE_INSENSITVE ;
+\addindex rule_ListSort
+
+Sorts the provided \c LIST in either a case sensitive or case insensitive fashion.
+
+\param LIST The list of strings to be sorted.
+\param CASE_INSENSITIVE 0 for case insensitive, 1 for case sensitive.  Case sensitive is the default.
+\return Returns a sorted list of strings.
+
+\code
+    FILES = xyz.cpp abc.cpp qrs.cpp ;
+    Echo [ ListSort $(FILES) ] ;
+	# abc.cpp qrs.cpp xyz.cpp
+\endcode
 
 
 
@@ -429,6 +516,40 @@ If the given generated \c TARGETS are already built and stored within the file c
 
 
 <hr>
+\section rule_QuickSettingsLookup rule QuickSettingsLookup TARGET : SYMBOL ;
+\addindex rule_QuickSettingsLookup
+
+Quickly looks up a single setting from from a \c TARGET.  This is generally much faster than using the syntax:
+
+\code
+    on $(TARGET) var = $(SYMBOL) ;
+\endcode
+
+QuickSettingsLookup can also be achieved by using the expansion modifier <tt>:Z=</tt>.
+
+\param TARGET The target to look up the \c SYMBOL within.
+\param SYMBOL The name of the symbol to lookup within \c TARGET.
+\return Returns the symbol's value if the symbol was found, otherwise an empty list.
+
+\code
+    MY_SYMBOL on MyTarget = Hello ;
+
+	local var ;
+	on $(TARGET) var = $(MY_SYMBOL) ;
+	Echo $(var) ;
+    # Hello
+
+	local var2 = [ QuickSettingsLookup MyTarget : MY_SYMBOL ] ;
+	Echo $(var2) ;
+    # Hello
+\endcode
+
+
+
+
+
+
+<hr>
 \section rule_QueueJamfile rule QueueJamfile JAMFILE_LIST [ : PRIORITY ] ;
 \addindex rule_QueueJamfile
 
@@ -446,6 +567,28 @@ Queued Jamfiles are processed in the order they are queued.  There may be cases 
     # Queue me_first.jam with a higher priority than me_second.jam.
     QueueJamfile me_second.jam ;  # Priority of 0.
     QueueJamfile me_first.jam : 1000 ;  # Parse me_first.jam and then me_second.jam.
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_RuleExists rule RuleExists RULE_NAME ;
+\addindex rule_RuleExists
+
+Determines whether \c RULE_NAME exists.
+
+\param RULE_NAME The name of the rule whose existence is to be determined.
+\return Returns \c true if the rule exists, an empty list otherwise.
+
+\code
+    if ! [ RuleExists HiBob ] {
+        rule HiBob {
+            Echo HiBob ;
+        }
+    }
 \endcode
 
 
@@ -472,6 +615,32 @@ The \c Shell rule is used to execute one or more \c COMMANDS and return the outp
     dir_listings = [ Shell "dir *.tga" "dir *.png" ]
     Echo dir *.tga - $(dir_listings[1]) ;
     Echo dir *.png - $(dir_listings[2]) ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_Split rule Split STRINGS : SPLIT_CHARACTERS
+\addindex rule_Split
+
+Splits each of the \c STRINGS at \c SPLIT_CHARACTERS.  All splits are returned as a string list.
+
+\param STRINGS The list of strings to split at the points specified by \c SPLIT_CHARACTERS.
+\param SPLIT_CHARACTERS One or more characters to split the list of \c STRINGS at.
+\return Returns a list of strings split at the points specified by \c SPLIT_CHARACTERS.
+
+\code
+    # Prints:
+    #
+    # **I** **like** **peas.**
+    # No splits here
+    local list = [ Split I like peas. : " " ] ;
+    Echo **$(list)** ;
+
+    Echo [ Split No splits here : "|" ] ;
 \endcode
 
 
@@ -698,6 +867,21 @@ string <code>"flaaap"</code>, there will be two captures: 3&nbsp;and&nbsp;5.
 
 <p>
 A pattern cannot contain embedded zeros.  Use <code>%z</code> instead.
+
+
+
+
+
+<hr>
+\section rule_SubstLiteralize rule SubstLiteralize LITERAL_PATTERN ;
+\addindex rule_SubstLiteralize
+
+Returns an escaped version of \c LITERAL_PATTERN that is suitable to be passed to the \ref rule_Subst "Subst" rule.  That is, any special character used for matching in the Subst rule is escaped with a percent sign.
+
+\code
+Echo [ SubstLiteralize "Hello [world].  How (are) you?" ] ;
+# Hello %[world%].  How %(are%) you%?
+\endcode
 
 
 
