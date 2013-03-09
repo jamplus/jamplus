@@ -260,11 +260,11 @@ int main( int argc, char **argv, char **arg_environ )
 
 # ifdef NT
                 ptr = scriptPath + strlen( scriptPath );
-                strcat( ptr, ".bat" );
+                strcpy( ptr, ".bat" );
                 if ( access( scriptPath, 0 ) == -1 ) {
-                    strcat( ptr, ".cmd" );
+                    strcpy( ptr, ".cmd" );
                     if ( access( scriptPath, 0 ) == -1 ) {
-                        strcat( ptr, ".exe" );
+                        strcpy( ptr, ".exe" );
                         if ( access( scriptPath, 0 ) == -1 ) {
                             printf("* Unable to access script %s.\n", name);
                             exit(-1);
@@ -274,7 +274,7 @@ int main( int argc, char **argv, char **arg_environ )
 # else
                 ptr = scriptPath + strlen( scriptPath );
                 if ( access( scriptPath, 0 ) == -1 ) {
-                    strcat( ptr, ".sh" );
+                    strcpy( ptr, ".sh" );
                     if ( access( scriptPath, 0 ) == -1 ) {
                         printf("* Unable to access script %s.\n", name);
                         exit(-1);
