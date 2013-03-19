@@ -2,8 +2,6 @@ SubDir TOP ;
 
 C.ActiveTarget opengles ;
 
-#C.MacOSX_SDK : $(PLATFORM) ;
-
 IncludeModule CopyFile ;
 
 C.OutputPostfixClear : debug ;
