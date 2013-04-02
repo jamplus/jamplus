@@ -41,7 +41,7 @@ function Test()
 			'jam/win32-release/helloworld/createprecomp.obj',
 			'jam/win32-release/helloworld/file.obj',
 			'jam/win32-release/helloworld/helloworld.release.exe',
-			'jam/win32-release/helloworld/helloworld.release.exe.intermediate.manifest',
+			'?jam/win32-release/helloworld/helloworld.release.exe.intermediate.manifest',
 			'jam/win32-release/helloworld/helloworld.release.pdb',
 			'jam/win32-release/helloworld/main.obj',
 			'jam/win32-release/helloworld/precomp.h.pch',
@@ -52,11 +52,11 @@ function Test()
 		}
 
 		pattern = [[
-*** found 21 target(s)...
+*** found 23 target(s)...
 *** updating 7 target(s)...
 @ C.vc.CC <win32!release:helloworld>precomp.h.pch
 !NEXT!@ C.vc.CC <win32!release:helloworld>../src/file.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!@ C.vc.Link <win32!release:helloworld>helloworld.exe
 !NEXT!*** updated 7 target(s)...
 ]]
 	else
@@ -108,7 +108,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 21 target(s)...
+				*** found 23 target(s)...
 ]]
 		else
 			pattern = [[
@@ -127,11 +127,11 @@ function Test()
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 21 target(s)...
+*** found 23 target(s)...
 *** updating 5 target(s)...
 @ C.vc.CC <win32!release:helloworld>precomp.h.pch
 !NEXT!@ C.vc.CC <win32!release:helloworld>../src/file.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!@ C.vc.Link <win32!release:helloworld>helloworld.exe
 !NEXT!*** updated 5 target(s)...
 ]]
 		else
@@ -156,7 +156,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 21 target(s)...
+				*** found 23 target(s)...
 ]]
 		else
 			pattern = [[
@@ -175,11 +175,11 @@ function Test()
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 21 target(s)...
+*** found 23 target(s)...
 *** updating 5 target(s)...
 @ C.vc.CC <win32!release:helloworld>precomp.h.pch
 !NEXT!@ C.vc.CC <win32!release:helloworld>../src/file.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!@ C.vc.Link <win32!release:helloworld>helloworld.exe
 !NEXT!*** updated 5 target(s)...
 ]]
 		else

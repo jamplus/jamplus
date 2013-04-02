@@ -26,15 +26,15 @@ Pass 1
 @ WriteFile <win32!release:test>foo.cpp
 *** updated 4 target(s)...
 Pass 2
-*** found 30 target(s)...
+*** found 32 target(s)...
 *** updating 12 target(s)...
 @ WriteFile <win32!release:test>foo.h
 @ WriteFile <win32!release:test>main.cpp
 @ C.vc.C++ <win32!release:test>main.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+!NEXT!@ C.vc.Link <win32!release:test>test.exe
 !NEXT!*** updated 5 target(s)...
 Pass 3
-*** found 41 target(s)...
+*** found 43 target(s)...
 *** updating 12 target(s)...
 ]]
 
@@ -52,7 +52,7 @@ Pass 3
 				'win32-release/test/main.cpp',
 				'win32-release/test/main.obj',
 				'win32-release/test/test.release.exe',
-				'win32-release/test/test.release.exe.intermediate.manifest',
+				'?win32-release/test/test.release.exe.intermediate.manifest',
 				'win32-release/test/test.release.pdb',
 			}
 

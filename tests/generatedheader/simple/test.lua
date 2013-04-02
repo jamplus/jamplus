@@ -18,10 +18,10 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 18 target(s)...
+*** found 20 target(s)...
 *** updating 6 target(s)...
 @ C.vc.CC <win32!release:test>main.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+!NEXT!@ C.vc.Link <win32!release:test>test.exe
 *** updated 6 target(s)...
 ]]
 
@@ -41,7 +41,7 @@ function Test()
 			'win32-release/test/main.obj',
 			'win32-release/test/test.obj',
 			'win32-release/test/test.release.exe',
-			'win32-release/test/test.release.exe.intermediate.manifest',
+			'?win32-release/test/test.release.exe.intermediate.manifest',
 			'win32-release/test/test.release.pdb',
 		}
 
@@ -49,7 +49,7 @@ function Test()
 		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 18 target(s)...
+*** found 20 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	
@@ -57,10 +57,10 @@ function Test()
 		os.touch('test.h')
 
 		local pattern3 = [[
-*** found 18 target(s)...
+*** found 20 target(s)...
 *** updating 2 target(s)...
 @ C.vc.CC <win32!release:test>main.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:test>test.exe
+!NEXT!@ C.vc.Link <win32!release:test>test.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

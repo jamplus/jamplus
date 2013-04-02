@@ -14,12 +14,12 @@ function Test()
 		{
 			'Building appA...',
 			'Building appB...',
-			'*** found 27 target(s)...',
+			'*** found 31 target(s)...',
 			'*** updating 7 target(s)...',
 			'@ C.vc.C++ <win32!release:appA>appA.obj',
-			'!NEXT!@ C.vc.LinkWithManifest <win32!release:appA>appA.exe',
+			'!NEXT!@ C.vc.Link <win32!release:appA>appA.exe',
 			'!NEXT!@ C.vc.C++ <win32!release:appB>appB.obj',
-			'!NEXT!@ C.vc.LinkWithManifest <win32!release:appB>appB.exe',
+			'!NEXT!@ C.vc.Link <win32!release:appB>appB.exe',
 			'*** updated 7 target(s)...',
 		}
 
@@ -29,11 +29,9 @@ function Test()
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'win32-release/appA/appA.obj',
 			'win32-release/appA/appA.release.exe',
-			'win32-release/appA/appA.release.exe.intermediate.manifest',
 			'win32-release/appA/appA.release.pdb',
 			'win32-release/appB/appB.obj',
 			'win32-release/appB/appB.release.exe',
-			'win32-release/appB/appB.release.exe.intermediate.manifest',
 			'win32-release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
@@ -54,10 +52,10 @@ Building appB...
 		---------------------------------------------------------------------------
 		local appAPattern = [[
 Building appA...
-*** found 14 target(s)...
+*** found 16 target(s)...
 *** updating 4 target(s)...
 @ C.vc.C++ <win32!release:appA>appA.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:appA>appA.exe
+!NEXT!@ C.vc.Link <win32!release:appA>appA.exe
 *** updated 4 target(s)...
 ]]
 
@@ -66,17 +64,16 @@ Building appA...
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'win32-release/appA/appA.obj',
 			'win32-release/appA/appA.release.exe',
-			'win32-release/appA/appA.release.exe.intermediate.manifest',
 			'win32-release/appA/appA.release.pdb',
 --			'?vc.pdb'
 		}
 
 		local appBPattern = [[
 Building appB...
-*** found 14 target(s)...
+*** found 16 target(s)...
 *** updating 3 target(s)...
 @ C.vc.C++ <win32!release:appB>appB.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:appB>appB.exe
+!NEXT!@ C.vc.Link <win32!release:appB>appB.exe
 *** updated 3 target(s)...
 ]]
 
@@ -85,11 +82,9 @@ Building appB...
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'win32-release/appA/appA.obj',
 			'win32-release/appA/appA.release.exe',
-			'win32-release/appA/appA.release.exe.intermediate.manifest',
 			'win32-release/appA/appA.release.pdb',
 			'win32-release/appB/appB.obj',
 			'win32-release/appB/appB.release.exe',
-			'win32-release/appB/appB.release.exe.intermediate.manifest',
 			'win32-release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
@@ -99,7 +94,6 @@ Building appB...
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'win32-release/appB/appB.obj',
 			'win32-release/appB/appB.release.exe',
-			'win32-release/appB/appB.release.exe.intermediate.manifest',
 			'win32-release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}

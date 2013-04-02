@@ -38,31 +38,31 @@ function Test()
 			'includes/usefuldefine.h',
 			'win32-release/main/main.obj',
 			'win32-release/main/main.release.exe',
-			'win32-release/main/main.release.exe.intermediate.manifest',
+			'?win32-release/main/main.release.exe.intermediate.manifest',
 			'win32-release/main/main.release.pdb',
 			'win32-release/main/mypch.h.pch',
 			'win32-release/main/mypch.obj',
 		}
 
 		pass1Pattern = [[
-			*** found 20 target(s)...
+			*** found 22 target(s)...
 			*** updating 6 target(s)...
 			@ C.vc.C++ <win32!release:main>mypch.h.pch
 			mypch.cpp
 			@ C.vc.C++ <win32!release:main>main.obj
 			main.cpp
-			@ C.vc.LinkWithManifest <win32!release:main>main.exe
+			@ C.vc.Link <win32!release:main>main.exe
 			*** updated 6 target(s)...
 ]]
 
 		pass2Pattern = [[
-			*** found 20 target(s)...
+			*** found 22 target(s)...
 			*** updating 4 target(s)...
 			@ C.vc.C++ <win32!release:main>mypch.h.pch
 			mypch.cpp
 			@ C.vc.C++ <win32!release:main>main.obj
 			main.cpp
-			@ C.vc.LinkWithManifest <win32!release:main>main.exe
+			@ C.vc.Link <win32!release:main>main.exe
 			*** updated 4 target(s)...
 ]]
 	elseif Compiler == 'mingw' then
@@ -125,7 +125,7 @@ function Test()
 		}
 
 		pass1Pattern = [[
-			*** found 15 target(s)...
+			*** found 20 target(s)...
 			*** updating 6 target(s)...
 			&@ C.gcc.PCH <macosx32!release:main%-%x+>mypch.h.gch
 			@ C.gcc.C++ <macosx32!release:main>main.o 
@@ -135,7 +135,7 @@ function Test()
 ]]
 
 		pass2Pattern = [[
-			*** found 15 target(s)...
+			*** found 20 target(s)...
 			*** updating 4 target(s)...
 			&@ C.gcc.PCH <macosx32!release:main%-%x+>mypch.h.gch
 			@ C.gcc.C++ <macosx32!release:main>main.o 
@@ -153,7 +153,7 @@ function Test()
 	local pattern2
 	if Platform == 'win32' and Compiler ~= 'mingw' then
 		pattern2 = [[
-*** found 20 target(s)...
+*** found 22 target(s)...
 ]]
 	else
 		pattern2 = [[

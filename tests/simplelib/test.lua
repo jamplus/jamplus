@@ -48,7 +48,7 @@ function Test()
 			'app/Jamfile.jam',
 			'app/main.c',
 			'app/win32-release/app/app.release.exe',
-			'app/win32-release/app/app.release.exe.intermediate.manifest',
+			'?app/win32-release/app/app.release.exe.intermediate.manifest',
 			'app/win32-release/app/app.release.pdb',
 			'app/win32-release/app/main.obj',
 			'lib-a/add.c',
@@ -64,7 +64,7 @@ function Test()
 @ C.vc.CC <win32!release:app>main.obj
 !NEXT!@ C.vc.CC <win32!release:lib-a>add.obj
 !NEXT!@ C.vc.Archive <win32!release:lib-a>lib-a.lib
-!NEXT!@ C.vc.LinkWithManifest <win32!release:app>app.exe
+!NEXT!@ C.vc.Link <win32!release:app>app.exe
 !NEXT!*** updated 8 target(s)...
 ]]
 
@@ -76,7 +76,7 @@ function Test()
 *** found 16 target(s)...
 *** updating 2 target(s)...
 @ C.vc.CC <win32!release:app>main.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:app>app.exe
+!NEXT!@ C.vc.Link <win32!release:app>app.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 

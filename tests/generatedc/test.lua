@@ -18,11 +18,11 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 18 target(s)...
+*** found 20 target(s)...
 *** updating 6 target(s)...
 @ GenerateCFile <win32!release:helloworld>file.c
 !NEXT!@ C.vc.CC <win32!release:helloworld>main.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!@ C.vc.Link <win32!release:helloworld>helloworld.exe
 !NEXT!*** updated 6 target(s)...
 ]]
 
@@ -41,7 +41,7 @@ function Test()
 			'test.lua',
 			'win32-release/helloworld/file.obj',
 			'win32-release/helloworld/helloworld.release.exe',
-			'win32-release/helloworld/helloworld.release.exe.intermediate.manifest',
+			'?win32-release/helloworld/helloworld.release.exe.intermediate.manifest',
 			'win32-release/helloworld/helloworld.release.pdb',
 			'win32-release/helloworld/main.obj',
 		}
@@ -50,7 +50,7 @@ function Test()
 		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 18 target(s)...
+*** found 20 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 
@@ -58,11 +58,11 @@ function Test()
 		os.touch('file.c')
 
 		local pattern3 = [[
-*** found 18 target(s)...
+*** found 20 target(s)...
 *** updating 2 target(s)...
 @ C.vc.CC <win32!release:helloworld>file.obj
 file.c
-!NEXT!@ C.vc.LinkWithManifest <win32!release:helloworld>helloworld.exe
+!NEXT!@ C.vc.Link <win32!release:helloworld>helloworld.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
