@@ -1,4 +1,4 @@
-/*! \page index JamPlus
+/*! \mainpage JamPlus
 
 <h2>Introduction</h2>
 JamPlus is a powerful code and data build system built on the code base of the original Perforce version of Jam, a software build tool similar to <b>make</b>.
