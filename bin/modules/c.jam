@@ -50,6 +50,17 @@ rule C.ActiveTarget TARGET {
 	return $(C.ACTIVE_TARGET) ;
 }
 
+rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC
+{
+	local toolChainGrist ;
+	if $(TOOLCHAIN_SPEC) {
+		toolChainGrist = $(TOOLCHAIN_SPEC:J=!) ;
+	} else {
+		toolChainGrist = $(C.ACTIVE_TOOLCHAIN) ;
+	}
+	local toolChainTarget = $(TARGET:G=$(toolChainGrist)) ;
+	return $(LINKTARGETS:Z=$(toolChainTarget)) ;
+}
 
 rule C.Clean TARGET : FILES {
 	C.ActiveTarget $(TARGET) ;
@@ -652,6 +663,8 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 		C.$(C.COMPILER_SUITE)._ApplicationFromObjects_PostBuildUser ;
 	}
 
+	LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(linkTargets) ;
+
 	return $(_linkTargets) ;
 }
 
@@ -768,6 +781,8 @@ rule C._LibraryFromObjects OBJECTS {
 
 	if ! ( $(NOARSCAN) || $(NOARUPDATE) ) { RmTemps $(_l) : $(_s) ; }
 
+	LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_l) ;
+
 	return $(_l) ;
 }
 
@@ -881,6 +896,8 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 	if [ RuleExists C.$(C.COMPILER_SUITE)._SharedLibraryFromObjects_PostBuild ] {
 		C.$(C.COMPILER_SUITE)._SharedLibraryFromObjects_PostBuild ;
 	}
+
+	LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
 
 	return $(_linkTargets) ;
 }

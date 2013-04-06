@@ -25,6 +25,7 @@ When first loaded, it attempts to detect the compiler on the machine.  On Window
 \refitem rule_C_ExcludeFromBuild C.ExcludeFromBuild
 \refitem rule_C_Flags C.Flags
 \refitem rule_C_ForceInclude C.ForceInclude
+\refitem rule_C_GetLinkTargets C.GetLinkTargets
 \refitem rule_C_IncludeDirectories C.IncludeDirectories
 \refitem rule_C_Library C.Library
 \refitem rule_C_LinkDirectories C.LinkDirectories
@@ -86,6 +87,7 @@ Compiles \c SOURCES and links them into \c TARGET.  Platform specific <tt>.o</tt
 \param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> (and possibly others) to link into the application.  Object and compiled Windows resource files may also be passed with this list.
 \param OPTIONS The following options are available.  All options are optional.
+\return Returns the list of link targets, sometimes more than one, that will be built by the Jam.
 
 \htmlonly <blockquote> \endhtmlonly
 <ul>
@@ -382,6 +384,42 @@ For the given project \c TARGET, assign the \c INCLUDES to the appropriate confi
 
 
 <hr>
+\section rule_C_GetLinkTargets rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC
+\addindex rule_C_GetLinkTargets
+
+The \ref rule_C_Application and \ref rule_C_Library rules return the target name of the executable or library being built.  The properly gristed target name is unique within the dependency graph and takes into account the currently active toolchain.
+
+When it is not possible to save off the result when calling the \c C.Application or \c C.Library rules, the \c C.GetLinkTargets rule can retrieve the properly gristed target later.
+
+\param TARGET The target to retrieve the link targets from.
+\param TOOLCHAIN_SPEC A tool specification such as "win32 debug" (without the quotes) or "$(PLATFORM) $(CONFIG) spu" (without the quotes).
+\return Returns the list of link targets, sometimes more than one, that will be built by the Jam.  The target list may be passed to another rule like \ref rule_C_LinkLibraries.
+
+\code
+	C.Toolchain ps3 debug spu ;
+	local sputhing_library = [ C.Library sputhing : sputhing.c ] ;
+
+	C.Toolchain ps3 debug ppu ;
+
+	local also_sputhing_library = [ C.GetLinkTargets sputhing : ps3 debug spu ] ;
+
+	# <fakeps3!release!spu:sputhing>sputhing.lib
+	Echo sputhing_library - $(sputhing_library) ;
+
+	# <fakeps3!release!spu:sputhing>sputhing.lib
+	Echo also_sputhing_library - $(also_sputhing_library) ;
+
+	C.LinkLibraries pputhing : $(sputhing_library) ;
+	C.Application pputhing : pputhing.c ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_C_IncludeDirectories rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]
 \addindex rule_C_IncludeDirectories
 
@@ -434,6 +472,8 @@ If \c shared is specified for \c OPTIONS, the following additional options are a
   <li>\c windows - Forces a GUI application.  For Visual C++, the DLL is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
 </ul>
 \htmlonly </blockquote> \endhtmlonly
+
+\return Returns the list of link targets, sometimes more than one, that will be built by the Jam.  The target list may be passed to another rule like \ref rule_C_LinkLibraries.
 
 \code
     # Build a static library called mystaticlibrary from the sources
