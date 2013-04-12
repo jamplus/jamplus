@@ -1,0 +1,7 @@
+C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+
+IncludeModule c-compilers/c-vc-autodetect ;
+
+C.ToolchainHelper vc-win32-release ;
+
+C.Defines * : TEST_RETAIL_DEFINE ;

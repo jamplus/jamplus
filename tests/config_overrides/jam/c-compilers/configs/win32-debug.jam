@@ -1,0 +1,9 @@
+C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+
+IncludeModule c-compilers/c-vc-autodetect ;
+C.AutoDetect ;
+
+C.ToolchainHelper vc-win32-debug ;
+
+C.Defines * : TEST_DEBUG_DEFINE ;
+
