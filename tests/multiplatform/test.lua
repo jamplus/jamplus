@@ -28,10 +28,10 @@ function Test()
 		local pattern
 	    if Platform == 'win32' then
 			pattern = [[
-*** found 19 target(s)...
+*** found 21 target(s)...
 *** updating 6 target(s)...
 @ C.vc.CC <win32!release:platform>platform.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:platform>platform.exe
+!NEXT!@ C.vc.Link <win32!release:platform>platform.exe
 !NEXT!*** updated 6 target(s)...
 ]]
 			pass1Directories = {
@@ -53,7 +53,7 @@ function Test()
 				'win32-release/platform/filerelease.obj',
 				'win32-release/platform/platform.obj',
 				'win32-release/platform/platform.release.exe',
-				'win32-release/platform/platform.release.exe.intermediate.manifest',
+				'?win32-release/platform/platform.release.exe.intermediate.manifest',
 				'win32-release/platform/platform.release.pdb',
 				'win32-release/platform/win32.obj',
 			}
@@ -128,7 +128,7 @@ RELEASE: What's up?!
 		TestPattern(pattern2, ex.collectlines{'win32-release\\platform\\platform.release.exe'})
 
 		pattern3 = [[
-*** found 19 target(s)...
+*** found 21 target(s)...
 ]]
 
 	elseif Platform == 'macosx' then

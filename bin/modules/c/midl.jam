@@ -97,14 +97,14 @@ rule C.MidlCompiler PARENT : SOURCE
 			MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
 
 		case vs2008 :
-			LINK_PATHS += $(MSSDK)/bin ;
-			MIDL = "$(MSSDK)/bin/midl" ;
+			LINK_PATHS += $(MSSDK_BINDIR) ;
+			MIDL = "$(MSSDK_BINDIR)/midl" ;
 			MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
 			MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
 
 		case vs2010 :
-			LINK_PATHS += $(MSSDK)/bin ;
-			MIDL = "$(MSSDK:Z=$(C.COMPILER_SUITE_SYMBOL))/bin/midl" ;
+			LINK_PATHS += $(MSSDK_BINDIR) ;
+			MIDL = "$(MSSDK_BINDIR:Z=$(C.COMPILER_SUITE_SYMBOL))/midl" ;
 			switch $(CONFIG) {
 				case debug :
 					MIDLFLAGS = /D "_DEBUG" /char signed /env win32 /Oicf ;
@@ -113,8 +113,8 @@ rule C.MidlCompiler PARENT : SOURCE
 			}
 
 		case vs2012 :
-			LINK_PATHS += $(MSSDK)/bin ;
-			MIDL = "$(MSSDK:Z=$(C.COMPILER_SUITE_SYMBOL))/bin/x86/midl" ;
+			LINK_PATHS += $(MSSDK_BINDIR) ;
+			MIDL = "$(MSSDK_BINDIR:Z=$(C.COMPILER_SUITE_SYMBOL))/midl" ;
 			switch $(CONFIG) {
 				case debug :
 					MIDLFLAGS = /D "_DEBUG" /char signed /env win32 /Oicf ;

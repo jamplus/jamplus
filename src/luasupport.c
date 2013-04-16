@@ -62,6 +62,7 @@ void (*ls_lua_remove) (ls_lua_State *L, int idx);
 #define ls_lua_isboolean(L,n)	(ls_lua_type(L, (n)) == LUA_TBOOLEAN)
 int             (*ls_lua_isnumber) (ls_lua_State *L, int idx);
 int             (*ls_lua_isstring) (ls_lua_State *L, int idx);
+int             (*ls_lua_isuserdata) (ls_lua_State *L, int idx);
 int             (*ls_lua_type) (ls_lua_State *L, int idx);
 
 ls_lua_Number      (*ls_lua_tonumber) (ls_lua_State *L, int idx);
@@ -111,13 +112,13 @@ static ls_lua_State *L;
 static LIST *luahelper_addtolist(ls_lua_State *L, LIST *list, int index)
 {
     if (ls_lua_isboolean(L, index))
-	return list_new(list, ls_lua_toboolean(L, index) ? "true" : "false", 0);
+	return list_append(list, ls_lua_toboolean(L, index) ? "true" : "false", 0);
 
     if (ls_lua_isnumber(L, index))
-	return list_new(list, ls_lua_tostring(L, index), 0);
+	return list_append(list, ls_lua_tostring(L, index), 0);
 
     if (ls_lua_isstring(L, index))
-	return list_new(list, ls_lua_tostring(L, index), 0);
+	return list_append(list, ls_lua_tostring(L, index), 0);
 
     else if (ls_lua_istable(L, index))
     {
@@ -166,6 +167,7 @@ int LS_jam_setvar(ls_lua_State *L)
 int LS_jam_getvar(ls_lua_State *L)
 {
     LIST *list;
+    LISTITEM* item;
     int index;
 
     int numParams = ls_lua_gettop(L);
@@ -194,10 +196,10 @@ int LS_jam_getvar(ls_lua_State *L)
 
     ls_lua_newtable(L);
     index = 1;
-    for (; list; list = list_next(list), ++index)
+    for (item = list_first(list); item; item = list_next(item), ++index)
     {
 	ls_lua_pushnumber(L, index);
-	ls_lua_pushstring(L, list->string);
+	ls_lua_pushstring(L, list_value(item));
 	ls_lua_settable(L, -3);
     }
 
@@ -210,6 +212,7 @@ int LS_jam_evaluaterule(ls_lua_State *L)
     LOL lol;
     int i;
     LIST *list;
+    LISTITEM* item;
     int index;
 
     int numParams = ls_lua_gettop(L);
@@ -230,10 +233,10 @@ int LS_jam_evaluaterule(ls_lua_State *L)
 
     ls_lua_newtable(L);
     index = 1;
-    for (; list; list = list_next(list), ++index)
+    for (item = list_first(list); item; item = list_next(item), ++index)
     {
 	ls_lua_pushnumber(L, index);
-	ls_lua_pushstring(L, list->string);
+	ls_lua_pushstring(L, list_value(item));
 	ls_lua_settable(L, -3);
     }
 
@@ -300,7 +303,7 @@ static int pmain (ls_lua_State *L)
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_evaluaterule");
 
     top = ls_lua_gettop(L);
-    ret = ls_luaL_loadstring(L, "require 'lanes'");
+    ret = ls_luaL_loadstring(L, "lanes = require 'lanes'");
     ls_lua_callhelper(top, ret);
     ret = ls_luaL_loadstring(L, "lanes.configure()");
     ls_lua_callhelper(top, ret);
@@ -339,12 +342,12 @@ void ls_lua_init()
 #else
     luaSharedLibrary = var_get("LUA_SHARED_LIBRARY.RELEASE");
 #endif
-    if (luaSharedLibrary)
+    if (list_first(luaSharedLibrary))
     {
 #ifdef OS_NT
-	handle = LoadLibrary(luaSharedLibrary->string);
+	handle = LoadLibrary(list_value(list_first(luaSharedLibrary)));
 #else
-	handle = dlopen(luaSharedLibrary->string, RTLD_LAZY | RTLD_GLOBAL);
+	handle = dlopen(list_value(list_first(luaSharedLibrary)), RTLD_LAZY | RTLD_GLOBAL);
 #endif
     }
     if (!handle)
@@ -383,6 +386,7 @@ void ls_lua_init()
 
     ls_lua_isnumber = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isnumber");
     ls_lua_isstring = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isstring");
+    ls_lua_isuserdata = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isuserdata");
     ls_lua_type = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_type");
 
     ls_lua_tonumber = (ls_lua_Number (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_tonumber");
@@ -488,7 +492,7 @@ int luahelper_taskisrunning(int taskid, int* returnValue)
 	ls_lua_init();
 
 	ls_lua_rawgeti(L, LUA_REGISTRYINDEX, taskid);		/* lane_h */
-	if (!ls_lua_istable(L, -1))
+	if (!ls_lua_isuserdata(L, -1))
 	{
 		*returnValue = 1;
 		ls_lua_pop(L, 1);
@@ -698,14 +702,14 @@ builtin_luastring(
     int ret;
 
     LIST *l = lol_get(args, 0);
-    if (!l)
+    if (!list_first(l))
     {
 	printf("jam: No argument passed to LuaString\n");
 	exit(EXITBAD);
     }
     ls_lua_init();
     top = ls_lua_gettop(L);
-    ret = ls_luaL_loadstring(L, l->string);
+    ret = ls_luaL_loadstring(L, list_value(list_first(l)));
     return ls_lua_callhelper(top, ret);
 }
 
@@ -718,23 +722,23 @@ builtin_luafile(
 {
     int top;
     int ret;
-    LIST *l2;
+    LISTITEM *l2;
     int index = 0;
 
     LIST *l = lol_get(args, 0);
-    if (!l) {
+    if (!list_first(l)) {
 	printf("jam: No argument passed to LuaFile\n");
 	exit(EXITBAD);
     }
     ls_lua_init();
     top = ls_lua_gettop(L);
     ls_lua_newtable(L);
-    for (l2 = lol_get(args, 1); l2; l2 = l2->next) {
-	ls_lua_pushstring(L, l2->string);
+    for (l2 = list_first(lol_get(args, 1)); l2; l2 = list_next(l2)) {
+	ls_lua_pushstring(L, list_value(l2));
 	ls_lua_rawseti(L, -2, ++index);
     }
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "arg");
-    ret = ls_luaL_loadfile(L, l->string);
+    ret = ls_luaL_loadfile(L, list_value(list_first(l)));
     return ls_lua_callhelper(top, ret);
 }
 

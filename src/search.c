@@ -44,9 +44,9 @@ search_helper(
 	f->f_grist.len = 0;
 	
 #ifdef OPT_PATH_BINDING_EXT
-	if ( ( varlist = varget( "BINDING", userData ) ) )
+	if ( list_first(varlist = varget( "BINDING", userData )) )
 	{
-		path_parse( varlist->string, bf );
+		path_parse( list_value(list_first(varlist)), bf );
 		
 		f->f_dir = bf->f_dir;
 		f->f_base = bf->f_base;
@@ -54,10 +54,10 @@ search_helper(
 	}
 #endif
 	
-	if( ( varlist = varget( "LOCATE", userData ) ) )
+	if( list_first(varlist = varget( "LOCATE", userData )) )
 	{
-		f->f_root.ptr = varlist->string;
-		f->f_root.len = (int)(strlen( varlist->string ));
+		f->f_root.ptr = list_value(list_first(varlist));
+		f->f_root.len = (int)(strlen( list_value(list_first(varlist)) ));
 		
 		path_build( f, buf, 1 );
 		
@@ -68,14 +68,14 @@ search_helper(
 		
 		return newstr( buf );
 	}
-	else if( ( varlist = varget( "SEARCH", userData ) ) )
+	else if( list_first(varlist = varget( "SEARCH", userData )) )
 	{
 		LIST *searchextensionslist;
-		LIST *savevarlist = varlist;
-		while( varlist )
+		LISTITEM* var = list_first(varlist);
+		while( var )
 		{
-			f->f_root.ptr = varlist->string;
-			f->f_root.len = (int)(strlen( varlist->string ));
+			f->f_root.ptr = list_value(var);
+			f->f_root.len = (int)(strlen( list_value(var) ));
 			
 			path_build( f, buf, 1 );
 			
@@ -87,21 +87,22 @@ search_helper(
 			if( *time )
 				return newstr( buf );
 			
-			varlist = list_next( varlist );
+			var = list_next( var );
 		}
 		
 		searchextensionslist = varget( "SEARCH_EXTENSIONS", userData );
-		if ( searchextensionslist )
+		if ( list_first(searchextensionslist) )
 		{
-			for ( ; searchextensionslist; searchextensionslist = list_next( searchextensionslist ) )
+			LISTITEM* ext = list_first(searchextensionslist);
+			for ( ; ext; ext = list_next(ext) )
 			{
-				varlist = savevarlist;
-				while( varlist )
+				LISTITEM* var = list_first(varlist);
+				while( var )
 				{
-					f->f_root.ptr = varlist->string;
-					f->f_root.len = (int)(strlen( varlist->string ));
+					f->f_root.ptr = list_value(var);
+					f->f_root.len = (int)(strlen( list_value(var) ));
 					
-					strcpy( path_build( f, buf, 1 ), searchextensionslist->string );
+					strcpy( path_build( f, buf, 1 ), list_value(ext) );
 					
 					if( DEBUG_SEARCH )
 						printf( "search %s: %s\n", target, buf );
@@ -111,7 +112,7 @@ search_helper(
 					if( *time )
 						return newstr( buf );
 					
-					varlist = list_next( varlist );
+					var = list_next( var );
 				}
 			}
 		}			

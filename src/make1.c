@@ -889,9 +889,9 @@ make1d(
 		LIST*		useLuaLineFilters;
 
 		useLuaLineFilters = var_get( "USE_LUA_LINE_FILTERS" );
-		if ( useLuaLineFilters )
+		if ( list_first(useLuaLineFilters) )
 		{
-			if ( ( strcmp( useLuaLineFilters->string, "1" ) != 0  &&  strcmp( useLuaLineFilters->string, "true" ) != 0)
+			if ( ( strcmp( list_value(list_first(useLuaLineFilters)), "1" ) != 0  &&  strcmp( list_value(list_first(useLuaLineFilters)), "true" ) != 0)
 					||  !luahelper_push_linefilter( cmd->rule->name ) )
 			{
 				useLuaLineFilters = NULL;
@@ -1042,27 +1042,29 @@ make1d(
 	{
 		if ( !( cmd->rule->flags & RULE_UPDATED ) ) {
 	    LIST *targets = lol_get( &cmd->args, 0 );
+	    LISTITEM* target;
 
 #ifdef OPT_NODELETE_READONLY
-	    for( ; targets; targets = list_next( targets ) )
-		if( file_writeable( targets->string ) &&
-		    !unlink( targets->string ) )
-		    printf( "*** removing %s\n", targets->string );
+	    for(target = list_first(targets) ; target; target = list_next(target) )
+		if( file_writeable(list_value(target)) &&
+		    !unlink(list_value(target)) )
+		    printf( "*** removing %s\n", list_value(target) );
 #else
-	    for( ; targets; targets = list_next( targets ) )
-		if( !unlink( targets->string ) )
-		    printf( "*** removing %s\n", targets->string );
+	    for(target = list_first(targets) ; target; target = list_next( target ) )
+		if( !unlink( list_value(target) ) )
+		    printf( "*** removing %s\n", list_value(target) );
 #endif
 	}
 	}
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 	else
 	{
+		LISTITEM* target;
 	    LIST *targets = lol_get( &cmd->args, 0 );
 
-	    for( ; targets; targets = list_next( targets ) )
+	    for(target = list_first(targets) ; target; target = list_next( target ) )
 	    {
-		TARGET *t = bindtarget( targets->string );
+		TARGET *t = bindtarget( list_value(target) );
 		filecache_update( t );
 	    }
 	}
@@ -1150,7 +1152,7 @@ make1cmds( ACTIONS *a0 )
 			for( a1 = a0; a1; a1 = a1->next ) {
 				TARGETS* sources;
 				for ( sources = a1->action->sources; sources; sources = sources->next ) {
-					emptydirtargets = list_new( emptydirtargets, sources->target->name, 1 );
+					emptydirtargets = list_append( emptydirtargets, sources->target->name, 1 );
 				}
 			}
 		}
@@ -1197,10 +1199,12 @@ make1cmds( ACTIONS *a0 )
 		if ( strncmp( rule->name, "batched_", 8 ) == 0 )
 		{
 		    int anycacheable = 0;
-		    for( ; targets; targets = targets->next, sources = ( sources == NULL ? sources : sources->next ) )
+			LISTITEM* target = list_first(targets);
+			LISTITEM* source = list_first(sources);
+		    for( ; target; target = list_next(target), source = ( source == NULL ? source : list_next(source) ) )
 		    {
-			TARGET *t = bindtarget(targets->string);
-			TARGET *s = sources!=NULL ? bindtarget(sources->string) : NULL;
+			TARGET *t = bindtarget(list_value(target));
+			TARGET *s = source!=NULL ? bindtarget(list_value(source)) : NULL;
 
 			/* if this target could be cacheable */
 			if ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) {
@@ -1248,9 +1252,9 @@ make1cmds( ACTIONS *a0 )
 			    }
 			    /* Build new lists */
 
-			    nt = list_new( nt, t->boundname, 1 );
+			    nt = list_append( nt, t->boundname, 1 );
 			    if (s)
-				ns = list_new( ns, s->boundname, 1 );
+				ns = list_append( ns, s->boundname, 1 );
 			}
 		    }
 
@@ -1262,10 +1266,11 @@ make1cmds( ACTIONS *a0 )
 		else
 		{
 		    int allcached = 1;
+		    LISTITEM* target;
 		    popsettings( t->settings );
-		    for( ; targets; targets = list_next(targets) )
+		    for(target = list_first(targets) ; target; target = list_next(target) )
 		    {
-			TARGET *t = bindtarget(targets->string);
+			TARGET *t = bindtarget(list_value(target));
 //			TARGET *s = sources!=NULL ? bindtarget(sources->string) : NULL;
 			TARGETS *c;
 			TARGET *outt;
@@ -1305,12 +1310,12 @@ make1cmds( ACTIONS *a0 )
 				{
 				    if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
 				    {
-					LIST *list;
-					for ( list = vars->value; list; list = list->next )
+					LISTITEM *list;
+					for ( list = list_first(vars->value); list; list = list_next(list) )
 					{
-					    MD5Update( &context, (unsigned char*)list->string, (unsigned int)strlen( list->string ) );
+					    MD5Update( &context, (unsigned char*)list_value(list), (unsigned int)strlen( list_value(list) ) );
 					    if( DEBUG_MD5HASH )
-						printf( "\t\tCOMMANDLINE: %s\n", list->string );
+						printf( "\t\tCOMMANDLINE: %s\n", list_value(list) );
 					}
 
 					break;
@@ -1340,7 +1345,7 @@ make1cmds( ACTIONS *a0 )
 			    outt->flags |= T_FLAG_USEFILECACHE;
 			    outt->filecache_generate = t->filecache_generate;
 			    outt->filecache_use = t->filecache_use;
-			    outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_new( L0, filecache->string, 1 ) );
+			    outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_append( L0, list_value(list_first(filecache)), 1 ) );
 			    MD5Final( outt->buildmd5sum, &context );
 			    if (DEBUG_MD5HASH)
 			    {
@@ -1643,10 +1648,10 @@ make1list(
 
 	if( flags & RULE_TOGETHER )
 	{
-	    LIST *m;
+	    LISTITEM *m = list_first(l);
 
-	    for( m = l; m; m = m->next )
-		if( !strcmp( m->string, t->boundname ) )
+	    for( m; m; m = list_next(m) )
+		if( !strcmp( list_value(m), t->boundname ) )
 		    break;
 
 	    if( m )
@@ -1655,7 +1660,7 @@ make1list(
 
 	/* Build new list */
 
-	l = list_new( l, t->boundname, 1 );
+	l = list_append( l, t->boundname, 1 );
     }
 
     return l;
@@ -1695,10 +1700,10 @@ make1list_unbound(
 
 	if( flags & RULE_TOGETHER )
 	{
-	    LIST *m;
+	    LISTITEM *m = list_first(l);
 
-	    for( m = l; m; m = m->next )
-		if( !strcmp( m->string, t->boundname ) )
+	    for( m; m; m = list_next(m) )
+		if( !strcmp( list_value(m), t->boundname ) )
 		    break;
 
 	    if( m )
@@ -1707,7 +1712,7 @@ make1list_unbound(
 
 	/* Build new list */
 
-	l = list_new( l, t->name, 1 );
+	l = list_append( l, t->name, 1 );
     }
 
     return l;
@@ -1908,15 +1913,16 @@ static SETTINGS *
 make1settings( LIST *vars )
 {
 	SETTINGS *settings = 0;
+	LISTITEM* var;
 
-	for( ; vars; vars = list_next( vars ) )
+	for(var = list_first(vars) ; var; var = list_next( var ) )
 	{
-	    LIST *l = var_get( vars->string );
+	    LISTITEM *l = list_first(var_get(list_value(var)));
 	    LIST *nl = 0;
 
 	    for( ; l; l = list_next( l ) )
 	    {
-		TARGET *t = bindtarget( l->string );
+		TARGET *t = bindtarget(list_value(l));
 
 		/* Make sure the target is bound, warning if it is not in the */
 		/* dependency graph. */
@@ -1926,12 +1932,12 @@ make1settings( LIST *vars )
 
 		/* Build new list */
 
-		nl = list_new( nl, t->boundname, 1 );
+		nl = list_append( nl, t->boundname, 1 );
 	    }
 
 	    /* Add to settings chain */
 
-	    settings = addsettings( settings, 0, vars->string, nl );
+	    settings = addsettings( settings, 0, list_value(var), nl );
 	}
 
 	return settings;

@@ -4,7 +4,6 @@ function CreateLibJamfileHelper(lib_number, classes, lump)
     os.chdir(cppcodebase.lib_name(lib_number))
     local handle = io.open("Jamfile.jam", "w")
     handle:write("SubDir TOP lib_" .. lib_number .. " ;\n\n")
-    handle:write("C.SubDirHdrs $(INCLUDES) ;\n\n")
 	handle:write("SRCS =\n")
     for i = 0, classes - 1 do
         handle:write('        class_' .. i .. '.cpp\n')
@@ -16,6 +15,7 @@ function CreateLibJamfileHelper(lib_number, classes, lump)
 	end
 
     handle:write("C.Library lib_" .. lib_number .. " : $(SRCS) ;\n")
+    handle:write("Depends all : lib_" .. lib_number .. " ;\n")
     os.chdir('..')
 end
 
@@ -48,6 +48,7 @@ function CreateFullJamfile(libs)
 	handle:write('DEPCACHE.standard = .jamcache ;\n')
 	handle:write('DEPCACHE = standard ;\n')
     handle:write ('INCLUDES = $(TOP) ;\n')
+    handle:write ('C.IncludeDirectories * : $(TOP) ;\n')
 end
 
 

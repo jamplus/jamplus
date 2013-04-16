@@ -67,8 +67,8 @@ headers( TARGET *t )
 	LIST	*hdrrule;
 	LOL	lol;
 
-	if( !( hdrscan = var_get( "HDRSCAN" ) ) ||
-	    !( hdrrule = var_get( "HDRRULE" ) ) )
+	if( !list_first( hdrscan = var_get( "HDRSCAN" ) ) ||
+	    !list_first( hdrrule = var_get( "HDRRULE" ) ) )
 	        return;
 
 	/* Doctor up call to HDRRULE rule */
@@ -79,21 +79,21 @@ headers( TARGET *t )
 
 	lol_init( &lol );
 
-	lol_add( &lol, list_new( L0, t->name, 1 ) );
+	lol_add( &lol, list_append( L0, t->name, 1 ) );
 #ifdef OPT_HEADER_CACHE_EXT
 	lol_add( &lol, hcache( t, hdrscan ) );
 #else
 	lol_add( &lol, headers1( t->boundname, hdrscan ) );
 #endif
 
-	if( lol_get( &lol, 1 ) )
+	if( list_first(lol_get( &lol, 1 )) )
 	{
 #ifdef OPT_HDRRULE_BOUNDNAME_ARG_EXT
 	    /* The third argument to HDRRULE is the bound name of
 	     * $(<) */
-	    lol_add( &lol, list_new( L0, t->boundname, 0 ) );
+	    lol_add( &lol, list_append( L0, t->boundname, 0 ) );
 #endif
-	    list_free( evaluate_rule( hdrrule->string, &lol, L0 ) );
+	    list_free( evaluate_rule( list_value(list_first(hdrrule)), &lol, L0 ) );
 	}
 
 	/* Clean up */
@@ -128,6 +128,7 @@ static LIST *headers1helper(
 	char	buf[ 1024 ];
 	LIST	*hdrdownshift;
 	int	dodownshift = 1;
+	LISTITEM* pattern;
 
 #ifdef OPT_IMPROVED_PATIENCE_EXT
 	static int count = 0;
@@ -137,26 +138,28 @@ static LIST *headers1helper(
 #endif
 
 	hdrdownshift = var_get( "HDRDOWNSHIFT" );
-	if ( hdrdownshift )
+	if ( list_first(hdrdownshift) )
 	{
-	    dodownshift = strcmp( hdrdownshift->string, "false" ) != 0  &&
-		    strcmp( hdrdownshift->string, "0" ) != 0;
+		char const* str = list_value(list_first(hdrdownshift));
+	    dodownshift = strcmp( str, "false" ) != 0  &&
+		    strcmp( str, "0" ) != 0;
 	}
 
 	if ( !regexhash )
 	    regexhash = hashinit( sizeof(regexdata), "regex" );
 
-	while( rec < MAXINC && hdrscan )
+	pattern = list_first(hdrscan);
+	while( rec < MAXINC && pattern )
 	{
 	    regexdata data, *d = &data;
-	    data.name = hdrscan->string;
+	    data.name = list_value(pattern);
 	    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 	    {
-		d->re = jam_regcomp( hdrscan->string );
+		d->re = jam_regcomp( list_value(pattern) );
 		(void)hashenter( regexhash, (HASHDATA **)&d );
 	    }
 	    re[rec++] = d->re;
-	    hdrscan = list_next( hdrscan );
+	    pattern = list_next( pattern );
 	}
 
 	while( fgets( buf, sizeof( buf ), f ) )
@@ -189,7 +192,7 @@ static LIST *headers1helper(
 		buf2[ l ] = 0;
 		}
 
-		result = list_new( result, buf2, 0 );
+		result = list_append( result, buf2, 0 );
 
 		if( DEBUG_HEADER )
 		    printf( "header found: %s\n", buf2 );
@@ -209,15 +212,15 @@ headers1(
 	LIST    *hdrpipe;
 	LIST	*hdrpipefile;
 
-	if ( ( hdrpipe = var_get( "HDRPIPE" ) ) )
+	if ( list_first(hdrpipe = var_get( "HDRPIPE" )) )
 	{
 		LOL args;
 		BUFFER buff;
 		lol_init( &args );
-		lol_add( &args, list_new( L0, file, 0 ) );
+		lol_add( &args, list_append( L0, file, 0 ) );
 		buffer_init( &buff );
-		if ( var_string( hdrpipe->string, &buff, 0, &args, ' ') < 0 )  {
-		    printf( "Cannot expand HDRPIPE '%s' !\n", hdrpipe->string );
+		if ( var_string( list_value(list_first(hdrpipe)), &buff, 0, &args, ' ') < 0 )  {
+		    printf( "Cannot expand HDRPIPE '%s' !\n", list_value(list_first(hdrpipe)) );
 		    exit( EXITBAD );
 		}
 		buffer_addchar( &buff, 0 );
@@ -236,14 +239,14 @@ headers1(
 
 	result = headers1helper( f, hdrscan );
 
-	if ( hdrpipe )
+	if ( list_first(hdrpipe) )
 		file_pclose( f );
 	else
 		fclose( f );
 
-	if ( ( hdrpipefile = var_get( "HDRPIPEFILE" ) ) )
+	if ( list_first(hdrpipefile = var_get( "HDRPIPEFILE" )) )
 	{
-		if( !( f = fopen( hdrpipefile->string, "r" ) ) )
+		if( !( f = fopen( list_value(list_first(hdrpipefile)), "r" ) ) )
 		    return result;
 		result = headers1helper( f, hdrscan );
 		fclose( f );
@@ -274,6 +277,7 @@ headers1(
 	int	i;
 	int	rec = 0;
 	LIST	*result = 0;
+	LISTITEM* pattern;
 	regexp	*re[ MAXINC ];
 	char	buf[ 1024 ];
 
@@ -290,17 +294,18 @@ headers1(
 	if ( !regexhash )
 	    regexhash = hashinit( sizeof(regexdata), "regex" );
 
-	while( rec < MAXINC && hdrscan )
+	pattern = list_first(hdrscan);
+	while( rec < MAXINC && pattern )
 	{
 	    regexdata data, *d = &data;
-	    data.name = hdrscan->string;
+	    data.name = list_value(pattern);
 	    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 	    {
 		d->re = jam_regcomp( hdrscan->string );
 		(void)hashenter( regexhash, (HASHDATA **)&d );
 	    }
 	    re[rec++] = d->re;
-	    hdrscan = list_next( hdrscan );
+		pattern = list_next(pattern);
 	}
 
 	while( fgets( buf, sizeof( buf ), f ) )
@@ -324,7 +329,7 @@ headers1(
 		memcpy( buf2, re[i]->startp[1], l );
 		buf2[ l ] = 0;
 # endif
-		result = list_new( result, buf2, 0 );
+		result = list_append( result, buf2, 0 );
 
 		if( DEBUG_HEADER )
 		    printf( "header found: %s\n", buf2 );

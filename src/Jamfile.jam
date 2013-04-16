@@ -334,16 +334,10 @@ if $(LUA_BIN)
 	if $(OS) = NT
 	{
 		LUA_SRCS =
-				lua/base.lua
 				lua/ex.lua
 				lua/expand.lua
 				lua/getopt.lua
-				lua/io_ext.lua
 				lua/lanes.lua
-				lua/list.lua
-				lua/object.lua
-				lua/string_ext.lua
-				lua/table_ext.lua
 				lua/xmlize.lua
 				lua/lxp/lom.lua
 		;
@@ -391,16 +385,10 @@ if $(LUA_BIN)
 		}
 
 		LUA_SRCS =
-				share/lua/5.1/base.lua
 				share/lua/5.1/ex.lua
 				share/lua/5.1/expand.lua
 				share/lua/5.1/getopt.lua
-				share/lua/5.1/io_ext.lua
 				share/lua/5.1/lanes.lua
-				share/lua/5.1/list.lua
-				share/lua/5.1/object.lua
-				share/lua/5.1/string_ext.lua
-				share/lua/5.1/table_ext.lua
 				share/lua/5.1/xmlize.lua
 				share/lua/5.1/lxp/lom.lua
 		;

@@ -231,7 +231,7 @@ make_fixprogress(
 	}
 }
 
-LIST *queuedjamfiles;
+LIST *queuedjamfiles = NULL;
 
 typedef struct _queuedfileinfo QUEUEDFILEINFO;
 
@@ -272,17 +272,15 @@ int compare_sortedtargets( const void *_left, const void *_right ) {
 static void remove_empty_dirs()
 {
 	BUFFER lastdirbuff;
-	LIST *l;
-	LIST *origl;
+	LISTITEM *l;
 	int i;
 	int count;
 	SORTEDTARGETS* sortedfiles;
 
-	if ( !emptydirtargets )
+	if ( !list_first(emptydirtargets) )
 		return;
 
-	l = emptydirtargets;
-	origl = l;
+	l = list_first(emptydirtargets);
 	i = 0;
 	count = 0;
 
@@ -292,9 +290,9 @@ static void remove_empty_dirs()
 
 	sortedfiles = malloc( sizeof( SORTEDTARGETS ) * count );
 	i = 0;
-	for( l = origl; l; l = list_next( l ) ) {
+	for( l = list_first(emptydirtargets); l; l = list_next( l ) ) {
 		TARGET *t;
-		t = bindtarget( l->string );
+		t = bindtarget( list_value(l) );
 		pushsettings( t->settings );
 		t->boundname = search( t->name, &t->time );
 		popsettings( t->settings );
@@ -349,7 +347,7 @@ static void remove_empty_dirs()
 
 	free( sortedfiles );
 
-	list_free( origl );
+	list_free( emptydirtargets );
 }
 
 #endif /* OPT_REMOVE_EMPTY_DIRS_EXT */
@@ -422,10 +420,10 @@ pass:
 	    status |= make1( bindtarget( targets[i] ) );
 
 #ifdef OPT_MULTIPASS_EXT
-	if ( queuedjamfiles )
+	if ( list_first(queuedjamfiles) )
 	{
-		LIST *l = queuedjamfiles;
-		LIST *origl = l;
+		LIST *origqueuedjamfiles = queuedjamfiles;
+		LISTITEM *l = list_first(queuedjamfiles);
 		int i = 0;
 		int count = 0;
 		QUEUEDFILEINFO* sortedfiles;
@@ -444,11 +442,11 @@ pass:
 
 		sortedfiles = malloc( sizeof( QUEUEDFILEINFO ) * count );
 		i = 0;
-		for( l = origl; l; l = list_next( l ) ) {
-			char *colon = strchr( l->string, ':' );
+		for( l = list_first( origqueuedjamfiles ); l; l = list_next( l ) ) {
+			char *colon = strchr( list_value(l), ':' );
 			TARGET *t;
 			*colon = 0;
-			t = bindtarget( l->string );
+			t = bindtarget(list_value(l));
 			*colon = ':';
 			pushsettings( t->settings );
 			t->boundname = search( t->name, &t->time );
@@ -466,7 +464,7 @@ pass:
 
 		free( sortedfiles );
 
-		list_free( origl );
+		list_free( origqueuedjamfiles );
 
 		goto pass;
 	}
@@ -505,12 +503,14 @@ int  md5matchescommandline( TARGET *t )
 	{
 		if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
 		{
-			LIST *list;
+			LISTITEM *item;
 			MD5_CTX context;
 			MD5Init( &context );
 
-			for ( list = vars->value; list; list = list->next )
-				MD5Update( &context, (unsigned char*)list->string, (unsigned int)strlen( list->string ) );
+			for ( item = list_first(vars->value); item; item = list_next(item) ) {
+				char const* str = list_value(item);
+				MD5Update( &context, (unsigned char*)str, (unsigned int)strlen( str ) );
+			}
 
 			MD5Final( t->rulemd5sum, &context );
 			t->rulemd5sumclean = (char)hcache_getrulemd5sum( t );
@@ -613,9 +613,9 @@ make0(
 #ifdef OPT_SEMAPHORE
 	{
 		LIST *var = var_get( "SEMAPHORE" );
-		if( var )
+		if( list_first(var) )
 		{
-			TARGET *semaphore = bindtarget( var->string );
+			TARGET *semaphore = bindtarget(list_value(list_first(var)));
 
 			semaphore->progress = T_MAKE_SEMAPHORE;
 			t->semaphore = semaphore;
@@ -1285,12 +1285,13 @@ void make0calcmd5sum( TARGET *t, int source )
 		{
 			if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
 			{
-				LIST *list;
-				for ( list = vars->value; list; list = list->next )
+				LISTITEM *item;
+				for ( item = list_first(vars->value); item; item = list_next(item) )
 				{
-					MD5Update( &context, (unsigned char*)list->string, (unsigned int)strlen( list->string ) );
+					char const* str = list_value(item);
+					MD5Update( &context, (unsigned char*)str, (unsigned int)strlen(str) );
 					if( DEBUG_MD5HASH )
-						printf( "\t\tCOMMANDLINE: %s\n", list->string );
+						printf( "\t\tCOMMANDLINE: %s\n", str );
 				}
 
 				break;

@@ -36,6 +36,7 @@
 #ifdef OPT_RESPONSE_FILES
 #include "tmpfile.h"
 
+
 typedef struct _tmplist TMPLIST;
 
 struct _tmplist

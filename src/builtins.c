@@ -310,14 +310,14 @@ builtin_depends(
     {
 	LIST *targets = lol_get( args, curindex );
 	LIST *sources = lol_get( args, curindex + 1 );
-	LIST *l;
+	LISTITEM *l;
 
 	if ( !sources )
 	    break;
 
-	for( l = targets; l; l = list_next( l ) )
+	for( l = list_first(targets); l; l = list_next( l ) )
 	{
-	    TARGET *t = bindtarget( l->string );
+	    TARGET *t = bindtarget( list_value(l) );
 
 	    /* If doing INCLUDES, switch to the TARGET's include */
 	    /* TARGET, creating it if needed.  The internal include */
@@ -397,10 +397,11 @@ builtin_flags(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l = lol_get( args, 0 );
+	LISTITEM* flag;
+	LIST *flags = lol_get( args, 0 );
 
-	for( ; l; l = list_next( l ) )
-	    bindtarget( l->string )->flags |= parse->num;
+	for(flag = list_first(flags) ; flag; flag = list_next( flag ) )
+	    bindtarget( list_value(flag) )->flags |= parse->num;
 
 	return L0;
 }
@@ -415,10 +416,11 @@ builtin_flags_forcecare(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l = lol_get( args, 0 );
+	LISTITEM* target;
+	LIST *targets = lol_get( args, 0 );
 
-	for( ; l; l = list_next( l ) ) {
-		TARGET* t = bindtarget( l->string );
+	for(target = list_first(targets) ; target; target = list_next( target ) ) {
+		TARGET* t = bindtarget(list_value(target));
 		t->flags |= T_FLAG_FORCECARE;
 		t->flags &= ~T_FLAG_NOCARE;
 	}
@@ -436,10 +438,9 @@ builtin_flags_nocare(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l = lol_get( args, 0 );
-
-	for( ; l; l = list_next( l ) ) {
-		TARGET* t = bindtarget( l->string );
+	LISTITEM* l;
+	for(l = list_first(lol_get(args, 0)) ; l; l = list_next( l ) ) {
+		TARGET* t = bindtarget(list_value(l));
 		if ( ! ( t->flags & T_FLAG_FORCECARE ) )
 			t->flags |= T_FLAG_NOCARE;
 	}
@@ -471,7 +472,7 @@ builtin_glob_back(
 	int	dir )
 {
 	struct globbing *globbing = (struct globbing *)closure;
-	LIST		*l;
+	LISTITEM* l;
 
 	char buffer[ MAXJPATH ];
 	if ( dir )
@@ -481,11 +482,11 @@ builtin_glob_back(
 	    file = buffer;
 	}
 
-	for( l = globbing->patterns; l; l = l->next )
+	for( l = list_first(globbing->patterns); l; l = list_next(l) )
 	{
-	    if( !glob( l->string, file + globbing->dirnamelen ) )
+	    if( !glob( list_value(l), file + globbing->dirnamelen ) )
 	    {
-		globbing->results = list_new( globbing->results, file + ( ( 1 - globbing->prependdir ) * globbing->dirnamelen ), 0 );
+		globbing->results = list_append( globbing->results, file + ( ( 1 - globbing->prependdir ) * globbing->dirnamelen ), 0 );
 		break;
 	    }
 	}
@@ -499,7 +500,7 @@ builtin_glob_back(
 	time_t	time )
 {
 	struct globbing *globbing = (struct globbing *)closure;
-	LIST		*l;
+	LISTITEM* l;
 	PATHNAME	f;
 	char		buf[ MAXJPATH ];
 
@@ -510,10 +511,10 @@ builtin_glob_back(
 	f.f_dir.len = 0;
 	path_build( &f, buf, 0 );
 
-	for( l = globbing->patterns; l; l = l->next )
-	    if( !glob( l->string, buf ) )
+	for( l = list_first(globbing->patterns); l; l = list_next(l) )
+	    if( !glob( list_value(l), buf ) )
 	{
-	    globbing->results = list_new( globbing->results, file, 0 );
+	    globbing->results = list_append( globbing->results, file, 0 );
 	    break;
 	}
 }
@@ -525,8 +526,8 @@ builtin_glob(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l = lol_get( args, 0 );
-	LIST *r = lol_get( args, 1 );
+	LIST *dirs = lol_get( args, 0 );
+	LISTITEM* l;
 #ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
 	LIST *prepend = lol_get( args, 2 );
 #endif
@@ -534,28 +535,29 @@ builtin_glob(
 	struct globbing globbing;
 
 	globbing.results = L0;
-	globbing.patterns = r;
+	globbing.patterns = lol_get(args, 1);
 #ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
 	globbing.prependdir = 1;
-	if ( prepend )
+	if ( list_first(prepend) )
 	{
-	    if ( strcmp( prepend->string, "1" ) == 0  ||  strcmp( prepend->string, "true" ) == 0 )
+		char const* str = list_value(list_first(prepend));
+	    if ( strcmp( str, "1" ) == 0  ||  strcmp( str, "true" ) == 0 )
 		globbing.prependdir = 1;
 	    else
 		globbing.prependdir = 0;
 	}
 
-	for( ; l; l = list_next( l ) )
+	for(l = list_first(dirs) ; l; l = list_next( l ) )
 	{
-	    globbing.dirname = l->string;
-	    globbing.dirnamelen = strlen( l->string );
+	    globbing.dirname = list_value(l);
+	    globbing.dirnamelen = strlen(list_value(l));
 	    if ( globbing.dirname[ globbing.dirnamelen - 1 ] != '/'  &&  globbing.dirname[ globbing.dirnamelen - 1 ] != '\\' )
 		globbing.dirnamelen++;
-	    file_dirscan( l->string, builtin_glob_back, &globbing );
+	    file_dirscan( list_value(l), builtin_glob_back, &globbing );
 	}
 #else
-	for( ; l; l = list_next( l ) )
-	    file_dirscan( l->string, builtin_glob_back, &globbing );
+	for(l = list_furst(dirs) ; l; l = list_next( l ) )
+	    file_dirscan( list_value(l), builtin_glob_back, &globbing );
 #endif
 
 	return globbing.results;
@@ -571,19 +573,20 @@ builtin_match(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l, *r;
 	LIST *result = 0;
 
 	/* For each pattern */
 
-	for( l = lol_get( args, 0 ); l; l = l->next )
+	LISTITEM* pattern;
+	for(pattern = list_first(lol_get( args, 0 )); pattern; pattern = list_next(pattern) )
 	{
-	    regexp *re = jam_regcomp( l->string );
+	    regexp *re = jam_regcomp( list_value(pattern) );
 
 	    /* For each string to match against */
 
-	    for( r = lol_get( args, 1 ); r; r = r->next )
-		if( jam_regexec( re, r->string ) )
+		LISTITEM* r;
+	    for(r = list_first(lol_get( args, 1 )); r; r = list_next(r) )
+		if( jam_regexec( re, list_value(r) ) )
 	    {
 		int i, top;
 
@@ -604,7 +607,7 @@ builtin_match(
 		    l = re->endp[i] - re->startp[i];
 		    buffer_addstring( &buff, re->startp[i], l );
 		    buffer_addchar( &buff, 0 );
-		    result = list_new( result, buffer_ptr( &buff ), 0 );
+		    result = list_append( result, buffer_ptr( &buff ), 0 );
 		    buffer_free( &buff );
 		}
 	    }
@@ -629,21 +632,26 @@ builtin_subst(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *liststring;
+	LISTITEM* liststring;
 	LIST *result = 0;
 	LIST *pattern = lol_get( args, 1 );
 	LIST *repl = lol_get( args, 2 );
 	LIST *nstr = lol_get( args, 3 );
-	int n = nstr ? atoi( nstr->string ) : -1;
+	char const* patternStr = "";
+	char const* replStr = "";
+	int n = list_first(nstr) ? atoi( list_value(list_first(nstr)) ) : -1;
+
+	if(list_first(pattern)) { patternStr = list_value(list_first(pattern)); }
+	if(list_first(repl)) { replStr = list_value(list_first(repl)); }
 
 	/* For each string */
 
-	for( liststring = lol_get( args, 0 ); liststring; liststring = liststring->next )
+	for(liststring = list_first(lol_get( args, 0 )); liststring; liststring = list_next(liststring) )
 	{
 		BUFFER buff;
 		buffer_init( &buff );
-		str_gsub (&buff, liststring->string, pattern->string, repl ? repl->string : "", n);
-		result = list_new( result, buffer_ptr( &buff ), 0 );
+		str_gsub (&buff, list_value(liststring), patternStr, replStr, n);
+		result = list_append( result, buffer_ptr( &buff ), 0 );
 		buffer_free( &buff );
 	}
 
@@ -654,16 +662,16 @@ builtin_subst(
 
 LIST *builtin_subst_literalize( PARSE	*parse, LOL	*args, int	*jmp )
 {
-	LIST *pattern;
 	LIST *result = L0;
 
-	for( pattern = lol_get( args, 0 ); pattern; pattern = pattern->next )
+	LISTITEM* pattern;
+	for(pattern = list_first(lol_get( args, 0 )); pattern; pattern = list_next(pattern) )
 	{
 		const char* patternString;
 		BUFFER patternBuff;
 		buffer_init( &patternBuff );
 
-		for ( patternString = pattern->string; *patternString; ++patternString )
+		for ( patternString = list_value(pattern); *patternString; ++patternString )
 		{
 			if ( *patternString == '('  ||  *patternString == ')'  ||  *patternString == '.'  ||
 					*patternString == '%'  ||  *patternString == '+'  ||  *patternString == '-'  ||  
@@ -675,7 +683,7 @@ LIST *builtin_subst_literalize( PARSE	*parse, LOL	*args, int	*jmp )
 			buffer_addchar( &patternBuff, *patternString );
 		}
 		buffer_addchar( &patternBuff, 0 );
-		result = list_new( result, buffer_ptr( &patternBuff ), 0 );
+		result = list_append( result, buffer_ptr( &patternBuff ), 0 );
 	}
 
 	return result;
@@ -701,25 +709,26 @@ builtin_queuejamfile(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l = lol_get( args, 0 );
+	LISTITEM* l;
+	LIST *files = lol_get( args, 0 );
 	LIST *l2 = lol_get( args, 1 );
 	char priority[ 100 ];
 	size_t priorityLen;
 
-	if ( l2 ) {
-		sprintf( priority, ":%d", atoi( l2->string ) );
+	if ( list_first(l2) ) {
+		sprintf( priority, ":%d", atoi( list_value(list_first(l2)) ) );
 		priorityLen = strlen( priority );
 	} else {
 		strcpy( priority, ":0" );
 		priorityLen = 2;
 	}
 
-	for( ; l; l = list_next( l ) ) {
-		size_t stringLen = strlen( l->string );
+	for(l = list_first(files) ; l; l = list_next( l ) ) {
+		size_t stringLen = strlen( list_value(l) );
 		char *filename = malloc( stringLen + priorityLen + 1 );
-		strncpy( filename, l->string, stringLen );
+		strncpy( filename, list_value(l), stringLen );
 		strcpy( filename + stringLen, priority );
-		queuedjamfiles = list_new( queuedjamfiles, filename, 0 );
+		queuedjamfiles = list_append( queuedjamfiles, filename, 0 );
 		free( filename );
 	}
 
@@ -743,12 +752,13 @@ builtin_usedepcache(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l = lol_get( args, 0 );
+	LISTITEM* l;
+	LIST *targets = lol_get( args, 0 );
 	LIST *l2 = lol_get( args, 1 );
 
-	for( ; l; l = list_next( l ) ) {
-	    TARGET *t = bindtarget( l->string );
-	    if ( l2 )
+	for(l = list_first(targets) ; l; l = list_next( l ) ) {
+	    TARGET *t = bindtarget( list_value(l) );
+	    if ( list_first(l2) )
 		t->settings = addsettings( t->settings, VAR_SET, "DEPCACHE", list_copy( L0, l2 ) );
 	    else
 		t->settings = addsettings( t->settings, VAR_SET, "DEPCACHE", L0 );
@@ -774,18 +784,19 @@ builtin_usefilecache(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l = lol_get( args, 0 );
+	LISTITEM* l;
+	LIST *targets = lol_get( args, 0 );
 	LIST *l2 = lol_get( args, 1 );
-	const char* cachevar = l2 ? l2->string : "generic";
+	const char* cachevar = list_first(l2) ? list_value(list_first(l2)) : "generic";
 	BUFFER buff;
 	buffer_init( &buff );
 	buffer_addstring( &buff, "FILECACHE.", 10 );
 	buffer_addstring( &buff, cachevar, strlen( cachevar ) );
 	buffer_addchar( &buff, 0 );
 
-	for( ; l; l = list_next( l ) ) {
-	    TARGET *t = bindtarget( l->string );
-	    t->settings = addsettings( t->settings, VAR_SET, "FILECACHE", list_new( L0, buffer_ptr( &buff ), 0 ) );
+	for(l = list_first(targets) ; l; l = list_next( l ) ) {
+	    TARGET *t = bindtarget(list_value(l));
+	    t->settings = addsettings( t->settings, VAR_SET, "FILECACHE", list_append( L0, buffer_ptr( &buff ), 0 ) );
 	    t->flags |= parse->num;
 	}
 
@@ -807,12 +818,13 @@ builtin_usecommandline(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l = lol_get( args, 0 );
-	LIST *l2 = lol_get( args, 1 );
+	LIST *targets = lol_get( args, 0 );
+	LIST *cmdLine = lol_get( args, 1 );
+	LISTITEM* l;
 
-	for( ; l; l = list_next( l ) ) {
-	    TARGET *t = bindtarget( l->string );
-	    t->settings = addsettings( t->settings, VAR_SET, "COMMANDLINE", list_copy( L0, l2 ) );
+	for(l = list_first(targets) ; l; l = list_next( l ) ) {
+	    TARGET *t = bindtarget( list_value(l) );
+	    t->settings = addsettings( t->settings, VAR_SET, "COMMANDLINE", list_copy( L0, cmdLine ) );
 	    t->flags |= parse->num;
 	}
 
@@ -840,7 +852,6 @@ builtin_md5(
 	unsigned char* p;
 	int i;
 	LIST *l;
-	LIST *result;
 
 	MD5Init(&context);
 
@@ -853,14 +864,15 @@ builtin_md5(
 		MD5Update(&context, list_sep, sizeof(list_sep));
 	    }
 	    l = lol_get(args, i);
-	    if (l) {
-		MD5Update(&context, (unsigned char*)l->string, (unsigned int)strlen(l->string));
-		for (l = list_next(l); l; l = list_next(l)) {
+	    if (list_first(l)) {
+			LISTITEM* item = list_first(l);
+		MD5Update(&context, (unsigned char*)list_value(item), (unsigned int)strlen(list_value(item)));
+		for (item = list_next(item); item; item = list_next(item)) {
 		    /* separate list items with 1 NUL character.  This
 		     * guarantees that [ MD5 a b ] is different from [
 		     * MD5 ab ] */
 		    MD5Update(&context, item_sep, sizeof(item_sep));
-		    MD5Update(&context, (unsigned char*)l->string, (unsigned int)strlen(l->string));
+		    MD5Update(&context, (unsigned char*)list_value(item), (unsigned int)strlen(list_value(item)));
 		}
 	    }
 	}
@@ -872,9 +884,7 @@ builtin_md5(
 	}
 	*p = 0;
 
-	result = list_new(L0, (const char*)digest_string, 0);
-
-	return result;
+	return list_append(L0, (char const*)digest_string, 0);
 }
 
 LIST *
@@ -888,8 +898,6 @@ builtin_md5file(
 	unsigned char digest_string[33];
 	unsigned char* p;
 	int i;
-	LIST *l;
-	LIST *result;
 
 	const size_t BUFFER_SIZE = 100 * 1024;
 	unsigned char* buffer = (unsigned char*)malloc(BUFFER_SIZE);
@@ -898,11 +906,11 @@ builtin_md5file(
 
 	/* For each argument */
 	for (i = 0; i < args->count; ++i) {
-	    l = lol_get(args, i);
-	    if (l) {
+	    LISTITEM* target = list_first(lol_get(args, i));
+	    if (target) {
 		do {
 			FILE* file;
-			TARGET *t = bindtarget(l->string);
+			TARGET *t = bindtarget(list_value(target));
 			pushsettings( t->settings );
 			t->boundname = search( t->name, &t->time );
 			popsettings( t->settings );
@@ -919,8 +927,8 @@ builtin_md5file(
 			fclose(file);
 		    }
 
-		    l = list_next(l);
-		} while (l);
+			target = list_next(target);
+		} while (target);
 	    }
 	}
 
@@ -933,9 +941,7 @@ builtin_md5file(
 	}
 	*p = 0;
 
-	result = list_new(L0, (const char*)digest_string, 0);
-
-	return result;
+	return list_append(L0, (char const*)digest_string, 0);
 }
 #endif /* OPT_BUILTIN_MD5_EXT */
 
@@ -948,18 +954,28 @@ builtin_math(
 {
     char buffer[100];
     int num1;
+	char const* op;
     int num2;
     int result;
 
+	LISTITEM* exprEl;
     LIST *expression = lol_get( args, 0 );
-    if ( !expression  ||  !expression->next  ||  !expression->next->next )
-	return NULL;
+	if(list_length(expression) != 3) {
+		return NULL;
+	}
 
-    num1 = atoi( expression->string );
-    num2 = atoi( expression->next->next->string );
+	exprEl = list_first(expression);
+	num1 = atoi(list_value(exprEl));
+
+	exprEl = list_next(exprEl);
+	op = list_value(exprEl);
+
+	exprEl = list_next(exprEl);
+	num2 = atoi(list_value(exprEl));
+
     result = 0;
 
-    switch ( expression->next->string[0] )
+    switch (op[0])
     {
 	case '+':   result = num1 + num2;    break;
 	case '-':   result = num1 - num2;    break;
@@ -967,13 +983,13 @@ builtin_math(
 	case '/':   result = num1 / num2;    break;
 	case '%':   result = num1 % num2;    break;
 	default:
-	    printf( "jam: rule Math: Unknown operator [%s].\n", expression->next->string );
+	    printf( "jam: rule Math: Unknown operator [%s].\n", op );
 	    exit( EXITBAD );
     }
 
 	sprintf(buffer, "%d", result);
 
-    return list_new(L0, buffer, 0);
+    return list_append(L0, buffer, 0);
 }
 #endif
 
@@ -992,7 +1008,7 @@ builtin_w32_getreg( PARSE *parse, LOL *args, int *jmp )
 {
 	const char* result = w32_getreg(lol_get(args, 0));
 	if (result)
-		return list_new(L0, result, 0);
+		return list_append(L0, result, 0);
 	return L0;
 }
 
@@ -1008,7 +1024,7 @@ builtin_w32_getreg64( PARSE *parse, LOL *args, int *jmp )
 {
 	const char* result = w32_getreg64(lol_get(args, 0));
 	if (result)
-		return list_new(L0, result, 0);
+		return list_append(L0, result, 0);
 	return L0;
 }
 #endif
@@ -1028,8 +1044,8 @@ static LIST*
 builtin_w32_shortname( PARSE *parse, LOL *args, int *jmp )
 {
 	LIST* arg = lol_get(args, 0);
-	if (arg)
-		return list_new(L0, w32_shortname(arg), 0);
+	if (list_first(arg))
+		return list_append(L0, w32_shortname(arg), 0);
 	return L0;
 }
 #endif
@@ -1049,11 +1065,12 @@ builtin_usemd5callback(
 	LOL	*args,
 	int	*jmp )
 {
-	LIST *l = lol_get( args, 0 );
+	LIST *targets = lol_get( args, 0 );
 	LIST *l2 = lol_get( args, 1 );
+	LISTITEM* l;
 
-	for( ; l; l = list_next( l ) ) {
-	    TARGET *t = bindtarget( l->string );
+	for(l = list_first(targets) ; l; l = list_next( l ) ) {
+	    TARGET *t = bindtarget( list_value(l) );
 	    t->settings = addsettings( t->settings, VAR_SET, "MD5CALLBACK", list_copy( L0, l2 ) );
 	}
 
@@ -1096,7 +1113,7 @@ static void shell_done( const char* outputname, void *closure, int status )
     }
     buffer[size] = 0;
 
-    *list = list_new(*list, buffer, 0);
+    *list = list_append(*list, buffer, 0);
 
     free(buffer);
     fclose(file);
@@ -1109,14 +1126,15 @@ builtin_shell(
 	LOL	*args,
 	int	*jmp )
 {
-    LIST *l = lol_get( args, 0 );
+    LIST *cmds = lol_get( args, 0 );
+    LISTITEM* l;
     LIST *shell = var_get( "JAMSHELL" );	/* shell is per-target */
 
     LIST *output = L0;
 
     exec_init();
-    for( ; l; l = list_next( l ) ) {
-        execcmd( l->string, shell_done, &output, shell, 1 );
+    for( l = list_first(cmds); l; l = list_next( l ) ) {
+        execcmd( list_value(l), shell_done, &output, shell, 1 );
 	execwait();
     }
     exec_done();
@@ -1137,63 +1155,63 @@ builtin_groupbyvar(
 {
 	LIST* group1 = L0;
 	LIST* rest = L0;
-	LIST* f = L0;
+	LISTITEM* f;
 
 	LIST* filelist;
-	LIST* varname;
+	LIST* varnameList;
+	char const* varname;
 	LIST* maxPerGroupList;
 	int numInGroup = 0;
 	int maxPerGroup = INT_MAX;
 
 	LIST* all;
 	SETTINGS* vars;
-	LIST* var1;
+	LIST* matchVars;
 
 	filelist = lol_get( args, 0 );
-	if ( !filelist )
+	if ( !list_first(filelist) )
 		return L0;
-    varname = lol_get( args, 1 );
-	if ( !varname )
-		return L0;
+
+	varnameList = lol_get( args, 1 );
+	if ( !list_first(varnameList) )
+		return NULL;
+	varname = list_value(list_first(varnameList));
+
     maxPerGroupList = lol_get( args, 2 );
-	if ( maxPerGroupList ) {
-		maxPerGroup = atoi( maxPerGroupList->string );
+	if ( list_first(maxPerGroupList) ) {
+		maxPerGroup = atoi( list_value(list_first(maxPerGroupList)) );
 		if ( maxPerGroup == 0 )
 			maxPerGroup = INT_MAX;
 	}
 
 	/* get the actual filelist */
-	all = var_get( filelist->string );
+	all = var_get( list_value(list_first(filelist)) );
 
 	/* */
-	vars = quicksettingslookup( bindtarget( all->string ), varname->string );
+	vars = quicksettingslookup( bindtarget( list_value(list_first(all)) ), varname );
 	if ( !vars )
 		return L0;
-	var1 = vars->value;
+	matchVars = vars->value;
 
-	for ( f = all; f; f = list_next( f ) ) {
-		LIST* it;
-		LIST* it1;
-		LIST* var;
-		vars = quicksettingslookup( bindtarget( f->string ), varname->string );
+	for (f = list_first(all); f; f = list_next( f ) ) {
+		LIST* testVars;
+		int equal;
+		
+		vars = quicksettingslookup( bindtarget( list_value(f) ), varname );
 		if ( !vars )
 			continue;
-		var = vars->value;
+		testVars = vars->value;
 
-		for ( it = var, it1 = var1; it  &&  it1;  it = list_next( it ), it1 = list_next( it1 ) )
-		{
-			if ( it->string != it1->string )
-				break;
-		}
+		equal = list_equal(matchVars, testVars);
 
-		if ( numInGroup < maxPerGroup  &&  !it  &&  !it1 ) {
-			group1 = list_new( group1, f->string, 1 );
+		if ( numInGroup < maxPerGroup && equal ) {
+			group1 = list_append( group1, list_value(f), 1 );
 			++numInGroup;
 		} else
-			rest = list_new( rest, f->string, 1 );
+			rest = list_append( rest, list_value(f), 1 );
 	}
 
-	var_set( filelist->string, rest, VAR_SET );
+	var_set( list_value(list_first(filelist)), rest, VAR_SET );
 
     return group1;
 }
@@ -1209,26 +1227,32 @@ builtin_split(
 	LOL	*args,
 	int	*jmp )
 {
-    LIST*	input  = lol_get( args, 0 );
-    LIST*	tokens = lol_get( args, 1 );
-    LIST*	result = L0;
+    LIST* inputList = lol_get( args, 0 );
+    LIST* result = L0;
+    LISTITEM* input;
+
 	char	token[256];
-	BUFFER  buff;
+	BUFFER buff;
 
 	buffer_init( &buff );
 
-    /* build token array */
-    memset( token, 0, sizeof( token ) );
-    for ( ; tokens; tokens = tokens->next ) {
-        const char* s = tokens->string;
-        for ( ; *s; s++ )
-            token[(unsigned char)*s] = 1;
-    }
+	/* Build split token lookup table */
+	{
+		LISTITEM* tok;
+		LIST* tokens = lol_get(args, 1);
+		memset( token, 0, sizeof( token ) );
+		for(tok = list_first(tokens); tok; tok = list_next(tok)) {
+			char const* s = list_value(tok);
+			for(; *s; s += 1) {
+				token[(unsigned char)*s] = 1;
+			}
+		}
+	}
 
     /* now parse the input and split it */
-    for ( ; input; input = input->next ) {
-		const char* ptr = input->string;
-		const char* lastPtr = input->string;
+    for (input = list_first(inputList) ; input; input = list_next(input) ) {
+		const char* ptr = list_value(input);
+		const char* lastPtr = list_value(input);
 
 		while ( *ptr ) {
             if ( token[(unsigned char) *ptr] ) {
@@ -1238,14 +1262,14 @@ builtin_split(
 					buffer_addstring( &buff, lastPtr, count );
 					buffer_addchar( &buff, 0 );
 
-                    result = list_new( result, buffer_ptr( &buff ), 0 );
+                    result = list_append( result, buffer_ptr( &buff ), 0 );
                 }
 				lastPtr = ptr + 1;
             }
 			++ptr;
         }
         if ( ptr > lastPtr )
-            result = list_new( result, lastPtr, 0 );
+            result = list_append( result, lastPtr, 0 );
     }
 
 	buffer_free( &buff );
@@ -1262,20 +1286,23 @@ builtin_expandfilelist(
 	int	*jmp )
 {
 	LIST* files = lol_get( args, 0 );
+	LISTITEM* file;
 	LIST* result = L0;
 	LIST* searchSource = var_get( "SEARCH_SOURCE" );
-	size_t searchSourceLen;
+	size_t searchSourceLen = 0;
 	int searchSourceExtraLen = 0;
+	char const* searchSourceStr = "";
 
-	if ( searchSource ) {
-		searchSourceLen = strlen( searchSource->string );
-		if ( searchSource->string[ searchSourceLen - 1 ] != '/'  &&  searchSource->string[ searchSourceLen - 1 ] != '\\' )
+	if ( list_first(searchSource) ) {
+		searchSourceStr = list_value(list_first(searchSource));
+		searchSourceLen = strlen(searchSourceStr);
+		if ( searchSourceStr[ searchSourceLen - 1 ] != '/'  &&  searchSourceStr[ searchSourceLen - 1 ] != '\\' )
 			searchSourceExtraLen = 1;
 	}
 
-    for ( ; files; files = files->next ) {
+    for (file = list_first(files) ; file; file = list_next(file) ) {
 		int wildcard = 0;
-		const char* ptr = files->string;
+		const char* ptr = list_value(file);
 		while ( *ptr ) {
 			if ( *ptr == '*'  ||  *ptr == '?' ) {
 				wildcard = 1;
@@ -1285,7 +1312,7 @@ builtin_expandfilelist(
 		}
 
 		if ( !wildcard ) {
-			result = list_new( result, files->string, 1 );
+			result = list_append( result, list_value(file), 1 );
 		} else {
 			PATHNAME	f;
 			char		buf[ MAXJPATH ];
@@ -1293,13 +1320,13 @@ builtin_expandfilelist(
 			fileglob* glob;
 			int matches = 1;
 
-			path_parse( files->string, &f );
+			path_parse( list_value(file), &f );
 			f.f_root.len = searchSourceLen;
-			f.f_root.ptr = searchSource->string;
+			f.f_root.ptr = searchSourceStr;
 			path_build( &f, buf, 0 );
 
 			while ( testIndex < searchSourceLen ) {
-				if ( buf[ testIndex ] != searchSource->string[ testIndex ] ) {
+				if ( buf[ testIndex ] != searchSourceStr[ testIndex ] ) {
 					matches = 0;
 					break;
 				}
@@ -1308,7 +1335,7 @@ builtin_expandfilelist(
 
 			glob = fileglob_Create( buf );
 			while ( fileglob_Next( glob ) ) {
-	            result = list_new( result, fileglob_FileName( glob ) + ( matches ? searchSourceLen : 0 ) + searchSourceExtraLen, 0 );
+	            result = list_append( result, fileglob_FileName( glob ) + ( matches ? searchSourceLen : 0 ) + searchSourceExtraLen, 0 );
 			}
 			fileglob_Destroy( glob );
 		}
@@ -1324,10 +1351,10 @@ LIST *builtin_listsort( PARSE *parse, LOL *args, int *jmp )
 	LIST *l = list_copy( L0, lol_get( args, 0 ) );
     LIST *caseSensitiveList = lol_get( args, 1 );
 	int caseSensitive = 1;
-	if ( caseSensitiveList )
-		caseSensitive = atoi( caseSensitiveList->string );
-	l = list_sort( l, caseSensitive );
-	return l;
+	if ( list_first(caseSensitiveList) )
+		caseSensitive = atoi(list_value(list_first(caseSensitiveList)));
+
+	return list_sort(l, caseSensitive);
 }
 
 
@@ -1335,15 +1362,16 @@ LIST *builtin_listsort( PARSE *parse, LOL *args, int *jmp )
 LIST *builtin_dependslist(PARSE *parse, LOL *args, int *jmp)
 {
 	LIST *result = L0;
-	LIST *parents;
+	LIST *parents = lol_get(args, 0);
+	LISTITEM* parent;
 	
-    for (parents = lol_get(args, 0); parents; parents = parents->next) {
-		TARGET *t = bindtarget(parents->string);
+    for (parent = list_first(parents); parent; parent = list_next(parent)) {
+		TARGET *t = bindtarget(list_value(parent));
 		TARGETS *child;
 
 		for (child = t->depends; child; child = child->next)
 		{
-			result = list_new(result, child->target->name, 1);
+			result = list_append(result, child->target->name, 1);
 	    }
 	}
 	
@@ -1358,15 +1386,15 @@ LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp)
 	SETTINGS* settings;
 
 	LIST *target = lol_get(args, 0);
-	if (!target)
+	if (!list_first(target))
 		return L0;
 
 	symbol = lol_get(args, 1);
-	if (!symbol)
+	if (!list_first(symbol))
 		return L0;
 
-	t = bindtarget(target->string);
-	settings = quicksettingslookup(t, symbol->string);
+	t = bindtarget(list_value(list_first(target)));
+	settings = quicksettingslookup(t, list_value(list_first(symbol)));
 	if (settings)
 		return list_copy(L0, settings->value);
 
@@ -1379,10 +1407,10 @@ LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp)
 	LIST* symbol;
 
 	symbol = lol_get(args, 0);
-	if (!symbol)
+	if (!list_first(symbol))
 		return L0;
 
-	if ( ruleexists( symbol->string ) )
-		return list_new( L0, "true", 0 );
+	if ( ruleexists(list_value(list_first(symbol))) )
+		return list_append( L0, "true", 0 );
 	return L0;
 }

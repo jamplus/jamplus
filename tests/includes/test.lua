@@ -26,13 +26,13 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 31 target(s)...
+*** found 35 target(s)...
 *** updating 9 target(s)...
 @ C.vc.C++ <win32!release:project1>project1.obj
 !NEXT!@ C.vc.C++ <win32!release:project1>adefine.obj
 !NEXT!@ C.vc.C++ <win32!release:common>print.obj
 !NEXT!@ C.vc.Archive <win32!release:common>common.lib
-!NEXT!@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+!NEXT!@ C.vc.Link <win32!release:project1>project1.exe
 !NEXT!*** updated 9 target(s)...
 ]]
 
@@ -63,7 +63,7 @@ function Test()
 			'project1/win32-release/project1/adefine.obj',
 			'project1/win32-release/project1/project1.obj',
 			'project1/win32-release/project1/project1.release.exe',
-			'project1/win32-release/project1/project1.release.exe.intermediate.manifest',
+			'?project1/win32-release/project1/project1.release.exe.intermediate.manifest',
 			'project1/win32-release/project1/project1.release.pdb',
 			'shared/adefine.h',
 		}
@@ -72,7 +72,7 @@ function Test()
 		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
-*** found 31 target(s)...
+*** found 35 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	
@@ -80,10 +80,10 @@ function Test()
 		os.touch('common/print.h')
 
 		local pattern3 = [[
-*** found 31 target(s)...
+*** found 35 target(s)...
 *** updating 2 target(s)...
 @ C.vc.C++ <win32!release:project1>project1.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+!NEXT!@ C.vc.Link <win32!release:project1>project1.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
@@ -94,10 +94,10 @@ function Test()
 		os.touch('shared/adefine.h')
 
 		local pattern4 = [[
-*** found 31 target(s)...
+*** found 35 target(s)...
 *** updating 2 target(s)...
 @ C.vc.C++ <win32!release:project1>adefine.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+!NEXT!@ C.vc.Link <win32!release:project1>project1.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern4, RunJam())

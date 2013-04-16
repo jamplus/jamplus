@@ -29,7 +29,7 @@ function Test()
 *** updating 14 target(s)...
 @ C.vc.C++ <win32!release:project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
 project1.cpp
-@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+@ C.vc.Link <win32!release:project1>project1.exe
 *** updated 14 target(s)...
 ]]
 
@@ -43,7 +43,7 @@ project1.cpp
 			'source/project1/project1.cpp',
 			'source/project1/lib/win32/release/project1.exe',
 			'source/project1/lib/win32/release/project1.pdb',
-			'source/project1/obj/win32/release/project1.exe.intermediate.manifest',
+			'?source/project1/obj/win32/release/project1.exe.intermediate.manifest',
 			'source/project1/obj/win32/release/vc.pdb',
 			'source/project1/obj/win32/release/' .. cwd .. '/source/project1/project1.obj',
 		}
@@ -80,7 +80,7 @@ project1.cpp
 *** updating 2 target(s)...
 @ C.vc.C++ <win32!release:project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
 project1.cpp
-@ C.vc.LinkWithManifest <win32!release:project1>project1.exe
+@ C.vc.Link <win32!release:project1>project1.exe
 *** updated 2 target(s)...
 ]]
 

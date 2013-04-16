@@ -2,16 +2,16 @@
 
 \section scripts_overview Overview
 
-JamPlus ships with useful scripts for the generation of Jamfiles from various sources.  Those scripts can be found in the <tt>bin/scripts/</tt> directory.
+JamPlus ships with useful scripts for the generation of Jamfiles from various sources.  Those scripts can be found in the <tt>bin/scripts/</tt> directory, but they are run by executing the Jam executable with certain command-line options.
 
 \section folderstojamfile FoldersToJamfile
 
-From the current working directory, \b FoldersToJamfile recurses the directory structure and creates a Jamfile with all found files.  A source group is generated automatically for every directory.
+From the specified directory, \b FoldersToJamfile recurses the directory structure and creates a Jamfile with all found files.  A source group is generated automatically for every directory.
 
-\b FoldersToJamfile currently accepts just one argument, the destination Jamfile.  It is run like so:
+\b FoldersToJamfile accepts two arguments, the start path and the destination Jamfile.  It is run like so:
 
 \code
-FoldersToJamfile Jamfile.jam
+jam --folderstojamfile c:/path/to/start/at Jamfile.jam
 \endcode
 
 The generated Jamfile will need some basic clean up, and until the clean up has occurred, it will not run.
@@ -30,7 +30,24 @@ The generated Jamfile will need some basic clean up, and until the clean up has 
 \b VCProjToJamfile accepts two arguments, the source vcproj and destination Jamfile.
 
 \code
-VCProjToJamfile Misc.vcproj Misc.jam
+jam --vcprojtojamfile Misc.vcproj Misc.jam
+\endcode
+
+
+
+
+
+
+
+
+\section vcxprojtojamfile VCXProjToJamfile
+
+\b VCXProjToJamfile is capable of reading a .vcxproj file from Visual Studio 2010 or 2012 and writing a Jamfile bearing the folder structure and file contents of the .vcxproj.
+
+\b VCXProjToJamfile accepts two arguments, the source vcproj and destination Jamfile.
+
+\code
+jam --vcxprojtojamfile Misc.vcproj Misc.jam
 \endcode
 
 */

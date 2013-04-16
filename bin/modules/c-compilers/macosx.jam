@@ -68,7 +68,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 		case iphone :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 6.0 ;
+			SDK_VERSION ?= 6.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -90,13 +90,18 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = iphoneos6.0 ;
 					flags += -arch armv7 ;
 
+				case 6.1 :
+					isysroot = @(../../../../Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk:R=$(COMPILER_BIN_PATH)) ;
+					sdkroot = iphoneos6.1 ;
+					flags += -arch armv7s ;
+
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -fvisibility=hidden ;
 
 		case iphonesimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 6.0 ;
+			SDK_VERSION ?= 6.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -115,6 +120,10 @@ rule C.MacOSX_SDK SDK_VERSION {
 					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk:R=$(COMPILER_BIN_PATH)) ;
 					sdkroot = iphoneos6.0 ;
 
+				case 6.1 :
+					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.1.sdk:R=$(COMPILER_BIN_PATH)) ;
+					sdkroot = iphoneos6.1 ;
+
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -arch i386 ;
@@ -122,7 +131,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 		case ipadsimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 6.0 ;
+			SDK_VERSION ?= 6.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -142,6 +151,10 @@ rule C.MacOSX_SDK SDK_VERSION {
 					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk:R=$(COMPILER_BIN_PATH)) ;
 					sdkroot = iphoneos6.0 ;
 
+				case 6.1 :
+					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk:R=$(COMPILER_BIN_PATH)) ;
+					sdkroot = iphoneos6.1 ;
+
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -arch i386 ;
@@ -149,7 +162,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 		case ipad :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 6.0 ;
+			SDK_VERSION ?= 6.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -166,6 +179,10 @@ rule C.MacOSX_SDK SDK_VERSION {
 				case 6.0 :
 					isysroot = @(../../../../Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk:R=$(COMPILER_BIN_PATH)) ;
 					sdkroot = iphoneos6.0 ;
+
+				case 6.1 :
+					isysroot = @(../../../../Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk:R=$(COMPILER_BIN_PATH)) ;
+					sdkroot = iphoneos6.1 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}

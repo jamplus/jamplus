@@ -183,6 +183,27 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 			self.Contents[#self.Contents + 1] = [[
   </PropertyGroup>
 ]]
+
+			self.Contents[#self.Contents + 1] = expand([==[
+  <ItemDefinitionGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'">
+    <Link>
+]==], configInfo, info, _G)
+			if project.Options then
+				if project.Options.windows then
+					self.Contents[#self.Contents + 1] = [==[
+      <SubSystem>Windows</SubSystem>
+]==]
+				else
+					self.Contents[#self.Contents + 1] = [==[
+      <SubSystem>Console</SubSystem>
+]==]
+				end
+			end
+
+			self.Contents[#self.Contents + 1] = expand([==[
+    </Link>
+  </ItemDefinitionGroup>
+]==])
 		end
 	end
 

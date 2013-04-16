@@ -7,3 +7,10 @@ jamplus (no-op - individual .obj - dep cache) - 0:01.62
 
 jamplus-lump (full) - 0:26.71
 jamplus-lump (no-op) - 0:01.11
+
+
+
+
+
+jamplus nextgen newlist (full) - 1:41.95
+jamplus nextgen newlist (no-op - dep cache) - 0:01.20

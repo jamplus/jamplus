@@ -91,7 +91,7 @@ rule FindVisualStudioHelper VERSION {
 			}
 	}
 
-	if ! (compiler) {
+	if ! $(compiler) {
 		return ;
 	}
 
@@ -120,6 +120,7 @@ rule FindVisualStudioHelper VERSION {
 	MSVCNT_BIN_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCNT_BIN_PATH) ;
 	MSVCBIN on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCBIN) ;
 	MSSDK on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK) ;
+	MSSDK_BINDIR on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_BINDIR) ;
 	MSSDK_STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_STDHDRS) ;
 	MSSDK_LINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
 
@@ -141,6 +142,7 @@ rule FindVisualStudio VERSION {
 	local MSVCNT_BIN_PATH ;
 	local MSVCBIN ;
 	local MSSDK ;
+	local MSSDK_BINDIR ;
 	local MSSDK_STDHDRS ;
 	local MSSDK_LINKDIRECTORIES ;
 

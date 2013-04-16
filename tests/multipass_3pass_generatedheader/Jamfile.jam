@@ -53,6 +53,7 @@ void foo()
     C.Clean test : $(foo.cpp) ;
     Depends $(main.cpp) : $(foo.h) ;
 
+	C.IncludeDirectories : . ;
     C.Application test : main.cpp foo.cpp ;
 
     QueueJamfile $(JAMFILE) ;

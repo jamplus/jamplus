@@ -28,244 +28,461 @@
 # include "newstr.h"
 # include "lists.h"
 
-static LIST *freelist = 0;	/* junkpile for list_free() */
-#ifdef OPT_IMPROVED_MEMUSE_EXT
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#define USE_MEMPOOL (1)
+#define USE_COPYONWRITE (1)
+
+struct LISTITEM {
+	struct LISTITEM* next;
+	char const* string;
+};
+
+struct LIST {
+	struct LISTITEM* head;
+	struct LISTITEM** tail;
+#if USE_COPYONWRITE
+	unsigned int refs;
+#endif
+};
+
+/*
+ * lol_init() - initialize a LOL (list of lists)
+ */
+
+void
+lol_init( LOL *lol )
+{
+	lol->count = 0;
+}
+
+/*
+ * lol_add() - append a LIST onto an LOL
+ */
+
+void
+lol_add( 
+	LOL	*lol,
+	LIST	*l )
+{
+	if( lol->count < LOL_MAX )
+	    lol->list[ lol->count++ ] = l;
+}
+
+/*
+ * lol_free() - free the LOL and its LISTs
+ */
+
+void
+lol_free( LOL *lol )
+{
+	int i;
+
+	for( i = 0; i < lol->count; i++ )
+	    list_free( lol->list[i] );
+
+	lol->count = 0;
+}
+
+/*
+ * lol_get() - return one of the LISTs in the LOL
+ */
+
+LIST *
+lol_get( 
+	LOL	*lol,
+	int	i )
+{
+	return i < lol->count ? lol->list[i] : 0;
+}
+
+/*
+ * lol_print() - debug print LISTS separated by ":"
+ */
+
+void
+lol_print( LOL *lol )
+{
+	int i;
+
+	for( i = 0; i < lol->count; i++ )
+	{
+	    if( i )
+		printf( " : " );
+	    list_print( lol->list[i] );
+	}
+}
+
+/* Allocators */
+#if USE_MEMPOOL
+
 #include "mempool.h"
-static MEMPOOL* list_pool = NULL;
-#endif
 
-/*
- * list_append() - append a list onto another one, returning total
- */
-
-LIST *
-list_append( 
-	LIST	*l,
-	LIST	*nl )
+/* Note: the pool is shared when non-COW lists are on as the head and item are the same size */
+static MEMPOOL* g_listPool = NULL;
+static MEMPOOL* g_listHeadPool = NULL;
+static LISTITEM* allocItem(void)
 {
-	if( !nl )
-	{
-	    /* Just return l */
-	}
-	else if( !l )
-	{
-	    l = nl;
-	}
-	else
-	{
-	    /* Graft two non-empty lists. */
-	    l->tail->next = nl;
-	    l->tail = nl->tail;
+	if(!g_listPool) {
+		g_listPool = mempool_create("LIST", sizeof(LISTITEM));
+#if !USE_COPYONWRITE
+		g_listHeadPool = g_listPool;
+#endif
 	}
 
-	return l;
+	return mempool_alloc(g_listPool);
 }
 
-#ifdef OPT_MINUS_EQUALS_EXT
-
-/*
- * list_remove() - remove items from a list
- */
-
-LIST *
-list_remove( 
-	LIST	*l,
-	LIST	*nl )
+static LIST* allocHead(void)
 {
-    LIST *newlist = L0;
-    LIST *list;
-    /* Remove values */
-    for ( list = l; list; list = list->next )
-    {
-	LIST *variable;
-	int found = 0;
-	for ( variable = nl; variable; variable = variable->next )
-	{
-	    if ( list->string == variable->string )
-	    {
-		found = 1;
-		break;
-	    }
+	if(!g_listHeadPool) {
+		g_listHeadPool = mempool_create("LIST", sizeof(LIST));
+#if !USE_COPYONWRITE
+		g_listPool = g_listHeadPool;
+#endif
 	}
-	if ( !found )
-	    newlist = list_new( newlist, list->string, 0 );
-    }
-
-    list_free( l );
-    return newlist;
+	return mempool_alloc(g_listHeadPool);
 }
 
-#endif
-
-/*
- * list_new() - tack a string onto the end of a list of strings
- */
-
-LIST *
-list_new( 
-	LIST	*head,
-	const char *string,
-	int	copy )
+static void freeItem(LISTITEM* item)
 {
-	LIST *l;
+	mempool_free(g_listPool, item);
+}
 
-	if( DEBUG_LISTS )
-	    printf( "list > %s <\n", string );
+static void freeHead(LIST* list)
+{
+	mempool_free(g_listHeadPool, list);
+}
 
-	/* Copy/newstr as needed */
+void list_done(void)
+{
+	mempool_done(g_listPool);
+#if USE_COPYONWRITE
+	mempool_done(g_listHeadPool);
+#endif
+}
 
-	string = copy ? copystr( string ) : newstr( string );
-
-	/* Get list struct from freelist, if one available.  */
-	/* Otherwise allocate. */
-	/* If from freelist, must free string first */
-
-	if( freelist )
-	{
-	    l = freelist;
-	    freestr( l->string );
-	    freelist = freelist->next;
-	}
-	else
-	{
-#ifdef OPT_IMPROVED_MEMUSE_EXT
-	    if (!list_pool) {
-		list_pool = mempool_create("LIST", sizeof(LIST));
-	    }
-	    l = mempool_alloc(list_pool);
 #else
-	    l = (LIST *)malloc( sizeof( *l ) );
-#endif
-	}
 
-	/* If first on chain, head points here. */
-	/* If adding to chain, tack us on. */
-	/* Tail must point to this new, last element. */
-
-	if( !head ) head = l;
-	else head->tail->next = l;
-	head->tail = l;
-	l->next = 0;
-
-	l->string = string;
-
-	return head;
+static size_t g_allocated = 0;
+static LISTITEM* allocItem(void)
+{
+	g_allocated += sizeof(LISTITEM);
+	return malloc(sizeof(LISTITEM));
 }
 
-/*
- * list_copy() - copy a whole list of strings (nl) onto end of another (l)
- */
-
-LIST *
-list_copy( 
-	LIST	*l,
-	LIST 	*nl )
+static LIST* allocHead(void)
 {
-	for( ; nl; nl = list_next( nl ) )
-	    l = list_new( l, nl->string, 1 );
+	g_allocated += sizeof(LIST);
+	return malloc(sizeof(LIST));
+}
 
+static void freeItem(LISTITEM* item)
+{
+	g_allocated -= sizeof(LISTITEM);
+	free(item);
+}
+
+static void freeHead(LIST* list)
+{
+	g_allocated -= sizeof(LIST);
+	free(list);
+}
+
+void list_done(void)
+{
+	printf("LIST: %luK allocated at exit\n", g_allocated / 1024);
+}
+#endif
+
+LIST* list_realcopy(LIST* head, LIST* list);
+
+/* List implementation */
+LISTITEM* list_first(LIST* list)
+{
+	if(list) {
+		return list->head;
+	} else {
+		return NULL;
+	}
+}
+
+LISTITEM* list_next(LISTITEM* item)
+{
+	return item->next;
+}
+
+char const* list_value(LISTITEM* item)
+{
+	return item->string;
+}
+
+LIST* list_new(void)
+{
+	LIST* list = allocHead();
+	list->head = NULL;
+	list->tail = &list->head;
+#if USE_COPYONWRITE
+	list->refs = 1;
+#endif
+
+	return list;
+}
+
+void list_freeitem(LISTITEM* item)
+{
+	freestr(item->string);
+	freeItem(item);
+}
+
+void list_free(LIST* list)
+{
+#if USE_COPYONWRITE
+	if(list && list->refs > 1) {
+		list->refs -= 1;
+	}
+	else
+#endif
+	{
+		LISTITEM* item;
+		for(item = list_first(list); item;) {
+			LISTITEM* n = list_next(item);
+			list_freeitem(item);
+			item = n;
+		}
+		freeHead(list);
+	}
+}
+
+int list_length(LIST* list)
+{
+	int l = 0;
+	LISTITEM* item;
+	for(item = list_first(list); item; item = list_next(item)) {
+		l += 1;
+	}
 	return l;
 }
 
-/*
- * list_sublist() - copy a subset of a list of strings
- */
-
-LIST *
-list_sublist( 
-	LIST	*l,
-	int	start,
-	int	count )
+int list_empty(LIST* list)
 {
-	LIST	*nl = 0;
-
-	for( ; l && start--; l = list_next( l ) )
-	    ;
-
-	for( ; l && count--; l = list_next( l ) )
-	    nl = list_new( nl, l->string, 1 );
-
-	return nl;
+	return !list_first(list);
 }
 
-/*
- * list_free() - free a list of strings
- */
-
-void
-list_free( LIST	*head )
+int list_in(LIST* l0, LIST* l1)
 {
-	/* Just tack onto freelist. */
+	LISTITEM* item;
 
-	if( head )
+	if(!l1) { return 0; }
+	if(!l0) { return 1; }
+
+	for(item = list_first(l0); item; item = list_next(item)) {
+		int found = 0;
+		LISTITEM* searchItem;
+		for(searchItem = list_first(l1); searchItem; searchItem = list_next(searchItem)) {
+			if(!strcmp(list_value(item), list_value(searchItem))) {
+				found = 1;
+				break;
+			}
+		}
+		if(!found) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+LIST* list_append(LIST* list, char const* value, int copy)
+{
+	LISTITEM* item;
+
+#if USE_COPYONWRITE
+	if(list && list->refs > 1) {
+		LIST* copy = list_realcopy(NULL, list);
+		list_free(list);
+		list = copy;
+	}
+#endif
+
+	if(DEBUG_LISTS) {
+		printf("list > %s <\n", value);
+	}
+	if(!list)
 	{
-	    head->tail->next = freelist;
-	    freelist = head;
+		list = list_new();
+	}
+
+	item = allocItem();
+	item->string = copy? copystr(value) : newstr(value);
+
+	item->next = NULL;
+	*list->tail = item;
+
+	list->tail = &item->next;
+
+	return list;
+}
+
+LIST* list_appendList(LIST* list, LIST* tail)
+{
+	if(!list) { return tail; }
+	if(!tail) { return list; }
+
+#if USE_COPYONWRITE
+	if(list && list->refs > 1) {
+		LIST* copy = list_realcopy(NULL, list);
+		list_free(list);
+		list = copy;
+	}
+	if(tail && tail->refs > 1) {
+		LISTITEM* item;
+		for(item = list_first(tail); item; item = list_next(item)) {
+			list_append(list, list_value(item), 1);
+		}
+
+		list_free(tail);
+
+		return list;
+	}
+	else
+#endif
+	{
+		LISTITEM* item;
+		for(item = list_first(tail); item;)
+		{
+			LISTITEM* next = list_next(item);
+
+			/* Move item into list */
+			item->next = NULL;
+			*(list->tail) = item;
+			list->tail = &(item->next);
+
+			item = next;
+		}
+
+		/* Dispose of the old list head */
+		tail->head = NULL;
+		tail->tail = &(tail->head);
+		list_free(tail);
+
+		return list;
 	}
 }
 
-/*
- * list_print() - print a list of strings to stdout
- */
-
-void
-list_print( LIST *l )
+LIST* list_realcopy(LIST* head, LIST* list)
 {
-	for( ; l; l = list_next( l ) )
-	    printf( "%s ", l->string );
+	LIST* result = head;
+	LISTITEM* item;
+	for(item = list_first(list); item ; item = list_next(item)) {
+		result = list_append(result, list_value(item), 1);
+	}
+
+	return result;
 }
 
-/*
- * list_printq() - print a list of safely quoted strings to a file
- */
-
-void
-list_printq( FILE *out, LIST *l )
+LIST* list_copy(LIST* head, LIST* list)
 {
-	/* Dump each word, enclosed in "s */
-	/* Suitable for Jambase use. */
-
-	for( ; l; l = list_next( l ) )
+#if USE_COPYONWRITE
+	if(!head) {
+		if(list) { list->refs += 1; }
+		return list;
+	} else if(!list) {
+		if(head) { head->refs += 1; }
+		return head;
+	} else
+#endif
 	{
-	    const char *p = l->string;
-	    const char *ep = p + strlen( p );
-	    const char *op = p;
-
-	    fputc( '\n', out );
-	    fputc( '\t', out );
-	    fputc( '"', out );
-
-	    /* Any embedded "'s?  Escape them */
-
-	    while( (p = (char *)memchr( op, '"',  ep - op )) )
-	    {
-		fwrite( op, p - op, 1, out );
-		fputc( '\\', out );
-		fputc( '"', out );
-		op = p + 1;
-	    }
-
-	    /* Write remainder */
-
-	    fwrite( op, ep - op, 1, out );
-	    fputc( '"', out );
-	    fputc( ' ', out );
+		return list_realcopy(head, list);
 	}
 }
 
-/*
- * list_length() - return the number of items in the list
- */
-
-int
-list_length( LIST *l )
+LIST* list_copytail(LIST* head, LISTITEM* first, int maxNumToCopy)
 {
-	int n = 0;
+	LIST* result;
 
-	for( ; l; l = list_next( l ), ++n )
-	    ;
+#if USE_COPYONWRITE
+	if(head && head->refs > 1) {
+		LIST* copy = list_realcopy(NULL, head);
+		list_free(head);
+		head = copy;
+	}
+#endif
 
-	return n;
+	result = head;
+	for(; first && maxNumToCopy--; first = list_next(first)) {
+		result = list_append(result, list_value(first), 1);
+	}
+
+	return result;
+}
+
+LIST* list_sublist(LIST* list, int start, int count)
+{
+	LIST* result = NULL;
+	LISTITEM* item = list_first(list);
+	for(; item && start--; item = list_next(item));
+	for(; item && count--; item = list_next(item)) {
+		result = list_append(result, list_value(item), 1);
+	}
+
+	return result;
+}
+
+LIST* list_remove(LIST* list, LIST* removeItems)
+{
+	LISTITEM** prevNext;
+
+	if(!list) { return NULL; }
+	if(!removeItems) { return list; }
+
+#if USE_COPYONWRITE
+	if(list->refs > 1) {
+		LIST* copy = list_realcopy(NULL, list);
+		list_free(list);
+		list = copy;
+	}
+#endif
+
+	prevNext = &list->head;
+	while(*prevNext) {
+		int remove = 0;
+		LISTITEM* searchItem;
+		for(searchItem = list_first(removeItems); searchItem; searchItem = list_next(searchItem)) {
+			if(list_value(searchItem) == list_value(*prevNext)) {
+				remove = 1;
+				break;
+			}
+		}
+
+		if(remove)
+		{
+			LISTITEM* item = *prevNext;
+			*prevNext = item->next;
+			list_freeitem(item);
+		} else {
+			prevNext = &((*prevNext)->next);
+		}
+	}
+
+	list->tail = prevNext;
+	return list;
+}
+
+int list_equal(LIST* a, LIST* b)
+{
+	LISTITEM* ai = list_first(a);
+	LISTITEM* bi = list_first(b);
+
+	for(; ai && bi; ai = list_next(ai), bi = list_next(bi)) {
+		if(list_value(ai) != list_value(bi)) {
+			return 0;
+		}
+	}
+
+	return !ai && !bi;
 }
 
 /*
@@ -367,105 +584,82 @@ static void *list_sort_helper(void *p, unsigned index,
 	return tape[base].first;
 }
 
-static int compare_case_sensitive_strings(LIST *p, LIST *q, void *pointer)
+static int compare_case(LISTITEM *p, LISTITEM *q, void *pointer)
 {
-    return strcmp(p->string, q->string);
+    return strcmp(list_value(p), list_value(q));
 }
 	
-static int compare_case_insensitive_strings(LIST *p, LIST *q, void *pointer)
+static int compare_nocase(LISTITEM *p, LISTITEM *q, void *pointer)
 {
 #if defined(_MSC_VER)
-	return stricmp(p->string, q->string);
+	return stricmp(list_value(p), list_value(q));
 #else
-	return strcasecmp(p->string, q->string);
+	return strcasecmp(list_value(p), list_value(q));
 #endif
 }
-	
-/*
- *
- */
-LIST *list_sort( LIST *l, int case_sensitive )
+
+LIST* list_sort(LIST* list, int caseSensitive)
 {
-	LIST *nl = list_sort_helper( l, 0, case_sensitive ? (int (*)(void*, void*, void*))compare_case_sensitive_strings : (int (*)(void*, void*, void*))compare_case_insensitive_strings, NULL, NULL );
-	LIST *tail = nl;
-	while ( tail->next )
-		tail = tail->next;
-	nl->tail = tail;
-	return nl;
+	LISTITEM* newHead;
+	LISTITEM* newLast;
+
+	if(!list || !list_first(list)) { return list; }
+
+#if USE_COPYONWRITE
+	if(list->refs > 1) {
+		LIST* copy = list_realcopy(NULL, list);
+		list_free(list);
+		list = copy;
+	}
+#endif
+
+	newHead = list_sort_helper(list_first(list), 0, caseSensitive? &compare_case : &compare_nocase, NULL, NULL);
+
+	newLast = newHead;
+	for(; list_next(newLast); newLast = list_next(newLast));
+	list->head = newHead;
+	list->tail = &newLast->next;
+
+	return list;
 }
 
-/*
- * lol_init() - initialize a LOL (list of lists)
- */
-
-void
-lol_init( LOL *lol )
+void list_print(LIST* list)
 {
-	lol->count = 0;
-}
-
-/*
- * lol_add() - append a LIST onto an LOL
- */
-
-void
-lol_add( 
-	LOL	*lol,
-	LIST	*l )
-{
-	if( lol->count < LOL_MAX )
-	    lol->list[ lol->count++ ] = l;
-}
-
-/*
- * lol_free() - free the LOL and its LISTs
- */
-
-void
-lol_free( LOL *lol )
-{
-	int i;
-
-	for( i = 0; i < lol->count; i++ )
-	    list_free( lol->list[i] );
-
-	lol->count = 0;
-}
-
-/*
- * lol_get() - return one of the LISTs in the LOL
- */
-
-LIST *
-lol_get( 
-	LOL	*lol,
-	int	i )
-{
-	return i < lol->count ? lol->list[i] : 0;
-}
-
-/*
- * lol_print() - debug print LISTS separated by ":"
- */
-
-void
-lol_print( LOL *lol )
-{
-	int i;
-
-	for( i = 0; i < lol->count; i++ )
-	{
-	    if( i )
-		printf( " : " );
-	    list_print( lol->list[i] );
+	LISTITEM* item;
+	for(item = list_first(list); item; item = list_next(item)) {
+		printf("%s ", list_value(item));
 	}
 }
-#ifdef OPT_DEBUG_MEM_TOTALS_EXT
-void
-list_done(void)
+
+void list_printq(FILE* out, LIST* list)
 {
-#ifdef OPT_IMPROVED_MEMUSE_EXT
-    mempool_done(list_pool);
-#endif
+	LISTITEM* item;
+	for(item = list_first(list); item; item = list_next(item)) {
+		/* Icky code from lists.c */
+
+		const char *p = list_value(item);
+		const char *ep = p + strlen( p );
+		const char *op = p;
+
+		fputc( '\n', out );
+		fputc( '\t', out );
+		fputc( '"', out );
+
+		/* Any embedded "'s?  Escape them */
+
+		while( p = (char *)memchr( op, '"',  ep - op ) )
+		{
+			fwrite( op, p - op, 1, out );
+			fputc( '\\', out );
+			fputc( '"', out );
+			op = p + 1;
+		}
+
+		/* Write remainder */
+
+		fwrite( op, ep - op, 1, out );
+		fputc( '"', out );
+		fputc( ' ', out );
+	}
 }
-#endif /* OPT_DEBUG_MEM_TOTALS_EXT */
+

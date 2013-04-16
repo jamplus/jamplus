@@ -11,7 +11,6 @@
  *
  * ALL WARRANTIES ARE HEREBY DISCLAIMED.
  */
-
 /*
  * jam.c - make redux
  *
@@ -261,11 +260,11 @@ int main( int argc, char **argv, char **arg_environ )
 
 # ifdef NT
                 ptr = scriptPath + strlen( scriptPath );
-                strcat( ptr, ".bat" );
+                strcpy( ptr, ".bat" );
                 if ( access( scriptPath, 0 ) == -1 ) {
-                    strcat( ptr, ".cmd" );
+                    strcpy( ptr, ".cmd" );
                     if ( access( scriptPath, 0 ) == -1 ) {
-                        strcat( ptr, ".exe" );
+                        strcpy( ptr, ".exe" );
                         if ( access( scriptPath, 0 ) == -1 ) {
                             printf("* Unable to access script %s.\n", name);
                             exit(-1);
@@ -275,7 +274,7 @@ int main( int argc, char **argv, char **arg_environ )
 # else
                 ptr = scriptPath + strlen( scriptPath );
                 if ( access( scriptPath, 0 ) == -1 ) {
-                    strcat( ptr, ".sh" );
+                    strcpy( ptr, ".sh" );
                     if ( access( scriptPath, 0 ) == -1 ) {
                         printf("* Unable to access script %s.\n", name);
                         exit(-1);
@@ -565,7 +564,7 @@ int main( int argc, char **argv, char **arg_environ )
 	    if( strlen( buf ) == 25 )
 		buf[ 24 ] = 0;
 
-	    var_set( "JAMDATE", list_new( L0, buf, 0 ), VAR_SET );
+	    var_set( "JAMDATE", list_append( L0, buf, 0 ), VAR_SET );
 	}
 
 	/* And JAMUNAME */
@@ -576,11 +575,11 @@ int main( int argc, char **argv, char **arg_environ )
 	    if( uname( &u ) >= 0 )
 	    {
 		LIST *l = L0;
-		l = list_new( l, u.machine, 0 );
-		l = list_new( l, u.version, 0 );
-		l = list_new( l, u.release, 0 );
-		l = list_new( l, u.nodename, 0 );
-		l = list_new( l, u.sysname, 0 );
+		l = list_append( l, u.machine, 0 );
+		l = list_append( l, u.version, 0 );
+		l = list_append( l, u.release, 0 );
+		l = list_append( l, u.nodename, 0 );
+		l = list_append( l, u.sysname, 0 );
 		var_set( "JAMUNAME", l, VAR_SET );
 	    }
 	}
@@ -591,7 +590,7 @@ int main( int argc, char **argv, char **arg_environ )
         {
             char filebuf[4096];
             if (getcwd(filebuf, sizeof(filebuf))) {
-                var_set( "CWD", list_new( L0, filebuf, 0 ),
+                var_set( "CWD", list_append( L0, filebuf, 0 ),
 			 VAR_SET );
             }
         }
@@ -601,7 +600,7 @@ int main( int argc, char **argv, char **arg_environ )
 	{
 	    char fileName[4096];
 	    getprocesspath(fileName, 4096);
-	    var_set( "JAM_PROCESS_PATH", list_new( L0, fileName, 0 ), VAR_SET );
+	    var_set( "JAM_PROCESS_PATH", list_append( L0, fileName, 0 ), VAR_SET );
 	}
 #endif
 
@@ -619,12 +618,12 @@ int main( int argc, char **argv, char **arg_environ )
 	    strcpy(options, QUOTE(JAM_OPTIONS));
 
 	    var_set("PATCHED_JAM_VERSION",
-		    list_new(list_new(L0, PATCHED_VERSION_MAJOR, 0),
+		    list_append(list_append(L0, PATCHED_VERSION_MAJOR, 0),
 			     PATCHED_VERSION_MINOR, 0),
 		    VAR_SET);
 
 	    for (s = strtok(options, ":"); s; s = strtok(NULL, ":")) {
-		var_set("PATCHED_JAM_VERSION", list_new(L0, s, 0),
+		var_set("PATCHED_JAM_VERSION", list_append(L0, s, 0),
 			VAR_APPEND);
 	    }
 	}
@@ -669,24 +668,24 @@ int main( int argc, char **argv, char **arg_environ )
 
 	    /* How many jobs are we allowed to spawn? */
 	    sprintf( num, "%d", globs.jobs );
-	    var_set( "JAM_NUM_JOBS", list_new( 0, newstr( num ), 0 ), VAR_SET );
+	    var_set( "JAM_NUM_JOBS", list_append( 0, newstr( num ), 0 ), VAR_SET );
 
 	    /* An easy test to see if there are multiple jobs */
 	    if( globs.jobs > 1 )
-		var_set( "JAM_MULTI_JOBS", list_new( 0, newstr( num ), 0 ),
+		var_set( "JAM_MULTI_JOBS", list_append( 0, newstr( num ), 0 ),
 			VAR_SET );
 
 	    /* Create a list of the job nums. ie, -j4 -> 0 1 2 3 */
 	    for( i = 0; i < globs.jobs; ++i )
 	    {
 		sprintf( num, "%d", i );
-		l = list_new( l, newstr( num ), 0 );
+		l = list_append( l, newstr( num ), 0 );
 	    }
 	    var_set( "JAM_JOB_LIST", l, VAR_SET );
 	}
 #endif
 
-    var_set( "DEPCACHE", list_new( L0, "standard", 0 ), VAR_SET );
+    var_set( "DEPCACHE", list_append( L0, "standard", 0 ), VAR_SET );
 
 #ifdef OPT_SET_JAMCOMMANDLINETARGETS_EXT
 	{
@@ -699,7 +698,7 @@ int main( int argc, char **argv, char **arg_environ )
 
 		for ( i = 0; i < n_targets; ++i )
 		{
-			l = list_new( l, actual_targets[ i ], 0 );
+			l = list_append( l, actual_targets[ i ], 0 );
 		}
 
 		var_set( "JAM_COMMAND_LINE_TARGETS", l, VAR_SET );

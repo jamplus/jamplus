@@ -1,9 +1,9 @@
 function md5zip(filename)
 	print("md5zip: Calculating " .. filename .. "...")
 
-	require 'md5'
-	require 'struct'
-	require 'ziparchive'
+	local md5 = require 'md5'
+	local struct = require 'struct'
+	local ziparchive = require 'ziparchive'
 
 	local archive = ziparchive.open(filename)
 	if not archive then

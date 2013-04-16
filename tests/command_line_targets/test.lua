@@ -14,12 +14,12 @@ function Test()
 		{
 			'Building appA...',
 			'Building appB...',
-			'*** found 27 target(s)...',
+			'*** found 31 target(s)...',
 			'*** updating 7 target(s)...',
 			'@ C.vc.C++ <win32!release:appA>appA.obj',
-			'!NEXT!@ C.vc.LinkWithManifest <win32!release:appA>appA.exe',
+			'!NEXT!@ C.vc.Link <win32!release:appA>appA.exe',
 			'!NEXT!@ C.vc.C++ <win32!release:appB>appB.obj',
-			'!NEXT!@ C.vc.LinkWithManifest <win32!release:appB>appB.exe',
+			'!NEXT!@ C.vc.Link <win32!release:appB>appB.exe',
 			'*** updated 7 target(s)...',
 		}
 
@@ -29,11 +29,9 @@ function Test()
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'win32-release/appA/appA.obj',
 			'win32-release/appA/appA.release.exe',
-			'win32-release/appA/appA.release.exe.intermediate.manifest',
 			'win32-release/appA/appA.release.pdb',
 			'win32-release/appB/appB.obj',
 			'win32-release/appB/appB.release.exe',
-			'win32-release/appB/appB.release.exe.intermediate.manifest',
 			'win32-release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
@@ -54,10 +52,10 @@ Building appB...
 		---------------------------------------------------------------------------
 		local appAPattern = [[
 Building appA...
-*** found 14 target(s)...
+*** found 16 target(s)...
 *** updating 4 target(s)...
 @ C.vc.C++ <win32!release:appA>appA.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:appA>appA.exe
+!NEXT!@ C.vc.Link <win32!release:appA>appA.exe
 *** updated 4 target(s)...
 ]]
 
@@ -66,17 +64,16 @@ Building appA...
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'win32-release/appA/appA.obj',
 			'win32-release/appA/appA.release.exe',
-			'win32-release/appA/appA.release.exe.intermediate.manifest',
 			'win32-release/appA/appA.release.pdb',
 --			'?vc.pdb'
 		}
 
 		local appBPattern = [[
 Building appB...
-*** found 14 target(s)...
+*** found 16 target(s)...
 *** updating 3 target(s)...
 @ C.vc.C++ <win32!release:appB>appB.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:appB>appB.exe
+!NEXT!@ C.vc.Link <win32!release:appB>appB.exe
 *** updated 3 target(s)...
 ]]
 
@@ -85,11 +82,9 @@ Building appB...
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'win32-release/appA/appA.obj',
 			'win32-release/appA/appA.release.exe',
-			'win32-release/appA/appA.release.exe.intermediate.manifest',
 			'win32-release/appA/appA.release.pdb',
 			'win32-release/appB/appB.obj',
 			'win32-release/appB/appB.release.exe',
-			'win32-release/appB/appB.release.exe.intermediate.manifest',
 			'win32-release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
@@ -99,7 +94,6 @@ Building appB...
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'win32-release/appB/appB.obj',
 			'win32-release/appB/appB.release.exe',
-			'win32-release/appB/appB.release.exe.intermediate.manifest',
 			'win32-release/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
@@ -116,10 +110,10 @@ Building appA...
 Building appB... 
 *** found 15 target(s)...
 *** updating 6 target(s)...
-@ C.gcc.C++ <macosx32!release:appA>appA.o 
-@ C.gcc.Link <macosx32!release:appA>appA$(SUFEXE) 
-@ C.gcc.C++ <macosx32!release:appB>appB.o 
-@ C.gcc.Link <macosx32!release:appB>appB$(SUFEXE) 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):appA>appA.o 
+@ C.gcc.Link <$(PLATFORM_CONFIG):appA>appA$(SUFEXE) 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):appB>appB.o 
+@ C.gcc.Link <$(PLATFORM_CONFIG):appB>appB$(SUFEXE) 
 *** updated 6 target(s)...
 ]]
 
@@ -130,10 +124,10 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32-release/appA/appA.o',
-			'macosx32-release/appA/appA.release',
-			'macosx32-release/appB/appB.o',
-			'macosx32-release/appB/appB.release',
+			'$(PLATFORM_CONFIG)/appA/appA.o',
+			'$(PLATFORM_CONFIG)/appA/appA.release',
+			'$(PLATFORM_CONFIG)/appB/appB.o',
+			'$(PLATFORM_CONFIG)/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -142,8 +136,8 @@ Building appA...
 Building appB... 
 *** found 6 target(s)...
 *** updating 2 target(s)...
-@ Clean <macosx32!release>clean:appA 
-@ Clean <macosx32!release>clean:appB 
+@ Clean <$(PLATFORM_CONFIG)>clean:appA 
+@ Clean <$(PLATFORM_CONFIG)>clean:appB 
 *** updated 2 target(s)...
 ]]
 		TestPattern(cleanPattern, RunJam{ 'clean' })
@@ -154,8 +148,8 @@ Building appB...
 Building appA... 
 *** found 7 target(s)...
 *** updating 3 target(s)...
-@ C.gcc.C++ <macosx32!release:appA>appA.o 
-@ C.gcc.Link <macosx32!release:appA>appA$(SUFEXE) 
+@ C.gcc.C++ <$(PLATFORM_CONFIG):appA>appA.o 
+@ C.gcc.Link <$(PLATFORM_CONFIG):appA>appA$(SUFEXE) 
 *** updated 3 target(s)...
 ]]
 
@@ -165,8 +159,8 @@ Building appA...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32-release/appA/appA.o',
-			'macosx32-release/appA/appA.release',
+			'$(PLATFORM_CONFIG)/appA/appA.o',
+			'$(PLATFORM_CONFIG)/appA/appA.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -174,8 +168,8 @@ Building appA...
 Building appB... 
 *** found 7 target(s)...
 *** updating 3 target(s)...
-@ C.gcc.C++ <macosx32!release:appB>appB.o 
-@ C.gcc.Link <macosx32!release:appB>appB$(SUFEXE)
+@ C.gcc.C++ <$(PLATFORM_CONFIG):appB>appB.o 
+@ C.gcc.Link <$(PLATFORM_CONFIG):appB>appB$(SUFEXE)
 *** updated 3 target(s)...
 ]]
 
@@ -185,10 +179,10 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32-release/appA/appA.o',
-			'macosx32-release/appA/appA.release',
-			'macosx32-release/appB/appB.o',
-			'macosx32-release/appB/appB.release',
+			'$(PLATFORM_CONFIG)/appA/appA.o',
+			'$(PLATFORM_CONFIG)/appA/appA.release',
+			'$(PLATFORM_CONFIG)/appB/appB.o',
+			'$(PLATFORM_CONFIG)/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -198,8 +192,8 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'macosx32-release/appB/appB.o',
-			'macosx32-release/appB/appB.release',
+			'$(PLATFORM_CONFIG)/appB/appB.o',
+			'$(PLATFORM_CONFIG)/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------

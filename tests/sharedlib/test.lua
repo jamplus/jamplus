@@ -70,14 +70,14 @@ function Test()
 			'image/slib-b.release.exp',
 			'image/slib-b.release.lib',
 			'image/slib-b.release.pdb',
-			'image/TOP/app/win32-release/app/app.release.exe.intermediate.manifest',
+			'?image/TOP/app/win32-release/app/app.release.exe.intermediate.manifest',
 			'image/TOP/app/win32-release/app/main.obj',
 			'image/TOP/lib-c/win32-release/lib-c/add.obj',
 			'image/TOP/lib-c/win32-release/lib-c/lib-c.release.lib',
 			'image/TOP/slib-a/win32-release/slib-a/slib-a.obj',
-			'image/TOP/slib-a/win32-release/slib-a/slib-a.release.dll.intermediate.manifest',
+			'?image/TOP/slib-a/win32-release/slib-a/slib-a.release.dll.intermediate.manifest',
 			'image/TOP/slib-b/win32-release/slib-b/slib-b.obj',
-			'image/TOP/slib-b/win32-release/slib-b/slib-b.release.dll.intermediate.manifest',
+			'?image/TOP/slib-b/win32-release/slib-b/slib-b.release.dll.intermediate.manifest',
 			'lib-c/add.c',
 			'lib-c/add.h',
 			'lib-c/Jamfile.jam',
@@ -135,16 +135,16 @@ function Test()
 	do
 		if Platform == 'win32' then
 		 	pattern = [[
-*** found 48 target(s)...
+*** found 52 target(s)...
 *** updating 24 target(s)...
 @ C.vc.CC <win32!release:app>main.obj
 !NEXT!@ C.vc.CC <win32!release:slib-a>slib-a.obj
 !NEXT!@ C.vc.CC <win32!release:lib-c>add.obj
 @ C.vc.Archive <win32!release:lib-c>lib-c.lib
-@ C.vc.LinkWithManifest <win32!release:slib-a>slib-a.dll
+@ C.vc.Link <win32!release:slib-a>slib-a.dll
 !NEXT!@ C.vc.CC <win32!release:slib-b>slib-b.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-b>slib-b.dll
-!NEXT!@ C.vc.LinkWithManifest <win32!release:app>app.exe
+!NEXT!@ C.vc.Link <win32!release:slib-b>slib-b.dll
+!NEXT!@ C.vc.Link <win32!release:app>app.exe
 *** updated 24 target(s)...
 ]]
 		else
@@ -173,7 +173,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 48 target(s)...
+*** found 52 target(s)...
 ]]
 		else
 			pattern = [[
@@ -192,13 +192,13 @@ function Test()
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 48 target(s)...
+*** found 52 target(s)...
 *** updating 4 target(s)...
 @ C.vc.CC <win32!release:slib-a>slib-a.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-a>slib-a.dll
+!NEXT!@ C.vc.Link <win32!release:slib-a>slib-a.dll
 !NEXT!@ C.vc.CC <win32!release:slib-b>slib-b.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-b>slib-b.dll
-!NEXT!*** updated 4 target(s)...
+!NEXT!@ C.vc.Link <win32!release:slib-b>slib-b.dll
+!NEXT!*** updated 5 target(s)...
 ]]
 		else
 			pattern = [[
@@ -221,7 +221,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 48 target(s)...
+*** found 52 target(s)...
 ]]
 		else
 			pattern = [[
@@ -242,9 +242,9 @@ function Test()
 			pattern = [[
 @ C.vc.CC <win32!release:lib-c>add.obj
 !NEXT!@ C.vc.Archive <win32!release:lib-c>lib-c.lib
-!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-a>slib-a.dll
-!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-b>slib-b.dll
-!NEXT!*** updated 4 target(s)...
+!NEXT!@ C.vc.Link <win32!release:slib-a>slib-a.dll
+!NEXT!@ C.vc.Link <win32!release:slib-b>slib-b.dll
+!NEXT!*** updated 5 target(s)...
 ]]
 		else
 			pattern = [[
@@ -268,7 +268,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 48 target(s)...
+*** found 52 target(s)...
 ]]
 		else
 			pattern = [[
@@ -287,11 +287,11 @@ function Test()
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 48 target(s)...
-*** updating 3 target(s)...
+*** found 52 target(s)...
+*** updating 2 target(s)...
 @ C.vc.CC <win32!release:slib-a>slib-a.obj
-!NEXT!@ C.vc.LinkWithManifest <win32!release:slib-a>slib-a.dll
-!NEXT!*** updated 2 target(s)...
+!NEXT!@ C.vc.Link <win32!release:slib-a>slib-a.dll
+!NEXT!*** updated 3 target(s)...
 ]]
 		else
 			pattern = [[
@@ -300,7 +300,7 @@ function Test()
 				@ C.gcc.CC <macosx32!release:slib-a>slib-a.o 
 				@ C.gcc.Link <macosx32!release:slib-a>slib-a.so 
 				@ C.gcc.Link <macosx32!release:app>app
-				*** updated 4 target(s)...
+				*** updated 5 target(s)...
 ]]
 		end
 		TestPattern(pattern, RunJam{})
@@ -312,7 +312,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-*** found 48 target(s)...
+*** found 52 target(s)...
 ]]
 		else
 			pattern = [[

@@ -10,19 +10,8 @@ rule C.ResourceCompiler PARENT : SOURCES : OPTIONS {
 	SOURCES = [ C.GristFiles : $(SOURCES) ] ;
 	local TARGETS = $(SOURCES:S=.res) ;
 
-	local source ;
-	for source in $(SOURCES) {
-		local binding ;
-		binding = $(BINDING:Z=$(source)) ;
-		if $(binding) {
-			BINDING on $(source:S=.res) = $(binding:S=.res) ;
-		}
-	}
-
 	SearchSource $(SOURCES) ;
 	MakeLocate $(TARGETS) : $(TARGETS:DR=$(LOCATE_TARGET)) ;
-
-	Depends $(TARGETS) : $(SOURCES) ;
 	C.Clean : $(TARGETS) ;
 
 	local rcdefines ;
@@ -43,21 +32,41 @@ rule C.ResourceCompiler PARENT : SOURCES : OPTIONS {
 		$(SUBDIRHDRS)
 	;
 
-	RCDEFINES on $(TARGETS) = $(rcdefines) ;
-	RCFLAGS on $(TARGETS) = $(rcflags) ;
-	RCHDRS on $(TARGETS) = $(rchdrs) ;
-
 	# Resources can have #include directives which we need to be aware of.
 	HDRRULE on $(SOURCES) = C.HdrRule ;
 	HDRSCAN on $(SOURCES) = $(C.HDRPATTERN) ;
 	HDRGRIST on $(SOURCES) = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST) ;
 
-	UseCommandLine $(TARGETS) : $(rcdefines) $(rcflags) $(rchdrs) ;
+	local source ;
+	for source in $(SOURCES) {
+		local target = $(source:S=.res) ;
+		local binding ;
+		binding = $(BINDING:Z=$(source)) ;
+		if $(binding) {
+			BINDING on $(target) = $(binding:S=.res) ;
+		}
 
-	if quiet in $(OPTIONS) {
-		C.ResourceCompileQuiet $(TARGETS) : $(SOURCES) : $(C.COMPILER_SUITE_SYMBOL) ;
-	} else {
-		C.ResourceCompile $(TARGETS) : $(SOURCES) : $(C.COMPILER_SUITE_SYMBOL) ;
+		Depends $(target) : $(source) ;
+
+		local sourcercdefines ;
+		local sourcercflags ;
+		local sourcerchdrs ;
+		on $(target) {
+			sourcercdefines += $(RCDEFINES) $(rcdefines) ;
+			sourcercflags += $(RCFLAGS) $(rcflags) ;
+			sourcerchdrs += $(RCHDRS) $(rchdrs) ;
+		}
+		RCDEFINES on $(target) = $(sourcercdefines) ;
+		RCFLAGS on $(target) = $(sourcercflags) ;
+		RCHDRS on $(target) = $(sourcerchdrs) ;
+
+		UseCommandLine $(target) : $(sourcercdefines) $(sourcercflags) $(sourcerchdrs) ;
+
+		if quiet in $(OPTIONS) {
+			C.ResourceCompileQuiet $(target) : $(source) : $(C.COMPILER_SUITE_SYMBOL) ;
+		} else {
+			C.ResourceCompile $(target) : $(source) : $(C.COMPILER_SUITE_SYMBOL) ;
+		}
 	}
 
 	return $(TARGETS) ;

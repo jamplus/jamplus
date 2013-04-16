@@ -365,18 +365,18 @@ cmd_string(
 	}
 
 	if (dollar) {
-	    LIST *l = var_expand(L0, buffer_ptr(buff) + lastword, buffer_posptr(buff), lol, 0);
-	    LIST *head = l;
+	    LIST *expanded = var_expand(L0, buffer_ptr(buff) + lastword, buffer_posptr(buff), lol, 0);
+	    LISTITEM *l = list_first(expanded);
 
 	    buffer_setpos(buff, lastword);
 
 	    while (l)
 	    {
-		size_t so = strlen(l->string);
+		size_t so = strlen(list_value(l));
 
 		if ((int)buffer_pos(buff) + so >= outsize)
 		    return -1;
-		buffer_addstring(buff, l->string, so);
+		buffer_addstring(buff, list_value(l), so);
 
 		/* Separate with space */
 
@@ -385,7 +385,7 @@ cmd_string(
 		    buffer_addchar(buff, ' ');
 		}
 	    }
-	    list_free(head);
+	    list_free(expanded);
 	}
     }
 

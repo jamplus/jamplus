@@ -4,7 +4,7 @@
 
 In the <tt>Jambase.jam</tt> that ships with JamPlus, the default build configuration is Release.
 
-The <tt>Jambase.jam</tt> rules attempt to detect the compiler on the machine.  It can successfully detect and run Visual C++ 6, Visual Studio 2003, Visual Studio 2005, and Visual Studio 2008.
+The <tt>Jambase.jam</tt> rules attempt to detect the compiler on the machine.  It can successfully detect and run Visual C++ 6, Visual Studio 2003, Visual Studio 2005, Visual Studio 2008, Visual Studio 2010, Visual Studio 2012, Xcode 4, GCC, and Clang.
 
 If [square] brackets are used the argument is optional.
 
@@ -25,10 +25,11 @@ documentation:
 \refitem rule_RmTemps RmTemps
 \refitem rule_SearchSource SearchSource
 \refitem rule_SourceGroup SourceGroup
-\refitem rule_Split Split
 \refitem rule_SubDir SubDir
 \refitem rule_SubInclude SubInclude
+\refitem rule_SubIncludeRelative SubIncludeRelative
 \refitem rule_Workspace Workspace
+\refitem rule_WriteFile WriteFile
 \endsecreflist
 
 The following is a list of rules available in <tt>bin/Jambase.jam</tt>.
@@ -340,32 +341,6 @@ For workspace projects that support grouping of files into folders, the \c Sourc
 
 
 <hr>
-\section rule_Split rule Split STRINGS : SPLIT_CHARACTERS
-\addindex rule_Split
-
-Splits each of the \c STRINGS at \c SPLIT_CHARACTERS.  All splits are returned as a string list.
-
-\param STRINGS The list of strings to split at the points specified by \c SPLIT_CHARACTERS.
-\param SPLIT_CHARACTERS One or more characters to split the list of \c STRINGS at.
-\return Returns a list of strings split at the points specified by \c SPLIT_CHARACTERS.
-
-\code
-    # Prints:
-    #
-    # **I** **like** **peas.**
-    # No splits here
-    local list = [ Split I like peas. : " " ] ;
-    Echo **$(list)** ;
-
-    Echo [ Split No splits here : "|" ] ;
-\endcode
-
-
-
-
-
-
-<hr>
 \section rule_SubDir rule SubDir TOP d1...dn : SUBNAME
 \addindex rule_SubDir
 
@@ -402,6 +377,30 @@ A given Jamfile is only ever read in once, even if multiple \c SubInclude calls 
 
 
 <hr>
+\section rule_SubIncludeRelative rule SubIncludeRelative RELATIVE_PATH : FILETITLE
+\addindex rule_SubIncludeRelative
+
+After a \c SubDir rule has been called, \c SubIncludeRelative can be used to move within the \c SubDir structure.  Currently, it only works traversing into child directories.  It cannot be used with a <tt>..</tt> to move to a parent directory.
+
+Further information may be found in \ref rule_SubInclude "SubInclude".
+
+\param RELATIVE_PATH The relative child directory to move into.
+\param FILETITLE (optional) If specified, a Jamfile called <tt>$(FILETITLE).jam</tt> is read instead of the default <tt>Jamfile.jam</tt>.
+
+\code
+    SubDir TOP ;
+
+    # ...
+
+    SubIncludeRelative MyProject ;  # The same as: SubInclude TOP MyProject
+\endcode
+
+
+
+
+
+
+<hr>
 \section rule_Workspace rule Workspace WORKSPACE_NAME : TARGETS
 \addindex rule_Workspace
 
@@ -413,6 +412,16 @@ Workspaces are automatically generated for any executable processed while readin
 \code
 	Workspace Project-all : AppA AppB AppC ;
 \endcode
+
+
+
+
+
+
+<hr>
+\section rule_WriteFile rule WriteFile WORKSPACE_NAME : TARGETS
+\addindex rule_WriteFile
+
 
 
 
