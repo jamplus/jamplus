@@ -6,7 +6,9 @@
 # platform.  After the toolchain is loaded, we force the platform back to
 # the intended one.
 C.PLATFORM = win32 ;
-C.ToolchainHelper $(C.PLATFORM) ;
+IncludeModule c-compilers/c-mingw-autodetect ;
+C.AutoDetect ;
+C.ToolchainHelper mingw-$(C.PLATFORM)-$(C.CONFIG) ;
 C.PLATFORM = fakeps3 ;
 
 C.Defines * : FAKEPS3_PPU ;
