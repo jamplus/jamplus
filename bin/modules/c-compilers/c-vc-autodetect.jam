@@ -125,8 +125,8 @@ rule FindVisualStudioHelper VERSION {
 	MSSDK_LINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
 
 	C.BUILD_EXTENSIONS on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) .res ;
-	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : CC : .c .s : C.vc.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
-	C.AddBuildExtensions $(C.COMPILER_SUITE_SYMBOL) : C++ : .cc .cpp .cxx : C.vc.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+	C.AddBuildExtensions CC : .c .s : C.vc.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+	C.AddBuildExtensions C++ : .cc .cpp .cxx : C.vc.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
 
 	C.Flags * : CC	: /TC ;
 	C.Flags * : C++	: /TP ;

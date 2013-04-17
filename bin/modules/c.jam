@@ -183,7 +183,8 @@ rule C.CompileOptions OPTIONS {
 
 __MultiCppCompile_OutputAsTree = 0 ;
 
-rule C.AddBuildExtensions COMPILER_SUITE : TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO_LINK {
+rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO_LINK {
+	local COMPILER_SUITE = $(C.COMPILER_SUITE_SYMBOL) ;
 	if $(ADD_TO_EXTENSIONS[1]) = 1 {
 		C.BUILD_EXTENSIONS on $(COMPILER_SUITE) += $(EXTS) ;
 	}
