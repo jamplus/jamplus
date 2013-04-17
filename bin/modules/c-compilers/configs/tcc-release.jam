@@ -1,3 +1,0 @@
-IncludeModule c-compilers/c-tcc ;
-
-C.ToolchainHelper Global_DEBUG ;
