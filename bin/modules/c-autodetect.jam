@@ -91,7 +91,12 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 
 C.COMPILER ?= $(COMPILER) ;
 
-C.Toolchain $(PLATFORM) $(CONFIG) $(ARCHITECTURE) ;
+if $(TOOLCHAIN) {
+	TOOLCHAIN = [ Split $(TOOLCHAIN) : - ] ;
+	C.Toolchain $(TOOLCHAIN) ;
+} else {
+	C.Toolchain $(PLATFORM) $(CONFIG) $(ARCHITECTURE) ;
+}
 
 COMPILER = $(C.COMPILER) ;
 
