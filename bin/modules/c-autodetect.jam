@@ -32,6 +32,7 @@ rule C.ToolchainSpecKeys TOOLCHAIN_SPEC_KEYS {
 		configIndex = [ Math $(configIndex) + 1 ] ;
 	}
 
+	TOOLCHAIN_SPEC_KEYS ?= $(TOOLCHAIN_SPEC_KEYS:Z=$(C.ACTIVE_TOOLCHAIN)) ;
 	TOOLCHAIN_SPEC_KEYS ?= C.COMPILER ;
 	TOOLCHAIN_SPEC_KEYS on $(C.ACTIVE_TOOLCHAIN) = $(TOOLCHAIN_SPEC_KEYS) ;
 
@@ -70,6 +71,7 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 			IncludeModule c-compilers/configs/$(TOOLCHAIN_SPEC:J=-) ;
 		}	
 
+		C.COMPILER_SUITE on $(gristedConfigSpec) = $(C.COMPILER_SUITE) ;
 		C.COMPILER_SUITE_SYMBOL on $(gristedConfigSpec) = $(C.COMPILER_SUITE_SYMBOL) ;
 		ALL_LOCATE_TARGET on $(C.COMPILER_SUITE_SYMBOL) = $(ALL_LOCATE_TARGET) ;
 	} else {
@@ -83,6 +85,7 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 
 	ALL_LOCATE_TARGET = $(save_ALL_LOCATE_TARGET) ;
 
+	C.COMPILER_SUITE = $(C.COMPILER_SUITE:Z=$(gristedConfigSpec)) ;
 	C.COMPILER_SUITE_SYMBOL = $(C.COMPILER_SUITE_SYMBOL:Z=$(gristedConfigSpec)) ;
 }
 
