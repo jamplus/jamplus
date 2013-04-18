@@ -41,16 +41,15 @@ actions ImageXexWithConfig
 
 rule C.Xbox360ImageXexToolSettings TARGET : CONFIG_FILE
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	CONFIG_FILE = [ C.TargetGrist $(TARGET) : $(CONFIG_FILE) ] ;
+	C.ActiveTarget $(TARGET) ;
+	CONFIG_FILE = $(CONFIG_FILE:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 	SearchSource $(CONFIG_FILE) ;
-	CONFIG_FILE on $(TARGET) = $(CONFIG_FILE) ;      
+	CONFIG_FILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CONFIG_FILE) ;
 }
 
 rule DeployXexHelper
 {
-	local deployLocation ;
-	on $(TARGET) deployLocation = $(DEPLOY_LOCATION) ;
+	local deployLocation = $(DEPLOY_LOCATION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	if $(deployLocation)
 	{
 		local xex = $(_t:S=.xex) ;
@@ -58,11 +57,11 @@ rule DeployXexHelper
 		MakeLocate $(deployXex) : $(LOCATE_TARGET)/deploy ;
 		Depends $(deployXex) : $(xex) ;
 		CopyXex $(deployXex) : $(xex) ;
-		Clean clean:$(TARGET) : $(deployXex) ;
+		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(deployXex) ;
 		
 		DEPLOY_LOCATION on $(deployXex) = $(deployLocation) ;
 		DeployXex $(deployXex) ;
-		Depends $(TARGET) : $(deployXex) ;
+		Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(deployXex) ;
 	}
 }
 
@@ -77,7 +76,7 @@ actions DeployXex
 	EXIT /B 0
 }
 
-rule C._ApplicationFromObjects_PostBuild
+rule C.vc._ApplicationFromObjects_PostBuild
 {
 	ImageXexHelper ;
 	DeployXexHelper ;
@@ -90,8 +89,8 @@ rule C._ApplicationTargetInfo
 
 rule C.DeployXex TARGET : DEPLOY_LOCATION
 {
-	TARGET = [ _retrieveActiveTargetName $(TARGET) ] ;
-	DEPLOY_LOCATION on $(TARGET) = $(DEPLOY_LOCATION) ;
+	C.ActiveTarget $(TARGET) ;
+	DEPLOY_LOCATION on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(DEPLOY_LOCATION) ;
 }
 
 rule C.Xbox360DeployToolSettings TARGET : REMOTE_ROOT : DEPLOYMENT_TYPE : DEPLOYMENT_FILES
