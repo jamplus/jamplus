@@ -1,8 +1,6 @@
 #VISUAL_STUDIO_FORCE_VERSION = 10.0 ;
 
-rule FindVisualStudioHelper VERSION {
-	local compiler ;
-
+rule FindVisualStudioHelper VERSION : COMPILER {
 	switch $(VERSION) {
 		case vs2012 :
 			local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
@@ -15,7 +13,7 @@ rule FindVisualStudioHelper VERSION {
 			if $(MSVCNT) {
 				MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
 				MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
-				compiler = vs2012 ;
+				COMPILER = vs2012 ;
 			}
 
 		case vs2010 :
@@ -29,7 +27,7 @@ rule FindVisualStudioHelper VERSION {
 			if $(MSVCNT) {
 				MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
 				MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
-				compiler = vs2010 ;
+				COMPILER = vs2010 ;
 			}
 
 		case vs2008 :
@@ -42,7 +40,7 @@ rule FindVisualStudioHelper VERSION {
 			if $(MSVCNT) {
 				MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
 				MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
-				compiler = vs2008 ;
+				COMPILER = vs2008 ;
 			}
 
 		case vs2005 :
@@ -54,7 +52,7 @@ rule FindVisualStudioHelper VERSION {
 			if $(MSVCNT) {
 				MSVCNT = @(..\\..\\VC:R=$(MSVCNT)) ;
 				MSVCNT_BIN_PATH = @($(MSVCNT)/../Common7/IDE:R=) ;
-				compiler = vs2005 ;
+				COMPILER = vs2005 ;
 			}
 
 		case vs2003 :
@@ -66,7 +64,7 @@ rule FindVisualStudioHelper VERSION {
 			if $(MSVCNT) {
 				MSVCNT = @(..\\..\\vc7:R=$(MSVCNT)) ;
 				MSVCNT_BIN_PATH = $(MSVCNT)/../Common7/IDE ;
-				compiler = vs2003 ;
+				COMPILER = vs2003 ;
 			}
 
 		case vs2002 :
@@ -79,7 +77,7 @@ rule FindVisualStudioHelper VERSION {
 			if $(MSVCNT) {
 				MSVCNT = $(MSVCNT)\\..\\..\\vc7 ;
 				MSVCNT = @(..\\..\\vc7:R=$(MSVCNT)) ;
-				compiler = vs2002 ;
+				COMPILER = vs2002 ;
 			}
 
 		case vc6 :
@@ -87,11 +85,11 @@ rule FindVisualStudioHelper VERSION {
 		    MSVCNT ?= [ W32_GETREG $(key) ] ;
 		    if $(MSVCNT) {
 				MSVCNT_BIN_PATH = "$(MSVCNT)/../Common/MSDev98/Bin" ;
-				compiler = vc6 ;
+				COMPILER = vc6 ;
 			}
 	}
 
-	if ! $(compiler) {
+	if ! $(COMPILER) {
 		return ;
 	}
 
@@ -114,7 +112,7 @@ rule FindVisualStudioHelper VERSION {
 		IncludeModule c-compilers/$(C.PLATFORM)-vc ;
 	}
 
-	C.$(C.PLATFORM).vc.AutoDetect $(compiler) ;
+	C.$(C.PLATFORM).vc.AutoDetect $(COMPILER) ;
 
 	MSVCNT on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCNT) ;
 	MSVCNT_BIN_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCNT_BIN_PATH) ;
@@ -133,7 +131,7 @@ rule FindVisualStudioHelper VERSION {
 
 	TOOLCHAIN_COMPILER_KEYS on $(C.COMPILER_SUITE_SYMBOL) += MSVCNT ;
 
-	return $(compiler) ;
+	return $(COMPILER) ;
 }
 
 

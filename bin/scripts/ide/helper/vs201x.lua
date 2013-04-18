@@ -124,6 +124,9 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 					and project.OutputNames and project.OutputNames[platformName] and project.OutputNames[platformName][configName] then
 					configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
 				end
+				if project.DebuggerOutputNames  and  project.DebuggerOutputNames[platformName]  and  project.DebuggerOutputNames[platformName][configName] then
+					configInfo.Output = project.DebuggerOutputNames[platformName][configName]
+				end
 				configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
 				configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
 				configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName

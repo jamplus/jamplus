@@ -85,7 +85,7 @@ rule C._ApplicationFromObjects_PostBuild
 
 rule C._ApplicationTargetInfo
 {
-	DEBUGGEROUTPUTNAME.$(PLATFORM).$(CONFIG) on $(TARGET) = $(_t:S=.xex:R=$(outputPath):G=) ;
+	DEBUGGEROUTPUTNAME.$(C.ACTIVE_TOOLCHAIN_TARGET) on $(TARGET) = $(_t:S=.xex:R=$(outputPath):G=) ;
 }
 
 rule C.DeployXex TARGET : DEPLOY_LOCATION

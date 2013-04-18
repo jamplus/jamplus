@@ -28,9 +28,7 @@ rule C.AutoDetect {
 	MSSDK_STDHDRS = "$(MSVCNT)/include/xbox" ;
 	MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/xbox" ;
 
-	FindVisualStudioHelper xbox360 ;
-
-	COMPILER = xbox360 ;
+	COMPILER = [ FindVisualStudioHelper xbox360 : xbox360 ] ;
 
 	IncludeModule c-compilers/c-vc ;
 
