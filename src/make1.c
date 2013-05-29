@@ -340,7 +340,9 @@ make1b( TARGET *t )
 #ifdef OPT_BUILTIN_NEEDS_EXT
 	    /* Only test a target's MightNotUpdate flag if the target's build was successful. */
 	    if( c->target->status == EXEC_CMD_OK ) {
-		if ( c->target->flags & T_FLAG_MIGHTNOTUPDATE ) {
+		/* Skip checking MightNotUpdate children if the target is bound to a missing file, */
+		/* as in this case it should be built anyway */
+		if ( c->target->flags & T_FLAG_MIGHTNOTUPDATE && t->binding != T_BIND_MISSING ) {
 		    time_t timestamp;
 
 		    /* Mark that we've seen a MightNotUpdate flag in this set of children. */
