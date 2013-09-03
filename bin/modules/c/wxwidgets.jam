@@ -17,6 +17,7 @@ if ! $(wxWidgets_ROOT)
 			"$(ProgramFiles:/J=$(SPACE))/"
 		;
 		local PATH_SUFFIXES =
+			wxWidgets-2.9.5
 			wxWidgets-2.9.4
 			wxWidgets-2.9.3
 			wxWidgets-2.9.2
