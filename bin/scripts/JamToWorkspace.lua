@@ -610,7 +610,42 @@ function DumpWorkspace(workspace)
 end
 
 
+function GetUserInput(variable)
+    if type(variable[2]) == 'table' then
+        local values = {}
+        for _, nonExpandedValue in ipairs(variable[2]) do
+            values[#values + 1] = expand(tostring(nonExpandedValue), expandTable, _G)
+        end
+
+        local userChoice
+        while true do
+            io.write('Choose setting for ' .. variable[1] .. ':\n')
+            for index, value in ipairs(values) do
+                io.write('    ' .. index .. ') ' .. value .. '\n')
+            end
+            io.write('Your choice? ');  io.stdout:flush()
+            userChoice = tonumber(io.read('*l'))
+            if userChoice >= 1  and  userChoice <= #values then
+                break
+            end
+
+            io.write('Invalid choice.  Try again.\n\n')
+        end
+
+        variable[2] = values[userChoice]
+    end
+end
+
+
 function BuildProject()
+	-- Fill in User Variables
+	local userVariables = {}
+	if type(Config.UserVariables) == 'table' then
+		for _, variable in ipairs(Config.UserVariables) do
+		    GetUserInput(variable)
+		end
+	end
+
 	print('Creating build environment...')
 	os.mkdir(destinationRootPath)
 
@@ -654,8 +689,9 @@ include "$(settingsFile)" ;
 	-- Write the Jamfile variables out.
 	if Config.JamfileVariables then
 		for _, variable in ipairs(Config.JamfileVariables) do
-			jamfileText[#jamfileText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2])) .. '" ;\n'
-		end
+		    GetUserInput(variable)
+            jamfileText[#jamfileText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2]), userVariables, _G) .. '" ;\n'
+        end
 		jamfileText[#jamfileText + 1] = '\n'
 	end
 
@@ -723,7 +759,8 @@ include "$(settingsFile)" ;
 		-- Write the Jambase variables out.
 		if type(Config.JambaseVariables) == 'table' then
 			for _, variable in ipairs(Config.JambaseVariables) do
-				jambaseText[#jambaseText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2]), variablesTable) .. '" ;\n'
+                GetUserInput(variable)
+				jambaseText[#jambaseText + 1] = variable[1] .. ' = "' .. expand(tostring(variable[2]), userVariables, variablesTable) .. '" ;\n'
 			end
 			jambaseText[#jambaseText + 1] = '\n'
 		end
@@ -744,10 +781,10 @@ include "$(settingsFile)" ;
 		-- Write the Jambase variables out.
 		if type(Config.JamModulesUserPath) == 'table' then
 			for _, path in ipairs(Config.JamModulesUserPath) do
-				jambaseText[#jambaseText + 1] = 'JAM_MODULES_USER_PATH += "' .. expand(path, variablesTable) .. '" ;\n'
+				jambaseText[#jambaseText + 1] = 'JAM_MODULES_USER_PATH += "' .. expand(path, userVariables, variablesTable) .. '" ;\n'
 			end
 		elseif type(Config.JamModulesUserPath) == 'string' then
-			jambaseText[#jambaseText + 1] = 'JAM_MODULES_USER_PATH += "' .. expand(Config.JamModulesUserPath, variablesTable) .. '" ;\n'
+			jambaseText[#jambaseText + 1] = 'JAM_MODULES_USER_PATH += "' .. expand(Config.JamModulesUserPath, userVariables, variablesTable) .. '" ;\n'
 		end
 
 		jambaseText[#jambaseText + 1] = "JAM_MODULES_USER_PATH += \"" .. sourceRootPath .. "\" ;\n"
