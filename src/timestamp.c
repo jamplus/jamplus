@@ -253,6 +253,11 @@ timestamp(
 
 							/* If the parent directory has been scanned, we can check to see if the */
 							/* child directory was in the list. */
+							if ( !( b2->flags & BIND_SCANNED ) )
+							{
+								file_dirscan( buf, time_enter, bindhash );
+								b2->flags |= BIND_SCANNED;
+							}
 							if ( b2->flags & BIND_SCANNED )
 							{
 								*prevPtr = 0;
