@@ -3,6 +3,8 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
+local uuid = require 'uuid'
+
 local VisualStudio200xProjectMetaTable = {  __index = VisualStudio200xProjectMetaTable  }
 
 local function GetMapPlatformToVSPlatform(platformName)

@@ -12,8 +12,7 @@ end
 
 local getopt = require 'getopt'
 require 'ex'
-require 'md5'
-require 'uuid'
+local md5 = require 'md5'
 expand = require 'expand'
 
 scriptPath = os.path.simplify(os.path.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()))
