@@ -144,15 +144,26 @@ end
 
 
 function ProcessCommandLine()
-	JamFlags = { }
+	JambaseFlags = { }
 
-	function ProcessJamFlags(newarg, oldarg)
+	function ProcessJambaseFlags(newarg, oldarg)
 		local key, value = newarg:match('(.+)=(.+)')
 		if not key then
-			errors = { 'Invalid --jamflags ' .. newarg .. '.  Must be in KEY=VALUE form.' }
+			errors = { 'Invalid --jambaseflags ' .. newarg .. '.  Must be in KEY=VALUE form.' }
 			Usage()
 		end
-		JamFlags[#JamFlags + 1] = { Key = key, Value = value }
+		JambaseFlags[#JambaseFlags + 1] = { Key = key, Value = value }
+	end
+
+	JamfileFlags = { }
+
+	function ProcessJamfileFlags(newarg, oldarg)
+		local key, value = newarg:match('(.+)=(.+)')
+		if not key then
+			errors = { 'Invalid --jamfileflags ' .. newarg .. '.  Must be in KEY=VALUE form.' }
+			Usage()
+		end
+		JamfileFlags[#JamfileFlags + 1] = { Key = key, Value = value }
 	end
 
 	local options = getopt.makeOptions{
@@ -161,7 +172,8 @@ function ProcessCommandLine()
 		getopt.Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
 		getopt.Option {{"postfix"}, "Extra text for the IDE project name"},
 		getopt.Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
-		getopt.Option {{"jamflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
+		getopt.Option {{"jambaseflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
+		getopt.Option {{"jamfileflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
 		getopt.Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMEXEPATH' },
 	}
 
@@ -199,9 +211,13 @@ function ProcessCommandLine()
 	opts.gen = opts.gen and opts.gen[#opts.gen] or 'none'
 	opts.compiler = opts.compiler and opts.compiler[#opts.compiler]
 	opts.config = opts.config and opts.config[#opts.config]
-	opts.jamflags = opts.jamflags and opts.jamflags[#opts.jamflags]
-	if opts.jamflags then
-		opts.jamflags = ProcessJamFlags(opts.jamflags)
+	opts.jambaseflags = opts.jambaseflags and opts.jambaseflags[#opts.jambaseflags]
+	if opts.jambaseflags then
+		ProcessJambaseFlags(opts.jambaseflags)
+	end
+	opts.jamfileflags = opts.jamfileflags and opts.jamfileflags[#opts.jamfileflags]
+	if opts.jamfileflags then
+		ProcessJamfileFlags(opts.jamfileflags)
 	end
 	opts.jamexepath = opts.jamexepath and opts.jamexepath[#opts.jamexepath]
 
@@ -694,6 +710,10 @@ include "$(settingsFile)" ;
 		jamfileText[#jamfileText + 1] = '\n'
 	end
 
+	for _, info in ipairs(Config.JamfileFlags) do
+		jamfileText[#jamfileText + 1] = expand(info.Key .. ' = "' .. info.Value .. '" ;\n', exporter.Options, userVariables, _G)
+	end
+
 	-- Write all the SubDir roots.
 	for _, subInclude in ipairs(Config.SubIncludes) do
 		local expandTable =
@@ -773,8 +793,8 @@ include "$(settingsFile)" ;
 			jambaseText[#jambaseText + 1] = '\n}\n'
 		end
 
-		for _, info in ipairs(Config.JamFlags) do
-			jambaseText[#jambaseText + 1] = expand(info.Key .. ' = ' .. info.Value .. ' ;\n', exporter.Options, _G)
+		for _, info in ipairs(Config.JambaseFlags) do
+			jambaseText[#jambaseText + 1] = expand(info.Key .. ' = "' .. info.Value .. '" ;\n', exporter.Options, _G)
 		end
 
 		-- Write the Jambase variables out.
@@ -968,7 +988,8 @@ Config.SubIncludes =
 	{ 'AppRoot', '"$(sourceRootPath)"', sourceJamfile },
 }
 
-Config.JamFlags = JamFlags
+Config.JambaseFlags = JambaseFlags
+Config.JamfileFlags = JamfileFlags
 
 -- Do the same with the destination.
 destinationRootPath = os.path.simplify(os.path.add_slash(os.path.make_absolute(nonOpts[2] or '.')))
