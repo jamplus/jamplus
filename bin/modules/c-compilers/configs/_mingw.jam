@@ -24,6 +24,9 @@
 
 	#STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = /usr/include ;
 
+	MINGW on $(C.COMPILER_SUITE_SYMBOL) = 1 ;
+	TOOLCHAIN_COMPILER_KEYS on $(C.COMPILER_SUITE_SYMBOL) += MINGW ;
+
 	C.Flags * : CC	: -x c ;
 	C.Flags * : C++	: -x c++ ;
 	C.Flags * : M	: -x objective-c ;
