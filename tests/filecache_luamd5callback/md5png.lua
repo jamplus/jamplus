@@ -1,5 +1,5 @@
-require 'md5'
-require 'struct'
+local md5 = require 'md5'
+local struct = require 'struct'
 
 function md5png(filename)
 	print("md5png: Calculating " .. filename .. "...")
