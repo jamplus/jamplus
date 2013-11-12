@@ -32,7 +32,7 @@
     C.AR on $(C.COMPILER_SUITE_SYMBOL)   	= "$(MINGW_ROOT)/bin/ar" ru ;
     C.CC on $(C.COMPILER_SUITE_SYMBOL)   	= "$(MINGW_ROOT)/bin/gcc" ;
     C.C++ on $(C.COMPILER_SUITE_SYMBOL)  	= "$(MINGW_ROOT)/bin/g++" ;
-    C.LINK on $(C.COMPILER_SUITE_SYMBOL) 	= "$(MINGW_ROOT)/bin/gcc" ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL) 	= "$(MINGW_ROOT)/bin/g++" ;
     C.RANLIB on $(C.COMPILER_SUITE_SYMBOL)  = "$(MINGW_ROOT)/bin/ranlib" ;
 }
 
