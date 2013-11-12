@@ -38,10 +38,15 @@ rule C.UseOpenSSL TARGET : OPTIONS {
 		C.IncludeDirectories $(TARGET) : $(OPENSSL$(bits)_ROOT)/include $(OPENSSL$(bits)_ROOT)/include/openssl ;
 
 		if link in $(OPTIONS) {
-			C.LinkDirectories $(TARGET) : $(OPENSSL$(bits)_ROOT)/lib/VC/static ;
+			if $(MSVCNT) {
+				C.LinkDirectories $(TARGET) : $(OPENSSL$(bits)_ROOT)/lib/VC/static ;
+				C.LinkPrebuiltLibraries $(TARGET) : libeay32MT ssleay32MT ;
+			} else if $(MINGW) {
+				local opensslMinGWLibDirectory = $(OPENSSL$(bits)_ROOT)/lib/MinGW ;
+				C.LinkPrebuiltLibraries : $(opensslMinGWLibDirectory)/libeay32 $(opensslMinGWLibDirectory)/ssleay32 ;
+			}
 
-			#C.LinkPrebuiltLibraries : libeay32 ssleay32 ;
-			C.LinkPrebuiltLibraries $(TARGET) : libeay32MT ssleay32MT advapi32 gdi32 user32 ;
+			C.LinkPrebuiltLibraries $(TARGET) : advapi32 gdi32 user32 ;
 
 			C.LinkPrebuiltLibraries $(TARGET) : ws2_32 ;
 		}
