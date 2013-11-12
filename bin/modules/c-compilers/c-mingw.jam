@@ -22,9 +22,9 @@ actions updated together piecemeal C.mingw.Archive {
 	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
 }
 
-actions C.mingw.Link {
+actions response C.mingw.Link {
     PATH=$(MINGW_ROOT)/bin;%PATH%
-	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:TC)
+	"$(C.LINK)" @@($(LINKFLAGS) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:TC)) -o $(<[1]:C)
 }
 
 actions together C.mingw.Ranlib {
