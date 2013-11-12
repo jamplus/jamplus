@@ -126,10 +126,6 @@ rule C.mingw._MultiCppCompile_SetupFlags {
 	}
 
 	_flags += "-o \"$(_obj:T)\"" ;
-
-	if $(C_LIBRARY_SHARED_MODULE) {
-		_flags += -fPIC ;
-	}
 }
 
 rule C.mingw._SharedLibraryFromObjects_ExportLib {
@@ -145,9 +141,9 @@ rule C.mingw._SharedLibraryFromObjects_ExportLib {
 rule C.mingw._SharedLibraryFromObjects_LinkFlags
 {
 	if module in $(OPTIONS) {
-		linkFlags += -shared -fPIC ;
+		linkFlags += -shared ;
 	} else {
-		on $(TARGET) linkFlags += -shared -fPIC ;
+		on $(TARGET) linkFlags += -shared ;
 	}
 }
 
