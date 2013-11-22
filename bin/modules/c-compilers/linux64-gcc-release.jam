@@ -1,0 +1,4 @@
+C.Flags CC	: * : -O2 : release : linux64 ;
+C.Flags C++	: *	: -O2 : release : linux64 ;
+C.Flags M	: *	: -O2 : release : linux64 ;
+C.Flags MM	: *	: -O2 : release : linux64 ;
