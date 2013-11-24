@@ -99,14 +99,39 @@ if ! $(wxWidgets_ROOT)
 					wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/msw ;
 				}
 			}
+			else if $(MINGW)
+			{
+				if shared in $(OPTIONS)
+				{
+					wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/gcc_dll ;
+				}
+				else
+				{
+					wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/gcc_lib ;
+				}
+
+				local wxbase.lib = [ Glob $(wxWidgets_LIB_DIR) : libwxbase*.a ] ;
+				if $(wxbase.lib)
+				{
+					wxWidgets_VERSION = [ Match $(wxWidgets_LIB_DIR)/libwxbase([0-9][0-9]) : $(wxbase.lib[1]) ] ;
+				}
+			}
 
 			if $(wxWidgets_VERSION) = 29 {
+				wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswud ;
+				wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/mswu ;
+				wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/mswu ;
+
 				wxWidgets_COMMON_LIBRARIES += scintilla ;
 
 				wxWidgets_POSTFIX.debug = ud ;
 				wxWidgets_POSTFIX.release = "u" ;
 				wxWidgets_POSTFIX.releaseltcg = "u" ;
 			} else {
+				wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswd ;
+				wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/msw ;
+				wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/msw ;
+
 				wxWidgets_POSTFIX.debug = d ;
 				wxWidgets_POSTFIX.release = "" ;
 				wxWidgets_POSTFIX.releaseltcg = "" ;
@@ -208,7 +233,10 @@ rule C.UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 			}
 
 			C.LinkDirectories $(TARGETS) : $(wxWidgets_LIB_DIR) ;
-			C.LinkPrebuiltLibraries $(TARGETS) : advapi32 comdlg32 comctl32 dbghelp gdi32 ole32 oleaut32 Rpcrt4 shell32 user32 uuid winspool wsock32 ;
+			C.LinkPrebuiltLibraries $(TARGETS) : advapi32 comdlg32 comctl32 gdi32 ole32 oleaut32 Rpcrt4 shell32 user32 uuid winspool wsock32 ;
+			if $(MSVCNT) {
+				C.LinkPrebuiltLibraries $(TARGETS) : dbghelp ;
+			}
 		} else {
 			local linkFlags = [ Split [ Subst [ Shell "wx-config $(wx-config--debug) --libs $(COMPONENTS:J=$(SPACE))" ] : $(NEWLINE) : ] : $(SPACE) ] ;
 			C.LinkFlags $(TARGETS) : $(linkFlags) ;
