@@ -19,8 +19,8 @@
 /*
 ** pseudo-indices
 */
-#define LUA_REGISTRYINDEX	(-10000)
-#define LUA_GLOBALSINDEX	(-10002)
+#define LUA_REGISTRYINDEX    (-10000)
+#define LUA_GLOBALSINDEX    (-10002)
 
 typedef struct ls_lua_State ls_lua_State;
 
@@ -37,17 +37,17 @@ typedef LUA_INTEGER ls_lua_Integer;
 /*
 ** basic types
 */
-#define LUA_TNONE		(-1)
+#define LUA_TNONE        (-1)
 
-#define LUA_TNIL		0
-#define LUA_TBOOLEAN		1
-#define LUA_TLIGHTUSERDATA	2
-#define LUA_TNUMBER		3
-#define LUA_TSTRING		4
-#define LUA_TTABLE		5
-#define LUA_TFUNCTION		6
-#define LUA_TUSERDATA		7
-#define LUA_TTHREAD		8
+#define LUA_TNIL        0
+#define LUA_TBOOLEAN        1
+#define LUA_TLIGHTUSERDATA    2
+#define LUA_TNUMBER        3
+#define LUA_TSTRING        4
+#define LUA_TTABLE        5
+#define LUA_TFUNCTION        6
+#define LUA_TUSERDATA        7
+#define LUA_TTHREAD        8
 
 void (*ls_lua_close) (ls_lua_State *L);
 
@@ -56,10 +56,10 @@ void  (*ls_lua_settop) (ls_lua_State *L, int idx);
 void (*ls_lua_pushvalue) (ls_lua_State *L, int idx);
 void (*ls_lua_remove) (ls_lua_State *L, int idx);
 
-#define ls_lua_isfunction(L,n)	(ls_lua_type(L, (n)) == LUA_TFUNCTION)
-#define ls_lua_istable(L,n)	(ls_lua_type(L, (n)) == LUA_TTABLE)
-#define ls_lua_isnil(L,n)		(ls_lua_type(L, (n)) == LUA_TNIL)
-#define ls_lua_isboolean(L,n)	(ls_lua_type(L, (n)) == LUA_TBOOLEAN)
+#define ls_lua_isfunction(L,n)    (ls_lua_type(L, (n)) == LUA_TFUNCTION)
+#define ls_lua_istable(L,n)    (ls_lua_type(L, (n)) == LUA_TTABLE)
+#define ls_lua_isnil(L,n)        (ls_lua_type(L, (n)) == LUA_TNIL)
+#define ls_lua_isboolean(L,n)    (ls_lua_type(L, (n)) == LUA_TBOOLEAN)
 int             (*ls_lua_isnumber) (ls_lua_State *L, int idx);
 int             (*ls_lua_isstring) (ls_lua_State *L, int idx);
 int             (*ls_lua_isuserdata) (ls_lua_State *L, int idx);
@@ -67,7 +67,7 @@ int             (*ls_lua_type) (ls_lua_State *L, int idx);
 
 ls_lua_Number      (*ls_lua_tonumber) (ls_lua_State *L, int idx);
 int             (*ls_lua_toboolean) (ls_lua_State *L, int idx);
-#define ls_lua_tostring(L,i)	ls_lua_tolstring(L, (i), NULL)
+#define ls_lua_tostring(L,i)    ls_lua_tolstring(L, (i), NULL)
 const char     *(*ls_lua_tolstring) (ls_lua_State *L, int idx, size_t *len);
 size_t          (*ls_lua_objlen) (ls_lua_State *L, int idx);
 
@@ -93,9 +93,9 @@ int   (*ls_lua_cpcall) (ls_lua_State *L, ls_lua_CFunction func, void *ud);
 
 int   (*ls_lua_next) (ls_lua_State *L, int idx);
 
-#define ls_lua_pop(L,n)		ls_lua_settop(L, -(n)-1)
+#define ls_lua_pop(L,n)        ls_lua_settop(L, -(n)-1)
 
-#define ls_lua_newtable(L)		ls_lua_createtable(L, 0, 0)
+#define ls_lua_newtable(L)        ls_lua_createtable(L, 0, 0)
 
 void (*ls_luaL_openlibs) (ls_lua_State *L);
 int (*ls_luaL_loadstring) (ls_lua_State *L, const char *s);
@@ -112,22 +112,22 @@ static ls_lua_State *L;
 static LIST *luahelper_addtolist(ls_lua_State *L, LIST *list, int index)
 {
     if (ls_lua_isboolean(L, index))
-	return list_append(list, ls_lua_toboolean(L, index) ? "true" : "false", 0);
+        return list_append(list, ls_lua_toboolean(L, index) ? "true" : "false", 0);
 
     if (ls_lua_isnumber(L, index))
-	return list_append(list, ls_lua_tostring(L, index), 0);
+        return list_append(list, ls_lua_tostring(L, index), 0);
 
     if (ls_lua_isstring(L, index))
-	return list_append(list, ls_lua_tostring(L, index), 0);
+        return list_append(list, ls_lua_tostring(L, index), 0);
 
     else if (ls_lua_istable(L, index))
     {
-	ls_lua_pushnil(L);
-	while (ls_lua_next(L, index) != 0)
-	{
-	    list = luahelper_addtolist(L, list, index + 2);
-	    ls_lua_pop(L, 1);
-	}
+        ls_lua_pushnil(L);
+        while (ls_lua_next(L, index) != 0)
+        {
+            list = luahelper_addtolist(L, list, index + 2);
+            ls_lua_pop(L, 1);
+        }
     }
 
     return list;
@@ -138,26 +138,26 @@ int LS_jam_setvar(ls_lua_State *L)
 {
     int numParams = ls_lua_gettop(L);
     if (numParams < 2  ||  numParams > 3)
-	return 0;
+        return 0;
 
     if (!ls_lua_isstring(L, 1))
-	return 0;
+        return 0;
 
     if (numParams == 2)
     {
-	var_set(ls_lua_tostring(L, 1), luahelper_addtolist(L, L0, 2), VAR_SET);
+        var_set(ls_lua_tostring(L, 1), luahelper_addtolist(L, L0, 2), VAR_SET);
     }
     else
     {
-	TARGET *t;
+        TARGET *t;
 
-	if (!ls_lua_isstring(L, 2))
-	    return 0;
+        if (!ls_lua_isstring(L, 2))
+            return 0;
 
-	t = bindtarget(ls_lua_tostring(L, 1));
-	pushsettings(t->settings);
-	var_set(ls_lua_tostring(L, 2), luahelper_addtolist(L, L0, 3), VAR_SET);
-	popsettings(t->settings);
+        t = bindtarget(ls_lua_tostring(L, 1));
+        pushsettings(t->settings);
+        var_set(ls_lua_tostring(L, 2), luahelper_addtolist(L, L0, 3), VAR_SET);
+        popsettings(t->settings);
     }
 
     return 0;
@@ -172,35 +172,35 @@ int LS_jam_getvar(ls_lua_State *L)
 
     int numParams = ls_lua_gettop(L);
     if (numParams < 1  ||  numParams > 2)
-	return 0;
+        return 0;
 
     if (!ls_lua_isstring(L, 1))
-	return 0;
+        return 0;
 
     if (numParams == 1)
     {
-	list = var_get(ls_lua_tostring(L, 1));
+        list = var_get(ls_lua_tostring(L, 1));
     }
     else
     {
-	TARGET *t;
+        TARGET *t;
 
-	if (!ls_lua_isstring(L, 2))
-	    return 0;
+        if (!ls_lua_isstring(L, 2))
+            return 0;
 
-	t = bindtarget(ls_lua_tostring(L, 1));
-	pushsettings(t->settings);
-	list = var_get(ls_lua_tostring(L, 2));
-	popsettings(t->settings);
+        t = bindtarget(ls_lua_tostring(L, 1));
+        pushsettings(t->settings);
+        list = var_get(ls_lua_tostring(L, 2));
+        popsettings(t->settings);
     }
 
     ls_lua_newtable(L);
     index = 1;
     for (item = list_first(list); item; item = list_next(item), ++index)
     {
-	ls_lua_pushnumber(L, index);
-	ls_lua_pushstring(L, list_value(item));
-	ls_lua_settable(L, -3);
+        ls_lua_pushnumber(L, index);
+        ls_lua_pushstring(L, list_value(item));
+        ls_lua_settable(L, -3);
     }
 
     return 1;
@@ -217,16 +217,16 @@ int LS_jam_evaluaterule(ls_lua_State *L)
 
     int numParams = ls_lua_gettop(L);
     if (numParams < 1)
-	return 0;
+        return 0;
 
     if (!ls_lua_isstring(L, 1))
-	return 0;
+        return 0;
 
     lol_init(&lol);
 
     for (i = 0; i < numParams - 1; ++i)
     {
-	lol_add(&lol, luahelper_addtolist(L, L0, 2 + i));
+        lol_add(&lol, luahelper_addtolist(L, L0, 2 + i));
     }
     list = evaluate_rule(ls_lua_tostring(L, 1), &lol, L0);
     lol_free(&lol);
@@ -235,9 +235,9 @@ int LS_jam_evaluaterule(ls_lua_State *L)
     index = 1;
     for (item = list_first(list); item; item = list_next(item), ++index)
     {
-	ls_lua_pushnumber(L, index);
-	ls_lua_pushstring(L, list_value(item));
-	ls_lua_settable(L, -3);
+        ls_lua_pushnumber(L, index);
+        ls_lua_pushstring(L, list_value(item));
+        ls_lua_settable(L, -3);
     }
 
     return 1;
@@ -255,25 +255,25 @@ static LIST *ls_lua_callhelper(int top, int ret)
 
     if (ret != 0)
     {
-	if (ls_lua_isstring(L, -1))
-	{
-	    printf("jam: Error compiling Lua code\n%s\n", ls_lua_tostring(L, -1));
-	    exit(EXITBAD);
-	}
-	ls_lua_pop(L, 1);
-	return L0;
+        if (ls_lua_isstring(L, -1))
+        {
+            printf("jam: Error compiling Lua code\n%s\n", ls_lua_tostring(L, -1));
+            exit(EXITBAD);
+        }
+        ls_lua_pop(L, 1);
+        return L0;
     }
 
     ret = ls_lua_pcall(L, 0, -1, 0);
     if (ret != 0)
     {
-	if (ls_lua_isstring(L, -1))
-	{
-	    printf("jam: Error running Lua code\n%s\n", ls_lua_tostring(L, -1));
-	    exit(EXITBAD);
-	}
-	ls_lua_pop(L, 1);
-	return L0;
+        if (ls_lua_isstring(L, -1))
+        {
+            printf("jam: Error running Lua code\n%s\n", ls_lua_tostring(L, -1));
+            exit(EXITBAD);
+        }
+        ls_lua_pop(L, 1);
+        return L0;
     }
 
     retList = L0;
@@ -281,7 +281,7 @@ static LIST *ls_lua_callhelper(int top, int ret)
     numParams = ls_lua_gettop(L) - top;
     for (i = 1; i <= numParams; ++i)
     {
-	retList = luahelper_addtolist(L, retList, top + i);
+        retList = luahelper_addtolist(L, retList, top + i);
     }
 
     return retList;
@@ -308,8 +308,8 @@ static int pmain (ls_lua_State *L)
     ret = ls_luaL_loadstring(L, "lanes.configure()");
     ls_lua_callhelper(top, ret);
 
-	ls_lua_newtable(L);
-	ls_lua_setfield(L, LUA_GLOBALSINDEX, "LineFilters");
+    ls_lua_newtable(L);
+    ls_lua_setfield(L, LUA_GLOBALSINDEX, "LineFilters");
 
     return 0;
 }
@@ -335,7 +335,7 @@ void ls_lua_init()
 #endif
 
     if (L)
-	return;
+        return;
 
 #ifdef _DEBUG
     luaSharedLibrary = var_get("LUA_SHARED_LIBRARY.DEBUG");
@@ -345,36 +345,36 @@ void ls_lua_init()
     if (list_first(luaSharedLibrary))
     {
 #ifdef OS_NT
-	handle = LoadLibrary(list_value(list_first(luaSharedLibrary)));
+        handle = LoadLibrary(list_value(list_first(luaSharedLibrary)));
 #else
-	handle = dlopen(list_value(list_first(luaSharedLibrary)), RTLD_LAZY | RTLD_GLOBAL);
+        handle = dlopen(list_value(list_first(luaSharedLibrary)), RTLD_LAZY | RTLD_GLOBAL);
 #endif
     }
     if (!handle)
     {
-	char fileName[4096];
-	getprocesspath(fileName, 4096);
+        char fileName[4096];
+        getprocesspath(fileName, 4096);
 
 #ifdef OS_NT
 #ifdef _DEBUG
-	strcat(fileName, "/lua/lua51_debug.dll");
+        strcat(fileName, "/lua/lua51_debug.dll");
 #else
-	strcat(fileName, "/lua/lua51.dll");
+        strcat(fileName, "/lua/lua51.dll");
 #endif
-	handle = LoadLibrary(fileName);
+        handle = LoadLibrary(fileName);
 #else
 #ifdef _DEBUG
-	strcat(fileName, "/lua/lua51_debug.so");
+        strcat(fileName, "/lua/lua51_debug.so");
 #else
-	strcat(fileName, "/lua/lua51.so");
+        strcat(fileName, "/lua/lua51.so");
 #endif
-	handle = dlopen(fileName, RTLD_LAZY | RTLD_GLOBAL);
+        handle = dlopen(fileName, RTLD_LAZY | RTLD_GLOBAL);
 #endif
-	if (!handle)
-	{
-	    printf("jam: Unable to find the LuaPlus shared library.\n");
-	    exit(EXITBAD);
-	}
+        if (!handle)
+        {
+            printf("jam: Unable to find the LuaPlus shared library.\n");
+            exit(EXITBAD);
+        }
     }
 
     ls_lua_close = (void (*)(ls_lua_State *))ls_lua_loadsymbol(handle, "lua_close");
@@ -437,47 +437,47 @@ int luahelper_taskadd(const char* taskscript)
 
     ls_lua_init();
 
-    ls_lua_getfield(L, LUA_GLOBALSINDEX, "lanes");			/* lanes */
-    ls_lua_getfield(L, -1, "gen");							/* lanes gen */
-    ls_lua_pushstring(L, "*");								/* lanes gen * */
+    ls_lua_getfield(L, LUA_GLOBALSINDEX, "lanes");            /* lanes */
+    ls_lua_getfield(L, -1, "gen");                            /* lanes gen */
+    ls_lua_pushstring(L, "*");                                /* lanes gen * */
 
     newTaskScript = malloc( taskscriptlen + 1 );
     strncpy(newTaskScript, taskscript, taskscriptlen);
     newTaskScript[taskscriptlen] = 0;
-    ret = ls_luaL_loadstring(L, newTaskScript);			/* lanes gen * script */
+    ret = ls_luaL_loadstring(L, newTaskScript);            /* lanes gen * script */
     if (ret != 0)
     {
-	if (ls_lua_isstring(L, -1))
-	    printf("jam: Error compiling Lua lane\n%s\n", ls_lua_tostring(L, -1));
-	ls_lua_pop(L, 2);
-	printf("%s\n", newTaskScript);
-	free(newTaskScript);
-	return -1;
+        if (ls_lua_isstring(L, -1))
+            printf("jam: Error compiling Lua lane\n%s\n", ls_lua_tostring(L, -1));
+        ls_lua_pop(L, 2);
+        printf("%s\n", newTaskScript);
+        free(newTaskScript);
+        return -1;
     }
 
     free(newTaskScript);
-    ret = ls_lua_pcall(L, 2, 1, 0);						/* lanes lane_h */
+    ret = ls_lua_pcall(L, 2, 1, 0);                        /* lanes lane_h */
     if (ret != 0)
     {
-	if (ls_lua_isstring(L, -1))
-	    printf("jam: Error creating Lua lane\n%s\n", ls_lua_tostring(L, -1));
-	ls_lua_pop(L, 2);
-	return -1;
+        if (ls_lua_isstring(L, -1))
+            printf("jam: Error creating Lua lane\n%s\n", ls_lua_tostring(L, -1));
+        ls_lua_pop(L, 2);
+        return -1;
     }
 
-    if (!ls_lua_isfunction(L, -1))							/* lanes lane_h */
+    if (!ls_lua_isfunction(L, -1))                            /* lanes lane_h */
     {
-	ls_lua_pop(L, 2);
-	return -1;
+        ls_lua_pop(L, 2);
+        return -1;
     }
 
-    ret = ls_lua_pcall(L, 0, 1, 0);						/* lanes ret */
+    ret = ls_lua_pcall(L, 0, 1, 0);                        /* lanes ret */
     if (ret != 0)
     {
-	if (ls_lua_isstring(L, -1))
-	    printf("jam: Error calling Lua lane\n%s\n", ls_lua_tostring(L, -1));
-	ls_lua_pop(L, 2);
-	return -1;
+        if (ls_lua_isstring(L, -1))
+            printf("jam: Error calling Lua lane\n%s\n", ls_lua_tostring(L, -1));
+        ls_lua_pop(L, 2);
+        return -1;
     }
 
     ref = ls_luaL_ref(L, LUA_REGISTRYINDEX);
@@ -488,72 +488,72 @@ int luahelper_taskadd(const char* taskscript)
 
 int luahelper_taskisrunning(int taskid, int* returnValue)
 {
-	const char* status;
-	ls_lua_init();
+    const char* status;
+    ls_lua_init();
 
-	ls_lua_rawgeti(L, LUA_REGISTRYINDEX, taskid);		/* lane_h */
-	if (!ls_lua_isuserdata(L, -1))
-	{
-		*returnValue = 1;
-		ls_lua_pop(L, 1);
-		return 0;
-	}
-	ls_lua_getfield(L, -1, "status");					/* lane_h status */
+    ls_lua_rawgeti(L, LUA_REGISTRYINDEX, taskid);        /* lane_h */
+    if (!ls_lua_isuserdata(L, -1))
+    {
+        *returnValue = 1;
+        ls_lua_pop(L, 1);
+        return 0;
+    }
+    ls_lua_getfield(L, -1, "status");                    /* lane_h status */
 
-	status = ls_lua_tostring(L, -1);
-	if (strcmp(status, "done") == 0)
-	{
-		int ret;
+    status = ls_lua_tostring(L, -1);
+    if (strcmp(status, "done") == 0)
+    {
+        int ret;
 
-		ls_lua_pop(L, 1);								/* lane_h */
-		ls_lua_getfield(L, -1, "join");					/* lane_h join(function) */
-		ls_lua_pushvalue(L, -2);						/* lane_h join(function) lane_h */
-		ret = ls_lua_pcall(L, 1, 1, 0);					/* lane_h ret */
-		if (ret != 0)
-		{
-			if (ls_lua_isstring(L, -1))
-				printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -1));
-			*returnValue = 1;
-		}
-		if (ls_lua_isnumber(L, -1))
-			*returnValue = (int)ls_lua_tonumber(L, -1);
-		else
-			*returnValue = 0;
-		ls_lua_pop(L, 2);
-		ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
-		return 0;
-	}
-	else if (strcmp(status, "error") == 0  ||  strcmp(status, "cancelled") == 0)
-	{
-		int ret;
+        ls_lua_pop(L, 1);                                /* lane_h */
+        ls_lua_getfield(L, -1, "join");                    /* lane_h join(function) */
+        ls_lua_pushvalue(L, -2);                        /* lane_h join(function) lane_h */
+        ret = ls_lua_pcall(L, 1, 1, 0);                    /* lane_h ret */
+        if (ret != 0)
+        {
+            if (ls_lua_isstring(L, -1))
+                printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -1));
+            *returnValue = 1;
+        }
+        if (ls_lua_isnumber(L, -1))
+            *returnValue = (int)ls_lua_tonumber(L, -1);
+        else
+            *returnValue = 0;
+        ls_lua_pop(L, 2);
+        ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
+        return 0;
+    }
+    else if (strcmp(status, "error") == 0  ||  strcmp(status, "cancelled") == 0)
+    {
+        int ret;
 
-		*returnValue = 1;
+        *returnValue = 1;
 
-		ls_lua_pop(L, 1);								/* lane_h */
-		ls_lua_getfield(L, -1, "join");					/* lane_h join(function) */
-		ls_lua_pushvalue(L, -2);						/* lane_h join(function) lane_h */
-		ret = ls_lua_pcall(L, 1, 3, 0);					/* lane_h nil err stack_tbl */
-		if (ret != 0)
-		{
-			if (ls_lua_isstring(L, -1))
-				printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -1));
-			ls_lua_pop(L, 2);
-			return 0;
-		}
+        ls_lua_pop(L, 1);                                /* lane_h */
+        ls_lua_getfield(L, -1, "join");                    /* lane_h join(function) */
+        ls_lua_pushvalue(L, -2);                        /* lane_h join(function) lane_h */
+        ret = ls_lua_pcall(L, 1, 3, 0);                    /* lane_h nil err stack_tbl */
+        if (ret != 0)
+        {
+            if (ls_lua_isstring(L, -1))
+                printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -1));
+            ls_lua_pop(L, 2);
+            return 0;
+        }
 
-		if (ls_lua_isstring(L, -2))
-		{
-			printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -2));
-		}
+        if (ls_lua_isstring(L, -2))
+        {
+            printf("jam: Error in Lua lane\n%s\n", ls_lua_tostring(L, -2));
+        }
 
-		ls_lua_pop(L, 4);								/* */
+        ls_lua_pop(L, 4);                                /* */
 
-		ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
-		return 0;
-	}
+        ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
+        return 0;
+    }
 
-	ls_lua_pop(L, 2);
-	return 1;
+    ls_lua_pop(L, 2);
+    return 1;
 }
 
 
@@ -573,10 +573,10 @@ void luahelper_taskcancel(int taskid)
     ret = ls_lua_pcall(L, 3, -1, 0);
     if (ret != 0)
     {
-	if (ls_lua_isstring(L, -1))
-	    printf("jam: Error running Lua task.cancel\n%s\n", ls_lua_tostring(L, -1));
-	ls_lua_pop(L, 2);
-	return;
+        if (ls_lua_isstring(L, -1))
+            printf("jam: Error running Lua task.cancel\n%s\n", ls_lua_tostring(L, -1));
+        ls_lua_pop(L, 2);
+        return;
     }
 
     ls_lua_pop(L, 1);
@@ -588,56 +588,56 @@ static int linefilter_stack_position = -1;
 int luahelper_push_linefilter(const char* actionName) {
     ls_lua_init();
 
-    ls_lua_getfield(L, LUA_GLOBALSINDEX, "LineFilters");	/* LineFilters */
-    ls_lua_getfield(L, -1, actionName);						/* LineFilters function */
-	if (!ls_lua_isfunction(L, -1)) {
-		ls_lua_pop(L, 2);
-		return 0;
-	}
-	ls_lua_remove(L, -2);
-	linefilter_stack_position = ls_lua_gettop(L);
-	return 1;
+    ls_lua_getfield(L, LUA_GLOBALSINDEX, "LineFilters");    /* LineFilters */
+    ls_lua_getfield(L, -1, actionName);                        /* LineFilters function */
+    if (!ls_lua_isfunction(L, -1)) {
+        ls_lua_pop(L, 2);
+        return 0;
+    }
+    ls_lua_remove(L, -2);
+    linefilter_stack_position = ls_lua_gettop(L);
+    return 1;
 }
 
 
 void luahelper_pop_linefilter() {
-	if (linefilter_stack_position == -1)
-		return;
+    if (linefilter_stack_position == -1)
+        return;
 
-	ls_lua_remove(L, linefilter_stack_position);
-	linefilter_stack_position = -1;
+    ls_lua_remove(L, linefilter_stack_position);
+    linefilter_stack_position = -1;
 }
 
 
 const char* luahelper_linefilter(const char* line, size_t lineSize) {
-	int ret;
-	int top;
-	char* out;
+    int ret;
+    int top;
+    char* out;
 
-	if (linefilter_stack_position == -1) {
-		fprintf(stderr, "jam: Line filter access not enabled.\n");
-		exit(1);
-	}
+    if (linefilter_stack_position == -1) {
+        fprintf(stderr, "jam: Line filter access not enabled.\n");
+        exit(1);
+    }
 
-	ls_lua_init();
+    ls_lua_init();
 
-	top = ls_lua_gettop(L);
-	ls_lua_pushvalue(L, linefilter_stack_position);
-	ls_lua_pushlstring(L, line, lineSize);					/* function line */
-	ret = ls_lua_pcall(L, 1, 1, 0);
-	if (ret != 0)
-	{
-		if (ls_lua_isstring(L, -1))
-			fprintf(stderr, "jam: Error running line filter.\n%s\n", ls_lua_tostring(L, -1));
-		ls_lua_settop(L, top);
-		return NULL;
-	}
+    top = ls_lua_gettop(L);
+    ls_lua_pushvalue(L, linefilter_stack_position);
+    ls_lua_pushlstring(L, line, lineSize);                    /* function line */
+    ret = ls_lua_pcall(L, 1, 1, 0);
+    if (ret != 0)
+    {
+        if (ls_lua_isstring(L, -1))
+            fprintf(stderr, "jam: Error running line filter.\n%s\n", ls_lua_tostring(L, -1));
+        ls_lua_settop(L, top);
+        return NULL;
+    }
 
-	out = malloc(ls_lua_objlen(L, -1) + 1);
-	strcpy(out, ls_lua_tostring(L, -1));
-	ls_lua_settop(L, top);
+    out = malloc(ls_lua_objlen(L, -1) + 1);
+    strcpy(out, ls_lua_tostring(L, -1));
+    ls_lua_settop(L, top);
 
-	return out;
+    return out;
 }
 
 
@@ -652,36 +652,36 @@ int luahelper_md5callback(const char *filename, MD5SUM sum, const char* callback
     ls_lua_getfield(L, LUA_GLOBALSINDEX, callback);
     if (!ls_lua_isfunction(L, -1))
     {
-	ls_lua_pop(L, 1);
-	printf("jam: Error calling Lua md5 callback '%s'.\n", callback);
-	memset(sum, 0, sizeof(MD5SUM));
-	return 0;
+        ls_lua_pop(L, 1);
+        printf("jam: Error calling Lua md5 callback '%s'.\n", callback);
+        memset(sum, 0, sizeof(MD5SUM));
+        return 0;
     }
 
     ls_lua_pushstring(L, filename);
     ret = ls_lua_pcall(L, 1, 1, 0);
     if (ret != 0)
     {
-	if (ls_lua_isstring(L, -1))
-	    printf("jam: Error running Lua md5 callback\n%s\n", ls_lua_tostring(L, -1));
-	ls_lua_pop(L, 1);
-	memset(sum, 0, sizeof(MD5SUM));
-	return 0;
+        if (ls_lua_isstring(L, -1))
+            printf("jam: Error running Lua md5 callback\n%s\n", ls_lua_tostring(L, -1));
+        ls_lua_pop(L, 1);
+        memset(sum, 0, sizeof(MD5SUM));
+        return 0;
     }
 
     if (ls_lua_isnil(L, -1))
     {
-	memset(sum, 0, sizeof(MD5SUM));
-	ls_lua_pop(L, 1);
-	return 0;
+        memset(sum, 0, sizeof(MD5SUM));
+        ls_lua_pop(L, 1);
+        return 0;
     }
 
     if (!ls_lua_isstring(L, -1)  ||  ls_lua_objlen(L, -1) != sizeof(MD5SUM))
     {
-	printf("jam: Error running Lua md5 callback '%s'.\n", callback);
-	memset(sum, 0, sizeof(MD5SUM));
-	ls_lua_pop(L, 1);
-	return 0;
+        printf("jam: Error running Lua md5 callback '%s'.\n", callback);
+        memset(sum, 0, sizeof(MD5SUM));
+        ls_lua_pop(L, 1);
+        return 0;
     }
 
     memcpy(sum, ls_lua_tostring(L, -1), sizeof(MD5SUM));
@@ -694,9 +694,9 @@ int luahelper_md5callback(const char *filename, MD5SUM sum, const char* callback
 
 LIST *
 builtin_luastring(
-		  PARSE	*parse,
-		  LOL		*args,
-		  int		*jmp)
+          PARSE    *parse,
+          LOL        *args,
+          int        *jmp)
 {
     int top;
     int ret;
@@ -704,8 +704,8 @@ builtin_luastring(
     LIST *l = lol_get(args, 0);
     if (!list_first(l))
     {
-	printf("jam: No argument passed to LuaString\n");
-	exit(EXITBAD);
+        printf("jam: No argument passed to LuaString\n");
+        exit(EXITBAD);
     }
     ls_lua_init();
     top = ls_lua_gettop(L);
@@ -716,9 +716,9 @@ builtin_luastring(
 
 LIST *
 builtin_luafile(
-		PARSE	*parse,
-		LOL		*args,
-		int		*jmp)
+        PARSE    *parse,
+        LOL        *args,
+        int        *jmp)
 {
     int top;
     int ret;
@@ -727,15 +727,15 @@ builtin_luafile(
 
     LIST *l = lol_get(args, 0);
     if (!list_first(l)) {
-	printf("jam: No argument passed to LuaFile\n");
-	exit(EXITBAD);
+        printf("jam: No argument passed to LuaFile\n");
+        exit(EXITBAD);
     }
     ls_lua_init();
     top = ls_lua_gettop(L);
     ls_lua_newtable(L);
     for (l2 = list_first(lol_get(args, 1)); l2; l2 = list_next(l2)) {
-	ls_lua_pushstring(L, list_value(l2));
-	ls_lua_rawseti(L, -2, ++index);
+        ls_lua_pushstring(L, list_value(l2));
+        ls_lua_rawseti(L, -2, ++index);
     }
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "arg");
     ret = ls_luaL_loadfile(L, list_value(list_first(l)));
@@ -747,8 +747,8 @@ void ls_lua_shutdown()
 {
     if (L)
     {
-	ls_lua_close(L);
-	L = NULL;
+        ls_lua_close(L);
+        L = NULL;
     }
 }
 
