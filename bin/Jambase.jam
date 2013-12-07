@@ -647,7 +647,7 @@ actions piecemeal together existing removeemptydirs Clean
 }
 
 actions piecemeal together existing removeemptydirs CleanTree {
-	$(RM) -rf "$(2:\\)"
+	$(RM) -rf $(2:C)
 }
 
 if $(NT)
