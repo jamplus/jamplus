@@ -36,7 +36,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 	switch $(SDK_PLATFORM) {
 		case macosx :
 			developerRoot = /Developer/SDKs ;
-			SDK_VERSION ?= 10.8 ;
+			SDK_VERSION ?= 10.9 ;
 			switch $(SDK_VERSION) {
 				case 10.4 :
 					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
@@ -59,8 +59,14 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = macosx10.7 ;
 				
 				case 10.8 :
-					isysroot = @(../../../../Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk:R=$(COMPILER_BIN_PATH)) ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk ;
 					sdkroot = macosx10.8 ;
+
+				case 10.9 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk ;
+					sdkroot = macosx10.9 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
