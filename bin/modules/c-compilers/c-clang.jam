@@ -12,13 +12,13 @@ rule C.clang._LinkPrebuiltLibraries {
 }
 
 
-actions updated together piecemeal C.clang.Archive {
-	"$(C.AR)" -static $(LIBFLAGS) -o $(<:C) $(>:C)
+actions response C.clang.Archive {
+	"$(C.AR)" -static $(LIBFLAGS) -o $(<:C) -filelist @($(>:CJ=$(NEWLINE)))
 }
 
 
-actions updated together piecemeal C.clang.Archive2 {
-	"$(C.AR)" -static $(LIBFLAGS) -o $(<:C) $(>:C)
+actions response C.clang.Archive2 {
+	"$(C.AR)" -static $(LIBFLAGS) -o $(<:C) -filelist @($(>:CJ=$(NEWLINE)))
 }
 
 
