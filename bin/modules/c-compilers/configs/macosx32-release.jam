@@ -6,5 +6,6 @@ C.Flags * : CC	: -g -O2 -arch i386 ;
 C.Flags * : C++	: -g -O2 -arch i386 ;
 C.Flags * : M	: -g -O2 -arch i386 ;
 C.Flags * : MM	: -g -O2 -arch i386 ;
+C.LibFlags * : -arch_only i386 ;
 C.LinkFlags * : -arch i386 ;
 
