@@ -474,7 +474,7 @@ rule C.GenerateDSYMFile TARGET {
 	OUTPUT_PATH on $(_t.dsym) = $(dsymBundlePath) ;
 	MakeLocate $(_t.dsym) : $(dsymBundlePath)/Contents/Resources/DWARF ;
 	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t.dsym) : $(_t) ;
-	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_t.dsym) ;
+	CleanTree $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(dsymBundlePath) ;
 	C._GenerateDSYMFile $(_t.dsym) : $(_t) : $(C.COMPILER_SUITE_SYMBOL) ;
 }
 
