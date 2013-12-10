@@ -616,7 +616,7 @@ rule FRelPath
 # First, the (generic) UNIX versions
 #
 
-rule FQuote { return \\\"$(<)\\\" ; }
+rule FQuote { return \\\"$(<)\\\" ; }		#"
 
 rule FDirName
 {
