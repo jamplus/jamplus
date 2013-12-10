@@ -17,11 +17,6 @@ rule C.mingw._LinkPrebuiltLibraries {
 }
 
 
-actions updated together piecemeal C.mingw.Archive {
-    PATH=$(MINGW_ROOT)/bin;%PATH%
-	"$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
-}
-
 actions response C.mingw.Link {
     PATH=$(MINGW_ROOT)/bin;%PATH%
 	"$(C.LINK)" @@($(LINKFLAGS) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:TC)) -o $(<[1]:C)
