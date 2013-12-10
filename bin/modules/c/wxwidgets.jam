@@ -17,6 +17,7 @@ if ! $(wxWidgets_ROOT)
 			"$(ProgramFiles:/J=$(SPACE))/"
 		;
 		local PATH_SUFFIXES =
+			wxWidgets-3.0.0
 			wxWidgets-2.9.5
 			wxWidgets-2.9.4
 			wxWidgets-2.9.3
@@ -89,7 +90,7 @@ if ! $(wxWidgets_ROOT)
 					wxWidgets_VERSION = [ Match $(wxWidgets_LIB_DIR)/wxbase([0-9][0-9]) : $(wxbase.lib[1]) ] ;
 				}
 
-				if $(wxWidgets_VERSION) = 29 {
+				if $(wxWidgets_VERSION) in 29 30 {
 					wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswud ;
 					wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/mswu ;
 					wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/mswu ;
@@ -117,7 +118,7 @@ if ! $(wxWidgets_ROOT)
 				}
 			}
 
-			if $(wxWidgets_VERSION) = 29 {
+			if $(wxWidgets_VERSION) in 29 30 {
 				wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswud ;
 				wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/mswu ;
 				wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/mswu ;
