@@ -30,6 +30,12 @@ rule C.UseDotNet TARGET : OPTIONS
 			includePaths = @(Include:R=$(DOTNETSDK)) "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
 			linkPaths = @(Lib:R=$(DOTNETSDK)) ;
 			referencePaths = "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
+
+		case vs2013 :
+			DOTNETSDK = "$(MSSDK)" ;
+			includePaths = @(Include:R=$(DOTNETSDK)) "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
+			linkPaths = @(Lib:R=$(DOTNETSDK)) ;
+			referencePaths = "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
 	}
 
 	C.IncludeDirectories : $(includePaths) ;

@@ -3,6 +3,16 @@ rule C.win32.vc.AutoDetect COMPILER {
 	local RC ;
 
 	switch $(COMPILER) {
+		case vs2013 :
+			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot ;
+			MSSDK = [ W32_GETREG $(key) ] ;
+			MSSDK ?= $(MSVCNT) ;
+			MSSDK_BINDIR = "$(MSSDK)/bin/x86" ;
+			MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/include/shared" "$(MSSDK)/include/um" "$(MSSDK)/include/winrt" ;
+			MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/lib/win8/um/x86" ;
+			RC = $(MSSDK)/bin/x86/rc ;
+			rc_nologo = /nologo ;
+
 		case vs2012 :
 			local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot ;
 			MSSDK = [ W32_GETREG $(key) ] ;

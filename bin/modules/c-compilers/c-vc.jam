@@ -264,7 +264,7 @@ rule C.vc._MultiCppCompile_PchDeps {
 }
 
 rule C.vc._MultiCppCompile_PostCompile {
-	if $(C.COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 vs2012 {
+	if $(C.COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 vs2012 vs2013 {
 		# If Incredibuild is enabled, we do not need the semaphore as Incredibuild does something magic to get around the problem.
 		if $(INCREDIBUILD) != "on" {
 #			SEMAPHORE on $(objects) = $(_VCPDB) ;
@@ -274,7 +274,7 @@ rule C.vc._MultiCppCompile_PostCompile {
 
 
 rule C.vc._ApplicationFromObjects_Setup {
-	if $(C.COMPILER) in vs2012 {
+	if $(C.COMPILER) in vs2012 vs2013 {
 		OPTIONS -= manifest nomanifest ;
 		OPTIONS += nomanifest ;
 	}
@@ -282,7 +282,7 @@ rule C.vc._ApplicationFromObjects_Setup {
 		OPTIONS += manifest ;
 	}
 
-	if $(C.COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 vs2012  &&  ! ( windows in $(OPTIONS) ) {
+	if $(C.COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 vs2012 vs2013  &&  ! ( windows in $(OPTIONS) ) {
 		OPTIONS += console ;
 	}
 }
@@ -330,7 +330,7 @@ rule C.vc._ApplicationFromObjects_LinkFlags {
 
 
 rule C.vc._SharedLibraryFromObjects_Setup {
-	if $(C.COMPILER) in vs2012 {
+	if $(C.COMPILER) in vs2012 vs2013 {
 		OPTIONS -= manifest nomanifest ;
 		OPTIONS += nomanifest ;
 	}

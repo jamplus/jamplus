@@ -81,6 +81,8 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 			extraInfo.TargetFrameworkVersion = "v4.0"
 		elseif self.Options.vs2012 then
 			extraInfo.TargetFrameworkVersion = "v4.5"
+		elseif self.Options.vs2013 then
+			extraInfo.TargetFrameworkVersion = "v4.5"
 		end
 		table.insert(self.Contents, expand([[
   <PropertyGroup Label="Globals">
@@ -156,6 +158,10 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 			if self.Options.vs2012 then
 				self.Contents[#self.Contents + 1] = [[
     <PlatformToolset>v110</PlatformToolset>
+]]
+			elseif self.Options.vs2013 then
+				self.Contents[#self.Contents + 1] = [[
+    <PlatformToolset>v120</PlatformToolset>
 ]]
 			end
 			self.Contents[#self.Contents + 1] = [[
@@ -369,6 +375,13 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 		table.insert(self.Contents, [[
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
+]])
+	elseif self.Options.vs2013 then
+		table.insert(self.Contents, [[
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 ]])
 	end
 

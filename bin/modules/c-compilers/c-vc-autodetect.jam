@@ -2,6 +2,20 @@
 
 rule FindVisualStudioHelper VERSION : COMPILER {
 	switch $(VERSION) {
+		case vs2013 :
+			local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+			MSVCNT ?= [ W32_GETREG $(key) ] ;
+
+			VS120COMNTOOLS = $(VS120COMNTOOLS:J=" ") ;
+			if ! $(MSVCNT) && $(VS120COMNTOOLS) {
+				MSVCNT = $(VS120COMNTOOLS) ;
+			}
+			if $(MSVCNT) {
+				MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+				MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+				COMPILER = vs2013 ;
+			}
+
 		case vs2012 :
 			local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
 			MSVCNT ?= [ W32_GETREG $(key) ] ;
@@ -160,7 +174,7 @@ rule C.AutoDetect THE_COMPILER {
 
 	# Do we need to attempt to detect the compiler?
 	if ! $(THE_COMPILER)  ||  $(THE_COMPILER) = * {
-		for ver in $(VISUAL_STUDIO_FORCE_VERSION) vs2012 vs2010 vs2008 vs2005 vs2003 vs2002 vc6 {
+		for ver in $(VISUAL_STUDIO_FORCE_VERSION) vs2013 vs2012 vs2010 vs2008 vs2005 vs2003 vs2002 vc6 {
 			C.COMPILER = [ FindVisualStudio $(ver) ] ;
 			if $(C.COMPILER) {
 				break ;
