@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#define BUFFER_STATIC_SIZE 1024
+#define BUFFER_STATIC_SIZE 260
 
 typedef void* (*buffer_Alloc)(void* userData, void* ptr, unsigned int size);
 
