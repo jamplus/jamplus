@@ -15,6 +15,7 @@ typedef struct hashdata HASHDATA;
 struct hash *	hashinit( int datalen, const char *name );
 int 		hashitem( struct hash *hp, HASHDATA **data, int enter );
 void 		hashdone( struct hash *hp );
+void		hashiterate( struct hash *hp, void (*callback)(void*, HASHDATA*), void *userdata );
 
 # define	hashenter( hp, data ) !hashitem( hp, data, !0 )
 # define	hashcheck( hp, data ) hashitem( hp, data, 0 )

@@ -174,6 +174,23 @@ static void hashrehash( register struct hash *hp )
 	}
 }
 
+/*
+ * hashrehash() - resize and rebuild hp->tab, the hash table
+ */
+
+void hashiterate( struct hash *hp, void (*callback)(void*, HASHDATA*), void *userdata )
+{
+	int i;
+	for( i = 0; i < hp->tab.nel; i++ ) {
+		if( hp->tab.base[i] ) {
+			register ITEM *item;
+			for( item = hp->tab.base[i]; item; item = item->hdr.next ) {
+				callback( userdata, &item->data );
+			}
+		}
+	}
+}
+
 /* --- */
 
 # define ALIGNED(x) ( ( x + sizeof( ITEM ) - 1 ) & ~( sizeof( ITEM ) - 1 ) )
