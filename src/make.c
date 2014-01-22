@@ -92,6 +92,9 @@
 # include "filesys.h"
 #endif
 
+#include "hash.h"
+# include "fileglob.h"
+
 # ifndef max
 # define max( a,b ) ((a)>(b)?(a):(b))
 # endif
@@ -269,6 +272,7 @@ int compare_sortedtargets( const void *_left, const void *_right ) {
 	return strcmp( right->filename, left->filename );
 }
 
+
 static void remove_empty_dirs()
 {
 	BUFFER lastdirbuff;
@@ -351,6 +355,138 @@ static void remove_empty_dirs()
 }
 
 #endif /* OPT_REMOVE_EMPTY_DIRS_EXT */
+
+
+#ifdef OPT_CLEAN_GLOBS_EXT
+
+struct usedtargetsdata {
+	const char	*name;
+} ;
+
+typedef struct usedtargetsdata USEDTARGETSDATA ;
+static struct hash *usedtargetshash;
+
+
+void add_used_target_to_hash(TARGET *t) {
+	USEDTARGETSDATA usedtargetsdata, *c = &usedtargetsdata;
+	if (!usedtargetshash) {
+		usedtargetshash = hashinit(sizeof(USEDTARGETSDATA), "usedtargets");
+	}
+	c->name = t->name;
+	if (hashenter(usedtargetshash, (HASHDATA **)&c)) {
+		c->name = newstr(t->name);
+	}
+}
+
+
+static void add_files_to_keepfileshash( void *userdata, HASHDATA *hashdata ) {
+	struct hash *keepfileshash = (struct hash *)userdata;
+	USEDTARGETSDATA usedfilesdata, *c = &usedfilesdata;
+	USEDTARGETSDATA *data = (USEDTARGETSDATA *)hashdata;
+	const char *target;
+# ifdef DOWNSHIFT_PATHS
+	char path[MAXJPATH], *p;
+# endif
+
+	TARGET *t = bindtarget( data->name );
+	if( t->binding == T_BIND_UNBOUND && !( t->flags & T_FLAG_NOTFILE ) )
+	{
+		pushsettings( t->settings );
+		t->boundname = search( t->name, &t->time );
+		t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
+		popsettings( t->settings );
+	}
+
+	target = t->boundname;
+
+# ifdef DOWNSHIFT_PATHS
+	p = path;
+	do *p++ = (char)tolower(*target); while (*target++);
+	target = path;
+# endif
+
+	c->name = target;
+	if (hashenter(keepfileshash, (HASHDATA **)&c)) {
+		c->name = newstr(target);
+	}
+}
+
+static void clean_unused_files() {
+	LISTITEM *l;
+	LIST* clean_wildcards;
+	struct hash *keepfileshash;
+
+	keepfileshash = hashinit(sizeof(USEDTARGETSDATA), "usedfiles");
+
+	for (l = list_first(var_get("CLEAN.KEEP_TARGETS")); l; l = list_next(l)) {
+		USEDTARGETSDATA keepfilesdata;
+		keepfilesdata.name = list_value(l);
+		add_files_to_keepfileshash(keepfileshash, (HASHDATA *)&keepfilesdata);
+	}
+
+	if (usedtargetshash) {
+		hashiterate(usedtargetshash, add_files_to_keepfileshash, keepfileshash);
+	}
+
+	for (l = list_first(var_get("CLEAN.KEEP_GLOBS")); l; l = list_next(l)) {
+		fileglob *glob = fileglob_Create(list_value(l));
+		while (fileglob_Next(glob)) {
+			USEDTARGETSDATA usedfilesdata, *c = &usedfilesdata;
+			const char *target = fileglob_FileName(glob);
+# ifdef DOWNSHIFT_PATHS
+			char path[MAXJPATH];
+			char *p = path;
+
+			do *p++ = (char)tolower(*target);
+			while (*target++);
+
+			target = path;
+# endif
+
+			c->name = target;
+			if (hashenter(keepfileshash, (HASHDATA **)&c)) {
+				c->name = newstr(target);
+			}
+		}
+		fileglob_Destroy(glob);
+	}
+
+	clean_wildcards = var_get("CLEAN.WILDCARDS");
+	for (l = list_first(clean_wildcards); l; l = list_next(l)) {
+		fileglob* glob;
+
+		glob = fileglob_Create(list_value(l));
+		while (fileglob_Next(glob)) {
+			const char *target = fileglob_FileName(glob);
+			USEDTARGETSDATA usedtargetsdata, *c = &usedtargetsdata;
+# ifdef DOWNSHIFT_PATHS
+			char path[MAXJPATH];
+			char *p = path;
+
+			do *p++ = (char)tolower(*target);
+			while (*target++);
+
+			target = path;
+# endif
+
+			c->name = target;
+
+			if (!hashcheck(keepfileshash, (HASHDATA **)&c)) {
+				printf("Removing %s...\n", target);
+				unlink(target);
+				emptydirtargets = list_append(emptydirtargets, target, 0);
+			}
+		}
+		fileglob_Destroy(glob);
+	}
+
+	hashdone(keepfileshash);
+	hashdone(usedtargetshash);
+	usedtargetshash = NULL;
+}
+
+#endif /* OPT_CLEAN_GLOBS_EXT */
+
 
 int
 make(
@@ -474,6 +610,10 @@ pass:
 	if ( globs.noexec == 0 )
 		hcache_done();
 #endif
+
+#ifdef OPT_CLEAN_GLOBS_EXT
+	clean_unused_files();
+#endif /* OPT_CLEAN_GLOBS_EXT */
 
 #ifdef OPT_REMOVE_EMPTY_DIRS_EXT
 	remove_empty_dirs();

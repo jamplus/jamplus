@@ -533,6 +533,10 @@ compile_rule(
  * evaluate_rule() - execute a rule invocation
  */
 
+#ifdef OPT_CLEAN_GLOBS_EXT
+extern void add_used_target_to_hash(TARGET *t);
+#endif /* OPT_CLEAN_GLOBS_EXT */
+
 LIST *
 evaluate_rule(
 	const char *rulename,
@@ -613,6 +617,16 @@ evaluate_rule(
 	    action->targets = targetlist( (TARGETS *)0, lol_get( args, 0 ) );
 	    action->sources = targetlist( (TARGETS *)0, lol_get( args, 1 ) );
 #endif
+
+#ifdef OPT_CLEAN_GLOBS_EXT
+		{
+			TARGETS* targets;
+			for ( targets = action->targets; targets; targets = targets->next ) {
+				if ( !( targets->target->flags & T_FLAG_NOTFILE ) )
+					add_used_target_to_hash( targets->target );
+			}
+		}
+#endif /* OPT_CLEAN_GLOBS_EXT */
 
 	    /* Append this action to the actions of each target */
 
