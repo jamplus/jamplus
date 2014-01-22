@@ -2,7 +2,7 @@ C.CFlags * : /Od /EHsc /MDd /W3 /Z7 ;
 C.C++Flags * : /Od /EHsc /MDd /W3 /Z7 ;
 C.LinkFlags * : /INCREMENTAL /DEBUG /MACHINE:X64 ;
 
-C.Defines * : WIN32 _WIN64 _AMD64_ WINDOWS ;
+C.Defines * : _WIN64 _AMD64_ _WINDOWS ;
 
 C.CFlags * : /RTC1 ;
 C.C++Flags * : /RTC1 ;
