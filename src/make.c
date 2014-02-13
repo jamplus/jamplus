@@ -611,6 +611,8 @@ pass:
 		hcache_done();
 #endif
 
+    donestamps();
+
 #ifdef OPT_CLEAN_GLOBS_EXT
 	clean_unused_files();
 #endif /* OPT_CLEAN_GLOBS_EXT */
