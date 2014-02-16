@@ -1,0 +1,60 @@
+MakeLocate out.txt : subdira/subdirb/subdirc ;
+CONTENTS on out.txt = "Hello!" ;
+WriteFile out.txt ;
+Depends all : out.txt ;
+Clean clean : out.txt ;
+
+MakeLocate out2.txt : subdir1/subdir2 ;
+CONTENTS on out2.txt = "Hello!" ;
+WriteFile out2.txt ;
+Depends all : out2.txt ;
+Clean clean : out2.txt ;
+
+actions WriteExtraFiles {
+    if not exist "subdira/subdirb/subdirc/subdird" mkdir "subdira/subdirb/subdirc/subdird"
+    echo abc > subdira/extrafile.txt
+    echo abc > subdir1/junk.txt
+    echo abc > subdira/junk.txt
+    echo abc > subdira/subdirb/subdirc/subdird/junk.txt
+    echo abc > subdira/subdirb/subdirc/subdird/anotherjunk.txt
+}
+
+WriteExtraFiles all ;
+Always all ;
+
+if $(TEST_CLEAN_KEEP_GLOBS) = 1 {
+    CLEAN.KEEP_GLOBS += subdira/junk.txt ;
+    TEST_CLEAN_WILDCARDS = 1 ;
+}
+
+if $(TEST_CLEAN_KEEP_GLOBS) = 2 {
+    CLEAN.KEEP_GLOBS += subdira/*.txt ;   #*/
+    TEST_CLEAN_WILDCARDS = 1 ;
+}
+
+if $(TEST_CLEAN_KEEP_GLOBS) = 3 {
+    CLEAN.KEEP_GLOBS += subdira/**.txt ;  #*/
+    TEST_CLEAN_WILDCARDS = 1 ;
+}
+
+if $(TEST_CLEAN_KEEP_TARGETS) {
+    SEARCH on junk.txt = subdir1 ;
+    CLEAN.KEEP_TARGETS += junk.txt ;
+    TEST_CLEAN_WILDCARDS = 1 ;
+}
+
+if $(TEST_CLEAN_WILDCARDS) = 1 {
+    CLEAN.WILDCARDS = subdira/** subdir1/** ;  #*/
+}
+
+if $(TEST_CLEAN_WILDCARDS) = 2 {
+    CLEAN.WILDCARDS = subdira/**@-**/junk.txt subdir1/** ;   #*/
+}
+
+if $(TEST_CLEAN_WILDCARDS) = 3 {
+    CLEAN.WILDCARDS = subdira/**@-**junk.txt subdir1/** ;   #*/
+}
+
+CleanTree clean : subdira subdir1 ;
+
+
