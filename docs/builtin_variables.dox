@@ -169,5 +169,66 @@ Just as <b>jam</b> expands a % to be the text of the rule's action block, it exp
 \endcode
 
 <hr>
+
+
+
+
+
+
+\section language_built_in_variables_clean_globs Clean up of extra files and directories
+
+After a build has completed, files and directories may be left in the build's destination directories that came from a previous build and are no longer being built.  JamPlus' clean up facility can be used to remove the extra files and directories at the end of the build process.
+
+Three variables are used to control the clean up:
+
+<table width=75% align=center>
+  <tr><td>CLEAN.VERBOSE</td><td>Prints out file removals during the clean up phase.
+  <tr><td>CLEAN.ROOTS</td><td>The list of root paths denoted by wildcards to check for extra files to clean up.
+  <tr><td>CLEAN.KEEP_WILDCARDS</td><td>Extra wildcards to prevent from being cleaned up.
+  <tr><td>CLEAN.KEEP_TARGETS</td><td>Extra targets to prevent from being cleaned up.
+</table>
+
+To begin a clean-up, the <b>CLEAN.ROOTS</b> variable must contain one or more wildcard entries specifying the directory locations to be scanned for extra file entries during the clean-up.  Wildcards must conform to the format in the <b>:W</b> modifier documentation.
+
+\code
+    # This ensures subdira/ and subdirb/ are recursively checked for
+    # extra files that were not generated as part of this build.
+    CLEAN.ROOTS = subdira/** subdirb/** ;
+
+    # Check subdira/ recursively for extra files, but ignore any
+    # references to junk.txt within the hierarchy.  Also check subdirb/
+    # recursively.
+    CLEAN.ROOTS = subdira/**@-**/junk.txt subdirb/** ;
+\endcode
+
+All targets that are in the dependency graph for this build are automatically preserved within the \c CLEAN.ROOTS directories.
+
+If additional files or targets should be preserved and are not specified within the dependency graph, the \c CLEAN.KEEP_WILDCARDS or \c CLEAN.KEEP_TARGETS variables should be used.
+
+\c CLEAN.KEEP_WILDCARDS is a list of wildcard entries specifying inclusions (and even exclusions) of files to be preserved during the clean up process.  As with \c CLEAN.ROOTS, it conforms to the format described in the <b>:W=</b> modifier documentation.
+
+\code
+    # In the case where Jam itself does not know about generated *.txt
+    # files within the subdira/ directory structure, preserve any found
+    # *.txt file for later usage.
+    CLEAN.KEEP_WILDCARDS += subdira/**.txt ;
+\endcode
+
+\c CLEAN.KEEP_TARGETS is a list of Jam targets that were not processed as part of the dependency graph for this build.
+
+\code
+    # junk.txt is a target residing in subdirb, but it has no build
+    # instructions.  We want to preserve it during the clean up, so we add
+    # it to the CLEAN.KEEP_TARGETS list.
+    SEARCH on junk.txt = subdirb ;
+    CLEAN.KEEP_TARGETS += junk.txt ;
+\endcode
+
+By default, directory and file removals happen silently at the end of the build.  Set the \c CLEAN.VERBOSE variable to \c 1 to print out the removals.
+
+\code
+    CLEAN.VERBOSE = 1 ;
+\endcode
+
 */
 
