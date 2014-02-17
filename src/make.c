@@ -430,7 +430,7 @@ static void clean_unused_files() {
 		hashiterate(usedtargetshash, add_files_to_keepfileshash, keepfileshash);
 	}
 
-	for (l = list_first(var_get("CLEAN.KEEP_GLOBS")); l; l = list_next(l)) {
+	for (l = list_first(var_get("CLEAN.KEEP_WILDCARDS")); l; l = list_next(l)) {
 		fileglob *glob = fileglob_Create(list_value(l));
 		while (fileglob_Next(glob)) {
 			USEDTARGETSDATA usedfilesdata, *c = &usedfilesdata;
