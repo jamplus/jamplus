@@ -414,7 +414,7 @@ static void add_files_to_keepfileshash( void *userdata, HASHDATA *hashdata ) {
 static void clean_unused_files() {
 	LISTITEM *l;
 	LIST* clean_verbose;
-	LIST* clean_wildcards;
+	LIST* clean_roots;
 	struct hash *keepfileshash;
 	int verbose = 0;
 
@@ -458,8 +458,8 @@ static void clean_unused_files() {
 		verbose = 1;
 	}
 
-	clean_wildcards = var_get("CLEAN.WILDCARDS");
-	for (l = list_first(clean_wildcards); l; l = list_next(l)) {
+	clean_roots = var_get("CLEAN.ROOTS");
+	for (l = list_first(clean_roots); l; l = list_next(l)) {
 		fileglob* glob;
 
 		glob = fileglob_Create(list_value(l));
