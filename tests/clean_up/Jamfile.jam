@@ -22,37 +22,37 @@ actions WriteExtraFiles {
 WriteExtraFiles all ;
 Always all ;
 
-if $(TEST_CLEAN_KEEP_GLOBS) = 1 {
-    CLEAN.KEEP_GLOBS += subdira/junk.txt ;
-    TEST_CLEAN_WILDCARDS = 1 ;
+if $(TEST_CLEAN_KEEP_WILDCARDS) = 1 {
+    CLEAN.KEEP_WILDCARDS += subdira/junk.txt ;
+    TEST_CLEAN_ROOTS = 1 ;
 }
 
-if $(TEST_CLEAN_KEEP_GLOBS) = 2 {
-    CLEAN.KEEP_GLOBS += subdira/*.txt ;   #*/
-    TEST_CLEAN_WILDCARDS = 1 ;
+if $(TEST_CLEAN_KEEP_WILDCARDS) = 2 {
+    CLEAN.KEEP_WILDCARDS += subdira/*.txt ;   #*/
+    TEST_CLEAN_ROOTS = 1 ;
 }
 
-if $(TEST_CLEAN_KEEP_GLOBS) = 3 {
-    CLEAN.KEEP_GLOBS += subdira/**.txt ;  #*/
-    TEST_CLEAN_WILDCARDS = 1 ;
+if $(TEST_CLEAN_KEEP_WILDCARDS) = 3 {
+    CLEAN.KEEP_WILDCARDS += subdira/**.txt ;  #*/
+    TEST_CLEAN_ROOTS = 1 ;
 }
 
 if $(TEST_CLEAN_KEEP_TARGETS) {
     SEARCH on junk.txt = subdir1 ;
     CLEAN.KEEP_TARGETS += junk.txt ;
-    TEST_CLEAN_WILDCARDS = 1 ;
+    TEST_CLEAN_ROOTS = 1 ;
 }
 
-if $(TEST_CLEAN_WILDCARDS) = 1 {
-    CLEAN.WILDCARDS = subdira/** subdir1/** ;  #*/
+if $(TEST_CLEAN_ROOTS) = 1 {
+    CLEAN.ROOTS = subdira/** subdir1/** ;  #*/
 }
 
-if $(TEST_CLEAN_WILDCARDS) = 2 {
-    CLEAN.WILDCARDS = subdira/**@-**/junk.txt subdir1/** ;   #*/
+if $(TEST_CLEAN_ROOTS) = 2 {
+    CLEAN.ROOTS = subdira/**@-**/junk.txt subdir1/** ;   #*/
 }
 
-if $(TEST_CLEAN_WILDCARDS) = 3 {
-    CLEAN.WILDCARDS = subdira/**@-**junk.txt subdir1/** ;   #*/
+if $(TEST_CLEAN_ROOTS) = 3 {
+    CLEAN.ROOTS = subdira/**@-**junk.txt subdir1/** ;   #*/
 }
 
 CleanTree clean : subdira subdir1 ;

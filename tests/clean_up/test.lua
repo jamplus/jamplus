@@ -85,7 +85,7 @@ function Test()
         'Removing subdira/subdirb/subdirc/subdird/anotherjunk.txt...',
         'Removing subdira/subdirb/subdirc/subdird/junk.txt...',
         'Removing subdir1/junk.txt...',
-    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_KEEP_GLOBS=1'})
+    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_KEEP_WILDCARDS=1'})
 
     TestFiles({
         'Jamfile.jam',
@@ -116,7 +116,7 @@ function Test()
         'Removing subdira/subdirb/subdirc/subdird/anotherjunk.txt...',
         'Removing subdira/subdirb/subdirc/subdird/junk.txt...',
         'Removing subdir1/junk.txt...',
-    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_KEEP_GLOBS=2'})
+    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_KEEP_WILDCARDS=2'})
 
     TestFiles({
         'Jamfile.jam',
@@ -146,7 +146,7 @@ function Test()
         '@ WriteExtraFiles all',
         '*** updated 1 target(s)...',
         'Removing subdir1/junk.txt...',
-    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_KEEP_GLOBS=3'})
+    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_KEEP_WILDCARDS=3'})
 
     TestFiles({
         'Jamfile.jam',
@@ -215,7 +215,7 @@ function Test()
         'Removing subdira/subdirb/subdirc/subdird/anotherjunk.txt...',
         'Removing subdira/subdirb/subdirc/subdird/junk.txt...',
         'Removing subdir1/junk.txt...',
-    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_WILDCARDS=1'})
+    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_ROOTS=1'})
 
     TestFiles({
         'Jamfile.jam',
@@ -245,7 +245,7 @@ function Test()
         'Removing subdira/extrafile.txt...',
         'Removing subdira/subdirb/subdirc/subdird/anotherjunk.txt...',
         'Removing subdir1/junk.txt...',
-    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_WILDCARDS=2'})
+    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_ROOTS=2'})
 
     TestFiles({
         'Jamfile.jam',
@@ -277,7 +277,7 @@ function Test()
         '*** updated 1 target(s)...',
         'Removing subdira/extrafile.txt...',
         'Removing subdir1/junk.txt...',
-    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_WILDCARDS=3'})
+    }, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_ROOTS=3'})
 
     TestFiles({
         'Jamfile.jam',
