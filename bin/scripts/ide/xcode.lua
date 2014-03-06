@@ -412,6 +412,33 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 			table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
 			table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
 			table.insert(self.Contents, "\t\t\t\tTARGET_NAME = \"" .. (subProject.TargetName or projectName) .. "\";\n")
+
+			-- Deployment target (iOS).
+			local iosSdkVersionMin
+			if subProject.IOS_SDK_VERSION_MIN and  subProject.IOS_SDK_VERSION_MIN[platformName]  and  subProject.IOS_SDK_VERSION_MIN[platformName][configName] then
+				iosSdkVersionMin = subProject.IOS_SDK_VERSION_MIN[platformName][configName]
+			elseif Projects['C.*']  and  Projects['C.*'].IOS_SDK_VERSION_MIN  and  Projects['C.*'].IOS_SDK_VERSION_MIN[platformName]  and  Projects['C.*'].IOS_SDK_VERSION_MIN[platformName][configName] then
+				iosSdkVersionMin = Projects['C.*'].IOS_SDK_VERSION_MIN[platformName][configName]			
+		   	end
+
+			if iosSdkVersionMin then
+				table.insert(self.Contents, "\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = \"" .. iosSdkVersionMin .. "\";\n")
+				print( "IPHONEOS_DEPLOYMENT_TARGET found for " .. platformName .. " - " .. configName )
+			end
+
+			-- Deployment target (OSX).
+			local osxSdkVersionMin
+			if subProject.OSX_SDK_VERSION_MIN  and  subProject.OSX_SDK_VERSION_MIN[platformName]  and  subProject.OSX_SDK_VERSION_MIN[platformName][configName] then
+				osxSdkVersionMin = subProject.OSX_SDK_VERSION_MIN[platformName][configName]
+			elseif Projects['C.*']  and  Projects['C.*'].OSX_SDK_VERSION_MIN  and  Projects['C.*'].OSX_SDK_VERSION_MIN[platformName]  and  Projects['C.*'].OSX_SDK_VERSION_MIN[platformName][configName] then
+				osxSdkVersionMin = Projects['C.*'].OSX_SDK_VERSION_MIN[platformName][configName]			
+		   	end
+
+			if osxSdkVersionMin then
+				table.insert(self.Contents, "\t\t\t\tMACOSX_DEPLOYMENT_TARGET = \"" .. osxSdkVersionMin .. "\";\n")
+				print( "MACOSX_DEPLOYMENT_TARGET found for " .. platformName .. " - " .. configName )
+			end
+
 			table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. platformName .. ";\n")
 			table.insert(self.Contents, "\t\t\t\tCONFIG = " .. configName .. ";\n")
 			if configInfo.OutputPath ~= '' then
