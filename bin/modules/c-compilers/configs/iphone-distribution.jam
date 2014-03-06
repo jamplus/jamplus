@@ -1,0 +1,9 @@
+C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+C.ToolchainHelper ios Global_RELEASE ;
+
+C.Defines * : _FINAL _DISTRIBUTION ;
+C.Flags * : CC	: -g -O3 ;
+C.Flags * : C++	: -g -O3 ;
+C.Flags * : M	: -g -O3 ;
+C.Flags * : MM	: -g -O3 ;
+C.SetTaskAllow * : false ;
