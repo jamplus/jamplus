@@ -101,13 +101,13 @@ rule C.MacOSX_SDK SDK_VERSION {
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
-					flags += -arch armv7s ;
+					flags += -arch armv7 ;
 
 				case 7.0 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
-					flags += -arch armv7s ;
+					flags += -arch armv7 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
