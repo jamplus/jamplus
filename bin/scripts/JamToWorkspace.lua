@@ -326,6 +326,36 @@ function ReadTargetInfoFiles(outPath)
 	AutoWriteMetaTable.active = false
 end
 
+-- Query Xcode SDKSettings.plist as to whether it requires entitlements to build/run. Ideally this would be located in
+-- Xcode.lua, however code in there gets executed for eac library/project/etc. and we only want to call this once (as
+-- otherwise it slows down the workspace generation significantly for large projects).
+local function XcodeHelper_AreEntitlementsRequired( )
+	local p, i = ex.popen( { "/usr/libexec/PlistBuddy", "-c", "Print:DefaultProperties:ENTITLEMENTS_REQUIRED", "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk/SDKSettings.plist" }, false )
+	if p then
+		local output = i:read("*a"):gsub( "%s$", "" )
+		i:close( )
+		local exitCode = p:wait( )
+		if exitCode == 0  and  output == "NO" then
+			return false
+		end
+	end
+
+	return true
+end
+
+local function XcodeHelper_IsCodeSigningRequired( )
+	local p, i = ex.popen( { "/usr/libexec/PlistBuddy", "-c", "Print:DefaultProperties:CODE_SIGNING_REQUIRED", "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk/SDKSettings.plist" }, false )
+	if p then
+		local output = i:read("*a"):gsub( "%s$", "" )
+		i:close( )
+		local exitCode = p:wait( )
+		if exitCode == 0  and  output == "NO" then
+			return false;
+		end
+	end
+
+	return true
+end
 
 -- Ugly, but suitable for now until the autodetection process is in place.
 require 'ide/none'
@@ -462,6 +492,8 @@ Exporters =
 		Description = 'Generate Xcode project',
 		Options =
 		{
+			IsCodeSigningRequired = XcodeHelper_IsCodeSigningRequired( ),
+			AreEntitlementsRequired = XcodeHelper_AreEntitlementsRequired( )
 		}
 	},
 

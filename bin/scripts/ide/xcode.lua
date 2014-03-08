@@ -439,34 +439,58 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 				table.insert(self.Contents, "\t\t\t\tSDKROOT = " .. sdkRoot .. ";\n")
 			end
 
+			-- Ideally we don't want Xcode to sign/provision our builds, as we do it ourselves. However this is only
+			-- possible if Xcode is set up correctly with a modified SDKSettings.plist this is detected in JamToWorkspace.lua
+			-- and passed in via our Options.
+			local entitlementsRequired = self.Options.AreEntitlementsRequired
+			local codeSigningRequired = self.Options.IsCodeSigningRequired
+
 			-- Write CODE_SIGN_ENTITLEMENTS.
 			local codeSignEntitlements
-			if subProject.XCODE_ENTITLEMENTS  and  subProject.XCODE_ENTITLEMENTS[platformName]  and  subProject.XCODE_ENTITLEMENTS[platformName][configName] then
-				codeSignEntitlements = subProject.XCODE_ENTITLEMENTS[platformName][configName]
-			elseif Projects['C.*']  and  Projects['C.*'].XCODE_ENTITLEMENTS  and  Projects['C.*'].XCODE_ENTITLEMENTS[platformName]  and  Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName] then
-				codeSignEntitlements = Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName]			
-		   	end
+			if entitlementsRequired == false and codeSigningRequired == false then
+				codeSignEntitlements = ""
+			else
+				if subProject.XCODE_ENTITLEMENTS  and  subProject.XCODE_ENTITLEMENTS[platformName]  and  subProject.XCODE_ENTITLEMENTS[platformName][configName] then
+					codeSignEntitlements = subProject.XCODE_ENTITLEMENTS[platformName][configName]
+				elseif Projects['C.*']  and  Projects['C.*'].XCODE_ENTITLEMENTS  and  Projects['C.*'].XCODE_ENTITLEMENTS[platformName]  and  Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName] then
+					codeSignEntitlements = Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName]			
+				end
+			end
 			if codeSignEntitlements then
 				table.insert(self.Contents, "\t\t\t\tCODE_SIGN_ENTITLEMENTS = \"" .. codeSignEntitlements .. "\";\n")
 			end
+
+			-- Write CODE_SIGN_IDENTITY.
+			local codeSignIdentity	
+			if entitlementsRequired == false and codeSigningRequired == false then
+				codeSignIdentity = ""
+			else
+				codeSignIdentity = "iPhone Developer"
+				if subProject.IOS_SIGNING_IDENTITY  and  subProject.IOS_SIGNING_IDENTITY[platformName]  and  subProject.IOS_SIGNING_IDENTITY[platformName][configName] then
+					codeSignIdentity = subProject.IOS_SIGNING_IDENTITY[platformName][configName]
+				elseif Projects['C.*']  and  Projects['C.*'].IOS_SIGNING_IDENTITY  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName]  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName] then
+					codeSignIdentity = Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName]			
+				end
+			end
+
 
 			if platformName == 'macosx32'  or  platformName == 'macosx64' then
 				table.insert(self.Contents, "\t\t\t\tARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\";\n");
 			elseif platformName == 'iphone' then
 				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
-				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
+				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 1;\n")
 			elseif platformName == 'iphonesimulator' then
 				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
-				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
+				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 1;\n")
 			elseif platformName == 'ipad' then
 				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
-				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
+				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 2;\n")
 			elseif platformName == 'ipadsimulator' then
 				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
-				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
+				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 2;\n")
 			end
 			table.insert(self.Contents, "\t\t\t};\n")
