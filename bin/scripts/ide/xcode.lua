@@ -178,16 +178,16 @@ local function XcodeHelper_GetProjectExportInfo(projectName)
 				project.ConfigInfo[platformName][configName] = configInfo
 			end
 
-			if configInfo.Defines == ''  and  project.Defines  and  project.Defines[platformName]  and  project.Defines[platformName][configName] then
+			if configInfo.Defines == ''  and  project.Defines then
 				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
 			end
-			if configInfo.IncludePaths == ''  and  project.IncludePaths  and project.IncludePaths[platformName]  and  project.IncludePaths[platformName][configName]  then
+			if configInfo.IncludePaths == ''  and  project.IncludePaths then
 				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
 			end
-			if configInfo.OutputPath == ''  and  project.OutputPaths  and project.OutputPaths[platformName]  and  project.OutputPaths[platformName][configName]  then
+			if configInfo.OutputPath == ''  and  project.OutputPaths then
 				configInfo.OutputPath = project.OutputPaths[platformName][configName]
 			end
-			if configInfo.OutputName == ''  and  project.OutputNames  and project.OutputNames[platformName]  and project.OutputNames[platformName][configName]  then
+			if configInfo.OutputName == ''  and  project.OutputNames then
 				configInfo.OutputName = project.OutputNames[platformName][configName]
 			end
 		end
@@ -412,33 +412,6 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 			table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
 			table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
 			table.insert(self.Contents, "\t\t\t\tTARGET_NAME = \"" .. (subProject.TargetName or projectName) .. "\";\n")
-
-			-- Deployment target (iOS).
-			local iosSdkVersionMin
-			if subProject.IOS_SDK_VERSION_MIN and  subProject.IOS_SDK_VERSION_MIN[platformName]  and  subProject.IOS_SDK_VERSION_MIN[platformName][configName] then
-				iosSdkVersionMin = subProject.IOS_SDK_VERSION_MIN[platformName][configName]
-			elseif Projects['C.*']  and  Projects['C.*'].IOS_SDK_VERSION_MIN  and  Projects['C.*'].IOS_SDK_VERSION_MIN[platformName]  and  Projects['C.*'].IOS_SDK_VERSION_MIN[platformName][configName] then
-				iosSdkVersionMin = Projects['C.*'].IOS_SDK_VERSION_MIN[platformName][configName]			
-		   	end
-
-			if iosSdkVersionMin then
-				table.insert(self.Contents, "\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = \"" .. iosSdkVersionMin .. "\";\n")
-				print( "IPHONEOS_DEPLOYMENT_TARGET found for " .. platformName .. " - " .. configName )
-			end
-
-			-- Deployment target (OSX).
-			local osxSdkVersionMin
-			if subProject.OSX_SDK_VERSION_MIN  and  subProject.OSX_SDK_VERSION_MIN[platformName]  and  subProject.OSX_SDK_VERSION_MIN[platformName][configName] then
-				osxSdkVersionMin = subProject.OSX_SDK_VERSION_MIN[platformName][configName]
-			elseif Projects['C.*']  and  Projects['C.*'].OSX_SDK_VERSION_MIN  and  Projects['C.*'].OSX_SDK_VERSION_MIN[platformName]  and  Projects['C.*'].OSX_SDK_VERSION_MIN[platformName][configName] then
-				osxSdkVersionMin = Projects['C.*'].OSX_SDK_VERSION_MIN[platformName][configName]			
-		   	end
-
-			if osxSdkVersionMin then
-				table.insert(self.Contents, "\t\t\t\tMACOSX_DEPLOYMENT_TARGET = \"" .. osxSdkVersionMin .. "\";\n")
-				print( "MACOSX_DEPLOYMENT_TARGET found for " .. platformName .. " - " .. configName )
-			end
-
 			table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. platformName .. ";\n")
 			table.insert(self.Contents, "\t\t\t\tCONFIG = " .. configName .. ";\n")
 			if configInfo.OutputPath ~= '' then
@@ -466,58 +439,34 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 				table.insert(self.Contents, "\t\t\t\tSDKROOT = " .. sdkRoot .. ";\n")
 			end
 
-			-- Ideally we don't want Xcode to sign/provision our builds, as we do it ourselves. However this is only
-			-- possible if Xcode is set up correctly with a modified SDKSettings.plist this is detected in JamToWorkspace.lua
-			-- and passed in via our Options.
-			local entitlementsRequired = self.Options.AreEntitlementsRequired
-			local codeSigningRequired = self.Options.IsCodeSigningRequired
-
 			-- Write CODE_SIGN_ENTITLEMENTS.
 			local codeSignEntitlements
-			if entitlementsRequired == false and codeSigningRequired == false then
-				codeSignEntitlements = ""
-			else
-				if subProject.XCODE_ENTITLEMENTS  and  subProject.XCODE_ENTITLEMENTS[platformName]  and  subProject.XCODE_ENTITLEMENTS[platformName][configName] then
-					codeSignEntitlements = subProject.XCODE_ENTITLEMENTS[platformName][configName]
-				elseif Projects['C.*']  and  Projects['C.*'].XCODE_ENTITLEMENTS  and  Projects['C.*'].XCODE_ENTITLEMENTS[platformName]  and  Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName] then
-					codeSignEntitlements = Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName]			
-				end
-			end
+			if subProject.XCODE_ENTITLEMENTS  and  subProject.XCODE_ENTITLEMENTS[platformName]  and  subProject.XCODE_ENTITLEMENTS[platformName][configName] then
+				codeSignEntitlements = subProject.XCODE_ENTITLEMENTS[platformName][configName]
+			elseif Projects['C.*']  and  Projects['C.*'].XCODE_ENTITLEMENTS  and  Projects['C.*'].XCODE_ENTITLEMENTS[platformName]  and  Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName] then
+				codeSignEntitlements = Projects['C.*'].XCODE_ENTITLEMENTS[platformName][configName]			
+		   	end
 			if codeSignEntitlements then
 				table.insert(self.Contents, "\t\t\t\tCODE_SIGN_ENTITLEMENTS = \"" .. codeSignEntitlements .. "\";\n")
 			end
-
-			-- Write CODE_SIGN_IDENTITY.
-			local codeSignIdentity	
-			if entitlementsRequired == false and codeSigningRequired == false then
-				codeSignIdentity = ""
-			else
-				codeSignIdentity = "iPhone Developer"
-				if subProject.IOS_SIGNING_IDENTITY  and  subProject.IOS_SIGNING_IDENTITY[platformName]  and  subProject.IOS_SIGNING_IDENTITY[platformName][configName] then
-					codeSignIdentity = subProject.IOS_SIGNING_IDENTITY[platformName][configName]
-				elseif Projects['C.*']  and  Projects['C.*'].IOS_SIGNING_IDENTITY  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName]  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName] then
-					codeSignIdentity = Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName]			
-				end
-			end
-
 
 			if platformName == 'macosx32'  or  platformName == 'macosx64' then
 				table.insert(self.Contents, "\t\t\t\tARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\";\n");
 			elseif platformName == 'iphone' then
 				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
-				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
+				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 1;\n")
 			elseif platformName == 'iphonesimulator' then
 				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
-				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
+				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 1;\n")
 			elseif platformName == 'ipad' then
 				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
-				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
+				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 2;\n")
 			elseif platformName == 'ipadsimulator' then
 				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
-				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
+				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";\n')
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 2;\n")
 			end
 			table.insert(self.Contents, "\t\t\t};\n")
