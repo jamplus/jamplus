@@ -99,7 +99,33 @@ int   (*ls_lua_next) (ls_lua_State *L, int idx);
 
 #define ls_lua_newtable(L)        ls_lua_createtable(L, 0, 0)
 
-void (*ls_luaL_openlibs) (ls_lua_State *L);
+typedef struct ls_lua_Debug ls_lua_Debug;  /* activation record */
+int (*ls_lua_getstack)(ls_lua_State *L, int level, ls_lua_Debug *ar);
+int (*ls_lua_getinfo)(ls_lua_State *L, const char *what, ls_lua_Debug *ar);
+
+/*
+@@ LUA_IDSIZE gives the maximum size for the description of the source
+@* of a function in debug information.
+** CHANGE it if you want a different size.
+*/
+#define LUA_IDSIZE    60
+
+struct ls_lua_Debug {
+    int event;
+    const char *name;    /* (n) */
+    const char *namewhat;    /* (n) `global', `local', `field', `method' */
+    const char *what;    /* (S) `Lua', `C', `main', `tail' */
+    const char *source;    /* (S) */
+    int currentline;    /* (l) */
+    int nups;        /* (u) number of upvalues */
+    int linedefined;    /* (S) */
+    int lastlinedefined;    /* (S) */
+    char short_src[LUA_IDSIZE]; /* (S) */
+    /* private part */
+    int i_ci;  /* active function */
+};
+
+void(*ls_luaL_openlibs) (ls_lua_State *L);
 int (*ls_luaL_loadstring) (ls_lua_State *L, const char *s);
 int (*ls_luaL_loadfile) (ls_lua_State *L, const char *filename);
 ls_lua_State *(*ls_luaL_newstate) (void);
@@ -107,27 +133,34 @@ int (*ls_luaL_ref) (ls_lua_State *L, int t);
 void (*ls_luaL_unref) (ls_lua_State *L, int t, int ref);
 
 
-
 /*****************************************************************************/
 static ls_lua_State *L;
 
 static LIST *luahelper_addtolist(ls_lua_State *L, LIST *list, int index)
 {
+    int type = ls_lua_type(L, index);
     if (ls_lua_isboolean(L, index))
         return list_append(list, ls_lua_toboolean(L, index) ? "true" : "false", 0);
 
-    if (ls_lua_isnumber(L, index))
-        return list_append(list, ls_lua_tostring(L, index), 0);
+    if (ls_lua_isnumber(L, index)) {
+        LIST* newList;
+        ls_lua_pushvalue(L, index);
+        newList = list_append(list, ls_lua_tostring(L, -1), 0);
+        ls_lua_pop(L, 1);
+        return newList;
+    }
 
-    if (ls_lua_isstring(L, index))
-        return list_append(list, ls_lua_tostring(L, index), 0);
+    if (ls_lua_isstring(L, index)) {
+        const char* value = ls_lua_tostring(L, index);
+        return list_append(list, value, 0);
+    }
 
     else if (ls_lua_istable(L, index))
     {
         ls_lua_pushnil(L);
         while (ls_lua_next(L, index) != 0)
         {
-            list = luahelper_addtolist(L, list, index + 2);
+            list = luahelper_addtolist(L, list, ls_lua_gettop(L));
             ls_lua_pop(L, 1);
         }
     }
@@ -216,6 +249,7 @@ int LS_jam_evaluaterule(ls_lua_State *L)
     LIST *list;
     LISTITEM* item;
     int index;
+    const char* rule;
 
     int numParams = ls_lua_gettop(L);
     if (numParams < 1)
@@ -226,11 +260,12 @@ int LS_jam_evaluaterule(ls_lua_State *L)
 
     lol_init(&lol);
 
+    rule = ls_lua_tostring(L, 1);
     for (i = 0; i < numParams - 1; ++i)
     {
         lol_add(&lol, luahelper_addtolist(L, L0, 2 + i));
     }
-    list = evaluate_rule(ls_lua_tostring(L, 1), &lol, L0);
+    list = evaluate_rule(rule, &lol, L0);
     lol_free(&lol);
 
     ls_lua_newtable(L);
