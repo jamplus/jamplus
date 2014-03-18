@@ -244,6 +244,21 @@ int LS_jam_evaluaterule(ls_lua_State *L)
 }
 
 
+int LS_jam_print(ls_lua_State *L)
+{
+    int numParams = ls_lua_gettop(L);
+    if (numParams < 1  ||  numParams > 1)
+        return 0;
+
+    if (!ls_lua_isstring(L, 1))
+        return 0;
+
+    puts(ls_lua_tostring(L, 1));
+
+    return 0;
+}
+
+
 /*
 */
 
@@ -301,6 +316,8 @@ static int pmain (ls_lua_State *L)
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_setvar");
     ls_lua_pushcclosure(L, LS_jam_evaluaterule, 0);
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_evaluaterule");
+    ls_lua_pushcclosure(L, LS_jam_print, 0);
+    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_print");
 
     top = ls_lua_gettop(L);
     ret = ls_luaL_loadstring(L, "lanes = require 'lanes'");
