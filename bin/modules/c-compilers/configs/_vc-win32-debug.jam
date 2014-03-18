@@ -2,8 +2,6 @@ C.CFlags * : /Od /EHsc /MDd /W3 /Z7 ;
 C.C++Flags * : /Od /EHsc /MDd /W3 /Z7 ;
 C.LinkFlags * : /INCREMENTAL /DEBUG /MACHINE:X86 ;
 
-C.Defines * : WIN32 _WINDOWS ;
-
 if $(C.COMPILER) != vc6 {
 	C.CFlags * : /RTC1 ;
 	C.C++Flags * : /RTC1 ;
