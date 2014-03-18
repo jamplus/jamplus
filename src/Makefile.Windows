@@ -1,5 +1,5 @@
 CC = cl /nologo
-CFLAGS = -DNT -DWIN32 -EHsc -Foobj\\
+CFLAGS = -DNT -EHsc -Foobj\\
 TARGET = /Feobj\\jam0
 LINKLIBS = advapi32.lib
 EXENAME = .\obj\jam0.exe
