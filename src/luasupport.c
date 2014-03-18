@@ -420,7 +420,16 @@ static LIST *ls_lua_callhelper(int top, int ret)
     {
         if (ls_lua_isstring(L, -1))
         {
+            int ret;
             printf("jam: Error running Lua code\n%s\n", ls_lua_tostring(L, -1));
+            ls_lua_getfield(L, LUA_GLOBALSINDEX, "debug");
+            ls_lua_getfield(L, -1, "traceback");
+            ret = ls_lua_pcall(L, 0, 1, 0);
+            if (ret == 0) {
+                if (ls_lua_isstring(L, -1)) {
+                    puts(ls_lua_tostring(L, -1));
+                }
+            }
             exit(EXITBAD);
         }
         ls_lua_pop(L, 1);
