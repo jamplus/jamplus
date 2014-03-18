@@ -7,6 +7,7 @@
 #include "rules.h"
 #include "variable.h"
 #include "filesys.h"
+#include "expand.h"
 
 #ifdef OS_NT
 #include <windows.h>
@@ -244,6 +245,39 @@ int LS_jam_evaluaterule(ls_lua_State *L)
 }
 
 
+int LS_jam_expand(ls_lua_State *L)
+{
+    LIST *list = L0;
+    LISTITEM* item;
+    int index;
+
+    int numParams = ls_lua_gettop(L);
+    if (numParams < 1  ||  numParams > 1)
+        return 0;
+
+    if (!ls_lua_isstring(L, 1))
+        return 0;
+
+    {
+        LOL lol;
+        const char* src = ls_lua_tostring(L, 1);
+        lol_init(&lol);
+        list = var_expand(L0, src, src + strlen(src), &lol, 0);
+    }
+
+    ls_lua_newtable(L);
+    index = 1;
+    for (item = list_first(list); item; item = list_next(item), ++index)
+    {
+        ls_lua_pushnumber(L, index);
+        ls_lua_pushstring(L, list_value(item));
+        ls_lua_settable(L, -3);
+    }
+
+    return 1;
+}
+
+
 int LS_jam_print(ls_lua_State *L)
 {
     int numParams = ls_lua_gettop(L);
@@ -316,6 +350,8 @@ static int pmain (ls_lua_State *L)
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_setvar");
     ls_lua_pushcclosure(L, LS_jam_evaluaterule, 0);
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_evaluaterule");
+    ls_lua_pushcclosure(L, LS_jam_expand, 0);
+    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_expand");
     ls_lua_pushcclosure(L, LS_jam_print, 0);
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_print");
 
