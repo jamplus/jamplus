@@ -716,10 +716,10 @@ builtin_queuejamfile(
 	size_t priorityLen;
 
 	if ( list_first(l2) ) {
-		sprintf( priority, ":%d", atoi( list_value(list_first(l2)) ) );
+		sprintf( priority, "|%d", atoi( list_value(list_first(l2)) ) );
 		priorityLen = strlen( priority );
 	} else {
-		strcpy( priority, ":0" );
+		strcpy( priority, "|0" );
 		priorityLen = 2;
 	}
 

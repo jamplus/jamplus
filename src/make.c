@@ -507,8 +507,6 @@ make(
 	COUNTS counts[1];
 	int status = 0;		/* 1 if anything fails */
 
-	memset( (char *)counts, 0, sizeof( *counts ) );
-
 #ifdef OPT_INTERRUPT_FIX
 	signal( SIGINT, onintr );
 #endif
@@ -516,6 +514,8 @@ make(
 #ifdef OPT_MULTIPASS_EXT
 pass:
 #endif
+	memset( (char *)counts, 0, sizeof( *counts ) );
+
 	for( i = 0; i < n_targets; i++ )
 	{
 	    TARGET *t = bindtarget( targets[i] );
@@ -581,6 +581,8 @@ pass:
 		donestamps();
 		++actionpass;
 
+		printf( "*** executing pass %d...\n", actionpass + 1 );
+
 		for( ; l; l = list_next( l ) ) {
 			++count;
 		}
@@ -588,15 +590,15 @@ pass:
 		sortedfiles = malloc( sizeof( QUEUEDFILEINFO ) * count );
 		i = 0;
 		for( l = list_first( origqueuedjamfiles ); l; l = list_next( l ) ) {
-			char *colon = strchr( list_value(l), ':' );
+			char *pipe = strchr( list_value(l), '|' );
 			TARGET *t;
-			*colon = 0;
+			*pipe = 0;
 			t = bindtarget(list_value(l));
-			*colon = ':';
+			*pipe = '|';
 			pushsettings( t->settings );
 			t->boundname = search( t->name, &t->time );
 			popsettings( t->settings );
-			sortedfiles[i].priority = atoi( colon + 1 );
+			sortedfiles[i].priority = atoi( pipe + 1 );
 			sortedfiles[i].filename = t->boundname;
 			++i;
 		}
