@@ -190,9 +190,7 @@ int LS_jam_setvar(ls_lua_State *L)
             return 0;
 
         t = bindtarget(ls_lua_tostring(L, 1));
-        pushsettings(t->settings);
-        var_set(ls_lua_tostring(L, 2), luahelper_addtolist(L, L0, 3), VAR_SET);
-        popsettings(t->settings);
+        t->settings = addsettings(t->settings, VAR_SET, ls_lua_tostring(L, 2), luahelper_addtolist(L, L0, 3));
     }
 
     return 0;
