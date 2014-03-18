@@ -68,6 +68,46 @@ parse_file( const char *f )
 }
 
 void
+parse_lines( const char *s, char** lines )
+{
+	/* Suspend scan of current file */
+	/* and push this new file in the stream */
+
+	yyfparselines(s, lines);
+
+	/* Now parse each block of rules and execute it. */
+	/* Execute it outside of the parser so that recursive */
+	/* calls to yyrun() work (no recursive yyparse's). */
+
+	for(;;)
+	{
+	    LOL l;
+	    PARSE *p;
+	    int jmp = 0; /* JMP_NONE */
+
+	    /* $(<) and $(>) empty in outer scope. */
+
+	    lol_init( &l );
+
+	    /* Filled by yyparse() calling parse_save() */
+
+	    yypsave = 0;
+
+	    /* If parse error or empty parse, outta here */
+
+	    if( yyparse() || !( p = yypsave ) )
+		break;
+
+	    /* Run the parse tree. */
+
+	    list_free( (*(p->func))( p, &l, &jmp ) );
+
+
+	    parse_free( p );
+	}
+}
+
+void
 parse_save( PARSE *p )
 {
 	yypsave = p;

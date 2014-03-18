@@ -49,6 +49,7 @@ void yymode( int n );
 void yyerror( const char *s );
 int yyanyerrors();
 void yyfparse( const char *s );
+void yyfparselines(const char* s, char **lines);
 int yyline();
 int yylex();
 int yyparse();

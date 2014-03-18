@@ -33,6 +33,7 @@ struct _PARSE {
 } ;
 
 void 	parse_file( const char *f );
+void    parse_lines( const char *s, char** lines );
 void 	parse_save( PARSE *p );
 
 PARSE * parse_make( 

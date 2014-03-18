@@ -3,6 +3,7 @@
 #include "jam.h"
 #include "lists.h"
 #include "parse.h"
+#include "scan.h"
 #include "compile.h"
 #include "rules.h"
 #include "variable.h"
@@ -278,6 +279,74 @@ int LS_jam_expand(ls_lua_State *L)
 }
 
 
+int LS_jam_parse(ls_lua_State *L)
+{
+    int numParams = ls_lua_gettop(L);
+    if (numParams < 1  ||  numParams > 1)
+        return 0;
+
+    if (!ls_lua_isstring(L, 1))
+        return 0;
+
+    {
+        const char* src = ls_lua_tostring(L, 1);
+        const char* ptr = src;
+        const char* startPtr;
+        char** lines;
+        int numberOfLines = 1;
+        int status;
+
+        while (*ptr) {
+            if (*ptr == '\n') {
+                ++numberOfLines;
+            }
+            ++ptr;
+        }
+        lines = malloc(sizeof(char*) * (numberOfLines + 1));
+        numberOfLines = 0;
+        startPtr = ptr = src;
+        while (1) {
+            if (*ptr == '\n'  ||  *ptr == 0) {
+                char* line;
+                if (*ptr == '\n')
+                    ++ptr;
+                line = malloc(ptr - startPtr + 1);
+                memcpy(line, startPtr, ptr - startPtr);
+                line[ptr - startPtr] = 0;
+                startPtr = ptr;
+                lines[numberOfLines++] = line;
+                if (*ptr == 0)
+                    break;
+            } else {
+                ++ptr;
+            }
+        }
+        lines[numberOfLines] = 0;
+        parse_lines(lines[0], lines);
+
+        status = yyanyerrors();
+
+        while (numberOfLines > 0) {
+            free(lines[--numberOfLines]);
+        }
+        free(lines);
+
+        if (status) {
+            struct ls_lua_Debug ar;
+            if (ls_lua_getstack(L, 1, &ar)) {
+                ls_lua_getinfo(L, "nSl", &ar);
+                int hi = 5;
+            }
+
+            printf("jam: Error parsing Jam code near %s[%d].\n", ar.short_src, ar.currentline);
+            exit(EXITBAD);
+        }
+    }
+
+    return 0;
+}
+
+
 int LS_jam_print(ls_lua_State *L)
 {
     int numParams = ls_lua_gettop(L);
@@ -352,6 +421,8 @@ static int pmain (ls_lua_State *L)
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_evaluaterule");
     ls_lua_pushcclosure(L, LS_jam_expand, 0);
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_expand");
+    ls_lua_pushcclosure(L, LS_jam_parse, 0);
+    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_parse");
     ls_lua_pushcclosure(L, LS_jam_print, 0);
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_print");
 
