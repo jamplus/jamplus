@@ -1173,19 +1173,41 @@ make0(
 	/* We could insist that there are updating actions for all missing */
 	/* files, but if they have dependents we just pretend it's NOTFILE. */
 
-#ifdef OPT_MULTIPASS_EXT
-	if( fate == T_FATE_MISSING && !t->actions && !t->depends && !queuedjamfiles )
-#else
 	if( fate == T_FATE_MISSING && !t->actions && !t->depends )
-#endif
 	{
+#ifdef OPT_MULTIPASS_EXT
+		if ( queuedjamfiles )
+		{
+			if( ( t->flags & T_FLAG_NOCARE ) )
+			{
+				if( !( t->flags & T_FLAG_FORCECARE ) )
+				{
+#ifdef OPT_GRAPH_DEBUG_EXT
+					if( DEBUG_FATE )
+						printf( "fate change  %s to STABLE from %s, "
+							"no actions, no dependents and don't care\n",
+							t->name, target_fate[fate]);
+#endif
+					fate = T_FATE_STABLE;
+				}
+			}
+			else if( !( t->flags & T_FLAG_FORCECARE ) )
+			{
+				printf( "don't know how to make %s\n", t->name );
+
+				fate = T_FATE_CANTFIND;
+			}
+		}
+		else
+		{
+#endif
 		if( t->flags & T_FLAG_NOCARE )
 		{
 #ifdef OPT_GRAPH_DEBUG_EXT
 			if( DEBUG_FATE )
 				printf( "fate change  %s to STABLE from %s, "
-					"no actions, no dependents and don't care\n",
-					t->name, target_fate[fate]);
+						"no actions, no dependents and don't care\n",
+						t->name, target_fate[fate]);
 #endif
 			fate = T_FATE_STABLE;
 		}
@@ -1194,7 +1216,10 @@ make0(
 			printf( "don't know how to make %s\n", t->name );
 
 			fate = T_FATE_CANTFIND;
-	    }
+		}
+#ifdef OPT_MULTIPASS_EXT
+		}
+#endif
 	}
 
 	/* Step 4f: propagate dependents' time & fate. */
