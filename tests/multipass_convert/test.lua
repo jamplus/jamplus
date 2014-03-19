@@ -34,8 +34,17 @@ WriteOutput all - output6.dat
 WriteOutput all - output7.dat
 WriteAlternateOutput alternate_output1.dat
 WriteAlternateOutput alternate_output2.dat
-*** found 20 target(s)...
-*** updating 15 target(s)...
+*** found 13 target(s)...
+*** updating 12 target(s)...
+@ WriteFile output1.dat
+@ WriteFile output2.dat
+@ WriteFile output3.dat
+@ WriteFile output4.dat
+@ WriteFile output5.dat
+@ WriteFile output6.dat
+@ WriteFile output7.dat
+@ WriteFile alternate_output1.dat
+@ WriteFile alternate_output2.dat
 *** updated 12 target(s)...
 ]]
 
@@ -77,7 +86,7 @@ WriteOutput all - output6.dat
 WriteOutput all - output7.dat
 WriteAlternateOutput alternate_output1.dat
 WriteAlternateOutput alternate_output2.dat
-*** found 23 target(s)...
+*** found 16 target(s)...
 ]]
 	TestPattern(pattern2, RunJam{})
 	TestFiles(pass1Files)
@@ -95,7 +104,7 @@ WriteOutput all - output6.dat
 WriteOutput all - output7.dat
 WriteAlternateOutput alternate_output1.dat
 WriteAlternateOutput alternate_output2.dat
-*** found 3 target(s)...
+*** found 1 target(s)...
 *** updating 1 target(s)...
 @ Clean clean
 *** updated 1 target(s)...

@@ -28,7 +28,7 @@ function Test()
 		local pattern
 	    if Platform == 'win32' then
 			pattern = [[
-*** found 21 target(s)...
+*** found 22 target(s)...
 *** updating 6 target(s)...
 @ C.vc.CC <win32!release:platform>platform.obj
 !NEXT!@ C.vc.Link <win32!release:platform>platform.exe
@@ -128,7 +128,7 @@ RELEASE: What's up?!
 		TestPattern(pattern2, ex.collectlines{'win32-release\\platform\\platform.release.exe'})
 
 		pattern3 = [[
-*** found 21 target(s)...
+*** found 22 target(s)...
 ]]
 
 	elseif Platform == 'macosx' then

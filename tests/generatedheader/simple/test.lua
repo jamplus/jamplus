@@ -18,7 +18,7 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 20 target(s)...
+*** found 21 target(s)...
 *** updating 6 target(s)...
 @ C.vc.CC <win32!release:test>main.obj
 !NEXT!@ C.vc.Link <win32!release:test>test.exe
@@ -49,7 +49,7 @@ function Test()
 		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 20 target(s)...
+*** found 21 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	
@@ -57,7 +57,7 @@ function Test()
 		os.touch('test.h')
 
 		local pattern3 = [[
-*** found 20 target(s)...
+*** found 21 target(s)...
 *** updating 2 target(s)...
 @ C.vc.CC <win32!release:test>main.obj
 !NEXT!@ C.vc.Link <win32!release:test>test.exe

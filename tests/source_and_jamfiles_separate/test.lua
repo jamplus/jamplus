@@ -52,7 +52,7 @@ function Test()
 		}
 
 		pattern = [[
-*** found 23 target(s)...
+*** found 24 target(s)...
 *** updating 7 target(s)...
 @ C.vc.CC <win32!release:helloworld>precomp.h.pch
 !NEXT!@ C.vc.CC <win32!release:helloworld>../src/file.obj
@@ -108,7 +108,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 23 target(s)...
+				*** found 24 target(s)...
 ]]
 		else
 			pattern = [[
@@ -127,7 +127,7 @@ function Test()
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 23 target(s)...
+*** found 24 target(s)...
 *** updating 5 target(s)...
 @ C.vc.CC <win32!release:helloworld>precomp.h.pch
 !NEXT!@ C.vc.CC <win32!release:helloworld>../src/file.obj
@@ -156,7 +156,7 @@ function Test()
 	do
 		if Platform == 'win32' then
 			pattern = [[
-				*** found 23 target(s)...
+				*** found 24 target(s)...
 ]]
 		else
 			pattern = [[
@@ -175,7 +175,7 @@ function Test()
 
 		if Platform == 'win32' then
 			pattern = [[
-*** found 23 target(s)...
+*** found 24 target(s)...
 *** updating 5 target(s)...
 @ C.vc.CC <win32!release:helloworld>precomp.h.pch
 !NEXT!@ C.vc.CC <win32!release:helloworld>../src/file.obj
