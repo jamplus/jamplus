@@ -52,6 +52,7 @@ void foo()
     MakeLocate $(foo.cpp) : $(LOCATE_TARGET) ;
     C.Clean test : $(foo.cpp) ;
     Depends $(main.cpp) : $(foo.h) ;
+    ForceCare $(foo.h) ;
 
 	C.IncludeDirectories : . ;
     C.Application test : main.cpp foo.cpp ;
