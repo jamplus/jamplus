@@ -590,15 +590,15 @@ pass:
 		sortedfiles = malloc( sizeof( QUEUEDFILEINFO ) * count );
 		i = 0;
 		for( l = list_first( origqueuedjamfiles ); l; l = list_next( l ) ) {
-			char *pipe = strchr( list_value(l), '|' );
+			char *separator = strchr( list_value(l), '\xff' );
 			TARGET *t;
-			*pipe = 0;
+			*separator = 0;
 			t = bindtarget(list_value(l));
-			*pipe = '|';
+			*separator = '\xff';
 			pushsettings( t->settings );
 			t->boundname = search( t->name, &t->time );
 			popsettings( t->settings );
-			sortedfiles[i].priority = atoi( pipe + 1 );
+			sortedfiles[i].priority = atoi( separator + 1 );
 			sortedfiles[i].filename = t->boundname;
 			++i;
 		}
