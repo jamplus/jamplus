@@ -118,15 +118,13 @@ rule C.BatchCompileGroupSize TARGET [ : SIZE ]</h1>
 <div class="line"><span class="preprocessor">C.BatchCompileGroupSize wxLua : 5 ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_CFlags"></a>
-rule C.CFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.CFlags TARGET : FLAGS</h1>
 <p><a name="rule_%43_%43%46lags"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>FLAGS</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the flags are made available globally. </td></tr>
-    <tr><td class="paramname">FLAGS</td><td>The list of flags to apply. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">FLAGS</td><td>The list of flags to apply.</td></tr>
   </table>
   </dd>
 </dl>
@@ -143,15 +141,13 @@ rule C.CFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</h1>
 <div class="line"><span class="preprocessor">C.CFlags managedapp : /clr:oldsyntax : debug : win32 ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_CppExceptions"></a>
-rule C.C++Exceptions TARGET : TYPE [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.C++Exceptions TARGET : TYPE</h1>
 <p><a name="rule_%43_%43%2b%2b%45xceptions"></a></p>
 <p>For the given project <code>TARGET</code>, turn on/off C++ exception support within the specified configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the flags are made available globally. </td></tr>
-    <tr><td class="paramname">TYPE</td><td><code>true</code> to turn on exceptions, <code>false</code> (default) to turn off exceptions. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is the current <code>$</code>(CONFIG). </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is the current <code>$</code>(PLATFORM).</td></tr>
+    <tr><td class="paramname">TYPE</td><td><code>true</code> to turn on exceptions, <code>false</code> (default) to turn off exceptions.</td></tr>
   </table>
   </dd>
 </dl>
@@ -165,15 +161,13 @@ rule C.C++Exceptions TARGET : TYPE [ : THE_CONFIG : THE_PLATFORM ]</h1>
 <div class="line"><span class="preprocessor">C.C++Exceptions mycppapp : false : * ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_CppFlags"></a>
-rule C.C++Flags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.C++Flags TARGET : FLAGS</h1>
 <p><a name="rule_%43_%43pp%46lags"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>FLAGS</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the flags are made available globally. </td></tr>
-    <tr><td class="paramname">FLAGS</td><td>The list of flags to apply. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">FLAGS</td><td>The list of flags to apply.</td></tr>
   </table>
   </dd>
 </dl>
@@ -240,15 +234,13 @@ rule C.DefFile TARGET : SOURCES</h1>
 <div class="line"><span class="preprocessor">C.DefFile WorkspaceWhiz : WorkspaceWhiz.def ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_Defines"></a>
-rule C.Defines TARGET : DEFINES [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.Defines TARGET : DEFINES</h1>
 <p><a name="rule_%43_%44efines"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>DEFINES</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the <code>DEFINES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
-    <tr><td class="paramname">DEFINES</td><td>The list of defines to apply. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">DEFINES</td><td>The list of defines to apply.</td></tr>
   </table>
   </dd>
 </dl>
@@ -279,16 +271,14 @@ rule C.ExcludeFromBuild TARGET : SOURCES</h1>
 <div class="line">}</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_Flags"></a>
-rule C.Flags TYPE : TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.Flags TYPE : TARGET : FLAGS</h1>
 <p><a name="rule_%43_%46lags"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>FLAGS</code> to the appropriate configuration and platform. <code>TYPE</code> can be any known source compilation type, such as <code>CC</code> for C-style files, <code>C++</code> for C++-style files, and on certain compilers, <code>M</code> for Objective C files, or <code>MM</code> for Objective C++ files.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TYPE</td><td>A source compilation type added through "rule_C_AddBuildExtensions" "C.AddBuildExtensions". </td></tr>
     <tr><td class="paramname">TARGET</td><td>The target to assign the <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the flags are made available globally. </td></tr>
-    <tr><td class="paramname">FLAGS</td><td>The list of flags to apply. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">FLAGS</td><td>The list of flags to apply.</td></tr>
   </table>
   </dd>
 </dl>
@@ -296,15 +286,13 @@ rule C.Flags TYPE : TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</h1>
 <div class="line">C.Flags C++ : * : -g -O0 -arch i386 : debug : macosx32 ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_ForceInclude"></a>
-rule C.ForceInclude TARGET : INCLUDES [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.ForceInclude TARGET : INCLUDES</h1>
 <p><a name="rule_%43_%46orce%49nclude"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>INCLUDES</code> to the appropriate configuration and platform, causing that project's compilation to force the inclusion of the header before anything else.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the <code>INCLUDES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
-    <tr><td class="paramname">INCLUDES</td><td>The list of header files to force include. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">INCLUDES</td><td>The list of header files to force include.</td></tr>
   </table>
   </dd>
 </dl>
@@ -323,7 +311,7 @@ rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC</h1>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the list of link targets, sometimes more than one, that will be built by the Jam. The target list may be passed to another rule like <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]</a>.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the list of link targets, sometimes more than one, that will be built by the Jam. The target list may be passed to another rule like <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES</a>.</dd></dl>
 <div class="fragment"><div class="line">C.Toolchain ps3 debug spu ;</div>
 <div class="line">local sputhing_library = [ C.Library sputhing : sputhing.c ] ;</div>
 <div class="line"></div>
@@ -341,15 +329,13 @@ rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC</h1>
 <div class="line">C.Application pputhing : pputhing.c ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_IncludeDirectories"></a>
-rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.IncludeDirectories TARGET : INCLUDEPATHS</h1>
 <p><a name="rule_%43_%49nclude%44irectories"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>INCLUDEPATHS</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the <code>INCLUDEPATHS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
-    <tr><td class="paramname">INCLUDEPATHS</td><td>The list of include paths to apply. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">INCLUDEPATHS</td><td>The list of include paths to apply.</td></tr>
   </table>
   </dd>
 </dl>
@@ -390,7 +376,7 @@ rule C.Library TARGET : SOURCES [ : OPTIONS ]</h1>
 <li>
 <code>windows</code> - Forces a GUI application. For Visual C++, the DLL is linked with <code>/SUBSYSTEM:WINDOWS</code>. </li>
 </ul>
- </blockquote> <dl class="section return"><dt>Returns</dt><dd>Returns the list of link targets, sometimes more than one, that will be built by the Jam. The target list may be passed to another rule like <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]</a>.</dd></dl>
+ </blockquote> <dl class="section return"><dt>Returns</dt><dd>Returns the list of link targets, sometimes more than one, that will be built by the Jam. The target list may be passed to another rule like <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES</a>.</dd></dl>
 <div class="fragment"><div class="line"><span class="preprocessor"># Build a static library called mystaticlibrary from the sources</span></div>
 <div class="line"><span class="preprocessor"></span><span class="preprocessor"># file1.c and file2.cpp.</span></div>
 <div class="line"><span class="preprocessor"></span>C.Library mystaticlibrary : file1.c file2.cpp ;</div>
@@ -400,15 +386,13 @@ rule C.Library TARGET : SOURCES [ : OPTIONS ]</h1>
 <div class="line"><span class="preprocessor">C.Library mysharedlibrary : file3.c file4.cpp : shared ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_LinkDirectories"></a>
-rule C.LinkDirectories TARGET : DIRECTORIES [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.LinkDirectories TARGET : DIRECTORIES</h1>
 <p><a name="rule_%43_%4cink%44irectories"></a></p>
 <p>For the given project <code>TARGET</code>, assign the link <code>DIRECTORIES</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the link <code>DIRECTORIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
-    <tr><td class="paramname">DIRECTORIES</td><td>The list of link directories to apply. Absolute paths are used directly. Relative paths are local to <code></code>. That is, they are relative to the subdirectory specified via <a class="el" href="jambase_rules.html#rule_SubDir">SubDir</a>. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">DIRECTORIES</td><td>The list of link directories to apply. Absolute paths are used directly. Relative paths are local to <code></code>. That is, they are relative to the subdirectory specified via <a class="el" href="jambase_rules.html#rule_SubDir">SubDir</a>.</td></tr>
   </table>
   </dd>
 </dl>
@@ -423,15 +407,13 @@ rule C.LinkDirectories TARGET : DIRECTORIES [ : THE_CONFIG : THE_PLATFORM ]</h1>
 <div class="line"><span class="preprocessor">C.LinkDirectories myproject : ../lib ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_LinkFlags"></a>
-rule C.LinkFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.LinkFlags TARGET : FLAGS</h1>
 <p><a name="rule_%43_%4cink%46lags"></a></p>
 <p>For the given project <code>TARGET</code>, assign the link <code>FLAGS</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the link <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the flags are made available globally. </td></tr>
-    <tr><td class="paramname">FLAGS</td><td>The list of link flags to apply. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">FLAGS</td><td>The list of link flags to apply.</td></tr>
   </table>
   </dd>
 </dl>
@@ -440,46 +422,40 @@ rule C.LinkFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</h1>
 <div class="line">C.LinkFlags ManagedLuaPlus : /KEYFILE:\<span class="stringliteral">&quot;$(SEARCH_SOURCE)/ManagedLuaPlus.snk\&quot; ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_LinkFrameworks"></a>
-rule C.LinkFrameworks TARGET : FRAMEWORKS [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.LinkFrameworks TARGET : FRAMEWORKS</h1>
 <p><a name="rule_%43_%4cink%46rameworks"></a></p>
 <dl class="section note"><dt>Note</dt><dd>This rule is only valid on Mac OS X.</dd></dl>
 <p>Links <code>TARGET</code> against the <code>FRAMEWORKS</code> specified. No dependencies are set, so changes to the framework will not be relinked.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to link <code>LIBRARIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td class="paramname">FRAMEWORKS</td><td>The list of frameworks to link. The frameworks are specified without an extension. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">FRAMEWORKS</td><td>The list of frameworks to link. The frameworks are specified without an extension.</td></tr>
   </table>
   </dd>
 </dl>
 <div class="fragment"><div class="line">C.LinkFrameworks MyApp : CoreFoundation ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_LinkLibraries"></a>
-rule C.LinkLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.LinkLibraries TARGET : LIBRARIES</h1>
 <p><a name="rule_%43_%4cink%4cibraries"></a></p>
 <p>Makes <code>TARGET</code> depend on Jam generated <code>LIBRARIES</code> and includes them during linking.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to link <code>LIBRARIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td class="paramname">LIBRARIES</td><td>The list of libraries to apply. These libraries are those generated from the <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rule. They do not include prebuilt libraries. To link prebuilt libraries, use the <a class="el" href="module_c.html#rule_C_LinkPrebuiltLibraries">rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]</a> rule. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">LIBRARIES</td><td>The list of libraries to apply. These libraries are those generated from the <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rule. They do not include prebuilt libraries. To link prebuilt libraries, use the <a class="el" href="module_c.html#rule_C_LinkPrebuiltLibraries">rule C.LinkPrebuiltLibraries TARGET : LIBRARIES</a> rule.</td></tr>
   </table>
   </dd>
 </dl>
 <div class="fragment"><div class="line">C.LinkLibraries MiniApp : Application LuaPlusStatic Misc ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_LinkPrebuiltLibraries"></a>
-rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.LinkPrebuiltLibraries TARGET : LIBRARIES</h1>
 <p><a name="rule_%43_%4cink%50rebuilt%4cibraries"></a></p>
 <p>Makes <code>TARGET</code> depend on <code>LIBRARIES</code> and includes them during linking.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to link <code>LIBRARIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td class="paramname">LIBRARIES</td><td>The list of libraries to apply. These libraries are prebuilt libraries, such as kernel32.lib, and are specified without an extension. For those libraries generated from the <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rule, use the <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]</a> rule. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">LIBRARIES</td><td>The list of libraries to apply. These libraries are prebuilt libraries, such as kernel32.lib, and are specified without an extension. For those libraries generated from the <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rule, use the <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES</a> rule.</td></tr>
   </table>
   </dd>
 </dl>
@@ -545,16 +521,14 @@ rule C.NoPrecompiledHeader TARGET : FILES</h1>
 <div class="line"><span class="preprocessor">C.NoPrecompiledHeader Misc : file_no_pch.c ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_ObjectCFlags"></a>
-rule C.ObjectCFlags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.ObjectCFlags TARGET : SOURCES : FLAGS</h1>
 <p><a name="rule_%43_%4fbject%43%46lags"></a></p>
 <p>For the given <code>SOURCES</code> matching <code>*.c</code>, assign the <code>FLAGS</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target containing the <code>SOURCES</code>. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
     <tr><td class="paramname">SOURCES</td><td>The list of sources to assign the <code>FLAGS</code> to. </td></tr>
-    <tr><td class="paramname">FLAGS</td><td>The list of flags to apply. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">FLAGS</td><td>The list of flags to apply.</td></tr>
   </table>
   </dd>
 </dl>
@@ -563,16 +537,14 @@ rule C.ObjectCFlags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</h1
 <div class="line"><span class="preprocessor">C.ObjectCFlags managedapp : somefile.c : /clr:oldsyntax ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_ObjectCppFlags"></a>
-rule C.ObjectC++Flags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.ObjectC++Flags TARGET : SOURCES : FLAGS</h1>
 <p><a name="rule_%43_%4fbject%43pp%46lags"></a></p>
 <p>For the given <code>SOURCES</code> matching *.cpp or *.cxx, assign the <code>FLAGS</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target containing the <code>SOURCES</code>. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
     <tr><td class="paramname">SOURCES</td><td>The list of sources to assign the <code>FLAGS</code> to. </td></tr>
-    <tr><td class="paramname">FLAGS</td><td>The list of flags to apply. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">FLAGS</td><td>The list of flags to apply.</td></tr>
   </table>
   </dd>
 </dl>
@@ -581,16 +553,14 @@ rule C.ObjectC++Flags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]</
 <div class="line"><span class="preprocessor">C.ObjectC++Flags managedapp : somefile.cpp : /clr:oldsyntax ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_ObjectDefines"></a>
-rule C.ObjectDefines TARGET : SOURCES : DEFINES [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.ObjectDefines TARGET : SOURCES : DEFINES</h1>
 <p><a name="rule_%43_%4fbject%44efines"></a></p>
 <p>For the given <code>SOURCES</code>, assign the <code>DEFINES</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target containing the <code>SOURCES</code>. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
     <tr><td class="paramname">SOURCES</td><td>The list of sources to assign the <code>DEFINES</code> to. </td></tr>
-    <tr><td class="paramname">DEFINES</td><td>The list of defines to apply. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">DEFINES</td><td>The list of defines to apply.</td></tr>
   </table>
   </dd>
 </dl>
@@ -599,16 +569,14 @@ rule C.ObjectDefines TARGET : SOURCES : DEFINES [ : THE_CONFIG : THE_PLATFORM ]<
 <div class="line"><span class="preprocessor">C.ObjectDefines someproject : justafile.cpp : ABC DEF=5 ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_ObjectForceInclude"></a>
-rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES</h1>
 <p><a name="rule_%43_%4fbject%46orce%49nclude"></a></p>
 <p>For the given <code>SOURCES</code>, assign the <code>INCLUDES</code> to the appropriate configuration and platform, causing that project's compilation to force the inclusion of the header before anything else.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target containing the <code>SOURCES</code>. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
     <tr><td class="paramname">SOURCES</td><td>The list of sources to assign the force include flag to. </td></tr>
-    <tr><td class="paramname">INCLUDES</td><td>The list of header files to force include. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">INCLUDES</td><td>The list of header files to force include.</td></tr>
   </table>
   </dd>
 </dl>
@@ -616,16 +584,14 @@ rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES [ : THE_CONFIG : THE_PLATF
 <div class="line"><span class="preprocessor">C.ObjectForceInclude libA : libA.cpp : ../common/print.h ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_ObjectIncludeDirectories"></a>
-rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS</h1>
 <p><a name="rule_%43_%4fbject%49nclude%44irectories"></a></p>
 <p>For the given <code>SOURCES</code>, assign the <code>INCLUDEPATHS</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target containing the <code>SOURCES</code>. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
     <tr><td class="paramname">SOURCES</td><td>The list of sources to assign the include paths to. </td></tr>
-    <tr><td class="paramname">INCLUDEPATHS</td><td>The list of include paths to apply. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">INCLUDEPATHS</td><td>The list of include paths to apply.</td></tr>
   </table>
   </dd>
 </dl>
@@ -634,15 +600,13 @@ rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS [ : THE_CONFIG : 
 <div class="line"><span class="preprocessor">C.ObjectIncludeDirectories myproject : somefile.cpp : $(Code)/Shared ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_OutputName"></a>
-rule C.OutputName TARGET : NAME [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.OutputName TARGET : NAME</h1>
 <p><a name="rule_%43_%4futput%4eame"></a></p>
 <p>By default, the name of a generated executable or library is determined by the name of the <code>TARGET</code>. <code>OutputName</code> is used to override the name of the executable or library.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to affect the output name change on. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td class="paramname">NAME</td><td>The new name of the output target. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">NAME</td><td>The new name of the output target.</td></tr>
   </table>
   </dd>
 </dl>
@@ -651,15 +615,13 @@ rule C.OutputName TARGET : NAME [ : THE_CONFIG : THE_PLATFORM ]</h1>
 <div class="line"><span class="preprocessor">C.OutputName LuaPlusShared : LuaPlus_1100 ;</span></div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_OutputPath"></a>
-rule C.OutputPath TARGET : OUTPUTPATH [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.OutputPath TARGET : OUTPUTPATH</h1>
 <p><a name="rule_%43_%4futput%50ath"></a></p>
 <p>By default, the output location of a generated executable or library is at <code>LOCATE_TARGET</code>. <code>OutputPath</code> is used to override the output location of the executable or library.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to affect the output path change on. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td class="paramname">OUTPUTPATH</td><td>The new output location of the generated target. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">OUTPUTPATH</td><td>The new output location of the generated target.</td></tr>
   </table>
   </dd>
 </dl>
@@ -671,16 +633,14 @@ rule C.OutputPath TARGET : OUTPUTPATH [ : THE_CONFIG : THE_PLATFORM ]</h1>
 <div class="line">C.OutputPath LuaPlusShared : <span class="stringliteral">&quot;c:/Program Files/LuaPlus&quot;</span> ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_OutputPostfix"></a>
-rule C.OutputPostfix TARGET : POSTFIX [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.OutputPostfix TARGET : POSTFIX</h1>
 <p><a name="rule_%43_%4futput%50ostfix"></a></p>
 <p>The output postfix is appended to the end of the generated target name. By default, the output postfix is .$(CONFIG). This means the resultant filename is $(OUTPUTNAME).$(CONFIG).$(EXT).</p>
 <p>If there is no assigned output postfix for <code>TARGET</code>, then the global target <code>*</code> is checked for a postfix.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to affect the output path change on. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td class="paramname">POSTFIX</td><td>The new output postfix of the generated target. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">POSTFIX</td><td>The new output postfix of the generated target.</td></tr>
   </table>
   </dd>
 </dl>
@@ -699,14 +659,12 @@ rule C.OutputPostfix TARGET : POSTFIX [ : THE_CONFIG : THE_PLATFORM ]</h1>
 <div class="line">C.OutputPostfix LuaPlusShared : : release ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_OutputPostfixClear"></a>
-rule C.OutputPostfixClear TARGET : THE_CONFIG : THE_PLATFORM</h1>
+rule C.OutputPostfixClear TARGET</h1>
 <p><a name="rule_%43_%4futput%50ostfix%43lear"></a></p>
 <p>Clear the output postfix.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to affect the output path change on. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to affect the output path change on. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified.</td></tr>
   </table>
   </dd>
 </dl>
@@ -714,15 +672,13 @@ rule C.OutputPostfixClear TARGET : THE_CONFIG : THE_PLATFORM</h1>
 <div class="line">C.OutputPostfixClear LuaPlusShared : debug ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_OutputSuffix"></a>
-rule C.OutputSuffix TARGET : SUFFIX [ : THE_CONFIG : THE_PLATFORM ]</h1>
+rule C.OutputSuffix TARGET : SUFFIX</h1>
 <p><a name="rule_%43_%4futput%53uffix"></a></p>
 <p>The output suffix is the file extension of the generated target. By default, the output suffix is appropriate for an executable or library.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to affect the output suffix change on. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td class="paramname">SUFFIX</td><td>The new output suffix of the generated target. </td></tr>
-    <tr><td class="paramname">THE_CONFIG</td><td>(optional) If not specified, the default is all configurations. </td></tr>
-    <tr><td class="paramname">THE_PLATFORM</td><td>(optional) If not specified, the default is all platforms.</td></tr>
+    <tr><td class="paramname">SUFFIX</td><td>The new output suffix of the generated target.</td></tr>
   </table>
   </dd>
 </dl>
