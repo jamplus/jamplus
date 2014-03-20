@@ -628,7 +628,11 @@ static void* ls_lua_loadsymbol(void* handle, const char* symbol)
 }
 
 
+#ifdef OS_NT
 HMODULE luaTildeModule;
+#else
+void* luaTildeModule;
+#endif
 typedef void* LuaTildeHost;
 LuaTildeHost* (*LuaTilde_Command)(LuaTildeHost*, const char*, void*, void*);
 
@@ -761,7 +765,7 @@ void ls_lua_init()
         luaTildeModule = ls_lua_loadlibrary(fileName);
         if (luaTildeModule) {
             LuaTildeHost* host;
-            LuaTilde_Command = (LuaTildeHost* (*)(LuaTildeHost*, const char*, void*, void*))GetProcAddress(luaTildeModule, "LuaTilde_Command");
+            LuaTilde_Command = (LuaTildeHost* (*)(LuaTildeHost*, const char*, void*, void*))ls_lua_loadsymbol(luaTildeModule, "LuaTilde_Command");
             host = LuaTilde_Command(NULL, "create", (void*)10000, NULL);
             LuaTilde_Command(host, "registerstate", "State", L);
             LuaTilde_Command(host, "waitfordebuggerconnection", NULL, NULL);
