@@ -481,6 +481,20 @@ static int pmain (ls_lua_State *L)
 }
 
 
+#ifdef OS_NT
+static HMODULE ls_lua_loadlibrary(const char* filename)
+#else
+static void* ls_lua_loadlibrary(const char* filename)
+#endif
+{
+#ifdef OS_NT
+    return LoadLibrary(filename);
+#else
+    return dlopen(filename, RTLD_LAZY | RTLD_GLOBAL);
+#endif
+}
+
+
 static void* ls_lua_loadsymbol(void* handle, const char* symbol)
 {
 #ifdef OS_NT
@@ -491,8 +505,14 @@ static void* ls_lua_loadsymbol(void* handle, const char* symbol)
 }
 
 
+HMODULE luaTildeModule;
+typedef void* LuaTildeHost;
+LuaTildeHost* (*LuaTilde_Command)(LuaTildeHost*, const char*, void*, void*);
+
+
 void ls_lua_init()
 {
+    char fileName[4096];
     LIST *luaSharedLibrary;
 #ifdef OS_NT
     HINSTANCE handle = NULL;
@@ -510,15 +530,11 @@ void ls_lua_init()
 #endif
     if (list_first(luaSharedLibrary))
     {
-#ifdef OS_NT
-        handle = LoadLibrary(list_value(list_first(luaSharedLibrary)));
-#else
-        handle = dlopen(list_value(list_first(luaSharedLibrary)), RTLD_LAZY | RTLD_GLOBAL);
-#endif
+        strcpy(fileName, list_value(list_first(luaSharedLibrary)));
+        handle = ls_lua_loadlibrary(fileName);
     }
     if (!handle)
     {
-        char fileName[4096];
         getprocesspath(fileName, 4096);
 
 #ifdef OS_NT
@@ -527,21 +543,21 @@ void ls_lua_init()
 #else
         strcat(fileName, "/lua/lua51.dll");
 #endif
-        handle = LoadLibrary(fileName);
 #else
 #ifdef _DEBUG
         strcat(fileName, "/lua/lua51_debug.so");
 #else
         strcat(fileName, "/lua/lua51.so");
 #endif
-        handle = dlopen(fileName, RTLD_LAZY | RTLD_GLOBAL);
 #endif
+        handle = ls_lua_loadlibrary(fileName);
         if (!handle)
         {
             printf("jam: Unable to find the LuaPlus shared library.\n");
             exit(EXITBAD);
         }
     }
+
 
     ls_lua_close = (void (*)(ls_lua_State *))ls_lua_loadsymbol(handle, "lua_close");
 
@@ -591,6 +607,40 @@ void ls_lua_init()
 
     L = ls_luaL_newstate();
     ls_lua_cpcall(L, &pmain, 0);
+
+    if (globs.lua_debugger) {
+        char* slashPtr;
+        char* backslashPtr;
+        slashPtr = strrchr(fileName, '/');
+        backslashPtr = strrchr(fileName, '\\');
+        slashPtr = slashPtr > backslashPtr ? slashPtr : backslashPtr;
+        if (slashPtr) {
+            ++slashPtr;
+        } else {
+            slashPtr = fileName;
+        }
+#ifdef OS_NT
+#ifdef _DEBUG
+        strcpy(slashPtr, "lua-tilde.debug.dll");
+#else
+        strcpy(slashPtr, "lua-tilde.dll");
+#endif
+#else
+#ifdef _DEBUG
+        strcpy(slashPtr, "lua-tilde.debug.so");
+#else
+        strcpy(slashPtr, "lua-tilde.so");
+#endif
+#endif
+        luaTildeModule = ls_lua_loadlibrary(fileName);
+        if (luaTildeModule) {
+            LuaTildeHost* host;
+            LuaTilde_Command = (LuaTildeHost* (*)(LuaTildeHost*, const char*, void*, void*))GetProcAddress(luaTildeModule, "LuaTilde_Command");
+            host = LuaTilde_Command(NULL, "create", (void*)10000, NULL);
+            LuaTilde_Command(host, "registerstate", "State", L);
+            LuaTilde_Command(host, "waitfordebuggerconnection", NULL, NULL);
+        }
+    }
 }
 
 

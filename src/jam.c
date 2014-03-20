@@ -187,6 +187,9 @@ struct globs globs = {
 # endif
 	0,			/* output commands, not run them */
 	0,                      /* silence */
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+	0,          /* lua debugger */
+#endif
 } ;
 
 /* Symbols to be defined as true for use in Jambase */
@@ -385,14 +388,25 @@ int main( int argc, char **argv, char **arg_environ )
 #endif
 
 #ifdef OPT_SETCWD_SETTING_EXT
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tabno:qvS", optv, targets ) ) < 0 )
+#else
 	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qvS", optv, targets ) ) < 0 )
+#endif
+#else
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+	if( ( num_targets = getoptions( argc, argv, "d:j:f:gs:t:abno:qv", optv, targets ) ) < 0 )
 #else
 	if( ( num_targets = getoptions( argc, argv, "d:j:f:gs:t:ano:qv", optv, targets ) ) < 0 )
+#endif
 #endif
 	{
 	    printf( "\nusage: jam [ options ] targets...\n\n" );
 
             printf( "-a      Build all targets, even if they are current.\n" );
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+            printf( "-b      Enable Lua debugger.\n" );
+#endif
 #ifdef OPT_SETCWD_SETTING_EXT
             printf( "-Cx     Set working directory to x.\n" );
 #endif
@@ -469,6 +483,11 @@ int main( int argc, char **argv, char **arg_environ )
 
 	if( ( s = getoptval( optv, 'a', 0 ) ) )
 	    anyhow++;
+
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+	if( ( s = getoptval( optv, 'b', 0 ) ) )
+	    globs.lua_debugger = 1;
+#endif
 
 	if( ( s = getoptval( optv, 'S', 0 ) ) )
 	    globs.silence = 1;
