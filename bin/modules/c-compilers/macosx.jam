@@ -59,12 +59,12 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = macosx10.7 ;
 				
 				case 10.8 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk ;
 					sdkroot = macosx10.8 ;
 
 				case 10.9 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk ;
 					sdkroot = macosx10.9 ;
 
@@ -92,19 +92,19 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = iphoneos5.1 ;
 
 				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk ;
 					sdkroot = iphoneos6.0 ;
 					flags += -arch armv7 ;
 
 				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
 					flags += -arch armv7s ;
 
 				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
 					flags += -arch armv7s ;
@@ -131,17 +131,17 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = iphoneos5.1 ;
 
 				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk ;
 					sdkroot = iphoneos6.0 ;
 
 				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
 
 				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
 
@@ -169,17 +169,17 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = iphoneos5.1 ;
 
 				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk ;
 					sdkroot = iphoneos6.0 ;
 
 				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
 
 				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
 
@@ -205,17 +205,17 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = iphoneos5.1 ;
 
 				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk ;
 					sdkroot = iphoneos6.0 ;
 
 				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
 
 				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
 
