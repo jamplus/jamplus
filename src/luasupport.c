@@ -9,6 +9,7 @@
 #include "variable.h"
 #include "filesys.h"
 #include "expand.h"
+#include "newstr.h"
 
 #ifdef OS_NT
 #include <windows.h>
@@ -312,6 +313,126 @@ int LS_jam_expand(ls_lua_State *L)
 }
 
 
+// jam_action(name, function, {options})
+int LS_jam_action(ls_lua_State *L)
+{
+    RULE* rule;
+    const char* name;
+    int paramIndex = 2;
+
+    int numParams = ls_lua_gettop(L);
+    if (numParams < 2) {
+        //ls_luaL_error
+        return 0;
+    }
+
+    if (!ls_lua_isstring(L, 1))
+        return 0;
+    name = ls_lua_tostring(L, 1);
+    rule = bindrule(name);
+
+    if (rule->actions) {
+        freestr(rule->actions);
+        rule->actions = NULL;
+    }
+
+    if (rule->bindlist) {
+        list_free(rule->bindlist);
+        rule->bindlist = L0;
+    }
+
+    if (ls_lua_isstring(L, 2))
+        paramIndex = 2;
+    else if (ls_lua_isstring(L, 3))
+        paramIndex = 3;
+    else {
+        return 0;
+    }
+
+    rule->actions = copystr(ls_lua_tostring(L, paramIndex));
+    rule->flags = 0;
+
+    paramIndex = paramIndex == 2 ? 3 : 2;
+
+    if (ls_lua_istable(L, paramIndex)) {
+        ls_lua_getfield(L, paramIndex, "bind");
+        if (ls_lua_istable(L, -1)) {
+            ls_lua_pushnil(L);
+            while (ls_lua_next(L, -2) != 0) {
+                if (!ls_lua_tostring(L, -1)) {
+                    printf("!!\n");
+                    exit(1);
+                }
+                rule->bindlist = list_append(rule->bindlist, ls_lua_tostring(L, -1), 0);
+                ls_lua_pop(L, 1);
+            }
+            ls_lua_pop(L, 1);
+        }
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "updated");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_UPDATED : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "together");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_TOGETHER : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "ignore");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_IGNORE : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "quietly");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_QUIETLY : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "piecemeal");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_PIECEMEAL : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "existing");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_EXISTING : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "response");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_RESPONSE : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "lua");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_LUA : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "writefile");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_WRITEFILE : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "screenoutput");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_SCREENOUTPUT : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "removeemptydirs");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_REMOVEEMPTYDIRS : 0;
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "maxtargets");
+        if (ls_lua_isnumber(L, -1)) {
+            rule->flags |= RULE_MAXTARGETS;
+            rule->maxtargets = (int)ls_lua_tonumber(L, -1);
+        }
+        ls_lua_pop(L, 1);
+
+        ls_lua_getfield(L, paramIndex, "maxline");
+        if (ls_lua_isnumber(L, -1)) {
+            rule->flags |= RULE_MAXLINE;
+            rule->maxline = (int)ls_lua_tonumber(L, -1);
+        }
+        ls_lua_pop(L, 1);
+    }
+
+    return 0;
+}
+
+
 int LS_jam_parse(ls_lua_State *L)
 {
     int numParams = ls_lua_gettop(L);
@@ -459,6 +580,8 @@ static int pmain (ls_lua_State *L)
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_getvar");
     ls_lua_pushcclosure(L, LS_jam_setvar, 0);
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_setvar");
+    ls_lua_pushcclosure(L, LS_jam_action, 0);
+    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_action");
     ls_lua_pushcclosure(L, LS_jam_evaluaterule, 0);
     ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_evaluaterule");
     ls_lua_pushcclosure(L, LS_jam_expand, 0);
@@ -597,6 +720,9 @@ void ls_lua_init()
     ls_lua_cpcall = (int (*)(ls_lua_State *, ls_lua_CFunction, void *))ls_lua_loadsymbol(handle, "lua_cpcall");
 
     ls_lua_next = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_next");
+
+    ls_lua_getstack = (int(*)(ls_lua_State *, int, ls_lua_Debug *))ls_lua_loadsymbol(handle, "lua_getstack");
+    ls_lua_getinfo = (int(*)(ls_lua_State *, const char *, ls_lua_Debug *))ls_lua_loadsymbol(handle, "lua_getinfo");
 
     ls_luaL_openlibs = (void (*)(ls_lua_State *))ls_lua_loadsymbol(handle, "luaL_openlibs");
     ls_luaL_loadstring = (int (*)(ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "luaL_loadstring");
