@@ -489,7 +489,6 @@ int LS_jam_parse(ls_lua_State *L)
             struct ls_lua_Debug ar;
             if (ls_lua_getstack(L, 1, &ar)) {
                 ls_lua_getinfo(L, "nSl", &ar);
-                int hi = 5;
             }
 
             printf("jam: Error parsing Jam code near %s[%d].\n", ar.short_src, ar.currentline);
