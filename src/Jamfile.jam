@@ -349,6 +349,7 @@ if $(LUA_BIN)
 				lua.debug.exe
 				lua5.1.debug.dll
 				lua51_debug.dll
+				lua-tilde.debug.dll
 				modules/ex.debug.dll
 				modules/filefind.debug.dll
 				modules/lanes/core.debug.dll
@@ -365,6 +366,7 @@ if $(LUA_BIN)
 				lua.exe
 				lua5.1.dll
 				lua51.dll
+				lua-tilde.dll
 				modules/ex.dll
 				modules/filefind.dll
 				modules/lanes/core.dll
