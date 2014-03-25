@@ -2,9 +2,9 @@
 
 \section lua_support_overview Overview
 
-JamPlus has built in Lua support, provided through a minimal distribution of LuaPlus (http://luaplus.org/).  Lua script may be run during the \ref operation_parsing and during the \ref operation_updating.
+JamPlus has built in Lua support, provided through a minimal distribution of LuaPlus (http://luaplus.org/).  Lua scripts may be run during the \ref operation_parsing and during the \ref operation_updating.
 
-Any LuaBinaries capable module can run in the LuaPlus environment. Just drop the binary in the <tt>bin/LuaPlus/modules/</tt> directory.
+Any LuaBinaries capable module can run in the LuaPlus environment. Just drop the binary in the <tt>bin/PLATFORM/LuaPlus/modules/</tt> directory or alter the <tt>package.path</tt> or <tt>package.cpath</tt>
 
 The scripts located in <tt>bin/scripts/</tt> are written in Lua, although they are executed external to the Jam executable.
 
@@ -58,7 +58,9 @@ Using the new <tt>lua</tt> modifier for an action, Lua script can be run in a th
 \code
 actions lua RunLuaScript
 {
-    require 'iox'; iox.Sleep($(SLEEP)); print($(TEXT))
+    require 'ex'
+    ex.Sleep($(SLEEP))
+    print($(TEXT))
 }
 \endcode
 \htmlonly </blockquote> \endhtmlonly
@@ -71,6 +73,84 @@ actions lua RunLuaScript
 \section lua_support_jam Accessing Jam from Lua
 
 Within a Lua script, it is possible to access Jam variables and execute Jam rules.
+
+\subsection lua_jam_action function jam_action(ACTION_NAME, ACTION_TEXT [, FLAGS])
+\addindex lua_jam_action
+
+\htmlonly <blockquote> \endhtmlonly
+
+Creates an action to be executed by Jam called \c ACTION_NAME made up of \c ACTION_TEXT.  If written in the Jam language, the equivalent would be:
+
+\htmlonly <blockquote> \endhtmlonly
+\code
+jam_action(ACTION_NAME, ACTION_TEXT)
+
+is equivalent to:
+
+actions ACTION_NAME
+{
+    ACTION_TEXT
+}
+\endcode
+\htmlonly </blockquote> \endhtmlonly
+
+If \c FLAGS is specified as a table, those flags are applied to the action and have direct correspondence to action modifiers specified in a Jam action.
+
+\htmlonly <blockquote> \endhtmlonly
+\code
+jam_action(ACTION_NAME, ACTION_TEXT, { updated = true, together = true })
+
+is equivalent to:
+
+actions updated together ACTION_NAME
+{
+    ACTION_TEXT
+}
+\endcode
+\htmlonly </blockquote> \endhtmlonly
+
+\param ACTION_NAME The name of any valid Jam action.
+\param ACTION_TEXT Text representing the commands to be executed by the shell.
+\param FLAGS (optional) If specifed, \c FLAGS must be a table of action modifiers containing one or more of the following: <tt>bind = { 'various', 'target', 'names' }</tt>, <tt>existing = true</tt>,<tt>ignore = true</tt>, <tt>lua = true</tt>,<tt>maxline = true</tt>, <tt>maxresponse = true</tt>, <tt>piecemeal = true</tt>, <tt>quietly = true</tt>, <tt>removeemptydirs = true</tt>, <tt>response = true</tt>, <tt>screenoutput = true</tt>, <tt>together = true</tt>, <tt>updated = true</tt>
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+
+\subsection lua_jam_evaluaterule function jam_evaluaterule(RULE_NAME [, PARAMETERS])
+\addindex lua_jam_evaluaterule
+
+\htmlonly <blockquote> \endhtmlonly
+
+Executes rule \c RULE_NAME using any optional \c PARAMETERS specified.  Returns the result as a Lua table.
+
+\param RULE_NAME The name of any valid Jam rule.
+\param PARAMETERS (optional) If specifed, the \c PARAMETERS are collapsed into a Jam string list and passed to the rule.
+\return If the Jam rule doesn't return any values, the return value is \c nil.  If the Jam rule does return values, the return values are transformed to a Lua array of strings.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+
+\subsection lua_jam_expand function jam_expand(TEXT_TO_EXPAND)
+\addindex lua_jam_expand
+
+\htmlonly <blockquote> \endhtmlonly
+
+Expands \c TEXT_TO_EXPAND according to Jam rules.  \c TEXT_TO_EXPAND must use the \$() or \@() expansion forms described elsewhere.
+
+\param TEXT_TO_EXPAND The text to expand.
+\return Returns the expanded text.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
 
 \subsection lua_jam_getvar function jam_getvar([ TARGET_NAME, ] VARIABLE_NAME)
 \addindex lua_jam_getvar
@@ -92,6 +172,38 @@ If \c TARGET_NAME is specified, \c VARIABLE_NAME is retrieved as if an <tt>on TA
 
 
 
+\subsection lua_jam_parse function jam_parse(TEXT_TO_PARSE)
+\addindex lua_jam_parse
+
+\htmlonly <blockquote> \endhtmlonly
+
+Parses \c TEXT_TO_PARSE as if it existed in a Jamfile.
+
+\param TEXT_TO_PARSE Jam source code to be parsed and executed by Jam immediately.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+
+
+\subsection lua_jam_print function jam_print(TEXT_TO_PRINT)
+\addindex lua_jam_print
+
+\htmlonly <blockquote> \endhtmlonly
+
+Prints \c TEXT_TO_PRINT to the standard output stream.
+
+\param TEXT_TO_PRINT The text to print.
+
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+
+
 \subsection lua_jam_setvar function jam_setvar([ TARGET_NAME, ] VARIABLE_NAME, VALUE)
 \addindex lua_jam_setvar
 
@@ -105,23 +217,6 @@ If \c TARGET_NAME is specified, \c VALUE is set into \c VARIABLE_NAME as if an <
 \param VARIABLE_NAME The Jam variable to set.
 
 \htmlonly </blockquote> \endhtmlonly
-
-
-
-
-\subsection lua_jam_evaluaterule function jam_evaluaterule(RULE_NAME [, PARAMETERS])
-\addindex lua_jam_evaluaterule
-
-\htmlonly <blockquote> \endhtmlonly
-
-Executes rule \c RULE_NAME using any optional \c PARAMETERS specified.  Returns the result as a Lua table.
-
-\param RULE_NAME The name of any valid Jam rule.
-\param PARAMETERS (optional) If specifed, the \c PARAMETERS are collapsed into a Jam string list and passed to the rule.
-\return If the Jam rule doesn't return any values, the return value is \c nil.  If the Jam rule does return values, the return values are transformed to a Lua array of strings.
-
-\htmlonly </blockquote> \endhtmlonly
-
 
 
 
