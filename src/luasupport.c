@@ -402,10 +402,6 @@ int LS_jam_action(ls_lua_State *L)
         rule->flags |= ls_lua_toboolean(L, -1) ? RULE_LUA : 0;
         ls_lua_pop(L, 1);
 
-        ls_lua_getfield(L, paramIndex, "writefile");
-        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_WRITEFILE : 0;
-        ls_lua_pop(L, 1);
-
         ls_lua_getfield(L, paramIndex, "screenoutput");
         rule->flags |= ls_lua_toboolean(L, -1) ? RULE_SCREENOUTPUT : 0;
         ls_lua_pop(L, 1);
