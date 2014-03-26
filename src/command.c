@@ -362,7 +362,9 @@ cmd_string(
 		in = ine;
 		break;
 #endif
-	    }
+	    } else if (in[0] == '@' && in[1] == '(') {
+		dollar++;
+		}
 
 	    buffer_addchar(buff, *in++);
 	}
