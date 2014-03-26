@@ -25,6 +25,7 @@ Introduction</h1>
 <li><a href="jambase_rules.html#rule_ActiveProject">ActiveProject</a></li>
 <li><a href="jambase_rules.html#rule_AutoSourceGroup">AutoSourceGroup</a></li>
 <li><a href="jambase_rules.html#rule_Clean">Clean</a></li>
+<li><a href="jambase_rules.html#rule_CleanTree">CleanTree</a></li>
 <li><a href="jambase_rules.html#rule_FGristDirectories">FGristDirectories</a></li>
 <li><a href="jambase_rules.html#rule_GroupByVar">GroupByVar</a></li>
 <li><a href="jambase_rules.html#rule_IncludeModule">IncludeModule</a></li>
@@ -90,6 +91,19 @@ rule Clean TARGETS : FILES</h1>
   </dd>
 </dl>
 <div class="fragment"><div class="line">Clean clean : &lt;mytarget&gt;myfile.txt $(TEMP)/anotherfile.txt ;</div>
+</div><!-- fragment --><hr/>
+ <h1><a class="anchor" id="rule_CleanTree"></a>
+rule CleanTree TARGETS : DIRECTORIES</h1>
+<p><a name="rule_%43lean%54ree"></a></p>
+<p>When executing actions for <code>TARGETS</code>, the specified list of <code>DIRECTORIES</code> are removed from the disk.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TARGETS</td><td>A list of one or more targets. Generally, the target name is <code>clean</code> or <code>clean:SOMETARGET</code>. </td></tr>
+    <tr><td class="paramname">DIRECTORIES</td><td>A list of directories to be deleted.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><div class="line">CleanTree clean : $(TEMP)/a/directory ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_FGristDirectories"></a>
 rule FGristDirectories DIRECTORIES</h1>
