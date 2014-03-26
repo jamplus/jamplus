@@ -92,7 +92,11 @@ var_defines( const char **e )
 # ifdef OS_MAC
 		char split = ',';
 # else
+#ifdef OPT_ENVIRONMENT_FIX
+		char split = '\xff';
+#else
 		char split = ' ';
+#endif
 # endif
 		char buf[ MAXSYM ];
 
