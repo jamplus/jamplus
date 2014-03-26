@@ -204,6 +204,9 @@ cmd_string(
 
 	    if (in[0] == '$' && in[1] == '(') {
 		dollar++;
+		} else if (in[0] == '$' && in[1] == '@' && in[2] == '(') {
+		in++;
+		dollar++;
 	    } else if ((rule->flags & RULE_RESPONSE)
 		       && in[0] == '@' && in[1] == '(') {
 		const char *ine;

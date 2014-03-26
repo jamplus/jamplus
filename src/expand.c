@@ -158,6 +158,11 @@ var_expand(
 		literal = 1;
 		goto expand;
 	    }
+	    if( ch == '@' && in[0] == '$' && in[1] == '(' ) {
+		++in;
+		literal = 1;
+		goto expand;
+	    }
 #endif
 	}
 
