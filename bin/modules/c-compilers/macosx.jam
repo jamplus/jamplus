@@ -287,23 +287,23 @@ rule C.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 	local flags ;
 	switch $(SDK_PLATFORM) {
 		case macosx :
-			# 10.4, 10.5, 10.6, 10.7, 10.8
+			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
 			flags += -mmacosx-version-min=$(SDK_VERSION_MIN) ;
 
 		case iphone :
-			# 4.3, 5.0, 5.1, 6.0
+			# 4.3, 5.0, 5.1, 6.0 6.1 7.0
 			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
 
 		case iphonesimulator :
-			# 4.3, 5.0, 5.1, 6.0
+			# 4.3, 5.0, 5.1, 6.0 6.1 7.0
 			flags += -mios-simulator-version-min=$(SDK_VERSION_MIN) ;
 
 		case ipadsimulator :
-			# 4.3, 5.0, 5.1, 6.0
+			# 4.3, 5.0, 5.1, 6.0 6.1 7.0
 			flags += -mios-simulator-version-min=$(SDK_VERSION_MIN) ;
 
 		case ipad :
-			# 4.3, 5.0, 5.1, 6.0
+			# 4.3, 5.0, 5.1, 6.0 6.1 7.0
 			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
 	}
 
@@ -314,6 +314,18 @@ rule C.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 	C.LinkFlags $(TARGET) : $(flags) ;
 
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION_MIN) ;
+
+	if $(TARGETINFO_LOCATE) {
+		if $(SDK_PLATFORM) in iphone iphonesimulator ipad ipadsimulator {
+			Contents += "Projects[ [[C.*]] ].IOS_SDK_VERSION_MIN[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(SDK_VERSION_MIN)]]
+
+" ;
+		} else if $(SDK_PLATFORM) in macosx {
+			Contents += "Projects[ [[C.*]] ].OSX_SDK_VERSION_MIN[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(SDK_VERSION_MIN)]]
+
+" ;
+		}
+	}
 }
 
 
