@@ -74,7 +74,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 		case iphone :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 7.0 ;
+			SDK_VERSION ?= 7.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -109,13 +109,19 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = iphoneos7.0 ;
 					flags += -arch armv7s ;
 
+				case 7.1 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk ;
+					sdkroot = iphoneos7.0 ;
+					flags += -arch armv7s ;
+
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -fvisibility=hidden ;
 
 		case iphonesimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 7.0 ;
+			SDK_VERSION ?= 7.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -145,6 +151,11 @@ rule C.MacOSX_SDK SDK_VERSION {
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
 
+				case 7.1 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk ;
+					sdkroot = iphoneos7.1 ;
+
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -arch i386 ;
@@ -152,7 +163,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 		case ipadsimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 7.0 ;
+			SDK_VERSION ?= 7.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -183,6 +194,11 @@ rule C.MacOSX_SDK SDK_VERSION {
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
 
+				case 7.1 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk ;
+					sdkroot = iphoneos7.1 ;
+
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -arch i386 ;
@@ -190,7 +206,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 		case ipad :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 7.0 ;
+			SDK_VERSION ?= 7.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -218,6 +234,11 @@ rule C.MacOSX_SDK SDK_VERSION {
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
+
+				case 7.1 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk ;
+					sdkroot = iphoneos7.1 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
