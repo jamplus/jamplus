@@ -422,6 +422,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 		case uidevicefamily :		C._BundleInfoArray UIDeviceFamily : $(VALUE) ;
 		case uiprerenderedicon :	C._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
 		case uistatusbarhidden :	C._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
+		case uiviewcontrollerbasedstatusbarappearance : C._BundleInfoBoolean UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
 		case uiinterfaceorientation :	
 			if $(VALUE) = portrait {
 				C._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationPortrait ;
