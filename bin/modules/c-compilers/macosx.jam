@@ -641,7 +641,10 @@ rule XIB {
 rule C.SetTaskAllow {
 }
 
-rule C.CodeSign {
+rule C.CodeSign TARGET : PROVISIONING_PROFILE {
+	Contents += "Projects[ [[C.*]] ].IOS_SIGNING_IDENTITY[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(PROVISIONING_PROFILE)]]
+
+" ;
 }
 
 
