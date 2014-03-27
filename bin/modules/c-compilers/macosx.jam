@@ -674,22 +674,37 @@ actions CompileXIB
 
 rule C.Provision TARGET : PROFILE_ID {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-
-	# Find profile from GUID.
-	local _profileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
-
-	# Open each profile and search for : "<string>$(PROFILE_ID)</string>"
-	local _mobileProvisions = [ Glob $(_profileDirectory) : *.mobileprovision ] ;
-
 	local _matchingProvision ;
 
-	local _mobileProvision ;
-	for _mobileProvision in $(_mobileProvisions) {
-		local _cmd = "cat \"$(_mobileProvision)\" | grep \"<string>$(PROFILE_ID)</string>\"" ;
-		local result = [ Shell $(_cmd) ] ;
-		if $(result) != "" {
-			_matchingProvision = $(_mobileProvision) ;
-			break ;
+	# See if provided provision is a filename that exists.
+	local _profileDir = $(PROFILE_ID:P/) ;
+	local _profileFilename = [ C.GristFiles : $(PROFILE_ID:BS/) ] ;
+	
+	if $(_profileDir) && $(_profileDir) != "" && $(_profileFilename) && $(_profileFilename) != ""
+	{
+		SEARCH on $(_profileFilename) = $(_profileDir) ;
+		if $(_profileFilename:TC/) != $(PROFILE_ID:BSTC/)
+		{
+			_matchingProvision = $(_profileFilename) ;
+		}
+	}
+
+	if ! $(_matchingProvision)
+	{
+		# Find profile from GUID.
+		local _profileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
+
+		# Open each profile and search for : "<string>$(PROFILE_ID)</string>"
+		local _mobileProvisions = [ Glob $(_profileDirectory) : *.mobileprovision ] ;
+
+		local _mobileProvision ;
+		for _mobileProvision in $(_mobileProvisions) {
+			local _cmd = "cat \"$(_mobileProvision)\" | grep \"<string>$(PROFILE_ID)</string>\"" ;
+			local result = [ Shell $(_cmd) ] ;
+			if $(result) != "" {
+				_matchingProvision = $(_mobileProvision) ;
+				break ;
+			}
 		}
 	}
 
@@ -699,16 +714,30 @@ rule C.Provision TARGET : PROFILE_ID {
 
 	# Get bundle path.
 	local _bundlePath ;
-	on $(C.ACTIVE_TOOLCHAIN_TARGET) _bundlePath = $(BUNDLE_PATH) ;
+	local _bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local _bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
 	if ! $(_bundlePath) {
 		Echo *** C.Provision $(TARGET) \: $(PROFILE_ID) ;
 		Exit *** Bundle path not setup for target $(TARGET) ;
 	}
+	if ! $(_bundleTarget) {
+		Echo *** C.Provision $(TARGET) \: $(PROFILE_ID) ;
+		Exit *** Bundle target not setup for target $(TARGET) ;
+	}
+
+	local _dstProvision = [ C.GristFiles : embedded.mobileprovision ] ;
+	MakeLocate $(_dstProvision) : $(_bundlePath) ;
 
 	# Copy provision into the bundle and name it embedded.mobileprovision
 	IncludeModule copyfile ;
-	CopyFile $(TARGET) : $(_bundlePath)/embedded.mobileprovision : $(_matchingProvision) ;
+	CopyFile $(TARGET) : $(_dstProvision) : $(_matchingProvision) ;
+	Depends $(_bundleTarget) : $(_dstProvision) ;
+
+	# Without this, if we change between profiles, the copy will not always
+	# work due to destination time stamp being newer than source (despite
+	# coming from a different file).
+	UseCommandLine $(_dstProvision) : $(_matchingProvision) ;
 }
 
 
