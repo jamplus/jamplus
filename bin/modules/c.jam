@@ -1374,6 +1374,65 @@ rule C.IncludeDirectories TARGET : INCLUDEPATHS : OPTIONS {
 }
 
 
+rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+	__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+
+	local public ;
+	if public in $(OPTIONS) {
+		public = public ;
+	}
+
+	local suflib = $(SUFLIB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+	local gristLibraries ;
+	for lib in $(INHERITS_TARGETS) {
+		local grist = $(C.ACTIVE_TOOLCHAIN):$(lib) ;
+		if $(lib:G) {
+			gristLibraries += $(lib) ;
+		} else {
+			gristLibraries += $(lib:G=$(grist))$(suflib) ;
+		}
+	}
+	NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristLibraries) ;
+	PUBLIC_NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristLibraries) ;
+
+	local optional ;
+	if optional in $(OPTIONS) {
+	    optional = true ;
+	}
+
+	local inheritsTarget ;
+	for inheritsTarget in $(INHERITS_TARGETS) {
+		local originalInheritsTarget = $(inheritsTarget) ;
+		inheritsTarget = [ C.GristTarget $(inheritsTarget) ] ;
+		if ! $(optional)  &&  ! $(__PUBLIC:Z=$(inheritsTarget)) {
+			Echo * C.Inherits $(TARGET) \: $(originalInheritsTarget) ;
+			Echo "*     No public interfaces to $(originalInheritsTarget) have been defined yet." ;
+			Echo * ;
+			Echo "*     Does $(originalInheritsTarget) exist before $(TARGET) in the Jamfile chain?" ;
+			Exit ;
+		}
+		local publicHdrs = $(PUBLIC_HDRS:Z=$(inheritsTarget)) ;
+		if $(publicHdrs) {
+			HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicHdrs) ;
+			if $(public) {
+				PUBLIC_HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicHdrs) ;
+			}
+		}
+
+		local publicLinkLibs = $(PUBLIC_LINKLIBS:Z=$(inheritsTarget)) ;
+		if $(publicLinkLibs) {
+			LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicLinkLibs) ;
+			PUBLIC_LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicLinkLibs) ;
+		}
+
+		local publicNeedLibs = $(PUBLIC_NEEDLIBS:Z=$(inheritsTarget)) ;
+		if $(publicNeedLibs) {
+			NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicNeedLibs) ;
+			PUBLIC_NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicNeedLibs) ;
+		}
+	}
 }
 
 
