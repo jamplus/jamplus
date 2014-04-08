@@ -1,0 +1,32 @@
+USE_LUA_LINE_FILTERS = 1 ;
+
+LuaString "
+    LineFilters.UpperCaseRule = function(input)
+        return '-> ' .. input:upper()
+    end
+    LineFilters.LowerCaseRule = function(input)
+        return '-> ' .. input:lower()
+    end
+    LineFilters.Compiler = function(input)
+        return input:gsub('(.-):(%d+):(.+)', '%1(%2) %3')
+    end
+" ;
+
+actions UpperCaseRule {
+    echo This text will be uppercase.
+    echo This text will also be uppercase in the output.
+}
+
+actions LowerCaseRule {
+    echo THIS TEXT will be LOWERCASE.
+}
+
+actions Compiler {
+    echo c:\the\directory\filename.cpp:1000:This is an error message.
+}
+
+Always all ;
+UpperCaseRule all ;
+LowerCaseRule all ;
+Compiler all ;
+
