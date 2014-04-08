@@ -1079,7 +1079,7 @@ rule C.LinkLibraries TARGET : LIBRARIES {
 }
 
 
-rule C.LinkPrebuiltLibraries TARGET : LIBRARIES {
+rule C.LinkPrebuiltLibraries TARGET : LIBRARIES : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):prebuiltlib ;
 	local gristedLibraries = $(LIBRARIES:G=$(grist)) ;
@@ -1089,6 +1089,10 @@ rule C.LinkPrebuiltLibraries TARGET : LIBRARIES {
 	SEARCH on $(gristedLibraries) += $(SUBDIR) ;
 	SEARCH_EXTENSIONS on $(gristedLibraries) = $(SUFLINKLIBS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristedLibraries) ;
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristedLibraries) ;
+	}
 }
 
 
