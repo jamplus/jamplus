@@ -27,6 +27,7 @@ When first loaded, it attempts to detect the compiler on the machine.  On Window
 \refitem rule_C_ForceInclude C.ForceInclude
 \refitem rule_C_GetLinkTargets C.GetLinkTargets
 \refitem rule_C_IncludeDirectories C.IncludeDirectories
+\refitem rule_C_Inherits C.Inherits
 \refitem rule_C_Library C.Library
 \refitem rule_C_LinkDirectories C.LinkDirectories
 \refitem rule_C_LinkFlags C.LinkFlags
@@ -408,20 +409,53 @@ When it is not possible to save off the result when calling the \c C.Application
 
 
 <hr>
-\section rule_C_IncludeDirectories rule C.IncludeDirectories TARGET : INCLUDEPATHS
+\section rule_C_IncludeDirectories rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]
 \addindex rule_C_IncludeDirectories
 
 For the given project \c TARGET, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
 
 \param TARGET The target to assign the \c INCLUDEPATHS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param INCLUDEPATHS The list of include paths to apply.
+\param OPTIONS If \c public is specified, the paths specified by \c INCLUDEPATHS are made available to a project using \c C.Inherits.
 
 \code
-    # Add $(Code)/Shared to myproject for all configurations and all platforms.
+    # Add $(Code)/Shared as an include path to myproject.
     C.IncludeDirectories myproject : $(Code)/Shared ;
 
     # For the win32 platform, add the MFC include path.
-    C.IncludeDirectories myproject : "$(MSVCNT)/atlmfc/include" : : win32 ;
+    C.IncludeDirectories myproject : "$(MSVCNT)/atlmfc/include" i;
+
+    # Add $(Code)/Shared to myproject and make it available to C.Inherits users.
+    C.IncludeDirectories myproject : $(Code)/Shared : public ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_Inherits rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]
+\addindex rule_C_Inherits
+
+Inherits the settings from \c INHERITS_TARGETS and apply them to \c TARGET.
+
+<ul>
+  <li>All include directories made public via \c C.IncludeDirectories are inherited.  If \c OPTIONS contains \c public, the include directories are made available for any \c C.Inherits utilizing this \c TARGET as an \c INHERITS_TARGET.
+  <li>All libraries made public via \c C.LinkPrebuiltLibraries are inherited and passed up the \c C.Inherits chain regardless of \c OPTIONS containing \c public.
+  <li>All libraries made public via \c C.LinkLibraries are inherited and passed up the \c C.Inherits chain regardless of \c OPTIONS containing \c public.
+</ul>
+
+If one of the targets specified in \c INHERITS_TARGETS has no public entries, then an error is generated.
+
+\param TARGET The target to inherit settings from \c INHERITS_TARGETS into.
+\param INHERITS_TARGETS The list of targets to inherit public settings from.
+\param OPTIONS May be empty or may contain \c public.  Behavior for \c public is described above.
+
+\code
+    C.LinkPrebuiltLibraries Misc : advapi32 shell32 user32 : public ;
+    C.Inherits MiniApp : Misc ;
 \endcode
 
 
@@ -547,15 +581,17 @@ Links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are set, s
 
 
 <hr>
-\section rule_C_LinkLibraries rule C.LinkLibraries TARGET : LIBRARIES
+\section rule_C_LinkLibraries rule C.LinkLibraries TARGET : LIBRARIES [ : OPTIONS ]
 \addindex rule_C_LinkLibraries
 
 Makes \c TARGET depend on Jam generated \c LIBRARIES and includes them during linking.
 
 \param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param LIBRARIES The list of libraries to apply.  These libraries are those generated from the \ref rule_C_Library rule.  They do not include prebuilt libraries.  To link prebuilt libraries, use the \ref rule_C_LinkPrebuiltLibraries rule.
+\param OPTIONS If \c public is specified, the libraries specified by \c LIBRARIES are made available to a project using \c C.Inherits.
 
 \code
+	C.LinkLibraries Misc : zlib : public ;
 	C.LinkLibraries MiniApp : Application LuaPlusStatic Misc ;
 \endcode
 
@@ -566,16 +602,20 @@ Makes \c TARGET depend on Jam generated \c LIBRARIES and includes them during li
 
 
 <hr>
-\section rule_C_LinkPrebuiltLibraries rule C.LinkPrebuiltLibraries TARGET : LIBRARIES
+\section rule_C_LinkPrebuiltLibraries rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : OPTIONS ]
 \addindex rule_C_LinkPrebuiltLibraries
 
 Makes \c TARGET depend on \c LIBRARIES and includes them during linking.
 
 \param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param LIBRARIES The list of libraries to apply.  These libraries are prebuilt libraries, such as kernel32.lib, and are specified without an extension.  For those libraries generated from the \ref rule_C_Library rule, use the \ref rule_C_LinkLibraries rule.
+\param OPTIONS If \c public is specified, the libraries specified by \c LIBRARIES are made available to a project using \c C.Inherits.
 
 \code
     C.LinkPrebuiltLibraries MiniApp : advapi32 gdi32 ole32 shell32 user32 ;
+
+    C.LinkPrebuiltLibraries Misc : advapi32 shell32 user32 : public ;
+    C.Inherits MiniApp : Misc ;
 \endcode
 
 

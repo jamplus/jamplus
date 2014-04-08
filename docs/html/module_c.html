@@ -37,6 +37,7 @@ List of Rules</h1>
 <li><a href="module_c.html#rule_C_ForceInclude">C.ForceInclude</a></li>
 <li><a href="module_c.html#rule_C_GetLinkTargets">C.GetLinkTargets</a></li>
 <li><a href="module_c.html#rule_C_IncludeDirectories">C.IncludeDirectories</a></li>
+<li><a href="module_c.html#rule_C_Inherits">C.Inherits</a></li>
 <li><a href="module_c.html#rule_C_Library">C.Library</a></li>
 <li><a href="module_c.html#rule_C_LinkDirectories">C.LinkDirectories</a></li>
 <li><a href="module_c.html#rule_C_LinkFlags">C.LinkFlags</a></li>
@@ -311,7 +312,7 @@ rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC</h1>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the list of link targets, sometimes more than one, that will be built by the Jam. The target list may be passed to another rule like <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES</a>.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the list of link targets, sometimes more than one, that will be built by the Jam. The target list may be passed to another rule like <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES [ : OPTIONS ]</a>.</dd></dl>
 <div class="fragment"><div class="line">C.Toolchain ps3 debug spu ;</div>
 <div class="line">local sputhing_library = [ C.Library sputhing : sputhing.c ] ;</div>
 <div class="line"></div>
@@ -329,21 +330,49 @@ rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC</h1>
 <div class="line">C.Application pputhing : pputhing.c ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_IncludeDirectories"></a>
-rule C.IncludeDirectories TARGET : INCLUDEPATHS</h1>
+rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]</h1>
 <p><a name="rule_%43_%49nclude%44irectories"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>INCLUDEPATHS</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the <code>INCLUDEPATHS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
-    <tr><td class="paramname">INCLUDEPATHS</td><td>The list of include paths to apply.</td></tr>
+    <tr><td class="paramname">INCLUDEPATHS</td><td>The list of include paths to apply. </td></tr>
+    <tr><td class="paramname">OPTIONS</td><td>If <code>public</code> is specified, the paths specified by <code>INCLUDEPATHS</code> are made available to a project using <code>C.Inherits</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<div class="fragment"><div class="line"><span class="preprocessor"># Add $(Code)/Shared to myproject for all configurations and all platforms.</span></div>
+<div class="fragment"><div class="line"><span class="preprocessor"># Add $(Code)/Shared as an include path to myproject.</span></div>
 <div class="line"><span class="preprocessor"></span>C.IncludeDirectories myproject : $(Code)/Shared ;</div>
 <div class="line"></div>
 <div class="line"><span class="preprocessor"># For the win32 platform, add the MFC include path.</span></div>
-<div class="line"><span class="preprocessor">C.IncludeDirectories myproject : &quot;$(MSVCNT)/atlmfc/include&quot; : : win32 ;</span></div>
+<div class="line"><span class="preprocessor"></span>C.IncludeDirectories myproject : <span class="stringliteral">&quot;$(MSVCNT)/atlmfc/include&quot;</span> i;</div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor"># Add $(Code)/Shared to myproject and make it available to C.Inherits users.</span></div>
+<div class="line"><span class="preprocessor">C.IncludeDirectories myproject : $(Code)/Shared : public ;</span></div>
+</div><!-- fragment --><hr/>
+ <h1><a class="anchor" id="rule_C_Inherits"></a>
+rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]</h1>
+<p><a name="rule_%43_%49nherits"></a></p>
+<p>Inherits the settings from <code>INHERITS_TARGETS</code> and apply them to <code>TARGET</code>.</p>
+<ul>
+<li>
+All include directories made public via <code>C.IncludeDirectories</code> are inherited. If <code>OPTIONS</code> contains <code>public</code>, the include directories are made available for any <code>C.Inherits</code> utilizing this <code>TARGET</code> as an <code>INHERITS_TARGET</code>. </li>
+<li>
+All libraries made public via <code>C.LinkPrebuiltLibraries</code> are inherited and passed up the <code>C.Inherits</code> chain regardless of <code>OPTIONS</code> containing <code>public</code>. </li>
+<li>
+All libraries made public via <code>C.LinkLibraries</code> are inherited and passed up the <code>C.Inherits</code> chain regardless of <code>OPTIONS</code> containing <code>public</code>. </li>
+</ul>
+<p>If one of the targets specified in <code>INHERITS_TARGETS</code> has no public entries, then an error is generated.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TARGET</td><td>The target to inherit settings from <code>INHERITS_TARGETS</code> into. </td></tr>
+    <tr><td class="paramname">INHERITS_TARGETS</td><td>The list of targets to inherit public settings from. </td></tr>
+    <tr><td class="paramname">OPTIONS</td><td>May be empty or may contain <code>public</code>. Behavior for <code>public</code> is described above.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><div class="line">C.LinkPrebuiltLibraries Misc : advapi32 shell32 user32 : public ;</div>
+<div class="line">C.Inherits MiniApp : Misc ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_Library"></a>
 rule C.Library TARGET : SOURCES [ : OPTIONS ]</h1>
@@ -376,7 +405,7 @@ rule C.Library TARGET : SOURCES [ : OPTIONS ]</h1>
 <li>
 <code>windows</code> - Forces a GUI application. For Visual C++, the DLL is linked with <code>/SUBSYSTEM:WINDOWS</code>. </li>
 </ul>
- </blockquote> <dl class="section return"><dt>Returns</dt><dd>Returns the list of link targets, sometimes more than one, that will be built by the Jam. The target list may be passed to another rule like <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES</a>.</dd></dl>
+ </blockquote> <dl class="section return"><dt>Returns</dt><dd>Returns the list of link targets, sometimes more than one, that will be built by the Jam. The target list may be passed to another rule like <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES [ : OPTIONS ]</a>.</dd></dl>
 <div class="fragment"><div class="line"><span class="preprocessor"># Build a static library called mystaticlibrary from the sources</span></div>
 <div class="line"><span class="preprocessor"></span><span class="preprocessor"># file1.c and file2.cpp.</span></div>
 <div class="line"><span class="preprocessor"></span>C.Library mystaticlibrary : file1.c file2.cpp ;</div>
@@ -436,30 +465,36 @@ rule C.LinkFrameworks TARGET : FRAMEWORKS</h1>
 <div class="fragment"><div class="line">C.LinkFrameworks MyApp : CoreFoundation ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_LinkLibraries"></a>
-rule C.LinkLibraries TARGET : LIBRARIES</h1>
+rule C.LinkLibraries TARGET : LIBRARIES [ : OPTIONS ]</h1>
 <p><a name="rule_%43_%4cink%4cibraries"></a></p>
 <p>Makes <code>TARGET</code> depend on Jam generated <code>LIBRARIES</code> and includes them during linking.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to link <code>LIBRARIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td class="paramname">LIBRARIES</td><td>The list of libraries to apply. These libraries are those generated from the <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rule. They do not include prebuilt libraries. To link prebuilt libraries, use the <a class="el" href="module_c.html#rule_C_LinkPrebuiltLibraries">rule C.LinkPrebuiltLibraries TARGET : LIBRARIES</a> rule.</td></tr>
+    <tr><td class="paramname">LIBRARIES</td><td>The list of libraries to apply. These libraries are those generated from the <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rule. They do not include prebuilt libraries. To link prebuilt libraries, use the <a class="el" href="module_c.html#rule_C_LinkPrebuiltLibraries">rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : OPTIONS ]</a> rule. </td></tr>
+    <tr><td class="paramname">OPTIONS</td><td>If <code>public</code> is specified, the libraries specified by <code>LIBRARIES</code> are made available to a project using <code>C.Inherits</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<div class="fragment"><div class="line">C.LinkLibraries MiniApp : Application LuaPlusStatic Misc ;</div>
+<div class="fragment"><div class="line">C.LinkLibraries Misc : zlib : public ;</div>
+<div class="line">C.LinkLibraries MiniApp : Application LuaPlusStatic Misc ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_LinkPrebuiltLibraries"></a>
-rule C.LinkPrebuiltLibraries TARGET : LIBRARIES</h1>
+rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : OPTIONS ]</h1>
 <p><a name="rule_%43_%4cink%50rebuilt%4cibraries"></a></p>
 <p>Makes <code>TARGET</code> depend on <code>LIBRARIES</code> and includes them during linking.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to link <code>LIBRARIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
-    <tr><td class="paramname">LIBRARIES</td><td>The list of libraries to apply. These libraries are prebuilt libraries, such as kernel32.lib, and are specified without an extension. For those libraries generated from the <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rule, use the <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES</a> rule.</td></tr>
+    <tr><td class="paramname">LIBRARIES</td><td>The list of libraries to apply. These libraries are prebuilt libraries, such as kernel32.lib, and are specified without an extension. For those libraries generated from the <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rule, use the <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES [ : OPTIONS ]</a> rule. </td></tr>
+    <tr><td class="paramname">OPTIONS</td><td>If <code>public</code> is specified, the libraries specified by <code>LIBRARIES</code> are made available to a project using <code>C.Inherits</code>.</td></tr>
   </table>
   </dd>
 </dl>
 <div class="fragment"><div class="line">C.LinkPrebuiltLibraries MiniApp : advapi32 gdi32 ole32 shell32 user32 ;</div>
+<div class="line"></div>
+<div class="line">C.LinkPrebuiltLibraries Misc : advapi32 shell32 user32 : public ;</div>
+<div class="line">C.Inherits MiniApp : Misc ;</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_Lump"></a>
 rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME [ : PCH_FILENAMES : EXTRA_INCLUDE_PATHS ]</h1>
