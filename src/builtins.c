@@ -1335,7 +1335,7 @@ builtin_expandfilelist(
 
 			glob = fileglob_Create( buf );
 			while ( fileglob_Next( glob ) ) {
-	            result = list_append( result, fileglob_FileName( glob ) + ( matches ? searchSourceLen : 0 ) + searchSourceExtraLen, 0 );
+				result = list_append(result,fileglob_FileName(glob) + (matches ? (searchSourceLen + searchSourceExtraLen) : 0),0);
 			}
 			fileglob_Destroy( glob );
 		}
