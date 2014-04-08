@@ -1057,25 +1057,8 @@ rule C.LinkFlags TARGET : FLAGS {
 }
 
 
-rule C.LinkLibraries TARGET : LIBRARIES {
-	TARGET = [ C.ActiveTarget $(TARGET) ] ;
-#	Depends $(TARGET) : $(LIBRARIES) ;
-	Depends allclean:$(TARGET) : allclean:$(LIBRARIES) ;
-	NotFile allclean:$(TARGET) ;
-	Always allclean:$(TARGET) ;
-
-	local suflib = $(SUFLIB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
-	local gristLibraries ;
-	local lib ;
-	for lib in $(LIBRARIES) {
-		local grist = $(C.ACTIVE_TOOLCHAIN):$(lib) ;
-		if $(lib:G) {
-			gristLibraries += $(lib) ;
-		} else {
-			gristLibraries += $(lib:G=$(grist))$(suflib) ;
-		}
-	}
-	NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristLibraries) ;
+rule C.LinkLibraries TARGET : LIBRARIES : OPTIONS {
+    C.Inherits $(TARGET) : $(LIBRARIES) : $(OPTIONS) optional ;
 }
 
 
