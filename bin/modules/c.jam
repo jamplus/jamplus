@@ -641,14 +641,27 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 		C.$(C.COMPILER_SUITE)._ApplicationFromObjects_LinkFlags ;
 	}
 
-	local linkLibs =
+	local _linkLibs =
 		$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
 		$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
 	;
-	local needLibs =
+	local linkLibs ;
+	local lib ;
+	for lib in $(_linkLibs) {
+		if ! $(lib) in $(linkLibs) {
+			linkLibs += $(lib) ;
+		}
+	}
+	local _needLibs =
 		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
 		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
 	;
+	local needLibs ;
+	for lib in $(_needLibs) {
+		if ! $(lib) in $(needLibs) {
+			needLibs += $(lib) ;
+		}
+	}
 
 	SEARCH on $(linkLibs) += $(linkDirectories) $(C.STDLINKDIRECTORIES) ;
 	LINKLIBS on $(_linkTargets) = $(linkLibs) ;
@@ -870,16 +883,29 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 		C.$(C.COMPILER_SUITE)._SharedLibraryFromObjects_LinkFlags ;
 	}
 
-	local linkLibs ;
-	local needLibs ;
+	local _linkLibs ;
+	local _needLibs ;
 
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) {
-		linkLibs += $(LINKLIBS) ;
-		needLibs += $(NEEDLIBS) ;
+		_linkLibs += $(LINKLIBS) ;
+		_needLibs += $(NEEDLIBS) ;
 	}
 	on $(C.ACTIVE_TOOLCHAIN_*) {
-		linkLibs += $(LINKLIBS) ;
-		needLibs += $(NEEDLIBS) ;
+		_linkLibs += $(LINKLIBS) ;
+		_needLibs += $(NEEDLIBS) ;
+	}
+	local linkLibs ;
+	local lib ;
+	for lib in $(_linkLibs) {
+		if ! $(lib) in $(linkLibs) {
+			linkLibs += $(lib) ;
+		}
+	}
+	local needLibs ;
+	for lib in $(_needLibs) {
+		if ! $(lib) in $(needLibs) {
+			needLibs += $(lib) ;
+		}
 	}
 
 	SEARCH on $(linkLibs) += $(linkDirectories) $(C.STDLINKDIRECTORIES) ;
