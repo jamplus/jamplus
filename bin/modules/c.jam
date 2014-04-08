@@ -347,7 +347,7 @@ rule C._MultiCppCompile SOURCES {
 
 		$(makeobj_pass1) ;
 
-		local _hdrs = ; # $(SEARCH_SOURCE) ;
+		local collectHdrs = ;
 		local objectForceIncludes ;
 
 		local objflags ;
@@ -355,15 +355,23 @@ rule C._MultiCppCompile SOURCES {
 		local objectFlagsToRemove ;
 		local objectFlagsToAdd ;
 		on $(_obj) {
-			_hdrs += $(HDRS) ;
+			collectHdrs += $(HDRS) ;
 			objectForceIncludes = $(FORCE_INCLUDES) ;
 			objflags = $($($(BUILD_EXT).FLAGS)) ;
 			objdefines = $(DEFINES) ;
 			objectFlagsToRemove = $(FLAGS_TO_REMOVE) ;
 			objectFlagsToAdd = $(FLAGS_TO_ADD) ;
 		}
-		_hdrs += $(postHDRS) $(C.STDHDRS) ;
 		objectForceIncludes += $(forceIncludes) ;
+		collectHdrs += $(postHDRS) $(C.STDHDRS) ;
+
+		local _hdrs ;
+		local hdr ;
+		for hdr in $(collectHdrs) {
+			if ! $(hdr) in $(_hdrs) {
+				_hdrs += $(hdr) ;
+			}
+		}
 
 		HDRSEARCH on $(_src) = $(SEARCH_SOURCE) $(_hdrs) ;
 
