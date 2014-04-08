@@ -788,6 +788,12 @@ rule C._LibraryFromObjects OBJECTS {
 	;
 	LIBFLAGS on $(_l) = $(libFlags) ;
 
+	local needLibs =
+		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+	;
+	Depends $(_l) : $(needLibs) ;
+
 	UseCommandLine $(_l) : $(libFlags) $(_s) ;
 
 	UseFileCache $(_l) : code ;
