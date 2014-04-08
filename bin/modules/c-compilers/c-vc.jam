@@ -217,7 +217,7 @@ rule C.vc._MultiCppCompile_SetupFlags {
 		forceIncludeHeader = $(_pch[2]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|force) ;
 		BINDING on $(forceIncludeHeader) = $(_pch[3]) ;
 		SEARCH on $(forceIncludeHeader) = $(_hdrs) ;
-		objectForceIncludes = $(forceIncludeHeader) $(objectForceIncludes) ;
+		objectForceIncludes = $(objectForceIncludes) $(forceIncludeHeader) ;
 	}
 
 	if $(_pch[4]) {
