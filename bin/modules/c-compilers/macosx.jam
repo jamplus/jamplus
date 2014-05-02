@@ -1,10 +1,7 @@
 rule C.FrameworkDirectories TARGET : FRAMEWORKDIRS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	C.Flags $(TARGET) : CC	: "-F$(FRAMEWORKDIRS)" ;
-	C.Flags $(TARGET) : C++	: "-F$(FRAMEWORKDIRS)" ;
-	C.Flags $(TARGET) : M	: "-F$(FRAMEWORKDIRS)" ;
-	C.Flags $(TARGET) : MM	: "-F$(FRAMEWORKDIRS)" ;
-	C.LinkFlags $(TARGET) : "-F$(FRAMEWORKDIRS)" ;
+	C.Flags $(TARGET) : CC C++ M MM : -F\"$(FRAMEWORKDIRS)\" ;
+	C.LinkFlags $(TARGET) : -F\"$(FRAMEWORKDIRS)\" ;
 }
 
 
