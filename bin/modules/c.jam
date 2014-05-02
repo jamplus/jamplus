@@ -786,6 +786,10 @@ rule C._LibraryFromObjects OBJECTS {
 		$(LIBFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
 		$(LIBFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_*))
 	;
+	if [ RuleExists C.$(C.COMPILER_SUITE)._LibraryFromObjects_LibFlags ] {
+		C.$(C.COMPILER_SUITE)._LibraryFromObjects_LibFlags ;
+	}
+
 	LIBFLAGS on $(_l) = $(libFlags) ;
 
 	local needLibs =
