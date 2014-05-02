@@ -491,7 +491,7 @@ rule C.macosx._ApplicationFromObjects_LinkFlags {
 
 
 actions C._GenerateDSYMFile {
-	$(COMPILER_BIN_PATH)/dsymutil $(2:C) -o $(OUTPUT_PATH:C)
+	@($(COMPILER_BIN_PATH)/dsymutil:C) $(2:C) -o $(OUTPUT_PATH:C)
 }
 
 
