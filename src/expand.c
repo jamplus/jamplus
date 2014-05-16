@@ -850,7 +850,11 @@ var_edit_file(
 
 	/* Put filename back together */
 
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	path_build( &pathname, buf, 0, 1 );
+#else
 	path_build( &pathname, buf, 0 );
+#endif
 	buffer_addstring( buff, buf, strlen( buf ) + 1 );
 }
 

@@ -114,7 +114,11 @@ file_dirscan(
 	    f.f_base.ptr = finfo->ff_name;
 	    f.f_base.len = strlen( finfo->ff_name );
 
-	    path_build( &f, filename );
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	    path_build( &f, filename, 0, 1 );
+#else
+	    path_build( &f, filename, 0 );
+#endif
 
 	    (*func)( closure, filename, 1 /* stat()'ed */, time_write );
 
@@ -137,7 +141,11 @@ file_dirscan(
 		    f.f_base.ptr = finfo->name;
 		    f.f_base.len = (int)(strlen( finfo->name ) + 1);
 
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+		    path_build( &f, filename, 0, 1 );
+#else
 		    path_build( &f, filename, 0 );
+#endif
 
 		    (*func)( closure, filename, 1 /* stat()'ed */, finfo->time_write, 1 );
 		}
@@ -147,7 +155,11 @@ file_dirscan(
 		f.f_base.ptr = finfo->name;
 		f.f_base.len = (int)(strlen( finfo->name ));
 
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+		path_build( &f, filename, 0, 1 );
+#else
 		path_build( &f, filename, 0 );
+#endif
 
 		(*func)( closure, filename, 1 /* stat()'ed */, finfo->time_write, 0 );
 	    }
@@ -155,7 +167,11 @@ file_dirscan(
 	    f.f_base.ptr = finfo->name;
 	    f.f_base.len = strlen( finfo->name );
 
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	    path_build( &f, filename, 0, 1 );
+#else
 	    path_build( &f, filename, 0 );
+#endif
 
 	    (*func)( closure, filename, 1 /* stat()'ed */, finfo->time_write );
 #endif

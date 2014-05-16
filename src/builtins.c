@@ -509,7 +509,11 @@ builtin_glob_back(
 
 	path_parse( file, &f );
 	f.f_dir.len = 0;
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	path_build( &f, buf, 0, 1 );
+#else
 	path_build( &f, buf, 0 );
+#endif
 
 	for( l = list_first(globbing->patterns); l; l = list_next(l) )
 	    if( !glob( list_value(l), buf ) )
@@ -1292,6 +1296,13 @@ builtin_expandfilelist(
 	size_t searchSourceLen = 0;
 	int searchSourceExtraLen = 0;
 	char const* searchSourceStr = "";
+	LIST* absoluteList = lol_get( args, 1 );
+	int absolute = 1;
+	if ( list_first( absoluteList ) )
+	{
+		char const* str = list_value( list_first( absoluteList ) );
+		absolute = strcmp( str, "1" ) == 0  ||  strcmp( str, "true" ) == 0;
+	}
 
 	if ( list_first(searchSource) ) {
 		searchSourceStr = list_value(list_first(searchSource));
@@ -1323,7 +1334,11 @@ builtin_expandfilelist(
 			path_parse( list_value(file), &f );
 			f.f_root.len = searchSourceLen;
 			f.f_root.ptr = searchSourceStr;
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+			path_build( &f, buf, 0, absolute );
+#else
 			path_build( &f, buf, 0 );
+#endif
 
 			while ( testIndex < searchSourceLen ) {
 				if ( buf[ testIndex ] != searchSourceStr[ testIndex ] ) {

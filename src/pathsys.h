@@ -45,7 +45,11 @@ struct _pathname {
 
 } ;
 
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+char* path_build( PATHNAME *f, char *file, int binding, int absolute );
+#else
 char* path_build( PATHNAME *f, char *file, int binding );
+#endif
 void path_parse( const char *file, PATHNAME *f );
 void path_parent( PATHNAME *f );
 

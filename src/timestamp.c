@@ -111,7 +111,11 @@ timestamp(
 	    f2 = f1;
 	    f2.f_grist.len = 0;
 	    path_parent( &f2 );
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	    path_build( &f2, buf, 0, 1 );
+#else
 	    path_build( &f2, buf, 0 );
+#endif
 
 	    b->name = buf;
 	    b->time = b->flags = 0;
@@ -144,7 +148,11 @@ timestamp(
 				path_parse( buf, &f2 );
 				f2.f_grist.len = 0;
 				path_parent( &f2 );
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+				path_build( &f2, buf2, 0, 1 );
+#else
 				path_build( &f2, buf2, 0 );
+#endif
 
 				b2->name = buf2;
 				b2->flags = 0;
@@ -340,7 +348,11 @@ timestamp(
 	    f2 = f1;
 	    f2.f_grist.len = 0;
 	    f2.f_member.len = 0;
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	    path_build( &f2, buf, 0, 1 );
+#else
 	    path_build( &f2, buf, 0 );
+#endif
 
 	    b->name = buf;
 	    b->time = b->flags = 0;

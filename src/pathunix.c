@@ -134,11 +134,20 @@ path_parse(
  * path_build() - build a filename given dir/base/suffix/member
  */
 
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+char*
+path_build(
+	PATHNAME *f,
+	char	*file,
+	int	binding,
+	int	absolute )
+#else
 char*
 path_build(
 	PATHNAME *f,
 	char	*file,
 	int	binding )
+#endif
 {
 #ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
 	char *fileorg = file;
@@ -245,6 +254,7 @@ path_build(
 	*file = 0;
 
 #ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	if( absolute )
 	{
 		char *ptr = fileorg;
 		char *endptr = file;

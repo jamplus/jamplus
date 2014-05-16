@@ -126,7 +126,11 @@ file_dirscan(
 	    f.f_base.ptr = (char *)fullPath + 1;
 	    f.f_base.len = *fullPath;
 	    
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	    path_build( &f, filename, 0, 1 );
+#else
 	    path_build( &f, filename, 0 );
+#endif
 
 	    (*func)( closure, filename, 0 /* not stat()'ed */, (time_t)0 );
 	}

@@ -59,7 +59,11 @@ search_helper(
 		f->f_root.ptr = list_value(list_first(varlist));
 		f->f_root.len = (int)(strlen( list_value(list_first(varlist)) ));
 		
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+		path_build( f, buf, 1, 1 );
+#else
 		path_build( f, buf, 1 );
+#endif
 		
 		if( DEBUG_SEARCH )
 			printf( "locate %s: %s\n", target, buf );
@@ -77,7 +81,11 @@ search_helper(
 			f->f_root.ptr = list_value(var);
 			f->f_root.len = (int)(strlen( list_value(var) ));
 			
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+			path_build( f, buf, 1, 1 );
+#else
 			path_build( f, buf, 1 );
+#endif
 			
 			if( DEBUG_SEARCH )
 				printf( "search %s: %s\n", target, buf );
@@ -102,7 +110,11 @@ search_helper(
 					f->f_root.ptr = list_value(var);
 					f->f_root.len = (int)(strlen( list_value(var) ));
 					
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+					strcpy( path_build( f, buf, 1, 1 ), list_value(ext) );
+#else
 					strcpy( path_build( f, buf, 1 ), list_value(ext) );
+#endif
 					
 					if( DEBUG_SEARCH )
 						printf( "search %s: %s\n", target, buf );
@@ -125,7 +137,11 @@ search_helper(
 	f->f_root.ptr = 0;
 	f->f_root.len = 0;
 	
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	path_build( f, buf, 1, 1 );
+#else
 	path_build( f, buf, 1 );
+#endif
 	
 	if( DEBUG_SEARCH )
 		printf( "search %s: %s\n", target, buf );

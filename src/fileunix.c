@@ -161,7 +161,11 @@ file_dirscan(
 /*	    struct stat attr;*/
 	    f.f_base.ptr = dirent->d_name;
 	    f.f_base.len = strlen(dirent->d_name);
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	    path_build( &f, filename, 0, 1 );
+#else
 	    path_build( &f, filename, 0 );
+#endif
 /*	    stat(filename, &attr);*/
 /*	    if ( attr.st_mode & S_IFDIR )*/
 		if ( dirent->d_type & DT_DIR )
@@ -185,7 +189,11 @@ file_dirscan(
 # endif
 	    f.f_base.len = strlen( f.f_base.ptr );
 
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	    path_build( &f, filename, 0, 1 );
+#else
 	    path_build( &f, filename, 0 );
+#endif
 
 	    (*func)( closure, filename, 0 /* not stat()'ed */, (time_t)0 );
 #endif

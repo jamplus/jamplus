@@ -210,7 +210,11 @@ file_dirscan(
 	    f.f_suffix.len = xnam.nam$b_type;
 	}
 
+#ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
+	path_build( &f, filename2, 0, 1 );
+#else
 	path_build( &f, filename2, 0 );
+#endif
 
 	/*
 	if( DEBUG_SEARCH )
