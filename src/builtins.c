@@ -278,6 +278,8 @@ load_builtins()
 
 	bindrule( "ExpandFileList" )->procedure =
 		parse_make( builtin_expandfilelist, P0, P0, P0, C0, C0, 0 );
+	bindrule( "Wildcard" )->procedure =
+		parse_make( builtin_expandfilelist, P0, P0, P0, C0, C0, 0 );
 	bindrule( "ListSort" )->procedure =
 		parse_make( builtin_listsort, P0, P0, P0, C0, C0, 0 );
 
