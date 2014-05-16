@@ -1347,6 +1347,9 @@ builtin_expandfilelist(
 				}
 				++testIndex;
 			}
+			if ( buf[ testIndex ] != '/' ) {
+				matches = 0;
+			}
 
 			glob = fileglob_Create( buf );
 			while ( fileglob_Next( glob ) ) {
