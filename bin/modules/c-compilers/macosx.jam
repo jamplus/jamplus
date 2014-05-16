@@ -335,6 +335,15 @@ rule C._BundleInfoArray KEY : VALUE {
 }
 
 
+rule C._BundleInfoIntegerArray KEY : VALUE {
+	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<array>$(NEWLINE)" ;
+	for value in $(VALUE) {
+		INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)$(TAB)<integer>$(value)</integer>$(NEWLINE)" ;
+	}
+	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)</array>$(NEWLINE)" ;
+}
+
+
 rule C._BundleInfoBoolean KEY : VALUE {
 	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)" ;
 	if $(VALUE) = true {
@@ -371,7 +380,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 			case macosx64 :			VALUE = "" ;
 			case iphone :
 				C._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C._BundleInfoArray UIDeviceFamily : 1 ;
+				C._BundleInfoIntegerArray UIDeviceFamily : 1 ;
 				C._BundleInfoString DTPlatformName : iphoneos ;
 				C._BundleInfoString DTSDKName : iphoneos$(IPHONEOS_SDK_VERSION) ;
 				C._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
@@ -379,7 +388,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 
 			case iphonesimulator :
 				C._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C._BundleInfoArray UIDeviceFamily : 1 ;
+				C._BundleInfoIntegerArray UIDeviceFamily : 1 ;
 				C._BundleInfoString DTPlatformName : iphonesimulator ;
 				C._BundleInfoString DTSDKName : iphonesimulator$(IPHONEOS_SDK_VERSION) ;
 				C._BundleInfoArray CFBundleSupportedPlatforms : iPhoneSimulator ;
@@ -387,7 +396,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 
 			case ipad :
 				C._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C._BundleInfoArray UIDeviceFamily : 2 ;
+				C._BundleInfoIntegerArray UIDeviceFamily : 2 ;
 				C._BundleInfoString DTPlatformName : iphoneos ;
 				C._BundleInfoString DTSDKName : iphoneos$(IPHONEOS_SDK_VERSION) ;
 				C._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
@@ -395,7 +404,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 
 			case ipadsimulator :
 				C._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C._BundleInfoArray UIDeviceFamily : 2 ;
+				C._BundleInfoIntegerArray UIDeviceFamily : 2 ;
 				C._BundleInfoString DTPlatformName : iphonesimulator ;
 				C._BundleInfoString DTSDKName : iphonesimulator$(IPHONEOS_SDK_VERSION) ;
 				C._BundleInfoArray CFBundleSupportedPlatforms : iPhoneSimulator ;
@@ -428,7 +437,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 		case resourcespec :			C._BundleInfoString CFBundleResourceSpecification : $(VALUE) ;
 		case supportedplatforms :   C._BundleInfoArray CFBundleSupportedPlatforms : $(VALUE) ;
 		case minimumosversion :		C._BundleInfoString MinimumOSVersion : $(VALUE) ;
-		case uidevicefamily :		C._BundleInfoArray UIDeviceFamily : $(VALUE) ;
+		case uidevicefamily :		C._BundleInfoIntegerArray UIDeviceFamily : $(VALUE) ;
 		case uiprerenderedicon :	C._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
 		case uistatusbarhidden :	C._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
 		case uiviewcontrollerbasedstatusbarappearance : C._BundleInfoBoolean UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
