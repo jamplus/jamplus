@@ -258,8 +258,8 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 	C.Flags * : CC	: -isysroot $(isysroot) $(flags) ;
 	C.Flags * : C++	: -isysroot $(isysroot) $(flags) ;
-	C.Flags * : M	: -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch  ;
-	C.Flags * : MM	: -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch ; 
+	C.Flags * : M	: -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch ;
+	C.Flags * : MM	: -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch ;
 	C.LibFlags * : -syslibroot $(isysroot) ;
 	C.LinkFlags * : -isysroot $(isysroot) $(flags) ;
 
