@@ -23,7 +23,7 @@ actions response C.clang.Archive2 {
 
 
 actions C.clang.Link {
-	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:TC)
+	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) $(NEEDLIBS:TC) $(LINKLIBS:TC)
 }
 
 
