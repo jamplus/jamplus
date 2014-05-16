@@ -30,6 +30,7 @@ static int do_newtmp(char** name, const char* ext)
      */
 
      flags |= _O_SHORT_LIVED;
+     flags |= _O_BINARY;
 #endif
 #endif
 
@@ -66,7 +67,7 @@ TMPFILE* tmp_new(const char* ext)
 	return 0;
     }
 
-    t->file = fdopen(h, "a");
+    t->file = fdopen(h, "ab");
 
     if (!t->file) {
 	close(h);
