@@ -928,8 +928,11 @@ make1d(
 					count = ptr - startPtr;
 					if ( count == 0 )
 					{
-						buffer_reset( &lineBuffer );
-						break;
+						if ( ptr == buffer_posptr( &lineBuffer ) )
+						{
+							buffer_reset( &lineBuffer );
+							break;
+						}
 					}
 					if ( *ptr != '\n' )
 					{
