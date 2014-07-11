@@ -32,6 +32,33 @@ local function RealVSConfig(platform, config)
 	return GetMapPlatformToVSPlatform(platform) .. ' ' .. realConfig
 end
 
+-- For a source group, find the depth to which all files (excluding jam files) share the same absolute path.
+local function FindCommonPathDepth(sourceGroup)
+	-- Files have nothing to be common with; call that depth 0.
+	if type(sourceGroup) ~= 'table' then
+		return 0
+	end
+
+	local children = {}
+
+	-- Count children, excluding jamfiles.
+	-- The jamfile exclusing only seems to work because they are always on their own in the source group;
+	-- if they were contained within their directory we would have to prune this from the source group.
+	for child in ivalues(sourceGroup) do
+		if type(child) == 'table' or not child:match("%w+%.jam") then
+			table.insert(children, child)
+		end
+	end
+
+	if # children == 1 then
+		-- If there's exactly one entry (excluding jamfiles) under this one, carry on to the next level, as all children share this part of the path.
+		return 1 + FindCommonPathDepth(children[1])
+	else
+		-- If there is more than one item under this one, that's because they don't share the next directory.
+		return 0
+	end
+end
+
 function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	local filename = outputPath .. self.ProjectName .. '.vcxproj'
 
@@ -235,8 +262,14 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
   <ItemGroup>
 ]])
 
+	local commonPathDepth = 0
+
 	if project then
-		self:_WriteFolders(project.SourcesTree, '')
+		commonPathDepth = FindCommonPathDepth(project.SourcesTree)
+	end
+
+	if project then
+		self:_WriteFolders(project.SourcesTree, '', 0, commonPathDepth)
 	end
 
 	table.insert(self.Contents, [[
@@ -249,7 +282,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 ]])
 
 	if project then
-		self:_WriteFiles(project.SourcesTree, '')
+		self:_WriteFiles(project.SourcesTree, '', 0, commonPathDepth)
 	end
 
 	table.insert(self.Contents, [[
@@ -277,29 +310,39 @@ function VisualStudio201xProject(projectName, options)
 end
 
 
-function VisualStudio201xProjectMetaTable:_WriteFolders(folder, inFilter)
+function VisualStudio201xProjectMetaTable:_WriteFolders(folder, inFilter, depth, rootDepth)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
 			local filter = inFilter
-			if filter ~= '' then filter = filter .. '\\' end
-			filter = filter .. entry.folder
-			self:_WriteFolders(entry, filter)
-			table.insert(self.Contents, [[
-    <Filter Include="]] .. filter .. [[">
-    </Filter>
-]])
+
+			-- Ignore the first 'rootDepth' segments of the path when naming a filter, to avoid the unnecessary shared parts of absolute paths being generated as filters.
+			if depth >= rootDepth then
+				if filter ~= '' then filter = filter .. '\\' end
+				filter = filter .. entry.folder
+			end
+
+			self:_WriteFolders(entry, filter, depth + 1, rootDepth)
+
+			if depth >= rootDepth then
+				table.insert(self.Contents, "    <Filter Include=\"" .. filter .. "\"/>\n")
+			end
 		end
 	end
 end
 
 
-function VisualStudio201xProjectMetaTable:_WriteFiles(folder, inFilter)
+function VisualStudio201xProjectMetaTable:_WriteFiles(folder, inFilter, depth, rootDepth)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
 			local filter = inFilter
-			if filter ~= '' then filter = filter .. '\\' end
-			filter = filter .. entry.folder
-			self:_WriteFiles(entry, filter)
+
+			-- Ignore the first 'rootDepth' segments of the path when naming a filter, to avoid the unnecessary shared parts of absolute paths being generated as filters.
+			if depth >= rootDepth then
+				if filter ~= '' then filter = filter .. '\\' end
+				filter = filter .. entry.folder
+			end
+
+			self:_WriteFiles(entry, filter, depth + 1, rootDepth)
 		else
 			table.insert(self.Contents, '    <None Include="' .. entry:gsub('/', '\\') .. '">\n')
 			table.insert(self.Contents, '      <Filter>' .. inFilter .. '</Filter>\n')

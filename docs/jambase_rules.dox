@@ -14,6 +14,7 @@ documentation:
 \refitem rule_ActiveProject ActiveProject
 \refitem rule_AutoSourceGroup AutoSourceGroup
 \refitem rule_Clean Clean
+\refitem rule_CleanTree CleanTree
 \refitem rule_FGristDirectories FGristDirectories
 \refitem rule_GroupByVar GroupByVar
 \refitem rule_IncludeModule IncludeModule
@@ -87,6 +88,24 @@ When executing actions for \c TARGETS, the specified list of \c FILES are remove
 
 \code
     Clean clean : <mytarget>myfile.txt $(TEMP)/anotherfile.txt ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_CleanTree rule CleanTree TARGETS : DIRECTORIES
+\addindex rule_CleanTree
+
+When executing actions for \c TARGETS, the specified list of \c DIRECTORIES are removed from the disk.
+
+\param TARGETS A list of one or more targets.  Generally, the target name is \c clean or <tt>clean:SOMETARGET</tt>.
+\param DIRECTORIES A list of directories to be deleted.
+
+\code
+    CleanTree clean : $(TEMP)/a/directory ;
 \endcode
 
 

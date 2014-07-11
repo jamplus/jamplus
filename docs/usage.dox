@@ -2,6 +2,7 @@
 
 <pre>
 jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
+    [ -b ]
     [ -C <i>workdir</i> ]
     [ -d <i>debug</i> ]
     [ -f <i>jambase</i> ]
@@ -22,6 +23,10 @@ If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target;</
   <tr>
     <td valign=top width=20%><code> -a </code>
 	<td> Build all targets anyway, even if they are up-to-date.
+
+  <tr>
+    <td valign=top><code> -b </code>
+	<td> Enables the Tilde Lua debugger and waits for a connection.
 
   <tr>
     <td valign=top><code> -C <i>workdir</i>  </code>

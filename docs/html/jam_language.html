@@ -171,11 +171,22 @@ Statements</h2>
 <tr>
 <td><code>actions updated</code> </td><td>$(&gt;) includes only source targets themselves marked for updating.  </td></tr>
 </table>
-<p>One final set of symbols is understood within the body of the action. It is used to write a file to disk based on the contents of an available variable.</p>
+<p>Two other sets of symbols are understood within the body of the action.</p>
+<p>The first is used to write a file to disk based on the contents of an available variable.</p>
 <div class="fragment"><div class="line"><span class="preprocessor"># Write a file to disk</span></div>
 <div class="line"><span class="preprocessor"></span>actions WriteFile</div>
 <div class="line">{</div>
 <div class="line">    ^^($(1)|$(CONTENTS))</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>The second is used to write a response file to disk. Response files store text surrounded by <code>^^^(text...)</code> into a temporary response file. The <code>^^^(text)</code> in an action is replaced with the full path to the temporary response file. The response file is deleted when the action completes.</p>
+<div class="fragment"><div class="line">actions C++</div>
+<div class="line">{</div>
+<div class="line">    $(C++) @^^^($(2))</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>It is valid to nest the generation of response files. In the example below, the file list is written to a temporary response file and the filename is inserted in the place of <code>^^^($(2))</code>. In a secondary response file, the <code>-filelist</code> parameter and the first response filename are added. This response filename is then passed to the C++ compiler.</p>
+<div class="fragment"><div class="line">actions response C++</div>
+<div class="line">{</div>
+<div class="line">    $(C++) @^^^(-filelist ^^^($(2)))</div>
 <div class="line">}</div>
 </div><!-- fragment --> </blockquote> <p><code>break</code></p>
  <blockquote> <p>Breaks out of the closest enclosing <em>for</em> or <em>while</em> loop.</p>

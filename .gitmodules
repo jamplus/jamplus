@@ -1,0 +1,3 @@
+[submodule "src/luaplus"]
+	path = src/luaplus
+	url = https://github.com/jjensen/luaplus51-all.git

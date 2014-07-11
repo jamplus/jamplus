@@ -1,0 +1,2 @@
+C.IncludeDirectories nested-lib-c : . : public ;
+C.Library nested-lib-c : mul.c mul.h ;

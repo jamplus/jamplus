@@ -27,6 +27,7 @@ When first loaded, it attempts to detect the compiler on the machine.  On Window
 \refitem rule_C_ForceInclude C.ForceInclude
 \refitem rule_C_GetLinkTargets C.GetLinkTargets
 \refitem rule_C_IncludeDirectories C.IncludeDirectories
+\refitem rule_C_Inherits C.Inherits
 \refitem rule_C_Library C.Library
 \refitem rule_C_LinkDirectories C.LinkDirectories
 \refitem rule_C_LinkFlags C.LinkFlags
@@ -127,15 +128,13 @@ For the given project \c TARGET, only allow \c SIZE files to be batch compiled i
 
 
 <hr>
-\section rule_C_CFlags rule C.CFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_CFlags rule C.CFlags TARGET : FLAGS
 \addindex rule_C_CFlags
 
 For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.
 
 \param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param FLAGS The list of flags to apply.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Assign /clr:oldsyntax to all C files in managedapp across all
@@ -158,15 +157,13 @@ For the given project \c TARGET, assign the \c FLAGS to the appropriate configur
 
 
 <hr>
-\section rule_C_CppExceptions rule C.C++Exceptions TARGET : TYPE [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_CppExceptions rule C.C++Exceptions TARGET : TYPE
 \addindex rule_C_C++Exceptions
 
 For the given project \c TARGET, turn on/off C++ exception support within the specified configuration and platform.
 
 \param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param TYPE \c true to turn on exceptions, \c false (default) to turn off exceptions.
-\param THE_CONFIG (optional) If not specified, the default is the current \c \$(CONFIG).
-\param THE_PLATFORM (optional) If not specified, the default is the current \c \$(PLATFORM).
 
 \code
     # Turn on exceptions in the target mycppapp for the current $(CONFIG).
@@ -186,15 +183,13 @@ For the given project \c TARGET, turn on/off C++ exception support within the sp
 
 
 <hr>
-\section rule_C_CppFlags rule C.C++Flags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_CppFlags rule C.C++Flags TARGET : FLAGS
 \addindex rule_C_CppFlags
 
 For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.
 
 \param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param FLAGS The list of flags to apply.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Assign /clr:oldsyntax to all C++ files in managedapp across all
@@ -288,15 +283,13 @@ When linking the given \c TARGET, link the .def file(s) specified in \c SOURCES.
 
 
 <hr>
-\section rule_C_Defines rule C.Defines TARGET : DEFINES [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_Defines rule C.Defines TARGET : DEFINES
 \addindex rule_C_Defines
 
 For the given project \c TARGET, assign the \c DEFINES to the appropriate configuration and platform.
 
 \param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param DEFINES The list of defines to apply.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Make #defines available for ABC and DEF=5 in someproject for all
@@ -339,7 +332,7 @@ For the given project \c TARGET, exclude the \c SOURCES from the build.  If usin
 
 
 <hr>
-\section rule_C_Flags rule C.Flags TYPE : TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_Flags rule C.Flags TYPE : TARGET : FLAGS
 \addindex rule_C_Flags
 
 For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.  \c TYPE can be any known source compilation type, such as \c CC for C-style files, \c C++ for C++-style files, and on certain compilers, \c M for Objective C files, or \c MM for Objective C++ files.
@@ -347,8 +340,6 @@ For the given project \c TARGET, assign the \c FLAGS to the appropriate configur
 \param TYPE A source compilation type added through \ref "rule_C_AddBuildExtensions" "C.AddBuildExtensions".
 \param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param FLAGS The list of flags to apply.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     C.Flags CC  : * : -g -O0 -arch i386 : debug : macosx32 ;
@@ -362,15 +353,13 @@ For the given project \c TARGET, assign the \c FLAGS to the appropriate configur
 
 
 <hr>
-\section rule_C_ForceInclude rule C.ForceInclude TARGET : INCLUDES [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_ForceInclude rule C.ForceInclude TARGET : INCLUDES
 \addindex rule_C_ForceInclude
 
 For the given project \c TARGET, assign the \c INCLUDES to the appropriate configuration and platform, causing that project's compilation to force the inclusion of the header before anything else.
 
 \param TARGET The target to assign the \c INCLUDES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param INCLUDES The list of header files to force include.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Automatically #include myheader.h for all source files listed in myproject.
@@ -420,22 +409,53 @@ When it is not possible to save off the result when calling the \c C.Application
 
 
 <hr>
-\section rule_C_IncludeDirectories rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_IncludeDirectories rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]
 \addindex rule_C_IncludeDirectories
 
 For the given project \c TARGET, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
 
 \param TARGET The target to assign the \c INCLUDEPATHS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param INCLUDEPATHS The list of include paths to apply.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+\param OPTIONS If \c public is specified, the paths specified by \c INCLUDEPATHS are made available to a project using \c C.Inherits.
 
 \code
-    # Add $(Code)/Shared to myproject for all configurations and all platforms.
+    # Add $(Code)/Shared as an include path to myproject.
     C.IncludeDirectories myproject : $(Code)/Shared ;
 
     # For the win32 platform, add the MFC include path.
-    C.IncludeDirectories myproject : "$(MSVCNT)/atlmfc/include" : : win32 ;
+    C.IncludeDirectories myproject : "$(MSVCNT)/atlmfc/include" i;
+
+    # Add $(Code)/Shared to myproject and make it available to C.Inherits users.
+    C.IncludeDirectories myproject : $(Code)/Shared : public ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_Inherits rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]
+\addindex rule_C_Inherits
+
+Inherits the settings from \c INHERITS_TARGETS and apply them to \c TARGET.
+
+<ul>
+  <li>All include directories made public via \c C.IncludeDirectories are inherited.  If \c OPTIONS contains \c public, the include directories are made available for any \c C.Inherits utilizing this \c TARGET as an \c INHERITS_TARGET.
+  <li>All libraries made public via \c C.LinkPrebuiltLibraries are inherited and passed up the \c C.Inherits chain regardless of \c OPTIONS containing \c public.
+  <li>All libraries made public via \c C.LinkLibraries are inherited and passed up the \c C.Inherits chain regardless of \c OPTIONS containing \c public.
+</ul>
+
+If one of the targets specified in \c INHERITS_TARGETS has no public entries, then an error is generated.
+
+\param TARGET The target to inherit settings from \c INHERITS_TARGETS into.
+\param INHERITS_TARGETS The list of targets to inherit public settings from.
+\param OPTIONS May be empty or may contain \c public.  Behavior for \c public is described above.
+
+\code
+    C.LinkPrebuiltLibraries Misc : advapi32 shell32 user32 : public ;
+    C.Inherits MiniApp : Misc ;
 \endcode
 
 
@@ -492,15 +512,13 @@ If \c shared is specified for \c OPTIONS, the following additional options are a
 
 
 <hr>
-\section rule_C_LinkDirectories rule C.LinkDirectories TARGET : DIRECTORIES [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_LinkDirectories rule C.LinkDirectories TARGET : DIRECTORIES
 \addindex rule_C_LinkDirectories
 
 For the given project \c TARGET, assign the link \c DIRECTORIES to the appropriate configuration and platform.
 
 \param TARGET The target to assign the link \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param DIRECTORIES The list of link directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Add c:/some/directory to myproject for all configurations and
@@ -521,15 +539,13 @@ For the given project \c TARGET, assign the link \c DIRECTORIES to the appropria
 
 
 <hr>
-\section rule_C_LinkFlags rule C.LinkFlags TARGET : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_LinkFlags rule C.LinkFlags TARGET : FLAGS
 \addindex rule_C_LinkFlags
 
 For the given project \c TARGET, assign the link \c FLAGS to the appropriate configuration and platform.
 
 \param TARGET The target to assign the link \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param FLAGS The list of link flags to apply.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     C.LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.debug.dll : debug ;
@@ -544,7 +560,7 @@ For the given project \c TARGET, assign the link \c FLAGS to the appropriate con
 
 
 <hr>
-\section rule_C_LinkFrameworks rule C.LinkFrameworks TARGET : FRAMEWORKS [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_LinkFrameworks rule C.LinkFrameworks TARGET : FRAMEWORKS
 \addindex rule_C_LinkFrameworks
 
 \note This rule is only valid on Mac OS X.
@@ -553,8 +569,6 @@ Links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are set, s
 
 \param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param FRAMEWORKS The list of frameworks to link.  The frameworks are specified without an extension.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     C.LinkFrameworks MyApp : CoreFoundation ;
@@ -567,17 +581,17 @@ Links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are set, s
 
 
 <hr>
-\section rule_C_LinkLibraries rule C.LinkLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_LinkLibraries rule C.LinkLibraries TARGET : LIBRARIES [ : OPTIONS ]
 \addindex rule_C_LinkLibraries
 
 Makes \c TARGET depend on Jam generated \c LIBRARIES and includes them during linking.
 
 \param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param LIBRARIES The list of libraries to apply.  These libraries are those generated from the \ref rule_C_Library rule.  They do not include prebuilt libraries.  To link prebuilt libraries, use the \ref rule_C_LinkPrebuiltLibraries rule.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+\param OPTIONS If \c public is specified, the libraries specified by \c LIBRARIES are made available to a project using \c C.Inherits.
 
 \code
+	C.LinkLibraries Misc : zlib : public ;
 	C.LinkLibraries MiniApp : Application LuaPlusStatic Misc ;
 \endcode
 
@@ -588,18 +602,20 @@ Makes \c TARGET depend on Jam generated \c LIBRARIES and includes them during li
 
 
 <hr>
-\section rule_C_LinkPrebuiltLibraries rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_LinkPrebuiltLibraries rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : OPTIONS ]
 \addindex rule_C_LinkPrebuiltLibraries
 
 Makes \c TARGET depend on \c LIBRARIES and includes them during linking.
 
 \param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param LIBRARIES The list of libraries to apply.  These libraries are prebuilt libraries, such as kernel32.lib, and are specified without an extension.  For those libraries generated from the \ref rule_C_Library rule, use the \ref rule_C_LinkLibraries rule.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
+\param OPTIONS If \c public is specified, the libraries specified by \c LIBRARIES are made available to a project using \c C.Inherits.
 
 \code
     C.LinkPrebuiltLibraries MiniApp : advapi32 gdi32 ole32 shell32 user32 ;
+
+    C.LinkPrebuiltLibraries Misc : advapi32 shell32 user32 : public ;
+    C.Inherits MiniApp : Misc ;
 \endcode
 
 
@@ -682,7 +698,7 @@ Creates a precompiled header and uses it on the specified \c FILES.
 
 
 <hr>
-\section rule_C_ObjectCFlags rule C.ObjectCFlags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_ObjectCFlags rule C.ObjectCFlags TARGET : SOURCES : FLAGS
 \addindex rule_C_ObjectCFlags
 
 For the given \c SOURCES matching <tt>*.c</tt>, assign the \c FLAGS to the appropriate configuration and platform.
@@ -690,8 +706,6 @@ For the given \c SOURCES matching <tt>*.c</tt>, assign the \c FLAGS to the appro
 \param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param SOURCES The list of sources to assign the \c FLAGS to.
 \param FLAGS The list of flags to apply.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Assign /clr:oldsyntax to all C files in managedapp across all
@@ -706,7 +720,7 @@ For the given \c SOURCES matching <tt>*.c</tt>, assign the \c FLAGS to the appro
 
 
 <hr>
-\section rule_C_ObjectCppFlags rule C.ObjectC++Flags TARGET : SOURCES : FLAGS [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_ObjectCppFlags rule C.ObjectC++Flags TARGET : SOURCES : FLAGS
 \addindex rule_C_ObjectCppFlags
 
 For the given \c SOURCES matching *.cpp or *.cxx, assign the \c FLAGS to the appropriate configuration and platform.
@@ -714,8 +728,6 @@ For the given \c SOURCES matching *.cpp or *.cxx, assign the \c FLAGS to the app
 \param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param SOURCES The list of sources to assign the \c FLAGS to.
 \param FLAGS The list of flags to apply.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Assign /clr:oldsyntax to all C files in managedapp across all
@@ -730,7 +742,7 @@ For the given \c SOURCES matching *.cpp or *.cxx, assign the \c FLAGS to the app
 
 
 <hr>
-\section rule_C_ObjectDefines rule C.ObjectDefines TARGET : SOURCES : DEFINES [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_ObjectDefines rule C.ObjectDefines TARGET : SOURCES : DEFINES
 \addindex rule_C_ObjectDefines
 
 For the given \c SOURCES, assign the \c DEFINES to the appropriate configuration and platform.
@@ -738,8 +750,6 @@ For the given \c SOURCES, assign the \c DEFINES to the appropriate configuration
 \param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param SOURCES The list of sources to assign the \c DEFINES to.
 \param DEFINES The list of defines to apply.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Make #defines available for ABC and DEF=5 in someproject's justafile.cpp
@@ -754,7 +764,7 @@ For the given \c SOURCES, assign the \c DEFINES to the appropriate configuration
 
 
 <hr>
-\section rule_C_ObjectForceInclude rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_ObjectForceInclude rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES
 \addindex rule_C_ObjectForceInclude
 
 For the given \c SOURCES, assign the \c INCLUDES to the appropriate configuration and platform, causing that project's compilation to force the inclusion of the header before anything else.
@@ -762,8 +772,6 @@ For the given \c SOURCES, assign the \c INCLUDES to the appropriate configuratio
 \param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param SOURCES The list of sources to assign the force include flag to.
 \param INCLUDES The list of header files to force include.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Automatically #include ../common/print.h in libA.cpp.
@@ -777,7 +785,7 @@ For the given \c SOURCES, assign the \c INCLUDES to the appropriate configuratio
 
 
 <hr>
-\section rule_C_ObjectIncludeDirectories rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_ObjectIncludeDirectories rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS
 \addindex rule_C_ObjectIncludeDirectories
 
 For the given \c SOURCES, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
@@ -785,8 +793,6 @@ For the given \c SOURCES, assign the \c INCLUDEPATHS to the appropriate configur
 \param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param SOURCES The list of sources to assign the include paths to.
 \param INCLUDEPATHS The list of include paths to apply.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Add $(Code)/Shared to myproject's somefile.cpp for all configurations
@@ -801,15 +807,13 @@ For the given \c SOURCES, assign the \c INCLUDEPATHS to the appropriate configur
 
 
 <hr>
-\section rule_C_OutputName rule C.OutputName TARGET : NAME [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_OutputName rule C.OutputName TARGET : NAME
 \addindex rule_C_OutputName
 
 By default, the name of a generated executable or library is determined by the name of the \c TARGET.  \c OutputName is used to override the name of the executable or library.
 
 \param TARGET The target to affect the output name change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param NAME The new name of the output target.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Change the name of the LuaPlusShared target to LuaPlus_1100.  When
@@ -824,15 +828,13 @@ By default, the name of a generated executable or library is determined by the n
 
 
 <hr>
-\section rule_C_OutputPath rule C.OutputPath TARGET : OUTPUTPATH [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_OutputPath rule C.OutputPath TARGET : OUTPUTPATH
 \addindex rule_C_OutputPath
 
 By default, the output location of a generated executable or library is at \c LOCATE_TARGET.  \c OutputPath is used to override the output location of the executable or library.
 
 \param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param OUTPUTPATH The new output location of the generated target.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Change the name of the LuaPlusShared target to LuaPlus_1100.  When
@@ -850,7 +852,7 @@ By default, the output location of a generated executable or library is at \c LO
 
 
 <hr>
-\section rule_C_OutputPostfix rule C.OutputPostfix TARGET : POSTFIX [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_OutputPostfix rule C.OutputPostfix TARGET : POSTFIX
 \addindex rule_C_OutputPostfix
 
 The output postfix is appended to the end of the generated target name.  By default, the output postfix is .\$(CONFIG).  This means the resultant filename is \$(OUTPUTNAME).\$(CONFIG).\$(EXT).
@@ -859,8 +861,6 @@ If there is no assigned output postfix for \c TARGET, then the global target \c 
 
 \param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param POSTFIX The new output postfix of the generated target.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # Change the name of the LuaPlusShared target to LuaPlus_1100.  When
@@ -885,14 +885,12 @@ If there is no assigned output postfix for \c TARGET, then the global target \c 
 
 
 <hr>
-\section rule_C_OutputPostfixClear rule C.OutputPostfixClear TARGET : THE_CONFIG : THE_PLATFORM
+\section rule_C_OutputPostfixClear rule C.OutputPostfixClear TARGET
 \addindex rule_C_OutputPostfixClear
 
 Clear the output postfix.
 
 \param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     C.OutputPostfix LuaPlusShared : .debug : debug ;
@@ -906,15 +904,13 @@ Clear the output postfix.
 
 
 <hr>
-\section rule_C_OutputSuffix rule C.OutputSuffix TARGET : SUFFIX [ : THE_CONFIG : THE_PLATFORM ]
+\section rule_C_OutputSuffix rule C.OutputSuffix TARGET : SUFFIX
 \addindex rule_C_OutputSuffix
 
 The output suffix is the file extension of the generated target.  By default, the output suffix is appropriate for an executable or library.
 
 \param TARGET The target to affect the output suffix change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
 \param SUFFIX The new output suffix of the generated target.
-\param THE_CONFIG (optional) If not specified, the default is all configurations.
-\param THE_PLATFORM (optional) If not specified, the default is all platforms.
 
 \code
     # The final name will be SomePlugin.appplugin.

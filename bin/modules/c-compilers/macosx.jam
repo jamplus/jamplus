@@ -59,12 +59,12 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = macosx10.7 ;
 				
 				case 10.8 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk ;
 					sdkroot = macosx10.8 ;
 
 				case 10.9 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk ;
 					sdkroot = macosx10.9 ;
 
@@ -74,7 +74,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 		case iphone :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 7.0 ;
+			SDK_VERSION ?= 7.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -92,20 +92,26 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = iphoneos5.1 ;
 
 				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk ;
 					sdkroot = iphoneos6.0 ;
 					flags += -arch armv7 ;
 
 				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
 					flags += -arch armv7s ;
 
 				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
+					sdkroot = iphoneos7.0 ;
+					flags += -arch armv7s ;
+
+				case 7.1 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk ;
 					sdkroot = iphoneos7.0 ;
 					flags += -arch armv7s ;
 
@@ -115,7 +121,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 		case iphonesimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 7.0 ;
+			SDK_VERSION ?= 7.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -131,19 +137,24 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = iphoneos5.1 ;
 
 				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk ;
 					sdkroot = iphoneos6.0 ;
 
 				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
 
 				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
+
+				case 7.1 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk ;
+					sdkroot = iphoneos7.1 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -152,7 +163,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 		case ipadsimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 7.0 ;
+			SDK_VERSION ?= 7.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -169,19 +180,24 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = iphoneos5.1 ;
 
 				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk ;
 					sdkroot = iphoneos6.0 ;
 
 				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
 
 				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
+
+				case 7.1 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk ;
+					sdkroot = iphoneos7.1 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -190,7 +206,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 		case ipad :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 7.0 ;
+			SDK_VERSION ?= 7.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -205,19 +221,24 @@ rule C.MacOSX_SDK SDK_VERSION {
 					sdkroot = iphoneos5.1 ;
 
 				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk ;
 					sdkroot = iphoneos6.0 ;
 
 				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
 
 				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select -p" ] ] ;
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
+
+				case 7.1 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk ;
+					sdkroot = iphoneos7.1 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -266,23 +287,23 @@ rule C.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 	local flags ;
 	switch $(SDK_PLATFORM) {
 		case macosx :
-			# 10.4, 10.5, 10.6, 10.7, 10.8
+			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
 			flags += -mmacosx-version-min=$(SDK_VERSION_MIN) ;
 
 		case iphone :
-			# 4.3, 5.0, 5.1, 6.0
+			# 4.3, 5.0, 5.1, 6.0 6.1 7.0
 			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
 
 		case iphonesimulator :
-			# 4.3, 5.0, 5.1, 6.0
+			# 4.3, 5.0, 5.1, 6.0 6.1 7.0
 			flags += -mios-simulator-version-min=$(SDK_VERSION_MIN) ;
 
 		case ipadsimulator :
-			# 4.3, 5.0, 5.1, 6.0
+			# 4.3, 5.0, 5.1, 6.0 6.1 7.0
 			flags += -mios-simulator-version-min=$(SDK_VERSION_MIN) ;
 
 		case ipad :
-			# 4.3, 5.0, 5.1, 6.0
+			# 4.3, 5.0, 5.1, 6.0 6.1 7.0
 			flags += -miphoneos-version-min=$(SDK_VERSION_MIN) ;
 	}
 
@@ -293,6 +314,18 @@ rule C.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 	C.LinkFlags $(TARGET) : $(flags) ;
 
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION_MIN) ;
+
+	if $(TARGETINFO_LOCATE) {
+		if $(SDK_PLATFORM) in iphone iphonesimulator ipad ipadsimulator {
+			Contents += "Projects[ [[C.*]] ].IOS_SDK_VERSION_MIN[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(SDK_VERSION_MIN)]]
+
+" ;
+		} else if $(SDK_PLATFORM) in macosx {
+			Contents += "Projects[ [[C.*]] ].OSX_SDK_VERSION_MIN[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(SDK_VERSION_MIN)]]
+
+" ;
+		}
+	}
 }
 
 
@@ -401,6 +434,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 		case uidevicefamily :		C._BundleInfoArray UIDeviceFamily : $(VALUE) ;
 		case uiprerenderedicon :	C._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
 		case uistatusbarhidden :	C._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
+		case uiviewcontrollerbasedstatusbarappearance : C._BundleInfoBoolean UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
 		case uiinterfaceorientation :	
 			if $(VALUE) = portrait {
 				C._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationPortrait ;
@@ -607,7 +641,10 @@ rule XIB {
 rule C.SetTaskAllow {
 }
 
-rule C.CodeSign {
+rule C.CodeSign TARGET : PROVISIONING_PROFILE {
+	Contents += "Projects[ [[C.*]] ].IOS_SIGNING_IDENTITY[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(PROVISIONING_PROFILE)]]
+
+" ;
 }
 
 
@@ -674,22 +711,37 @@ actions CompileXIB
 
 rule C.Provision TARGET : PROFILE_ID {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-
-	# Find profile from GUID.
-	local _profileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
-
-	# Open each profile and search for : "<string>$(PROFILE_ID)</string>"
-	local _mobileProvisions = [ Glob $(_profileDirectory) : *.mobileprovision ] ;
-
 	local _matchingProvision ;
 
-	local _mobileProvision ;
-	for _mobileProvision in $(_mobileProvisions) {
-		local _cmd = "cat \"$(_mobileProvision)\" | grep \"<string>$(PROFILE_ID)</string>\"" ;
-		local result = [ Shell $(_cmd) ] ;
-		if $(result) != "" {
-			_matchingProvision = $(_mobileProvision) ;
-			break ;
+	# See if provided provision is a filename that exists.
+	local _profileDir = $(PROFILE_ID:P/) ;
+	local _profileFilename = [ C.GristFiles : $(PROFILE_ID:BS/) ] ;
+	
+	if $(_profileDir) && $(_profileDir) != "" && $(_profileFilename) && $(_profileFilename) != ""
+	{
+		SEARCH on $(_profileFilename) = $(_profileDir) ;
+		if $(_profileFilename:TC/) != $(PROFILE_ID:BSTC/)
+		{
+			_matchingProvision = $(_profileFilename) ;
+		}
+	}
+
+	if ! $(_matchingProvision)
+	{
+		# Find profile from GUID.
+		local _profileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
+
+		# Open each profile and search for : "<string>$(PROFILE_ID)</string>"
+		local _mobileProvisions = [ Glob $(_profileDirectory) : *.mobileprovision ] ;
+
+		local _mobileProvision ;
+		for _mobileProvision in $(_mobileProvisions) {
+			local _cmd = "cat \"$(_mobileProvision)\" | grep \"<string>$(PROFILE_ID)</string>\"" ;
+			local result = [ Shell $(_cmd) ] ;
+			if $(result) != "" {
+				_matchingProvision = $(_mobileProvision) ;
+				break ;
+			}
 		}
 	}
 
@@ -699,16 +751,30 @@ rule C.Provision TARGET : PROFILE_ID {
 
 	# Get bundle path.
 	local _bundlePath ;
-	on $(C.ACTIVE_TOOLCHAIN_TARGET) _bundlePath = $(BUNDLE_PATH) ;
+	local _bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local _bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
 	if ! $(_bundlePath) {
 		Echo *** C.Provision $(TARGET) \: $(PROFILE_ID) ;
 		Exit *** Bundle path not setup for target $(TARGET) ;
 	}
+	if ! $(_bundleTarget) {
+		Echo *** C.Provision $(TARGET) \: $(PROFILE_ID) ;
+		Exit *** Bundle target not setup for target $(TARGET) ;
+	}
+
+	local _dstProvision = [ C.GristFiles : embedded.mobileprovision ] ;
+	MakeLocate $(_dstProvision) : $(_bundlePath) ;
 
 	# Copy provision into the bundle and name it embedded.mobileprovision
 	IncludeModule copyfile ;
-	CopyFile $(TARGET) : $(_bundlePath)/embedded.mobileprovision : $(_matchingProvision) ;
+	CopyFile $(TARGET) : $(_dstProvision) : $(_matchingProvision) ;
+	Depends $(_bundleTarget) : $(_dstProvision) ;
+
+	# Without this, if we change between profiles, the copy will not always
+	# work due to destination time stamp being newer than source (despite
+	# coming from a different file).
+	UseCommandLine $(_dstProvision) : $(_matchingProvision) ;
 }
 
 

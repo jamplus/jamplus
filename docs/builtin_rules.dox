@@ -245,8 +245,10 @@ The remaining rules are utility rules.
 \refitem rule_MD5 MD5
 \refitem rule_MD5File MD5File
 \refitem rule_OptionalFileCache OptionalFileCache
+\refitem rule_RuleExists RuleExists
 \refitem rule_QueueJamfile QueueJamfile
 \refitem rule_QuickSettingsLookup QuickSettingsLookup
+\refitem rule_Shell Shell
 \refitem rule_Split Split
 \refitem rule_Subst Subst
 \refitem rule_SubstLiteralize SubstLiteralize

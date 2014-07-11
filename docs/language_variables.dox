@@ -75,13 +75,11 @@ Variables referenced in updating commands will be replaced with their values; ta
 
 
 
-
-
 \section language_variable_expansion Variable Expansion
 
 During parsing, \b Jam performs variable expansion on each token that is not a keyword or rule name.  Such tokens with embedded variable references are replaced with zero or more tokens.  Variable references are of the form \$(<i>variable</i>) or \$(<i>variable:modifiers</i>), where \em variable is the variable name, and \em modifiers are optional modifiers.
 
-A literal expansion is in the form \@(<i>literal</i>) or \@(<i>literal:modifiers</i>).  Instead of expanding a variable's contents, as with a \$(<i>variable</i>) expansion, the direct contents of <i>literal</i> are used.  All other behavior is the same.
+A literal expansion is in the form \@(<i>literal</i>) or \@(<i>literal:modifiers</i>) or alternatively as \$\@(<i>literal</i>) or \$\@(<i>literal:modifiers</i>).  Instead of expanding a variable's contents, as with a \$(<i>variable</i>) expansion, the direct contents of <i>literal</i> are used.  All other behavior is the same.
 
 Variable expansion in a rule's actions is similar to variable expansion in statements,  except that the action string is tokenized at whitespace regardless of quoting.
 

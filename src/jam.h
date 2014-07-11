@@ -539,6 +539,9 @@ struct globs {
 #endif
 	FILE	*cmdout;		/* print cmds, not run them */
 	int     silence;
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+	int     lua_debugger;
+#endif
 } ;
 
 extern struct globs globs;

@@ -1,0 +1,4 @@
+SubInclude TOP nested-lib-c ;
+C.IncludeDirectories nested-lib-b : . : public ;
+C.Inherits nested-lib-b : nested-lib-c : public ;
+C.Library nested-lib-b : sub.c sub.h ;

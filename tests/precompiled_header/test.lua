@@ -45,7 +45,7 @@ function Test()
 		}
 
 		pass1Pattern = [[
-			*** found 22 target(s)...
+			*** found 23 target(s)...
 			*** updating 6 target(s)...
 			@ C.vc.C++ <win32!release:main>mypch.h.pch
 			mypch.cpp
@@ -56,7 +56,7 @@ function Test()
 ]]
 
 		pass2Pattern = [[
-			*** found 22 target(s)...
+			*** found 23 target(s)...
 			*** updating 4 target(s)...
 			@ C.vc.C++ <win32!release:main>mypch.h.pch
 			mypch.cpp
@@ -153,7 +153,7 @@ function Test()
 	local pattern2
 	if Platform == 'win32' and Compiler ~= 'mingw' then
 		pattern2 = [[
-*** found 22 target(s)...
+*** found 23 target(s)...
 ]]
 	else
 		pattern2 = [[

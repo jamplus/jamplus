@@ -33,6 +33,7 @@ NotFile all clean ;
 #     all -> copiedfile.txt -> originalfile.txt
 Depends all : copiedfile.txt ;
 Depends copiedfile.txt : originalfile.txt ;
+ForceCare copiedfile.txt originalfile.txt ;
 
 Copy copiedfile.txt : originalfile.txt ;
 Clean clean : copiedfile.txt ;

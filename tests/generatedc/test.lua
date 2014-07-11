@@ -18,7 +18,7 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 20 target(s)...
+*** found 21 target(s)...
 *** updating 6 target(s)...
 @ GenerateCFile <win32!release:helloworld>file.c
 !NEXT!@ C.vc.CC <win32!release:helloworld>main.obj
@@ -50,7 +50,7 @@ function Test()
 		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 20 target(s)...
+*** found 21 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 
@@ -58,7 +58,7 @@ function Test()
 		os.touch('file.c')
 
 		local pattern3 = [[
-*** found 20 target(s)...
+*** found 21 target(s)...
 *** updating 2 target(s)...
 @ C.vc.CC <win32!release:helloworld>file.obj
 file.c

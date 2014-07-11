@@ -265,7 +265,9 @@ different processes.  'screenoutput' may be used to display the output as it hap
   </tr>
 </table>
 
-One final set of symbols is understood within the body of the action.  It is used to write a file to disk based on the contents of an available variable.
+Two other sets of symbols are understood within the body of the action.
+
+The first is used to write a file to disk based on the contents of an available variable.
 
 \code
     # Write a file to disk
@@ -274,6 +276,26 @@ One final set of symbols is understood within the body of the action.  It is use
         ^^($(1)|$(CONTENTS))
     }
 \endcode
+
+The second is used to write a response file to disk.  Response files store text surrounded by <tt>^^^(text...)</tt> into a temporary response file.  The <tt>^^^(text)</tt> in an action is replaced with the full path to the temporary response file.  The response file is deleted when the action completes.
+
+\code
+actions C++
+{
+    $(C++) @^^^($(2))
+}
+\endcode
+
+It is valid to nest the generation of response files.  In the example below, the file list is written to a temporary response file and the filename is inserted in the place of <tt>^^^($(2))</tt>.  In a secondary response file, the <tt>-filelist</tt> parameter and the first response filename are added.  This response filename is then passed to the C++ compiler.
+
+
+\code
+actions response C++
+{
+    $(C++) @^^^(-filelist ^^^($(2)))
+}
+\endcode
+
 
 \htmlonly </blockquote> \endhtmlonly
 

@@ -122,6 +122,22 @@ yyfparse( const char *s )
 	    i->strings = jambase;
 }
 
+void
+yyfparselines( const char* s, char **lines )
+{
+	struct include *i = (struct include *)malloc( sizeof( *i ) );
+
+	/* Push this onto the incp chain. */
+
+	i->string = "";
+	i->strings = lines;
+	i->file = 0;
+	i->fname = copystr( s );
+	i->line = 0;
+	i->next = incp;
+	incp = i;
+}
+
 /*
  * yyline() - read new line and return first character
  *

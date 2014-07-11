@@ -34,6 +34,7 @@ Always clean ;
 #     all -> copiedfile.txt -> originalfile.txt
 Depends all : copiedfile.txt ;
 Depends copiedfile.txt : originalfile.txt ;
+ForceCare copiedfile.txt originalfile.txt ;
 
 # Set up the 'clean' target for the 'copiedfile.txt' target.  The interesting
 # point to be had here is the 'copiedfile.txt' target hasn't been defined

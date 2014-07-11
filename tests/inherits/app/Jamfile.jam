@@ -1,0 +1,5 @@
+SubInclude TOP lib-a ;
+
+C.Inherits app : lib-a ;
+C.Application app : main.c ;
+

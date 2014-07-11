@@ -204,12 +204,16 @@ cmd_string(
 
 	    if (in[0] == '$' && in[1] == '(') {
 		dollar++;
-	    } else if ((rule->flags & RULE_RESPONSE)
-		       && in[0] == '@' && in[1] == '(') {
+		} else if (in[0] == '$' && in[1] == '@' && in[2] == '(') {
+		in++;
+		dollar++;
+	    } else if (((rule->flags & RULE_RESPONSE) && in[0] == '@' && in[1] == '(')
+	        || (in[0] == '^' && in[1] == '^' && in[2] == '^' && in[3] == '(')) {
 		const char *ine;
 		int depth;
 		TMPLIST *r;
 		size_t tlen;
+        int offset;
 
 		r = malloc(sizeof(*r));
 		r->next = *response_files;
@@ -226,7 +230,11 @@ cmd_string(
 		    return -1;
 		buffer_addstring(buff, r->file->name, tlen);
 
-		ine = in + 2;
+        if (in[0] == '^')
+		offset = 4;
+		else
+		offset = 2;
+        ine = in + offset;
 		depth = 1;
 		while (*ine && depth > 0) {
 		    switch (*ine) {
@@ -252,7 +260,7 @@ cmd_string(
 		    buffer_init(&subbuff);
 
 		    while (0 > (expandedSize = var_string(
-				     in + 2, &subbuff, 0, lol, ' '))) {
+				     in + offset, &subbuff, 0, lol, ' '))) {
 			    printf("jam: out of memory");
 			    exit(EXITBAD);
 			}
@@ -359,7 +367,9 @@ cmd_string(
 		in = ine;
 		break;
 #endif
-	    }
+	    } else if (in[0] == '@' && in[1] == '(') {
+		dollar++;
+		}
 
 	    buffer_addchar(buff, *in++);
 	}

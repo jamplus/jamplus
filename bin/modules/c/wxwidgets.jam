@@ -67,7 +67,7 @@ if ! $(wxWidgets_ROOT)
 			wxWidgets_COMMON_LIBRARIES = png tiff jpeg zlib expat scintilla ;
 			wxWidgets_COMMON_LIBRARIES_U = regex ;
 			wxWidgets_BASE_LIBRARIES = net odbc xml ;
-			wxWidgets_PLATFORM_LIBRARIES = adv aui core dbgrid gl html media qa richtext xrc ;
+			wxWidgets_PLATFORM_LIBRARIES = adv aui core dbgrid gl html media qa richtext webview xrc ;
 			wxWidgets_PLATFORM_PREFIX = msw ;
 			wxWidgets_CONTRIB_LIBRARIES = stc ;
 

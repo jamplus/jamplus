@@ -16,8 +16,8 @@
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="lua_support_overview"></a>
 Overview</h1>
-<p>JamPlus has built in Lua support, provided through a minimal distribution of LuaPlus (<a href="http://luaplus.org/">http://luaplus.org/</a>). Lua script may be run during the <a class="el" href="jam_language.html#operation_parsing">Parsing Phase</a> and during the <a class="el" href="jam_language.html#operation_updating">Updating Phase</a>.</p>
-<p>Any LuaBinaries capable module can run in the LuaPlus environment. Just drop the binary in the <code>bin/LuaPlus/modules/</code> directory.</p>
+<p>JamPlus has built in Lua support, provided through a minimal distribution of LuaPlus (<a href="http://luaplus.org/">http://luaplus.org/</a>). Lua scripts may be run during the <a class="el" href="jam_language.html#operation_parsing">Parsing Phase</a> and during the <a class="el" href="jam_language.html#operation_updating">Updating Phase</a>.</p>
+<p>Any LuaBinaries capable module can run in the LuaPlus environment. Just drop the binary in the <code>bin/PLATFORM/LuaPlus/modules/</code> directory or alter the <code>package.path</code> or <code>package.cpath</code></p>
 <p>The scripts located in <code>bin/scripts/</code> are written in Lua, although they are executed external to the Jam executable.</p>
 <hr/>
  <h1><a class="anchor" id="lua_support_rules"></a>
@@ -51,34 +51,40 @@ Using Lua in Actions</h1>
 <p>Using the new <code>lua</code> modifier for an action, Lua script can be run in a thread within the Jam process.</p>
  <blockquote>  <div class="fragment"><div class="line">actions lua RunLuaScript</div>
 <div class="line">{</div>
-<div class="line">    require <span class="stringliteral">&#39;iox&#39;</span>; iox.Sleep($(SLEEP)); print($(TEXT))</div>
+<div class="line">    require <span class="stringliteral">&#39;ex&#39;</span></div>
+<div class="line">    ex.Sleep($(SLEEP))</div>
+<div class="line">    print($(TEXT))</div>
 <div class="line">}</div>
 </div><!-- fragment -->  </blockquote> <hr/>
  <h1><a class="anchor" id="lua_support_jam"></a>
 Accessing Jam from Lua</h1>
 <p>Within a Lua script, it is possible to access Jam variables and execute Jam rules.</p>
-<h2><a class="anchor" id="lua_jam_getvar"></a>
-function jam_getvar([ TARGET_NAME, ] VARIABLE_NAME)</h2>
-<p><a name="lua_jam_getvar"></a></p>
- <blockquote> <p>Retrieves <code>VARIABLE_NAME</code> from the active Jam globals and returns it as a table of strings.</p>
-<p>If <code>TARGET_NAME</code> is specified, <code>VARIABLE_NAME</code> is retrieved as if an <code>on TARGET_NAME</code> had been issued in Jam.</p>
-<dl class="params"><dt>Parameters</dt><dd>
+<h2><a class="anchor" id="lua_jam_action"></a>
+function jam_action(ACTION_NAME, ACTION_TEXT [, FLAGS])</h2>
+<p><a name="lua_jam_action"></a></p>
+ <blockquote> <p>Creates an action to be executed by Jam called <code>ACTION_NAME</code> made up of <code>ACTION_TEXT</code>. If written in the Jam language, the equivalent would be:</p>
+ <blockquote>  <div class="fragment"><div class="line">jam_action(ACTION_NAME, ACTION_TEXT)</div>
+<div class="line"></div>
+<div class="line">is equivalent to:</div>
+<div class="line"></div>
+<div class="line">actions ACTION_NAME</div>
+<div class="line">{</div>
+<div class="line">    ACTION_TEXT</div>
+<div class="line">}</div>
+</div><!-- fragment -->  </blockquote> <p>If <code>FLAGS</code> is specified as a table, those flags are applied to the action and have direct correspondence to action modifiers specified in a Jam action.</p>
+ <blockquote>  <div class="fragment"><div class="line">jam_action(ACTION_NAME, ACTION_TEXT, { updated = <span class="keyword">true</span>, together = <span class="keyword">true</span> })</div>
+<div class="line"></div>
+<div class="line">is equivalent to:</div>
+<div class="line"></div>
+<div class="line">actions updated together ACTION_NAME</div>
+<div class="line">{</div>
+<div class="line">    ACTION_TEXT</div>
+<div class="line">}</div>
+</div><!-- fragment -->  </blockquote> <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET_NAME</td><td>(optional) The target to make active to retrieve <code>VARIABLE_NAME</code> from. </td></tr>
-    <tr><td class="paramname">VARIABLE_NAME</td><td>The Jam variable to retrieve. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>All strings within the <code>VARIABLE_NAME</code> string are returned as a Lua array of strings.</dd></dl>
- </blockquote> <h2><a class="anchor" id="lua_jam_setvar"></a>
-function jam_setvar([ TARGET_NAME, ] VARIABLE_NAME, VALUE)</h2>
-<p><a name="lua_jam_setvar"></a></p>
- <blockquote> <p>Sets <code>VALUE</code> into the active Jam global <code>VARIABLE_NAME</code>. <code>VALUE</code> can be a boolean, number, string, or table. Nested tables are collapsed.</p>
-<p>If <code>TARGET_NAME</code> is specified, <code>VALUE</code> is set into <code>VARIABLE_NAME</code> as if an <code>VARIABLE_NAME on TARGET_NAME</code> had been issued in Jam.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">TARGET_NAME</td><td>(optional) The target to make active to set <code>VARIABLE_NAME</code> into. </td></tr>
-    <tr><td class="paramname">VARIABLE_NAME</td><td>The Jam variable to set.</td></tr>
+    <tr><td class="paramname">ACTION_NAME</td><td>The name of any valid Jam action. </td></tr>
+    <tr><td class="paramname">ACTION_TEXT</td><td>Text representing the commands to be executed by the shell. </td></tr>
+    <tr><td class="paramname">FLAGS</td><td>(optional) If specifed, <code>FLAGS</code> must be a table of action modifiers containing one or more of the following: <code>bind = { 'various', 'target', 'names' }</code>, <code>existing = true</code>,<code>ignore = true</code>, <code>lua = true</code>,<code>maxline = true</code>, <code>maxresponse = true</code>, <code>piecemeal = true</code>, <code>quietly = true</code>, <code>removeemptydirs = true</code>, <code>response = true</code>, <code>screenoutput = true</code>, <code>together = true</code>, <code>updated = true</code></td></tr>
   </table>
   </dd>
 </dl>
@@ -94,6 +100,62 @@ function jam_evaluaterule(RULE_NAME [, PARAMETERS])</h2>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>If the Jam rule doesn't return any values, the return value is <code>nil</code>. If the Jam rule does return values, the return values are transformed to a Lua array of strings.</dd></dl>
+ </blockquote> <h2><a class="anchor" id="lua_jam_expand"></a>
+function jam_expand(TEXT_TO_EXPAND)</h2>
+<p><a name="lua_jam_expand"></a></p>
+ <blockquote> <p>Expands <code>TEXT_TO_EXPAND</code> according to Jam rules. <code>TEXT_TO_EXPAND</code> must use the $() or @() expansion forms described elsewhere.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TEXT_TO_EXPAND</td><td>The text to expand. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the expanded text.</dd></dl>
+ </blockquote> <h2><a class="anchor" id="lua_jam_getvar"></a>
+function jam_getvar([ TARGET_NAME, ] VARIABLE_NAME)</h2>
+<p><a name="lua_jam_getvar"></a></p>
+ <blockquote> <p>Retrieves <code>VARIABLE_NAME</code> from the active Jam globals and returns it as a table of strings.</p>
+<p>If <code>TARGET_NAME</code> is specified, <code>VARIABLE_NAME</code> is retrieved as if an <code>on TARGET_NAME</code> had been issued in Jam.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TARGET_NAME</td><td>(optional) The target to make active to retrieve <code>VARIABLE_NAME</code> from. </td></tr>
+    <tr><td class="paramname">VARIABLE_NAME</td><td>The Jam variable to retrieve. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>All strings within the <code>VARIABLE_NAME</code> string are returned as a Lua array of strings.</dd></dl>
+ </blockquote> <h2><a class="anchor" id="lua_jam_parse"></a>
+function jam_parse(TEXT_TO_PARSE)</h2>
+<p><a name="lua_jam_parse"></a></p>
+ <blockquote> <p>Parses <code>TEXT_TO_PARSE</code> as if it existed in a Jamfile.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TEXT_TO_PARSE</td><td>Jam source code to be parsed and executed by Jam immediately.</td></tr>
+  </table>
+  </dd>
+</dl>
+ </blockquote> <h2><a class="anchor" id="lua_jam_print"></a>
+function jam_print(TEXT_TO_PRINT)</h2>
+<p><a name="lua_jam_print"></a></p>
+ <blockquote> <p>Prints <code>TEXT_TO_PRINT</code> to the standard output stream.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TEXT_TO_PRINT</td><td>The text to print.</td></tr>
+  </table>
+  </dd>
+</dl>
+ </blockquote> <h2><a class="anchor" id="lua_jam_setvar"></a>
+function jam_setvar([ TARGET_NAME, ] VARIABLE_NAME, VALUE)</h2>
+<p><a name="lua_jam_setvar"></a></p>
+ <blockquote> <p>Sets <code>VALUE</code> into the active Jam global <code>VARIABLE_NAME</code>. <code>VALUE</code> can be a boolean, number, string, or table. Nested tables are collapsed.</p>
+<p>If <code>TARGET_NAME</code> is specified, <code>VALUE</code> is set into <code>VARIABLE_NAME</code> as if an <code>VARIABLE_NAME on TARGET_NAME</code> had been issued in Jam.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TARGET_NAME</td><td>(optional) The target to make active to set <code>VARIABLE_NAME</code> into. </td></tr>
+    <tr><td class="paramname">VARIABLE_NAME</td><td>The Jam variable to set.</td></tr>
+  </table>
+  </dd>
+</dl>
  </blockquote> <hr/>
  <h1><a class="anchor" id="lua_support_examples"></a>
 Examples</h1>

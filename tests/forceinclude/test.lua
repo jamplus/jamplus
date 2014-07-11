@@ -26,7 +26,7 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 31 target(s)...
+*** found 32 target(s)...
 *** updating 12 target(s)...
 @ C.vc.C++ <win32!release:project1>project1.obj
 !NEXT!@ C.vc.C++ <win32!release:common>print.obj
@@ -75,7 +75,7 @@ function Test()
 		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
-*** found 31 target(s)...
+*** found 32 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	else
@@ -141,7 +141,7 @@ function Test()
 
 	if Platform == 'win32' then
 		local pattern3 = [[
-*** found 31 target(s)...
+*** found 32 target(s)...
 *** updating 4 target(s)...
 @ C.vc.C++ <win32!release:project1>project1.obj
 !NEXT!@ C.vc.C++ <win32!release:libA>libA.obj

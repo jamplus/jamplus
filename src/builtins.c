@@ -716,10 +716,10 @@ builtin_queuejamfile(
 	size_t priorityLen;
 
 	if ( list_first(l2) ) {
-		sprintf( priority, ":%d", atoi( list_value(list_first(l2)) ) );
+		sprintf( priority, "%c%d", '\xff', atoi( list_value(list_first(l2)) ) );
 		priorityLen = strlen( priority );
 	} else {
-		strcpy( priority, ":0" );
+		sprintf( priority, "%c0", '\xff' );
 		priorityLen = 2;
 	}
 
@@ -1335,7 +1335,7 @@ builtin_expandfilelist(
 
 			glob = fileglob_Create( buf );
 			while ( fileglob_Next( glob ) ) {
-	            result = list_append( result, fileglob_FileName( glob ) + ( matches ? searchSourceLen : 0 ) + searchSourceExtraLen, 0 );
+				result = list_append(result,fileglob_FileName(glob) + (matches ? (searchSourceLen + searchSourceExtraLen) : 0),0);
 			}
 			fileglob_Destroy( glob );
 		}

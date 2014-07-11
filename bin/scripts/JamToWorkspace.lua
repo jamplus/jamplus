@@ -906,7 +906,7 @@ include "$(settingsFile)" ;
 
 		jambaseText[#jambaseText + 1] = expand([[
 
-include $(jamPath)Jambase.jam ;
+include "$(jamPath)Jambase.jam" ;
 ]], exporter.Options, _G)
 		io.writeall(destinationRootPath .. 'Jambase.jam', table.concat(jambaseText))
 	end

@@ -69,8 +69,8 @@ rule C.Clean TARGET : FILES {
 
 
 rule C.GristTarget TARGET {
-	C.ActiveTarget $(TARGET) ;
-	return $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+	if $(TARGET) = * { TARGET = C.* ; }
+	return $(TARGET:G=$(C.ACTIVE_TOOLCHAIN)) ;
 }
 
 
@@ -347,7 +347,7 @@ rule C._MultiCppCompile SOURCES {
 
 		$(makeobj_pass1) ;
 
-		local _hdrs = ; # $(SEARCH_SOURCE) ;
+		local collectHdrs = ;
 		local objectForceIncludes ;
 
 		local objflags ;
@@ -355,15 +355,23 @@ rule C._MultiCppCompile SOURCES {
 		local objectFlagsToRemove ;
 		local objectFlagsToAdd ;
 		on $(_obj) {
-			_hdrs += $(HDRS) ;
+			collectHdrs += $(HDRS) ;
 			objectForceIncludes = $(FORCE_INCLUDES) ;
 			objflags = $($($(BUILD_EXT).FLAGS)) ;
 			objdefines = $(DEFINES) ;
 			objectFlagsToRemove = $(FLAGS_TO_REMOVE) ;
 			objectFlagsToAdd = $(FLAGS_TO_ADD) ;
 		}
-		_hdrs += $(postHDRS) $(C.STDHDRS) ;
 		objectForceIncludes += $(forceIncludes) ;
+		collectHdrs += $(postHDRS) $(C.STDHDRS) ;
+
+		local _hdrs ;
+		local hdr ;
+		for hdr in $(collectHdrs) {
+			if ! $(hdr) in $(_hdrs) {
+				_hdrs += $(hdr) ;
+			}
+		}
 
 		HDRSEARCH on $(_src) = $(SEARCH_SOURCE) $(_hdrs) ;
 
@@ -633,14 +641,27 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 		C.$(C.COMPILER_SUITE)._ApplicationFromObjects_LinkFlags ;
 	}
 
-	local linkLibs =
+	local _linkLibs =
 		$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
 		$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
 	;
-	local needLibs =
+	local linkLibs ;
+	local lib ;
+	for lib in $(_linkLibs) {
+		if ! $(lib) in $(linkLibs) {
+			linkLibs += $(lib) ;
+		}
+	}
+	local _needLibs =
 		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
 		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
 	;
+	local needLibs ;
+	for lib in $(_needLibs) {
+		if ! $(lib) in $(needLibs) {
+			needLibs += $(lib) ;
+		}
+	}
 
 	SEARCH on $(linkLibs) += $(linkDirectories) $(C.STDLINKDIRECTORIES) ;
 	LINKLIBS on $(_linkTargets) = $(linkLibs) ;
@@ -767,6 +788,12 @@ rule C._LibraryFromObjects OBJECTS {
 	;
 	LIBFLAGS on $(_l) = $(libFlags) ;
 
+	local needLibs =
+		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+	;
+	Depends $(_l) : $(needLibs) ;
+
 	UseCommandLine $(_l) : $(libFlags) $(_s) ;
 
 	UseFileCache $(_l) : code ;
@@ -862,16 +889,29 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 		C.$(C.COMPILER_SUITE)._SharedLibraryFromObjects_LinkFlags ;
 	}
 
-	local linkLibs ;
-	local needLibs ;
+	local _linkLibs ;
+	local _needLibs ;
 
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) {
-		linkLibs += $(LINKLIBS) ;
-		needLibs += $(NEEDLIBS) ;
+		_linkLibs += $(LINKLIBS) ;
+		_needLibs += $(NEEDLIBS) ;
 	}
 	on $(C.ACTIVE_TOOLCHAIN_*) {
-		linkLibs += $(LINKLIBS) ;
-		needLibs += $(NEEDLIBS) ;
+		_linkLibs += $(LINKLIBS) ;
+		_needLibs += $(NEEDLIBS) ;
+	}
+	local linkLibs ;
+	local lib ;
+	for lib in $(_linkLibs) {
+		if ! $(lib) in $(linkLibs) {
+			linkLibs += $(lib) ;
+		}
+	}
+	local needLibs ;
+	for lib in $(_needLibs) {
+		if ! $(lib) in $(needLibs) {
+			needLibs += $(lib) ;
+		}
 	}
 
 	SEARCH on $(linkLibs) += $(linkDirectories) $(C.STDLINKDIRECTORIES) ;
@@ -1017,29 +1057,12 @@ rule C.LinkFlags TARGET : FLAGS {
 }
 
 
-rule C.LinkLibraries TARGET : LIBRARIES {
-	TARGET = [ C.ActiveTarget $(TARGET) ] ;
-#	Depends $(TARGET) : $(LIBRARIES) ;
-	Depends allclean:$(TARGET) : allclean:$(LIBRARIES) ;
-	NotFile allclean:$(TARGET) ;
-	Always allclean:$(TARGET) ;
-
-	local suflib = $(SUFLIB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
-	local gristLibraries ;
-	local lib ;
-	for lib in $(LIBRARIES) {
-		local grist = $(C.ACTIVE_TOOLCHAIN):$(lib) ;
-		if $(lib:G) {
-			gristLibraries += $(lib) ;
-		} else {
-			gristLibraries += $(lib:G=$(grist))$(suflib) ;
-		}
-	}
-	NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristLibraries) ;
+rule C.LinkLibraries TARGET : LIBRARIES : OPTIONS {
+    C.Inherits $(TARGET) : $(LIBRARIES) : $(OPTIONS) optional ;
 }
 
 
-rule C.LinkPrebuiltLibraries TARGET : LIBRARIES {
+rule C.LinkPrebuiltLibraries TARGET : LIBRARIES : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):prebuiltlib ;
 	local gristedLibraries = $(LIBRARIES:G=$(grist)) ;
@@ -1049,6 +1072,10 @@ rule C.LinkPrebuiltLibraries TARGET : LIBRARIES {
 	SEARCH on $(gristedLibraries) += $(SUBDIR) ;
 	SEARCH_EXTENSIONS on $(gristedLibraries) = $(SUFLINKLIBS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristedLibraries) ;
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristedLibraries) ;
+	}
 }
 
 
@@ -1319,9 +1346,76 @@ rule C.ForceInclude TARGET : INCLUDES {
 }
 
 
-rule C.IncludeDirectories TARGET : INCLUDEPATHS {
+rule C.IncludeDirectories TARGET : INCLUDEPATHS : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
-	HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(INCLUDEPATHS:R=$(SUBDIR:E="")) ;
+	local paths = $(INCLUDEPATHS:R=$(SUBDIR:E="")) ;
+	HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(paths) ;
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(paths) ;
+	}
+}
+
+
+rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+	__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+
+	local public ;
+	if public in $(OPTIONS) {
+		public = public ;
+	}
+
+	local suflib = $(SUFLIB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+	local gristLibraries ;
+	for lib in $(INHERITS_TARGETS) {
+		local grist = $(C.ACTIVE_TOOLCHAIN):$(lib) ;
+		if $(lib:G) {
+			gristLibraries += $(lib) ;
+		} else {
+			gristLibraries += $(lib:G=$(grist))$(suflib) ;
+		}
+	}
+	NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristLibraries) ;
+	PUBLIC_NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristLibraries) ;
+
+	local optional ;
+	if optional in $(OPTIONS) {
+	    optional = true ;
+	}
+
+	local inheritsTarget ;
+	for inheritsTarget in $(INHERITS_TARGETS) {
+		local originalInheritsTarget = $(inheritsTarget) ;
+		inheritsTarget = [ C.GristTarget $(inheritsTarget) ] ;
+		if ! $(optional)  &&  ! $(__PUBLIC:Z=$(inheritsTarget)) {
+			Echo * C.Inherits $(TARGET) \: $(originalInheritsTarget) ;
+			Echo "*     No public interfaces to $(originalInheritsTarget) have been defined yet." ;
+			Echo * ;
+			Echo "*     Does $(originalInheritsTarget) exist before $(TARGET) in the Jamfile chain?" ;
+			Exit ;
+		}
+		local publicHdrs = $(PUBLIC_HDRS:Z=$(inheritsTarget)) ;
+		if $(publicHdrs) {
+			HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicHdrs) ;
+			if $(public) {
+				PUBLIC_HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicHdrs) ;
+			}
+		}
+
+		local publicLinkLibs = $(PUBLIC_LINKLIBS:Z=$(inheritsTarget)) ;
+		if $(publicLinkLibs) {
+			LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicLinkLibs) ;
+			PUBLIC_LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicLinkLibs) ;
+		}
+
+		local publicNeedLibs = $(PUBLIC_NEEDLIBS:Z=$(inheritsTarget)) ;
+		if $(publicNeedLibs) {
+			NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicNeedLibs) ;
+			PUBLIC_NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicNeedLibs) ;
+		}
+	}
 }
 
 
