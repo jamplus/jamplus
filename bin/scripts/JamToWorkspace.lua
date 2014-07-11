@@ -373,7 +373,7 @@ end
 local function XcodeHelper_AreEntitlementsRequired( )
 	local iosDir = XcodeHelper_GetLatestIPhoneSDKDirectory( );
 	
-	if not iosDir == "" then
+	if iosDir:len( ) > 0 then
 		local p, i = ex.popen( { "/usr/libexec/PlistBuddy", "-c", "Print:DefaultProperties:ENTITLEMENTS_REQUIRED", iosDir .. "/SDKSettings.plist" }, false )
 		if p then
 			local output = i:read("*a"):gsub( "%s$", "" )
@@ -391,7 +391,7 @@ end
 local function XcodeHelper_IsCodeSigningRequired( )
 	local iosDir = XcodeHelper_GetLatestIPhoneSDKDirectory( );
 	
-	if not iosDir == "" then
+	if iosDir:len( ) > 0 then
 		local p, i = ex.popen( { "/usr/libexec/PlistBuddy", "-c", "Print:DefaultProperties:CODE_SIGNING_REQUIRED", iosDir .. "/SDKSettings.plist" }, false )
 		if p then
 			local output = i:read("*a"):gsub( "%s$", "" )
