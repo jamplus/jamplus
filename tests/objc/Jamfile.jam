@@ -1,0 +1,5 @@
+SubDir TOP ;
+
+C.LinkFrameworks objc : AppKit ;
+C.Application objc : main.mm ;
+
