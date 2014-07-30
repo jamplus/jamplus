@@ -10,8 +10,8 @@ function Test()
 	{
 	}
 
-	os.remove('cache/')
-	os.remove('.depcache')
+	ospath.remove('cache/')
+	ospath.remove('.depcache')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -83,8 +83,8 @@ Using cached file2.image
 	TestFiles(pass1Files)
 	TestDirectories(newDirectories)
 
-	os.sleep(1.0)
-	os.touch('file1.tga')
+	osprocess.sleep(1.0)
+	ospath.touch('file1.tga')
 
 	local pattern3 = [[
 *** found 5 target(s)...
@@ -94,8 +94,8 @@ file1.image is already the proper cached target.
 ]]
 	TestPattern(pattern3, RunJam())
 
-	os.remove('cache/')
-	os.remove('.depcache')
+	ospath.remove('cache/')
+	ospath.remove('.depcache')
 
 	RunJam{ 'clean' }
 

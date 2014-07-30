@@ -1,5 +1,12 @@
-require 'ex'
+ospath = require 'ospath'
+osprocess = require 'osprocess'
 local filefind = require 'filefind'
+
+function io.writeall(filename, buffer)
+    local file = io.open(filename, 'wb')
+    file:write(buffer)
+    file:close()
+end
 
 rotatingCharacters = { '|', '/', '-', '\\' }
 
@@ -31,7 +38,7 @@ function RunJam(commandLine)
 		commandLine[#commandLine + 1] = '2>&1'
 	end
 
-	return ex.collectlines(commandLine)
+	return osprocess.collectlines(commandLine)
 end
 
 function TestExpression(result, failMessage)
@@ -380,10 +387,10 @@ function ErrorHandler(inMessage)
 	return table.concat(message)
 end
 
-local cwd = os.getcwd()
+local cwd = ospath.getcwd()
 for _, dir in ipairs(dirs) do
-	os.chdir(dir)
-	if os.path.exists('test.lua') then
+	ospath.chdir(dir)
+	if ospath.exists('test.lua') then
 		local text = 'Running tests for ' .. dir:gsub('[\\/]$', '') .. '...'
 		io.write(('%-60s'):format(text))
 		io.flush()
@@ -421,7 +428,7 @@ for _, dir in ipairs(dirs) do
 			io.write('\t' .. err .. '\n')
 		end
 	end
-	os.chdir(cwd)
+	ospath.chdir(cwd)
 end
 
 print()

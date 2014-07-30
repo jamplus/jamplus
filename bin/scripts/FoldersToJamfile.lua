@@ -1,6 +1,6 @@
 local getopt = require 'getopt'
 local filefind = require 'filefind'
-require 'ex'
+local ospath = require 'ospath'
 
 package.path = (debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. "/?.lua;" .. package.path
 local foldertree = require 'FolderTree'
@@ -17,8 +17,8 @@ end
 
 local files = {}
 
-local rootPath = os.path.add_slash(nonOpts[1])
-for entry in filefind.glob(os.path.combine(rootPath, '**')) do
+local rootPath = ospath.add_slash(nonOpts[1])
+for entry in filefind.glob(ospath.join(rootPath, '**')) do
 	local relativePath = entry.filename:sub(#rootPath + 1)
 	local path, filename = relativePath:match('(.+)/(.*)')
 	if not path then

@@ -165,8 +165,8 @@ function Test()
 	TestFiles(pass1Files)
 	
 	---------------------------------------------------------------------------
-	os.sleep(1)
-	os.touch('includes/usefuldefine.h')
+	osprocess.sleep(1)
+	ospath.touch('includes/usefuldefine.h')
 	TestPattern(pass2Pattern, RunJam{})
 	TestDirectories(pass1Directories)
 	TestFiles(pass1Files)

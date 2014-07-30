@@ -20,8 +20,8 @@ function Test()
 	TestFiles(originalFiles)
 
 	-- First build
-	local cwd = os.getcwd():gsub(':', '--'):gsub('\\', '/')
-	local cwdNoDashes = os.getcwd():gsub('\\', '/')
+	local cwd = ospath.getcwd():gsub(':', '--'):gsub('\\', '/')
+	local cwdNoDashes = ospath.getcwd():gsub('\\', '/')
 	
 	if Platform == 'win32' then
 		local pattern = [[
@@ -72,8 +72,8 @@ project1.cpp
 ]]
 		TestPattern(pattern2, RunJam())
 	
-		os.sleep(1.0)
-		os.touch('source/project1/project1.cpp')
+		osprocess.sleep(1.0)
+		ospath.touch('source/project1/project1.cpp')
 
 		local pattern3 = [[
 *** found 23 target(s)...
@@ -131,8 +131,8 @@ project1.cpp
 ]]
 		TestPattern(pattern2, RunJam())
 
-		os.sleep(1.0)
-		os.touch('source/project1/project1.cpp')
+		osprocess.sleep(1.0)
+		ospath.touch('source/project1/project1.cpp')
 
 		local pattern3 = [[
 *** found 7 target(s)...

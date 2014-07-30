@@ -18,39 +18,70 @@
 #include <dlfcn.h>
 #endif
 
+/*
+@@ LUAI_BITSINT defines the number of bits in an int.
+** CHANGE here if Lua cannot automatically detect the number of bits of
+** your machine. Probably you do not need to change this.
+*/
+/* avoid overflows in comparison */
+#if INT_MAX-20 < 32760		/* { */
+#define LUAI_BITSINT	16
+#elif INT_MAX > 2147483640L	/* }{ */
+/* int has at least 32 bits */
+#define LUAI_BITSINT	32
+#else				/* }{ */
+#error "you must define LUA_BITSINT with number of bits in an integer"
+#endif				/* } */
+
+
+/*
+@@ LUAI_MAXSTACK limits the size of the Lua stack.
+** CHANGE it if you need a different limit. This limit is arbitrary;
+** its only purpose is to stop Lua to consume unlimited stack
+** space (and to reserve some numbers for pseudo-indices).
+*/
+#if LUAI_BITSINT >= 32
+#define LUAI_MAXSTACK		1000000
+#else
+#define LUAI_MAXSTACK		15000
+#endif
+
+/* reserve some space for error handling */
+#define LUAI_FIRSTPSEUDOIDX	(-LUAI_MAXSTACK - 1000)
+
 /* Declarations from lua.h. */
 /*
 ** pseudo-indices
 */
-#define LUA_REGISTRYINDEX    (-10000)
-#define LUA_GLOBALSINDEX    (-10002)
+#define LUA_REGISTRYINDEX	LUAI_FIRSTPSEUDOIDX
 
 typedef struct ls_lua_State ls_lua_State;
 
 typedef int (*ls_lua_CFunction) (ls_lua_State *L);
 
-/* type of numbers in Lua */
-#define LUA_NUMBER double
-typedef LUA_NUMBER ls_lua_Number;
-
-/* type for integer functions */
-#define LUA_INTEGER int
-typedef LUA_INTEGER ls_lua_Integer;
-
 /*
 ** basic types
 */
+#define LUA_TNONE		(-1)
+
+#define LUA_TNIL		0
+#define LUA_TBOOLEAN		1
+#define LUA_TLIGHTUSERDATA	2
+#define LUA_TNUMBER		3
+#define LUA_TSTRING		4
+#define LUA_TTABLE		5
+#define LUA_TFUNCTION		6
+#define LUA_TUSERDATA		7
+#define LUA_TTHREAD		8
 #define LUA_TNONE        (-1)
 
-#define LUA_TNIL        0
-#define LUA_TBOOLEAN        1
-#define LUA_TLIGHTUSERDATA    2
-#define LUA_TNUMBER        3
-#define LUA_TSTRING        4
-#define LUA_TTABLE        5
-#define LUA_TFUNCTION        6
-#define LUA_TUSERDATA        7
-#define LUA_TTHREAD        8
+/* type of numbers in Lua */
+#define LUA_NUMBER	double
+typedef LUA_NUMBER ls_lua_Number;
+
+/* type for integer functions */
+#define LUA_INTEGER	ptrdiff_t
+typedef LUA_INTEGER ls_lua_Integer;
 
 void (*ls_lua_close) (ls_lua_State *L);
 
@@ -68,31 +99,34 @@ int             (*ls_lua_isstring) (ls_lua_State *L, int idx);
 int             (*ls_lua_isuserdata) (ls_lua_State *L, int idx);
 int             (*ls_lua_type) (ls_lua_State *L, int idx);
 
-ls_lua_Number      (*ls_lua_tonumber) (ls_lua_State *L, int idx);
+ls_lua_Number      (*ls_lua_tonumberx) (ls_lua_State *L, int idx, int *isnum);
 int             (*ls_lua_toboolean) (ls_lua_State *L, int idx);
 #define ls_lua_tostring(L,i)    ls_lua_tolstring(L, (i), NULL)
 const char     *(*ls_lua_tolstring) (ls_lua_State *L, int idx, size_t *len);
-size_t          (*ls_lua_objlen) (ls_lua_State *L, int idx);
+size_t          (*ls_lua_rawlen) (ls_lua_State *L, int idx);
 
 void  (*ls_lua_pushnil) (ls_lua_State *L);
 void  (*ls_lua_pushnumber) (ls_lua_State *L, ls_lua_Number n);
 void  (*ls_lua_pushinteger) (ls_lua_State *L, ls_lua_Integer n);
-void  (*ls_lua_pushstring) (ls_lua_State *L, const char *s);
-void  (*ls_lua_pushlstring) (ls_lua_State *L, const char *s, size_t l);
+const char *(*ls_lua_pushlstring) (ls_lua_State *L, const char *s, size_t l);
+const char *(*ls_lua_pushstring) (ls_lua_State *L, const char *s);
 void  (*ls_lua_pushcclosure) (ls_lua_State *L, ls_lua_CFunction fn, int n);
 void  (*ls_lua_pushboolean) (ls_lua_State *L, int b);
 
+void  (*ls_lua_getglobal) (ls_lua_State *L, const char *var);
 void  (*ls_lua_gettable) (ls_lua_State *L, int idx);
 void  (*ls_lua_getfield) (ls_lua_State *L, int idx, const char *k);
 void  (*ls_lua_rawgeti) (ls_lua_State *L, int idx, int n);
 void  (*ls_lua_createtable) (ls_lua_State *L, int narr, int nrec);
 
+void  (*ls_lua_setglobal) (ls_lua_State *L, const char *var);
 void  (*ls_lua_settable) (ls_lua_State *L, int idx);
 void  (*ls_lua_setfield) (ls_lua_State *L, int idx, const char *k);
 void  (*ls_lua_rawseti) (ls_lua_State *L, int idx, int n);
 
-int   (*ls_lua_pcall) (ls_lua_State *L, int nargs, int nresults, int errfunc);
-int   (*ls_lua_cpcall) (ls_lua_State *L, ls_lua_CFunction func, void *ud);
+int   (*ls_lua_pcallk) (ls_lua_State *L, int nargs, int nresults, int errfunc,
+                            int ctx, ls_lua_CFunction k);
+#define ls_lua_pcall(L,n,r,f)	ls_lua_pcallk(L, (n), (r), (f), 0, NULL)
 
 int   (*ls_lua_next) (ls_lua_State *L, int idx);
 
@@ -112,27 +146,33 @@ int (*ls_lua_getinfo)(ls_lua_State *L, const char *what, ls_lua_Debug *ar);
 #define LUA_IDSIZE    60
 
 struct ls_lua_Debug {
-    int event;
-    const char *name;    /* (n) */
-    const char *namewhat;    /* (n) `global', `local', `field', `method' */
-    const char *what;    /* (S) `Lua', `C', `main', `tail' */
-    const char *source;    /* (S) */
-    int currentline;    /* (l) */
-    int nups;        /* (u) number of upvalues */
-    int linedefined;    /* (S) */
-    int lastlinedefined;    /* (S) */
-    char short_src[LUA_IDSIZE]; /* (S) */
-    /* private part */
-    int i_ci;  /* active function */
+  int event;
+  const char *name;	/* (n) */
+  const char *namewhat;	/* (n) 'global', 'local', 'field', 'method' */
+  const char *what;	/* (S) 'Lua', 'C', 'main', 'tail' */
+  const char *source;	/* (S) */
+  int currentline;	/* (l) */
+  int linedefined;	/* (S) */
+  int lastlinedefined;	/* (S) */
+  unsigned char nups;	/* (u) number of upvalues */
+  unsigned char nparams;/* (u) number of parameters */
+  char isvararg;        /* (u) */
+  char istailcall;	/* (t) */
+  char short_src[LUA_IDSIZE]; /* (S) */
+  /* private part */
+  struct CallInfo *i_ci;  /* active function */
 };
 
-void(*ls_luaL_openlibs) (ls_lua_State *L);
+void (*ls_luaL_openlibs) (ls_lua_State *L);
 int (*ls_luaL_loadstring) (ls_lua_State *L, const char *s);
-int (*ls_luaL_loadfile) (ls_lua_State *L, const char *filename);
+int (*ls_luaL_loadfilex) (ls_lua_State *L, const char *filename, const char *mode);
+#define ls_luaL_loadfile(L,f)	ls_luaL_loadfilex(L,f,NULL)
+
 ls_lua_State *(*ls_luaL_newstate) (void);
 int (*ls_luaL_ref) (ls_lua_State *L, int t);
 void (*ls_luaL_unref) (ls_lua_State *L, int t, int ref);
 
+#define ls_lua_tonumber(L,i)	ls_lua_tonumberx(L,i,NULL)
 
 /*****************************************************************************/
 static ls_lua_State *L;
@@ -538,7 +578,7 @@ static LIST *ls_lua_callhelper(int top, int ret)
         {
             int ret;
             printf("jam: Error running Lua code\n%s\n", ls_lua_tostring(L, -1));
-            ls_lua_getfield(L, LUA_GLOBALSINDEX, "debug");
+            ls_lua_getglobal(L, "debug");
             ls_lua_getfield(L, -1, "traceback");
             ret = ls_lua_pcall(L, 0, 1, 0);
             if (ret == 0) {
@@ -564,6 +604,19 @@ static LIST *ls_lua_callhelper(int top, int ret)
 }
 
 
+static int lanes_on_state_create(ls_lua_State *L) {
+    ls_lua_pushcclosure(L, LS_jam_getvar, 0);
+    ls_lua_setglobal(L, "jam_getvar");
+    ls_lua_pushcclosure(L, LS_jam_setvar, 0);
+    ls_lua_setglobal(L, "jam_setvar");
+    ls_lua_pushcclosure(L, LS_jam_expand, 0);
+    ls_lua_setglobal(L, "jam_expand");
+    ls_lua_pushcclosure(L, LS_jam_print, 0);
+    ls_lua_setglobal(L, "jam_print");
+    return 0;
+}
+
+
 static int pmain (ls_lua_State *L)
 {
     int top;
@@ -572,28 +625,38 @@ static int pmain (ls_lua_State *L)
     ls_luaL_openlibs(L);
 
     ls_lua_pushcclosure(L, LS_jam_getvar, 0);
-    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_getvar");
+    ls_lua_setglobal(L, "jam_getvar");
     ls_lua_pushcclosure(L, LS_jam_setvar, 0);
-    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_setvar");
+    ls_lua_setglobal(L, "jam_setvar");
     ls_lua_pushcclosure(L, LS_jam_action, 0);
-    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_action");
+    ls_lua_setglobal(L, "jam_action");
     ls_lua_pushcclosure(L, LS_jam_evaluaterule, 0);
-    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_evaluaterule");
+    ls_lua_setglobal(L, "jam_evaluaterule");
     ls_lua_pushcclosure(L, LS_jam_expand, 0);
-    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_expand");
+    ls_lua_setglobal(L, "jam_expand");
     ls_lua_pushcclosure(L, LS_jam_parse, 0);
-    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_parse");
+    ls_lua_setglobal(L, "jam_parse");
     ls_lua_pushcclosure(L, LS_jam_print, 0);
-    ls_lua_setfield(L, LUA_GLOBALSINDEX, "jam_print");
+    ls_lua_setglobal(L, "jam_print");
 
     top = ls_lua_gettop(L);
     ret = ls_luaL_loadstring(L, "lanes = require 'lanes'");
     ls_lua_callhelper(top, ret);
-    ret = ls_luaL_loadstring(L, "lanes.configure()");
-    ls_lua_callhelper(top, ret);
+
+    ls_lua_getglobal(L, "lanes");                       /* lanes */
+    ls_lua_getfield(L, -1, "configure");                /* lanes configure */
+    ls_lua_newtable(L);                                 /* lanes configure table */
+    ls_lua_pushcclosure(L, lanes_on_state_create, 0);   /* lanes configure table lanes_on_state_create */
+    ls_lua_setfield(L, -2, "on_state_create");          /* lanes configure table */
+    ret = ls_lua_pcall(L, 1, 0, 0);                     /* lanes */
+    if (ret != 0) {
+        const char* err = ls_lua_tostring(L, -1);
+        int hi = 5;
+	}
+    ls_lua_pop(L, 2);
 
     ls_lua_newtable(L);
-    ls_lua_setfield(L, LUA_GLOBALSINDEX, "LineFilters");
+    ls_lua_setglobal(L, "LineFilters");
 
     return 0;
 }
@@ -661,15 +724,15 @@ void ls_lua_init()
 
 #ifdef OS_NT
 #ifdef _DEBUG
-        strcat(fileName, "/lua/lua51_debug.dll");
+        strcat(fileName, "/lua/lua52_debug.dll");
 #else
-        strcat(fileName, "/lua/lua51.dll");
+        strcat(fileName, "/lua/lua52.dll");
 #endif
 #else
 #ifdef _DEBUG
-        strcat(fileName, "/lua/lua51_debug.so");
+        strcat(fileName, "/lua/lua52_debug.so");
 #else
-        strcat(fileName, "/lua/lua51.so");
+        strcat(fileName, "/lua/lua52.so");
 #endif
 #endif
         handle = ls_lua_loadlibrary(fileName);
@@ -693,30 +756,31 @@ void ls_lua_init()
     ls_lua_isuserdata = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isuserdata");
     ls_lua_type = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_type");
 
-    ls_lua_tonumber = (ls_lua_Number (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_tonumber");
+    ls_lua_tonumberx = (ls_lua_Number (*)(ls_lua_State *, int, int *))ls_lua_loadsymbol(handle, "lua_tonumberx");
     ls_lua_toboolean = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_toboolean");
     ls_lua_tolstring = (const char *(*)(ls_lua_State *, int, size_t *))ls_lua_loadsymbol(handle, "lua_tolstring");
-    ls_lua_objlen = (size_t (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_objlen");
+    ls_lua_rawlen = (size_t (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_rawlen");
 
     ls_lua_pushnil = (void (*) (ls_lua_State *))ls_lua_loadsymbol(handle, "lua_pushnil");
     ls_lua_pushnumber = (void (*) (ls_lua_State *, ls_lua_Number))ls_lua_loadsymbol(handle, "lua_pushnumber");
     ls_lua_pushinteger = (void (*) (ls_lua_State *, ls_lua_Integer))ls_lua_loadsymbol(handle, "lua_pushinteger");
-    ls_lua_pushstring = (void (*) (ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "lua_pushstring");
-    ls_lua_pushlstring = (void (*) (ls_lua_State *, const char *, size_t))ls_lua_loadsymbol(handle, "lua_pushlstring");
+    ls_lua_pushstring = (const char *(*) (ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "lua_pushstring");
+    ls_lua_pushlstring = (const char *(*) (ls_lua_State *, const char *, size_t))ls_lua_loadsymbol(handle, "lua_pushlstring");
     ls_lua_pushcclosure = (void (*) (ls_lua_State *, ls_lua_CFunction, int))ls_lua_loadsymbol(handle, "lua_pushcclosure");
     ls_lua_pushboolean = (void (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_pushboolean");
 
+    ls_lua_getglobal = (void (*) (ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "lua_getglobal");
     ls_lua_gettable = (void (*) (ls_lua_State *, int id))ls_lua_loadsymbol(handle, "lua_gettable");
     ls_lua_getfield = (void (*)(ls_lua_State *, int, const char *))ls_lua_loadsymbol(handle, "lua_getfield");
     ls_lua_rawgeti = (void  (*) (ls_lua_State *, int, int))ls_lua_loadsymbol(handle, "lua_rawgeti");
     ls_lua_createtable = (void (*)(ls_lua_State *, int, int))ls_lua_loadsymbol(handle, "lua_createtable");
 
+    ls_lua_setglobal = (void (*)(ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "lua_setglobal");
     ls_lua_settable = (void (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_settable");
     ls_lua_setfield = (void (*)(ls_lua_State *, int, const char *))ls_lua_loadsymbol(handle, "lua_setfield");
     ls_lua_rawseti = (void (*)(ls_lua_State *, int, int))ls_lua_loadsymbol(handle, "lua_rawseti");
 
-    ls_lua_pcall = (int (*)(ls_lua_State *, int, int, int))ls_lua_loadsymbol(handle, "lua_pcall");
-    ls_lua_cpcall = (int (*)(ls_lua_State *, ls_lua_CFunction, void *))ls_lua_loadsymbol(handle, "lua_cpcall");
+    ls_lua_pcallk = (int (*)(ls_lua_State *, int, int, int, int, ls_lua_CFunction))ls_lua_loadsymbol(handle, "lua_pcallk");
 
     ls_lua_next = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_next");
 
@@ -725,13 +789,14 @@ void ls_lua_init()
 
     ls_luaL_openlibs = (void (*)(ls_lua_State *))ls_lua_loadsymbol(handle, "luaL_openlibs");
     ls_luaL_loadstring = (int (*)(ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "luaL_loadstring");
-    ls_luaL_loadfile = (int (*)(ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "luaL_loadfile");
+    ls_luaL_loadfilex = (int (*)(ls_lua_State *, const char *, const char *))ls_lua_loadsymbol(handle, "luaL_loadfilex");
     ls_luaL_newstate = (ls_lua_State *(*)(void))ls_lua_loadsymbol(handle, "luaL_newstate");
     ls_luaL_ref = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "luaL_ref");
     ls_luaL_unref = (void (*)(ls_lua_State *, int, int))ls_lua_loadsymbol(handle, "luaL_unref");
 
     L = ls_luaL_newstate();
-    ls_lua_cpcall(L, &pmain, 0);
+    ls_lua_pushcclosure(L, &pmain, 0);
+    ls_lua_pcall(L, 0, 0, 0);
 
     if (globs.lua_debugger) {
         char* slashPtr;
@@ -778,7 +843,7 @@ int luahelper_taskadd(const char* taskscript)
 
     ls_lua_init();
 
-    ls_lua_getfield(L, LUA_GLOBALSINDEX, "lanes");            /* lanes */
+    ls_lua_getglobal(L, "lanes");                             /* lanes */
     ls_lua_getfield(L, -1, "gen");                            /* lanes gen */
     ls_lua_pushstring(L, "*");                                /* lanes gen * */
 
@@ -929,7 +994,7 @@ static int linefilter_stack_position = -1;
 int luahelper_push_linefilter(const char* actionName) {
     ls_lua_init();
 
-    ls_lua_getfield(L, LUA_GLOBALSINDEX, "LineFilters");    /* LineFilters */
+    ls_lua_getglobal(L, "LineFilters");                        /* LineFilters */
     ls_lua_getfield(L, -1, actionName);                        /* LineFilters function */
     if (!ls_lua_isfunction(L, -1)) {
         ls_lua_pop(L, 2);
@@ -974,7 +1039,7 @@ const char* luahelper_linefilter(const char* line, size_t lineSize) {
         return NULL;
     }
 
-    out = malloc(ls_lua_objlen(L, -1) + 1);
+    out = malloc(ls_lua_rawlen(L, -1) + 1);
     strcpy(out, ls_lua_tostring(L, -1));
     ls_lua_settop(L, top);
 
@@ -990,7 +1055,7 @@ int luahelper_md5callback(const char *filename, MD5SUM sum, const char* callback
 
     ls_lua_init();
 
-    ls_lua_getfield(L, LUA_GLOBALSINDEX, callback);
+    ls_lua_getglobal(L, callback);
     if (!ls_lua_isfunction(L, -1))
     {
         ls_lua_pop(L, 1);
@@ -1017,7 +1082,7 @@ int luahelper_md5callback(const char *filename, MD5SUM sum, const char* callback
         return 0;
     }
 
-    if (!ls_lua_isstring(L, -1)  ||  ls_lua_objlen(L, -1) != sizeof(MD5SUM))
+    if (!ls_lua_isstring(L, -1)  ||  ls_lua_rawlen(L, -1) != sizeof(MD5SUM))
     {
         printf("jam: Error running Lua md5 callback '%s'.\n", callback);
         memset(sum, 0, sizeof(MD5SUM));
@@ -1078,7 +1143,7 @@ builtin_luafile(
         ls_lua_pushstring(L, list_value(l2));
         ls_lua_rawseti(L, -2, ++index);
     }
-    ls_lua_setfield(L, LUA_GLOBALSINDEX, "arg");
+    ls_lua_setglobal(L, "arg");
     ret = ls_luaL_loadfile(L, list_value(list_first(l)));
     return ls_lua_callhelper(top, ret);
 }

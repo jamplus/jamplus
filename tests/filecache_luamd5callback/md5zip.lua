@@ -1,5 +1,5 @@
 function md5zip(filename)
-	print("md5zip: Calculating " .. filename .. "...")
+	jam_print("md5zip: Calculating " .. filename .. "...")
 
 	local md5 = require 'md5'
 	local struct = require 'struct'

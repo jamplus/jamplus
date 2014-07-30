@@ -11,15 +11,17 @@ if not OS  or  not OSPLAT  or  not JAM_EXECUTABLE then
 end
 
 local getopt = require 'getopt'
-require 'ex'
+ospath = require 'ospath'
+osprocess = require 'osprocess'
+prettydump = require 'prettydump'
 local md5 = require 'md5'
 expand = require 'expand'
 
-scriptPath = os.path.simplify(os.path.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()))
+scriptPath = ospath.simplify(ospath.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()))
 package.path = scriptPath .. "?.lua;" .. package.path
 FolderTree = require 'FolderTree'
 
-jamPath = os.path.simplify(os.path.make_absolute(scriptPath .. '../'))
+jamPath = ospath.simplify(ospath.make_absolute(scriptPath .. '../'))
 
 Compilers =
 {
@@ -125,7 +127,7 @@ end
 
 function WriteFileIfModified(filename, contents)
 	local md5Contents = md5.digest(contents)
-	local writeFile = not os.path.exists(filename)
+	local writeFile = not ospath.exists(filename)
 	if not writeFile then
 		local md5File = io.open(filename .. '.md5', 'rb')
 		if md5File then
@@ -137,9 +139,9 @@ function WriteFileIfModified(filename, contents)
 		end
 	end
 	if writeFile then
-		os.mkdir(filename)
-		io.writeall(filename, contents)
-		io.writeall(filename .. '.md5', md5Contents)
+		ospath.mkdir(filename)
+		ospath.write_file(filename, contents)
+		ospath.write_file(filename .. '.md5', md5Contents)
 	end
 end
 
@@ -239,7 +241,7 @@ end
 
 function ReadTargetInfo(outPath, platform, config)
 	local targetInfoFilename = _getTargetInfoFilename(outPath, platform, config)
-	if os.path.exists(targetInfoFilename) then
+	if ospath.exists(targetInfoFilename) then
 		local chunk, message = loadfile(targetInfoFilename)
 		if not chunk then
 			error('* Error parsing ' .. targetInfoFilename .. '.\n\n' .. message)
@@ -253,15 +255,15 @@ end
 function CreateTargetInfoFiles(outPath)
 	function DumpConfig(platform, config)
 		local targetInfoFilename = _getTargetInfoFilename(outPath, platform, config)
-		os.remove(targetInfoFilename)
+		ospath.remove(targetInfoFilename)
 
 		local collectConfigurationArgs =
 		{
 			jamExePath,
-			os.path.escape('-C' .. destinationRootPath),
-			os.path.escape('-sJAMFILE_ROOT=' .. sourceRootPath),
-			os.path.escape('-sJAMFILE=' .. outPath .. 'DumpJamTargetInfo.jam'),
-			os.path.escape('-sTARGETINFO_LOCATE=' .. outPath .. '_targetinfo_/'),
+			ospath.escape('-C' .. destinationRootPath),
+			ospath.escape('-sJAMFILE_ROOT=' .. sourceRootPath),
+			ospath.escape('-sJAMFILE=' .. outPath .. 'DumpJamTargetInfo.jam'),
+			ospath.escape('-sTARGETINFO_LOCATE=' .. outPath .. '_targetinfo_/'),
 			'-sPLATFORM=' .. platform,
 			'-sCONFIG=' .. config,
 			'-d0',
@@ -270,7 +272,7 @@ function CreateTargetInfoFiles(outPath)
 
 		print('Reading platform [' .. platform .. '] and config [' .. config .. ']...')
 --		print(table.concat(collectConfigurationArgs, ' '))
-		for line in ex.lines(collectConfigurationArgs) do
+		for line in osprocess.lines(collectConfigurationArgs) do
 			print(line)
 		end
 --		print(p, i, o)
@@ -514,8 +516,8 @@ end
 
 
 function DumpProject(project)
-	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_', project.RelativePath) .. '/'
-	os.mkdir(outPath)
+	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_', project.RelativePath) .. '/'
+	ospath.mkdir(outPath)
 
 	local exporter = Exporters[opts.gen]
 	local projectExporter = exporter.ProjectExporter(project.Name, exporter.Options)
@@ -558,7 +560,7 @@ end
 
 
 function DumpWorkspace(workspace)
-	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
+	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 
 	-- Write the !BuildWorkspace project
 	local exporter = Exporters[opts.gen]
@@ -578,7 +580,7 @@ function DumpWorkspace(workspace)
 	Projects[updateWorkspaceName].Sources =
 	{
 		jamPath:gsub('\\', '/') .. '/Jambase.jam',
-		os.path.combine(destinationRootPath, 'customsettings.jam'),
+		ospath.join(destinationRootPath, 'customsettings.jam'),
 	}
 	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
 	Projects[updateWorkspaceName].Name = updateWorkspaceName
@@ -588,9 +590,9 @@ function DumpWorkspace(workspace)
 	if uname == 'windows' then
 		updateWorkspaceCommandLines =
 		{
-			os.path.make_backslash( '"' .. outPath .. 'updateworkspace.bat' .. '"' ),
-			os.path.make_backslash( '"' .. outPath .. 'updateworkspace.bat' .. '"' ),
-			os.path.make_backslash( '"' .. outPath .. 'updateworkspace.bat' .. '"' ),
+			ospath.make_backslash( '"' .. outPath .. 'updateworkspace.bat' .. '"' ),
+			ospath.make_backslash( '"' .. outPath .. 'updateworkspace.bat' .. '"' ),
+			ospath.make_backslash( '"' .. outPath .. 'updateworkspace.bat' .. '"' ),
 		}
 	else
 		updateWorkspaceCommandLines =
@@ -677,7 +679,7 @@ function BuildProject()
 	end
 
 	print('Creating build environment...')
-	os.mkdir(destinationRootPath)
+	ospath.mkdir(destinationRootPath)
 
 	local exporter = Exporters[opts.gen]
 	opts.compiler = opts.compiler  or  opts.gen
@@ -688,7 +690,7 @@ function BuildProject()
 		locateTargetText = [[
 ALL_LOCATE_TARGET = "$(destinationRootPath:gsub('\\', '/'))$$(PLATFORM)-$$(CONFIG)" ;
 ]],
-		settingsFile = os.path.make_slash(os.path.combine(destinationRootPath, 'customsettings.jam')),
+		settingsFile = ospath.make_slash(ospath.join(destinationRootPath, 'customsettings.jam')),
 	}
 
 	---------------------------------------------------------------------------
@@ -708,8 +710,8 @@ include "$(settingsFile)" ;
 	---------------------------------------------------------------------------
 	-- Write the UserSettings.jam.
 	---------------------------------------------------------------------------
-	if not os.path.exists(locateTargetText.settingsFile) then
-		io.writeall(locateTargetText.settingsFile, [[
+	if not ospath.exists(locateTargetText.settingsFile) then
+		ospath.write_file(locateTargetText.settingsFile, [[
 # This file is included before any other Jamfiles.
 #
 # Enter your own settings here.
@@ -744,7 +746,7 @@ include "$(settingsFile)" ;
 		end
 	end
 
-	io.writeall(destinationRootPath .. 'Jamfile.jam', table.concat(jamfileText))
+	ospath.write_file(destinationRootPath .. 'Jamfile.jam', table.concat(jamfileText))
 
 	---------------------------------------------------------------------------
 	-- Write the generated Jambase.jam.
@@ -827,51 +829,51 @@ include "$(settingsFile)" ;
 
 include "$(jamPath)Jambase.jam" ;
 ]], exporter.Options, _G)
-		io.writeall(destinationRootPath .. 'Jambase.jam', table.concat(jambaseText))
+		ospath.write_file(destinationRootPath .. 'Jambase.jam', table.concat(jambaseText))
 	end
 
 	WriteJambase()
 
 	if uname == 'windows' then
 		-- Write jam.bat.
-		jamScript = os.path.make_backslash(os.path.combine(destinationRootPath, 'jam.bat'))
-		io.writeall(jamScript,
-			'@' .. (opts.jamexepath or jamExePath) .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' %*\n')
+		jamScript = ospath.make_backslash(ospath.join(destinationRootPath, 'jam.bat'))
+		ospath.write_file(jamScript,
+			'@' .. (opts.jamexepath or jamExePath) .. ' ' .. ospath.escape("-C" .. destinationRootPath) .. ' %*\n')
 
 		-- Write updatebuildenvironment.bat.
-		io.writeall(os.path.combine(destinationRootPath, 'updatebuildenvironment.bat'),
+		ospath.write_file(ospath.join(destinationRootPath, 'updatebuildenvironment.bat'),
 				("@%s --workspace --config=%s %s %s\n"):format(
-				os.path.escape(jamScript),
-				os.path.escape(destinationRootPath .. '/buildenvironment.config'),
-				os.path.escape(sourceJamfilePath),
-				os.path.escape(destinationRootPath)))
+				ospath.escape(jamScript),
+				ospath.escape(destinationRootPath .. '/buildenvironment.config'),
+				ospath.escape(sourceJamfilePath),
+				ospath.escape(destinationRootPath)))
 	else
 		-- Write jam shell script.
-		jamScript = os.path.combine(destinationRootPath, 'jam')
-		io.writeall(jamScript,
+		jamScript = ospath.join(destinationRootPath, 'jam')
+		ospath.write_file(jamScript,
 				'#!/bin/sh\n' ..
-				(opts.jamexepath or jamExePath) .. ' ' .. os.path.escape("-C" .. destinationRootPath) .. ' $*\n')
+				(opts.jamexepath or jamExePath) .. ' ' .. ospath.escape("-C" .. destinationRootPath) .. ' $*\n')
 		os.chmod(jamScript, 777)
 
 		-- Write updatebuildenvironment.sh.
-		local updatebuildenvironment = os.path.combine(destinationRootPath, 'updatebuildenvironment')
-		io.writeall(updatebuildenvironment,
+		local updatebuildenvironment = ospath.join(destinationRootPath, 'updatebuildenvironment')
+		ospath.write_file(updatebuildenvironment,
 				("#!/bin/sh\n%s --workspace --config=%s %s %s\n"):format(
-				os.path.escape(jamScript),
-				os.path.escape(destinationRootPath .. '/buildenvironment.config'),
-				os.path.escape(sourceJamfilePath),
-				os.path.escape(destinationRootPath)))
+				ospath.escape(jamScript),
+				ospath.escape(destinationRootPath .. '/buildenvironment.config'),
+				ospath.escape(sourceJamfilePath),
+				ospath.escape(destinationRootPath)))
 		os.chmod(updatebuildenvironment, 777)
 	end
 
 	if opts.gen ~= 'none' then
-		local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
-		os.mkdir(outPath)
+		local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
+		ospath.mkdir(outPath)
 
 		---------------------------------------------------------------------------
 		-- Write the generated DumpJamTargetInfo.jam.
 		---------------------------------------------------------------------------
-		io.writeall(outPath .. 'DumpJamTargetInfo.jam', expand([[
+		ospath.write_file(outPath .. 'DumpJamTargetInfo.jam', expand([[
 $(locateTargetText)
 __JAM_SCRIPTS_PATH = "$(scriptPath)" ;
 include "$(scriptPath)ide/$(gen).jam" ;
@@ -889,20 +891,20 @@ include "$(scriptPath)DumpJamTargetInfo.jam" ;
 
 		if uname == 'windows' then
 			-- Write updateworkspace.bat.
-			io.writeall(outPath .. 'updateworkspace.bat',
+			ospath.write_file(outPath .. 'updateworkspace.bat',
 					("@%s --workspace --gen=%s --config=%s %s %s\n"):format(
-					os.path.escape(jamScript), opts.gen,
-					os.path.escape(destinationRootPath .. '/buildenvironment.config'),
-					os.path.escape(sourceJamfilePath),
-					os.path.escape(destinationRootPath)))
+					ospath.escape(jamScript), opts.gen,
+					ospath.escape(destinationRootPath .. '/buildenvironment.config'),
+					ospath.escape(sourceJamfilePath),
+					ospath.escape(destinationRootPath)))
 		else
 			-- Write updateworkspace.sh.
-			io.writeall(outPath .. 'updateworkspace',
+			ospath.write_file(outPath .. 'updateworkspace',
 					("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s %s\n"):format(
-					os.path.escape(jamScript), opts.gen,
-					os.path.escape(destinationRootPath .. '/buildenvironment.config'),
-					os.path.escape(sourceJamfilePath),
-					os.path.escape(destinationRootPath)))
+					ospath.escape(jamScript), opts.gen,
+					ospath.escape(destinationRootPath .. '/buildenvironment.config'),
+					ospath.escape(sourceJamfilePath),
+					ospath.escape(destinationRootPath)))
 			os.chmod(outPath .. 'updateworkspace', 777)
 		end
 
@@ -910,7 +912,7 @@ include "$(scriptPath)DumpJamTargetInfo.jam" ;
 		exporter.Initialize()
 
 		-- Iterate all the workspaces.
-		local outWorkspacePath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
+		local outWorkspacePath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 		for _, workspace in pairs(Workspaces) do
 			if workspace.Export == nil  or  workspace.Export == true then
 				-- Rid ourselves of duplicates.
@@ -965,15 +967,15 @@ include "$(scriptPath)DumpJamTargetInfo.jam" ;
 	end
 
 	-- Write buildenvironment.config.
-	LuaDumpObject(destinationRootPath .. 'buildenvironment.config', 'Config', Config)
+	prettydump.dumpascii(destinationRootPath .. 'buildenvironment.config', 'Config', Config)
 
 	if opts.gen ~= 'none' then
 		-- This can fail on Windows 7 with TCC 10.00.76.  Put it at the end, so the rest of
 		-- the process finishes.
 		if opts.gui then
-			local outWorkspacePath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
+			local outWorkspacePath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 			if OS == "NT" then
-				os.execute('explorer "' .. os.path.make_backslash(outWorkspacePath) .. '"')
+				os.execute('explorer "' .. ospath.make_backslash(outWorkspacePath) .. '"')
 			end
 		end
 	end
@@ -983,14 +985,14 @@ end
 ProcessCommandLine()
 
 if opts.jamexepath then
-	jamExePathNoQuotes = os.path.combine(opts.jamexepath)
+	jamExePathNoQuotes = ospath.join(opts.jamexepath)
 else
 	jamExePathNoQuotes = JAM_EXECUTABLE
 end
-jamExePath = os.path.escape(jamExePathNoQuotes)
+jamExePath = ospath.escape(jamExePathNoQuotes)
 
 -- Turn the source code root into an absolute path based on the current working directory.
-sourceJamfilePath = os.path.simplify(os.path.make_absolute(nonOpts[1]))
+sourceJamfilePath = ospath.simplify(ospath.make_absolute(nonOpts[1]))
 sourceRootPath, sourceJamfile = sourceJamfilePath:match('(.+/)(.*)')
 if not sourceRootPath or not sourceJamfile then
 	sourceRootPath = sourceJamfilePath
@@ -1007,19 +1009,21 @@ Config.JambaseFlags = JambaseFlags
 Config.JamfileFlags = JamfileFlags
 
 -- Do the same with the destination.
-destinationRootPath = os.path.simplify(os.path.add_slash(os.path.make_absolute(nonOpts[2] or '.')))
+destinationRootPath = ospath.simplify(ospath.add_slash(ospath.make_absolute(nonOpts[2] or '.')))
 
 -- Load the config file.
 if opts.config then
-	local chunk, err = loadfile(opts.config)
+	local configFile = {}
+	local chunk, err = loadfile(opts.config, 'bt', configFile)
 	if not chunk then
 		print('JamToWorkspace: Unable to load config file [' .. opts.config .. '].')
 		print(err)
 		os.exit(-1)
 	end
 
-	local configFile = {}
-	setfenv(chunk, configFile)
+	if setfenv then
+		setfenv(chunk, configFile)
+	end
 
 	local ret, err = pcall(chunk)
 	if not ret then

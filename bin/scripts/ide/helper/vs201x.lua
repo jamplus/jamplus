@@ -128,8 +128,8 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	-- Write Configurations.
 	for platformName in ivalues(Config.Platforms) do
 		for configName in ivalues(Config.Configurations) do
-			local jamCommandLine = os.path.escape(os.path.make_backslash(jamScript)) .. ' ' ..
-					os.path.escape('-C' .. destinationRootPath) .. ' ' ..
+			local jamCommandLine = ospath.escape(ospath.make_backslash(jamScript)) .. ' ' ..
+					ospath.escape('-C' .. destinationRootPath) .. ' ' ..
 					'-sPLATFORM=' .. platformName .. ' ' ..
 					'-sCONFIG=' .. configName
 
@@ -591,7 +591,7 @@ end
 
 
 function VisualStudio201xInitialize()
-	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
+	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 	local chunk = loadfile(outPath .. 'VSProjectExportInfo.lua')
 	if chunk then chunk() end
 	if not ProjectExportInfo then
@@ -601,8 +601,8 @@ end
 
 
 function VisualStudio201xShutdown()
-	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
-	LuaDumpObject(outPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
+	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
+	prettydump.dumpascii(outPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
 end
 
 

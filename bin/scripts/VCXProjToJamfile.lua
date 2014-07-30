@@ -1,6 +1,6 @@
 local getopt = require 'getopt'
 local xmlize = require 'xmlize'
-require 'ex'
+local ospath = require 'ospath'
 
 local options = getopt.makeOptions {}
 local nonOpts, opts, errors = getopt.getOpt(arg, options)
@@ -15,7 +15,7 @@ package.path = (debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. "/?.
 local foldertree = require 'FolderTree'
 local WriteJamfileHelper = require 'WriteJamfileHelper'
 
-local vcxproj = io.readall(nonOpts[1])
+local vcxproj = ospath.read_file(nonOpts[1])
 if not vcxproj then
 	print('VCXProjToJamfile: * Error: Unable to read ' .. nonOpts[1] .. '.')
 	os.exit(-1)
@@ -31,7 +31,7 @@ local function RecurseItemGroup(files, itemGroupRoot)
 			if key ~= 'Filter' then
 				local value = entry[key][orderTable[2]]
 				local attr = value['@']
-				local filename = os.path.make_slash(attr.Include)
+				local filename = ospath.make_slash(attr.Include)
 
 				local filter = value['#'].Filter
 				if filter then
@@ -89,7 +89,7 @@ end
 files.folder = ''
 SourceGroups = RecurseFilters({ files } , '')
 
-local target = os.path.remove_directory(os.path.remove_extension(nonOpts[1]))
+local target = ospath.remove_directory(ospath.remove_extension(nonOpts[1]))
 
 if not WriteJamfileHelper.Write(nonOpts[2], target, SourceGroups) then
 	print('VCProjToJamfile: * Error: Unable to write ' .. nonOpts[2] .. '.')

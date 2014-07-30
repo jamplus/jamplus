@@ -335,10 +335,11 @@ if $(LUA_BIN)
 	if $(OS) = NT
 	{
 		LUA_SRCS =
-				lua/ex.lua
 				lua/expand.lua
 				lua/getopt.lua
 				lua/lanes.lua
+				lua/ospath.lua
+				lua/osprocess.lua
 				lua/xmlize.lua
 				lua/lxp/lom.lua
 		;
@@ -347,14 +348,15 @@ if $(LUA_BIN)
 		{
 			LUA_SRCS +=
 				lua.debug.exe
-				lua5.1.debug.dll
-				lua51_debug.dll
+				lua52_debug.dll
 				lua-tilde.debug.dll
-				modules/ex.debug.dll
 				modules/filefind.debug.dll
 				modules/lanes/core.debug.dll
 				modules/lxp.debug.dll
 				modules/md5.debug.dll
+				modules/ospath.debug.dll
+				modules/osprocess.debug.dll
+				modules/prettydump.debug.dll
 				modules/struct.debug.dll
 				modules/uuid.debug.dll
 				modules/ziparchive.debug.dll
@@ -364,14 +366,15 @@ if $(LUA_BIN)
 		{
 			LUA_SRCS +=
 				lua.exe
-				lua5.1.dll
-				lua51.dll
+				lua52.dll
 				lua-tilde.dll
-				modules/ex.dll
 				modules/filefind.dll
 				modules/lanes/core.dll
 				modules/lxp.dll
 				modules/md5.dll
+				modules/ospath.dll
+				modules/osprocess.dll
+				modules/prettydump.dll
 				modules/struct.dll
 				modules/uuid.dll
 				modules/ziparchive.dll
@@ -388,42 +391,47 @@ if $(LUA_BIN)
 		}
 
 		LUA_SRCS =
-				share/lua/5.1/ex.lua
-				share/lua/5.1/expand.lua
-				share/lua/5.1/getopt.lua
-				share/lua/5.1/lanes.lua
-				share/lua/5.1/xmlize.lua
-				share/lua/5.1/lxp/lom.lua
+				share/lua/5.2/expand.lua
+				share/lua/5.2/getopt.lua
+				share/lua/5.2/lanes.lua
+				share/lua/5.2/ospath.lua
+				share/lua/5.2/osprocess.lua
+				share/lua/5.2/xmlize.lua
+				share/lua/5.2/lxp/lom.lua
 		;
 
 		if $(CONFIG) = debug
 		{
 			LUA_SRCS +=
 				lua.debug
-				liblua51_debug.so
-				lib/lua/5.1/ex.debug.$(MODULE_EXT)
-				lib/lua/5.1/filefind.debug.$(MODULE_EXT)
-				lib/lua/5.1/lanes/core.debug.$(MODULE_EXT)
-				lib/lua/5.1/lxp.debug.$(MODULE_EXT)
-				lib/lua/5.1/md5.debug.$(MODULE_EXT)
-				lib/lua/5.1/struct.debug.$(MODULE_EXT)
-				lib/lua/5.1/uuid.debug.$(MODULE_EXT)
-				lib/lua/5.1/ziparchive.debug.$(MODULE_EXT)
+				liblua52_debug.so
+				lib/lua/5.2/filefind.debug.$(MODULE_EXT)
+				lib/lua/5.2/lanes/core.debug.$(MODULE_EXT)
+				lib/lua/5.2/lxp.debug.$(MODULE_EXT)
+				lib/lua/5.2/md5.debug.$(MODULE_EXT)
+				lib/lua/5.2/ospath.debug.$(MODULE_EXT)
+				lib/lua/5.2/osprocess.debug.$(MODULE_EXT)
+				lib/lua/5.2/struct.debug.$(MODULE_EXT)
+				lib/lua/5.2/prettydump.debug.$(MODULE_EXT)
+				lib/lua/5.2/uuid.debug.$(MODULE_EXT)
+				lib/lua/5.2/ziparchive.debug.$(MODULE_EXT)
 			;
 		}
 		else
 		{
 			LUA_SRCS +=
 				lua
-				liblua51.so
-				lib/lua/5.1/ex.$(MODULE_EXT)
-				lib/lua/5.1/filefind.$(MODULE_EXT)
-				lib/lua/5.1/lanes/core.$(MODULE_EXT)
-				lib/lua/5.1/lxp.$(MODULE_EXT)
-				lib/lua/5.1/md5.$(MODULE_EXT)
-				lib/lua/5.1/struct.$(MODULE_EXT)
-				lib/lua/5.1/uuid.$(MODULE_EXT)
-				lib/lua/5.1/ziparchive.$(MODULE_EXT)
+				liblua52.so
+				lib/lua/5.2/filefind.$(MODULE_EXT)
+				lib/lua/5.2/lanes/core.$(MODULE_EXT)
+				lib/lua/5.2/lxp.$(MODULE_EXT)
+				lib/lua/5.2/md5.$(MODULE_EXT)
+				lib/lua/5.2/ospath.$(MODULE_EXT)
+				lib/lua/5.2/osprocess.$(MODULE_EXT)
+				lib/lua/5.2/prettydump.$(MODULE_EXT)
+				lib/lua/5.2/struct.$(MODULE_EXT)
+				lib/lua/5.2/uuid.$(MODULE_EXT)
+				lib/lua/5.2/ziparchive.$(MODULE_EXT)
 			;
 		}
 	}

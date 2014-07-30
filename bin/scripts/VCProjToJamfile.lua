@@ -1,8 +1,8 @@
-require 'getopt'
-require 'xmlize'
-require 'ex'
+local getopt = require 'getopt'
+local xmlize = require 'xmlize'
+local ospath = require 'ospath'
 
-local options = Options {}
+local options = getopt.makeOptions{}
 local nonOpts, opts, errors = getopt.getOpt(arg, options)
 if #errors > 0  or  #nonOpts ~= 2 then
 	print(table.concat (errors, "\n") .. "\n" ..
@@ -14,7 +14,7 @@ end
 package.path = (debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. "/?.lua;" .. package.path
 require 'WriteJamfileHelper'
 
-local vcproj = io.readall(nonOpts[1])
+local vcproj = path.read_file(nonOpts[1])
 if not vcproj then
 	print('VCProjToJamfile: * Error: Unable to read ' .. nonOpts[1] .. '.')
 	os.exit(-1)

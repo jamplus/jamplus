@@ -2,7 +2,7 @@ local md5 = require 'md5'
 local struct = require 'struct'
 
 function md5png(filename)
-	print("md5png: Calculating " .. filename .. "...")
+	jam_print("md5png: Calculating " .. filename .. "...")
 	local file = io.open(filename, 'rb')
 	if not file then return nil end
 

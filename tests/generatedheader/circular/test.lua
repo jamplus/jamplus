@@ -55,8 +55,8 @@ function Test()
 ]]
 		TestPattern(pattern2, RunJam{ 'foo' })
 	
-		os.sleep(1.0)
-		os.touch('generated.h')
+		osprocess.sleep(1.0)
+		ospath.touch('generated.h')
 
 		local pattern3 = [[
 *** found 11 target(s)...
@@ -105,8 +105,8 @@ function Test()
 ]]
 		TestPattern(pattern2, RunJam{ 'foo' })
 
-		os.sleep(1.0)
-		os.touch('generated.h')
+		osprocess.sleep(1.0)
+		ospath.touch('generated.h')
 
 		local pattern3 = [[
 *** found 11 target(s)...

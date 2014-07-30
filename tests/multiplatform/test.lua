@@ -16,7 +16,7 @@ function Test()
 	{
 	}
 
-	os.remove('.jamcache')
+	ospath.remove('.jamcache')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -125,7 +125,7 @@ Using win32
 This is a Win32 build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, ex.collectlines{'win32-release\\platform\\platform.release.exe'})
+		TestPattern(pattern2, osprocess.collectlines{'win32-release\\platform\\platform.release.exe'})
 
 		pattern3 = [[
 *** found 22 target(s)...
@@ -137,7 +137,7 @@ Using macosx
 This is a Mac OS X build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, ex.collectlines{'./macosx32-release/platform/platform.release'})
+		TestPattern(pattern2, osprocess.collectlines{'./macosx32-release/platform/platform.release'})
 
 		pattern3 = [[
 *** found 12 target(s)...
@@ -149,7 +149,7 @@ Using linux
 This is a Linux build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, ex.collectlines{'./platform.release'})
+		TestPattern(pattern2, osprocess.collectlines{'./platform.release'})
 
 		pattern3 = [[
 *** found 11 target(s)...
@@ -163,7 +163,7 @@ RELEASE: What's up?!
 	TestFiles(pass1Files)
 
 	---------------------------------------------------------------------------
-	os.remove('.jamcache')
+	ospath.remove('.jamcache')
 	RunJam{ 'clean' }
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)

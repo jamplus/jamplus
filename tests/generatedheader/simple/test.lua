@@ -53,8 +53,8 @@ function Test()
 ]]
 		TestPattern(pattern2, RunJam())
 	
-		os.sleep(1.0)
-		os.touch('test.h')
+		osprocess.sleep(1.0)
+		ospath.touch('test.h')
 
 		local pattern3 = [[
 *** found 21 target(s)...
@@ -103,8 +103,8 @@ function Test()
 ]]
 		TestPattern(pattern2, RunJam())
 
-		os.sleep(1.0)
-		os.touch('test.h')
+		osprocess.sleep(1.0)
+		ospath.touch('test.h')
 
 		local pattern3 = [[
 *** found 11 target(s)...

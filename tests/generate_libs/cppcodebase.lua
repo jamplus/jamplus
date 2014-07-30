@@ -1,12 +1,12 @@
-require 'ex'
+local ospath = require 'ospath'
 
 module('cppcodebase', package.seeall)
 
 function SetDir(dir)
-    if not os.path.exists(dir) then
-        os.mkdir(dir .. '/')
+    if not ospath.exists(dir) then
+        ospath.mkdir(dir .. '/')
 	end
-    os.chdir(dir)
+    ospath.chdir(dir)
 end
 
 
@@ -87,7 +87,7 @@ function CreateLibrary(lib_number, classes, internal_includes, external_includes
         CreateHeader(lib, classname)
         CreateCPP(lib, classname, lib_number, classes, internal_includes, external_includes)
 	end
-    os.chdir("..")
+    ospath.chdir("..")
 end
 
 

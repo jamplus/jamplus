@@ -12,7 +12,7 @@ function Test()
 	{
 	}
 
-	os.remove('.depcache')
+	ospath.remove('.depcache')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -121,6 +121,6 @@ WriteAlternateOutput alternate_output2.dat
 	}
 	TestFiles(cleanFiles)
 	TestDirectories(originalDirs)
-	os.remove('.depcache')
+	ospath.remove('.depcache')
 end
 

@@ -5,8 +5,7 @@ rule SleepThenTouch
 
 actions lua SleepThenTouch
 {
-    require 'ex'
-    os.sleep(5)
+    require 'osprocess'.sleep(5)
 	print([[Writing $(<)]])
     local file = io.open([[$(<)]], 'wb')
 	print(file)

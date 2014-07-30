@@ -17,8 +17,8 @@ function Test()
 	{
 	}
 
-	os.remove('cache/')
-	os.remove('.depcache')
+	ospath.remove('cache/')
+	ospath.remove('.depcache')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -27,12 +27,12 @@ function Test()
 	local pattern = [[
 *** found 11 target(s)...
 *** updating 5 target(s)...
-!OOO!md5png: Calculating file1.png...
+md5png: Calculating file1.png...
 @ ConvertImageHelper file1.image
 !NEXT!Caching file1.image
 @ ConvertImageHelper file2.image
 !NEXT!@ ConvertImageHelper file3.image
-!OOO!md5zip: Calculating file4.zip...
+md5zip: Calculating file4.zip...
 !NEXT!@ ConvertImageHelper file4.image
 !NEXT!Caching file4.image
 @ ConvertImageHelper file5.image
@@ -124,8 +124,8 @@ Using cached file5.image
 	TestFiles(pass1Files)
 	TestDirectories(newDirectories)
 
-	os.sleep(1.0)
-	os.touch('file3.png')
+	osprocess.sleep(1.0)
+	ospath.touch('file3.png')
 
 	local pattern3 = [[
 *** found 11 target(s)...
@@ -135,8 +135,8 @@ file3.image is already the proper cached target.
 ]]
 	TestPattern(pattern3, RunJam())
 
-	os.remove('cache/')
-	os.remove('.depcache')
+	ospath.remove('cache/')
+	ospath.remove('.depcache')
 	RunJam{ 'clean' }
 
 	TestDirectories(originalDirs)

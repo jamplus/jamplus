@@ -136,8 +136,8 @@ function Test()
 		TestPattern(pattern2, RunJam())
 	end
 	
-	os.sleep(1.0)
-	os.touch('common/print.h')
+	osprocess.sleep(1.0)
+	ospath.touch('common/print.h')
 
 	if Platform == 'win32' then
 		local pattern3 = [[

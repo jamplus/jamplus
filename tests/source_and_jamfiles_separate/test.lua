@@ -122,8 +122,8 @@ function Test()
 
 	---------------------------------------------------------------------------
 	do
-		os.sleep(1.0)
-		os.touch('src/precomp.h')
+		osprocess.sleep(1.0)
+		ospath.touch('src/precomp.h')
 
 		if Platform == 'win32' then
 			pattern = [[
@@ -170,8 +170,8 @@ function Test()
 
 	---------------------------------------------------------------------------
 	do
-		os.sleep(1.0)
-		os.touch('src/createprecomp.c')
+		osprocess.sleep(1.0)
+		ospath.touch('src/createprecomp.c')
 
 		if Platform == 'win32' then
 			pattern = [[

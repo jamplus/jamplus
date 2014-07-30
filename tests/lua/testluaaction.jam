@@ -1,6 +1,6 @@
 actions lua RunLuaScript
 {
-	require 'ex'; os.sleep($(SLEEP)); print([[$(TEXT)]])
+	process = require 'osprocess'; process.sleep($(SLEEP)); jam_print([[$(TEXT)]])
 }
 
 rule DoLua TARGET : SOURCES : SLEEP : TEXT

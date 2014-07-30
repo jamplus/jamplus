@@ -152,8 +152,8 @@ function Test()
 
 	---------------------------------------------------------------------------
 	do
-		os.sleep(1.0)
-		os.touch('lib-a/add.h')
+		osprocess.sleep(1.0)
+		ospath.touch('lib-a/add.h')
 
 		TestPattern(patternC, RunJam{})
 		TestDirectories(dirs)

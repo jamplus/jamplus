@@ -187,8 +187,8 @@ function Test()
 
 	---------------------------------------------------------------------------
 	do
-		os.sleep(1.0)
-		os.touch('lib-c/add.h')
+		osprocess.sleep(1.0)
+		ospath.touch('lib-c/add.h')
 
 		if Platform == 'win32' then
 			pattern = [[
@@ -235,8 +235,8 @@ function Test()
 
 	---------------------------------------------------------------------------
 	do
-		os.sleep(1.0)
-		os.touch('lib-c/add.c')
+		osprocess.sleep(1.0)
+		ospath.touch('lib-c/add.c')
 
 		if Platform == 'win32' then
 			pattern = [[
@@ -282,8 +282,8 @@ function Test()
 
 	---------------------------------------------------------------------------
 	do
-		os.sleep(1.0)
-		os.touch('slib-a/slib-a.c')
+		osprocess.sleep(1.0)
+		ospath.touch('slib-a/slib-a.c')
 
 		if Platform == 'win32' then
 			pattern = [[

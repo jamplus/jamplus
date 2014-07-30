@@ -10,7 +10,7 @@ function Test()
 
 	do
 		-- Test for a clean directory.
-		os.remove('.depcache')
+		ospath.remove('.depcache')
 		RunJam{ 'clean' }
 		TestDirectories(originalDirs)
 		TestFiles(originalFiles)
@@ -79,7 +79,7 @@ Executing test action for 1
 
 	---------------------------------------------------------------------------
 	RunJam{ 'clean' }
-	os.remove('.depcache')
+	ospath.remove('.depcache')
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
 end

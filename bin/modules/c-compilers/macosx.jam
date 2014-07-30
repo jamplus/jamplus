@@ -1053,11 +1053,11 @@ if $(NT) {
 
 actions lua C._BundleArchive
 {
-	require 'ex'
+	local ospath = require 'ospath'
 	local filefind = require 'filefind'
 	local filelist = {}
-	local bundlePath = os.path.remove_slash([[$(BUNDLE_PATH)]])
-	local bundleName = os.path.get_filename(bundlePath)
+	local bundlePath = ospath.remove_slash([[$(BUNDLE_PATH)]])
+	local bundleName = ospath.get_filename(bundlePath)
 	for entry in filefind.glob(bundlePath .. '/**') do
 		filelist[#filelist + 1] = {
 			EntryName = 'Payload/' .. bundleName .. '/' .. entry.filename:sub(#bundlePath + 2),
