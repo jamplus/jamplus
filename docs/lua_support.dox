@@ -58,8 +58,8 @@ Using the new <tt>lua</tt> modifier for an action, Lua script can be run in a th
 \code
 actions lua RunLuaScript
 {
-    require 'ex'
-    ex.Sleep($(SLEEP))
+    osprocess = require 'osprocess'
+    osprocess.sleep($(SLEEP))
     print($(TEXT))
 }
 \endcode

@@ -23,14 +23,14 @@ In order to build JamPlus using the Visual C++ compiler, do the following:
 
 <tt>jmake</tt> selects the most recent Visual Studio version available and uses that compiler to build the Jam executable.  When finished, the Jam executable will have been built as <tt>bin/win32/jam.exe</tt>
 
-Alternatively, Visual Studio 2012 and Visual Studio 2010 solutions are maintained.  Open <tt>src/jam.VS2012.sln</tt> to build within the IDE.  Note: When using the standard Visual Studio 2012 Release build, the Jam executable is nowhere near as fast as the command-line generated Link Time Code Generated version.
-
 To clean the Visual C++ build, run:
 
 \code
     cd src
     clean
 \endcode
+
+Visual Studio 2010, 2012, and 2013 solutions are maintained for easy debugging of Jam.  Open <tt>src/jam.VS201?.sln</tt> to build within the appropriate IDE.  Note: The Release build of the Jam executable built via the IDE is nowhere near as fast as the command-line generated Link Time Code Generated version.
 
 
 
@@ -68,39 +68,50 @@ When finished, the Jam executable will have been built as <tt>bin/linux32/jam</t
 
 \section build_luaplus Building and Copying the LuaPlus Binaries
 
-Grab the LuaPlus source code.  One way of doing so is by cloning the LuaPlus Git repository:
+The JamPlus Git repository has LuaPlus as a submodule residing at <tt>src/luaplus/</tt>.  To clone or update the repository, run the following command at the root of the JamPlus tree:
 
 \code
-    git clone http://git.luaplus.org/luaplus51-all.git
+    git submodule update --init
 \endcode
 
-Change directories into <tt>luaplus51-all</tt>.
-
-If you are building the JamPlus nextgen version, be sure to checkout the LuaPlus nextgen branch:
+Change directories into <tt>src/luaplus/</tt>.
 
 \code
-    git checkout nextgen
+    cd src
+    cd luaplus
 \endcode
 
 Build LuaPlus by running:
 
 \code
-    jam
+    # On Windows:
+    ..\..\bin\win32\jam.exe LUA_VERSION=lua52-luaplus
+
+    # On Linux:
+    ../../bin/linux32/jam LUA_VERSION=lua52-luaplus
+
+    # On Mac:
+    ../../bin/macosx32/jam LUA_VERSION=lua52-luaplus
 \endcode
 
-When finished a <tt>bin.compilers.platform/</tt> directory will have been created.  Set the <tt>LUA_BIN</tt> environment variable to point to the directory.
-
-On Windows, you would do so like:
+When finished a <tt>.build/bin.lua51-luaplus/bin.lua52-luaplus.COMPILER.PLATFORM/</tt> directory will have been created.  Set the <tt>LUA_BIN</tt> environment variable to point to the directory.
 
 \code
-    set LUA_BIN=d:/luaplus51-all/bin.vs2010.win32
+    # On Windows:
+    set LUA_BIN=d:/jamplus/src/luaplus/.build/bin.lua52-luaplus.COMPILER.PLATFORM
+
+    # On Linux:
+    export LUA_BIN=~/jamplus/src/luaplus/.build/bin.lua52-luaplus.COMPILER.PLATFORM
+
+    # On Mac:
+    export LUA_BIN=~/jamplus/src/luaplus/.build/bin.lua52-luaplus.COMPILER.PLATFORM
 \endcode
 
-In a Bash shell under Linux or Mac OS X, you would export:
+Change directories back to the <tt>jamplus/src/</tt> directory.
 
 \code
-    export LUA_BIN=~/luaplus51-all/bin.gcc.linux32
+    cd ..
 \endcode
 
-Change directories back to the <tt>jamplus/src/</tt> directory.  Run the appropriate <tt>jmake</tt>/<tt>make</tt> command again, and the LuaPlus binaries will be copied to the appropriate <tt>jamplus/bin/</tt> directory.
+Run the appropriate <tt>jmake</tt>/<tt>make</tt> command again, and the LuaPlus binaries will be copied to the appropriate <tt>jamplus/bin/</tt> directory.
 */
