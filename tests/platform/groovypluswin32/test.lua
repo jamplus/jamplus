@@ -9,13 +9,14 @@ function Test()
 		'test.lua',
 		'c-compilers/c-groovycompiler.jam',
 		'c-compilers/groovyplatform-autodetect.jam',
-		'c-compilers/groovyplatform-groovycompiler-debug.jam',
-		'c-compilers/groovyplatform-groovycompiler-release.jam',
+		'c-compilers/configs/groovyplatform-debug.jam',
+		'c-compilers/configs/groovyplatform-release.jam',
 	}
 
 	local originalDirs =
 	{
 		'c-compilers/',
+		'c-compilers/configs/',
 	}
 
 	RunJam{ 'PLATFORM=groovyplatform', 'CONFIG=release', 'clean' }
@@ -24,41 +25,48 @@ function Test()
 
 	---------------------------------------------------------------------------
 	local pattern = [[
-*** found 7 target(s)...
-*** updating 2 target(s)...
-@ C.CC <helloworld>helloworld.o
-@ C.Link <helloworld>helloworld.release.exe
-*** updated 2 target(s)...
+*** found 10 target(s)...
+*** updating 4 target(s)...
+@ C.groovycompiler.CC <groovyplatform!release:helloworld>helloworld.o
+@ C.groovycompiler.Link <groovyplatform!release:helloworld>helloworld.exe
+*** updated 4 target(s)...
 ]]
 
 	TestPattern(pattern, RunJam{ 'PLATFORM=groovyplatform', 'CONFIG=release' })
 
-	local pass1Files =
+	local pass1Dirs =
 	{
-		'CreateJamVS2008Workspace.bat',
-		'CreateJamVS2008Workspace.config',
-		'Jamfile.jam',
-		'helloworld.c',
-		'helloworld.o',
-		'helloworld.release.exe',
-		'test.lua',
-		'c-compilers/c-groovycompiler.jam',
-		'c-compilers/groovyplatform-autodetect.jam',
-		'c-compilers/groovyplatform-groovycompiler-debug.jam',
-		'c-compilers/groovyplatform-groovycompiler-release.jam',
+		'c-compilers/',
+		'c-compilers/configs/',
+		'groovyplatform-release/',
+		'groovyplatform-release/helloworld/',
 	}
 
-	TestDirectories(originalDirs)
+	local pass1Files =
+	{
+		'c-compilers/c-groovycompiler.jam',
+		'c-compilers/configs/groovyplatform-debug.jam',
+		'c-compilers/configs/groovyplatform-release.jam',
+		'c-compilers/groovyplatform-autodetect.jam',
+		'CreateJamVS2008Workspace.bat',
+		'CreateJamVS2008Workspace.config',
+		'groovyplatform-release/helloworld/helloworld.o',
+		'groovyplatform-release/helloworld/helloworld.release.exe',
+		'helloworld.c',
+		'Jamfile.jam',
+	}
+
+	TestDirectories(pass1Dirs)
 	TestFiles(pass1Files)
 
 	---------------------------------------------------------------------------
 	local pattern2 = [[
-*** found 7 target(s)...
+*** found 10 target(s)...
 ]]
 	TestPattern(pattern2, RunJam{ 'PLATFORM=groovyplatform', 'CONFIG=release' })
-	TestDirectories(originalDirs)
+	TestDirectories(pass1Dirs)
 	TestFiles(pass1Files)
-
+	
 	---------------------------------------------------------------------------
 	RunJam{ 'PLATFORM=groovyplatform', 'CONFIG=release', 'clean' }
 	TestFiles(originalFiles)
@@ -66,7 +74,7 @@ function Test()
 
 	---------------------------------------------------------------------------
 	local pattern3 = [[
-!NEXT!* No supported build platform found on this computer.
+!NEXT!c-compilers/configs/badplatform-release.jam: No such file or directory
 ]]
 	TestPattern(pattern3, RunJam{ 'PLATFORM=badplatform' })
 	TestDirectories(originalDirs)
