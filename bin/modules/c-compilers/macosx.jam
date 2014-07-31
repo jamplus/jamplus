@@ -32,6 +32,8 @@ rule C.MacOSX_SDK SDK_VERSION {
 	local isysroot ;
 	local flags ;
 	local sdkroot ;
+	local architecture ;
+
 	switch $(SDK_PLATFORM) {
 		case macosx :
 			developerRoot = /Developer/SDKs ;
@@ -77,42 +79,42 @@ rule C.MacOSX_SDK SDK_VERSION {
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
-					flags += -arch armv6 ;
+					architecture = armv6 ;
 					sdkroot = iphoneos4.3 ;
 
 				case 5.0 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS5.0.sdk ;
-					flags += -arch armv6 ; 
+					architecture = armv6 ;
 					sdkroot = iphoneos5.0 ;
 
 				case 5.1 :
 					isysroot = @(../../SDKs/iPhoneOS5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
-					flags += -arch armv6 ; 
+					architecture = armv6 ;
 					sdkroot = iphoneos5.1 ;
 
 				case 6.0 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk ;
 					sdkroot = iphoneos6.0 ;
-					flags += -arch armv7 ;
+					architecture = armv7 ;
 
 				case 6.1 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
-					flags += -arch armv7s ;
+					architecture = armv7s ;
 
 				case 7.0 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
-					flags += -arch armv7s ;
+					architecture = armv7s ;
 
 				case 7.1 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk ;
 					sdkroot = iphoneos7.0 ;
-					flags += -arch armv7s ;
+					architecture = armv7s ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -157,8 +159,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
-			flags += -arch i386 ;
-			flags += -fvisibility=hidden ;
+			architecture = i386 ;
 
 		case ipadsimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
@@ -167,7 +168,6 @@ rule C.MacOSX_SDK SDK_VERSION {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
 					#flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 ;
-					flags += -arch i386 ;
 					sdkroot = iphoneos4.3 ;
 
 				case 5.0 :
@@ -200,8 +200,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
-			flags += -arch i386 ;
-			flags += -fvisibility=hidden ;
+			architecture = i386 ;
 
 		case ipad :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
@@ -241,8 +240,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
-			flags += -arch armv7 ; 
-			flags += -fvisibility=hidden ;
+			architecture = armv7 ;
 	}
 
 	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.AR:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
@@ -251,6 +249,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 	C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.LINK:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
 	C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = ;
 
+	C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(architecture) ;
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;	
 	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
@@ -258,12 +257,9 @@ rule C.MacOSX_SDK SDK_VERSION {
 
 	#flags += -gdwarf-2 ;
 
-	#C.Flags * : CC	: -isysroot $(isysroot) $(flags) ;
-	#C.Flags * : C++	: -isysroot $(isysroot) $(flags) ;
 	#C.Flags * : M	: -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch ;
 	#C.Flags * : MM	: -isysroot $(isysroot) $(flags) -fobjc-abi-version=2 -fobjc-legacy-dispatch ;
 	#C.LibFlags * : -syslibroot $(isysroot) ;
-	#C.LinkFlags * : -isysroot $(isysroot) $(flags) ;
 
 	if $(TARGETINFO_LOCATE) {
 		Contents += "Projects[ [[C.*]] ].XCODE_SDKROOT[ [[$(PLATFORM)]] ][ [[$(CONFIG)]] ] = [[$(sdkroot)]]
@@ -584,11 +580,13 @@ rule C.clang._MultiCppCompile_SetupFlags {
 	local sdkversion = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	sdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-	local cpu = $(C.ARCHITECTURE:E=armv6) ;
+	local architecture = $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	architecture ?= $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
 	local extraflags ;
 	if $(IOSBUILDENV_PATH) {
-		extraflags = -target $(cpu)-apple-ios$(sdkversion) ;
+		architecture ?= armv7 ;
+		extraflags = -target $(architecture)-apple-ios$(sdkversion) ;
 		if $(isysroot) {
 			extraflags += --sysroot $(isysroot:C) ;
 		}
@@ -597,8 +595,8 @@ rule C.clang._MultiCppCompile_SetupFlags {
 		extraflags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=$(noPeriodVersion)000 ;
 		extraflags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;    #"
 	} else {
-		extraflags += -isysroot $(isysroot:C) ;
-		extraflags += -arch $(cpu) ;
+		extraflags += "-isysroot $(isysroot:C)" ;
+		extraflags += "-arch $(architecture)" ;
 		switch $(PLATFORM) {
 			case macosx32 :
 				# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
@@ -635,25 +633,22 @@ rule C.clang._MultiCppCompile_SetupFlags {
 rule C.macosx._ApplicationFromObjects_LinkFlags {
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-	if $(isysroot) {
-		if $(IOSBUILDENV_PATH) {
-			linkFlags += -syslibroot $(isysroot:C) ;
-		} else {
-			linkFlags += -isysroot $(isysroot:C) ;
-		}
-	}
+
+	local architecture = $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	architecture ?= $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
 	if $(IOSBUILDENV_PATH) {
 		local sdkversion = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		sdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
+		linkFlags += "-syslibroot $(isysroot:C)" ;
 		linkFlags += -ios_version_min $(sdkversion) ;
 		linkFlags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;
 		linkFlags += -lSystem -lcrt1.o -lstdc++ ;
 		#linkFlags += -lSystem -lbundle1.o -lstdc++ ;
 	} else {
-		local cpu = $(C.ARCHITECTURE:E=armv6) ;
-		linkFlags += -arch $(cpu) ;
+		linkFlags += "-isysroot $(isysroot:C)" ;
+		linkFlags += "-arch $(architecture)" ;
 	}
 
 	if bundle in $(OPTIONS) {
@@ -693,12 +688,17 @@ rule C.clang._LibraryFromObjects_LibFlags {
 rule C.macosx._SharedLibraryFromObjects_LinkFlags {
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-	if $(isysroot) {
-		linkFlags += -syslibroot $(isysroot:C) ;
-	}
+
+	local architecture = $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	architecture ?= $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
 	if $(IOSBUILDENV_PATH) {
+		linkFlags += "-syslibroot $(isysroot:C)" ;
 		linkFlags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;
 		linkFlags += -lSystem -lcrt1.o -lstdc++ ;
+	} else {
+		linkFlags += "-isysroot $(isysroot:C)" ;
+		linkFlags += "-arch $(architecture)" ;
 	}
 
 	if module in $(OPTIONS) {
