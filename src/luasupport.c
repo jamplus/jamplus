@@ -17,6 +17,7 @@
 #else
 #include <dlfcn.h>
 #endif
+#include <stddef.h>
 
 /*
 @@ LUAI_BITSINT defines the number of bits in an int.
