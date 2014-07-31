@@ -712,7 +712,7 @@ int main( int argc, char **argv, char **arg_environ )
 		/* and add them to a variable called JAM_COMMAND_LINE_TARGETS. */
 		LIST* l = L0;
 		int n_targets = num_targets ? num_targets : 1;
-		const char** actual_targets = num_targets ? targets : &all;
+		const char** actual_targets = num_targets ? (const char**)targets : &all;
 		int i;
 
 		for ( i = 0; i < n_targets; ++i )

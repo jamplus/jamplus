@@ -24,7 +24,7 @@
 # include <stdio.h>
 # include <string.h>
 
-main( int argc, char **argv, char **envp )
+int main( int argc, char **argv, char **envp )
 {
 	char buf[ 1024 ];
 	FILE *fin;
