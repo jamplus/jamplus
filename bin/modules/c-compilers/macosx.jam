@@ -375,6 +375,9 @@ rule C._BundleInfoString KEY : VALUE {
 
 rule C.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
+	IPHONEOS_SDK_VERSION = $(IPHONEOS_SDK_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+	IOS_SDK_VERSION_MIN = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
 		C._BundleInfoString CFBundleDevelopmentRegion : en ;
 		C._BundleInfoString CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
