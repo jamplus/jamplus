@@ -731,9 +731,9 @@ void ls_lua_init()
 #endif
 #else
 #ifdef _DEBUG
-        strcat(fileName, "/lua/lua52_debug.so");
+        strcat(fileName, "/lua/liblua52_debug.so");
 #else
-        strcat(fileName, "/lua/lua52.so");
+        strcat(fileName, "/lua/liblua52.so");
 #endif
 #endif
         handle = ls_lua_loadlibrary(fileName);
