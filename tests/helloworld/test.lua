@@ -72,9 +72,9 @@ function Test()
 		local pattern = [[
 *** found 10 target(s)...
 *** updating 4 target(s)...
-@ C.gcc.CC <macosx32!release:helloworld>main.o 
-@ C.gcc.CC <macosx32!release:helloworld>file.o 
-@ C.gcc.Link <macosx32!release:helloworld>helloworld 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>main.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>file.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):helloworld>helloworld 
 *** updated 4 target(s)...
 ]]
 
@@ -109,8 +109,8 @@ function Test()
 		local pattern3 = [[
 *** found 10 target(s)...
 *** updating 2 target(s)...
-@ C.gcc.CC <macosx32!release:helloworld>file.o 
-@ C.gcc.Link <macosx32!release:helloworld>helloworld 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>file.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):helloworld>helloworld 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

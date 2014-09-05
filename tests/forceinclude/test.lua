@@ -83,14 +83,12 @@ function Test()
 		local pattern = [[
 *** found 18 target(s)...
 *** updating 9 target(s)...
-@ C.gcc.C++ <macosx32!release:project1>project1.o 
-@ C.gcc.C++ <macosx32!release:common>print.o 
-@ C.gcc.Archive <macosx32!release:common>common.a 
-!NEXT!@ C.gcc.Ranlib <macosx32!release:common>common.a 
-@ C.gcc.C++ <macosx32!release:libA>libA.o 
-@ C.gcc.Archive <macosx32!release:libA>libA.a 
-!NEXT!@ C.gcc.Ranlib <macosx32!release:libA>libA.a
-@ C.gcc.Link <macosx32!release:project1>project1
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>project1.o 
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):common>print.o 
+@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):common>common.a 
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libA>libA.o 
+@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):libA>libA.a 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1
 *** updated 9 target(s)...
 ]]
 
@@ -154,11 +152,10 @@ function Test()
 		local pattern3 = [[
 *** found 18 target(s)...
 *** updating 4 target(s)...
-@ C.gcc.C++ <macosx32!release:project1>project1.o 
-@ C.gcc.C++ <macosx32!release:libA>libA.o 
-@ C.gcc.Archive <macosx32!release:libA>libA.a 
-!NEXT!@ C.gcc.Ranlib <macosx32!release:libA>libA.a
-@ C.gcc.Link <macosx32!release:project1>project1
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>project1.o 
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libA>libA.o 
+@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):libA>libA.a 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1
 *** updated 4 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

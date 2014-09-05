@@ -10,13 +10,24 @@ WriteFile out2.txt ;
 Depends all : out2.txt ;
 Clean clean : out2.txt ;
 
-actions WriteExtraFiles {
-    if not exist "subdira/subdirb/subdirc/subdird" mkdir "subdira/subdirb/subdirc/subdird"
-    echo abc > subdira/extrafile.txt
-    echo abc > subdir1/junk.txt
-    echo abc > subdira/junk.txt
-    echo abc > subdira/subdirb/subdirc/subdird/junk.txt
-    echo abc > subdira/subdirb/subdirc/subdird/anotherjunk.txt
+if $(NT) {
+	actions WriteExtraFiles {
+		if not exist "subdira/subdirb/subdirc/subdird" mkdir "subdira/subdirb/subdirc/subdird"
+		echo abc > subdira/extrafile.txt
+		echo abc > subdir1/junk.txt
+		echo abc > subdira/junk.txt
+		echo abc > subdira/subdirb/subdirc/subdird/junk.txt
+		echo abc > subdira/subdirb/subdirc/subdird/anotherjunk.txt
+	}
+} else {
+	actions WriteExtraFiles {
+		mkdir "subdira/subdirb/subdirc/subdird"
+		echo abc > subdira/extrafile.txt
+		echo abc > subdir1/junk.txt
+		echo abc > subdira/junk.txt
+		echo abc > subdira/subdirb/subdirc/subdird/junk.txt
+		echo abc > subdira/subdirb/subdirc/subdird/anotherjunk.txt
+	}
 }
 
 WriteExtraFiles all ;

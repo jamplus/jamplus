@@ -62,35 +62,35 @@ Pass 3
 Pass 1 
 *** found 10 target(s)...
 *** updating 6 target(s)...
-@ WriteFile <macosx32!release:test>foo.cpp 
-@ C.gcc.C++ <macosx32!release:test>foo.o 
+@ WriteFile <$(PLATFORM_CONFIG):test>foo.cpp 
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):test>foo.o 
 *** updated 3 target(s)...
 Pass 2 
-*** found 21 target(s)...
-*** updating 11 target(s)...
-@ WriteFile <macosx32!release:test>foo.h 
-@ WriteFile <macosx32!release:test>main.cpp 
-@ C.gcc.C++ <macosx32!release:test>main.o 
-@ C.gcc.Link <macosx32!release:test>test
-*** updated 5 target(s)...
+*** found 11 target(s)...
+*** updating 4 target(s)...
+@ WriteFile <$(PLATFORM_CONFIG):test>foo.h 
+@ WriteFile <$(PLATFORM_CONFIG):test>main.cpp 
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):test>main.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
+*** updated 4 target(s)...
 Pass 3 
-*** found 31 target(s)...
+*** found 8 target(s)...
 ]]
 
 			pass1Dirs = {
-				'macosx32-release/',
-				'macosx32-release/test/',
+				'$(PLATFORM_CONFIG)/',
+				'$(PLATFORM_CONFIG)/test/',
 			}
 
 			pass1Files = {
 				'foo.h',
 				'Jamfile.jam',
 				'test.lua',
-				'macosx32-release/test/foo.cpp',
-				'macosx32-release/test/foo.o',
-				'macosx32-release/test/main.cpp',
-				'macosx32-release/test/main.o',
-				'macosx32-release/test/test.release',
+				'$(PLATFORM_CONFIG)/test/foo.cpp',
+				'$(PLATFORM_CONFIG)/test/foo.o',
+				'$(PLATFORM_CONFIG)/test/main.cpp',
+				'$(PLATFORM_CONFIG)/test/main.o',
+				'$(PLATFORM_CONFIG)/test/test.release',
 			}
 		end
 
@@ -123,11 +123,11 @@ Pass 3
 Pass 1
 *** found 4 target(s)...
 *** updating 1 target(s)...
-@ Clean <macosx32!release>clean:test
+@ Clean <$(PLATFORM_CONFIG)>clean:test
 *** updated 1 target(s)...
 Pass 2
 *** found 2 target(s)...
-@ Clean <macosx32!release>clean:test
+@ Clean <$(PLATFORM_CONFIG)>clean:test
 *** updated 1 target(s)...
 Pass 3
 *** found 2 target(s)...

@@ -109,12 +109,11 @@ function Test()
 		-- First build
 		local pattern = [[
 *** updating 7 target(s)...
-@ C.gcc.C++ <macosx32!release:project1>project1.o 
-@ C.gcc.C++ <macosx32!release:project1>adefine.o 
-@ C.gcc.C++ <macosx32!release:common>print.o 
-@ C.gcc.Archive <macosx32!release:common>common.a 
-!NEXT!@ C.gcc.Ranlib <macosx32!release:common>common.a 
-@ C.gcc.Link <macosx32!release:project1>project1 
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>project1.o 
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>adefine.o 
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):common>print.o 
+@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):common>common.a 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1 
 *** updated 7 target(s)...
 ]]
 
@@ -161,8 +160,8 @@ function Test()
 		local pattern3 = [[
 *** found 17 target(s)...
 *** updating 2 target(s)...
-@ C.gcc.C++ <macosx32!release:project1>project1.o 
-@ C.gcc.Link <macosx32!release:project1>project1 
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>project1.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
@@ -175,8 +174,8 @@ function Test()
 		local pattern4 = [[
 *** found 17 target(s)...
 *** updating 2 target(s)...
-@ C.gcc.C++ <macosx32!release:project1>adefine.o 
-@ C.gcc.Link <macosx32!release:project1>project1 
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>adefine.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern4, RunJam())

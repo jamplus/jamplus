@@ -74,10 +74,10 @@ file.c
 		local pattern = [[
 *** found 11 target(s)...
 *** updating 5 target(s)...
-@ C.gcc.CC <macosx32!release:helloworld>main.o 
-@ GenerateCFile <macosx32!release:helloworld>file.c 
-@ C.gcc.CC <macosx32!release:helloworld>file.o 
-@ C.gcc.Link <macosx32!release:helloworld>helloworld 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>main.o 
+@ GenerateCFile <$(PLATFORM_CONFIG):helloworld>file.c 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>file.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):helloworld>helloworld 
 *** updated 5 target(s)...
 ]]
 
@@ -114,8 +114,8 @@ file.c
 		local pattern3 = [[
 *** found 11 target(s)...
 *** updating 2 target(s)...
-@ C.gcc.CC <macosx32!release:helloworld>file.o
-@ C.gcc.Link <macosx32!release:helloworld>helloworld
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>file.o
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):helloworld>helloworld
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

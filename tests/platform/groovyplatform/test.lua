@@ -28,13 +28,31 @@ function Test()
 	TestFiles(originalFiles)
 
 	---------------------------------------------------------------------------
-	local pattern = [[
+	local pattern
+	local pattern2
+	if Platform == 'win32' then
+		pattern = [[
 *** found 10 target(s)...
 *** updating 4 target(s)...
 @ C.groovycompiler.CC <groovyplatform!retail:helloworld>helloworld.o
-@ C.groovycompiler.Link <groovyplatform!retail:helloworld>helloworld.exe
+!NEXT!@ C.groovycompiler.Link <groovyplatform!retail:helloworld>helloworld.exe
 *** updated 4 target(s)...
 ]]
+		pattern2 = [[
+*** found 10 target(s)...
+]]
+	else
+		pattern = [[
+*** found 8 target(s)...
+*** updating 3 target(s)...
+@ C.groovycompiler.CC <groovyplatform!retail:helloworld>helloworld.o
+!NEXT!@ C.groovycompiler.Link <groovyplatform!retail:helloworld>helloworld.exe
+*** updated 3 target(s)...
+]]
+		pattern2 = [[
+!NEXT!*** found 8 target(s)...
+]]
+	end
 
 	TestPattern(pattern, RunJam{ 'PLATFORM=groovyplatform', 'CONFIG=retail' })
 
@@ -68,9 +86,6 @@ function Test()
 	TestFiles(pass1Files)
 
 	---------------------------------------------------------------------------
-	local pattern2 = [[
-*** found 10 target(s)...
-]]
 	TestPattern(pattern2, RunJam{ 'PLATFORM=groovyplatform', 'CONFIG=retail' })
 	TestDirectories(pass1Dirs)
 	TestFiles(pass1Files)

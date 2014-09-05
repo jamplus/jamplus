@@ -151,15 +151,14 @@ function Test()
 			pattern = [[
 *** found 26 target(s)...
 *** updating 15 target(s)...
-@ C.gcc.CC <macosx32!release:app>main.o 
-@ C.gcc.CC <macosx32!release:slib-a>slib-a.o 
-@ C.gcc.CC <macosx32!release:lib-c>add.o 
-@ C.gcc.Archive <macosx32!release:lib-c>lib-c.a 
-!NEXT!@ C.gcc.Ranlib <macosx32!release:lib-c>lib-c.a 
-@ C.gcc.Link <macosx32!release:slib-a>slib-a.so 
-@ C.gcc.CC <macosx32!release:slib-b>slib-b.o 
-@ C.gcc.Link <macosx32!release:slib-b>slib-b.so 
-@ C.gcc.Link <macosx32!release:app>app
+@ C.$(COMPILER).CC <macosx32!release:app>main.o 
+@ C.$(COMPILER).CC <macosx32!release:slib-a>slib-a.o 
+@ C.$(COMPILER).CC <macosx32!release:lib-c>add.o 
+@ C.$(COMPILER).Archive2 <macosx32!release:lib-c>lib-c.a 
+@ C.$(COMPILER).Link <macosx32!release:slib-a>slib-a.so 
+@ C.$(COMPILER).CC <macosx32!release:slib-b>slib-b.o 
+@ C.$(COMPILER).Link <macosx32!release:slib-b>slib-b.so 
+@ C.$(COMPILER).Link <macosx32!release:app>app
 *** updated 15 target(s)...
 ]]
 		end
@@ -204,11 +203,11 @@ function Test()
 			pattern = [[
 				*** found 26 target(s)...
 				*** updating 7 target(s)...
-				@ C.gcc.CC <macosx32!release:slib-a>slib-a.o 
-				@ C.gcc.Link <macosx32!release:slib-a>slib-a.so 
-				@ C.gcc.CC <macosx32!release:slib-b>slib-b.o 
-				@ C.gcc.Link <macosx32!release:slib-b>slib-b.so 
-				@ C.gcc.Link <macosx32!release:app>app
+				@ C.$(COMPILER).CC <macosx32!release:slib-a>slib-a.o 
+				@ C.$(COMPILER).Link <macosx32!release:slib-a>slib-a.so 
+				@ C.$(COMPILER).CC <macosx32!release:slib-b>slib-b.o 
+				@ C.$(COMPILER).Link <macosx32!release:slib-b>slib-b.so 
+				@ C.$(COMPILER).Link <macosx32!release:app>app
 				*** updated 7 target(s)...
 ]]
 		end
@@ -250,12 +249,11 @@ function Test()
 			pattern = [[
 				*** found 26 target(s)...
 				*** updating 7 target(s)...
-				@ C.gcc.CC <macosx32!release:lib-c>add.o 
-				@ C.gcc.Archive <macosx32!release:lib-c>lib-c.a 
-				@ C.gcc.Ranlib <macosx32!release:lib-c>lib-c.a 
-				@ C.gcc.Link <macosx32!release:slib-a>slib-a.so 
-				@ C.gcc.Link <macosx32!release:slib-b>slib-b.so 
-				@ C.gcc.Link <macosx32!release:app>app
+				@ C.$(COMPILER).CC <macosx32!release:lib-c>add.o 
+				@ C.$(COMPILER).Archive2 <macosx32!release:lib-c>lib-c.a 
+				@ C.$(COMPILER).Link <macosx32!release:slib-a>slib-a.so 
+				@ C.$(COMPILER).Link <macosx32!release:slib-b>slib-b.so 
+				@ C.$(COMPILER).Link <macosx32!release:app>app
 				*** updated 7 target(s)...
 ]]
 		end
@@ -297,10 +295,10 @@ function Test()
 			pattern = [[
 				*** found 26 target(s)...
 				*** updating 4 target(s)...
-				@ C.gcc.CC <macosx32!release:slib-a>slib-a.o 
-				@ C.gcc.Link <macosx32!release:slib-a>slib-a.so 
-				@ C.gcc.Link <macosx32!release:app>app
-				*** updated 5 target(s)...
+				@ C.$(COMPILER).CC <macosx32!release:slib-a>slib-a.o 
+				@ C.$(COMPILER).Link <macosx32!release:slib-a>slib-a.so 
+				@ C.$(COMPILER).Link <macosx32!release:app>app
+				*** updated 4 target(s)...
 ]]
 		end
 		TestPattern(pattern, RunJam{})

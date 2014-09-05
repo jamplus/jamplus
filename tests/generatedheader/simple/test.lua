@@ -71,9 +71,10 @@ function Test()
 		local pattern = [[
 *** found 11 target(s)...
 *** updating 5 target(s)...
-@ C.gcc.CC <macosx32!release:test>main.o 
-@ C.gcc.CC <macosx32!release:test>test.o 
-@ C.gcc.Link <macosx32!release:test>test 
+@ WriteFile <$(PLATFORM_CONFIG):test>test.h
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>test.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test 
 *** updated 5 target(s)...
 ]]
 
@@ -109,8 +110,8 @@ function Test()
 		local pattern3 = [[
 *** found 11 target(s)...
 *** updating 2 target(s)...
-@ C.gcc.CC <macosx32!release:test>main.o 
-@ C.gcc.Link <macosx32!release:test>test 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

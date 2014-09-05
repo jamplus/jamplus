@@ -125,22 +125,22 @@ function Test()
 		}
 
 		pass1Pattern = [[
-			*** found 20 target(s)...
+			*** found 15 target(s)...
 			*** updating 6 target(s)...
-			&@ C.gcc.PCH <macosx32!release:main%-%x+>mypch.h.gch
-			@ C.gcc.C++ <macosx32!release:main>main.o 
-			@ C.gcc.C++ <macosx32!release:main>mypch.o 
-			@ C.gcc.Link <macosx32!release:main>main
+			&@ C.$(COMPILER).PCH <$(PLATFORM_CONFIG):main%-%x+>mypch.h.gch
+			@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):main>main.o 
+			@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):main>mypch.o 
+			@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):main>main
 			*** updated 6 target(s)...
 ]]
 
 		pass2Pattern = [[
-			*** found 20 target(s)...
+			*** found 15 target(s)...
 			*** updating 4 target(s)...
-			&@ C.gcc.PCH <macosx32!release:main%-%x+>mypch.h.gch
-			@ C.gcc.C++ <macosx32!release:main>main.o 
-			@ C.gcc.C++ <macosx32!release:main>mypch.o 
-			@ C.gcc.Link <macosx32!release:main>main
+			&@ C.$(COMPILER).PCH <$(PLATFORM_CONFIG):main%-%x+>mypch.h.gch
+			@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):main>main.o 
+			@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):main>mypch.o 
+			@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):main>main
 			*** updated 4 target(s)...
 ]]
 	end

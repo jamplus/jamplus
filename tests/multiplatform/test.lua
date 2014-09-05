@@ -63,10 +63,10 @@ function Test()
 				pattern = [[
 *** found 12 target(s)...
 *** updating 5 target(s)...
-@ C.gcc.CC <macosx32!release:platform>platform.o 
-@ C.gcc.CC <macosx32!release:platform>macosx.o 
-@ C.gcc.CC <macosx32!release:platform>filerelease.o 
-@ C.gcc.Link <macosx32!release:platform>platform
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):platform>platform.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):platform>macosx.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):platform>filerelease.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):platform>platform
 *** updated 5 target(s)...
 ]]
 			else
@@ -82,8 +82,8 @@ function Test()
 			end
 
 			pass1Directories = {
-				'macosx32-release/',
-				'macosx32-release/platform/',
+				'$(PLATFORM_CONFIG)/',
+				'$(PLATFORM_CONFIG)/platform/',
 			}
 
 			pass1Files = {
@@ -97,14 +97,14 @@ function Test()
 				'platform.c',
 				'test.lua',
 				'win32.c',
-				'macosx32-release/platform/filerelease.o',
-				'macosx32-release/platform/macosx.o',
-				'macosx32-release/platform/platform.o',
-				'macosx32-release/platform/platform.release',
+				'$(PLATFORM_CONFIG)/platform/filerelease.o',
+				'$(PLATFORM_CONFIG)/platform/macosx.o',
+				'$(PLATFORM_CONFIG)/platform/platform.o',
+				'$(PLATFORM_CONFIG)/platform/platform.release',
 			}
 
 			if Platform == 'macosx' then
-				pass1Files[#pass1Files + 1] = 'macosx32-release/platform/macosx.o'
+				pass1Files[#pass1Files + 1] = '$(PLATFORM_CONFIG)/platform/macosx.o'
 			else
 				pass1Files[#pass1Files + 1] = 'linux.o'
 			end

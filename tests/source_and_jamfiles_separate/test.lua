@@ -63,8 +63,8 @@ function Test()
 		dirs = {
 			'jam/',
 			'src/',
-			'jam/macosx32-release/',
-			'jam/macosx32-release/helloworld/',
+			'jam/$(PLATFORM_CONFIG)/',
+			'jam/$(PLATFORM_CONFIG)/helloworld/',
 			'jam/macosx32%-release/helloworld/precomp%-%x+/',
 		}
 
@@ -74,10 +74,10 @@ function Test()
 			'src/main.c',
 			'src/precomp.h',
 			'jam/Jamfile.jam',
-			'jam/macosx32-release/helloworld/createprecomp.o',
-			'jam/macosx32-release/helloworld/file.o',
-			'jam/macosx32-release/helloworld/helloworld.release',
-			'jam/macosx32-release/helloworld/main.o',
+			'jam/$(PLATFORM_CONFIG)/helloworld/createprecomp.o',
+			'jam/$(PLATFORM_CONFIG)/helloworld/file.o',
+			'jam/$(PLATFORM_CONFIG)/helloworld/helloworld.release',
+			'jam/$(PLATFORM_CONFIG)/helloworld/main.o',
 			'jam/macosx32%-release/helloworld/precomp%-%x+/precomp.h.gch',
 			'src/createprecomp.c',
 			'src/file.c',
@@ -88,11 +88,11 @@ function Test()
 		pattern = [[
 			*** found 17 target(s)...
 			*** updating 7 target(s)...
-			&@ C.gcc.PCH <macosx32!release:helloworld%-%x+>precomp.h.gch 
-			@ C.gcc.CC <macosx32!release:helloworld>../src/file.o 
-			@ C.gcc.CC <macosx32!release:helloworld>../src/main.o 
-			@ C.gcc.CC <macosx32!release:helloworld>../src/createprecomp.o 
-			@ C.gcc.Link <macosx32!release:helloworld>helloworld 
+			&@ C.$(COMPILER).PCH <$(PLATFORM_CONFIG):helloworld%-%x+>precomp.h.gch 
+			@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>../src/file.o 
+			@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>../src/main.o 
+			@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>../src/createprecomp.o 
+			@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):helloworld>helloworld 
 			*** updated 7 target(s)...
 ]]
 	
@@ -138,11 +138,11 @@ function Test()
 			pattern = [[
 				*** found 17 target(s)...
 				*** updating 5 target(s)...
-				&@ C.gcc.PCH <macosx32!release:helloworld%-%x+>precomp.h.gch 
-				@ C.gcc.CC <macosx32!release:helloworld>../src/file.o 
-				@ C.gcc.CC <macosx32!release:helloworld>../src/main.o 
-				@ C.gcc.CC <macosx32!release:helloworld>../src/createprecomp.o 
-				@ C.gcc.Link <macosx32!release:helloworld>helloworld
+				&@ C.$(COMPILER).PCH <$(PLATFORM_CONFIG):helloworld%-%x+>precomp.h.gch 
+				@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>../src/file.o 
+				@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>../src/main.o 
+				@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>../src/createprecomp.o 
+				@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):helloworld>helloworld
 				*** updated 5 target(s)...
 ]]
 		end
@@ -186,8 +186,8 @@ function Test()
 			pattern = [[
 				*** found 17 target(s)...
 				*** updating 2 target(s)...
-				@ C.gcc.CC <macosx32!release:helloworld>../src/createprecomp.o 
-				@ C.gcc.Link <macosx32!release:helloworld>helloworld
+				@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):helloworld>../src/createprecomp.o 
+				@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):helloworld>helloworld
 				*** updated 2 target(s)...
 ]]
 		end

@@ -8,7 +8,7 @@ function Test()
 @ LowerCaseRule all
 -> this text will be lowercase.
 @ Compiler all
-c:\the\directory\filename.cpp(1000) This is an error message.
+c:/the/directory/filename.cpp(1000) This is an error message.
 *** updated 1 target(s)...
 ]]
 

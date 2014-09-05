@@ -69,8 +69,8 @@ function Test()
 ]]
 	else
 		dirs = {
-			'macosx32-release/',
-			'macosx32-release/test/',
+			'$(PLATFORM_CONFIG)/',
+			'$(PLATFORM_CONFIG)/test/',
 		}
 
 		noDepCacheFiles = {
@@ -80,33 +80,33 @@ function Test()
 			'main.h',
 			'test.c',
 			'test.lua',
-			'macosx32-release/test/main.o',
-			'macosx32-release/test/test.o',
-			'macosx32-release/test/test.release',
+			'$(PLATFORM_CONFIG)/test/main.o',
+			'$(PLATFORM_CONFIG)/test/test.o',
+			'$(PLATFORM_CONFIG)/test/test.release',
 		}
 		
 		patternA = [[
 *** found 13 target(s)...
 *** updating 5 target(s)...
-@ C.gcc.CC <macosx32!release:test>main.o 
-@ C.gcc.CC <macosx32!release:test>test.o 
-@ C.gcc.Link <macosx32!release:test>test
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>test.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
 *** updated 5 target(s)...
 ]]
 
 		patternB = [[
 *** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.gcc.CC <macosx32!release:test>main.o 
-@ C.gcc.Link <macosx32!release:test>test
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
 *** updated 3 target(s)...
 ]]
 
 		patternC = [[
 *** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.gcc.CC <macosx32!release:test>main.o 
-@ C.gcc.Link <macosx32!release:test>test
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
 *** updated 3 target(s)...
 ]]
 	end
@@ -204,17 +204,17 @@ function Test()
 			'main.h',
 			'test.c',
 			'test.lua',
-			'macosx32-release/test/main.o',
-			'macosx32-release/test/test.o',
-			'macosx32-release/test/test.release',
+			'$(PLATFORM_CONFIG)/test/main.o',
+			'$(PLATFORM_CONFIG)/test/test.o',
+			'$(PLATFORM_CONFIG)/test/test.release',
 		}
 		
 		patternA = [[
 *** found 13 target(s)...
 *** updating 5 target(s)...
-@ C.gcc.CC <macosx32!release:test>main.o 
-@ C.gcc.CC <macosx32!release:test>test.o 
-@ C.gcc.Link <macosx32!release:test>test
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>test.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
 *** updated 5 target(s)...
 ]]
 
@@ -227,8 +227,8 @@ function Test()
 		patternC = [[
 *** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.gcc.CC <macosx32!release:test>main.o 
-@ C.gcc.Link <macosx32!release:test>test
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
 *** updated 3 target(s)...
 ]]
 
@@ -241,8 +241,8 @@ function Test()
 		patternE = [[
 *** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.gcc.CC <macosx32!release:test>main.o 
-@ C.gcc.Link <macosx32!release:test>test
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
 *** updated 3 target(s)...
 ]]
 	end

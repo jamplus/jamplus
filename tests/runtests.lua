@@ -34,9 +34,7 @@ function RunJam(commandLine)
 		table.insert(commandLine, 3, 'COMPILER=' .. Compiler)
 	end
 
-	if Platform == 'win32' then
-		commandLine[#commandLine + 1] = '2>&1'
-	end
+	commandLine.stderr_to_stdout = true
 
 	return osprocess.collectlines(commandLine)
 end
@@ -81,6 +79,7 @@ function TestPattern(patterns, lines)
 			pattern = patterns[patternIndex]
 			if pattern then
 				pattern = pattern:gsub('$%(SUFEXE%)', SUFEXE)
+				pattern = pattern:gsub('$%(COMPILER%)', COMPILER)
 				pattern = pattern:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '!release')
 			end
 		end
@@ -225,6 +224,7 @@ function TestDirectories(expectedDirs)
 	local expectedDirsMap = {}
 	for _, dirName in ipairs(expectedDirs) do
 		dirName = dirName:gsub('$PlatformDir', PlatformDir)
+		dirName = dirName:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '-release')
 		if dirName:sub(1, 1) == '?' then
 			expectedDirsMap[dirName:sub(2)] = '?'
 		else
@@ -297,7 +297,7 @@ function TestFiles(expectedFiles)
 	local extraFiles = {}
 	for foundFile in pairs(foundFilesMap) do
 		if foundFile ~= 'test.lua'  and  foundFile ~= 'test.out'  and  not foundFile:match('%.swp')
-				and  not foundFile:match('~$') then
+				and  not foundFile:match('~$')  and  not foundFile:match('%.swo') then
 			if not expectedFilesMap[foundFile] then
 				local found = false
 				for _, fileName in ipairs(expectedFiles) do
@@ -338,10 +338,7 @@ if os.getenv("OS") == "Windows_NT" then
  	Platform = 'win32'
 	PlatformDir = 'win32'
 	SUFEXE = '.exe'
-elseif os.getenv("OSTYPE") == "darwin9.0" then
-	Platform = 'macosx'
-	PlatformDir = 'macosx32'
-	SUFEXE = ''
+	COMPILER = 'vc'
 else
 	local f = io.popen('uname')
 	uname = f:read('*a'):lower():gsub('\n', '')
@@ -350,9 +347,11 @@ else
 	if uname == 'darwin' then
 		Platform = 'macosx'
 		PlatformDir = 'macosx32'
+		COMPILER = 'clang'
 	elseif uname == 'linux' then
 		Platform = 'linux'
 		PlatformDir = 'linux32'
+		COMPILER = 'gcc'
 	end
 
 	SUFEXE = ''

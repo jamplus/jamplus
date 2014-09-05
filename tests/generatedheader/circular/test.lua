@@ -73,10 +73,9 @@ function Test()
 *** found 11 target(s)...
 *** updating 4 target(s)...
 @ SleepThenTouch <$(PLATFORM_CONFIG):foo>generated.h 
-@ C.gcc.CC <$(PLATFORM_CONFIG):foo>sourceA.o 
-@ C.gcc.CC <$(PLATFORM_CONFIG):foo>sourceB.o 
-@ C.gcc.Archive <$(PLATFORM_CONFIG):foo>foo.a 
-!NEXT!@ C.gcc.Ranlib <$(PLATFORM_CONFIG):foo>foo.a 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):foo>sourceA.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):foo>sourceB.o 
+@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):foo>foo.a 
 !NEXT!*** updated 4 target(s)...
 ]]
 
@@ -111,10 +110,9 @@ function Test()
 		local pattern3 = [[
 *** found 11 target(s)...
 *** updating 3 target(s)...
-@ C.gcc.CC <$(PLATFORM_CONFIG):foo>sourceA.o 
-@ C.gcc.CC <$(PLATFORM_CONFIG):foo>sourceB.o 
-@ C.gcc.Archive <$(PLATFORM_CONFIG):foo>foo.a 
-@ C.gcc.Ranlib <$(PLATFORM_CONFIG):foo>foo.a 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):foo>sourceA.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):foo>sourceB.o 
+@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):foo>foo.a 
 !NEXT!*** updated 3 target(s)...
 ]]
 		TestPattern(pattern3, RunJam{ 'foo' })

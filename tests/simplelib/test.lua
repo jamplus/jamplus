@@ -111,11 +111,10 @@ function Test()
 		patternA = [[
 *** found 12 target(s)...
 *** updating 6 target(s)...
-@ C.gcc.CC <macosx32!release:app>main.o 
-@ C.gcc.CC <macosx32!release:lib-a>add.o 
-@ C.gcc.Archive <macosx32!release:lib-a>lib-a.a 
-!NEXT!@ C.gcc.Ranlib <macosx32!release:lib-a>lib-a.a 
-@ C.gcc.Link <macosx32!release:app>app
+@ C.$(COMPILER).CC <macosx32!release:app>main.o 
+@ C.$(COMPILER).CC <macosx32!release:lib-a>add.o 
+@ C.$(COMPILER).Archive2 <macosx32!release:lib-a>lib-a.a 
+@ C.$(COMPILER).Link <macosx32!release:app>app
 *** updated 6 target(s)...
 ]]
 
@@ -126,8 +125,8 @@ function Test()
 		patternC = [[
 *** found 12 target(s)...
 *** updating 2 target(s)...
-@ C.gcc.CC <macosx32!release:app>main.o 
-@ C.gcc.Link <macosx32!release:app>app
+@ C.$(COMPILER).CC <macosx32!release:app>main.o 
+@ C.$(COMPILER).Link <macosx32!release:app>app
 *** updated 2 target(s)...
 ]]
 

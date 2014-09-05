@@ -22,7 +22,7 @@ actions LowerCaseRule {
 }
 
 actions Compiler {
-    echo c:\the\directory\filename.cpp:1000:This is an error message.
+    echo c:/the/directory/filename.cpp:1000:This is an error message.
 }
 
 Always all ;

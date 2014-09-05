@@ -92,8 +92,8 @@ project1.cpp
 		local pattern = [[
 *** found 8 target(s)...
 *** updating 3 target(s)...
-@ C.gcc.C++ <$(PLATFORM_CONFIG):project1>]] .. cwd .. [[/source/project1/project1.o
-@ C.gcc.Link <$(PLATFORM_CONFIG):project1>project1
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>]] .. cwd .. [[/source/project1/project1.o
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1
 *** updated 3 target(s)...
 ]]
 
@@ -107,16 +107,16 @@ project1.cpp
 			'source/project1/Jamfile.jam',
 			'source/project1/project1.cpp',
 			'source/project1/project1.o',
-			'source/project1/obj/$PlatformDir/release/project1.release',
+			'source/project1/lib/$PlatformDir/release/project1',
 		}
 
 		local pass1Directories =
 		{
 			'source/',
 			'source/project1/',
-			'source/project1/obj/',
-			'source/project1/obj/$PlatformDir/',
-			'source/project1/obj/$PlatformDir/release/',
+			'source/project1/lib/',
+			'source/project1/lib/$PlatformDir/',
+			'source/project1/lib/$PlatformDir/release/',
 		}
 
 --		for component in (cwd .. [[/source/project1/project1.o]]):gmatch('(.-/)') do
@@ -127,7 +127,7 @@ project1.cpp
 		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
-*** found 7 target(s)...
+*** found 8 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 
@@ -135,10 +135,10 @@ project1.cpp
 		ospath.touch('source/project1/project1.cpp')
 
 		local pattern3 = [[
-*** found 7 target(s)...
+*** found 8 target(s)...
 *** updating 2 target(s)...
-@ C.gcc.C++ <$(PLATFORM_CONFIG):project1>]] .. cwd .. [[/source/project1/project1.o
-@ C.gcc.Link <$(PLATFORM_CONFIG):project1>project1
+@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>]] .. cwd .. [[/source/project1/project1.o
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1
 *** updated 2 target(s)...
 ]]
 

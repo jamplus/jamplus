@@ -110,6 +110,75 @@ function Test()
 ]]
 
 	else
+		dirs =
+		{
+			'app/',
+			'app/$(PLATFORM_CONFIG)/',
+			'app/$(PLATFORM_CONFIG)/app/',
+			'lib-a/',
+			'lib-a/$(PLATFORM_CONFIG)/',
+			'lib-a/$(PLATFORM_CONFIG)/lib-a/',
+			'nested-lib-b/',
+			'nested-lib-b/$(PLATFORM_CONFIG)/',
+			'nested-lib-b/$(PLATFORM_CONFIG)/nested-lib-b/',
+			'nested-lib-c/',
+			'nested-lib-c/$(PLATFORM_CONFIG)/',
+			'nested-lib-c/$(PLATFORM_CONFIG)/nested-lib-c/',
+		}
+
+		files = {
+			'app/Jamfile.jam',
+			'app/main.c',
+			'app/$(PLATFORM_CONFIG)/app/app.release',
+			'app/$(PLATFORM_CONFIG)/app/main.o',
+			'Jamfile.jam',
+			'lib-a/add.c',
+			'lib-a/add.h',
+			'lib-a/Jamfile.jam',
+			'lib-a/$(PLATFORM_CONFIG)/lib-a/add.o',
+			'lib-a/$(PLATFORM_CONFIG)/lib-a/lib-a.release.a',
+			'nested-lib-b/Jamfile.jam',
+			'nested-lib-b/sub.c',
+			'nested-lib-b/sub.h',
+			'nested-lib-b/$(PLATFORM_CONFIG)/nested-lib-b/nested-lib-b.release.a',
+			'nested-lib-b/$(PLATFORM_CONFIG)/nested-lib-b/sub.o',
+			'nested-lib-c/Jamfile.jam',
+			'nested-lib-c/mul.c',
+			'nested-lib-c/mul.h',
+			'nested-lib-c/$(PLATFORM_CONFIG)/nested-lib-c/mul.o',
+			'nested-lib-c/$(PLATFORM_CONFIG)/nested-lib-c/nested-lib-c.release.a',
+		}
+	
+		patternA = [[
+*** found 22 target(s)...
+*** updating 12 target(s)...
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):app>main.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):lib-a>add.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):nested-lib-b>sub.o 
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):nested-lib-c>mul.o 
+@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):nested-lib-c>nested-lib-c.a 
+@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):nested-lib-b>nested-lib-b.a 
+@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):lib-a>lib-a.a 
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):app>app 
+*** updated 12 target(s)...
+]]
+
+		patternB = [[
+*** found 22 target(s)...
+]]
+
+		patternC = [[
+*** found 22 target(s)...
+*** updating 2 target(s)...
+@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):app>main.o
+@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):app>app 
+*** updated 2 target(s)...
+]]
+
+		patternD = [[
+*** found 22 target(s)...
+]]
+
 
 	end
 
