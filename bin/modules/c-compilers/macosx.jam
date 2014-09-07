@@ -313,13 +313,30 @@ rule C.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 	}
 }
 
+rule C._InfoPlistKeyExists KEY
+{
+	on $(C.ACTIVE_TOOLCHAIN_TARGET)
+	{
+		if $(INFO_PLIST_KEYS)
+		{
+			for _key in $(INFO_PLIST_KEYS)
+			{
+				if $(_key) = $(KEY)
+				{
+					return true ;
+				}
+			}
+		}
+	}
+	return false ;
+}
 
 rule C._BundleInfoArray KEY : VALUE {
-	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<array>$(NEWLINE)" ;
-	for value in $(VALUE) {
-		INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)$(TAB)<string>$(value)</string>$(NEWLINE)" ;
+	if [ C._InfoPlistKeyExists $(KEY) ] = false {
+		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
 	}
-	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)</array>$(NEWLINE)" ;
+	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = Array ;
+	INFO_PLIST_KEYS.$(KEY).VALUE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 }
 
 
@@ -333,29 +350,26 @@ rule C._BundleInfoIntegerArray KEY : VALUE {
 
 
 rule C._BundleInfoBoolean KEY : VALUE {
-	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)" ;
-	if $(VALUE) = true {
-		INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "<true/>$(NEWLINE)" ;
-	} else {
-		INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "<false/>$(NEWLINE)" ;
+	if [ C._InfoPlistKeyExists $(KEY) ] = false {
+		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
 	}
+	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = Boolean ;
+	INFO_PLIST_KEYS.$(KEY).VALUE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 }
 
 
 rule C._BundleInfoString KEY : VALUE {
-	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<string>$(VALUE)</string>$(NEWLINE)" ;
+	if [ C._InfoPlistKeyExists $(KEY) ] = false {
+		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
+	}
+	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = String ;
+	INFO_PLIST_KEYS.$(KEY).VALUE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 }
 
 
 rule C.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST) {
-		INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) ?= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-" ;
-
+	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
 		C._BundleInfoString CFBundleDevelopmentRegion : en ;
 		C._BundleInfoString CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
 		C._BundleInfoString CFBundleInfoDictionaryVersion : 6.0 ;
@@ -522,8 +536,38 @@ rule C.macosx._ApplicationFromObjects_PostBuild {
 		Depends $(bundleTarget) : $(pkginfo) ;
 		Clean $(cleanBundleTarget) : $(pkginfo) ;
 
-		local infoplistcontents = $(INFO_PLIST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		if $(infoplistcontents) {
+		if $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+
+			# Set up Info.plist file header.
+			local infoplistcontents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+" ;
+			# Set up each key/value pair based on the type (Array/Boolean/String).
+			for _key in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+			{
+				switch $(INFO_PLIST_KEYS.$(_key).TYPE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+				{
+					case Array :
+						infoplistcontents += "$(TAB)<key>$(_key)</key>$(NEWLINE)$(TAB)<array>$(NEWLINE)" ;
+						for value in $(INFO_PLIST_KEYS.$(_key).VALUE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+							infoplistcontents += "$(TAB)$(TAB)<string>$(value)</string>$(NEWLINE)" ;
+						}
+						infoplistcontents += "$(TAB)</array>$(NEWLINE)" ;
+					case Boolean :
+						infoplistcontents += "$(TAB)<key>$(_key)</key>$(NEWLINE)$(TAB)" ;
+						if $(INFO_PLIST_KEYS.$(_key).VALUE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) = true {
+							infoplistcontents += "<true/>$(NEWLINE)" ;
+						} else {
+							infoplistcontents += "<false/>$(NEWLINE)" ;
+						}
+					case String :
+						infoplistcontents += "$(TAB)<key>$(_key)</key>$(NEWLINE)$(TAB)<string>$(INFO_PLIST_KEYS.$(_key).VALUE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))</string>$(NEWLINE)" ;
+				}
+			}
+
+			# Set up Info.plist file footer.
 			infoplistcontents += "</dict>
 </plist>
 " ;
@@ -533,7 +577,7 @@ rule C.macosx._ApplicationFromObjects_PostBuild {
 			MakeLocate $(infoplist) : $(bundlePath) ;
 			CONTENTS on $(infoplist) = $(infoplistcontents) ;
 			WriteFile $(infoplist) ;
-			
+
 			UseCommandLine $(infoplist) : $(infoplistcontents) ;
 			Depends $(bundleTarget) : $(infoplist) ;
 			Clean $(cleanBundleTarget) : $(infoplist) ;
