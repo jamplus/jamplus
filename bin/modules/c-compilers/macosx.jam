@@ -313,44 +313,26 @@ rule C.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 	}
 }
 
-rule C._InfoPlistKeyExists KEY
-{
-	on $(C.ACTIVE_TOOLCHAIN_TARGET)
-	{
-		if $(INFO_PLIST_KEYS)
-		{
-			for _key in $(INFO_PLIST_KEYS)
-			{
-				if $(_key) = $(KEY)
-				{
-					return true ;
-				}
-			}
-		}
-	}
-	return false ;
-}
-
 rule C._BundleInfoArray KEY : VALUE {
-	if [ C._InfoPlistKeyExists $(KEY) ] = false {
+	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
 	}
-	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = Array ;
+	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = ArrayString ;
 	INFO_PLIST_KEYS.$(KEY).VALUE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 }
 
 
 rule C._BundleInfoIntegerArray KEY : VALUE {
-	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)<key>$(KEY)</key>$(NEWLINE)$(TAB)<array>$(NEWLINE)" ;
-	for value in $(VALUE) {
-		INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)$(TAB)<integer>$(value)</integer>$(NEWLINE)" ;
+	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
 	}
-	INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) += "$(TAB)</array>$(NEWLINE)" ;
+	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = ArrayInteger ;
+	INFO_PLIST_KEYS.$(KEY).VALUE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 }
 
 
 rule C._BundleInfoBoolean KEY : VALUE {
-	if [ C._InfoPlistKeyExists $(KEY) ] = false {
+	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
 	}
 	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = Boolean ;
@@ -359,7 +341,7 @@ rule C._BundleInfoBoolean KEY : VALUE {
 
 
 rule C._BundleInfoString KEY : VALUE {
-	if [ C._InfoPlistKeyExists $(KEY) ] = false {
+	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
 	}
 	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = String ;
@@ -549,7 +531,13 @@ rule C.macosx._ApplicationFromObjects_PostBuild {
 			{
 				switch $(INFO_PLIST_KEYS.$(_key).TYPE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
 				{
-					case Array :
+					case ArrayInteger :
+						infoplistcontents += "$(TAB)<key>$(_key)</key>$(NEWLINE)$(TAB)<array>$(NEWLINE)" ;
+						for value in $(INFO_PLIST_KEYS.$(_key).VALUE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+							infoplistcontents += "$(TAB)$(TAB)<integer>$(value)</integer>$(NEWLINE)" ;
+						}
+						infoplistcontents += "$(TAB)</array>$(NEWLINE)" ;
+					case ArrayString :
 						infoplistcontents += "$(TAB)<key>$(_key)</key>$(NEWLINE)$(TAB)<array>$(NEWLINE)" ;
 						for value in $(INFO_PLIST_KEYS.$(_key).VALUE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 							infoplistcontents += "$(TAB)$(TAB)<string>$(value)</string>$(NEWLINE)" ;
