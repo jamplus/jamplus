@@ -690,10 +690,10 @@ rule C.macosx._ApplicationFromObjects_LinkFlags {
 	local architecture = $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	architecture ?= $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-	if $(IOSBUILDENV_PATH) {
-		local sdkversion = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		sdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+	local sdkversion = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	sdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
+	if $(IOSBUILDENV_PATH) {
 		linkFlags += "-syslibroot $(isysroot:C)" ;
 		linkFlags += -ios_version_min $(sdkversion) ;
 		linkFlags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;
@@ -702,6 +702,31 @@ rule C.macosx._ApplicationFromObjects_LinkFlags {
 	} else {
 		linkFlags += "-isysroot $(isysroot:C)" ;
 		linkFlags += "-arch $(architecture)" ;
+		switch $(C.PLATFORM) {
+			case macosx32 :
+				# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
+				linkFlags += -mmacosx-version-min=$(sdkversion) ;
+
+			case macosx64 :
+				# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
+				linkFlags += -mmacosx-version-min=$(sdkversion) ;
+
+			case iphone :
+				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
+				linkFlags += -miphoneos-version-min=$(sdkversion) ;
+
+			case iphonesimulator :
+				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
+				linkFlags += -mios-simulator-version-min=$(sdkversion) ;
+
+			case ipadsimulator :
+				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
+				linkFlags += -mios-simulator-version-min=$(sdkversion) ;
+
+			case ipad :
+				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
+				linkFlags += -miphoneos-version-min=$(sdkversion) ;
+		}
 	}
 
 	if bundle in $(OPTIONS) {
