@@ -177,10 +177,11 @@ The current working directory <code>$(CWD)</code> </li>
 <p>When <code>IncludeModule</code> is specified more than once for the same <code>MODULE_NAME</code>, the module is only loaded once.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">MODULE_NAME</td><td>The name of the module, which is the filename without path and extension.</td></tr>
+    <tr><td class="paramname">MODULE_NAME</td><td>The name of the module, which is the filename without an extension. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the module name if successful. If the <code>MODULE_NAME</code> was not found, nothing is returned.</dd></dl>
 <div class="fragment"><div class="line"><span class="preprocessor"># Make the C.UseDirectX rule available.</span></div>
 <div class="line"><span class="preprocessor">IncludeModule c/directx ;</span></div>
 </div><!-- fragment --><hr/>
