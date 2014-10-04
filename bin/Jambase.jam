@@ -86,18 +86,37 @@ rule UseModule MODULE_NAME : OPTIONS
 {
 	local include_marker = included_module_$(MODULE_NAME:J=_) ;
 	if $($(include_marker))  &&  ! ( force in $(OPTIONS) ) {
-		return ;
+		return $(moduleName) ;
 	}
 	$(include_marker) = true ;
 
 	local moduleName = <jam:modules>$(MODULE_NAME).jam ;
-	SEARCH on $(moduleName) = $(SUBDIR) $(CWD) $(JAM_MODULES_USER_PATH) $(JAM_MODULES_PATH) ;
-
-	if optional in $(OPTIONS) {
-		NoCare $(moduleName) ;
+	local searchPaths = $(SUBDIR) $(CWD) $(JAM_MODULES_USER_PATH) $(JAM_MODULES_PATH) ;
+	local searchPath ;
+	local foundPath ;
+	for searchPath in $(searchPaths) {
+		searchPath = $(moduleName:G=:R=$(searchPath)) ;
+		foundPath = [ Glob $(searchPath:D) : $(searchPath:D=) ] ;
+		if $(foundPath) {
+			break ;
+		}
+	}
+	if $(foundPath[1]:BL) = $(MODULE_NAME:BL) {
+		BINDING on $(moduleName) = $(foundPath[1]:BS) ;
+		LOCATE on $(moduleName) = $(foundPath[1]:D) ;
+	} else if ! ( optional in $(OPTIONS) ) {
+		if $(JAM_VERBOSE) {
+			Echo "include $(moduleName) -- Not found!" ;
+		}
+		return ;
 	}
 
+	if $(JAM_VERBOSE) {
+		Echo "include $(moduleName)" ;
+	}
 	include $(moduleName) ;
+
+	return $(moduleName) ;
 }
 
 

@@ -195,7 +195,8 @@ Loads a Jam module.  It searches in the following manner:
 
 When \c IncludeModule is specified more than once for the same \c MODULE_NAME, the module is only loaded once.
 
-\param MODULE_NAME The name of the module, which is the filename without path and extension.
+\param MODULE_NAME The name of the module, which is the filename without an extension.
+\return Returns the module name if successful.  If the \c MODULE_NAME was not found, nothing is returned.
 
 \code
     # Make the C.UseDirectX rule available.
