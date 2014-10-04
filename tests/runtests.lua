@@ -394,7 +394,7 @@ for _, dir in ipairs(dirs) do
 		io.write(('%-60s'):format(text))
 		io.flush()
 
-		local chunk, err = loadfile('test.lua')
+		local chunk, err = loadfile(ospath.make_absolute('test.lua'))
 		if chunk then
 			testNumber = 0
 
