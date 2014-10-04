@@ -13,18 +13,6 @@ rule Var {
 }
 
 
-# Helper rule used to get value of a variable bound to specific target.
-rule SearchVar {
-	local key ;
-	for key in $(1)
-	{
-		local value = $($(key)) ;
-		if $(value) { return $(value) ; }
-	}
-	return $(2) ;
-}
-
-
 SPACE = " " ;
 TAB = "	" ;
 NEWLINE = "
