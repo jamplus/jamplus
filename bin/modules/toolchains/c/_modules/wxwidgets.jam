@@ -1,0 +1,246 @@
+if ! $(wxWidgets_ROOT)
+{
+	# Based on FindwxWidgets.cmake.
+	# Look for an installation tree.
+	local registryRootPath ;
+	if $(NT)
+	{
+		registryRootPath = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Microsoft Windows CurrentVersion Uninstall wxWidgets_is1 "Inno Setup: App Path" ] ;
+
+		local PATHS =
+			"$(wxWidgets_ROOT_DIR:J=$(SPACE))/"
+			"$(WXWIN:/J=$(SPACE))/"
+			$(registryRootPath:/J=$(SPACE))
+			c:/
+			d:/
+			e:/
+			"$(ProgramFiles:/J=$(SPACE))/"
+		;
+		local PATH_SUFFIXES =
+			wxWidgets-3.0.0
+			wxWidgets-2.9.5
+			wxWidgets-2.9.4
+			wxWidgets-2.9.3
+			wxWidgets-2.9.2
+			wxWidgets-2.9.1
+			wxWidgets-2.9.0
+			wxWidgets-2.8.10
+			wxWidgets-2.8.9
+			wxWidgets-2.8.8
+			wxWidgets-2.8.7
+			wxWidgets-2.8.6
+			wxWidgets-2.8.5
+			wxWidgets-2.8.4
+			wxWidgets-2.8.3
+			wxWidgets-2.8.2
+			wxWidgets-2.8.1
+			wxWidgets-2.8.0
+			wxWidgets-2.7.4
+			wxWidgets-2.7.3
+			wxWidgets-2.7.2
+			wxWidgets-2.7.1
+			wxWidgets-2.7.0
+			wxWidgets-2.7.0-1
+			wxWidgets-2.6.3
+			wxWidgets-2.6.2
+			wxWidgets-2.6.1
+			wxWidgets-2.5.4
+			wxWidgets-2.5.3
+			wxWidgets-2.5.2
+			wxWidgets-2.5.1
+			wxWidgets
+		;
+
+		local wx.h ;
+		if $(PLATFORM) = win64 {
+			wx.h = [ Glob $(PATHS)$(PATH_SUFFIXES).x64/include/wx : wx.h ] ;
+		}
+		if ! $(wx.h) {
+			wx.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include/wx : wx.h ] ;
+		}
+		if $(wx.h)
+		{
+			wxWidgets_ROOT = [ Match (.+)/include/wx/wx.h : $(wx.h[1]) ] ;
+
+			wxWidgets_HDRS.* = $(wxWidgets_ROOT)/include ;
+
+			wxWidgets_COMMON_LIBRARIES = png tiff jpeg zlib expat scintilla ;
+			wxWidgets_COMMON_LIBRARIES_U = regex ;
+			wxWidgets_BASE_LIBRARIES = net odbc xml ;
+			wxWidgets_PLATFORM_LIBRARIES = adv aui core dbgrid gl html media qa richtext webview xrc ;
+			wxWidgets_PLATFORM_PREFIX = msw ;
+			wxWidgets_CONTRIB_LIBRARIES = stc ;
+
+			wxWidgets_LIB_DIR = $(wxWidgets_ROOT)/lib ;
+
+			if $(C.COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 vs2012 vs2013
+			{
+				if shared in $(OPTIONS)
+				{
+					wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/vc_dll ;
+				}
+				else
+				{
+					wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/vc_lib ;
+				}
+
+				local wxbase.lib = [ Glob $(wxWidgets_LIB_DIR) : wxbase*.lib ] ;
+				if $(wxbase.lib)
+				{
+					wxWidgets_VERSION = [ Match $(wxWidgets_LIB_DIR)/wxbase([0-9][0-9]) : $(wxbase.lib[1]) ] ;
+				}
+
+				if $(wxWidgets_VERSION) in 29 30 {
+					wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswud ;
+					wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/mswu ;
+					wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/mswu ;
+				} else {
+					wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswd ;
+					wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/msw ;
+					wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/msw ;
+				}
+			}
+			else if $(MINGW)
+			{
+				if shared in $(OPTIONS)
+				{
+					wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/gcc_dll ;
+				}
+				else
+				{
+					wxWidgets_LIB_DIR = $(wxWidgets_LIB_DIR)/gcc_lib ;
+				}
+
+				local wxbase.lib = [ Glob $(wxWidgets_LIB_DIR) : libwxbase*.a ] ;
+				if $(wxbase.lib)
+				{
+					wxWidgets_VERSION = [ Match $(wxWidgets_LIB_DIR)/libwxbase([0-9][0-9]) : $(wxbase.lib[1]) ] ;
+				}
+			}
+
+			if $(wxWidgets_VERSION) in 29 30 {
+				wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswud ;
+				wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/mswu ;
+				wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/mswu ;
+
+				wxWidgets_COMMON_LIBRARIES += scintilla ;
+
+				wxWidgets_POSTFIX.debug = ud ;
+				wxWidgets_POSTFIX.release = "u" ;
+				wxWidgets_POSTFIX.releaseltcg = "u" ;
+			} else {
+				wxWidgets_HDRS.debug += $(wxWidgets_LIB_DIR)/mswd ;
+				wxWidgets_HDRS.release += $(wxWidgets_LIB_DIR)/msw ;
+				wxWidgets_HDRS.releaseltcg += $(wxWidgets_LIB_DIR)/msw ;
+
+				wxWidgets_POSTFIX.debug = d ;
+				wxWidgets_POSTFIX.release = "" ;
+				wxWidgets_POSTFIX.releaseltcg = "" ;
+			}
+
+			wxWidgets_POSTFIX_SIMPLE.debug = "d" ;
+			wxWidgets_POSTFIX_SIMPLE.release = "" ;
+			wxWidgets_POSTFIX_SIMPLE.releaseltcg = "" ;
+
+			wxComponents_ROOT_DIR ?= @(../wxComponents:R=$(wxWidgets_ROOT)) ;
+
+			wxWidgets_FOUND = 1 ;
+		}
+	} else {
+		local wx-config = [ Glob $(PATH) : wx-config ] ;
+		if $(wx-config) {
+			wx-config--debug = --debug= ;
+			if $(CONFIG) = debug {
+				wx-config--debug += yes ;
+			} else {
+				wx-config--debug += no ;
+			}
+			wx-config--debug = $(wx-config--debug:J) ;
+			local cxxflags = [ Split [ Shell "wx-config --cxxflags $(wx-config--debug)" ] : $(SPACE) ] ;
+			Echo $(cxxflags) ;
+			wxWidgets_DEFINES.debug = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
+			wxWidgets_HDRS.debug = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
+
+			cxxflags = [ Split [ Shell "wx-config --cxxflags --debug=no" ] : $(SPACE) ] ;
+			wxWidgets_DEFINES.release = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
+			wxWidgets_DEFINES.releaseltcg = [ Subst $(cxxflags:I=^\\-D) : ^%-D : ] ;
+			wxWidgets_HDRS.release = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
+			wxWidgets_HDRS.releaseltcg = [ Subst $(cxxflags:I=^\\-I) : ^%-I : ] ;
+
+			wxWidgets_FOUND = 1 ;
+		}
+	}
+}
+
+
+
+rule C.UseWxWidgets TARGETS : COMPONENTS : OPTIONS
+{
+	if ! $(wxWidgets_FOUND) {
+		Exit wxWidgets not found. ;
+	}
+
+	TARGETS = [ ActiveTarget $(TARGETS) ] ;
+
+	if $(C.COMPILER) in vc6 vs2003 vs2005 vs2008 vs2010 vs2012 vs2013
+	{
+		if shared in $(OPTIONS)
+		{
+			C.Defines $(TARGETS) : WXUSINGDLL ;
+		}
+	}
+
+	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.*) ;
+	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.$(CONFIG)) ;
+	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) : * ;
+	if $(MSVCNT) {
+		C.RcIncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) ;
+	}
+	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.$(CONFIG)) ;
+
+	if linklibs in $(OPTIONS)
+	{
+		if $(NT) {
+			local postfix = $(wxWidgets_POSTFIX.$(CONFIG)) ;
+			local postfix_simple = $(wxWidgets_POSTFIX_SIMPLE.$(CONFIG)) ;
+
+			local component ;
+			for component in $(COMPONENTS) $(wxWidgets_COMMON_LIBRARIES) $(wxWidgets_COMMON_LIBRARIES_U)
+			{
+				if $(component) = base
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix) ;
+				}
+				else if $(component) in $(wxWidgets_BASE_LIBRARIES)
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wxbase$(wxWidgets_VERSION)$(postfix)_$(component) ;
+				}
+				else if $(component) in $(wxWidgets_COMMON_LIBRARIES)
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(component)$(postfix_simple) ;
+				}
+				else if $(component) in $(wxWidgets_COMMON_LIBRARIES_U)
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(component)$(postfix) ;
+				}
+				else if $(component) in $(wxWidgets_PLATFORM_LIBRARIES)
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) ;
+				}
+				else if $(component) in $(wxWidgets_CONTRIB_LIBRARIES)
+				{
+					C.LinkPrebuiltLibraries $(TARGETS) : wx$(wxWidgets_PLATFORM_PREFIX)$(wxWidgets_VERSION)$(postfix)_$(component) ;
+				}
+			}
+
+			C.LinkDirectories $(TARGETS) : $(wxWidgets_LIB_DIR) ;
+			C.LinkPrebuiltLibraries $(TARGETS) : advapi32 comdlg32 comctl32 gdi32 ole32 oleaut32 Rpcrt4 shell32 user32 uuid winspool wsock32 ;
+			if $(MSVCNT) {
+				C.LinkPrebuiltLibraries $(TARGETS) : dbghelp ;
+			}
+		} else {
+			local linkFlags = [ Split [ Subst [ Shell "wx-config $(wx-config--debug) --libs $(COMPONENTS:J=$(SPACE))" ] : $(NEWLINE) : ] : $(SPACE) ] ;
+			C.LinkFlags $(TARGETS) : $(linkFlags) ;
+		}
+	}
+}

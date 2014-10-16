@@ -1,20 +1,20 @@
 SubDir TOP ;
 
-C.Toolchain $(C.PLATFORM) $(C.CONFIG) spu ;
+Toolchain c/$(C.PLATFORM)/$(C.CONFIG)/spu ;
 local sputhing_library = [ C.Library sputhing : sputhing.c ] ;
 
-C.Toolchain $(C.PLATFORM) $(C.CONFIG) ppu ;
+Toolchain c/$(C.PLATFORM)/$(C.CONFIG)/ppu ;
 
 C.LinkLibraries pputhing : $(sputhing_library) ;
 C.Application pputhing : pputhing.c ;
 
 ############################################################
 
-C.Toolchain $(C.PLATFORM) $(C.CONFIG) spu ;
+Toolchain c/$(C.PLATFORM)/$(C.CONFIG)/spu ;
 C.Library sputhing2 : sputhing2.c ;
 
-C.Toolchain $(C.PLATFORM) $(C.CONFIG) ppu ;
-local sputhing2_library = [ C.GetLinkTargets sputhing2 : $(C.PLATFORM) $(C.CONFIG) spu ] ;
+Toolchain c/$(C.PLATFORM)/$(C.CONFIG)/ppu ;
+local sputhing2_library = [ C.GetLinkTargets sputhing2 : c/$(C.PLATFORM)/$(C.CONFIG)/spu ] ;
 
 C.LinkLibraries pputhing2 : $(sputhing2_library) ;
 C.Application pputhing2 : pputhing2.c ;

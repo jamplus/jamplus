@@ -234,8 +234,8 @@ end
 
 local function _getTargetInfoFilename(outPath, platform, config)
 	local targetInfoFilename = outPath .. '_targetinfo_/targetinfo.' ..
-			(platform == '*' and '!all!' or platform) .. '.' ..
-			(config == '*' and '!all!' or config) .. '.lua'
+			(platform == '*' and '_all_' or platform) .. '.' ..
+			(config == '*' and '_all_' or config) .. '.lua'
 	return targetInfoFilename
 end
 
@@ -261,17 +261,16 @@ function CreateTargetInfoFiles(outPath)
 		{
 			jamExePath,
 			ospath.escape('-C' .. destinationRootPath),
-			ospath.escape('-sJAMFILE_ROOT=' .. sourceRootPath),
-			ospath.escape('-sJAMFILE=' .. outPath .. 'DumpJamTargetInfo.jam'),
-			ospath.escape('-sTARGETINFO_LOCATE=' .. outPath .. '_targetinfo_/'),
-			'-sPLATFORM=' .. platform,
-			'-sCONFIG=' .. config,
+			ospath.escape('JAMFILE_ROOT=' .. sourceRootPath),
+			ospath.escape('JAMFILE=' .. outPath .. 'DumpJamTargetInfo.jam'),
+			ospath.escape('TARGETINFO_LOCATE=' .. outPath .. '_targetinfo_/'),
+			'TOOLCHAIN=c/' .. platform .. '/' .. config,
 			'-d0',
 			'-S'
 		}
 
 		print('Reading platform [' .. platform .. '] and config [' .. config .. ']...')
---		print(table.concat(collectConfigurationArgs, ' '))
+		--print(table.concat(collectConfigurationArgs, ' '))
 		for line in osprocess.lines(collectConfigurationArgs) do
 			print(line)
 		end
@@ -688,7 +687,7 @@ function BuildProject()
 	locateTargetText =
 	{
 		locateTargetText = [[
-ALL_LOCATE_TARGET = "$(destinationRootPath:gsub('\\', '/'))$$(PLATFORM)-$$(CONFIG)" ;
+ALL_LOCATE_TARGET = "$(destinationRootPath:gsub('\\', '/'))$$(C.PLATFORM)-$$(C.CONFIG)" ;
 ]],
 		settingsFile = ospath.make_slash(ospath.join(destinationRootPath, 'customsettings.jam')),
 	}
@@ -853,7 +852,7 @@ include "$(jamPath)Jambase.jam" ;
 		ospath.write_file(jamScript,
 				'#!/bin/sh\n' ..
 				(opts.jamexepath or jamExePath) .. ' ' .. ospath.escape("-C" .. destinationRootPath) .. ' $*\n')
-		os.chmod(jamScript, 777)
+		ospath.chmod(jamScript, 777)
 
 		-- Write updatebuildenvironment.sh.
 		local updatebuildenvironment = ospath.join(destinationRootPath, 'updatebuildenvironment')
@@ -863,7 +862,7 @@ include "$(jamPath)Jambase.jam" ;
 				ospath.escape(destinationRootPath .. '/buildenvironment.config'),
 				ospath.escape(sourceJamfilePath),
 				ospath.escape(destinationRootPath)))
-		os.chmod(updatebuildenvironment, 777)
+		ospath.chmod(updatebuildenvironment, 777)
 	end
 
 	if opts.gen ~= 'none' then
@@ -905,7 +904,7 @@ include "$(scriptPath)DumpJamTargetInfo.jam" ;
 					ospath.escape(destinationRootPath .. '/buildenvironment.config'),
 					ospath.escape(sourceJamfilePath),
 					ospath.escape(destinationRootPath)))
-			os.chmod(outPath .. 'updateworkspace', 777)
+			ospath.chmod(outPath .. 'updateworkspace', 777)
 		end
 
 		-- Export everything.

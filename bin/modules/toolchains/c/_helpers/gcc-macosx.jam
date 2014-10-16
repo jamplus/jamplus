@@ -1,0 +1,16 @@
+C.ToolchainHelperOnce macosx-shared ;
+
+rule C.gcc._ApplicationFromObjects_LinkFlags {
+	C.macosx._ApplicationFromObjects_LinkFlags ;
+}
+
+
+rule C.gcc._ApplicationFromObjects_PostBuild {
+	C.macosx._ApplicationFromObjects_PostBuild ;
+}
+
+
+rule C.gcc._SharedLibraryFromObjects_LinkFlags {
+	C.macosx._SharedLibraryFromObjects_LinkFlags ;
+}
+

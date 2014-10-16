@@ -1,4 +1,0 @@
-C.Flags CC	: * : -O3 -m32 : releaseltcg : nacl32 ;
-C.Flags C++	: *	: -O3 -m32 : releaseltcg : nacl32 ;
-C.Flags M	: *	: -O3 -m32 : releaseltcg : nacl32 ;
-C.Flags MM	: *	: -O3 -m32 : releaseltcg : nacl32 ;

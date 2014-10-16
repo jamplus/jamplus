@@ -1,4 +1,0 @@
-C.Flags CC	: * : -g -O0 : debug : linux32 ;
-C.Flags C++	: *	: -g -O0 : debug : linux32 ;
-C.Flags M	: *	: -g -O0 : debug : linux32 ;
-C.Flags MM	: *	: -g -O0 : debug : linux32 ;

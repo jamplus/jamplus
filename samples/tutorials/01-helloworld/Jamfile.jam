@@ -2,3 +2,21 @@ SubDir TOP ;
 
 C.Application helloworld : main.c ;
 
+#Toolchain c/win32 : C.CONFIG=release ; #C.COMPILER=vs2010 ;
+#C.Application helloworld : main.c ;
+
+#Toolchain c/win32/release : C.COMPILER=vs2010 ;
+#C.Application helloworld : main.c ;
+#
+#Toolchain c/win32/release : C.COMPILER=vs2012 ;
+#C.Application helloworld : main.c ;
+#
+#Toolchain c/win32/release : C.COMPILER=vs2013 ;
+#C.Application helloworld : main.c ;
+#
+#Toolchain c/win32/debug : C.COMPILER=vs2013 ;
+#C.Application helloworld : main.c ;
+#
+#Toolchain c/win32/release : C.COMPILER=mingw ;
+#C.Application helloworld : main.c ;
+

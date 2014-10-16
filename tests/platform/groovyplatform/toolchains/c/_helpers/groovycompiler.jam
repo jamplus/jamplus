@@ -1,0 +1,43 @@
+if ! $(TARGETINFO_LOCATE) {
+
+rule C.groovycompiler.FDefines { return -D$(<) ; }
+rule C.groovycompiler.FIncludes { return -I$(<) ; }
+rule C.groovycompiler.FLibraryPaths { return -L$(<) ; }
+
+actions updated together piecemeal C.groovycompiler.Archive
+{
+	PATH=$(GROOVY_ROOT)/bin;%PATH%
+	"$(C.AR)" $(LIBFLAGS) $(<) $(>)
+}
+
+actions C.groovycompiler.Link
+{
+	PATH=$(GROOVY_ROOT)/bin;%PATH%
+	"$(C.LINK)" $(LINKFLAGS) -o $(<[1]) $(>) $(NEEDLIBS:T) $(LINKLIBS)
+}
+
+actions together C.groovycompiler.Ranlib
+{
+	PATH=$(GROOVY_ROOT)/bin;%PATH%
+	"$(C.RANLIB)" $(<)
+}
+
+actions updated response C.groovycompiler.CC
+{
+	PATH=$(GROOVY_ROOT)/bin;%PATH%
+	"$(C.CC)" -c $(MFLAGS) $(>)
+}
+
+actions updated response C.groovycompiler.C++
+{
+	PATH=$(GROOVY_ROOT)/bin;%PATH%
+	"$(C.C++)" -c $(MFLAGS) $(>)
+}
+
+rule C.groovycompiler._MultiCppCompile_SetupFlags
+{
+	_flags += "-c -o \"$(_obj:T)\"" ;
+}
+
+} # TARGETINFO_LOCATE
+

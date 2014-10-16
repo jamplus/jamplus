@@ -1,0 +1,7 @@
+C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+if ! $(TARGETINFO_LOCATE) {
+    C.ToolchainHelper $(C.PLATFORM) ;
+}
+
+

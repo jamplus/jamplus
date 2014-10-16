@@ -23,9 +23,9 @@ function Test()
 		-- First build
 		local pattern = [[
 *** found 11 target(s)...
-@ SleepThenTouch <win32!release:foo>generated.h
-!NEXT!@ C.vc.CC <win32!release:foo>sourceA.obj
-!NEXT!@ C.vc.Archive <win32!release:foo>foo.lib
+@ SleepThenTouch <$(TOOLCHAIN_GRIST):foo>generated.h
+!NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.obj
+!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):foo>foo.lib
 !NEXT!*** updated 4 target(s)...
 ]]
 
@@ -61,8 +61,8 @@ function Test()
 		local pattern3 = [[
 *** found 11 target(s)...
 *** updating 3 target(s)...
-!NEXT!@ C.vc.CC <win32!release:foo>sourceA.obj
-!NEXT!@ C.vc.Archive <win32!release:foo>foo.lib
+!NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.obj
+!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):foo>foo.lib
 !NEXT!*** updated 3 target(s)...
 ]]
 		TestPattern(pattern3, RunJam{ 'foo' })
@@ -72,10 +72,10 @@ function Test()
 		local pattern = [[
 *** found 11 target(s)...
 *** updating 4 target(s)...
-@ SleepThenTouch <$(PLATFORM_CONFIG):foo>generated.h 
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):foo>sourceA.o 
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):foo>sourceB.o 
-@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):foo>foo.a 
+@ SleepThenTouch <$(TOOLCHAIN_GRIST):foo>generated.h 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceB.o 
+@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):foo>foo.a 
 !NEXT!*** updated 4 target(s)...
 ]]
 
@@ -110,9 +110,9 @@ function Test()
 		local pattern3 = [[
 *** found 11 target(s)...
 *** updating 3 target(s)...
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):foo>sourceA.o 
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):foo>sourceB.o 
-@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):foo>foo.a 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceB.o 
+@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):foo>foo.a 
 !NEXT!*** updated 3 target(s)...
 ]]
 		TestPattern(pattern3, RunJam{ 'foo' })

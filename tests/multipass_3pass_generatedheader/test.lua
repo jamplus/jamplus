@@ -21,40 +21,40 @@ function Test()
 		if Platform == 'win32' then
 			pattern = [[
 Pass 1
-*** found 12 target(s)...
-*** updating 7 target(s)...
-@ WriteFile <win32!release:test>foo.cpp
-*** updated 4 target(s)...
+*** found 10 target(s)...
+*** updating 6 target(s)...
+@ WriteFile <$(TOOLCHAIN_GRIST):test>foo.cpp
+*** updated 3 target(s)...
 *** executing pass 2...
 Pass 2
-*** found 21 target(s)...
+*** found 19 target(s)...
 *** updating 5 target(s)...
-@ WriteFile <win32!release:test>foo.h
-@ WriteFile <win32!release:test>main.cpp
-@ C.vc.C++ <win32!release:test>main.obj
-!NEXT!@ C.vc.Link <win32!release:test>test.exe
+@ WriteFile <$(TOOLCHAIN_GRIST):test>foo.h
+@ WriteFile <$(TOOLCHAIN_GRIST):test>main.cpp
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
 !NEXT!*** updated 5 target(s)...
 *** executing pass 3...
 Pass 3
-*** found 12 target(s)...
+*** found 10 target(s)...
 ]]
 
 			pass1Dirs = {
-				'win32-release/',
-				'win32-release/test/',
+				'$(TOOLCHAIN_PATH)/',
+				'$(TOOLCHAIN_PATH)/test/',
 			}
 
 			pass1Files =
 			{
 				'foo.h',
 				'Jamfile.jam',
-				'win32-release/test/foo.cpp',
-				'win32-release/test/foo.obj',
-				'win32-release/test/main.cpp',
-				'win32-release/test/main.obj',
-				'win32-release/test/test.release.exe',
-				'?win32-release/test/test.release.exe.intermediate.manifest',
-				'win32-release/test/test.release.pdb',
+				'$(TOOLCHAIN_PATH)/test/foo.cpp',
+				'$(TOOLCHAIN_PATH)/test/foo.obj',
+				'$(TOOLCHAIN_PATH)/test/main.cpp',
+				'$(TOOLCHAIN_PATH)/test/main.obj',
+				'$(TOOLCHAIN_PATH)/test/test.release.exe',
+				'?$(TOOLCHAIN_PATH)/test/test.release.exe.intermediate.manifest',
+				'$(TOOLCHAIN_PATH)/test/test.release.pdb',
 			}
 
 		else
@@ -62,35 +62,35 @@ Pass 3
 Pass 1 
 *** found 10 target(s)...
 *** updating 6 target(s)...
-@ WriteFile <$(PLATFORM_CONFIG):test>foo.cpp 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):test>foo.o 
+@ WriteFile <$(TOOLCHAIN_GRIST):test>foo.cpp 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):test>foo.o 
 *** updated 3 target(s)...
 Pass 2 
 *** found 11 target(s)...
 *** updating 4 target(s)...
-@ WriteFile <$(PLATFORM_CONFIG):test>foo.h 
-@ WriteFile <$(PLATFORM_CONFIG):test>main.cpp 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):test>main.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
+@ WriteFile <$(TOOLCHAIN_GRIST):test>foo.h 
+@ WriteFile <$(TOOLCHAIN_GRIST):test>main.cpp 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):test>main.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test
 *** updated 4 target(s)...
 Pass 3 
 *** found 8 target(s)...
 ]]
 
 			pass1Dirs = {
-				'$(PLATFORM_CONFIG)/',
-				'$(PLATFORM_CONFIG)/test/',
+				'$(TOOLCHAIN_PATH)/',
+				'$(TOOLCHAIN_PATH)/test/',
 			}
 
 			pass1Files = {
 				'foo.h',
 				'Jamfile.jam',
 				'test.lua',
-				'$(PLATFORM_CONFIG)/test/foo.cpp',
-				'$(PLATFORM_CONFIG)/test/foo.o',
-				'$(PLATFORM_CONFIG)/test/main.cpp',
-				'$(PLATFORM_CONFIG)/test/main.o',
-				'$(PLATFORM_CONFIG)/test/test.release',
+				'$(TOOLCHAIN_PATH)/test/foo.cpp',
+				'$(TOOLCHAIN_PATH)/test/foo.o',
+				'$(TOOLCHAIN_PATH)/test/main.cpp',
+				'$(TOOLCHAIN_PATH)/test/main.o',
+				'$(TOOLCHAIN_PATH)/test/test.release',
 			}
 		end
 
@@ -107,12 +107,12 @@ Pass 3
 Pass 1
 *** found 4 target(s)...
 *** updating 1 target(s)...
-@ Clean <win32!release>clean:test
+@ Clean <$(TOOLCHAIN_GRIST)>clean:test
 *** updated 1 target(s)...
 *** executing pass 2...
 Pass 2
 *** found 2 target(s)...
-@ Clean <win32!release>clean:test
+@ Clean <$(TOOLCHAIN_GRIST)>clean:test
 *** updated 1 target(s)...
 *** executing pass 3...
 Pass 3
@@ -123,11 +123,11 @@ Pass 3
 Pass 1
 *** found 4 target(s)...
 *** updating 1 target(s)...
-@ Clean <$(PLATFORM_CONFIG)>clean:test
+@ Clean <$(TOOLCHAIN_GRIST)>clean:test
 *** updated 1 target(s)...
 Pass 2
 *** found 2 target(s)...
-@ Clean <$(PLATFORM_CONFIG)>clean:test
+@ Clean <$(TOOLCHAIN_GRIST)>clean:test
 *** updated 1 target(s)...
 Pass 3
 *** found 2 target(s)...

@@ -1,0 +1,5 @@
+C._ApplicationFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._ApplicationFromObjects_LinkFlags ;
+C._ApplicationFromObjects_PostBuild on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._ApplicationFromObjects_PostBuild ;
+C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._MultiCppCompile_SetupFlags ;
+C._SharedLibraryFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._SharedLibraryFromObjects_LinkFlags ;
+

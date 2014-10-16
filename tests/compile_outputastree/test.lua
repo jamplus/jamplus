@@ -168,24 +168,24 @@ function Test()
 
 		do
 			local pattern = [[
-*** found 88 target(s)...
-*** updating 56 target(s)...
-@ C.vc.C++ <win32!release:liba>rootfile.obj
-!NEXT!@ C.vc.C++ <win32!release:liba>treea/treeb/deepfile.obj
-!NEXT!@ C.vc.C++ <win32!release:liba>../outer/outer.obj
-!NEXT!@ C.vc.Archive <win32!release:liba>liba.lib
-!NEXT!@ C.vc.C++ <win32!release:libb>filea.obj
-!NEXT!@ C.vc.C++ <win32!release:libb>onelevel/oneleveldeeper.obj
-!NEXT!@ C.vc.C++ <win32!release:libb>../outerb/outer.obj
-!NEXT!@ C.vc.Archive <win32!release:libb>libb.lib
-!NEXT!@ C.vc.C++ <win32!release:libc>src/Loading/Loading.obj
-!NEXT!@ C.vc.C++ <win32!release:libc>src/Saving/Saving1.obj
-!NEXT!@ C.vc.C++ <win32!release:libc>src/memory/memorya.obj
-!NEXT!@ C.vc.C++ <win32!release:libc>src/integral/integral1.obj
-!NEXT!@ C.vc.C++ <win32!release:libc>src/win32/Loading/Loading.obj
-!NEXT!@ C.vc.C++ <win32!release:libc>src/win32/Saving/Saving1.obj
-!NEXT!@ C.vc.Archive <win32!release:libc>libc.lib
-*** updated 27 target(s)...
+*** found 64 target(s)...
+*** updating 38 target(s)...
+@ C.vc.C++ <$(TOOLCHAIN_GRIST):liba>rootfile.obj
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):liba>treea/treeb/deepfile.obj
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):liba>../outer/outer.obj
+!NEXT!@ C.vc.Archive <$(TOOLCHAIN_GRIST):liba>liba.lib
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libb>filea.obj
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libb>onelevel/oneleveldeeper.obj
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libb>../outerb/outer.obj
+!NEXT!@ C.vc.Archive <$(TOOLCHAIN_GRIST):libb>libb.lib
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/Loading/Loading.obj
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/Saving1.obj
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memorya.obj
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/integral/integral1.obj
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/win32/Loading/Loading.obj
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/win32/Saving/Saving1.obj
+!NEXT!@ C.vc.Archive <$(TOOLCHAIN_GRIST):libc>libc.lib
+*** updated 20 target(s)...
 ]]
 
 			TestPattern(pattern, RunJam{ 'liba', 'libb', 'libc' })
@@ -196,7 +196,7 @@ function Test()
 		---------------------------------------------------------------------------
 		do
 			local pattern = [[
-*** found 88 target(s)...
+*** found 64 target(s)...
 ]]
 
 			TestPattern(pattern, RunJam{ 'liba', 'libb', 'libc' })
@@ -314,27 +314,27 @@ function Test()
 			local pattern = [[
 *** found 54 target(s)...
 *** updating 32 target(s)...
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):liba>rootfile.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):liba>treea/treeb/deepfile.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):liba>../outer/outer.o 
-@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):liba>liba.a 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):liba>rootfile.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):liba>treea/treeb/deepfile.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):liba>../outer/outer.o 
+@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):liba>liba.a 
 *** updated 8 target(s)...
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libb>filea.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libb>fileb.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libb>filec.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libb>onelevel/oneleveldeeper.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libb>../outerb/outer.o 
-@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):libb>libb.a 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>filea.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>fileb.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>filec.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>onelevel/oneleveldeeper.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>../outerb/outer.o 
+@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):libb>libb.a 
 *** updated 10 target(s)...
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libc>src/Loading/Loading.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libc>src/Saving/Saving1.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libc>src/Saving/Saving3.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libc>src/Saving/SavingB.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libc>src/memory/memorya.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libc>src/memory/memoryb.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libc>src/integral/integral1.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libc>src/integral/integral2.o 
-@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):libc>libc.a 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Loading/Loading.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/Saving1.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/Saving3.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/SavingB.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memorya.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memoryb.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/integral/integral1.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/integral/integral2.o 
+@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):libc>libc.a 
 *** updated 14 target(s)...
 ]]
 

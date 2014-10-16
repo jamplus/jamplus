@@ -1,0 +1,39 @@
+if ! [ RuleExists FindGCC ] {
+	rule FindGCC {
+		local PATHS =
+			$(PATH)
+		;
+
+		local gcc = [ Glob $(PATHS) : gcc ] ;
+		if ! $(gcc)
+		{
+			return ;
+		}
+		return [ Match (.+)/ : $(gcc[1]) ] ;
+	}
+}
+
+rule C.AutoDetect {
+	local COMPILER_BIN_PATH = [ FindGCC ] ;
+
+	if ! $(COMPILER_BIN_PATH) {
+		return ;
+	}
+
+	C.COMPILER = gcc ;
+
+	C.COMPILER_SUITE = gcc ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN_GRIST).info! ;
+
+	COMPILER_BIN_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH) ;
+
+	C.ToolchainHelperOnce gcc ;
+	C.ToolchainHelperOnce gcc-shared ;
+
+	if $(C.PLATFORM) != *  &&  $(C.CONFIG) != * {
+		C.ToolchainHelperOnce gcc-$(C.PLATFORM) ;
+	}
+
+	return $(C.COMPILER) ;
+}
+

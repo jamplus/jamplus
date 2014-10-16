@@ -1,0 +1,16 @@
+if $(C.COMPILER) {
+    C.ToolchainHelper $(C.COMPILER)-autodetect ;
+    if [ C.AutoDetect $(C.COMPILER) ] {
+        C.ToolchainHelper $(C.COMPILER_SUITE)-$(C.PLATFORM)-$(C.CONFIG) ;
+    }
+} else {
+    C.ToolchainHelper vc-autodetect ;
+    if [ C.AutoDetect ] {
+        C.ToolchainHelper $(C.COMPILER_SUITE)-$(C.PLATFORM)-$(C.CONFIG) ;
+    } else {
+        C.ToolchainHelper mingw-autodetect ;
+        C.AutoDetect ;
+        C.ToolchainHelper mingw-$(C.PLATFORM)-$(C.CONFIG) ;
+    }
+}
+

@@ -1,0 +1,74 @@
+rule C.UseDotNet TARGET : OPTIONS
+{
+	C.ActiveTarget $(TARGET) ;
+
+	local includePaths ;
+	local referencePaths ;
+	local linkPaths ;
+	switch $(C.COMPILER)
+	{
+		case vs2005 :
+			DOTNETSDK = @("$(MSSDK)/../SDK/v2.0":R=) ;
+			includePaths = @(include:R=$(DOTNETSDK)) "$(windir)/Microsoft.NET/Framework/v2.0.50727" ;
+			referencePaths = "$(windir)/Microsoft.NET/Framework/v2.0.50727" ;
+			linkPaths = @(Lib:R=$(DOTNETSDK)) ;
+
+		case vs2008 :
+			DOTNETSDK = "$(MSSDK)" ;
+			includePaths = @(Include:R=$(DOTNETSDK)) "$(windir)/Microsoft.NET/Framework/v2.0.50727" ;
+			linkPaths = @(Lib:R=$(DOTNETSDK)) ;
+			referencePaths = "$(windir)/Microsoft.NET/Framework/v2.0.50727" ;
+
+		case vs2010 :
+			DOTNETSDK = "$(MSSDK)" ;
+			includePaths = @(Include:R=$(DOTNETSDK)) "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
+			linkPaths = @(Lib:R=$(DOTNETSDK)) ;
+			referencePaths = "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
+
+		case vs2012 :
+			DOTNETSDK = "$(MSSDK)" ;
+			includePaths = @(Include:R=$(DOTNETSDK)) "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
+			linkPaths = @(Lib:R=$(DOTNETSDK)) ;
+			referencePaths = "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
+
+		case vs2013 :
+			DOTNETSDK = "$(MSSDK)" ;
+			includePaths = @(Include:R=$(DOTNETSDK)) "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
+			linkPaths = @(Lib:R=$(DOTNETSDK)) ;
+			referencePaths = "$(windir)/Microsoft.NET/Framework/v4.0.30319" ;
+	}
+
+	C.IncludeDirectories : $(includePaths) ;
+	C.ReferenceDirectories : $(referencePaths) ;
+
+	if link in $(OPTIONS)
+	{
+		C.LinkDirectories : $(linkPaths) ;
+	}
+}
+
+
+rule C.ReferenceDirectories TARGET : DIRECTORIES
+{
+	THE_CONFIG ?= * ;
+	THE_PLATFORM ?= * ;
+	REFERENCEDIRECTORIES.$(THE_PLATFORM).$(THE_CONFIG) on $(TARGET) += $(DIRECTORIES:R=$(SUBDIR)) ;
+}
+
+
+rule C.StrongName TARGET : SNK_NAME
+{
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	local grist = $(TARGET) ;
+	local _t = $(LINK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local snk = [ C.GristFiles $(SNK_NAME) ] ;
+	Depends $(_t) : $(snk) ;
+	SearchSource $(snk) : $(SEARCH_SOURCE) ;
+	StrongName1 $(_t) : $(snk) ;
+}
+
+actions StrongName1
+{
+	"$(DOTNETSDK)/bin/sn" -q -R "$(1[1])" "$(2)"
+}
+

@@ -19,14 +19,14 @@ if $(NT) {
 
 actions ConvertImageHelper
 {
-	copy $(2) $(1)
+	copy $(2:C) $(1:C)
 }
 
 } else {
 
 actions ConvertImageHelper
 {
-	cp $(2) $(1)
+	cp $(2:C) $(1:C)
 }
 
 }

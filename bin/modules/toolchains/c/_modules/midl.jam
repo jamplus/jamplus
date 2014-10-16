@@ -1,0 +1,161 @@
+if ! $(TARGETINFO_LOCATE)
+{
+
+# OPTIONS = proxy ;
+rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
+{
+	ActiveTarget $(PARENT) ;
+
+	BASE_NAME = $(BASE_NAME:L) ;
+	BASE_NAME = [ C.GristFiles $(PARENT) : $(BASE_NAME) ] ;
+	local tlbFile = $(BASE_NAME:S=.tlb) ;
+	local hFile ;
+	if $(C.COMPILER) = vc6 {
+		hFile = @($(BASE_NAME:GDB)types:S=.h) ;
+	} else {
+		hFile = $(BASE_NAME:S=.h) ;
+	}
+	local iidFile = $(BASE_NAME:S=_i.c) ;
+	local proxyFile = $(BASE_NAME:S=_p.c) ;
+	local targets ;
+
+	if ! ( postmidl in $(OPTIONS) )
+	{
+		if $(C.COMPILER) = vc6 {
+			targets += $(tlbFile) $(hFile) $(iidFile) ;
+		} else {
+			targets += $(tlbFile) $(hFile) $(iidFile) ;
+			if proxy in $(OPTIONS)
+			{
+				targets += $(proxyFile) ;
+			}
+		}
+		MakeLocate $(targets) : $(LOCATE_TARGET) ;
+
+		local flags ;
+#		on $(PARENT) flags += $(MIDLFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+flags += $(MIDLFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+#		on C.* flags += $(MIDLFLAGS.$(CONFIG)) $(MIDLFLAGS.*) ;
+
+		if $(C.COMPILER) = vc6 {
+			flags += /tlb $(tlbFile:T) /h $(hFile:T) ;
+		} else {
+			flags += /tlb $(tlbFile:T) /h $(hFile:T) /iid $(iidFile:T) ;
+			if proxy in $(OPTIONS)
+			{
+				flags += /proxy $(proxyFile:T) ;
+			}
+		}
+
+		MIDLINCLUDE on $(targets) = $(tlbFile:TD) ;
+		FLAGS on $(targets) = $(flags) ;
+	}
+	else
+	{
+		targets += $(hFile) $(iidFile) ;
+		if proxy in $(OPTIONS)
+		{
+			targets += $(proxyFile) ;
+		}
+		MakeLocate $(targets) : $(CWD) ;
+		flags += /h \"$(hFile:T)\" /iid \"$(iidFile:T)\" ;
+		FLAGS on $(targets) = $(flags) ;
+	}
+
+	Clean clean:$(PARENT) : $(targets) ;
+
+	return $(targets) ;
+}
+
+rule C.MidlCompiler PARENT : SOURCE
+{
+	PARENT = [ ActiveTarget $(PARENT) ] ;
+
+	SOURCE = [ C.GristFiles $(PARENT) : $(SOURCE) ] ;
+	SearchSource $(SOURCE) ;
+
+	local targets = [ C.MidlFlags $(PARENT) : $(SOURCE) ] ;
+	Depends $(targets) : $(SOURCE) ;
+
+	local MIDL ;
+	local MIDLFLAGS ;
+
+	switch $(C.COMPILER)
+	{
+		case vc6 :
+			local binPath = @($(MSVCBIN)/:R=) ;
+			LINK_PATHS += $(binPath) ;
+			MIDL = "$(binPath)/MIDL" ;
+			MIDLFLAGS.debug on * = /nologo /D "_DEBUG" /mktyplib203 /env win32 ;
+			MIDLFLAGS.release on * = /nologo /D "NDEBUG" /mktyplib203 /env win32 ;
+
+		case vs2005 :
+			local binPath = @($(MSVCNT)/../Common7/Tools/Bin:R=) ;
+			LINK_PATHS += $(binPath) ;
+			MIDL = "$(binPath)/Midl" ;
+			MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
+			MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
+
+		case vs2008 :
+			LINK_PATHS += $(MSSDK_BINDIR) ;
+			MIDL = "$(MSSDK_BINDIR)/midl" ;
+			MIDLFLAGS.debug on * = /D "_DEBUG" /char signed /env win32 /Oicf ;
+			MIDLFLAGS.release on * = /D "NDEBUG" /char signed /env win32 ;
+
+		case vs2010 :
+			LINK_PATHS += $(MSSDK_BINDIR) ;
+			MIDL = "$(MSSDK_BINDIR:Z=$(C.COMPILER_SUITE_SYMBOL))/midl" ;
+			switch $(CONFIG) {
+				case debug :
+					MIDLFLAGS = /D "_DEBUG" /char signed /env win32 /Oicf ;
+				case release :
+					MIDLFLAGS = /D "NDEBUG" /char signed /env win32 ;
+			}
+
+		case vs2012 :
+			LINK_PATHS += $(MSSDK_BINDIR) ;
+			MIDL = "$(MSSDK_BINDIR:Z=$(C.COMPILER_SUITE_SYMBOL))/midl" ;
+			switch $(CONFIG) {
+				case debug :
+					MIDLFLAGS = /D "_DEBUG" /char signed /env win32 /Oicf ;
+				case release :
+					MIDLFLAGS = /D "NDEBUG" /char signed /env win32 ;
+			}
+
+		case vs2013 :
+			LINK_PATHS += $(MSSDK_BINDIR) ;
+			MIDL = "$(MSSDK_BINDIR:Z=$(C.COMPILER_SUITE_SYMBOL))/midl" ;
+			switch $(CONFIG) {
+				case debug :
+					MIDLFLAGS = /D "_DEBUG" /char signed /env win32 /Oicf ;
+				case release :
+					MIDLFLAGS = /D "NDEBUG" /char signed /env win32 ;
+			}
+	}
+
+	MIDL on $(C.COMPILER_SUITE_SYMBOL) = $(MIDL) ;
+	MIDLFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(MIDLFLAGS) ;
+	C.Midl $(targets) : $(SOURCE) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+	return $(targets) ;
+}
+
+
+actions C.Midl
+{
+	set PATH=$(MSVCBIN);$(MSVCNT_BIN_PATH:J=;);%PATH%
+	set INCLUDE=$(MSSDK_STDHDRS:J=;);%INCLUDE%
+	"$(MIDL)" $(FLAGS) /out $(1[1]:D) $(2)
+}
+
+} else {
+
+rule C.MidlCompiler
+{
+}
+
+rule C.MidlFlags
+{
+}
+
+}

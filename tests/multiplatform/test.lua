@@ -28,15 +28,15 @@ function Test()
 		local pattern
 	    if Platform == 'win32' then
 			pattern = [[
-*** found 22 target(s)...
-*** updating 6 target(s)...
-@ C.vc.CC <win32!release:platform>platform.obj
-!NEXT!@ C.vc.Link <win32!release:platform>platform.exe
-!NEXT!*** updated 6 target(s)...
+*** found 20 target(s)...
+*** updating 5 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>platform.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):platform>platform.exe
+!NEXT!*** updated 5 target(s)...
 ]]
 			pass1Directories = {
-				'win32-release/',
-				'win32-release/platform/',
+				'$(TOOLCHAIN_PATH)/',
+				'$(TOOLCHAIN_PATH)/platform/',
 			}
 
 			pass1Files =
@@ -50,12 +50,12 @@ function Test()
 				'macosx.c',
 				'platform.c',
 				'win32.c',
-				'win32-release/platform/filerelease.obj',
-				'win32-release/platform/platform.obj',
-				'win32-release/platform/platform.release.exe',
-				'?win32-release/platform/platform.release.exe.intermediate.manifest',
-				'win32-release/platform/platform.release.pdb',
-				'win32-release/platform/win32.obj',
+				'$(TOOLCHAIN_PATH)/platform/filerelease.obj',
+				'$(TOOLCHAIN_PATH)/platform/platform.obj',
+				'$(TOOLCHAIN_PATH)/platform/platform.release.exe',
+				'?$(TOOLCHAIN_PATH)/platform/platform.release.exe.intermediate.manifest',
+				'$(TOOLCHAIN_PATH)/platform/platform.release.pdb',
+				'$(TOOLCHAIN_PATH)/platform/win32.obj',
 			}
 
 		else
@@ -63,10 +63,10 @@ function Test()
 				pattern = [[
 *** found 12 target(s)...
 *** updating 5 target(s)...
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):platform>platform.o 
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):platform>macosx.o 
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):platform>filerelease.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):platform>platform
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>platform.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>macosx.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>filerelease.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):platform>platform
 *** updated 5 target(s)...
 ]]
 			else
@@ -82,8 +82,8 @@ function Test()
 			end
 
 			pass1Directories = {
-				'$(PLATFORM_CONFIG)/',
-				'$(PLATFORM_CONFIG)/platform/',
+				'$(TOOLCHAIN_PATH)/',
+				'$(TOOLCHAIN_PATH)/platform/',
 			}
 
 			pass1Files = {
@@ -97,14 +97,14 @@ function Test()
 				'platform.c',
 				'test.lua',
 				'win32.c',
-				'$(PLATFORM_CONFIG)/platform/filerelease.o',
-				'$(PLATFORM_CONFIG)/platform/macosx.o',
-				'$(PLATFORM_CONFIG)/platform/platform.o',
-				'$(PLATFORM_CONFIG)/platform/platform.release',
+				'$(TOOLCHAIN_PATH)/platform/filerelease.o',
+				'$(TOOLCHAIN_PATH)/platform/macosx.o',
+				'$(TOOLCHAIN_PATH)/platform/platform.o',
+				'$(TOOLCHAIN_PATH)/platform/platform.release',
 			}
 
 			if Platform == 'macosx' then
-				pass1Files[#pass1Files + 1] = '$(PLATFORM_CONFIG)/platform/macosx.o'
+				pass1Files[#pass1Files + 1] = '$(TOOLCHAIN_PATH)/platform/macosx.o'
 			else
 				pass1Files[#pass1Files + 1] = 'linux.o'
 			end
@@ -128,7 +128,7 @@ RELEASE: What's up?!
 		TestPattern(pattern2, osprocess.collectlines{'win32-release\\platform\\platform.release.exe'})
 
 		pattern3 = [[
-*** found 22 target(s)...
+*** found 20 target(s)...
 ]]
 
 	elseif Platform == 'macosx' then

@@ -1,8 +1,0 @@
-C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
-IncludeModule c-compilers/groovyplatform-autodetect ;
-C.AutoDetect ;
-
-C.Flags CC  : * : -g -O0 ;
-C.Flags C++ : * : -g -O0 ;
-
-VSCONFIGMAP.debug = "Groovy Debug" ;

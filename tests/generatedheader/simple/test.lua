@@ -18,18 +18,19 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 21 target(s)...
-*** updating 6 target(s)...
-@ C.vc.CC <win32!release:test>main.obj
-!NEXT!@ C.vc.Link <win32!release:test>test.exe
-*** updated 6 target(s)...
+*** found 19 target(s)...
+*** updating 5 target(s)...
+@ WriteFile <$(TOOLCHAIN_GRIST):test>test.h
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
+*** updated 5 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
 
 		local pass1Dirs = {
-			'win32-release/',
-			'win32-release/test/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/test/',
 		}
 		
 		local pass1Files =
@@ -38,18 +39,18 @@ function Test()
 			'main.c',
 			'test.c',
 			'test.h',
-			'win32-release/test/main.obj',
-			'win32-release/test/test.obj',
-			'win32-release/test/test.release.exe',
-			'?win32-release/test/test.release.exe.intermediate.manifest',
-			'win32-release/test/test.release.pdb',
+			'$(TOOLCHAIN_PATH)/test/main.obj',
+			'$(TOOLCHAIN_PATH)/test/test.obj',
+			'$(TOOLCHAIN_PATH)/test/test.release.exe',
+			'?$(TOOLCHAIN_PATH)/test/test.release.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/test/test.release.pdb',
 		}
 
 		TestFiles(pass1Files)
 		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 21 target(s)...
+*** found 19 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	
@@ -57,10 +58,10 @@ function Test()
 		ospath.touch('test.h')
 
 		local pattern3 = [[
-*** found 21 target(s)...
+*** found 19 target(s)...
 *** updating 2 target(s)...
-@ C.vc.CC <win32!release:test>main.obj
-!NEXT!@ C.vc.Link <win32!release:test>test.exe
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
@@ -71,18 +72,18 @@ function Test()
 		local pattern = [[
 *** found 11 target(s)...
 *** updating 5 target(s)...
-@ WriteFile <$(PLATFORM_CONFIG):test>test.h
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>test.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test 
+@ WriteFile <$(TOOLCHAIN_GRIST):test>test.h
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>test.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test 
 *** updated 5 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
 
 		local pass1Dirs = { 
-			'macosx32-release/',
-			'macosx32-release/test/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/test/',
 		}
 
 		local pass1Files = { 
@@ -91,9 +92,9 @@ function Test()
 			'test.c',
 			'test.h',
 			'test.lua',
-			'macosx32-release/test/main.o',
-			'macosx32-release/test/test.o',
-			'macosx32-release/test/test.release',
+			'$(TOOLCHAIN_PATH)/test/main.o',
+			'$(TOOLCHAIN_PATH)/test/test.o',
+			'$(TOOLCHAIN_PATH)/test/test.release',
 		}	
 
 		TestFiles(pass1Files)
@@ -110,8 +111,8 @@ function Test()
 		local pattern3 = [[
 *** found 11 target(s)...
 *** updating 2 target(s)...
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

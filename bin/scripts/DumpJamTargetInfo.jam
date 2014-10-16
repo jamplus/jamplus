@@ -1,11 +1,12 @@
 JAM_MODULES_PATH += $(JAMFILE_ROOT) ;
 
-IncludeModule c-autodetect ;
+PLATFORM ?= $(C.PLATFORM) ;
+CONFIG ?= $(C.CONFIG) ;
 
 local platformName = $(PLATFORM) ;
-if $(PLATFORM) = * 	{ platformName = !all! ; }
+if $(platformName) = * 	{ platformName = _all_ ; }
 local configName = $(CONFIG) ;
-if $(CONFIG) = * 	{ configName = !all! ; }
+if $(configName) = * 	{ configName = _all_ ; }
 TargetInfoFile = targetinfo.$(platformName).$(configName).lua ;
 
 MakeLocate $(TargetInfoFile) : $(TARGETINFO_LOCATE) ;
@@ -23,7 +24,7 @@ rule DumpSources prefix : SOURCES
 
 rule ProjectGroup TARGET : FOLDERNAME : PROJECTS
 {
-	if $(PLATFORM) != *  ||  $(CONFIG) != *  {  return ;  }
+	#if $(PLATFORM) != *  ||  $(CONFIG) != *  {  return ;  }
 	if ! $(FOLDERNAME)  ||  ! $(PROJECTS)  {  return ;  }
 
 	local workspace ;
@@ -124,10 +125,10 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	local defines ;
 	local hdrs = $(SEARCH_SOURCE) ;
 
-	on $(C.ACTIVE_TOOLCHAIN_*) {
-		defines += $(DEFINES) ;
-		hdrs += $(HDRS) ;
-	}
+	#on $(C.ACTIVE_TOOLCHAIN_*) {
+		#defines += $(DEFINES) ;
+		#hdrs += $(HDRS) ;
+	#}
 
 	local forceIncludes ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) {
@@ -188,15 +189,15 @@ Assign NoWorkspace to one of the two to prevent the conflict." ;
 	Contents += "$(TAB)$(TAB)[[$(VALID_CONFIGS)]],$(NEWLINE)" ;
 	Contents += "}$(NEWLINE)$(NEWLINE)" ;
 
-	if $(CONFIG) != * {
+	#if $(CONFIG) != * {
 		Contents += [ CompilerPlatformInfo ] ;
 		Contents += [ CompilerConfigInfo ] ;
-	}
+	#}
 
-	if $(PLATFORM) != *
-	{
-		return ;
-	}
+	#if $(PLATFORM) != *
+	#{
+		#return ;
+	#}
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 	local solutionInfo = "Workspaces['$(WORKSPACE_NAME)']" ;
@@ -230,47 +231,55 @@ actions WriteTargetInfoFileHelper
 
 Contents += "-- This file is generated.  Do not modify.$(NEWLINE)$(NEWLINE)" ;
 
-if $(PLATFORM) = *  &&  $(CONFIG) = * {
-	Contents += "function concat(l, r)
-	local out = {}
-	if l then
-		for _, v in ipairs(l) do
+#if $(PLATFORM) = *  &&  $(CONFIG) = * {
+	Contents += "if not concat then
+	function concat(l, r)
+		local out = {}
+		if l then
+			for _, v in ipairs(l) do
+				table.insert(out, v)
+			end
+		end
+		for _, v in ipairs(r) do
 			table.insert(out, v)
 		end
+		return out
 	end
-	for _, v in ipairs(r) do
-		table.insert(out, v)
-	end
-	return out
 end
 
-local autoWriteMetaTable = { active = true }
-AutoWriteMetaTable = autoWriteMetaTable
+if not AutoWriteMetaTable then
+	local autoWriteMetaTable = { active = true }
+	AutoWriteMetaTable = autoWriteMetaTable
 
-function autoWriteMetaTable.__index(table, key)
-	local t = rawget(table, key)
-	if autoWriteMetaTable.active and not t then
-		t = {}
-		setmetatable(t, autoWriteMetaTable)
-		rawset(table, key, t)
+	function autoWriteMetaTable.__index(table, key)
+		local t = rawget(table, key)
+		if autoWriteMetaTable.active and not t then
+			t = {}
+			setmetatable(t, autoWriteMetaTable)
+			rawset(table, key, t)
+		end
+		return t
 	end
-	return t
+
+	function autoWriteMetaTable.__newindex(table, key, value)
+		local t = rawget(table, key)
+		if not t then
+			rawset(table, key, value)
+			t = rawget(table, key)
+		end
+		return t
+	end
 end
 
-function autoWriteMetaTable.__newindex(table, key, value)
-	local t = rawget(table, key)
-	if not t then
-		rawset(table, key, value)
-		t = rawget(table, key)
-	end
-	return t
+if not Projects then
+	Projects = setmetatable({}, AutoWriteMetaTable)
 end
-
-Projects = setmetatable({}, autoWriteMetaTable)
-Workspaces = setmetatable({}, autoWriteMetaTable)
+if not Workspaces then
+	Workspaces = setmetatable({}, AutoWriteMetaTable)
+end
 
 " ;
-}
+#}
 
 JAMFILE = Jamfile.jam ;
 include $(JAMFILE) ;

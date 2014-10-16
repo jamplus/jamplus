@@ -14,26 +14,26 @@ function Test()
 		{
 			'Building appA...',
 			'Building appB...',
-			'*** found 33 target(s)...',
-			'*** updating 7 target(s)...',
-			'@ C.vc.C++ <win32!release:appA>appA.obj',
-			'!NEXT!@ C.vc.Link <win32!release:appA>appA.exe',
-			'!NEXT!@ C.vc.C++ <win32!release:appB>appB.obj',
-			'!NEXT!@ C.vc.Link <win32!release:appB>appB.exe',
-			'*** updated 7 target(s)...',
+			'*** found 31 target(s)...',
+			'*** updating 6 target(s)...',
+			'@ C.vc.C++ <$(TOOLCHAIN_GRIST):appA>appA.obj',
+			'!NEXT!@ C.vc.Link <$(TOOLCHAIN_GRIST):appA>appA.exe',
+			'!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):appB>appB.obj',
+			'!NEXT!@ C.vc.Link <$(TOOLCHAIN_GRIST):appB>appB.exe',
+			'*** updated 6 target(s)...',
 		}
 
 		TestPattern(run1pattern, RunJam())
 
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'win32-release/appA/appA.obj',
-			'win32-release/appA/appA.release.exe',
-			'win32-release/appA/appA.release.pdb',
-			'win32-release/appB/appB.obj',
-			'win32-release/appB/appB.release.exe',
-			'win32-release/appB/appB.release.pdb',
-			'?vc.pdb'
+			'$(TOOLCHAIN_PATH)/appA/appA.obj',
+			'$(TOOLCHAIN_PATH)/appA/appA.release.exe',
+			'$(TOOLCHAIN_PATH)/appA/appA.release.pdb',
+			'$(TOOLCHAIN_PATH)/appB/appB.obj',
+			'$(TOOLCHAIN_PATH)/appB/appB.release.exe',
+			'$(TOOLCHAIN_PATH)/appB/appB.release.pdb',
+			'?vc.pdb',
 		}
 
 		---------------------------------------------------------------------------
@@ -42,8 +42,8 @@ Building appA...
 Building appB... 
 *** found 6 target(s)...
 *** updating 2 target(s)...
-@ Clean <win32!release>clean:appA 
-@ Clean <win32!release>clean:appB 
+@ Clean <$(TOOLCHAIN_GRIST)>clean:appA 
+@ Clean <$(TOOLCHAIN_GRIST)>clean:appB 
 *** updated 2 target(s)...
 ]]
 		TestPattern(cleanPattern, RunJam{ 'clean' })
@@ -52,49 +52,49 @@ Building appB...
 		---------------------------------------------------------------------------
 		local appAPattern = [[
 Building appA...
-*** found 17 target(s)...
-*** updating 4 target(s)...
-@ C.vc.C++ <win32!release:appA>appA.obj
-!NEXT!@ C.vc.Link <win32!release:appA>appA.exe
-*** updated 4 target(s)...
+*** found 15 target(s)...
+*** updating 3 target(s)...
+@ C.vc.C++ <$(TOOLCHAIN_GRIST):appA>appA.obj
+!NEXT!@ C.vc.Link <$(TOOLCHAIN_GRIST):appA>appA.exe
+*** updated 3 target(s)...
 ]]
 
 		TestPattern(appAPattern, RunJam{ 'appA' })
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'win32-release/appA/appA.obj',
-			'win32-release/appA/appA.release.exe',
-			'win32-release/appA/appA.release.pdb',
+			'$(TOOLCHAIN_PATH)/appA/appA.obj',
+			'$(TOOLCHAIN_PATH)/appA/appA.release.exe',
+			'$(TOOLCHAIN_PATH)/appA/appA.release.pdb',
 --			'?vc.pdb'
 		}
 
 		local appBPattern = [[
 Building appB...
-*** found 17 target(s)...
+*** found 15 target(s)...
 *** updating 3 target(s)...
-@ C.vc.C++ <win32!release:appB>appB.obj
-!NEXT!@ C.vc.Link <win32!release:appB>appB.exe
+@ C.vc.C++ <$(TOOLCHAIN_GRIST):appB>appB.obj
+!NEXT!@ C.vc.Link <$(TOOLCHAIN_GRIST):appB>appB.exe
 *** updated 3 target(s)...
 ]]
 
 		TestPattern(appBPattern, RunJam{ 'appB' })
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'win32-release/appA/appA.obj',
-			'win32-release/appA/appA.release.exe',
-			'win32-release/appA/appA.release.pdb',
-			'win32-release/appB/appB.obj',
-			'win32-release/appB/appB.release.exe',
-			'win32-release/appB/appB.release.pdb',
+			'$(TOOLCHAIN_PATH)/appA/appA.obj',
+			'$(TOOLCHAIN_PATH)/appA/appA.release.exe',
+			'$(TOOLCHAIN_PATH)/appA/appA.release.pdb',
+			'$(TOOLCHAIN_PATH)/appB/appB.obj',
+			'$(TOOLCHAIN_PATH)/appB/appB.release.exe',
+			'$(TOOLCHAIN_PATH)/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
 
 		RunJam{ 'clean:appA' }
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
-			'win32-release/appB/appB.obj',
-			'win32-release/appB/appB.release.exe',
-			'win32-release/appB/appB.release.pdb',
+			'$(TOOLCHAIN_PATH)/appB/appB.obj',
+			'$(TOOLCHAIN_PATH)/appB/appB.release.exe',
+			'$(TOOLCHAIN_PATH)/appB/appB.release.pdb',
 			'?vc.pdb'
 		}
 
@@ -110,10 +110,10 @@ Building appA...
 Building appB... 
 *** found 15 target(s)...
 *** updating 6 target(s)...
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):appA>appA.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):appA>appA$(SUFEXE) 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):appB>appB.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):appB>appB$(SUFEXE) 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):appA>appA.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):appA>appA$(SUFEXE) 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):appB>appB.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):appB>appB$(SUFEXE) 
 *** updated 6 target(s)...
 ]]
 
@@ -124,10 +124,10 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'$(PLATFORM_CONFIG)/appA/appA.o',
-			'$(PLATFORM_CONFIG)/appA/appA.release',
-			'$(PLATFORM_CONFIG)/appB/appB.o',
-			'$(PLATFORM_CONFIG)/appB/appB.release',
+			'$(TOOLCHAIN_PATH)/appA/appA.o',
+			'$(TOOLCHAIN_PATH)/appA/appA.release',
+			'$(TOOLCHAIN_PATH)/appB/appB.o',
+			'$(TOOLCHAIN_PATH)/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -136,8 +136,8 @@ Building appA...
 Building appB... 
 *** found 6 target(s)...
 *** updating 2 target(s)...
-@ Clean <$(PLATFORM_CONFIG)>clean:appA 
-@ Clean <$(PLATFORM_CONFIG)>clean:appB 
+@ Clean <$(TOOLCHAIN_GRIST)>clean:appA 
+@ Clean <$(TOOLCHAIN_GRIST)>clean:appB 
 *** updated 2 target(s)...
 ]]
 		TestPattern(cleanPattern, RunJam{ 'clean' })
@@ -148,8 +148,8 @@ Building appB...
 Building appA... 
 *** found 7 target(s)...
 *** updating 3 target(s)...
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):appA>appA.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):appA>appA$(SUFEXE) 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):appA>appA.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):appA>appA$(SUFEXE) 
 *** updated 3 target(s)...
 ]]
 
@@ -159,8 +159,8 @@ Building appA...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'$(PLATFORM_CONFIG)/appA/appA.o',
-			'$(PLATFORM_CONFIG)/appA/appA.release',
+			'$(TOOLCHAIN_PATH)/appA/appA.o',
+			'$(TOOLCHAIN_PATH)/appA/appA.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -168,8 +168,8 @@ Building appA...
 Building appB... 
 *** found 7 target(s)...
 *** updating 3 target(s)...
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):appB>appB.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):appB>appB$(SUFEXE)
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):appB>appB.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):appB>appB$(SUFEXE)
 *** updated 3 target(s)...
 ]]
 
@@ -179,10 +179,10 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'$(PLATFORM_CONFIG)/appA/appA.o',
-			'$(PLATFORM_CONFIG)/appA/appA.release',
-			'$(PLATFORM_CONFIG)/appB/appB.o',
-			'$(PLATFORM_CONFIG)/appB/appB.release',
+			'$(TOOLCHAIN_PATH)/appA/appA.o',
+			'$(TOOLCHAIN_PATH)/appA/appA.release',
+			'$(TOOLCHAIN_PATH)/appB/appB.o',
+			'$(TOOLCHAIN_PATH)/appB/appB.release',
 		}
 
 		---------------------------------------------------------------------------
@@ -192,7 +192,7 @@ Building appB...
 			'appB.cpp',
 			'Jamfile.jam',
 			'test.lua',
-			'$(PLATFORM_CONFIG)/appB/appB.o',
+			'$(TOOLCHAIN_PATH)/appB/appB.o',
 			'$(PLATFORM_CONFIG)/appB/appB.release',
 		}
 

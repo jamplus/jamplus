@@ -1,0 +1,4 @@
+C.Flags * : CC	: -g ;
+
+C.ToolchainHelper global_debug ;
+

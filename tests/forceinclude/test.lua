@@ -26,15 +26,15 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 32 target(s)...
-*** updating 12 target(s)...
-@ C.vc.C++ <win32!release:project1>project1.obj
-!NEXT!@ C.vc.C++ <win32!release:common>print.obj
-!NEXT!@ C.vc.Archive <win32!release:common>common.lib
-!NEXT!@ C.vc.C++ <win32!release:libA>libA.obj
-!NEXT!@ C.vc.Archive <win32!release:libA>libA.lib
-!NEXT!@ C.vc.Link <win32!release:project1>project1.exe
-!NEXT!*** updated 12 target(s)...
+*** found 26 target(s)...
+*** updating 9 target(s)...
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.obj
+!NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):common>print.obj
+!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):common>common.lib
+!NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.obj
+!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):libA>libA.lib
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
+!NEXT!*** updated 9 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
@@ -45,37 +45,37 @@ function Test()
 			'common/common.jam',
 			'common/print.cpp',
 			'common/print.h',
-			'common/win32-release/common/common.release.lib',
-			'common/win32-release/common/print.obj',
+			'common/$(TOOLCHAIN_PATH)/common/common.release.lib',
+			'common/$(TOOLCHAIN_PATH)/common/print.obj',
 			'libA/libA.cpp',
 			'libA/libA.jam',
-			'libA/win32-release/libA/libA.obj',
-			'libA/win32-release/libA/libA.release.lib',
+			'libA/$(TOOLCHAIN_PATH)/libA/libA.obj',
+			'libA/$(TOOLCHAIN_PATH)/libA/libA.release.lib',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/win32-release/project1/project1.obj',
-			'project1/win32-release/project1/project1.release.exe',
-			'?project1/win32-release/project1/project1.release.exe.intermediate.manifest',
-			'project1/win32-release/project1/project1.release.pdb',
+			'project1/$(TOOLCHAIN_PATH)/project1/project1.obj',
+			'project1/$(TOOLCHAIN_PATH)/project1/project1.release.exe',
+			'?project1/$(TOOLCHAIN_PATH)/project1/project1.release.exe.intermediate.manifest',
+			'project1/$(TOOLCHAIN_PATH)/project1/project1.release.pdb',
 		}
 
 		local pass1Directories = {
 			'common/',
 			'libA/',
 			'project1/',
-			'common/win32-release/',
-			'common/win32-release/common/',
-			'libA/win32-release/',
-			'libA/win32-release/libA/',
-			'project1/win32-release/',
-			'project1/win32-release/project1/',
+			'common/$(TOOLCHAIN_PATH)/',
+			'common/$(TOOLCHAIN_PATH)/common/',
+			'libA/$(TOOLCHAIN_PATH)/',
+			'libA/$(TOOLCHAIN_PATH)/libA/',
+			'project1/$(TOOLCHAIN_PATH)/',
+			'project1/$(TOOLCHAIN_PATH)/project1/',
 		}
 
 		TestFiles(pass1Files)
 		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
-*** found 32 target(s)...
+*** found 26 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	else
@@ -83,12 +83,12 @@ function Test()
 		local pattern = [[
 *** found 18 target(s)...
 *** updating 9 target(s)...
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>project1.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):common>print.o 
-@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):common>common.a 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libA>libA.o 
-@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):libA>libA.a 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):common>print.o 
+@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):common>common.a 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
+@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):libA>libA.a 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 9 target(s)...
 ]]
 
@@ -98,12 +98,12 @@ function Test()
 			'common/',
 			'libA/',
 			'project1/',
-			'common/macosx32-release/',
-			'common/macosx32-release/common/',
-			'libA/macosx32-release/',
-			'libA/macosx32-release/libA/',
-			'project1/macosx32-release/',
-			'project1/macosx32-release/project1/',
+			'common/$(TOOLCHAIN_PATH)/',
+			'common/$(TOOLCHAIN_PATH)/common/',
+			'libA/$(TOOLCHAIN_PATH)/',
+			'libA/$(TOOLCHAIN_PATH)/libA/',
+			'project1/$(TOOLCHAIN_PATH)/',
+			'project1/$(TOOLCHAIN_PATH)/project1/',
 		}
 
 		local pass1Files =
@@ -113,16 +113,16 @@ function Test()
 			'common/common.jam',
 			'common/print.cpp',
 			'common/print.h',
-			'common/macosx32-release/common/common.release.a',
-			'common/macosx32-release/common/print.o',
+			'common/$(TOOLCHAIN_PATH)/common/common.release.a',
+			'common/$(TOOLCHAIN_PATH)/common/print.o',
 			'libA/libA.cpp',
 			'libA/libA.jam',
-			'libA/macosx32-release/libA/libA.o',
-			'libA/macosx32-release/libA/libA.release.a',
+			'libA/$(TOOLCHAIN_PATH)/libA/libA.o',
+			'libA/$(TOOLCHAIN_PATH)/libA/libA.release.a',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/macosx32-release/project1/project1.o',
-			'project1/macosx32-release/project1/project1.release',
+			'project1/$(TOOLCHAIN_PATH)/project1/project1.o',
+			'project1/$(TOOLCHAIN_PATH)/project1/project1.release',
 		}
 
 		TestFiles(pass1Files)
@@ -139,12 +139,12 @@ function Test()
 
 	if Platform == 'win32' then
 		local pattern3 = [[
-*** found 32 target(s)...
+*** found 26 target(s)...
 *** updating 4 target(s)...
-@ C.vc.C++ <win32!release:project1>project1.obj
-!NEXT!@ C.vc.C++ <win32!release:libA>libA.obj
-!NEXT!@ C.vc.Archive <win32!release:libA>libA.lib
-!NEXT!@ C.vc.Link <win32!release:project1>project1.exe
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.obj
+!NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.obj
+!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):libA>libA.lib
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
 !NEXT!*** updated 4 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
@@ -152,10 +152,10 @@ function Test()
 		local pattern3 = [[
 *** found 18 target(s)...
 *** updating 4 target(s)...
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>project1.o 
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):libA>libA.o 
-@ C.$(COMPILER).Archive2 <$(PLATFORM_CONFIG):libA>libA.a 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
+@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):libA>libA.a 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 4 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

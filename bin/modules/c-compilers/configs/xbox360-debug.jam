@@ -1,9 +1,0 @@
-C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
-IncludeModule c-compilers/xbox360-autodetect ;
-
-C.CFlags * : /Od /EHsc /MTd /W3 /Z7 ;
-C.C++Flags * : /Od /EHsc /MTd /W3 /Z7 ;
-C.LibFlags * : ;
-C.LinkFlags * : /INCREMENTAL /DEBUG ;
-
-C.Defines * : _XBOX ;

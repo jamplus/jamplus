@@ -26,8 +26,8 @@ function Test()
 	if Platform == 'win32' and not Compiler then
 		pass1Directories = {
 			'includes/',
-			'win32-release/',
-			'win32-release/main/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/main/',
 		}
 
 		pass1Files = {
@@ -36,33 +36,33 @@ function Test()
 			'mypch.cpp',
 			'includes/mypch.h',
 			'includes/usefuldefine.h',
-			'win32-release/main/main.obj',
-			'win32-release/main/main.release.exe',
-			'?win32-release/main/main.release.exe.intermediate.manifest',
-			'win32-release/main/main.release.pdb',
-			'win32-release/main/mypch.h.pch',
-			'win32-release/main/mypch.obj',
+			'$(TOOLCHAIN_PATH)/main/main.obj',
+			'$(TOOLCHAIN_PATH)/main/main.release.exe',
+			'?$(TOOLCHAIN_PATH)/main/main.release.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/main/main.release.pdb',
+			'$(TOOLCHAIN_PATH)/main/mypch.h.pch',
+			'$(TOOLCHAIN_PATH)/main/mypch.obj',
 		}
 
 		pass1Pattern = [[
-			*** found 23 target(s)...
-			*** updating 6 target(s)...
-			@ C.vc.C++ <win32!release:main>mypch.h.pch
+			*** found 21 target(s)...
+			*** updating 5 target(s)...
+			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.h.pch
 			mypch.cpp
-			@ C.vc.C++ <win32!release:main>main.obj
+			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.obj
 			main.cpp
-			@ C.vc.Link <win32!release:main>main.exe
-			*** updated 6 target(s)...
+			@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):main>main.exe
+			*** updated 5 target(s)...
 ]]
 
 		pass2Pattern = [[
-			*** found 23 target(s)...
+			*** found 21 target(s)...
 			*** updating 4 target(s)...
-			@ C.vc.C++ <win32!release:main>mypch.h.pch
+			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.h.pch
 			mypch.cpp
-			@ C.vc.C++ <win32!release:main>main.obj
+			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.obj
 			main.cpp
-			@ C.vc.Link <win32!release:main>main.exe
+			@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):main>main.exe
 			*** updated 4 target(s)...
 ]]
 	elseif Compiler == 'mingw' then
@@ -106,8 +106,8 @@ function Test()
 	else
 		pass1Directories = {
 			'includes/',
-			'macosx32-release/',
-			'macosx32-release/main/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/main/',
 			'macosx32%-release/main/mypch%-%x+/',
 		}
 
@@ -118,29 +118,29 @@ function Test()
 			'test.lua',
 			'includes/mypch.h',
 			'includes/usefuldefine.h',
-			'macosx32-release/main/main.o',
-			'macosx32-release/main/main.release',
-			'macosx32-release/main/mypch.o',
+			'$(TOOLCHAIN_PATH)/main/main.o',
+			'$(TOOLCHAIN_PATH)/main/main.release',
+			'$(TOOLCHAIN_PATH)/main/mypch.o',
 			'macosx32%-release/main/mypch%-%x+/mypch.h.gch',
 		}
 
 		pass1Pattern = [[
 			*** found 15 target(s)...
 			*** updating 6 target(s)...
-			&@ C.$(COMPILER).PCH <$(PLATFORM_CONFIG):main%-%x+>mypch.h.gch
-			@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):main>main.o 
-			@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):main>mypch.o 
-			@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):main>main
+			&@ C.$(COMPILER).PCH <$(TOOLCHAIN_GRIST):main%-%x+>mypch.h.gch
+			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.o 
+			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.o 
+			@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):main>main
 			*** updated 6 target(s)...
 ]]
 
 		pass2Pattern = [[
 			*** found 15 target(s)...
 			*** updating 4 target(s)...
-			&@ C.$(COMPILER).PCH <$(PLATFORM_CONFIG):main%-%x+>mypch.h.gch
-			@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):main>main.o 
-			@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):main>mypch.o 
-			@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):main>main
+			&@ C.$(COMPILER).PCH <$(TOOLCHAIN_GRIST):main%-%x+>mypch.h.gch
+			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.o 
+			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.o 
+			@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):main>main
 			*** updated 4 target(s)...
 ]]
 	end
@@ -153,7 +153,7 @@ function Test()
 	local pattern2
 	if Platform == 'win32' and Compiler ~= 'mingw' then
 		pattern2 = [[
-*** found 23 target(s)...
+*** found 21 target(s)...
 ]]
 	else
 		pattern2 = [[

@@ -1,8 +1,0 @@
-C.AR			?= nacl-ar ru ;
-C.CC			?= nacl-gcc ;
-C.C++			?= nacl-g++ ;
-C.LINK			?= nacl-g++ ;
-C.RANLIB		?= nacl-ranlib ;
-
-SUFMODULE	= .so ;
-

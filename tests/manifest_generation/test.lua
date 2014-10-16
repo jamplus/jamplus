@@ -25,12 +25,12 @@ function Test()
 	
 	if Platform == 'win32' then
 		local pattern = [[
-*** found 23 target(s)...
-*** updating 14 target(s)...
-@ C.vc.C++ <win32!release:project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
+*** found 8 target(s)...
+*** updating 4 target(s)...
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
 project1.cpp
-@ C.vc.Link <win32!release:project1>project1.exe
-*** updated 14 target(s)...
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
+*** updated 4 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
@@ -68,7 +68,7 @@ project1.cpp
 		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
-*** found 23 target(s)...
+*** found 8 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 	
@@ -76,11 +76,11 @@ project1.cpp
 		ospath.touch('source/project1/project1.cpp')
 
 		local pattern3 = [[
-*** found 23 target(s)...
+*** found 8 target(s)...
 *** updating 2 target(s)...
-@ C.vc.C++ <win32!release:project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
 project1.cpp
-@ C.vc.Link <win32!release:project1>project1.exe
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
 *** updated 2 target(s)...
 ]]
 
@@ -92,8 +92,8 @@ project1.cpp
 		local pattern = [[
 *** found 8 target(s)...
 *** updating 3 target(s)...
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>]] .. cwd .. [[/source/project1/project1.o
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>]] .. cwd .. [[/source/project1/project1.o
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 3 target(s)...
 ]]
 
@@ -137,8 +137,8 @@ project1.cpp
 		local pattern3 = [[
 *** found 8 target(s)...
 *** updating 2 target(s)...
-@ C.$(COMPILER).C++ <$(PLATFORM_CONFIG):project1>]] .. cwd .. [[/source/project1/project1.o
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):project1>project1
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>]] .. cwd .. [[/source/project1/project1.o
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 2 target(s)...
 ]]
 

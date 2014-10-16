@@ -52,7 +52,7 @@ if ! $(wxWidgets_ROOT)
 		;
 
 		local wx.h ;
-		if $(PLATFORM) = win64 {
+		if $(C.PLATFORM) = win64 {
 			wx.h = [ Glob $(PATHS)$(PATH_SUFFIXES).x64/include/wx : wx.h ] ;
 		}
 		if ! $(wx.h) {
@@ -150,7 +150,7 @@ if ! $(wxWidgets_ROOT)
 		local wx-config = [ Glob $(PATH) : wx-config ] ;
 		if $(wx-config) {
 			wx-config--debug = --debug= ;
-			if $(CONFIG) = debug {
+			if $(C.CONFIG) = debug {
 				wx-config--debug += yes ;
 			} else {
 				wx-config--debug += no ;
@@ -191,18 +191,18 @@ rule C.UseWxWidgets TARGETS : COMPONENTS : OPTIONS
 	}
 
 	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.*) ;
-	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.$(CONFIG)) ;
+	C.Defines $(TARGETS) : $(wxWidgets_DEFINES.$(C.CONFIG)) ;
 	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) : * ;
 	if $(MSVCNT) {
 		C.RcIncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.*) ;
 	}
-	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.$(CONFIG)) ;
+	C.IncludeDirectories $(TARGETS) : $(wxWidgets_HDRS.$(C.CONFIG)) ;
 
 	if linklibs in $(OPTIONS)
 	{
 		if $(NT) {
-			local postfix = $(wxWidgets_POSTFIX.$(CONFIG)) ;
-			local postfix_simple = $(wxWidgets_POSTFIX_SIMPLE.$(CONFIG)) ;
+			local postfix = $(wxWidgets_POSTFIX.$(C.CONFIG)) ;
+			local postfix_simple = $(wxWidgets_POSTFIX_SIMPLE.$(C.CONFIG)) ;
 
 			local component ;
 			for component in $(COMPONENTS) $(wxWidgets_COMMON_LIBRARIES) $(wxWidgets_COMMON_LIBRARIES_U)

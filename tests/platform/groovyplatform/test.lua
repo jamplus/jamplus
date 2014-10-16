@@ -11,65 +11,50 @@ function Test()
 		'Jamfile.jam',
 		'helloworld.c',
 		'test.lua',
-		'c-compilers/c-groovycompiler.jam',
-		'c-compilers/groovyplatform-autodetect.jam',
-		'c-compilers/configs/groovyplatform-debug.jam',
-		'c-compilers/configs/groovyplatform-retail.jam',
+		'toolchains/c/_helpers/groovycompiler.jam',
+		'toolchains/c/_helpers/groovyplatform-autodetect.jam',
+		'toolchains/c/groovyplatform-debug.jam',
+		'toolchains/c/groovyplatform-retail.jam',
 	}
 
 	local originalDirs =
 	{
-		'c-compilers/',
-		'c-compilers/configs/',
+		'toolchains/',
+		'toolchains/c/',
+		'toolchains/c/_helpers/',
 	}
 
-	RunJam{ 'PLATFORM=groovyplatform', 'CONFIG=retail', 'clean' }
+	RunJam{ 'TOOLCHAIN=c/groovyplatform/retail', 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
 
 	---------------------------------------------------------------------------
 	local pattern
 	local pattern2
-	if Platform == 'win32' then
-		pattern = [[
-*** found 10 target(s)...
-*** updating 4 target(s)...
-@ C.groovycompiler.CC <groovyplatform!retail:helloworld>helloworld.o
-!NEXT!@ C.groovycompiler.Link <groovyplatform!retail:helloworld>helloworld.exe
-*** updated 4 target(s)...
-]]
-		pattern2 = [[
-*** found 10 target(s)...
-]]
-	else
-		pattern = [[
+	pattern = [[
 *** found 8 target(s)...
 *** updating 3 target(s)...
-@ C.groovycompiler.CC <groovyplatform!retail:helloworld>helloworld.o
-!NEXT!@ C.groovycompiler.Link <groovyplatform!retail:helloworld>helloworld.exe
+@ C.groovycompiler.CC <c/groovyplatform/retail:helloworld>helloworld.o
+!NEXT!@ C.groovycompiler.Link <c/groovyplatform/retail:helloworld>helloworld.exe
 *** updated 3 target(s)...
 ]]
-		pattern2 = [[
+	pattern2 = [[
 !NEXT!*** found 8 target(s)...
 ]]
-	end
 
-	TestPattern(pattern, RunJam{ 'PLATFORM=groovyplatform', 'CONFIG=retail' })
+	TestPattern(pattern, RunJam{ 'TOOLCHAIN=c/groovyplatform/retail' })
 
 	local pass1Dirs =
 	{
-		'c-compilers/',
-		'c-compilers/configs/',
 		'groovyplatform-retail/',
 		'groovyplatform-retail/helloworld/',
+		'toolchains/',
+		'toolchains/c/',
+		'toolchains/c/_helpers/',
 	}
 
 	local pass1Files =
 	{
-		'c-compilers/c-groovycompiler.jam',
-		'c-compilers/configs/groovyplatform-debug.jam',
-		'c-compilers/configs/groovyplatform-retail.jam',
-		'c-compilers/groovyplatform-autodetect.jam',
 		'CreateJamVS2008Workspace.bat',
 		'CreateJamVS2008Workspace.config',
 		'CreateJamVS2010Workspace.bat',
@@ -80,26 +65,30 @@ function Test()
 		'groovyplatform-retail/helloworld/helloworld.retail.exe',
 		'helloworld.c',
 		'Jamfile.jam',
+		'toolchains/c/_helpers/groovycompiler.jam',
+		'toolchains/c/_helpers/groovyplatform-autodetect.jam',
+		'toolchains/c/groovyplatform-debug.jam',
+		'toolchains/c/groovyplatform-retail.jam',
 	}
 
 	TestDirectories(pass1Dirs)
 	TestFiles(pass1Files)
 
 	---------------------------------------------------------------------------
-	TestPattern(pattern2, RunJam{ 'PLATFORM=groovyplatform', 'CONFIG=retail' })
+	TestPattern(pattern2, RunJam{ 'TOOLCHAIN=c/groovyplatform/retail' })
 	TestDirectories(pass1Dirs)
 	TestFiles(pass1Files)
 	
 	---------------------------------------------------------------------------
-	RunJam{ 'PLATFORM=groovyplatform', 'CONFIG=retail', 'clean' }
+	RunJam{ 'TOOLCHAIN=c/groovyplatform/retail', 'clean' }
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
 
 	---------------------------------------------------------------------------
 	local pattern3 = [[
-!NEXT!c-compilers/configs/badplatform-release.jam: No such file or directory
+!NEXT!* Unable to find [toolchains/c/_helpers/badplatform].
 ]]
-	TestPattern(pattern3, RunJam{ 'PLATFORM=badplatform' })
+	TestPattern(pattern3, RunJam{ 'TOOLCHAIN=c/badplatform' })
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
 end

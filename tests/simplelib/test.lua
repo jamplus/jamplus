@@ -36,10 +36,10 @@ function Test()
 		{
 			'app/',
 			'lib-a/',
-			'app/win32-release/',
-			'app/win32-release/app/',
-			'lib-a/win32-release/',
-			'lib-a/win32-release/lib-a/',
+			'app/$(TOOLCHAIN_PATH)/',
+			'app/$(TOOLCHAIN_PATH)/app/',
+			'lib-a/$(TOOLCHAIN_PATH)/',
+			'lib-a/$(TOOLCHAIN_PATH)/lib-a/',
 		}
 
 		files = {
@@ -47,51 +47,51 @@ function Test()
 			'test.lua',
 			'app/Jamfile.jam',
 			'app/main.c',
-			'app/win32-release/app/app.release.exe',
-			'?app/win32-release/app/app.release.exe.intermediate.manifest',
-			'app/win32-release/app/app.release.pdb',
-			'app/win32-release/app/main.obj',
+			'app/$(TOOLCHAIN_PATH)/app/app.release.exe',
+			'?app/$(TOOLCHAIN_PATH)/app/app.release.exe.intermediate.manifest',
+			'app/$(TOOLCHAIN_PATH)/app/app.release.pdb',
+			'app/$(TOOLCHAIN_PATH)/app/main.obj',
 			'lib-a/add.c',
 			'lib-a/add.h',
 			'lib-a/Jamfile.jam',
-			'lib-a/win32-release/lib-a/add.obj',
-			'lib-a/win32-release/lib-a/lib-a.release.lib',
+			'lib-a/$(TOOLCHAIN_PATH)/lib-a/add.obj',
+			'lib-a/$(TOOLCHAIN_PATH)/lib-a/lib-a.release.lib',
 		}
 	
 		patternA = [[
-*** found 16 target(s)...
-*** updating 8 target(s)...
-@ C.vc.CC <win32!release:app>main.obj
-!NEXT!@ C.vc.CC <win32!release:lib-a>add.obj
-!NEXT!@ C.vc.Archive <win32!release:lib-a>lib-a.lib
-!NEXT!@ C.vc.Link <win32!release:app>app.exe
-!NEXT!*** updated 8 target(s)...
+*** found 12 target(s)...
+*** updating 6 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.obj
+!NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-a>add.obj
+!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):lib-a>lib-a.lib
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app.exe
+!NEXT!*** updated 6 target(s)...
 ]]
 
 		patternB = [[
-*** found 16 target(s)...
+*** found 12 target(s)...
 ]]
 
 		patternC = [[
-*** found 16 target(s)...
+*** found 12 target(s)...
 *** updating 2 target(s)...
-@ C.vc.CC <win32!release:app>main.obj
-!NEXT!@ C.vc.Link <win32!release:app>app.exe
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 
 		patternD = [[
-*** found 16 target(s)...
+*** found 12 target(s)...
 ]]
 
 	else
 		dirs = {
 			'app/',
 			'lib-a/',
-			'app/macosx32-release/',
-			'app/macosx32-release/app/',
-			'lib-a/macosx32-release/',
-			'lib-a/macosx32-release/lib-a/',
+			'app/$(TOOLCHAIN_PATH)/',
+			'app/$(TOOLCHAIN_PATH)/app/',
+			'lib-a/$(TOOLCHAIN_PATH)/',
+			'lib-a/$(TOOLCHAIN_PATH)/lib-a/',
 		}
 
 		files = {
@@ -99,22 +99,22 @@ function Test()
 			'test.lua',
 			'app/Jamfile.jam',
 			'app/main.c',
-			'app/macosx32-release/app/app.release',
-			'app/macosx32-release/app/main.o',
+			'app/$(TOOLCHAIN_PATH)/app/app.release',
+			'app/$(TOOLCHAIN_PATH)/app/main.o',
 			'lib-a/add.c',
 			'lib-a/add.h',
 			'lib-a/Jamfile.jam',
-			'lib-a/macosx32-release/lib-a/add.o',
-			'lib-a/macosx32-release/lib-a/lib-a.release.a',
+			'lib-a/$(TOOLCHAIN_PATH)/lib-a/add.o',
+			'lib-a/$(TOOLCHAIN_PATH)/lib-a/lib-a.release.a',
 		}
 
 		patternA = [[
 *** found 12 target(s)...
 *** updating 6 target(s)...
-@ C.$(COMPILER).CC <macosx32!release:app>main.o 
-@ C.$(COMPILER).CC <macosx32!release:lib-a>add.o 
-@ C.$(COMPILER).Archive2 <macosx32!release:lib-a>lib-a.a 
-@ C.$(COMPILER).Link <macosx32!release:app>app
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-a>add.o 
+@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):lib-a>lib-a.a 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app
 *** updated 6 target(s)...
 ]]
 
@@ -125,8 +125,8 @@ function Test()
 		patternC = [[
 *** found 12 target(s)...
 *** updating 2 target(s)...
-@ C.$(COMPILER).CC <macosx32!release:app>main.o 
-@ C.$(COMPILER).Link <macosx32!release:app>app
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app
 *** updated 2 target(s)...
 ]]
 

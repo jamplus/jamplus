@@ -1,0 +1,50 @@
+rule C.AutoDetect {
+	local PATHS =
+		c:/tcc
+		d:/tcc
+	;
+
+	local tcc = [ Glob $(PATHS) : tcc.exe ] ;
+	if ! $(tcc)
+	{
+		return ;
+	}
+
+	TCC_ROOT = $(tcc[1]:D) ;
+	if ! $(TCC_ROOT) {
+		return ;
+	}
+
+	C.COMPILER_SUITE = tcc ;
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN_GRIST).info! ;
+
+	{
+		local SUFOBJ = .o ;
+		SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = .exe ;
+		SUFLIB on $(C.COMPILER_SUITE_SYMBOL) = .a ;
+		SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a ;
+		SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+		SUFOBJ on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+		SUFSHAREDLIB on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+		SUFRES on $(C.COMPILER_SUITE_SYMBOL) = .res ;
+
+		NOARSCAN on $(C.COMPILER_SUITE_SYMBOL) = true ;
+		NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
+
+		C.AR on $(C.COMPILER_SUITE_SYMBOL)			= $(TCC_ROOT)/tiny_libmaker ;
+		C.CC on $(C.COMPILER_SUITE_SYMBOL)			= $(TCC_ROOT)/tcc ;
+		C.C++ on $(C.COMPILER_SUITE_SYMBOL)			= **UNIMPLEMENTED** ;
+		C.LINK on $(C.COMPILER_SUITE_SYMBOL)		= $(TCC_ROOT)/tcc ;
+
+		C.BUILD_EXTENSIONS on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+		C.AddBuildExtensions CC : .c .s : C.tcc.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+
+		C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.tcc._MultiCppCompile_SetupFlags ;
+	}
+
+	C.ToolchainHelperOnce tcc ;
+
+	return $(C.COMPILER) ;
+}
+
+

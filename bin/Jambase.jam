@@ -18,7 +18,7 @@ TAB = "	" ;
 NEWLINE = "
 " ;
 
-JAMBASE_VERSION = "JamPlus 1.0 RC1 (2010.01.04)" ;
+JAMBASE_VERSION = "JamPlus 3.0 Alpha (2014.10.11)" ;
 
 #
 # OS specific variable settings
@@ -29,7 +29,7 @@ if $(NT)
 	MV		?= move /y ;
 	CP		?= copy ;
 	MKDIR	?= mkdir ;
-	MKDIR_RECURSIVE = ;
+	MKDIR_RECURSIVE = 1 ;
 	RM		?= del /f/q ;
 	RMDIR	?= rmdir /s/q ;
 	SLASH	?= / ;
@@ -267,6 +267,15 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 
 	ALL_SUBDIR_TOKENS = $(SUBDIR_PATH) ;
 
+#	if ! $(ALL_LOCATE_TARGET) {
+#		ALL_LOCATE_TARGET = $(CWD)/.build ;
+#	}
+#
+#	if ! $(DEPCACHE.$(DEPCACHE)) {
+#		DEPCACHE.$(DEPCACHE) = $(ALL_LOCATE_TARGET)/.depcache ;
+#		Clean clean : $(DEPCACHE.$(DEPCACHE)) ;
+#	}
+
 	#
 	# First time through sets up relative root and includes Jamrules.
 	#
@@ -410,6 +419,7 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 
 	local target = /$(TARGET_DIRECTORY) ;
 
+#	local _optionalRoot = $(_top) ;
 	local _optionalRoot ;
 	if $(ALL_LOCATE_TARGET) {
 		_optionalRoot = $(_top) ;
@@ -754,8 +764,55 @@ rule Workspace WORKSPACE_NAME : TARGETS
 
 INCREDIBUILD ?= off ;
 
-if ! $(TARGETINFO_LOCATE) {
-	IncludeModule c-autodetect ;
+###############################################################################
+# Toolchain support
+###############################################################################
+rule ToolchainHelper TOOLCHAIN_MODULE_NAME_LIST {
+	local module ;
+	for module in $(TOOLCHAIN_MODULE_NAME_LIST) {
+		IncludeModule toolchains/$(module) : force ;
+	}
+}
+
+rule Toolchain TOOLCHAIN_SPEC {
+	local TOOLCHAIN = [ Split $(TOOLCHAIN_SPEC) : "@" ] ;
+	local TOOLCHAIN_SPEC_OPTIONS = $(TOOLCHAIN[2-]) ;
+	TOOLCHAIN = $(TOOLCHAIN[1]) ;
+
+	#TOOLCHAIN_SPEC_OPTIONS = [ ListSort $(TOOLCHAIN_SPEC_OPTIONS) : 0 ] ;
+
+	local TYPE = [ Split $(TOOLCHAIN) : / ] ;
+	TOOLCHAIN = $(TYPE[2-]) ;
+	TYPE = $(TYPE[1]) ;
+
+	IncludeModule toolchains/$(TYPE)/_helpers/$(TYPE) ;
+
+	$(TYPE:U)._Toolchain ;
+}
+
+VALID_CONFIGS ?= release releaseltcg debug ;
+
+switch $(OS)
+{
+	case NT :
+		VALID_PLATFORMS ?= win32 win64 ;
+
+	case MACOSX :
+		VALID_PLATFORMS ?= macosx32 macosx64 ;
+
+	case LINUX :
+		VALID_PLATFORMS ?= linux32 linux64 ;
+}
+
+if $(TOOLCHAIN) {
+	Toolchain $(TOOLCHAIN) ;
+} else {
+	CONFIG ?= $(VALID_CONFIGS[1]) ;
+
+	if $(PLATFORM) = "" { PLATFORM = ; }
+	PLATFORM ?= $(VALID_PLATFORMS[1]) ;
+
+	Toolchain c/$(PLATFORM)/$(CONFIG) ;
 }
 
 #

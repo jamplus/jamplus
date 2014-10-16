@@ -81,6 +81,8 @@ function TestPattern(patterns, lines)
 				pattern = pattern:gsub('$%(SUFEXE%)', SUFEXE)
 				pattern = pattern:gsub('$%(COMPILER%)', COMPILER)
 				pattern = pattern:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '!release')
+				pattern = pattern:gsub('$%(TOOLCHAIN_GRIST%)', 'c/' .. PlatformDir .. '/release')
+				pattern = pattern:gsub('$%(CWD%)', patterncwd)
 			end
 		end
 
@@ -96,6 +98,10 @@ function TestPattern(patterns, lines)
 					if pattern:sub(1, 10) ~= '!OOOGROUP!' then break end
 					pattern = pattern:sub(11)
 					pattern = pattern:gsub('$%(SUFEXE%)', SUFEXE)
+					pattern = pattern:gsub('$%(COMPILER%)', COMPILER)
+					pattern = pattern:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '!release')
+					pattern = pattern:gsub('$%(TOOLCHAIN_GRIST%)', 'c/' .. PlatformDir .. '/release')
+					pattern = pattern:gsub('$%(CWD%)', patterncwd)
 					oooGroupPatternsToFind[#oooGroupPatternsToFind + 1] = pattern
 					pattern = nil
 					patternIndex = patternIndex + 1
@@ -225,6 +231,8 @@ function TestDirectories(expectedDirs)
 	for _, dirName in ipairs(expectedDirs) do
 		dirName = dirName:gsub('$PlatformDir', PlatformDir)
 		dirName = dirName:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '-release')
+--		dirName = dirName:gsub('$%(TOOLCHAIN_PATH%)', '.build/TOP/' .. PlatformDir .. '-release')
+		dirName = dirName:gsub('$%(TOOLCHAIN_PATH%)', PlatformDir .. '-release')
 		if dirName:sub(1, 1) == '?' then
 			expectedDirsMap[dirName:sub(2)] = '?'
 		else
@@ -238,6 +246,23 @@ function TestDirectories(expectedDirs)
 	end
 
 	local extraDirs = {}
+	local expectedSubDirs = {}
+	for expectedDir in pairs(expectedDirsMap) do
+		local path = ""
+		for component in expectedDir:gmatch('([^/]+)') do
+			path = path .. component .. '/'
+			expectedSubDirs[path] = true
+		end
+	end
+	for expectedSubDir in pairs(expectedSubDirs) do
+		if not foundDirsMap[expectedSubDir] then
+			extraDirs[#extraDirs + 1] = expectedDir
+		else
+			foundDirsMap[expectedSubDir] = nil
+			expectedDirsMap[expectedSubDir] = nil
+		end
+	end
+
 	for foundDir in pairs(foundDirsMap) do
 		if not expectedDirsMap[foundDir] then
 			local found = false
@@ -255,7 +280,9 @@ function TestDirectories(expectedDirs)
 		end
 
 		expectedDirsMap[foundDir] = nil
-	end
+ 	end
+
+
 	if #extraDirs > 0 then
 		table.sort(extraDirs)
 		error('These directories should not exist:\n\t\t' .. table.concat(extraDirs, '\n\t\t'))
@@ -278,9 +305,13 @@ function TestFiles(expectedFiles)
 	TestNumberUpdate()
 
 	local expectedFilesMap = {}
+	expectedFiles[#expectedFiles + 1] = '?.build/.depcache'
 	for _, fileName in ipairs(expectedFiles) do
 		fileName = fileName:gsub('$PlatformDir', PlatformDir):gsub('$%(SUFEXE%)', SUFEXE)
 		fileName = fileName:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '-release')
+--		fileName = fileName:gsub('$%(TOOLCHAIN_PATH%)', '.build/TOP/' .. PlatformDir .. '-release')
+		fileName = fileName:gsub('$%(TOOLCHAIN_PATH%)', PlatformDir .. '-release')
+		fileName = fileName:gsub('$%(CWD%)', patterncwd)
 		if fileName:match('vc.pdb$') then fileName = '?' .. fileName end
 		if fileName:sub(1, 1) == '?' then
 			expectedFilesMap[fileName:sub(2)] = '?'
@@ -386,9 +417,12 @@ function ErrorHandler(inMessage)
 	return table.concat(message)
 end
 
-local cwd = ospath.getcwd()
+cwd = ospath.getcwd()
+
 for _, dir in ipairs(dirs) do
 	ospath.chdir(dir)
+--	patterncwd = ospath.add_slash(ospath.make_slash(ospath.getcwd()))
+	patterncwd = ""
 	if ospath.exists('test.lua') then
 		local text = 'Running tests for ' .. dir:gsub('[\\/]$', '') .. '...'
 		io.write(('%-60s'):format(text))

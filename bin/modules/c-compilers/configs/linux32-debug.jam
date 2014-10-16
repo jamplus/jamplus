@@ -1,9 +1,0 @@
-C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
-C.ToolchainHelper linux-gcc Global_DEBUG ;
-
-C.Flags * : CC	: -g -O0 -m32 ;
-C.Flags * : C++	: -g -O0 -m32 ;
-C.Flags * : M	: -g -O0 -m32 ;
-C.Flags * : MM	: -g -O0 -m32 ;
-C.LinkFlags * : -m32 ;
-

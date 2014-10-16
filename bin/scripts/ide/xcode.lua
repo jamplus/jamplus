@@ -224,14 +224,14 @@ function XcodeHelper_WritePBXFileReferences(self, folder)
 		if type(entry) == 'table' then
 			XcodeHelper_WritePBXFileReferences(self, entry)
 		else
-			local ext = os.path.get_extension(entry)
+			local ext = ospath.get_extension(entry)
 			local strippedEntry = entry:match('^app>(.+)')
 			if strippedEntry then
 				table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; explicitFileType = wrapper.application; includeInIndex = 0; name = "%s"; path = "%s"; sourceTree = BUILT_PRODUCTS_DIR; };\n'):format(
-						self.EntryUuids[entry], strippedEntry, os.path.remove_directory(strippedEntry), strippedEntry))
+						self.EntryUuids[entry], strippedEntry, ospath.remove_directory(strippedEntry), strippedEntry))
 			else
 				table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode%s; name = "%s"; path = "%s"; sourceTree = "<group>"; };\n'):format(
-						self.EntryUuids[entry], entry, ext, os.path.remove_directory(entry), entry))
+						self.EntryUuids[entry], entry, ext, ospath.remove_directory(entry), entry))
 			end
 		end
 	end
@@ -283,7 +283,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 					if subProject.BuildCommandLine then
 						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. subProject.BuildCommandLine[1] .. '";\n')
 					else
-						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. os.path.combine(projectsPath, 'xcodejam') .. '";\n')
+						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. ospath.join(projectsPath, 'xcodejam') .. '";\n')
 					end
 				end
 				table.insert(self.Contents, '\t\t\tbuildRules = (\n')
@@ -341,7 +341,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 			if subProject.BuildCommandLine then
 				table.insert(self.Contents, subProject.BuildCommandLine[1] .. '";\n')
 			else
-				table.insert(self.Contents, os.path.combine(projectsPath, 'xcodejam') .. [[ $PLATFORM $CONFIG $ACTION $TARGET_NAME";]] .. '\n')
+				table.insert(self.Contents, ospath.join(projectsPath, 'xcodejam') .. [[ $PLATFORM $CONFIG $ACTION $TARGET_NAME";]] .. '\n')
 			end
 			table.insert(self.Contents, "\t\t};\n")
 		end
@@ -442,7 +442,7 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 			table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. platformName .. ";\n")
 			table.insert(self.Contents, "\t\t\t\tCONFIG = " .. configName .. ";\n")
 			if configInfo.OutputPath ~= '' then
-				table.insert(self.Contents, "\t\t\t\tCONFIGURATION_BUILD_DIR = \"" .. os.path.remove_slash(configInfo.OutputPath) .. "\";\n")
+				table.insert(self.Contents, "\t\t\t\tCONFIGURATION_BUILD_DIR = \"" .. ospath.remove_slash(configInfo.OutputPath) .. "\";\n")
 			end
 			
 			local productName = configInfo.OutputName
@@ -561,8 +561,8 @@ end
 local XcodeProjectMetaTable = {  __index = XcodeProjectMetaTable  }
 
 function XcodeProjectMetaTable:Write(outputPath)
-	local projectsPath = os.path.combine(outputPath, self.ProjectName .. '.xcodeproj/')
-	local filename = os.path.combine(outputPath, projectsPath .. 'project.pbxproj')
+	local projectsPath = ospath.join(outputPath, self.ProjectName .. '.xcodeproj/')
+	local filename = ospath.join(outputPath, projectsPath .. 'project.pbxproj')
 
 	local info = XcodeHelper_GetProjectExportInfo(self.ProjectName)
 	info.Filename = filename
@@ -624,7 +624,7 @@ function XcodeProjectMetaTable:Write(outputPath)
 	table.insert(self.Contents, '/* End PBXGroup section */\n\n')
 
 	-- Write PBXLegacyTarget.
-	local projectsPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_')
+	local projectsPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_')
 	XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projectsPath)
 
 	-- Write PBXProject.
@@ -837,13 +837,13 @@ end
 
 
 function XcodeWorkspaceMetaTable:Write(outputPath)
-	--local projectsPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_')
+	--local projectsPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_')
 
-	local filename = os.path.combine(outputPath, self.Name .. '.xcworkspace/contents.xcworkspacedata')
+	local filename = ospath.join(outputPath, self.Name .. '.xcworkspace/contents.xcworkspacedata')
 
 	local workspace = Workspaces[self.Name]
 
-	--os.mkdir(filename)
+	--ospath.mkdir(filename)
 
 	self.Contents[#self.Contents + 1] = [[
 <?xml version="1.0" encoding="UTF-8"?>
@@ -886,8 +886,8 @@ EndProject
 </Workspace>
 ]]
 
-	local filename = os.path.combine(outputPath, self.Name .. '.workspace.xcodeproj/project.pbxproj')
-	os.mkdir(filename)
+	local filename = ospath.join(outputPath, self.Name .. '.workspace.xcodeproj/project.pbxproj')
+	ospath.mkdir(filename)
 
 	local workspaceName = self.Name .. '.workspace'
 
@@ -987,14 +987,14 @@ end
 
 
 function XcodeInitialize()
-	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
+	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
 	local chunk = loadfile(outPath .. 'XcodeProjectExportInfo.lua')
 	if chunk then chunk() end
 	if not ProjectExportInfo  or  ProjectExportInfo.Version ~= 2 then
 		ProjectExportInfo = { Version = 2 }
 	end
 
-	io.writeall(outPath .. 'xcodejam', [[
+	ospath.write_file(outPath .. 'xcodejam', [[
 #!/bin/sh
 TARGET_NAME=
 if [ "$4" = "" ]; then
@@ -1004,15 +1004,15 @@ elif [ "$3" = build ]; then
 elif [ "$3" = clean ]; then
 	TARGET_NAME=$4
 fi
-]] .. os.path.escape(os.path.combine(destinationRootPath, 'jam')) .. [[ -sPLATFORM=$1 -sCONFIG=$2 $TARGET_NAME
+]] .. ospath.escape(ospath.join(destinationRootPath, 'jam')) .. [[ TOOLCHAIN=c/$1/$2 $TARGET_NAME
 ]])
-	os.chmod(outPath .. 'xcodejam', 777)
+	ospath.chmod(outPath .. 'xcodejam', 777)
 end
 
 
 function XcodeShutdown()
-	local outPath = os.path.combine(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
-	LuaDumpObject(outPath .. 'XcodeProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
+	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
+	prettydump.dumpascii(outPath .. 'XcodeProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
 end
 
 

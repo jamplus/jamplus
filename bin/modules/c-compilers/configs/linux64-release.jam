@@ -1,9 +1,0 @@
-C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
-C.ToolchainHelper linux-gcc Global_RELEASE ;
-
-C.Flags * : CC	: -g -O2 -m64 ;
-C.Flags * : C++	: -g -O2 -m64 ;
-C.Flags * : M	: -g -O2 -m64 ;
-C.Flags * : MM	: -g -O2 -m64 ;
-C.LinkFlags * : -m64 ;
-

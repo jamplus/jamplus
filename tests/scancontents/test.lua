@@ -26,8 +26,8 @@ function Test()
 	
 	if Platform == 'win32' then
 		dirs = {
-			'win32-release/',
-			'win32-release/test/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/test/',
 		}
 
 		noDepCacheFiles =
@@ -37,40 +37,40 @@ function Test()
 			'main.c',
 			'main.h',
 			'test.c',
-			'win32-release/test/main.obj',
-			'win32-release/test/test.obj',
-			'win32-release/test/test.release.exe',
-			'?win32-release/test/test.release.exe.intermediate.manifest',
-			'win32-release/test/test.release.pdb',
+			'$(TOOLCHAIN_PATH)/test/main.obj',
+			'$(TOOLCHAIN_PATH)/test/test.obj',
+			'$(TOOLCHAIN_PATH)/test/test.release.exe',
+			'?$(TOOLCHAIN_PATH)/test/test.release.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/test/test.release.pdb',
 		}
 		
 		patternA = [[
-*** found 22 target(s)...
-*** updating 6 target(s)...
-@ C.vc.CC <win32!release:test>main.obj
-!NEXT!@ C.vc.Link <win32!release:test>test.exe
-!NEXT!*** updated 6 target(s)...
+*** found 21 target(s)...
+*** updating 5 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
+!NEXT!*** updated 5 target(s)...
 ]]
 
 		patternB = [[
-*** found 22 target(s)...
+*** found 21 target(s)...
 *** updating 3 target(s)...
-@ C.vc.CC <win32!release:test>main.obj
-!NEXT!@ C.vc.Link <win32!release:test>test.exe
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
 !NEXT!*** updated 3 target(s)...
 ]]
 
 		patternC = [[
-*** found 22 target(s)...
+*** found 21 target(s)...
 *** updating 3 target(s)...
-@ C.vc.CC <win32!release:test>main.obj
-!NEXT!@ C.vc.Link <win32!release:test>test.exe
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
 !NEXT!*** updated 3 target(s)...
 ]]
 	else
 		dirs = {
-			'$(PLATFORM_CONFIG)/',
-			'$(PLATFORM_CONFIG)/test/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/test/',
 		}
 
 		noDepCacheFiles = {
@@ -80,33 +80,33 @@ function Test()
 			'main.h',
 			'test.c',
 			'test.lua',
-			'$(PLATFORM_CONFIG)/test/main.o',
-			'$(PLATFORM_CONFIG)/test/test.o',
-			'$(PLATFORM_CONFIG)/test/test.release',
+			'$(TOOLCHAIN_PATH)/test/main.o',
+			'$(TOOLCHAIN_PATH)/test/test.o',
+			'$(TOOLCHAIN_PATH)/test/test.release',
 		}
 		
 		patternA = [[
 *** found 13 target(s)...
 *** updating 5 target(s)...
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>test.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>test.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test
 *** updated 5 target(s)...
 ]]
 
 		patternB = [[
 *** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test
 *** updated 3 target(s)...
 ]]
 
 		patternC = [[
 *** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test
 *** updated 3 target(s)...
 ]]
 	end
@@ -152,46 +152,46 @@ function Test()
 			'main.c',
 			'main.h',
 			'test.c',
-			'win32-release/test/main.obj',
-			'win32-release/test/test.obj',
-			'win32-release/test/test.release.exe',
-			'?win32-release/test/test.release.exe.intermediate.manifest',
-			'win32-release/test/test.release.pdb',
+			'$(TOOLCHAIN_PATH)/test/main.obj',
+			'$(TOOLCHAIN_PATH)/test/test.obj',
+			'$(TOOLCHAIN_PATH)/test/test.release.exe',
+			'?$(TOOLCHAIN_PATH)/test/test.release.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/test/test.release.pdb',
 		}
 		
 		patternA = [[
-*** found 22 target(s)...
-*** updating 6 target(s)...
-@ C.vc.CC <win32!release:test>main.obj
-!NEXT!@ C.vc.Link <win32!release:test>test.exe
-!NEXT!*** updated 6 target(s)...
+*** found 21 target(s)...
+*** updating 5 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
+!NEXT!*** updated 5 target(s)...
 ]]
 
 		patternB = [[
-*** found 22 target(s)...
+*** found 21 target(s)...
 *** updating 3 target(s)...
 *** updated 1 target(s)...
 ]]
 
 		patternC = [[
-*** found 22 target(s)...
+*** found 21 target(s)...
 *** updating 3 target(s)...
-@ C.vc.CC <win32!release:test>main.obj
-!NEXT!@ C.vc.Link <win32!release:test>test.exe
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
 !NEXT!*** updated 3 target(s)...
 ]]
 
 		patternD = [[
-*** found 22 target(s)...
+*** found 21 target(s)...
 *** updating 3 target(s)...
 *** updated 1 target(s)...
 ]]
 
 		patternE = [[
-*** found 22 target(s)...
+*** found 21 target(s)...
 *** updating 3 target(s)...
-@ C.vc.CC <win32!release:test>main.obj
-!NEXT!@ C.vc.Link <win32!release:test>test.exe
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
 !NEXT!*** updated 3 target(s)...
 ]]
 
@@ -204,17 +204,17 @@ function Test()
 			'main.h',
 			'test.c',
 			'test.lua',
-			'$(PLATFORM_CONFIG)/test/main.o',
-			'$(PLATFORM_CONFIG)/test/test.o',
-			'$(PLATFORM_CONFIG)/test/test.release',
+			'$(TOOLCHAIN_PATH)/test/main.o',
+			'$(TOOLCHAIN_PATH)/test/test.o',
+			'$(TOOLCHAIN_PATH)/test/test.release',
 		}
 		
 		patternA = [[
 *** found 13 target(s)...
 *** updating 5 target(s)...
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>test.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>test.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test
 *** updated 5 target(s)...
 ]]
 
@@ -227,8 +227,8 @@ function Test()
 		patternC = [[
 *** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test
 *** updated 3 target(s)...
 ]]
 
@@ -241,8 +241,8 @@ function Test()
 		patternE = [[
 *** found 13 target(s)...
 *** updating 3 target(s)...
-@ C.$(COMPILER).CC <$(PLATFORM_CONFIG):test>main.o 
-@ C.$(COMPILER).Link <$(PLATFORM_CONFIG):test>test
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
+@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test
 *** updated 3 target(s)...
 ]]
 	end

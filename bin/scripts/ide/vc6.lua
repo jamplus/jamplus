@@ -88,8 +88,7 @@ function VisualC6ProjectMetaTable:Write(outputPath, commandLines)
 		for configName in irvalues(Config.Configurations) do
 			local jamCommandLine = os.path.make_backslash(jamScript) .. ' ' ..
 					os.path.escape('-C' .. destinationRootPath) .. ' ' ..
-					'-sPLATFORM=' .. platformName .. ' ' ..
-					'-sCONFIG=' .. configName
+					'TOOLCHAIN=c/' .. platformName .. '/' .. configName
 
 			local configInfo =
 			{

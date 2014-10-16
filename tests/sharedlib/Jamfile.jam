@@ -1,6 +1,7 @@
-SubDir TOP ;
+Echo Here! ;
+ALL_LOCATE_TARGET = $(CWD)/image ;
 
-ALL_LOCATE_TARGET = $(SUBDIR)/image ;
+SubDir TOP ;
 
 SubInclude TOP app ;
 SubInclude TOP lib-c ;

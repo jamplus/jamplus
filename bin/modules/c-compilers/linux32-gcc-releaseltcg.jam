@@ -1,4 +1,0 @@
-C.Flags CC	: * : -O3 : releaseltcg : linux32 ;
-C.Flags C++	: *	: -O3 : releaseltcg : linux32 ;
-C.Flags M	: *	: -O3 : releaseltcg : linux32 ;
-C.Flags MM	: *	: -O3 : releaseltcg : linux32 ;
