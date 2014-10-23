@@ -624,7 +624,7 @@ function XcodeProjectMetaTable:Write(outputPath)
 	table.insert(self.Contents, '/* End PBXGroup section */\n\n')
 
 	-- Write PBXLegacyTarget.
-	local projectsPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_')
+	local projectsPath = _getWorkspaceProjectsPath()
 	XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projectsPath)
 
 	-- Write PBXProject.
@@ -837,9 +837,7 @@ end
 
 
 function XcodeWorkspaceMetaTable:Write(outputPath)
-	--local projectsPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_')
-
-	local filename = ospath.join(outputPath, self.Name .. '.xcworkspace/contents.xcworkspacedata')
+	local filename = ospath.join(outputPath, self.Name .. '.xcworkspace', 'contents.xcworkspacedata')
 
 	local workspace = Workspaces[self.Name]
 
@@ -987,14 +985,14 @@ end
 
 
 function XcodeInitialize()
-	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
-	local chunk = loadfile(outPath .. 'XcodeProjectExportInfo.lua')
+	local chunk = loadfile(ospath.join(_getTargetInfoPath(), 'XcodeProjectExportInfo.lua'))
 	if chunk then chunk() end
 	if not ProjectExportInfo  or  ProjectExportInfo.Version ~= 2 then
 		ProjectExportInfo = { Version = 2 }
 	end
 
-	ospath.write_file(outPath .. 'xcodejam', [[
+	local xcodejamFilename = ospath.join(_getWorkspacePath(), 'xcodejam')
+	ospath.write_file(xcodejamFilename, [[
 #!/bin/sh
 TARGET_NAME=
 if [ "$4" = "" ]; then
@@ -1006,13 +1004,12 @@ elif [ "$3" = clean ]; then
 fi
 ]] .. ospath.escape(ospath.join(destinationRootPath, 'jam')) .. [[ TOOLCHAIN=c/$1/$2 $TARGET_NAME
 ]])
-	ospath.chmod(outPath .. 'xcodejam', 777)
+	ospath.chmod(xcodejamFilename, 777)
 end
 
 
 function XcodeShutdown()
-	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
-	prettydump.dumpascii(outPath .. 'XcodeProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
+	prettydump.dumpascii(ospath.join(_getTargetInfoPath(), 'XcodeProjectExportInfo.lua'), 'ProjectExportInfo', ProjectExportInfo)
 end
 
 

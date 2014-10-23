@@ -60,7 +60,7 @@ local function FindCommonPathDepth(sourceGroup)
 end
 
 function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
-	local filename = outputPath .. self.ProjectName .. '.vcxproj'
+	local filename = ospath.join(outputPath, self.ProjectName .. '.vcxproj')
 
 	local info = ProjectExportInfo[self.ProjectName]
 	if not info then
@@ -173,7 +173,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 			table.insert(self.Contents, expand([==[
   <PropertyGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
-    <BuildLogFile>$(destinationRootPath:gsub('/', '\\'))$(Platform)-$(Config)/$$(MSBuildProjectName).log</BuildLogFile>
+    <BuildLogFile>$(ospath.make_backslash(destinationRootPath))$(Platform)-$(Config)/$$(MSBuildProjectName).log</BuildLogFile>
     <NMakeBuildCommandLine>$(BuildCommandLine)</NMakeBuildCommandLine>
     <NMakeOutput>$(Output)</NMakeOutput>
     <NMakeCleanCommandLine>$(CleanCommandLine)</NMakeCleanCommandLine>
@@ -247,7 +247,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	-- Write the .vcxproj.filters file.
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
-	local filename = outputPath .. self.ProjectName .. '.vcxproj.filters'
+	local filename = ospath.join(outputPath, self.ProjectName .. '.vcxproj.filters')
 	self.Contents = {}
 
 	-- Write header.
@@ -343,7 +343,7 @@ function VisualStudio201xProjectMetaTable:_WriteFiles(folder, inFilter, depth, r
 
 			self:_WriteFiles(entry, filter, depth + 1, rootDepth)
 		else
-			table.insert(self.Contents, '    <None Include="' .. entry:gsub('/', '\\') .. '">\n')
+			table.insert(self.Contents, '    <None Include="' .. ospath.make_backslash(entry) .. '">\n')
 			table.insert(self.Contents, '      <Filter>' .. inFilter .. '</Filter>\n')
 			table.insert(self.Contents, '    </None>\n')
 		end
@@ -356,7 +356,7 @@ function VisualStudio201xProjectMetaTable:_WriteFilesFlat(folder)
 		if type(entry) == 'table' then
 			self:_WriteFilesFlat(entry)
 		else
-			table.insert(self.Contents, '    <None Include="' .. entry:gsub('/', '\\') .. '" />\n')
+			table.insert(self.Contents, '    <None Include="' .. ospath.make_backslash(entry) .. '" />\n')
 		end
 	end
 end
@@ -401,7 +401,7 @@ end
 
 
 function VisualStudio201xSolutionMetaTable:Write(outputPath)
-	local filename = outputPath .. self.Name .. '.sln'
+	local filename = ospath.join(outputPath, self.Name .. '.sln')
 
 	local workspace = Workspaces[self.Name]
 
@@ -432,7 +432,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 		local info = ProjectExportInfo[projectName]
 		if info then
 			table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename:gsub('/', '\\'))", "$(Uuid)"
 EndProject
 ]], info))
 		end
@@ -590,8 +590,7 @@ end
 
 
 function VisualStudio201xInitialize()
-	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
-	local chunk = loadfile(outPath .. 'VSProjectExportInfo.lua')
+	local chunk = loadfile(ospath.join(_getTargetInfoPath(), 'VSProjectExportInfo.lua'))
 	if chunk then chunk() end
 	if not ProjectExportInfo then
 		ProjectExportInfo = {}
@@ -600,8 +599,7 @@ end
 
 
 function VisualStudio201xShutdown()
-	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
-	prettydump.dumpascii(outPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
+	prettydump.dumpascii(ospath.join(_getTargetInfoPath(), 'VSProjectExportInfo.lua'), 'ProjectExportInfo', ProjectExportInfo)
 end
 
 

@@ -33,7 +33,7 @@ local function RealVSConfig(platform, config)
 end
 
 function VisualStudio200xProjectMetaTable:Write(outputPath)
-	local filename = outputPath .. self.ProjectName .. '.vcproj'
+	local filename = ospath.join(outputPath, self.ProjectName .. '.vcproj')
 
 	local info = ProjectExportInfo[self.ProjectName]
 	if not info then
@@ -173,7 +173,7 @@ function VisualStudio200xProjectMetaTable:Write(outputPath)
 			OutputDirectory="$$(ConfigurationName)"
 			IntermediateDirectory="$$(ConfigurationName)"
 			ConfigurationType="0"
-			BuildLogFile="$(destinationRootPath:gsub('\\', '/'))$(Platform)-$(Config)/BuildLog.htm">
+			BuildLogFile="$(destinationRootPath:gsub('/', '\\'))$(Platform)-$(Config)/BuildLog.htm">
 			<Tool
 				Name="VCNMakeTool"
 				BuildCommandLine="$(BuildCommandLine)"
@@ -189,7 +189,7 @@ function VisualStudio200xProjectMetaTable:Write(outputPath)
 			OutputDirectory="$$(ConfigurationName)"
 			IntermediateDirectory="$$(ConfigurationName)"
 			ConfigurationType="0"
-			BuildLogFile="$(destinationRootPath:gsub('\\', '/'))$(Platform)-$(Config)/BuildLog.htm"
+			BuildLogFile="$(destinationRootPath:gsub('/', '\\'))$(Platform)-$(Config)/BuildLog.htm"
 			>
 			<Tool
 				Name="VCNMakeTool"
@@ -307,7 +307,7 @@ function VisualStudio200xProjectMetaTable:_WriteFiles(folder, tabs)
 			table.insert(self.Contents, tabs .. '</Filter>\n')
 		else
 			table.insert(self.Contents, tabs .. '<File\n')
-			table.insert(self.Contents, tabs .. '\tRelativePath="' .. entry:gsub('/', '\\') .. '"\n')
+			table.insert(self.Contents, tabs .. '\tRelativePath="' .. ospath.make_backslash(entry) .. '"\n')
 			table.insert(self.Contents, tabs .. '\t>\n')
 			table.insert(self.Contents, tabs .. '</File>\n')
 		end
@@ -353,7 +353,7 @@ end
 
 
 function VisualStudio200xSolutionMetaTable:Write(outputPath)
-	local filename = outputPath .. self.Name .. '.sln'
+	local filename = ospath.join(outputPath, self.Name .. '.sln')
 
 	local workspace = Workspaces[self.Name]
 
@@ -382,14 +382,14 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 		if info then
 			if self.Options.vs2003 then
 				table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename:gsub('/', '\\'))", "$(Uuid)"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
 ]], info))
 			elseif self.Options.vs2005 or self.Options.vs2008 then
 				table.insert(self.Contents, expand([[
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename)", "$(Uuid)"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(Name)", "$(Filename:gsub('/', '\\'))", "$(Uuid)"
 EndProject
 ]], info))
 			end
@@ -548,8 +548,7 @@ end
 
 
 function VisualStudio200xInitialize()
-	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
-	local chunk = loadfile(outPath .. 'VSProjectExportInfo.lua')
+	local chunk = loadfile(ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_', '_targetinfo_', 'VSProjectExportInfo.lua'))
 	if chunk then chunk() end
 	if not ProjectExportInfo then
 		ProjectExportInfo = {}
@@ -558,8 +557,7 @@ end
 
 
 function VisualStudio200xShutdown()
-	local outPath = ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_') .. '/'
-	prettydump.dumpascii(outPath .. 'VSProjectExportInfo.lua', 'ProjectExportInfo', ProjectExportInfo)
+	prettydump.dumpascii(ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_', '_targetinfo_', 'VSProjectExportInfo.lua'), 'ProjectExportInfo', ProjectExportInfo)
 end
 
 
