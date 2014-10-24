@@ -1,0 +1,14 @@
+LuaString "
+    ospath = require 'ospath'
+    osprocess = require 'osprocess'
+    local prettydump = require 'prettydump'
+    local assetsFileListPath = ospath.join(jam.globals.ASSETS_INTERMEDIATES[1], 'assetsFileList.lua')
+    local assetsDatPath = ospath.join(IMAGE_PATH, 'assets.dat')
+    prettydump.dumpascii(assetsFileListPath, 'assetsFileList', assetsFileList)
+    for line in osprocess.lines{ ospath.escape(jam.globals.LUA_EXE[1]), ospath.join(jam.globals.GameAssets[1], 'ArchiveAssets.lua'), assetsFileListPath, assetsDatPath} do
+        jam_print(line)
+    end
+    jam.Clean('clean:assets', assetsFileListPath)
+" ;
+#LuaFile $(GameAssets)/ArchiveAssets.lua ;
+
