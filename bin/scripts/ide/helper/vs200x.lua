@@ -548,7 +548,7 @@ end
 
 
 function VisualStudio200xInitialize()
-	local chunk = loadfile(ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_', '_targetinfo_', 'VSProjectExportInfo.lua'))
+	local chunk = loadfile(ospath.join(_getTargetInfoPath(), 'VSProjectExportInfo.lua'))
 	if chunk then chunk() end
 	if not ProjectExportInfo then
 		ProjectExportInfo = {}
@@ -557,7 +557,7 @@ end
 
 
 function VisualStudio200xShutdown()
-	prettydump.dumpascii(ospath.join(destinationRootPath, '_workspace.' .. opts.gen .. '_', '_targetinfo_', 'VSProjectExportInfo.lua'), 'ProjectExportInfo', ProjectExportInfo)
+	prettydump.dumpascii(ospath.join(_getTargetInfoPath(), 'VSProjectExportInfo.lua'), 'ProjectExportInfo', ProjectExportInfo)
 end
 
 
