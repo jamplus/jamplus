@@ -584,6 +584,29 @@ evaluate_rule(
 	}
 #endif
 
+#ifdef OPT_LOAD_MISSING_RULE_EXT
+	if( !rule->actions && !rule->procedure )
+	{
+		if( ruleexists( "FindMissingRule" ) )
+		{
+			LOL lol;
+			LIST *args = list_append( L0, expanded, 0 );
+			LIST *result;
+
+			lol_init( &lol );
+			lol_add( &lol, args );
+			result = evaluate_rule( "FindMissingRule", &lol, L0 );
+			lol_free( &lol );
+
+			if( list_first( result ) ) {
+				rule = bindrule( list_value( list_first( result ) ) );
+			}
+
+			list_free( result );
+		}
+	}
+#endif /* OPT_LOAD_MISSING_RULE_EXT */
+
 	/* Check traditional targets $(<) and sources $(>) */
 
 #ifdef OPT_IMPROVED_WARNINGS_EXT
