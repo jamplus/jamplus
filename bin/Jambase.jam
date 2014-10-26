@@ -91,7 +91,7 @@ rule UseModule MODULE_NAME : OPTIONS
 	$(include_marker) = true ;
 
 	local moduleName = <jam:modules>$(MODULE_NAME).jam ;
-	local searchPaths = $(SUBDIR) $(CWD) $(JAM_MODULES_USER_PATH) $(JAM_MODULES_PATH) ;
+	local searchPaths = $(SUBDIR) $(CWD) $(CWD)/jam $(JAM_MODULES_USER_PATH) $(JAM_MODULES_PATH) ;
 	local searchPath ;
 	local foundPath ;
 	for searchPath in $(searchPaths) {
