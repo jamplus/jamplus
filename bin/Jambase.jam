@@ -120,6 +120,36 @@ rule IncludeModule MODULE_NAME : OPTIONS
 }
 
 
+rule FindMissingRule RULE_NAME
+{
+	local components = [ Split $(RULE_NAME) : "." ] ;
+	local component ;
+	local path ;
+	for component in $(components) {
+		path += $(component) ;
+		IncludeModule $(path:LJ=/) ;
+		if [ RuleExists $(RULE_NAME) ] {
+			return $(RULE_NAME) ;
+		}
+	}
+
+	path = $(components:J=/) ;
+	local ruleName = $(components:J=.) ;
+	while true {
+		path = $(path:P) ;
+		if ! $(path) {
+			return ;
+		}
+		ruleName = [ Subst $(path) : "/" : "." ] ;
+		ruleName = $(ruleName).* ;
+		if [ RuleExists $(ruleName) ] {
+			__MISSING_RULE_COMPONENTS = $(components) ;
+			return $(ruleName) ;
+		}
+	}
+}
+
+
 rule FGristDirectories DIRECTORIES
 {
 	return $(DIRECTORIES:G=!dir!) ;
