@@ -82,7 +82,7 @@ Depends clean : clean:all ;
 
 JAM_MODULES_PATH ?= @($(JAM_PROCESS_PATH)/../modules:R=) ;
 
-rule UseModule MODULE_NAME : OPTIONS
+rule IncludeModule MODULE_NAME : OPTIONS
 {
 	local include_marker = included_module_$(MODULE_NAME:J=_) ;
 	if $($(include_marker))  &&  ! ( force in $(OPTIONS) ) {
@@ -117,12 +117,6 @@ rule UseModule MODULE_NAME : OPTIONS
 	include $(moduleName) ;
 
 	return $(moduleName) ;
-}
-
-
-rule IncludeModule MODULE_NAME : OPTIONS
-{
-	UseModule $(MODULE_NAME) : $(OPTIONS) ;
 }
 
 
