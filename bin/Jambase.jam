@@ -800,6 +800,8 @@ switch $(OS)
 
 if $(TOOLCHAIN) {
 	Toolchain $(TOOLCHAIN) ;
+} else if $(toolchain) {
+	Toolchain $(toolchain) ;
 } else {
 	CONFIG ?= $(VALID_CONFIGS[1]) ;
 
