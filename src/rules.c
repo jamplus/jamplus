@@ -92,7 +92,10 @@ int ruleexists( const char *rulename )
 
 	r->name = rulename;
 
-	return hashcheck( rulehash, (HASHDATA **)&r );
+	if( !hashcheck( rulehash, (HASHDATA **)&r ) )
+		return 0;
+
+	return r->actions || r->procedure;
 }
 
 /*
