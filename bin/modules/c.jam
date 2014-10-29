@@ -1604,7 +1604,8 @@ rule C._Toolchain {
 		local currentToolchainSpec = $(TOOLCHAIN) ;
 		local toolchainSpecPath = $(TOOLCHAIN:J=/) ;
 		while $(currentToolchainSpec) {
-			if [ IncludeModule toolchains/c/$(currentToolchainSpec:J=-) : force ] {
+			local filename = [ Subst toolchains/c/$(currentToolchainSpec:J=-) : %* : _all_ ] ;
+			if [ IncludeModule $(filename) : force ] {
 				break ;
 			}
 			toolchainSpecPath = $(toolchainSpecPath:P) ;
