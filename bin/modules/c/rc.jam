@@ -5,7 +5,7 @@ if ! $(TARGETINFO_LOCATE) {
 
 # Originally from http://maillist.perforce.com/pipermail/jamming/2004-July.txt.gz
 # windows resource compiler.
-rule C.ResourceCompiler PARENT : SOURCES : OPTIONS {
+rule C.Rc PARENT : SOURCES : OPTIONS {
 	C.ActiveTarget $(PARENT) ;
 	SOURCES = [ C.GristFiles : $(SOURCES) ] ;
 	local TARGETS = $(SOURCES:S=.res) ;
@@ -85,7 +85,7 @@ actions quietly C.ResourceCompileQuiet
 }
 
 # Set resource compiler options
-rule C._RcOptions VARIABLE : RESOURCE_NAME : OPTIONS {
+rule C._Rc.Options VARIABLE : RESOURCE_NAME : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 
 	local target ;
@@ -100,16 +100,16 @@ rule C._RcOptions VARIABLE : RESOURCE_NAME : OPTIONS {
 }
 
 
-rule C.RcFlags TARGET : RESOURCE_NAME : FLAGS {
-	C._RcOptions RCFLAGS : $(RESOURCE_NAME) : $(FLAGS) ;
+rule C.Rc.Flags TARGET : RESOURCE_NAME : FLAGS {
+	C._Rc.Options RCFLAGS : $(RESOURCE_NAME) : $(FLAGS) ;
 }
 
-rule C.RcDefines TARGET : RESOURCE_NAME : DEFINES {
-	C._RcOptions RCDEFINES : $(RESOURCE_NAME) : $(DEFINES) ;
+rule C.Rc.Defines TARGET : RESOURCE_NAME : DEFINES {
+	C._Rc.Options RCDEFINES : $(RESOURCE_NAME) : $(DEFINES) ;
 }
 
-rule C.RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS {
-	C._RcOptions RCHDRS : $(RESOURCE_NAME) : $(HDRS) ;
+rule C.Rc.IncludeDirectories TARGET : RESOURCE_NAME : HDRS {
+	C._Rc.Options RCHDRS : $(RESOURCE_NAME) : $(HDRS) ;
 }
 
 
@@ -117,19 +117,19 @@ rule C.RcIncludeDirectories TARGET : RESOURCE_NAME : HDRS {
 
 } else {  # TARGETINFO_LOCATE
 
-rule C.ResourceCompiler {
+rule C.Rc {
 }
 
 
-rule C.RcFlags {
+rule C.Rc.Flags {
 }
 
 
-rule C.RcDefines {
+rule C.Rc.Defines {
 }
 
 
-rule C.RcIncludeDirectories {
+rule C.Rc.IncludeDirectories {
 }
 
 }

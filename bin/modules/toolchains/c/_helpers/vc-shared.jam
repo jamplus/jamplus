@@ -3,8 +3,6 @@
 	MSVC_SUBSYSTEM_CONSOLE ?= /SUBSYSTEM:CONSOLE ;
 }
 
-C.IncludeModule win32resource ;
-
 if ! $(TARGETINFO_LOCATE) {
 
 rule C.vc.FDefines { return /D$(<) ; }
@@ -66,7 +64,7 @@ rule C.vc._ManifestHelper MANIFEST : MANIFEST_TYPE {
 	CONTENTS on $(manifestRC) = "$(MANIFEST_TYPE) 24 $(gristedManifest:TC/)" ;
 	C.vc.ManifestToRC $(manifestRC) : $(gristedManifest) ;
 
-	return [ C.ResourceCompiler $(manifestRC) ] ;
+	return [ C.Rc $(manifestRC) ] ;
 }
 
 actions response C.vc.Link {
@@ -156,7 +154,7 @@ rule C.vc._writeManifest {
 		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(tempEmbeddedRc) ;
 		Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
 
-		local tempEmbeddedRes = [ C.ResourceCompiler : $(tempEmbeddedRc) : quiet ] ;
+		local tempEmbeddedRes = [ C.Rc : $(tempEmbeddedRc) : quiet ] ;
 		_s += $(tempEmbeddedRes) ;
 
 		Depends $(_t[1]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
