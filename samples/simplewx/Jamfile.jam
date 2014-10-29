@@ -4,8 +4,7 @@ SRCS =
 		auidemo.cpp
 ;
 
-IncludeModule c/wxwidgets ;
-C.UseWxWidgets SimpleWx : base core adv aui html : linklibs ;
+C.WxWidgets SimpleWx : base core adv aui html : linklibs ;
 
 if $(PLATFORM) in macosx32 macosx64 {
 	C.BundleInfo SimpleWx : info : "1.1 Build 1000, Copyright 2010 wxWidgets" ;
