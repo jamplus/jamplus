@@ -809,8 +809,6 @@ rule Toolchain TOOLCHAIN_SPEC {
 	TOOLCHAIN = $(TYPE[2-]) ;
 	TYPE = $(TYPE[1]) ;
 
-	IncludeModule toolchains/$(TYPE)/_helpers/$(TYPE) ;
-
 	$(TYPE:U)._Toolchain ;
 }
 
