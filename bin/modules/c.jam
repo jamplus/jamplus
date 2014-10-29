@@ -1186,6 +1186,11 @@ rule C.NoPrecompiledHeader TARGET {
 }
 
 
+rule C.Flags TARGET {
+	C.ActiveTarget $(TARGET) ;
+}
+
+
 rule C.CFlags TARGET {
 	C.ActiveTarget $(TARGET) ;
 }
