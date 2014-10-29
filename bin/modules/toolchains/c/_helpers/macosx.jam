@@ -37,7 +37,7 @@ if $(C.COMPILER) {
 	}
 }
 
-C.ToolchainHelper $(C.COMPILER_SUITE)-$(C.PLATFORM)-$(C.CONFIG) ;
+C.ToolchainHelper $(C.COMPILER_SUITE)-$(C.PLATFORM)-$(C.CONFIG) : optional ;
 
 local COMPILER_BIN_PATH = $(COMPILER_BIN_PATH:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/libtool ;

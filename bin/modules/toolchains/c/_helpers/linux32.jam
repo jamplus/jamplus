@@ -11,5 +11,5 @@ if $(C.COMPILER) {
 	}
 }
 
-C.ToolchainHelper $(C.COMPILER_SUITE)-$(C.PLATFORM)-$(C.CONFIG) ;
+C.ToolchainHelper $(C.COMPILER_SUITE)-$(C.PLATFORM)-$(C.CONFIG) : optional ;
 
