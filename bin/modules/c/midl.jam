@@ -2,9 +2,9 @@ if ! $(TARGETINFO_LOCATE)
 {
 
 # OPTIONS = proxy ;
-rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
+rule C.Midl.Flags PARENT : BASE_NAME : OPTIONS
 {
-	ActiveTarget $(PARENT) ;
+	C.ActiveTarget $(PARENT) ;
 
 	BASE_NAME = $(BASE_NAME:L) ;
 	BASE_NAME = [ C.GristFiles $(PARENT) : $(BASE_NAME) ] ;
@@ -34,7 +34,7 @@ rule C.MidlFlags PARENT : BASE_NAME : OPTIONS
 
 		local flags ;
 #		on $(PARENT) flags += $(MIDLFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
-flags += $(MIDLFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+		flags += $(MIDLFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 #		on C.* flags += $(MIDLFLAGS.$(CONFIG)) $(MIDLFLAGS.*) ;
 
 		if $(C.COMPILER) = vc6 {
@@ -67,9 +67,9 @@ flags += $(MIDLFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	return $(targets) ;
 }
 
-rule C.MidlCompiler PARENT : SOURCE
+rule C.Midl.Compiler PARENT : SOURCE
 {
-	PARENT = [ ActiveTarget $(PARENT) ] ;
+	PARENT = [ C.ActiveTarget $(PARENT) ] ;
 
 	SOURCE = [ C.GristFiles $(PARENT) : $(SOURCE) ] ;
 	SearchSource $(SOURCE) ;
@@ -150,11 +150,11 @@ actions C.Midl
 
 } else {
 
-rule C.MidlCompiler
+rule C.Midl.Compiler
 {
 }
 
-rule C.MidlFlags
+rule C.Midl.Flags
 {
 }
 
