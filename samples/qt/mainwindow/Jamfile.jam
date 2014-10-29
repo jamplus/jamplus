@@ -1,10 +1,8 @@
 SubDir TOP ;
 
-IncludeModule c/qt ;
+if [ C.Qt.Found ] {
 
-if $(QT_FOUND) {
-
-C.UseQt mainwindow : core gui : link ;
+C.Qt mainwindow : core gui : link ;
 
 local SRCS =
 		colorswatch.cpp

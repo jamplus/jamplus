@@ -12,7 +12,12 @@ if ! $(QT_ROOT) {
 }
 
 
-rule C.UseQt TARGETS : COMPONENTS : OPTIONS {
+rule C.Qt.Found {
+    return $(QT_FOUND) ;
+}
+
+
+rule C.Qt TARGETS : COMPONENTS : OPTIONS {
 	if ! $(QT_ROOT) {
 		Exit Qt not found. ;
 	}
