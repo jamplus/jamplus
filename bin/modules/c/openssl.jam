@@ -1,4 +1,4 @@
-rule C.UseOpenSSL TARGET : OPTIONS {
+rule C.OpenSSL TARGET : OPTIONS {
 	if $(NT) {
 		local bits = 32 ;
 		if $(PLATFORM) = win64 {
