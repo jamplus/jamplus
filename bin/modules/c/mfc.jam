@@ -1,4 +1,4 @@
-rule C.UseMFC TARGET : OPTIONS {
+rule C.MFC TARGET : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 
 	if shared in $(OPTIONS) {

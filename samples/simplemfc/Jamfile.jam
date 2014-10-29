@@ -17,11 +17,9 @@ SRCS =
 		stdafx.h
 ;
 
-IncludeModule c/mfc ;
-
 ActiveTarget SimpleMFC ;
 
-C.UseMFC : link shared ;
+C.MFC : link shared ;
 
 C.Lump : SRCS : SimpleMFCLump : stdafx.cpp stdafx.h 1 ;
 
