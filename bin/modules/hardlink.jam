@@ -1,0 +1,27 @@
+if ! $(TARGETINFO_LOCATE) {
+
+rule HardLink PARENT : TARGET : SOURCE {
+	PARENT = [ ActiveTarget $(PARENT) ] ;
+	SOURCE = [ C.GristFiles $(SOURCE) ] ;
+	TARGET = [ C.GristFiles $(TARGET) ] ;
+	MakeLocate $(TARGET) : $(TARGET:D) ;
+	BINDING on $(TARGET) = $(TARGET:BS) ;
+
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(TARGET) : $(SOURCE) ;
+	SearchSource $(SOURCE) : $(SEARCH_SOURCE) ;
+
+	_HardLink $(TARGET) : $(SOURCE) ;
+}
+
+actions _HardLink
+{
+	$(RM) "$(1[1])" && $(LN) "$(2[1])" "$(1[1])"
+}
+
+} else {
+
+rule HardLink
+{
+}
+
+}
