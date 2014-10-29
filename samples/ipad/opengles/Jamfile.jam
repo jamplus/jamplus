@@ -2,8 +2,6 @@ SubDir TOP ;
 
 C.ActiveTarget opengles ;
 
-IncludeModule CopyFile ;
-
 if $(CONFIG) = debug {
 	C.OutputPostfixClear ;
 }
