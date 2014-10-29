@@ -1,6 +1,6 @@
 DXSDK_DIR = $(DXSDK_DIR:J=$(SPACE)) ;
 
-rule C.UseDirectX TARGET : OPTIONS {
+rule C.DirectX TARGET : OPTIONS {
 	ActiveTarget $(TARGET) ;
 
 	C.IncludeDirectories $(C.ACTIVE_TOOLCHAIN_TARGET) : "$(DXSDK_DIR)Include" ;
