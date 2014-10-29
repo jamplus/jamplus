@@ -22,22 +22,9 @@ if $(NT) {
 	}
 }
 
-
-rule CopyFiles PARENT : DESTINATION_PATH : SOURCE {
-	local filename ;
-	for filename in $(SOURCE) {
-		CopyFile $(PARENT) : $(DESTINATION_PATH)/$(filename:BS) : $(filename) ;
-	}
-}
-
 } else {
 
-rule CopyFile
-{
-}
-
-rule CopyFiles
-{
+rule CopyFile {
 }
 
 }
