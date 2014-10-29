@@ -125,10 +125,10 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	local defines ;
 	local hdrs = $(SEARCH_SOURCE) ;
 
-	#on $(C.ACTIVE_TOOLCHAIN_*) {
-		#defines += $(DEFINES) ;
-		#hdrs += $(HDRS) ;
-	#}
+	on $(C.ACTIVE_TOOLCHAIN_*) {
+		defines += $(DEFINES) ;
+		hdrs += $(HDRS) ;
+	}
 
 	local forceIncludes ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) {
@@ -142,6 +142,7 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	Contents += "$(project).Defines['$(PLATFORM)']['$(CONFIG)'] = { $(definesString:J= ) }$(NEWLINE)" ;
 
 	hdrs += $(STDHDRS) ;
+	hdrs += $(C.STDHDRS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 
 	local hdrsString = "[[$(hdrs)]]," ;
 	hdrsString ?= "" ;

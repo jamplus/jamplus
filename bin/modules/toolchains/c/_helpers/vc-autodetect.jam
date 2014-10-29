@@ -124,7 +124,7 @@ rule FindVisualStudioHelper VERSION : COMPILER {
 
 	C.ToolchainHelperOnce vc-shared ;
 
-	if $(C.PLATFORM) != *  &&  $(C.CONFIG) != * {
+	if $(C.PLATFORM) != * {
         C.ToolchainHelperOnce vc-$(C.PLATFORM) ;
 	}
 
