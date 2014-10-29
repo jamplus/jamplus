@@ -1557,7 +1557,9 @@ rule C.ToolchainSpecKeys TOOLCHAIN_SPEC_KEYS {
 
 rule C.ToolchainHelper TOOLCHAIN_MODULE_NAME_LIST : OPTIONS {
 	local includeModuleOptions ;
-	if ! ( once in $(OPTIONS) ) {
+	if optional in $(OPTIONS) {
+		includeModuleOptions += optional ;
+	} else if ! ( once in $(OPTIONS) ) {
 		includeModuleOptions += force ;
 	}
 	local module ;
