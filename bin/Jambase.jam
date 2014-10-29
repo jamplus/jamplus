@@ -803,8 +803,6 @@ rule Toolchain TOOLCHAIN_SPEC {
 	local TOOLCHAIN_SPEC_OPTIONS = $(TOOLCHAIN[2-]) ;
 	TOOLCHAIN = $(TOOLCHAIN[1]) ;
 
-	#TOOLCHAIN_SPEC_OPTIONS = [ ListSort $(TOOLCHAIN_SPEC_OPTIONS) : 0 ] ;
-
 	local TYPE = [ Split $(TOOLCHAIN) : / ] ;
 	TOOLCHAIN = $(TYPE[2-]) ;
 	TYPE = $(TYPE[1]) ;
