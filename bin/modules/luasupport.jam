@@ -1,1 +1,4 @@
-LuaFile "$(JAM_MODULES_PATH)/luasupport.lua" ;
+rule LuaSupport {
+	LuaFile "$(JAM_MODULES_PATH)/luasupport.lua" ;
+}
+
