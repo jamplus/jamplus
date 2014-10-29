@@ -139,19 +139,6 @@ rule C.HdrRule SOURCE : HEADERS {
 
 
 
-rule C.SubDirCcFlags {
-	SUBDIRCCFLAGS += $(<) ;
-}
-
-rule C.SubDirC++Flags {
-	SUBDIRC++FLAGS += $(<) ;
-}
-
-rule C.SubDirHdrs {
-	SUBDIRHDRS += [ FDirName $(<) ] ;
-}
-
-
 ########################################################################
 # The original MultiCppCompile rule was provided by Alen Ladavac.
 ########################################################################
@@ -243,8 +230,6 @@ rule C._MultiCppCompile SOURCES {
 	local preMMFLAGS ;
 	local flagsToRemove ;
 	local flagsToAdd ;
-
-	postHDRS += $(SUBDIRHDRS) ;
 
 	local forceIncludes ;
 	on $(C.ACTIVE_TOOLCHAIN_*) {
@@ -1134,18 +1119,6 @@ rule C.C++Exceptions TARGET : TYPE {
 
 # TARGETINFO_LOCATE
 } else {
-
-
-rule C.SubDirCcFlags {
-}
-
-
-rule C.SubDirC++Flags {
-}
-
-
-rule C.SubDirHdrs {
-}
 
 
 rule C.BatchCompileGroupSize SIZE {

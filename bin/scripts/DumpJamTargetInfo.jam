@@ -141,7 +141,7 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	definesString ?= "" ;
 	Contents += "$(project).Defines['$(PLATFORM)']['$(CONFIG)'] = { $(definesString:J= ) }$(NEWLINE)" ;
 
-	hdrs += $(SUBDIRHDRS) $(STDHDRS) ;
+	hdrs += $(STDHDRS) ;
 
 	local hdrsString = "[[$(hdrs)]]," ;
 	hdrsString ?= "" ;
