@@ -772,6 +772,7 @@ rule C._LibraryFromObjects OBJECTS {
 		$(LIBFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
 		$(LIBFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_*))
 	;
+	local archiveRule = C.$(C.COMPILER_SUITE).Archive ;
 	local theRule ;
 	for theRule in $(C._LibraryFromObjects_LibFlags:Z=$(C.COMPILER_SUITE_SYMBOL)) {
 		$(theRule) ;
@@ -788,11 +789,7 @@ rule C._LibraryFromObjects OBJECTS {
 	UseCommandLine $(_l) : $(libFlags) $(_s) ;
 
 	UseFileCache $(_l) : code ;
-	if $(USE_ARCHIVE2:Z=$(C.COMPILER_SUITE_SYMBOL)) {
-		C.$(C.COMPILER_SUITE).Archive2 $(_l) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
-	} else {
-		C.$(C.COMPILER_SUITE).Archive $(_l) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
-	}
+	$(archiveRule) $(_l) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
 
 	if $(C.RANLIB) { C.$(C.COMPILER_SUITE).Ranlib $(_l) : : $(C.COMPILER_SUITE_SYMBOL) ; }
 
