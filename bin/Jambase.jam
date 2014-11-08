@@ -138,7 +138,6 @@ rule FindMissingRule RULE_NAME
 	path = $(components:J=/) ;
 	local ruleName = $(components:J=.) ;
 	while true {
-		path = $(path:P) ;
 		if ! $(path) {
 			return ;
 		}
@@ -149,6 +148,7 @@ rule FindMissingRule RULE_NAME
 			return $(ruleName) ;
 		}
 		__MISSING_RULE_SCAN_LIST += $(ruleName) ;
+		path = $(path:P) ;
 	}
 }
 
