@@ -63,8 +63,8 @@ function Test()
 *** updating 6 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.obj
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-a>add.obj
-!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):lib-a>lib-a.lib
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app.exe
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-a>lib-a.lib
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app.exe
 !NEXT!*** updated 6 target(s)...
 ]]
 
@@ -76,7 +76,7 @@ function Test()
 *** found 12 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 
@@ -113,8 +113,8 @@ function Test()
 *** updating 6 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-a>add.o 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):lib-a>lib-a.a 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-a>lib-a.a 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app
 *** updated 6 target(s)...
 ]]
 
@@ -126,7 +126,7 @@ function Test()
 *** found 12 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app
 *** updated 2 target(s)...
 ]]
 

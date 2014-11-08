@@ -37,7 +37,7 @@ function Test()
 *** found 8 target(s)...
 *** updating 3 target(s)...
 @ C.groovycompiler.CC <c/groovyplatform/retail:helloworld>helloworld.o
-!NEXT!@ C.groovycompiler.Link <c/groovyplatform/retail:helloworld>helloworld.exe
+!NEXT!@ C.groovycompiler.Link <c/groovyplatform/retail:helloworld>helloworld$(SUFEXE)
 *** updated 3 target(s)...
 ]]
 	pattern2 = [[
@@ -67,7 +67,7 @@ function Test()
 		'CreateJamVS2012Workspace.config',
 		'helloworld.c',
 		'groovyplatform-retail/helloworld/helloworld.o',
-		'groovyplatform-retail/helloworld/helloworld.retail.exe',
+		'groovyplatform-retail/helloworld/helloworld.retail$(SUFEXE)',
 		'jam/c/toolchain/groovycompiler/groovyplatform.jam',
 		'jam/c/toolchain/groovycompiler/shared.jam',
 		'jam/c/toolchain/groovyplatform/debug.jam',

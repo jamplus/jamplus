@@ -140,11 +140,11 @@ function Test()
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.obj
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.obj
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-c>add.obj
-@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):lib-c>lib-c.lib
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.lib
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-b>slib-b.dll
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.dll
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app.exe
 *** updated 15 target(s)...
 ]]
 		else
@@ -154,11 +154,11 @@ function Test()
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-c>add.o 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):lib-c>lib-c.a 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.a 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.o 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app
 *** updated 15 target(s)...
 ]]
 		end
@@ -194,9 +194,9 @@ function Test()
 *** found 42 target(s)...
 *** updating 4 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-b>slib-b.dll
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.dll
 !NEXT!*** updated 5 target(s)...
 ]]
 		else
@@ -204,10 +204,10 @@ function Test()
 				*** found 26 target(s)...
 				*** updating 7 target(s)...
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.o 
-				@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.o 
-				@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
-				@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app
 				*** updated 7 target(s)...
 ]]
 		end
@@ -240,9 +240,9 @@ function Test()
 		if Platform == 'win32' then
 			pattern = [[
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-c>add.obj
-!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):lib-c>lib-c.lib
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-b>slib-b.dll
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.lib
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.dll
 !NEXT!*** updated 5 target(s)...
 ]]
 		else
@@ -250,10 +250,10 @@ function Test()
 				*** found 26 target(s)...
 				*** updating 7 target(s)...
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-c>add.o 
-				@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):lib-c>lib-c.a 
-				@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
-				@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
-				@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app
+				@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.a 
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app
 				*** updated 7 target(s)...
 ]]
 		end
@@ -288,7 +288,7 @@ function Test()
 *** found 42 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
 !NEXT!*** updated 3 target(s)...
 ]]
 		else
@@ -296,8 +296,8 @@ function Test()
 				*** found 26 target(s)...
 				*** updating 4 target(s)...
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.o 
-				@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
-				@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app
 				*** updated 4 target(s)...
 ]]
 		end

@@ -25,7 +25,7 @@ function Test()
 *** found 11 target(s)...
 @ SleepThenTouch <$(TOOLCHAIN_GRIST):foo>generated.h
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.obj
-!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):foo>foo.lib
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):foo>foo.lib
 !NEXT!*** updated 4 target(s)...
 ]]
 
@@ -62,7 +62,7 @@ function Test()
 *** found 11 target(s)...
 *** updating 3 target(s)...
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.obj
-!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):foo>foo.lib
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):foo>foo.lib
 !NEXT!*** updated 3 target(s)...
 ]]
 		TestPattern(pattern3, RunJam{ 'foo' })
@@ -75,7 +75,7 @@ function Test()
 @ SleepThenTouch <$(TOOLCHAIN_GRIST):foo>generated.h 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceB.o 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):foo>foo.a 
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):foo>foo.a 
 !NEXT!*** updated 4 target(s)...
 ]]
 
@@ -112,7 +112,7 @@ function Test()
 *** updating 3 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceB.o 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):foo>foo.a 
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):foo>foo.a 
 !NEXT!*** updated 3 target(s)...
 ]]
 		TestPattern(pattern3, RunJam{ 'foo' })

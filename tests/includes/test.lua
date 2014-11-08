@@ -31,8 +31,8 @@ function Test()
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.obj
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>adefine.obj
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):common>print.obj
-!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):common>common.lib
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):common>common.lib
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1.exe
 !NEXT!*** updated 7 target(s)...
 ]]
 
@@ -83,7 +83,7 @@ function Test()
 *** found 33 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
@@ -97,7 +97,7 @@ function Test()
 *** found 33 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>adefine.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern4, RunJam())
@@ -112,8 +112,8 @@ function Test()
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>adefine.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):common>print.o 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):common>common.a 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1 
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):common>common.a 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1 
 *** updated 7 target(s)...
 ]]
 
@@ -161,7 +161,7 @@ function Test()
 *** found 17 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
@@ -175,7 +175,7 @@ function Test()
 *** found 17 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>adefine.o 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern4, RunJam())

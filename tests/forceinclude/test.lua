@@ -30,10 +30,10 @@ function Test()
 *** updating 9 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.obj
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):common>print.obj
-!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):common>common.lib
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):common>common.lib
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.obj
-!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):libA>libA.lib
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libA>libA.lib
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1.exe
 !NEXT!*** updated 9 target(s)...
 ]]
 
@@ -85,10 +85,10 @@ function Test()
 *** updating 9 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):common>print.o 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):common>common.a 
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):common>common.a 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):libA>libA.a 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libA>libA.a 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 9 target(s)...
 ]]
 
@@ -143,8 +143,8 @@ function Test()
 *** updating 4 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.obj
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.obj
-!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):libA>libA.lib
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libA>libA.lib
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1.exe
 !NEXT!*** updated 4 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
@@ -154,8 +154,8 @@ function Test()
 *** updating 4 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):libA>libA.a 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libA>libA.a 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 4 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

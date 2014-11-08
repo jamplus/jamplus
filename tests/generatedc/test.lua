@@ -22,7 +22,7 @@ function Test()
 *** updating 5 target(s)...
 @ GenerateCFile <$(TOOLCHAIN_GRIST):helloworld>file.c
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>main.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 5 target(s)...
 ]]
 
@@ -62,7 +62,7 @@ function Test()
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>file.obj
 file.c
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
@@ -77,7 +77,7 @@ file.c
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>main.o 
 @ GenerateCFile <$(TOOLCHAIN_GRIST):helloworld>file.c 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>file.o 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):helloworld>helloworld 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld 
 *** updated 5 target(s)...
 ]]
 
@@ -115,7 +115,7 @@ file.c
 *** found 11 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>file.o
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):helloworld>helloworld
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

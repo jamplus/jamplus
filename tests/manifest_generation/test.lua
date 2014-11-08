@@ -29,7 +29,7 @@ function Test()
 *** updating 4 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
 project1.cpp
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1.exe
 *** updated 4 target(s)...
 ]]
 
@@ -80,7 +80,7 @@ project1.cpp
 *** updating 2 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>]] .. cwdNoDashes .. [[/source/project1/project1.obj
 project1.cpp
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1.exe
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1.exe
 *** updated 2 target(s)...
 ]]
 
@@ -93,7 +93,7 @@ project1.cpp
 *** found 8 target(s)...
 *** updating 3 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>]] .. cwd .. [[/source/project1/project1.o
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 3 target(s)...
 ]]
 
@@ -138,7 +138,7 @@ project1.cpp
 *** found 8 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>]] .. cwd .. [[/source/project1/project1.o
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):project1>project1
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 2 target(s)...
 ]]
 

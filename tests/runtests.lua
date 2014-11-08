@@ -80,6 +80,8 @@ function TestPattern(patterns, lines)
 			if pattern then
 				pattern = pattern:gsub('$%(SUFEXE%)', SUFEXE)
 				pattern = pattern:gsub('$%(COMPILER%)', COMPILER)
+				pattern = pattern:gsub('$%(C.ARCHIVE%)', C_ARCHIVE)
+				pattern = pattern:gsub('$%(C.LINK%)', C_LINK)
 				pattern = pattern:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '!release')
 				pattern = pattern:gsub('$%(TOOLCHAIN_GRIST%)', 'c/' .. PlatformDir .. '/release')
 				pattern = pattern:gsub('$%(CWD%)', patterncwd)
@@ -99,6 +101,8 @@ function TestPattern(patterns, lines)
 					pattern = pattern:sub(11)
 					pattern = pattern:gsub('$%(SUFEXE%)', SUFEXE)
 					pattern = pattern:gsub('$%(COMPILER%)', COMPILER)
+					pattern = pattern:gsub('$%(C.ARCHIVE%)', C_ARCHIVE)
+					pattern = pattern:gsub('$%(C.LINK%)', C_LINK)
 					pattern = pattern:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '!release')
 					pattern = pattern:gsub('$%(TOOLCHAIN_GRIST%)', 'c/' .. PlatformDir .. '/release')
 					pattern = pattern:gsub('$%(CWD%)', patterncwd)
@@ -370,6 +374,8 @@ if os.getenv("OS") == "Windows_NT" then
 	PlatformDir = 'win32'
 	SUFEXE = '.exe'
 	COMPILER = 'vc'
+	C_ARCHIVE = 'C.vc.Archive'
+	C_LINK = 'C.vc.Link'
 else
 	local f = io.popen('uname')
 	uname = f:read('*a'):lower():gsub('\n', '')
@@ -379,10 +385,14 @@ else
 		Platform = 'macosx'
 		PlatformDir = 'macosx32'
 		COMPILER = 'clang'
+		C_ARCHIVE = 'C.clang-apple.Archive'
+		C_LINK = 'C.clang-apple.Link'
 	elseif uname == 'linux' then
 		Platform = 'linux'
 		PlatformDir = 'linux32'
 		COMPILER = 'gcc'
+		C_ARCHIVE = 'C.gcc.Archive'
+		C_LINK = 'C.gcc.Link'
 	end
 
 	SUFEXE = ''

@@ -31,7 +31,7 @@ function Test()
 *** found 20 target(s)...
 *** updating 5 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>platform.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):platform>platform.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):platform>platform.exe
 !NEXT!*** updated 5 target(s)...
 ]]
 			pass1Directories = {
@@ -66,17 +66,17 @@ function Test()
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>platform.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>macosx.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>filerelease.o 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):platform>platform
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):platform>platform
 *** updated 5 target(s)...
 ]]
 			else
 				pattern = [[
 *** found 11 target(s)...
 *** updating 4 target(s)...
-@ C.CC <platform>platform.o
-@ C.CC <platform>linux.o
-@ C.CC <platform>filerelease.o
-@ C.Link <platform>platform.release
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>platform.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>linux.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>filerelease.o 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):platform>platform
 *** updated 4 target(s)...
 ]]
 			end

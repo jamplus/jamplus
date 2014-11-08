@@ -86,10 +86,10 @@ function Test()
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-a>add.obj
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):nested-lib-b>sub.obj
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):nested-lib-c>mul.obj
-!NEXT!@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):nested-lib-c>nested-lib-c.lib
-@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):nested-lib-b>nested-lib-b.lib
-@ C.$(COMPILER).Archive <$(TOOLCHAIN_GRIST):lib-a>lib-a.lib
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app.exe
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):nested-lib-c>nested-lib-c.lib
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):nested-lib-b>nested-lib-b.lib
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-a>lib-a.lib
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app.exe
 *** updated 12 target(s)...
 ]]
 
@@ -101,7 +101,7 @@ function Test()
 *** found 22 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 
@@ -156,10 +156,10 @@ function Test()
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-a>add.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):nested-lib-b>sub.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):nested-lib-c>mul.o 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):nested-lib-c>nested-lib-c.a 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):nested-lib-b>nested-lib-b.a 
-@ C.$(COMPILER).Archive2 <$(TOOLCHAIN_GRIST):lib-a>lib-a.a 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app 
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):nested-lib-c>nested-lib-c.a 
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):nested-lib-b>nested-lib-b.a 
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-a>lib-a.a 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app 
 *** updated 12 target(s)...
 ]]
 
@@ -171,7 +171,7 @@ function Test()
 *** found 22 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):app>app 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app 
 *** updated 2 target(s)...
 ]]
 

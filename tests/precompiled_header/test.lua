@@ -51,7 +51,7 @@ function Test()
 			mypch.cpp
 			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.obj
 			main.cpp
-			@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):main>main.exe
+			@ $(C_LINK) <$(TOOLCHAIN_GRIST):main>main.exe
 			*** updated 5 target(s)...
 ]]
 
@@ -62,7 +62,7 @@ function Test()
 			mypch.cpp
 			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.obj
 			main.cpp
-			@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):main>main.exe
+			@ $(C_LINK) <$(TOOLCHAIN_GRIST):main>main.exe
 			*** updated 4 target(s)...
 ]]
 	elseif Compiler == 'mingw' then
@@ -130,7 +130,7 @@ function Test()
 			&@ C.$(COMPILER).PCH <$(TOOLCHAIN_GRIST):main%-%x+>mypch.h.gch
 			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.o 
 			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.o 
-			@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):main>main
+			@ $(C_LINK) <$(TOOLCHAIN_GRIST):main>main
 			*** updated 6 target(s)...
 ]]
 
@@ -140,7 +140,7 @@ function Test()
 			&@ C.$(COMPILER).PCH <$(TOOLCHAIN_GRIST):main%-%x+>mypch.h.gch
 			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.o 
 			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.o 
-			@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):main>main
+			@ $(C_LINK) <$(TOOLCHAIN_GRIST):main>main
 			*** updated 4 target(s)...
 ]]
 	end

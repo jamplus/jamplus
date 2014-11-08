@@ -22,7 +22,7 @@ function Test()
 *** updating 5 target(s)...
 @ WriteFile <$(TOOLCHAIN_GRIST):test>test.h
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
 *** updated 5 target(s)...
 ]]
 
@@ -61,7 +61,7 @@ function Test()
 *** found 19 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
 !NEXT!*** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
@@ -75,7 +75,7 @@ function Test()
 @ WriteFile <$(TOOLCHAIN_GRIST):test>test.h
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>test.o 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test 
 *** updated 5 target(s)...
 ]]
 
@@ -112,7 +112,7 @@ function Test()
 *** found 11 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test 
 *** updated 2 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())

@@ -56,7 +56,7 @@ function Test()
 *** updating 6 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>precomp.h.pch
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 6 target(s)...
 ]]
 	else
@@ -92,7 +92,7 @@ function Test()
 			@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.o 
 			@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/main.o 
 			@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-			@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):helloworld>helloworld 
+			@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld 
 			*** updated 7 target(s)...
 ]]
 	
@@ -131,7 +131,7 @@ function Test()
 *** updating 5 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>precomp.h.pch
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 5 target(s)...
 ]]
 		else
@@ -142,7 +142,7 @@ function Test()
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.o 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/main.o 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-				@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):helloworld>helloworld
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld
 				*** updated 5 target(s)...
 ]]
 		end
@@ -179,7 +179,7 @@ function Test()
 *** updating 5 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>precomp.h.pch
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 5 target(s)...
 ]]
 		else
@@ -187,7 +187,7 @@ function Test()
 				*** found 17 target(s)...
 				*** updating 2 target(s)...
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-				@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):helloworld>helloworld
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld
 				*** updated 2 target(s)...
 ]]
 		end

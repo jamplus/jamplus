@@ -32,7 +32,7 @@ Pass 2
 @ WriteFile <$(TOOLCHAIN_GRIST):test>foo.h
 @ WriteFile <$(TOOLCHAIN_GRIST):test>main.cpp
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):test>main.obj
-!NEXT!@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test.exe
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
 !NEXT!*** updated 5 target(s)...
 *** executing pass 3...
 Pass 3
@@ -71,7 +71,7 @@ Pass 2
 @ WriteFile <$(TOOLCHAIN_GRIST):test>foo.h 
 @ WriteFile <$(TOOLCHAIN_GRIST):test>main.cpp 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):test>main.o 
-@ C.$(COMPILER).Link <$(TOOLCHAIN_GRIST):test>test
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
 *** updated 4 target(s)...
 Pass 3 
 *** found 8 target(s)...
