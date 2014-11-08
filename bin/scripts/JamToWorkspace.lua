@@ -996,13 +996,13 @@ include "$(settingsFile)" ;
 				ospath.escape(destinationRootPath)))
 	else
 		-- Write updateworkspace.sh.
-		ospath.write_file(ospath.join(_getWorkspacesPath, 'updateworkspaces'),
+		ospath.write_file(ospath.join(_getWorkspacesPath(), 'updateworkspaces'),
 				("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s %s\n"):format(
 				ospath.escape(jamScript), table.concat(opts.gen, ','),
 				ospath.escape(ospath.join(destinationRootPath, 'buildenvironment.config')),
 				ospath.escape(sourceJamfilePath),
 				ospath.escape(destinationRootPath)))
-		ospath.chmod(ospath.join(outPath, 'updateworkspaces'), 777)
+		ospath.chmod(ospath.join(_getWorkspacesPath(), 'updateworkspaces'), 777)
 	end
 
 	for _, _ide in ipairs(opts.gen) do
