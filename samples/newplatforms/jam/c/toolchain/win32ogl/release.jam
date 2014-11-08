@@ -1,0 +1,4 @@
+rule C.Toolchain.win32ogl.release.* {
+    C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+    C.Toolchain.win32ogl.* ;
+}

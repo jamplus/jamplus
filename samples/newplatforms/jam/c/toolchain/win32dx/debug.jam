@@ -1,0 +1,4 @@
+rule C.Toolchain.win32dx-debug.* {
+    C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+    C.Toolchain.win32dx.* ;
+}

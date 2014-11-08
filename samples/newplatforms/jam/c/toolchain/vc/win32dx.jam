@@ -1,0 +1,4 @@
+rule C.Toolchain.vc.win32dx.Detect {
+    C.Toolchain.vc.win32.Detect ;
+}
+

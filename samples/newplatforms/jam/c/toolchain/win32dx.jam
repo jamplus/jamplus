@@ -1,0 +1,15 @@
+rule C.Toolchain.win32dx.* {
+    # This feels like a complete hack, but the internals of the win32 toolchain
+    # use $(C.PLATFORM) to make decisions about what to include next.
+    #
+    # Since we're using a custom platform that JamPlus does not understand by
+    # default, we work around that by telling JamPlus we are using win32 as a
+    # platform.  After the toolchain is loaded, we force the platform back to
+    # the intended one.
+    C.OverrideToolchainSpec C.PLATFORM=win32 ;
+    C.Toolchain.win32.* ;
+    C.OverrideToolchainSpec C.PLATFORM=win32 : remove ;
+
+    C.Defines * : PLATFORM_WIN32DX ;
+}
+
