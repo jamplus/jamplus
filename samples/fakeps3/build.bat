@@ -1,1 +1,1 @@
-@jam PLATFORM=fakeps3 %*
+@jam PLATFORM=fakeps3 JAM_VERBOSE=1 %*

@@ -1,0 +1,18 @@
+rule C.Toolchain.fakeps3.* {
+    C.ToolchainSpecKeys C.PLATFORM C.CONFIG C.ARCHITECTURE ;
+
+    if ! $(C.CONFIG) in debug release {
+        Exit * Only 'debug' and 'release' are supported for the fakeps3 toolchain. ;
+    }
+
+    C.ARCHITECTURE ?= ppu ;
+    if ! $(C.ARCHITECTURE) in ppu spu {
+        Exit * Only 'ppu' and 'spu' are supported for the fakeps3 toolchain. ;
+    }
+
+    # Fake it with the win32 detection.
+    C.Toolchain.mingw.win32.Detect ;
+
+    C.Defines * : FAKEPS3_$(C.ARCHITECTURE:U) ;
+}
+
