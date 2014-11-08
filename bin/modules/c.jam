@@ -1504,24 +1504,6 @@ rule C.OutputSuffix TARGET : SUFFIX {
 
 
 
-#VALID_CONFIGS ?= release releaseltcg debug ;
-#
-#C.CONFIG ?= $(VALID_CONFIGS[1]) ;
-#
-#switch $(OS)
-#{
-#	case NT :
-#		VALID_PLATFORMS ?= win32 win64 ;
-#
-#	case MACOSX :
-#		VALID_PLATFORMS ?= macosx32 macosx64 ;
-#
-#	case LINUX :
-#		VALID_PLATFORMS ?= linux32 ;
-#}
-#
-#if $(C.PLATFORM) = "" { C.PLATFORM = ; }
-#C.PLATFORM ?= $(VALID_PLATFORMS[1]) ;
 
 rule C.IncludeModule MODULE_NAME : OPTIONS {
 	IncludeModule toolchains/c/_modules/$(MODULE_NAME) : $(OPTIONS) ;
