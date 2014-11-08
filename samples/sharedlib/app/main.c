@@ -1,4 +1,4 @@
-#if _MSC_VER
+#if defined(_WIN32)
 __declspec(dllimport) void ExportA();
 __declspec(dllimport) void ExportB();
 #endif
