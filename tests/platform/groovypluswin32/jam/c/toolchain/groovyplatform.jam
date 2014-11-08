@@ -1,0 +1,153 @@
+rule C.Toolchain.groovyplatform.debug.* {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+    if [ C.Toolchain.groovycompiler.Detect ] {
+        C.Flags * : CC  : -g -O0 ;
+        C.Flags * : C++ : -g -O0 ;
+    }
+}
+
+
+rule C.Toolchain.groovyplatform.release.* {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+    if [ C.Toolchain.groovycompiler.Detect ] {
+        C.Flags * : CC  : -g -O2 ;
+        C.Flags * : C++ : -g -O2 ;
+    }
+}
+
+
+rule C.Toolchain.groovycompiler.Detect {
+    local GROOVY_ROOT ;
+	if $(NT) {
+		local PATHS =
+			c:/mingw
+			d:/mingw
+		;
+
+		local gcc = [ Glob $(PATHS)/bin : gcc.exe ] ;
+		if ! $(gcc)
+		{
+			return ;
+		}
+
+		GROOVY_ROOT = [ Match (.+)/bin : $(gcc[1]) ] ;
+	} else {
+		GROOVY_ROOT = /usr ;
+	}
+
+	if ! $(GROOVY_ROOT) {
+		return ;
+	}
+
+    C.COMPILER = groovycompiler ;
+    C.COMPILER_SUITE = groovycompiler ;
+
+    local SUFOBJ = .o ;
+    if $(NT) {
+        SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = .exe ;
+	} else {
+        SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = "" ;
+    }
+    SUFLIB on $(C.COMPILER_SUITE_SYMBOL) = .a ;
+    SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a ;
+    SUFOBJ on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+
+    NOARSCAN on $(C.COMPILER_SUITE_SYMBOL) = true ;
+    NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
+
+    C.AddBuildExtensions CC : .c .s : C.groovycompiler.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+    C.AddBuildExtensions C++ : .cc .cpp .cxx : C.groovycompiler.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+
+    C.Defines * : GROOVY ;
+
+    C.Flags * : CC  : -x c ;
+    C.Flags * : C++ : -x c++ ;
+
+    C.AR on $(C.COMPILER_SUITE_SYMBOL)      = "$(GROOVY_ROOT)/bin/ar" ru ;
+    C.CC on $(C.COMPILER_SUITE_SYMBOL)      = "$(GROOVY_ROOT)/bin/gcc" ;
+    C.C++ on $(C.COMPILER_SUITE_SYMBOL)     = "$(GROOVY_ROOT)/bin/g++" ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL)    = "$(GROOVY_ROOT)/bin/g++" ;
+    C.RANLIB on $(C.COMPILER_SUITE_SYMBOL)  = "$(GROOVY_ROOT)/bin/ranlib" ;
+
+    C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.groovycompiler._MultiCppCompile_SetupFlags ;
+
+    return $(C.COMPILER) ;
+}
+
+
+if ! $(TARGETINFO_LOCATE) {
+
+rule C.groovycompiler.FDefines { return -D$(<) ; }
+rule C.groovycompiler.FIncludes { return -I$(<) ; }
+rule C.groovycompiler.FLibraryPaths { return -L$(<) ; }
+
+if $(NT) {
+
+actions updated together piecemeal C.groovycompiler.Archive
+{
+	PATH=$(C.AR:D);%PATH%
+	$(C.AR:C) $(LIBFLAGS) $(<) $(>)
+}
+
+actions C.groovycompiler.Link
+{
+	PATH=$(C.LINK:D);%PATH%
+	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]) $(>) $(NEEDLIBS:T) $(LINKLIBS)
+}
+
+actions together C.groovycompiler.Ranlib
+{
+	PATH=$(C.RANLIB:D);%PATH%
+	$(C.RANLIB:C) $(<)
+}
+
+actions updated response C.groovycompiler.CC
+{
+	PATH=$(C.CC:D);%PATH%
+	$(C.CC:C) -c $(MFLAGS) $(>)
+}
+
+actions updated response C.groovycompiler.C++
+{
+	PATH=$(C.C++:D);%PATH%
+	$(C.C++:C) -c $(MFLAGS) $(>)
+}
+
+} else {
+
+actions updated together piecemeal C.groovycompiler.Archive
+{
+	$(C.AR:C) $(LIBFLAGS) $(<) $(>)
+}
+
+actions C.groovycompiler.Link
+{
+	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]) $(>) $(NEEDLIBS:T) $(LINKLIBS)
+}
+
+actions together C.groovycompiler.Ranlib
+{
+	$(C.RANLIB:C) $(<)
+}
+
+actions updated response C.groovycompiler.CC
+{
+	$(C.CC:C) -c $(MFLAGS) $(>)
+}
+
+actions updated response C.groovycompiler.C++
+{
+	$(C.C++:C) -c $(MFLAGS) $(>)
+}
+
+}
+
+rule C.groovycompiler._MultiCppCompile_SetupFlags
+{
+	_flags += "-c -o \"$(_obj:T)\"" ;
+}
+
+} # TARGETINFO_LOCATE
+

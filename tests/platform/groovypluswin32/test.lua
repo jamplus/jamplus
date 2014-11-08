@@ -4,20 +4,17 @@ function Test()
 	{
 		'CreateJamVS2008Workspace.bat',
 		'CreateJamVS2008Workspace.config',
-		'Jamfile.jam',
 		'helloworld.c',
+		'jam/c/toolchain/groovyplatform.jam',
+		'Jamfile.jam',
 		'test.lua',
-		'toolchains/c/_helpers/groovycompiler.jam',
-		'toolchains/c/_helpers/groovyplatform-autodetect.jam',
-		'toolchains/c/groovyplatform-debug.jam',
-		'toolchains/c/groovyplatform-release.jam',
 	}
 
 	local originalDirs =
 	{
-		'toolchains/',
-		'toolchains/c/',
-		'toolchains/c/_helpers/',
+		'jam/',
+		'jam/c/',
+		'jam/c/toolchain/',
 	}
 
 	RunJam{ 'TOOLCHAIN=c/groovyplatform/release', 'clean' }
@@ -29,7 +26,7 @@ function Test()
 *** found 8 target(s)...
 *** updating 3 target(s)...
 @ C.groovycompiler.CC <c/groovyplatform/release:helloworld>helloworld.o
-!NEXT!@ C.groovycompiler.Link <c/groovyplatform/release:helloworld>helloworld.exe
+!NEXT!@ C.groovycompiler.Link <c/groovyplatform/release:helloworld>helloworld$(SUFEXE)
 *** updated 3 target(s)...
 ]]
 	local pattern2 = [[
@@ -42,23 +39,21 @@ function Test()
 	{
 		'groovyplatform-release/',
 		'groovyplatform-release/helloworld/',
-		'toolchains/',
-		'toolchains/c/',
-		'toolchains/c/_helpers/',
+		'jam/',
+		'jam/c/',
+		'jam/c/toolchain/',
 	}
 
 	local pass1Files =
 	{
 		'CreateJamVS2008Workspace.bat',
 		'CreateJamVS2008Workspace.config',
-		'groovyplatform-release/helloworld/helloworld.o',
-		'groovyplatform-release/helloworld/helloworld.release.exe',
 		'helloworld.c',
+		'groovyplatform-release/helloworld/helloworld.o',
+		'groovyplatform-release/helloworld/helloworld.release$(SUFEXE)',
+		'jam/c/toolchain/groovyplatform.jam',
 		'Jamfile.jam',
-		'toolchains/c/_helpers/groovycompiler.jam',
-		'toolchains/c/_helpers/groovyplatform-autodetect.jam',
-		'toolchains/c/groovyplatform-debug.jam',
-		'toolchains/c/groovyplatform-release.jam',
+		'test.lua',
 	}
 
 	TestDirectories(pass1Dirs)
@@ -76,7 +71,11 @@ function Test()
 
 	---------------------------------------------------------------------------
 	local pattern3 = [[
-!NEXT!* Unable to find [toolchains/c/_helpers/badplatform].
+!NEXT!* Toolchain [ c/badplatform ] not found!
+
+  Could not find any of the following matching rules:
+    -> C.Toolchain.badplatform
+    -> C.Toolchain.badplatform.*
 ]]
 	TestPattern(pattern3, RunJam{ 'TOOLCHAIN=c/badplatform' })
 	TestDirectories(originalDirs)
