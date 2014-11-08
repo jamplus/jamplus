@@ -806,6 +806,8 @@ rule C.macosx._LibraryFromObjects_LibFlags {
 
 
 rule C.macosx._SharedLibraryFromObjects_LinkFlags {
+	linkRule = C.clang-apple.Link ;
+
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
