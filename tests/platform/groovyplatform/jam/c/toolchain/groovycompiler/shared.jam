@@ -1,0 +1,78 @@
+rule C.Toolchain.groovycompiler.Shared { }
+
+if ! $(TARGETINFO_LOCATE) {
+
+rule C.groovycompiler.FDefines { return -D$(<) ; }
+rule C.groovycompiler.FIncludes { return -I$(<) ; }
+rule C.groovycompiler.FLibraryPaths { return -L$(<) ; }
+
+rule C.groovycompiler._MultiCppCompile_SetupFlags
+{
+	_flags += "-c -o \"$(_obj:T)\"" ;
+}
+
+
+if $(NT) {
+
+actions updated together piecemeal C.groovycompiler.Archive
+{
+	PATH=$(C.AR:D);%PATH%
+	$(C.AR:C) $(LIBFLAGS) $(<) $(>)
+}
+
+actions C.groovycompiler.Link
+{
+	PATH=$(C.LINK:D);%PATH%
+	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]) $(>) $(NEEDLIBS:T) $(LINKLIBS)
+}
+
+actions together C.groovycompiler.Ranlib
+{
+	PATH=$(C.RANLIB:D);%PATH%
+	$(C.RANLIB:C) $(<)
+}
+
+actions updated response C.groovycompiler.CC
+{
+	PATH=$(C.CC:D);%PATH%
+	$(C.CC:C) -c $(MFLAGS) $(>)
+}
+
+actions updated response C.groovycompiler.C++
+{
+	PATH=$(C.C++:D);%PATH%
+	$(C.C++:C) -c $(MFLAGS) $(>)
+}
+
+} else {
+
+actions updated together piecemeal C.groovycompiler.Archive
+{
+	$(C.AR:C) $(LIBFLAGS) $(<) $(>)
+}
+
+actions C.groovycompiler.Link
+{
+	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]) $(>) $(NEEDLIBS:T) $(LINKLIBS)
+}
+
+actions together C.groovycompiler.Ranlib
+{
+	$(C.RANLIB:C) $(<)
+}
+
+actions updated response C.groovycompiler.CC
+{
+	$(C.CC:C) -c $(MFLAGS) $(>)
+}
+
+actions updated response C.groovycompiler.C++
+{
+	$(C.C++:C) -c $(MFLAGS) $(>)
+}
+
+}
+
+
+} # TARGETINFO_LOCATE
+

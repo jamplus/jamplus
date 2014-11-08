@@ -1,8 +1,0 @@
-C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
-IncludeModule toolchains/c/_helpers/groovyplatform-autodetect ;
-C.AutoDetect ;
-
-C.Flags CC  : * : -g -O2 ;
-C.Flags C++ : * : -g -O2 ;
-
-VSCONFIGMAP.retail = "Groovy Retail" ;

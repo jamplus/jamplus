@@ -1,0 +1,8 @@
+rule C.Toolchain.groovyplatform.debug.* {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+    if [ C.Toolchain.groovycompiler.groovyplatform.Detect ] {
+        C.Flags * : CC  : -g -O0 ;
+        C.Flags * : C++ : -g -O0 ;
+    }
+}
