@@ -1,9 +1,0 @@
-C.Flags * : CC	: -g -O0 -arch x86_64 ;
-C.Flags * : C++	: -g -O0 -arch x86_64 ;
-C.Flags * : M	: -g -O0 -arch x86_64 ;
-C.Flags * : MM	: -g -O0 -arch x86_64 ;
-C.LibFlags * : -arch_only x86_64 ;
-C.LinkFlags * : -arch x86_64 ;
-
-C.ToolchainHelper global_debug ;
-

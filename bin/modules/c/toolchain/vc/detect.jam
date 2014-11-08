@@ -1,0 +1,200 @@
+#VISUAL_STUDIO_FORCE_VERSION = 10.0 ;
+
+rule FindVisualStudioHelper VERSION : COMPILER {
+    switch $(VERSION) {
+        case vs2013 :
+            local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+            MSVCNT ?= [ W32_GETREG $(key) ] ;
+
+            VS120COMNTOOLS = $(VS120COMNTOOLS:J=" ") ;
+            if ! $(MSVCNT) && $(VS120COMNTOOLS) {
+                MSVCNT = $(VS120COMNTOOLS) ;
+            }
+            if $(MSVCNT) {
+                MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+                MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+                COMPILER = vs2013 ;
+            }
+
+        case vs2012 :
+            local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+            MSVCNT ?= [ W32_GETREG $(key) ] ;
+
+            VS110COMNTOOLS = $(VS110COMNTOOLS:J=" ") ;
+            if ! $(MSVCNT) && $(VS110COMNTOOLS) {
+                MSVCNT = $(VS110COMNTOOLS) ;
+            }
+            if $(MSVCNT) {
+                MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+                MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+                COMPILER = vs2012 ;
+            }
+
+        case vs2010 :
+            local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+            MSVCNT ?= [ W32_GETREG $(key) ] ;
+
+            VS100COMNTOOLS = $(VS100COMNTOOLS:J=" ") ;
+            if ! $(MSVCNT) && $(VS100COMNTOOLS) {
+                MSVCNT = $(VS100COMNTOOLS) ;
+            }
+            if $(MSVCNT) {
+                MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+                MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+                COMPILER = vs2010 ;
+            }
+
+        case vs2008 :
+            local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
+            MSVCNT ?= [ W32_GETREG $(key) ] ;
+            VS90COMNTOOLS = $(VS90COMNTOOLS:J=" ") ;
+            if ! $(MSVCNT) && $(VS90COMNTOOLS) {
+                MSVCNT = $(VS90COMNTOOLS) ;
+            }
+            if $(MSVCNT) {
+                MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+                MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+                COMPILER = vs2008 ;
+            }
+
+        case vs2005 :
+            local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
+            MSVCNT ?= [ W32_GETREG $(key) ] ;
+            if ! $(MSVCNT) && $(VS80COMNTOOLS) {
+                MSVCNT = $(VS80COMNTOOLS) ;
+            }
+            if $(MSVCNT) {
+                MSVCNT = @(..\\..\\VC:R=$(MSVCNT)) ;
+                MSVCNT_BIN_PATH = @($(MSVCNT)/../Common7/IDE:R=) ;
+                COMPILER = vs2005 ;
+            }
+
+        case vs2003 :
+            local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio $(VERSION) InstallDir ;
+            MSVCNT ?= [ W32_GETREG $(key) ] ;
+            if ! $(MSVCNT) && $(VS71COMNTOOLS) {
+                MSVCNT = $(VS71COMNTOOLS) ;
+            }
+            if $(MSVCNT) {
+                MSVCNT = @(..\\..\\vc7:R=$(MSVCNT)) ;
+                MSVCNT_BIN_PATH = $(MSVCNT)/../Common7/IDE ;
+                COMPILER = vs2003 ;
+            }
+
+        case vs2002 :
+            local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft
+                VisualStudio $(VERSION) InstallDir ;
+            MSVCNT ?= [ W32_GETREG $(key) ] ;
+            if ! $(MSVCNT) && $(VS70COMNTOOLS) {
+                MSVCNT = $(VS70COMNTOOLS) ;
+            }
+            if $(MSVCNT) {
+                MSVCNT = $(MSVCNT)\\..\\..\\vc7 ;
+                MSVCNT = @(..\\..\\vc7:R=$(MSVCNT)) ;
+                COMPILER = vs2002 ;
+            }
+
+        case vc6 :
+            local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft DevStudio $(VERSION) Products "Microsoft Visual C++" ProductDir ;
+            MSVCNT ?= [ W32_GETREG $(key) ] ;
+            if $(MSVCNT) {
+                MSVCNT_BIN_PATH = "$(MSVCNT)/../Common/MSDev98/Bin" ;
+                COMPILER = vc6 ;
+            }
+    }
+
+    if ! $(COMPILER) {
+        return ;
+    }
+
+    C.COMPILER_SUITE = vc ;
+
+    local SUFOBJ = .obj ;
+    SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = .exe ;
+    SUFLIB on $(C.COMPILER_SUITE_SYMBOL) = .lib ;
+    SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .lib ;
+    SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+    SUFOBJ on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+    SUFSHAREDLIB on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+    SUFRES on $(C.COMPILER_SUITE_SYMBOL) = .res ;
+
+    NOARSCAN on $(C.COMPILER_SUITE_SYMBOL) = true ;
+    NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
+
+    C.Toolchain.vc.Shared ;
+
+    if $(C.COMPILER) != vc6 {
+        C.Toolchain.vc.crt-defines ;
+    }
+
+    C.BUILD_EXTENSIONS on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) .res ;
+    C.AddBuildExtensions CC : .c .s : C.vc.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+    C.AddBuildExtensions C++ : .cc .cpp .cxx : C.vc.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+
+    C.Flags * : CC  : /TC ;
+    C.Flags * : C++ : /TP ;
+
+    TOOLCHAIN_COMPILER_KEYS on $(C.COMPILER_SUITE_SYMBOL) += MSVCNT ;
+
+    MSVCNT on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCNT) ;
+    MSVCNT_BIN_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCNT_BIN_PATH) ;
+
+    return $(COMPILER) ;
+}
+
+
+rule FindVisualStudio VERSION {
+    local MSVCNT ;
+    local MSVCNT_BIN_PATH ;
+    local MSVCBIN ;
+    local MSSDK ;
+    local MSSDK_BINDIR ;
+    local MSSDK_STDHDRS ;
+    local MSSDK_LINKDIRECTORIES ;
+
+    local compiler = $(VERSION) ;
+    local C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN_GRIST).info! ;
+    local msvcnt = $(MSVCNT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+    if ! $(msvcnt) {
+        compiler = [ FindVisualStudioHelper $(VERSION) ] ;
+    }
+
+    return $(compiler) ;
+}
+
+
+rule C.Toolchain.vc.Detect THE_COMPILER : OPTIONS {
+    if none in $(OPTIONS) {
+        return ;
+    }
+
+    THE_COMPILER ?= $(C.COMPILER) ;
+
+    # Do we need to attempt to detect the compiler?
+    if ! $(THE_COMPILER)  ||  $(THE_COMPILER) = * {
+        for ver in $(VISUAL_STUDIO_FORCE_VERSION) vs2013 vs2012 vs2010 vs2008 vs2005 vs2003 vs2002 vc6 {
+            C.COMPILER = [ FindVisualStudio $(ver) ] ;
+            if $(C.COMPILER) {
+                break ;
+            }
+        }
+        if ! $(C.COMPILER) {
+            return ;
+        }
+    } else {
+        C.COMPILER = [ FindVisualStudio $(THE_COMPILER) ] ;
+        if ! $(C.COMPILER) {
+            if force in $(OPTIONS) {
+                Exit ** The requested Visual Studio version ($(THE_COMPILER)) was not found. ;
+            }
+            return ;
+        }
+    }
+
+    C.COMPILER_SUITE = vc ;
+
+    return $(C.COMPILER) ;
+}
+
+
+

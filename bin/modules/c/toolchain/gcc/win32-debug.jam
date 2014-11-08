@@ -1,0 +1,10 @@
+rule C.Toolchain.gcc.win32-debug {
+    C.Flags * : CC	: -g -O0 -m32 ;
+    C.Flags * : C++	: -g -O0 -m32 ;
+    C.Flags * : M	: -g -O0 -m32 ;
+    C.Flags * : MM	: -g -O0 -m32 ;
+    C.LinkFlags * : -m32 ;
+
+    C.Toolchain.Helper.DebugSettings ;
+}
+

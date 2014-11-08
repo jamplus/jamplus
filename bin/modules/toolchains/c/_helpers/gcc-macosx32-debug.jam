@@ -1,9 +1,0 @@
-C.Flags * : CC	: -g -O0 -arch i386 ;
-C.Flags * : C++	: -g -O0 -arch i386 ;
-C.Flags * : M	: -g -O0 -arch i386 ;
-C.Flags * : MM	: -g -O0 -arch i386 ;
-C.LibFlags * : -arch_only i386 ;
-C.LinkFlags * : -arch i386 ;
-
-C.ToolchainHelper global_debug ;
-

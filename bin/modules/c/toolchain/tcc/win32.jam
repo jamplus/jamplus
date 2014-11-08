@@ -1,0 +1,23 @@
+rule C.Toolchain.tcc.win32.Detect {
+	if ! $(TCC_ROOT) {
+		local PATHS =
+			c:/tcc
+			d:/tcc
+		;
+
+		local tcc = [ Glob $(PATHS) : tcc.exe ] ;
+		if ! $(tcc)
+		{
+			return ;
+		}
+
+		TCC_ROOT = $(tcc[1]:D) ;
+	}
+
+	if ! $(TCC_ROOT) {
+		return ;
+	}
+
+	return [ C.Toolchain.tcc.Setup $(TCC_ROOT) ] ;
+}
+

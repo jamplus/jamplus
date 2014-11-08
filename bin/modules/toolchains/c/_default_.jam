@@ -1,7 +1,0 @@
-C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
-
-if $(C.PLATFORM) != * {
-    C.ToolchainHelper $(C.PLATFORM) ;
-}
-
-

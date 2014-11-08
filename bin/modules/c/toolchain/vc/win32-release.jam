@@ -1,0 +1,7 @@
+rule C.Toolchain.vc.win32-release {
+    C.CFlags * : /O2 /Oi /EHsc /Gy /MD /W3 /Z7 ;
+    C.C++Flags * : /O2 /Oi /EHsc /Gy /MD /W3 /Z7 ;
+    C.LinkFlags * : /INCREMENTAL:NO /DEBUG /MACHINE:X86 /OPT:REF /OPT:ICF ;
+
+    C.Toolchain.Helper.ReleaseSettings ;
+}

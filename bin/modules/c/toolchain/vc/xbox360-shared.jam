@@ -1,0 +1,97 @@
+rule C.Toolchain.vc.xbox360-shared { }
+
+rule ImageXexHelper {
+    local _configFile ;
+    on $(TARGET) _configFile = $(CONFIG_FILE) ;
+
+    local xex = $(_t:S=.xex) ;
+    local binding = $(BINDING:Z=$(_t)) ;
+    BINDING on $(xex) = $(binding:S=.xex) ;
+    MakeLocate $(xex) : $(outputPath) ;
+    Depends $(TARGET) : $(xex) : $(_t) ;
+    Clean clean:$(TARGET) : $(xex) $(xex:S=.pe) $(xex:S=.xdb) ;
+    if $(_configFile) {
+        Depends $(xex) : $(_configFile) ;
+        ImageXexWithConfig $(xex) : $(_t) $(_configFile) ;
+    } else {
+        ImageXex $(xex) : $(_t) ;
+    }
+}
+
+actions ImageXex {
+    "$(XEDK)/bin/win32/imagexex" /out:"$(1)" /nologo "$(2)"
+}
+
+actions ImageXexWithConfig {
+    CD /D $(2[2]:PC\\)
+    "$(XEDK)/bin/win32/imagexex" /out:"$(1)" /nologo "$(2[1])" /CONFIG:"$(2[2]:\\)"
+}
+
+rule C.Xbox360ImageXexToolSettings TARGET : CONFIG_FILE {
+    C.ActiveTarget $(TARGET) ;
+    CONFIG_FILE = $(CONFIG_FILE:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+    SearchSource $(CONFIG_FILE) ;
+    CONFIG_FILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CONFIG_FILE) ;
+}
+
+rule DeployXexHelper {
+    local deployLocation = $(DEPLOY_LOCATION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    if $(deployLocation) {
+        local xex = $(_t:S=.xex) ;
+        local deployXex = $(xex:G=$(TARGET)|deploy) ;
+        MakeLocate $(deployXex) : $(LOCATE_TARGET)/deploy ;
+        Depends $(deployXex) : $(xex) ;
+        CopyXex $(deployXex) : $(xex) ;
+        Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(deployXex) ;
+
+        DEPLOY_LOCATION on $(deployXex) = $(deployLocation) ;
+        DeployXex $(deployXex) ;
+        Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(deployXex) ;
+    }
+}
+
+actions CopyXex {
+    copy $(2:C\\) $(1:C\\)
+}
+
+actions DeployXex {
+    "$(XEDK)/bin/win32/xbecopy" $(1:C\\) "$(DEPLOY_LOCATION)\$(1:BS)" /nologo
+}
+
+rule C.vc-xbox360._ApplicationFromObjects_PostBuild {
+    ImageXexHelper ;
+    DeployXexHelper ;
+}
+
+rule C.vc-xbox360._ApplicationFromObjects_CleanIntermediates {
+    C.vc._ApplicationFromObjects_CleanIntermediates ;
+
+    local sufs = .pe .xdb ;
+    local zap = $(_tBINDING:S=$(sufs)) ;
+    MakeLocate $(zap) : $(outputPath) ;
+    Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(zap) ;
+
+    Depends $(zap) : $(_linkTargets) ;
+}
+
+
+rule C._ApplicationTargetInfo {
+    DEBUGGEROUTPUTNAME.$(C.ACTIVE_TOOLCHAIN_TARGET) on $(TARGET) = $(_t:S=.xex:R=$(outputPath):G=) ;
+}
+
+rule C.DeployXex TARGET : DEPLOY_LOCATION {
+    C.ActiveTarget $(TARGET) ;
+    DEPLOY_LOCATION on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(DEPLOY_LOCATION) ;
+}
+
+rule C.Xbox360DeployToolSettings TARGET : REMOTE_ROOT : DEPLOYMENT_TYPE : DEPLOYMENT_FILES {
+    if $(TARGETINFO_LOCATE) {
+        Project.MakefileTool $(TARGET) : VCX360DeploymentTool : RemoteRoot : $(REMOTE_ROOT) ;
+        Project.MakefileTool $(TARGET) : VCX360DeploymentTool : DeploymentFiles : $(DEPLOYMENT_FILES:E="") ;
+        Project.MakefileTool $(TARGET) : VCX360DeploymentTool : DeploymentType : $(DEPLOYMENT_TYPE:E=0) ;
+    }
+}
+
+VSPLATFORMMAP.xbox360 = "Xbox 360" ;
+VSNATIVEPLATFORM.xbox360 = 1 ;
+

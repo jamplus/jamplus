@@ -1,0 +1,174 @@
+rule C.Toolchain.mingw.Shared { }
+
+if ! $(TARGETINFO_LOCATE) {
+
+rule C.mingw.FDefines { return -D$(<) ; }
+rule C.mingw.FIncludes { return -I$(<) ; }
+rule C.mingw.FLibraryPaths { return -L$(<) ; }
+
+
+rule C.mingw._LinkPrebuiltLibraries {
+	local lib ;
+	for lib in $(gristedLibraries) {
+		if ! $(lib:D) {
+			BINDING on $(lib) = lib$(lib:B) ;
+			EXPAND_TEXT on $(lib) = -l$(lib:G=) ;
+			NoCare $(lib) ;
+		}
+	}
+}
+
+
+rule C.mingw._C++Exceptions {
+	FLAGS_TO_REMOVE on $(C.ACTIVE_TOOLCHAIN_TARGET) += -fno-exceptions -fexceptions ;
+
+	if ! $(TYPE)  ||  $(TYPE) = false {
+		FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) += -fno-exceptions ;
+ 		FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) -= -fexceptions ;
+	} else if $(TYPE) = true {
+		FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) += -fexceptions ;
+		FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) -= -fno-exceptions ;
+	}
+}
+
+
+rule C.mingw._RuntimeTypeHelper {
+	if ! $(TYPE)  ||  $(TYPE) = dynamic {
+	} else if $(TYPE) = static {
+	}
+}
+
+
+rule C.mingw._MultiCppCompile_SetupFlags {
+	if $(_pch[1])  &&  ! $(_nopch) {
+		_flags += -Winvalid-pch ;
+
+		local md5 = [ MD5 $(_flags) ] ;
+		local _pchName = @($(_pch[3]:LBS):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)-$(md5)) ;
+		BINDING on $(_pchName) = $(_pch[3]) ;
+		local _pchFilename = $(_pchName).gch ;
+
+		if ! $(built-$(_pchName)) {
+			built-$(_pchName) = 1 ;
+
+			local pchext = $(_pchName:S) ;
+			local pchBUILD_EXT = C.BUILD$(pchext) ;
+
+			MakeLocate $(_pchFilename) : $(LOCATE_TARGET)/$(_pchName:S=:G=)-$(md5) ;
+
+			newsrcs += $(_pchName) ;
+
+			PCHFLAGS on $(_pchFilename) += $($($(pchBUILD_EXT).PCHFLAGS)) ;
+			MFLAGS on $(_pchName) = $($(pchBUILD_EXT).RULE) $($(pchBUILD_EXT).SUFOBJ) $($(pchBUILD_EXT).ADD_TO_LINK) $(_flags[5-]) $($($(BUILD_EXT).PCHFLAGS)) -o \"$(_pchFilename:T)\" ;
+			if $(objectForceIncludes[1]) {
+				MFLAGS on $(_pchName) += "-include $(objectForceIncludes:G=)" ;
+			}
+
+			Depends $(_pchFilename) : $(_pchName) ;
+			SEARCH on $(_pchName) = $(_hdrs) ;
+
+			# source needs to be scanned for header dependencies
+			HDRRULE on $(_pchName) = C.HdrRule ;
+			HDRSCAN on $(_pchName) = $(C.HDRPATTERN) ;
+			HDRGRIST on $(_pchName) = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST) ;
+			HDRSEARCH on $(_pchName) = $(_hdrs) ;
+		}
+
+		_flags += -include $(_pchFilename:T:S=:C) ;
+
+		HDREXTRA on $(_src) += $(_pchName:T) ;
+
+		# if the source should use pch
+		if $(_pch[2]) {
+			# mark that compilation will depend on it
+			Includes $(_src) : $(_pchFilename) ;
+		}
+
+		if $(_pch[3]) {
+			Depends $(_obj) : $(_pchFilename) ;
+		}
+	}
+
+	if $(objectForceIncludes[1]) {
+		SEARCH on $(objectForceIncludes) = $(_hdrs) ;
+		_flags += "-include $(objectForceIncludes:G=)" ;
+	}
+
+	_flags += "-o \"$(_obj:T)\"" ;
+
+	if $(C_LIBRARY_SHARED_MODULE) {
+		_flags += -fPIC ;
+	}
+}
+
+rule C.mingw._SharedLibraryFromObjects_ExportLib {
+	BINDING on $(_tlib) = [ C._retrieveOutputName : $(_t:S) ] ;
+	MakeLocate $(_tlib) : $(outputPath) ;
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_tlib) : $(_t) ;
+	NotFile $(_tlib) ;		# Turn this off for export libraries.
+	_linkTargets += $(_tlib) ;
+
+#			LinkFlags $(TARGET) : -Wl,--out-implib,$(_tlib:T) ;
+}
+
+rule C.mingw._SharedLibraryFromObjects_LinkFlags {
+	if module in $(OPTIONS) {
+		linkFlags += -shared ;
+	} else {
+		on $(TARGET) linkFlags += -shared ;
+	}
+}
+
+
+rule C.mingw._SharedLibraryFromObjects_ExportLib {
+	BINDING on $(_tlib) = [ C._retrieveOutputName : $(_t:S) ] ;
+	MakeLocate $(_tlib) : $(outputPath) ;
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_tlib) : $(_t) ;
+	NotFile $(_tlib) ;		# Turn this off for export libraries.
+	_linkTargets += $(_tlib) ;
+
+#			LinkFlags $(TARGET) : -Wl,--out-implib,$(_tlib:T) ;
+}
+
+rule C.mingw._SharedLibraryFromObjects_LinkFlags
+{
+	if module in $(OPTIONS) {
+		linkFlags += -shared ;
+	} else {
+		on $(TARGET) linkFlags += -shared ;
+	}
+}
+
+actions updated together piecemeal C.mingw.Archive {
+	PATH=$(C.AR:D);%PATH%
+	$(C.AR:C) $(LIBFLAGS) $(<:C) $(>:C)
+}
+
+actions C.mingw.Link {
+	PATH=$(C.LINK:D);%PATH%
+	$(C.LINK:C) @^^^($(LINKFLAGS) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:TC)) -o $(<[1]:C)
+}
+
+actions together C.mingw.Ranlib {
+	PATH=$(C.RANLIB:D)/bin;%PATH%
+	$(C.RANLIB:C) $(<:C)
+}
+
+actions updated response C.mingw.CC {
+	PATH=$(C.CC:D);%PATH%
+	$(C.CC:C) -c $(MFLAGS) $(>:C)
+}
+
+actions updated response C.mingw.C++ {
+	PATH=$(C.C++:D);%PATH%
+	$(C.C++:C) -c $(MFLAGS) $(>:C)
+}
+
+actions updated response C.mingw.PCH {
+	PATH=$(C.C++:D);%PATH%
+	$(C.C++:C) -c $(MFLAGS) $(>:C)
+}
+
+
+} # TARGETINFO_LOCATE
+

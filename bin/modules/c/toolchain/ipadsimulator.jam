@@ -1,0 +1,6 @@
+rule C.Toolchain.ipadsimulator.* {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+    return [ C.Toolchain.clang.ios.Detect ] ;
+}
+

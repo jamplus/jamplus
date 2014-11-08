@@ -1,0 +1,53 @@
+rule C.Toolchain.mingw.Setup MINGW_ROOT {
+    C.COMPILER = mingw ;
+    C.COMPILER_SUITE = mingw ;
+
+    C.Toolchain.mingw.Shared ;
+
+    local SUFOBJ = .o ;
+    SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = .exe ;
+    SUFLIB on $(C.COMPILER_SUITE_SYMBOL) = .a ;
+    SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+    SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a .dll ;
+    SUFOBJ on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+    SUFSHAREDLIB on $(C.COMPILER_SUITE_SYMBOL) = .dll ;
+
+    NOARSCAN on $(C.COMPILER_SUITE_SYMBOL) = true ;
+    NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
+
+    C.AddBuildExtensions CC : .c .s : C.mingw.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+    C.AddBuildExtensions C++ : .cc .cpp .cxx : C.mingw.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+    C.AddBuildExtensions M : .m : C.mingw.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+    C.AddBuildExtensions MM : .mm : C.mingw.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+    C.AddBuildExtensions PCH : .h .pch : C.mingw.PCH : "" .gch ;
+
+    PCHCCFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x c-header ;
+    PCHC++FLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x c++-header ;
+    PCHMFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x objective-c-header ;
+    PCHMMFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x objective-c++-header ;
+
+    MINGW on $(C.COMPILER_SUITE_SYMBOL) = 1 ;
+    TOOLCHAIN_COMPILER_KEYS on $(C.COMPILER_SUITE_SYMBOL) += MINGW ;
+
+    C.Flags * : CC	: -x c ;
+    C.Flags * : C++	: -x c++ ;
+    C.Flags * : M	: -x objective-c ;
+    C.Flags * : MM	: -x objective-c++ ;
+
+    C.AR on $(C.COMPILER_SUITE_SYMBOL)   	= "$(MINGW_ROOT)/bin/ar" ru ;
+    C.CC on $(C.COMPILER_SUITE_SYMBOL)   	= "$(MINGW_ROOT)/bin/gcc" ;
+    C.C++ on $(C.COMPILER_SUITE_SYMBOL)  	= "$(MINGW_ROOT)/bin/g++" ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL) 	= "$(MINGW_ROOT)/bin/g++" ;
+    C.RANLIB on $(C.COMPILER_SUITE_SYMBOL)  = "$(MINGW_ROOT)/bin/ranlib" ;
+
+    C._C++Exceptions on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._C++Exceptions ;
+    C._LinkPrebuiltLibraries on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._LinkPrebuiltLibraries ;
+    C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._MultiCppCompile_SetupFlags ;
+    C._RuntimeTypeHelper on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._RuntimeTypeHelper ;
+    C._SharedLibraryFromObjects_ExportLib on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._SharedLibraryFromObjects_ExportLib ;
+    C._SharedLibraryFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._SharedLibraryFromObjects_LinkFlags ;
+
+    return $(C.COMPILER) ;
+}
+
+

@@ -984,10 +984,10 @@ end
 
 
 function XcodeInitialize()
-	local chunk = loadfile(ospath.join(_getTargetInfoPath(), 'XcodeProjectExportInfo.lua'))
+	local chunk = loadfile(ospath.join(_getTargetInfoPath(), 'ProjectExportInfo.lua'))
 	if chunk then chunk() end
-	if not ProjectExportInfo  or  ProjectExportInfo.Version ~= 2 then
-		ProjectExportInfo = { Version = 2 }
+	if not ProjectExportInfo then
+		ProjectExportInfo = {}
 	end
 
 	local xcodejamFilename = ospath.join(_getWorkspacePath(), 'xcodejam')
@@ -1008,7 +1008,7 @@ end
 
 
 function XcodeShutdown()
-	prettydump.dumpascii(ospath.join(_getTargetInfoPath(), 'XcodeProjectExportInfo.lua'), 'ProjectExportInfo', ProjectExportInfo)
+	prettydump.dumpascii(ospath.join(_getTargetInfoPath(), 'ProjectExportInfo.lua'), 'ProjectExportInfo', ProjectExportInfo)
 end
 
 

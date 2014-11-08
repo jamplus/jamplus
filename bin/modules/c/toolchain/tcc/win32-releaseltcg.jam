@@ -1,0 +1,3 @@
+rule C.Toolchain.tcc.win32-releaseltcg {
+	C.Toolchain.Helper.ReleaseSettings ;
+}

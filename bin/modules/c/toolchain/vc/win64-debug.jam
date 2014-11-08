@@ -1,0 +1,13 @@
+rule C.Toolchain.vc.win64-debug {
+    C.CFlags * : /Od /EHsc /MDd /W3 /Z7 ;
+    C.C++Flags * : /Od /EHsc /MDd /W3 /Z7 ;
+    C.LinkFlags * : /INCREMENTAL /DEBUG /MACHINE:X64 ;
+
+    C.CFlags * : /RTC1 ;
+    C.C++Flags * : /RTC1 ;
+
+    C.LINKER_CONFIG on $(C.COMPILER_SUITE_SYMBOL) = debug ;
+
+    C.Toolchain.Helper.DebugSettings ;
+}
+

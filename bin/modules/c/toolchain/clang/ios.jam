@@ -1,0 +1,47 @@
+rule C.Toolchain.clang.ios.Detect {
+	local clang ;
+	if ! $(NT) {
+		local PATHS =
+			/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+			$(PATH)
+		;
+		clang = [ Glob $(PATHS) : clang ] ;
+	} else {
+		local PATHS =
+			"$(USERPROFILE)/iOS Build Environment/Toolchain"
+			$(PATH)
+		;
+		clang = [ Glob $(PATHS) : clang.exe ] ;
+		IOSBUILDENV_PATH = $(clang:D) ;
+		IOSBUILDENV_PATH = $(IOSBUILDENV_PATH:P) ;
+	}
+
+	if ! $(clang) {
+		return ;
+	}
+
+	local COMPILER_BIN_PATH = [ Match (.+)/ : $(clang[1]) ] ;
+	C.Toolchain.clang.Setup $(COMPILER_BIN_PATH) ;
+
+	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/libtool ;
+	if $(IOSBUILDENV_PATH) {
+		C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/ld ;
+	}
+	SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dylib ;
+	SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a .dylib ;
+
+	C.Toolchain.$(C.COMPILER_SUITE).macosx-shared ;
+
+	C._ApplicationFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._ApplicationFromObjects_LinkFlags ;
+	C._ApplicationFromObjects_PostBuild on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._ApplicationFromObjects_PostBuild ;
+	C._LibraryFromObjects_LibFlags on $(C.COMPILER_SUITE_SYMBOL) += C.macosx._LibraryFromObjects_LibFlags ;
+	C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._MultiCppCompile_SetupFlags ;
+	C._SharedLibraryFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._SharedLibraryFromObjects_LinkFlags ;
+
+	C.MacOSX_SDK $(SDK_VERSION) ;
+
+	C.Toolchain.$(C.COMPILER_SUITE).ios-$(C.CONFIG) ;
+
+ 	return $(C.COMPILER) ;
+}
+

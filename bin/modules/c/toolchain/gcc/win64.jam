@@ -1,0 +1,14 @@
+rule C.Toolchain.gcc.win64.Detect {
+    local PATHS =
+        c:/TDM-GCC-64/bin
+        $(PATH)
+        ;
+    local foundPath = [ Glob $(PATHS) : gcc.exe ] ;
+    if ! $(foundPath) {
+        return ;
+    }
+    foundPath = [ Match (.+)/ : $(foundPath[1]) ] ;
+
+    return [ C.Toolchain.gcc.Setup $(foundPath) ] ;
+}
+

@@ -1,0 +1,10 @@
+rule C.Toolchain.gcc.linux32.Detect {
+    local foundPath = [ Glob $(PATH) : gcc ] ;
+    if ! $(foundPath) {
+        return ;
+    }
+    foundPath = [ Match (.+)/ : $(foundPath gcc[1]) ] ;
+
+    return [ C.Toolchain.gcc.Setup $(foundPath) ] ;
+}
+

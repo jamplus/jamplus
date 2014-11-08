@@ -1,0 +1,13 @@
+rule C.Toolchain.vc.xbox360-releaseltcg {
+    C.CFlags * : /O2 /Oi /EHsc /Gy /MT /W3 /Z7 /GL ;
+    C.C++Flags * : /O2 /Oi /EHsc /Gy /MT /W3 /Z7 /GL ;
+    C.LibFlags * : /LTCG ;
+    C.LinkFlags * : /INCREMENTAL:NO /DEBUG /OPT:REF /OPT:ICF /LTCG ;
+
+    C.Defines * : _XBOX ;
+
+    C.Toolchain.Helper.ReleaseSettings ;
+}
+
+
+

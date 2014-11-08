@@ -1,0 +1,31 @@
+rule C.Toolchain.tcc.Shared { }
+
+rule C.tcc.FDefines { return -D$(<) ; }
+rule C.tcc.FIncludes { return -I"\"$(<)\"" ; }
+rule C.tcc.FLibraryPaths { return -L"\"$(<)\"" ; }
+
+
+actions response C.tcc.Link {
+	$(C.LINK:C) $(LINKFLAGS) $(>) $(NEEDLIBS:T) $(LINKLIBS:CT) -o $(<[1])
+}
+
+
+actions updated response C.tcc.CC {
+	$(C.CC:C) $(MFLAGS) $(>:C)
+}
+
+
+actions updated response C.tcc.C++ {
+	echo C.tcc.C++ is not supported!
+}
+
+
+actions together C.tcc.Archive {
+	$(C.AR:C) $(<:C) $(>:C)
+}
+
+
+rule C.tcc._MultiCppCompile_SetupFlags {
+	_flags += "-c -o $(_obj:TC)" ;
+}
+

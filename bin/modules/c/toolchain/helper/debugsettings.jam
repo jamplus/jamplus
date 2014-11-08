@@ -1,0 +1,3 @@
+rule C.Toolchain.Helper.DebugSettings {
+    C.Defines * : _DEBUG DEBUG ;
+}

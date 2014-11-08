@@ -1,0 +1,9 @@
+rule C.Toolchain.gcc.linux64-release {
+    C.Flags * : CC	: -g -O2 -m64 ;
+    C.Flags * : C++	: -g -O2 -m64 ;
+    C.Flags * : M	: -g -O2 -m64 ;
+    C.Flags * : MM	: -g -O2 -m64 ;
+    C.LinkFlags * : -m64 ;
+
+    C.Toolchain.Helper.ReleaseSettings ;
+}

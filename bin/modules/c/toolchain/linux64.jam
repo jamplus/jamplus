@@ -1,0 +1,16 @@
+rule C.Toolchain.linux64.* {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+    if $(C.COMPILER) {
+        if ! [ C.Toolchain.$(C.COMPILER).$(C.PLATFORM).Detect ] {
+            Exit * Unable to detect $(C.COMPILER) compiler. ;
+        }
+    } else {
+        if ! [ C.Toolchain.gcc.$(C.PLATFORM).Detect ] {
+            Exit * Unable to detect gcc compiler. ;
+        }
+        return ;
+    }
+    C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) ;
+}
+

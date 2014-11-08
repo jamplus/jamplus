@@ -1,0 +1,6 @@
+rule C.Toolchain.macosx32.* {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+    return [ C.Toolchain.clang.macosx.Detect ] ;
+}
+

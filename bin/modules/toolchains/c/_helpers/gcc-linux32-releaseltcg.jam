@@ -1,8 +1,0 @@
-C.Flags * : CC	: -g -O3 -fomit-frame-pointer -fstrength-reduce -m32 ;
-C.Flags * : C++	: -g -O3 -fomit-frame-pointer -fstrength-reduce -m32 ;
-C.Flags * : M	: -g -O3 -fomit-frame-pointer -fstrength-reduce -m32 ;
-C.Flags * : MM	: -g -O3 -fomit-frame-pointer -fstrength-reduce -m32 ;
-C.LinkFlags * : -m32 ;
-
-C.ToolchainHelper global_release ;
-

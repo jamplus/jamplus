@@ -1,0 +1,8 @@
+rule C.Toolchain.clang.macosx32-debug {
+    C.Flags * : CC C++ M MM : -g -O0 -arch i386 ;
+    C.LibFlags * : -arch_only i386 ;
+    C.LinkFlags * : -arch i386 ;
+
+    C.Toolchain.Helper.DebugSettings ;
+}
+

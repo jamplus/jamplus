@@ -1,0 +1,10 @@
+rule C.Toolchain.gcc.linux32-release {
+    C.Flags * : CC	: -g -O2 -m32 ;
+    C.Flags * : C++	: -g -O2 -m32 ;
+    C.Flags * : M	: -g -O2 -m32 ;
+    C.Flags * : MM	: -g -O2 -m32 ;
+    C.LinkFlags * : -m32 ;
+
+    C.Toolchain.Helper.ReleaseSettings ;
+}
+

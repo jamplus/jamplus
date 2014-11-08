@@ -1,0 +1,20 @@
+rule C.Toolchain.clang.win32.Detect {
+    local foundPath = [ Glob
+        $(ProgramFiles(x86):J=$(SPACE))/LLVM/bin
+        $(PATH)
+        : clang.exe ] ;
+    if ! $(foundPath) {
+        return ;
+    }
+
+    foundPath = [ Match (.+)/ : $(foundPath[1]) ] ;
+    if ! [ C.Toolchain.clang.Setup $(foundPath) ] {
+        return ;
+    }
+
+    C.AR on $(C.COMPILER_SUITE_SYMBOL) = @(llvm-ar:R=$(foundPath)) ru ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL) = @(lld:R=$(foundPath)) ;
+
+    return $(C.COMPILER) ;
+}
+

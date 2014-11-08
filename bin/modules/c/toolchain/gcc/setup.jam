@@ -1,0 +1,64 @@
+rule C.Toolchain.gcc.Setup COMPILER_BIN_PATH : SUFFIXES {
+    COMPILER_BIN_PATH ?= "" ;
+
+    C.COMPILER = gcc ;
+    C.COMPILER_SUITE = gcc ;
+
+    COMPILER_BIN_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH) ;
+
+    local SUFOBJ = $(SUFFIXES[1]:E=.o) ;
+    local SUFSHAREDLIB ;
+    local SUFEXE ;
+    if $(NT) {
+        SUFEXE = $(SUFFIXES[2]:E=.exe) ;
+        SUFSHAREDLIB = $(SUFFIXES[3]:E=.dll) ;
+    } else {
+        SUFOBJ = $(SUFFIXES[1]:E=.o) ;
+        SUFEXE = $(SUFFIXES[2]:E="") ;
+        SUFSHAREDLIB = $(SUFFIXES[3]:E=.so) ;
+    }
+    SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = $(SUFEXE) ;
+    SUFLIB on $(C.COMPILER_SUITE_SYMBOL) = .a ;
+    SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = $(SUFSHAREDLIB) ;
+    SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a $(SUFSHAREDLIB) ;
+    SUFOBJ on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+    SUFSHAREDLIB on $(C.COMPILER_SUITE_SYMBOL) = $(SUFSHAREDLIB) ;
+
+    NOARSCAN on $(C.COMPILER_SUITE_SYMBOL) = true ;
+    NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
+
+    C.BUILD_EXTENSIONS on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
+    C.AddBuildExtensions CC : .c .s : C.gcc.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+    C.AddBuildExtensions C++ : .cc .cpp .cxx : C.gcc.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+    C.AddBuildExtensions M : .m : C.gcc.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+    C.AddBuildExtensions MM : .mm : C.gcc.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+    C.AddBuildExtensions PCH : .h .pch : C.gcc.PCH : "" .gch ;
+
+    PCHCCFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x c-header ;
+    PCHC++FLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x c++-header ;
+    PCHMFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x objective-c-header ;
+    PCHMMFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x objective-c++-header ;
+
+    C.Flags * : CC  : -x c ;
+    C.Flags * : C++ : -x c++ ;
+    C.Flags * : M   : -x objective-c ;
+    C.Flags * : MM  : -x objective-c++ ;
+
+    C.AR on $(C.COMPILER_SUITE_SYMBOL) = @(ar:R=$(COMPILER_BIN_PATH)) ru ;
+    C.CC on $(C.COMPILER_SUITE_SYMBOL) = @(gcc:R=$(COMPILER_BIN_PATH)) ;
+    C.C++ on $(C.COMPILER_SUITE_SYMBOL) = @(g++:R=$(COMPILER_BIN_PATH)) ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL) = @(g++:R=$(COMPILER_BIN_PATH)) ;
+    C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = @(ranlib:R=$(COMPILER_BIN_PATH)) ;
+
+    C._C++Exceptions on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._C++Exceptions ;
+    C._LinkPrebuiltLibraries on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._LinkPrebuiltLibraries ;
+    C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._MultiCppCompile_SetupFlags ;
+    C._RuntimeTypeHelper on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._RuntimeTypeHelper ;
+    C._SharedLibraryFromObjects_ExportLib on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._SharedLibraryFromObjects_ExportLib ;
+    C._SharedLibraryFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._SharedLibraryFromObjects_LinkFlags ;
+
+    C.Toolchain.gcc.Shared ;
+
+    return $(C.COMPILER) ;
+}
+

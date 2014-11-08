@@ -1,0 +1,7 @@
+rule C.Toolchain.tcc.win32-debug {
+	C.Flags * : CC	: -g ;
+
+	C.Toolchain.Helper.DebugSettings ;
+}
+
+

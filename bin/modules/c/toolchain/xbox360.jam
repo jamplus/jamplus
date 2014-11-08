@@ -1,0 +1,66 @@
+rule C.Toolchain.xbox360.* {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+    XEDK = $(XEDK:J=" ") ;
+    if ! $(XEDK) {
+        return ;
+    }
+
+    local MSVCNT = $(XEDK) ;
+    local MSSDK = $(MSVCNT) ;
+    local MSSDK_BINDIR = $(MSSDK)/bin/win32 ;
+    local MSSDK_STDHDRS = $(MSVCNT)/include/xbox ;
+    local MSSDK_LINKDIRECTORIES = $(MSVCNT)/lib/xbox ;
+    local MSVCBIN = $(XEDK)/bin/win32/ ;
+    local MSVCNT_BIN_PATH = $(MSVCBIN) ;
+
+    C.Toolchain.vc.Detect : none ;
+    COMPILER = [ FindVisualStudioHelper xbox360 : xbox360 ] ;
+
+    MSVCBIN on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCBIN) ;
+    MSSDK on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK) ;
+    MSSDK_BINDIR on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_BINDIR) ;
+    MSSDK_STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_STDHDRS) ;
+    MSSDK_LINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
+
+    C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(MSVCBIN)lib ;
+    C.CC on $(C.COMPILER_SUITE_SYMBOL)          = $(MSVCBIN)cl ;
+    C.C++ on $(C.COMPILER_SUITE_SYMBOL)         = $(MSVCBIN)cl ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL)        = $(MSVCBIN)link ;
+    C.STDHDRS on $(C.COMPILER_SUITE_SYMBOL)     = $(MSSDK_STDHDRS) ;
+    C.STDLINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
+
+    C._ApplicationFromObjects_Setup on $(C.COMPILER_SUITE_SYMBOL) = C.vc._ApplicationFromObjects_Setup ;
+    C._ApplicationFromObjects_CleanIntermediates on $(C.COMPILER_SUITE_SYMBOL) = C.vc._ApplicationFromObjects_CleanIntermediates ;
+    C._ApplicationFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.vc._ApplicationFromObjects_LinkFlags ;
+    C._ApplicationFromObjects_PostBuild on $(C.COMPILER_SUITE_SYMBOL) = ;
+    C._ApplicationFromObjects_Setup on $(C.COMPILER_SUITE_SYMBOL) = C.vc._ApplicationFromObjects_Setup ;
+    C._C++Exceptions on $(C.COMPILER_SUITE_SYMBOL) = C.vc._C++Exceptions ;
+    C._LibraryFromObjects_LibFlags on $(C.COMPILER_SUITE_SYMBOL) = ;
+    C._LinkPrebuiltLibraries on $(C.COMPILER_SUITE_SYMBOL) = ;
+    C._MultiCppCompile_PchDeps on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_PchDeps ;
+    C._MultiCppCompile_PostCompile on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_PostCompile ;
+    C._MultiCppCompile_PreCompile on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_PreCompile ;
+    C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_SetupFlags ;
+    C._RuntimeTypeHelper on $(C.COMPILER_SUITE_SYMBOL) = C.vc._RuntimeTypeHelper ;
+    C._SharedLibraryFromObjects_CleanIntermediates on $(C.COMPILER_SUITE_SYMBOL) = C.vc._SharedLibraryFromObjects_CleanIntermediates ;
+    C._SharedLibraryFromObjects_ExportLib on $(C.COMPILER_SUITE_SYMBOL) = C.vc._SharedLibraryFromObjects_ExportLib ;
+    C._SharedLibraryFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.vc._SharedLibraryFromObjects_LinkFlags ;
+    C._SharedLibraryFromObjects_PostBuild on $(C.COMPILER_SUITE_SYMBOL) = ;
+    C._SharedLibraryFromObjects_RegServer on $(C.COMPILER_SUITE_SYMBOL) = C.vc._SharedLibraryFromObjects_RegServer ;
+    C._SharedLibraryFromObjects_UnRegServer on $(C.COMPILER_SUITE_SYMBOL) = C.vc._SharedLibraryFromObjects_UnRegServer ;
+    C._SharedLibraryFromObjects_Setup on $(C.COMPILER_SUITE_SYMBOL) = C.vc._SharedLibraryFromObjects_Setup ;
+
+    C.Toolchain.vc.xbox360-shared ;
+
+    {
+        MSVC_SUBSYSTEM_WINDOWS = ;
+        MSVC_SUBSYSTEM_CONSOLE = ;
+    }
+
+    C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) ;
+
+    return $(COMPILER) ;
+}
+
+

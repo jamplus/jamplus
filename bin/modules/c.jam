@@ -1501,72 +1501,98 @@ rule C.OutputSuffix TARGET : SUFFIX {
 
 
 
-
-rule C.IncludeModule MODULE_NAME : OPTIONS {
-	IncludeModule toolchains/c/_modules/$(MODULE_NAME) : $(OPTIONS) ;
-}
-
-
 rule C.ToolchainSpecKeys TOOLCHAIN_SPEC_KEYS {
-	local configKeyFull ;
-	local configKey ;
-	for configKeyFull in $(TOOLCHAIN_SPEC_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
-		for configKey in [ Split $(configKeyFull) : "/" ] {
-			$(configKey) = ;
-			$(configKey) on $(C.ACTIVE_TOOLCHAIN_GRIST) = ;
+	if $(TOOLCHAIN_SPEC_KEYS)  &&  ! $(TOOLCHAIN_SPEC_OPTIONS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
+		local newOptionsList ;
+
+		# First, convert the passed in TOOLCHAIN_SPEC_KEYS into the TOOLCHAIN_SPEC_OPTIONS
+		# format.  C.ACTIVE_TOOLCHAIN_SPEC_VALUES will contain the 'win32/debug' part from
+		# the TOOLCHAIN=c/win32/debug command line as a string list.
+		#
+		#     C.ACTIVE_TOOLCHAIN_SPEC_VALUES = win32 debug ;
+		#     TOOLCHAIN_SPEC_OPTIONS = C.COMPILER=vs2013 ;
+		#     C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+		#
+		# The converted form of the above will end up being:
+		#
+		#     TOOLCHAIN_SPEC_OPTIONS = C.PLATFORM=win32 PLATFORM=win32 C.CONFIG=debug CONFIG=debug C.COMPILER=vs2013 ;
+		local configKeyFull ;
+		local configIndex = 1 ;
+		for configKeyFull in $(TOOLCHAIN_SPEC_KEYS) {
+			local configKey ;
+			for configKey in [ Split $(configKeyFull) : "/" ] {
+				newOptionsList += $(configKey)=$(C.ACTIVE_TOOLCHAIN_SPEC_VALUES[$(configIndex)]) ;
+			}
+			configIndex = [ Math $(configIndex) + 1 ] ;
 		}
+
+		# Now, go through the passed in TOOLCHAIN_SPEC_OPTIONS, and add those to the newOptionsList.
+		# Allow TOOLCHAIN_SPEC_KEYS to override the TOOLCHAIN_SPEC_OPTIONS.  Perhaps this should be
+		# reported as an error to the user.
+		local keyValue ;
+		for keyValue in $(TOOLCHAIN_SPEC_OPTIONS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
+			local info = [ Split $(keyValue) : "=" ] ;
+			local found ;
+			for newKeyValue in $(newOptionsList) {
+				local newInfo = [ Split $(newKeyValue) : "=" ] ;
+				if $(info[1]) = $(newInfo[1]) {
+					found = true ;
+					break ;
+				}
+			}
+			if ! $(found) {
+				newOptionsList += $(keyValue) ;
+			}
+		}
+
+		# Add C.COMPILER=thecompiler to the newOptionsList.
+		local found ;
+		for keyValue in $(newOptionsList) {
+			local info = [ Split $(keyValue) : "=" ] ;
+			if $(info[1]) = C.COMPILER {
+				found = true ;
+				break ;
+			}
+		}
+
+		if ! $(found) {
+			newOptionsList += C.COMPILER=$(C.COMPILER) ;
+		}
+		TOOLCHAIN_SPEC_OPTIONS on $(C.ACTIVE_TOOLCHAIN_GRIST) = $(newOptionsList) ;
 	}
 
-	TOOLCHAIN_SPEC_KEYS ?= $(TOOLCHAIN_SPEC_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
-	if ! C.COMPILER/COMPILER in $(TOOLCHAIN_SPEC_KEYS) {
-		TOOLCHAIN_SPEC_KEYS += C.COMPILER/COMPILER ;
+	local keyValue ;
+	for keyValue in $(TOOLCHAIN_SPEC_OPTIONS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
+		local info = [ Split $(keyValue) : "=" ] ;
+		$(info[1]) = $(info[2]) ;
 	}
-	TOOLCHAIN_SPEC_KEYS on $(C.ACTIVE_TOOLCHAIN_GRIST) = $(TOOLCHAIN_SPEC_KEYS) ;
 
-	local configIndex = 1 ;
-	for configKeyFull in $(TOOLCHAIN_SPEC_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
-		for configKey in [ Split $(configKeyFull) : "/" ] {
-			$(configKey) = $(C.ACTIVE_TOOLCHAIN_SPEC_VALUES[$(configIndex)]) ;
-			$(configKey) on $(C.ACTIVE_TOOLCHAIN_GRIST) = $($(configKey)) ;
-		}
-		configIndex = [ Math $(configIndex) + 1 ] ;
+	for keyValue in $(OVERRIDE_TOOLCHAIN_SPEC_OPTIONS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
+		local info = [ Split $(keyValue) : "=" ] ;
+		$(info[1]) = $(info[2]) ;
 	}
 }
 
 
-rule C.ToolchainHelper TOOLCHAIN_MODULE_NAME_LIST : OPTIONS {
-	local includeModuleOptions ;
-	if optional in $(OPTIONS) {
-		includeModuleOptions += optional ;
-	} else if ! ( once in $(OPTIONS) ) {
-		includeModuleOptions += force ;
+rule C.OverrideToolchainSpec TOOLCHAIN_SPEC_OPTIONS : OPTIONS {
+	if remove in $(OPTIONS) {
+		OVERRIDE_TOOLCHAIN_SPEC_OPTIONS on $(C.ACTIVE_TOOLCHAIN_GRIST) -= $(TOOLCHAIN_SPEC_OPTIONS) ;
+	} else {
+		OVERRIDE_TOOLCHAIN_SPEC_OPTIONS on $(C.ACTIVE_TOOLCHAIN_GRIST) += $(TOOLCHAIN_SPEC_OPTIONS) ;
 	}
-	local module ;
-	for module in $(TOOLCHAIN_MODULE_NAME_LIST) {
-		if ! [ IncludeModule toolchains/c/_helpers/$(module) : $(includeModuleOptions) ] {
-			Exit * Unable to find [toolchains/c/_helpers/$(module)]. ;
-		}
-	}
-}
-
-
-rule C.ToolchainHelperOnce TOOLCHAIN_MODULE_NAME_LIST {
-    C.ToolchainHelper $(TOOLCHAIN_MODULE_NAME_LIST) : once ;
 }
 
 
 rule C._Toolchain {
 	local keyValue ;
-	for keyValue in $(C.ACTIVE_TOOLCHAIN_SPEC_OPTIONS) {
+	for keyValue in $(TOOLCHAIN_SPEC_OPTIONS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
 		local info = [ Split $(keyValue) : "=" ] ;
 		$(info[1]) = ;
 	}
 
 	local activeToolchainSpec = $(TOOLCHAIN) $(TOOLCHAIN_SPEC_OPTIONS) ;
-	#C.ACTIVE_TOOLCHAIN_GRIST = $(activeToolchainSpec:J=!) ;
 	C.ACTIVE_TOOLCHAIN_GRIST = $(TOOLCHAIN_SPEC) ;
 	C.ACTIVE_TOOLCHAIN_SPEC_PATH = [ Subst $(activeToolchainSpec:J=-) : "=" : "___" ] ;
-	C.ACTIVE_TOOLCHAIN_SPEC_OPTIONS = $(TOOLCHAIN_SPEC_OPTIONS) ;
 	C.ACTIVE_TOOLCHAIN_SPEC_VALUES = $(TOOLCHAIN) ;
 
 	C.ActiveTarget * ;
@@ -1577,37 +1603,23 @@ rule C._Toolchain {
 		SubDir ;
 	}
 	
+	C.COMPILER_SUITE_SYMBOL = !c.$(C.ACTIVE_TOOLCHAIN_GRIST).info! ;
+
 	if ! $(INITIALIZED:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
 		INITIALIZED on $(C.ACTIVE_TOOLCHAIN_GRIST) = 1 ;
 
-		local currentToolchainSpec = $(TOOLCHAIN) ;
-		local toolchainSpecPath = $(TOOLCHAIN:J=/) ;
-		while $(currentToolchainSpec) {
-			local filename = [ Subst toolchains/c/$(currentToolchainSpec:J=-) : %* : _all_ ] ;
-			if [ IncludeModule $(filename) : force ] {
-				break ;
-			}
-			toolchainSpecPath = $(toolchainSpecPath:P) ;
-			currentToolchainSpec = [ Split $(toolchainSpecPath) : "/" ] ;
-		}
-		if ! $(currentToolchainSpec) {
-			if ! [ IncludeModule toolchains/c/_default_ : force ] {
-				Exit "* Toolchain [ $(TOOLCHAIN_SPEC:J=/) ] not found!" ;
+		local ruleToolchain = [ Subst $(TOOLCHAIN:J=.) : %* : _all_ ] ;
+		if ! [ C.Toolchain.$(ruleToolchain) ] {
+			if $(C.PLATFORM) != * {
+				Exit "* Requested toolchain [ $(TOOLCHAIN_SPEC) ] was not found!" ;
 			}
 		}
 
 		C.COMPILER_SUITE on $(C.ACTIVE_TOOLCHAIN_GRIST) = $(C.COMPILER_SUITE) ;
 		C.COMPILER_SUITE_SYMBOL on $(C.ACTIVE_TOOLCHAIN_GRIST) = $(C.COMPILER_SUITE_SYMBOL) ;
 		ALL_LOCATE_TARGET on $(C.COMPILER_SUITE_SYMBOL) = $(ALL_LOCATE_TARGET) ;
-	} else {
-		C.ToolchainSpecKeys ;
 	}
-
-	local keyValue ;
-	for keyValue in $(TOOLCHAIN_SPEC_OPTIONS) {
-		local info = [ Split $(keyValue) : "=" ] ;
-		$(info[1]) = $(info[2]) ;
-	}
+	C.ToolchainSpecKeys ;
 
 	local compilerKey ;
 	for compilerKey in $(TOOLCHAIN_COMPILER_KEYS:Z=$(C.COMPILER_SUITE_SYMBOL)) {

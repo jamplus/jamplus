@@ -1,0 +1,10 @@
+rule C.Toolchain.vc.xbox360-debug {
+    C.CFlags * : /Od /EHsc /MTd /W3 /Z7 ;
+    C.C++Flags * : /Od /EHsc /MTd /W3 /Z7 ;
+    C.LibFlags * : ;
+    C.LinkFlags * : /INCREMENTAL /DEBUG ;
+
+    C.Defines * : _XBOX ;
+
+    C.Toolchain.Helper.DebugSettings ;
+}

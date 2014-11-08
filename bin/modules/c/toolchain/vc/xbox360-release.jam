@@ -1,0 +1,11 @@
+rule C.Toolchain.vc.xbox360-release {
+    C.CFlags * : /O2 /Oi /EHsc /Gy /MT /W3 /Z7 ;
+    C.C++Flags * : /O2 /Oi /EHsc /Gy /MT /W3 /Z7 ;
+    C.LibFlags * : ;
+    C.LinkFlags * : /INCREMENTAL:NO /DEBUG /OPT:REF /OPT:ICF ;
+
+    C.Defines * : _XBOX ;
+
+    C.Toolchain.Helper.ReleaseSettings ;
+}
+

@@ -1,0 +1,12 @@
+rule C.Toolchain.mingw.win32.Detect {
+    local foundPath = [ Glob
+        c:/mingw/bin
+        d:/mingw/bin
+        : gcc.exe ] ;
+    if ! $(foundPath) {
+        return ;
+    }
+    return [ C.Toolchain.mingw.Setup [ Match (.+)/bin : $(foundPath[1]) ] ] ;
+}
+
+

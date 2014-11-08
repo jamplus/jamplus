@@ -1,7 +1,0 @@
-C.Flags * : CC	: -g -O0 -m64 ;
-C.Flags * : C++	: -g -O0 -m64 ;
-C.Flags * : M	: -g -O0 -m64 ;
-C.Flags * : MM	: -g -O0 -m64 ;
-C.LinkFlags * : -m64 ;
-
-C.ToolchainHelper global_debug ;

@@ -1,0 +1,12 @@
+rule C.Toolchain.* {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+    if $(C.PLATFORM) != * {
+        Echo "* Toolchain [ $(TOOLCHAIN_SPEC:J=/) ] not found!" ;
+        Echo ;
+        Echo "  Could not match any of the following rules:" ;
+        Echo "@(    -> $(__MISSING_RULE_SCAN_LIST):J=$(NEWLINE))" ;
+        Exit ;
+    }
+}
+

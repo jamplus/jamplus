@@ -985,6 +985,7 @@ include "$(settingsFile)" ;
 		ospath.chmod(updatebuildenvironment, 777)
 	end
 
+	ospath.mkdir(ospath.add_slash(_getWorkspacesPath()))
 	if uname == 'windows' then
 		-- Write updateworkspace.bat.
 		ospath.write_file(ospath.join(_getWorkspacesPath(), 'updateworkspaces.bat'),

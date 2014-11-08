@@ -1,0 +1,23 @@
+rule C.Toolchain.win32.* {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+    if $(C.COMPILER) {
+        if $(C.COMPILER) in vs2013 vs2012 vs2010 vs2008 vs2005 vs2003 vc6 {
+            if ! [ C.Toolchain.vc.$(C.PLATFORM).Detect $(C.COMPILER) : force ] {
+                return ;
+            }
+        } else {
+            if ! [ C.Toolchain.$(C.COMPILER).$(C.PLATFORM).Detect ] {
+                return ;
+            }
+        }
+    } else if ! [ C.Toolchain.vc.$(C.PLATFORM).Detect ]  &&
+                ! [ C.Toolchain.gcc.$(C.PLATFORM).Detect ]  &&
+                ! [ C.Toolchain.mingw.$(C.PLATFORM).Detect ] {
+        return ;
+    }
+    if [ RuleExists C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) : 1 ] {
+        C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) ;
+    }
+}
+

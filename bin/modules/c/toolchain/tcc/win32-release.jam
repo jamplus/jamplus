@@ -1,0 +1,4 @@
+rule C.Toolchain.tcc.win32-release {
+	C.Toolchain.Helper.ReleaseSettings ;
+}
+
