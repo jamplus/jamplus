@@ -1,0 +1,6 @@
+rule C.Toolchain.win32.retail {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+    C.Defines * : TEST_RETAIL_DEFINE ;
+    C.Toolchain.win32 ;
+}
+

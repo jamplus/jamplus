@@ -1,4 +1,4 @@
-Echo Building configuration $(CONFIG)... ;
+Echo Building configuration $(C.CONFIG)... ;
 
 SubDir TOP ;
 

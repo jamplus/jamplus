@@ -1,0 +1,6 @@
+rule C.Toolchain.win32.debug {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+    C.Defines * : TEST_DEBUG_DEFINE ;
+    C.Toolchain.win32 ;
+}
+
