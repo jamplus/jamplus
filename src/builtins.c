@@ -54,6 +54,10 @@
 # include "execcmd.h"
 #endif
 
+#ifdef OPT_LOAD_MISSING_RULE_EXT
+# include "compile.h"
+#endif
+
 #include "fileglob.h"
 
 /*
@@ -1425,12 +1429,38 @@ LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp)
 LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp)
 {
 	LIST* symbol;
+	const char* rulename;
 
 	symbol = lol_get(args, 0);
 	if (!list_first(symbol))
 		return L0;
 
-	if ( ruleexists(list_value(list_first(symbol))) )
+	rulename = list_value( list_first( symbol ) );
+	if ( ruleexists( rulename ) )
 		return list_append( L0, "true", 0 );
+
+	if ( !lol_get( args, 1 ) )
+		return L0;
+
+#ifdef OPT_LOAD_MISSING_RULE_EXT
+	if( ruleexists( "FindMissingRule" ) ) {
+		LOL lol;
+		LIST *args = list_append( L0, rulename, 0 );
+		LIST *result;
+
+		lol_init( &lol );
+		lol_add( &lol, args );
+		result = evaluate_rule( "FindMissingRule", &lol, L0 );
+		lol_free( &lol );
+
+		if( list_first( result ) ) {
+			list_free( result );
+			return list_append( L0, "true", 0 );
+		}
+
+		list_free( result );
+	}
+#endif /* OPT_LOAD_MISSING_RULE_EXT */
+
 	return L0;
 }
