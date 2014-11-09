@@ -73,7 +73,7 @@ function Test()
 	local pattern3 = [[
 !NEXT!* Toolchain [ c/badplatform ] not found!
 
-  Could not find any of the following matching rules:
+  Could not match any of the following rules:
     -> C.Toolchain.badplatform
     -> C.Toolchain.badplatform.*
 ]]
