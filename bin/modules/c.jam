@@ -1583,7 +1583,12 @@ rule C.OverrideToolchainSpec TOOLCHAIN_SPEC_OPTIONS : OPTIONS {
 }
 
 
-rule C._Toolchain {
+rule C.Toolchain TOOLCHAIN_SPEC {
+	local TOOLCHAIN = [ Split $(TOOLCHAIN_SPEC) : "@" ] ;
+	local TOOLCHAIN_SPEC_OPTIONS = $(TOOLCHAIN[2-]) ;
+	TOOLCHAIN = $(TOOLCHAIN[1]) ;
+	TOOLCHAIN = [ Split $(TOOLCHAIN) : / ] ;
+
 	local keyValue ;
 	for keyValue in $(TOOLCHAIN_SPEC_OPTIONS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
 		local info = [ Split $(keyValue) : "=" ] ;
@@ -1591,7 +1596,7 @@ rule C._Toolchain {
 	}
 
 	local activeToolchainSpec = $(TOOLCHAIN) $(TOOLCHAIN_SPEC_OPTIONS) ;
-	C.ACTIVE_TOOLCHAIN_GRIST = $(TOOLCHAIN_SPEC) ;
+	C.ACTIVE_TOOLCHAIN_GRIST = c/$(TOOLCHAIN_SPEC) ;
 	C.ACTIVE_TOOLCHAIN_SPEC_PATH = [ Subst $(activeToolchainSpec:J=-) : "=" : "___" ] ;
 	C.ACTIVE_TOOLCHAIN_SPEC_VALUES = $(TOOLCHAIN) ;
 

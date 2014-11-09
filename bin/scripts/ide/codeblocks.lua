@@ -73,7 +73,7 @@ function CodeBlocksProjectMetaTable:Write(outputPath)
 		local configName = 'debug'
 		local jamCommandLine = os.path.escape(jamScript) .. ' ' ..
 				os.path.escape('-C' .. destinationRootPath) .. ' ' ..
-				'TOOLCHAIN=c/' .. platformName .. '/' .. configName
+				'C.TOOLCHAIN=' .. platformName .. '/' .. configName
 
 		local configInfo =
 		{

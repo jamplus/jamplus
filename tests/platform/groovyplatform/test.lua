@@ -26,7 +26,7 @@ function Test()
 		'jam/c/toolchain/groovyplatform/',
 	}
 
-	RunJam{ 'TOOLCHAIN=c/groovyplatform/retail', 'clean' }
+	RunJam{ 'C.TOOLCHAIN=groovyplatform/retail', 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
 
@@ -44,7 +44,7 @@ function Test()
 !NEXT!*** found 8 target(s)...
 ]]
 
-	TestPattern(pattern, RunJam{ 'TOOLCHAIN=c/groovyplatform/retail' })
+	TestPattern(pattern, RunJam{ 'C.TOOLCHAIN=groovyplatform/retail' })
 
 	local pass1Dirs =
 	{
@@ -80,24 +80,24 @@ function Test()
 	TestFiles(pass1Files)
 
 	---------------------------------------------------------------------------
-	TestPattern(pattern2, RunJam{ 'TOOLCHAIN=c/groovyplatform/retail' })
+	TestPattern(pattern2, RunJam{ 'C.TOOLCHAIN=groovyplatform/retail' })
 	TestDirectories(pass1Dirs)
 	TestFiles(pass1Files)
 	
 	---------------------------------------------------------------------------
-	RunJam{ 'TOOLCHAIN=c/groovyplatform/retail', 'clean' }
+	RunJam{ 'C.TOOLCHAIN=groovyplatform/retail', 'clean' }
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
 
 	---------------------------------------------------------------------------
 	local pattern3 = [[
-!NEXT!* Toolchain [ c/badplatform ] not found!
+!NEXT!* Toolchain [ badplatform ] not found!
 
   Could not match any of the following rules:
     -> C.Toolchain.badplatform
     -> C.Toolchain.badplatform.*
 ]]
-	TestPattern(pattern3, RunJam{ 'TOOLCHAIN=c/badplatform' })
+	TestPattern(pattern3, RunJam{ 'C.TOOLCHAIN=badplatform' })
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
 end

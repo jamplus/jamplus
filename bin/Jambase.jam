@@ -794,25 +794,6 @@ INCREDIBUILD ?= off ;
 ###############################################################################
 # Toolchain support
 ###############################################################################
-rule ToolchainHelper TOOLCHAIN_MODULE_NAME_LIST {
-	local module ;
-	for module in $(TOOLCHAIN_MODULE_NAME_LIST) {
-		IncludeModule toolchains/$(module) : force ;
-	}
-}
-
-rule Toolchain TOOLCHAIN_SPEC {
-	local TOOLCHAIN = [ Split $(TOOLCHAIN_SPEC) : "@" ] ;
-	local TOOLCHAIN_SPEC_OPTIONS = $(TOOLCHAIN[2-]) ;
-	TOOLCHAIN = $(TOOLCHAIN[1]) ;
-
-	local TYPE = [ Split $(TOOLCHAIN) : / ] ;
-	TOOLCHAIN = $(TYPE[2-]) ;
-	TYPE = $(TYPE[1]) ;
-
-	$(TYPE:U)._Toolchain ;
-}
-
 VALID_CONFIGS ?= release releaseltcg debug ;
 
 switch $(OS)
@@ -827,17 +808,17 @@ switch $(OS)
 		VALID_PLATFORMS ?= linux32 linux64 ;
 }
 
-if $(TOOLCHAIN) {
-	Toolchain $(TOOLCHAIN) ;
-} else if $(toolchain) {
-	Toolchain $(toolchain) ;
+if $(C.TOOLCHAIN) {
+	C.Toolchain $(C.TOOLCHAIN) ;
+} else if $(c.toolchain) {
+	C.Toolchain $(c.toolchain) ;
 } else {
 	CONFIG ?= $(VALID_CONFIGS[1]) ;
 
 	if $(PLATFORM) = "" { PLATFORM = ; }
 	PLATFORM ?= $(VALID_PLATFORMS[1]) ;
 
-	Toolchain c/$(PLATFORM)/$(CONFIG) ;
+	C.Toolchain $(PLATFORM)/$(CONFIG) ;
 }
 
 #
