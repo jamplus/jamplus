@@ -1530,7 +1530,7 @@ rule C.ToolchainSpecKeys TOOLCHAIN_SPEC_KEYS {
 		# Allow TOOLCHAIN_SPEC_KEYS to override the TOOLCHAIN_SPEC_OPTIONS.  Perhaps this should be
 		# reported as an error to the user.
 		local keyValue ;
-		for keyValue in $(TOOLCHAIN_SPEC_OPTIONS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
+		for keyValue in $(TOOLCHAIN_SPEC_OPTIONS) {
 			local info = [ Split $(keyValue) : "=" ] ;
 			local found ;
 			for newKeyValue in $(newOptionsList) {
