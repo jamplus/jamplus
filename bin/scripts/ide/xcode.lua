@@ -800,19 +800,15 @@ end
 function XcodeWorkspaceMetaTable:_WriteNestedProjects(folder, tabs)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
-			if folder.folder then
-				self.Contents[#self.Contents + 1] = tabs .. '<Group\n'
-				self.Contents[#self.Contents + 1] = tabs .. '   location = "container:"\n'
-				self.Contents[#self.Contents + 1] = tabs .. '   name = "' .. entry.folder .. '">\n'
-				self:_WriteNestedProjects(entry, tabs .. '   ')
-				self.Contents[#self.Contents + 1] = tabs .. '</Group>\n'
-			end
+			self.Contents[#self.Contents + 1] = tabs .. '<Group\n'
+			self.Contents[#self.Contents + 1] = tabs .. '   location = "container:"\n'
+			self.Contents[#self.Contents + 1] = tabs .. '   name = "' .. entry.folder .. '">\n'
+			self:_WriteNestedProjects(entry, tabs .. '   ')
+			self.Contents[#self.Contents + 1] = tabs .. '</Group>\n'
 		else
-			if folder.folder then
-				self.Contents[#self.Contents + 1] = tabs .. '<FileRef\n'
-				self.Contents[#self.Contents + 1] = tabs .. '   location = "absolute:' .. ProjectExportInfo[entry:lower()].Filename:gsub('/project.pbxproj', '') .. '">\n'
-				self.Contents[#self.Contents + 1] = tabs .. '</FileRef>\n'
-			end
+			self.Contents[#self.Contents + 1] = tabs .. '<FileRef\n'
+			self.Contents[#self.Contents + 1] = tabs .. '   location = "absolute:' .. ProjectExportInfo[entry:lower()].Filename:gsub('/project.pbxproj', '') .. '">\n'
+			self.Contents[#self.Contents + 1] = tabs .. '</FileRef>\n'
 		end
 	end
 end
