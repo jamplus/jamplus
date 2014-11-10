@@ -1,0 +1,35 @@
+rule C.Toolchain.clang.emscripten.Detect {
+    if ! $(EMSCRIPTEN_PATH) {
+        local emcc ;
+        if ! $(NT) {
+            local PATHS =
+                $(PATH)
+                ;
+            emcc = [ Glob $(PATHS) : emcc ] ;
+        } else {
+            local PATHS =
+                "c:/Program Files/Emscripten/emscripten/1.25.0"
+                $(PATH)
+                ;
+            emcc = [ Glob $(PATHS) : emcc.bat ] ;
+            if $(emcc) {
+                EMSCRIPTEN_PATH = $(emcc:D) ;
+            }
+        }
+    }
+
+    local SUFEXE = .js ;
+    if $(EMSCRIPTEN_HTML) {
+        SUFEXE = .html ;
+    }
+    C.Toolchain.clang.Setup $(EMSCRIPTEN_PATH) : .bc $(SUFEXE) ;
+
+    C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(EMSCRIPTEN_PATH)/emar ;
+    C.CC on $(C.COMPILER_SUITE_SYMBOL) = $(EMSCRIPTEN_PATH)/emcc ;
+    C.C++ on $(C.COMPILER_SUITE_SYMBOL) = $(EMSCRIPTEN_PATH)/em++ ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(EMSCRIPTEN_PATH)/emcc ;
+    C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = $(EMSCRIPTEN_PATH)/emranlib ;
+
+    return $(C.COMPILER) ;
+}
+
