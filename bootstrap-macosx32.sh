@@ -1,4 +1,5 @@
 cd src
+rm -rf bin.macosxx86 jam0
 make macosx32
 cd luaplus
 ../../bin/macosx32/jam LUA_VERSION=lua52-luaplus
