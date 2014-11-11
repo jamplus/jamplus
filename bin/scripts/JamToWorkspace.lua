@@ -328,6 +328,85 @@ function ReadTargetInfoFiles(outPath)
 	AutoWriteMetaTable.active = false
 end
 
+local function XcodeHelper_GetLatestIPhoneSDKDirectory( )
+	local p, i = ex.popen( { "find", "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs", "-type", "dir", "-name", "iPhoneOS[0-9][.][0-9][.]sdk", "-mindepth", "1", "-maxdepth", "1" }, false )
+	if p then
+		-- Read output from find.
+		local raw = i:read( "*a" )
+	
+		-- Close file handle.
+		i:close( )
+
+		-- Wait for process to wait.
+		local exitCode = p:wait( )
+
+		-- If process exited successfully.
+		if exitCode == 0 then
+
+			-- Store most recent iPhone directory into this string.
+			local mostRecent = ""
+
+			-- Iterate each line
+			for token in string.gmatch(raw, "[^\r\n]*") do
+		
+				-- Strip out \r and \n from end of line
+				token = token:gsub( "^%s*[\r\n]*$", "%1" )
+
+				-- If string isn't blank...
+				if string.len( token ) > 0 then
+
+					-- Store token
+					mostRecent = token
+				end
+			end
+
+			-- Return most recent iPhone directory
+			return mostRecent
+		end
+	end
+
+	return ""
+end
+
+
+-- Query Xcode SDKSettings.plist as to whether it requires entitlements to build/run. Ideally this would be located in
+-- Xcode.lua, however code in there gets executed for eac library/project/etc. and we only want to call this once (as
+-- otherwise it slows down the workspace generation significantly for large projects).
+local function XcodeHelper_AreEntitlementsRequired( )
+	local iosDir = XcodeHelper_GetLatestIPhoneSDKDirectory( );
+	
+	if iosDir:len( ) > 0 then
+		local p, i = ex.popen( { "/usr/libexec/PlistBuddy", "-c", "Print:DefaultProperties:ENTITLEMENTS_REQUIRED", iosDir .. "/SDKSettings.plist" }, false )
+		if p then
+			local output = i:read("*a"):gsub( "%s$", "" )
+			i:close( )
+			local exitCode = p:wait( )
+			if exitCode == 0  and  output == "NO" then
+				return false
+			end
+		end
+	end
+
+	return true
+end
+
+local function XcodeHelper_IsCodeSigningRequired( )
+	local iosDir = XcodeHelper_GetLatestIPhoneSDKDirectory( );
+	
+	if iosDir:len( ) > 0 then
+		local p, i = ex.popen( { "/usr/libexec/PlistBuddy", "-c", "Print:DefaultProperties:CODE_SIGNING_REQUIRED", iosDir .. "/SDKSettings.plist" }, false )
+		if p then
+			local output = i:read("*a"):gsub( "%s$", "" )
+			i:close( )
+			local exitCode = p:wait( )
+			if exitCode == 0  and  output == "NO" then
+				return false
+			end
+		end
+	end
+
+	return true
+end
 
 -- Ugly, but suitable for now until the autodetection process is in place.
 require 'ide/none'
@@ -464,6 +543,8 @@ Exporters =
 		Description = 'Generate Xcode project',
 		Options =
 		{
+			IsCodeSigningRequired = XcodeHelper_IsCodeSigningRequired( ),
+			AreEntitlementsRequired = XcodeHelper_AreEntitlementsRequired( )
 		}
 	},
 
