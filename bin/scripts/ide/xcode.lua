@@ -283,7 +283,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 					if subProject.BuildCommandLine then
 						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. subProject.BuildCommandLine[1] .. '";\n')
 					else
-						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. ospath.join(projectsPath, 'xcodejam') .. '";\n')
+						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. ospath.join(_getWorkspacePath(), 'xcodejam') .. '";\n')
 					end
 				end
 				table.insert(self.Contents, '\t\t\tbuildRules = (\n')
@@ -341,7 +341,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 			if subProject.BuildCommandLine then
 				table.insert(self.Contents, subProject.BuildCommandLine[1] .. '";\n')
 			else
-				table.insert(self.Contents, ospath.join(projectsPath, 'xcodejam') .. [[ $PLATFORM $CONFIG $ACTION $TARGET_NAME";]] .. '\n')
+				table.insert(self.Contents, ospath.join(_getWorkspacePath(), 'xcodejam') .. [[ $PLATFORM $CONFIG $ACTION $TARGET_NAME";]] .. '\n')
 			end
 			table.insert(self.Contents, "\t\t};\n")
 		end
