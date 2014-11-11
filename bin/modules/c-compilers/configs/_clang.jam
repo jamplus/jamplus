@@ -24,7 +24,8 @@
 
 	STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = /usr/include ;
 
-	C.Flags * : CC	: -x c -Wno-unused-parameter ;
+	# Removed '-x c' as it break ASM compiles.
+	C.Flags * : CC	: -Wno-unused-parameter ;
 	C.Flags * : C++	: -x c++ -Wno-unused-parameter ;
 	C.Flags * : M	: -x objective-c -Wno-unused-parameter ;
 	C.Flags * : MM	: -x objective-c++ -Wno-unused-parameter ;
