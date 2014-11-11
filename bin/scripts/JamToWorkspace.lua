@@ -172,6 +172,7 @@ function ProcessCommandLine()
 	local options = getopt.makeOptions{
 		getopt.Option {{"gen"}, "Set a project generator", "Req", 'GENERATOR'},
 		getopt.Option {{"gui"}, "Pop up a GUI to set options"},
+		getopt.Option {{"platform"}, "Set the default platform used to build with", "Req", 'PLATFORM'},
 		getopt.Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
 		getopt.Option {{"postfix"}, "Extra text for the IDE project name"},
 		getopt.Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
@@ -314,7 +315,11 @@ function CreateTargetInfoFiles(outPath)
 	ReadTargetInfo('*', '*')
 
 	if not Config.Platforms then
-		Config.Platforms = VALID_PLATFORMS
+		if opts.platform then
+			Config.Platforms = opts.platform
+		else
+			Config.Platforms = VALID_PLATFORMS
+		end
 	end
 
 	local workspacePlatforms = {}
