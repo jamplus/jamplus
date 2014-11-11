@@ -806,9 +806,12 @@ function XcodeWorkspaceMetaTable:_WriteNestedProjects(folder, tabs)
 			self:_WriteNestedProjects(entry, tabs .. '   ')
 			self.Contents[#self.Contents + 1] = tabs .. '</Group>\n'
 		else
-			self.Contents[#self.Contents + 1] = tabs .. '<FileRef\n'
-			self.Contents[#self.Contents + 1] = tabs .. '   location = "absolute:' .. ProjectExportInfo[entry:lower()].Filename:gsub('/project.pbxproj', '') .. '">\n'
-			self.Contents[#self.Contents + 1] = tabs .. '</FileRef>\n'
+			local info = ProjectExportInfo[entry:lower()]
+			if info then
+				self.Contents[#self.Contents + 1] = tabs .. '<FileRef\n'
+				self.Contents[#self.Contents + 1] = tabs .. '   location = "absolute:' .. info.Filename:gsub('/project.pbxproj', '') .. '">\n'
+				self.Contents[#self.Contents + 1] = tabs .. '</FileRef>\n'
+			end
 		end
 	end
 end
