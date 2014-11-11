@@ -423,7 +423,6 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 
 			if iosSdkVersionMin then
 				table.insert(self.Contents, "\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = \"" .. iosSdkVersionMin .. "\";\n")
-				print( "IPHONEOS_DEPLOYMENT_TARGET found for " .. platformName .. " - " .. configName )
 			end
 
 			-- Deployment target (OSX).
@@ -436,7 +435,6 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 
 			if osxSdkVersionMin then
 				table.insert(self.Contents, "\t\t\t\tMACOSX_DEPLOYMENT_TARGET = \"" .. osxSdkVersionMin .. "\";\n")
-				print( "MACOSX_DEPLOYMENT_TARGET found for " .. platformName .. " - " .. configName )
 			end
 
 			table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. platformName .. ";\n")
