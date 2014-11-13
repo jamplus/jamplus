@@ -1238,12 +1238,8 @@ rule C.LinkFlags TARGET {
 }
 
 
-rule C.LinkLibraries TARGET : LIBRARIES {
-	C.ActiveTarget $(TARGET) ;
-
-	local projectsString = "	'$(LIBRARIES)',$(NEWLINE)" ;
-	Contents += "Projects['$(C.ACTIVE_TARGET)'].Libraries = concat(Projects['$(C.ACTIVE_TARGET)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
-	Contents += "$(projectsString:J=$(EMPTY))})$(NEWLINE)" ;
+rule C.LinkLibraries TARGET : LIBRARIES : OPTIONS {
+	C.Inherits $(TARGET) : $(LIBRARIES) : $(OPTIONS) optional ;
 }
 
 
@@ -1401,6 +1397,12 @@ rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
 			NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicNeedLibs) ;
 			PUBLIC_NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicNeedLibs) ;
 		}
+	}
+
+	if $(TARGETINFO_LOCATE) {
+		local projectsString = "	'$(INHERITS_TARGETS)',$(NEWLINE)" ;
+		Contents += "Projects['$(C.ACTIVE_TARGET)'].Libraries = concat(Projects['$(C.ACTIVE_TARGET)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
+		Contents += "$(projectsString:J=$(EMPTY))})$(NEWLINE)" ;
 	}
 }
 
