@@ -628,16 +628,16 @@ function DumpWorkspace(workspace)
 	if uname == 'windows' then
 		updateWorkspaceCommandLines =
 		{
-			ospath.make_backslash( '"' .. ospath.join(outPath, 'updateworkspace.bat') .. '"' ),
-			ospath.make_backslash( '"' .. ospath.join(outPath, 'updateworkspace.bat') .. '"' ),
-			ospath.make_backslash( '"' .. ospath.join(outPath, 'updateworkspace.bat') .. '"' ),
+			ospath.make_backslash( '"' .. ospath.join(_getWorkspacesPath(), 'updateworkspaces.bat') .. '"' ),
+			ospath.make_backslash( '"' .. ospath.join(_getWorkspacesPath(), 'updateworkspaces.bat') .. '"' ),
+			ospath.make_backslash( '"' .. ospath.join(_getWorkspacesPath(), 'updateworkspaces.bat') .. '"' ),
 		}
 	else
 		updateWorkspaceCommandLines =
 		{
-			ospath.join(outPath, 'updateworkspace'),
-			ospath.join(outPath, 'updateworkspace'),
-			ospath.join(outPath, 'updateworkspace'),
+			ospath.join(_getWorkspacesPath(), 'updateworkspace'),
+			ospath.join(_getWorkspacesPath(), 'updateworkspace'),
+			ospath.join(_getWorkspacesPath(), 'updateworkspace'),
 		}
 	end
 
