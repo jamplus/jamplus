@@ -73,10 +73,17 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	local project = Projects[self.ProjectName]
 
 	-- Write header.
-	table.insert(self.Contents, expand([[
+    if self.Options.vs2015 then
+        table.insert(self.Contents, expand([[
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+]]))
+    else
+        table.insert(self.Contents, expand([[
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 ]]))
+    end
 
 	-- Write Configurations header
 	table.insert(self.Contents, [[
@@ -111,6 +118,8 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 		elseif self.Options.vs2012 then
 			extraInfo.TargetFrameworkVersion = "v4.5"
 		elseif self.Options.vs2013 then
+			extraInfo.TargetFrameworkVersion = "v4.5"
+		elseif self.Options.vs2015 then
 			extraInfo.TargetFrameworkVersion = "v4.5"
 		end
 		table.insert(self.Contents, expand([[
@@ -190,6 +199,10 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 			elseif self.Options.vs2013 then
 				self.Contents[#self.Contents + 1] = [[
     <PlatformToolset>v120</PlatformToolset>
+]]
+			elseif self.Options.vs2015 then
+				self.Contents[#self.Contents + 1] = [[
+    <PlatformToolset>v140</PlatformToolset>
 ]]
 			end
 			self.Contents[#self.Contents + 1] = [[
@@ -425,6 +438,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+]])
+	elseif self.Options.vs2015 then
+		table.insert(self.Contents, [[
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.22310.1
 MinimumVisualStudioVersion = 10.0.40219.1
 ]])
 	end
