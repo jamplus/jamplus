@@ -2,6 +2,20 @@
 
 rule FindVisualStudioHelper VERSION : COMPILER {
     switch $(VERSION) {
+        case vs2015 :
+            local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+            MSVCNT ?= [ W32_GETREG $(key) ] ;
+
+            VS140COMNTOOLS = $(VS140COMNTOOLS:J=" ") ;
+            if ! $(MSVCNT) && $(VS140COMNTOOLS) {
+                MSVCNT = $(VS140COMNTOOLS) ;
+            }
+            if $(MSVCNT) {
+                MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+                MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+                COMPILER = vs2015 ;
+            }
+
         case vs2013 :
             local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
             MSVCNT ?= [ W32_GETREG $(key) ] ;

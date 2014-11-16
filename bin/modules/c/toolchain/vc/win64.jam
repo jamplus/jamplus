@@ -10,6 +10,14 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
     local MSSDK_STDHDRS ;
     local MSSDK_LINKDIRECTORIES ;
     switch $(COMPILER) {
+        case vs2015 :
+            local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot81 ;
+            MSSDK = [ W32_GETREG $(key) ] ;
+            MSSDK ?= $(MSVCNT) ;
+            MSSDK_BINDIR = "$(MSSDK)/bin/x64" ;
+            MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include/shared" "$(MSSDK)/Include/um" "$(MSSDK)/Include/winrt" ;
+            MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib/amd64" "$(MSSDK)/lib/winv6.3/um/x64" ;
+
         case vs2013 :
             local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot81 ;
             MSSDK = [ W32_GETREG $(key) ] ;
