@@ -39,6 +39,8 @@ function VisualStudio200xProjectMetaTable:Write(outputPath)
 	if not info then
 		info = { Name = self.ProjectName, Filename = filename, Uuid = '{' .. uuid.new():upper() .. '}' }
 		ProjectExportInfo[self.ProjectName] = info
+	else
+		info.Filename = filename
 	end
 
 	local project = Projects[self.ProjectName]
