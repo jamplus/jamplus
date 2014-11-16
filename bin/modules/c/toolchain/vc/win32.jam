@@ -13,12 +13,12 @@ rule C.Toolchain.vc.win32.Detect COMPILER {
     local rc_nologo ;
     switch $(COMPILER) {
         case vs2013 :
-            local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot ;
+            local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot81 ;
             MSSDK = [ W32_GETREG $(key) ] ;
             MSSDK ?= $(MSVCNT) ;
             MSSDK_BINDIR = "$(MSSDK)/bin/x86" ;
-            MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/include/shared" "$(MSSDK)/include/um" "$(MSSDK)/include/winrt" ;
-            MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/lib/win8/um/x86" ;
+            MSSDK_STDHDRS = "$(MSVCNT)/include" "$(MSSDK)/Include/shared" "$(MSSDK)/Include/um" "$(MSSDK)/Include/winrt" ;
+            MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/lib/winv6.3/um/x86" ;
             RC = $(MSSDK)/bin/x86/rc ;
             rc_nologo = /nologo ;
 
