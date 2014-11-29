@@ -469,7 +469,7 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 		case shortversion :			C._BundleInfoString CFShortVersionString : $(VALUE) ;
 		case bundleversion :
 			C._BundleInfoString CFBundleVersion : $(VALUE) ;
-			CFBundleVersion = $(VALUE) ;
+			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case copyright :			C._BundleInfoString NSHumanReadableCopyright : $(VALUE) ;
 		case mainnibfile :			C._BundleInfoString NSMainNibFile : $(VALUE) ;
 		case resourcespec :			C._BundleInfoString CFBundleResourceSpecification : $(VALUE) ;
