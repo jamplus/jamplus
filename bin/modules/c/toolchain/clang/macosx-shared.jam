@@ -1137,10 +1137,10 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL : ITUNES_
 			Depends $(archiveTarget) : $(manifest.plist) ;
 			Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(manifest.plist) ;
 			local contents ;
-			on $(C.ACTIVE_TOOLCHAIN_TARGET) contents = "
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
+			on $(C.ACTIVE_TOOLCHAIN_TARGET) contents =
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
 <dict>
 	<key>items</key>
 	<array>
@@ -1169,7 +1169,7 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL : ITUNES_
 	</array>
 </dict>
 </plist>
-" ;	
+" ;
 			CONTENTS on $(manifest.plist) = $(contents) ;
 			WriteFile $(manifest.plist) ;
 			UseCommandLine $(manifest.plist) : $(contents) ;
