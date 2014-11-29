@@ -1065,7 +1065,7 @@ rule C.CodeSign TARGET : PROVISIONING_PROFILE {
 }
 
 
-rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL {
+rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL : ITUNES_ARTWORK {
 	# Set up the archive support.
 	if $(C.PLATFORM) in ipad iphone {
 		TARGET = [ ActiveTarget $(TARGET) ] ;
@@ -1080,10 +1080,14 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL {
 		OUTPUT_PATH ?= $(LOCATE_TARGET) ;
 		MakeLocate $(ipaTarget) : $(OUTPUT_PATH) ;
 
+		if $(ITUNES_ARTWORK) {
+			Depends $(archiveTarget) : $(ipaTarget) : $(ITUNES_ARTWORK) ;
+		}
 		Depends $(archiveTarget) : $(ipaTarget) : $(linkTarget) ;
 		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(ipaTarget) ;
 		BUNDLE_PATH on $(ipaTarget) = $(bundlePath) ;
 		PROVISIONING_PROFILE on $(ipaTarget) = $(PROVISIONING_PROFILE) ;
+		ITUNES_ARTWORK on $(ipaTarget) = $(ITUNES_ARTWORK) ;
 		C._BundleArchive $(ipaTarget) : $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
 
 		if $(URL) {
@@ -1193,6 +1197,7 @@ actions lua C._BundleArchive
 			SourcePath = entry.filename,
 		}
 	end
+	filelist[#filelist + 1] = { EntryName = 'iTunesArtwork', SourcePath = [[$(ITUNES_ARTWORK:T)]] }
 
 	local ziparchive = require 'ziparchive'
 	local archive = ziparchive.open([[$(1)]], 'a')
