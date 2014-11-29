@@ -27,6 +27,7 @@ rule C.Toolchain.clang.ios.Detect {
 	if $(IOSBUILDENV_PATH) {
 		C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/ld ;
 	}
+	SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = "" ;
 	SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dylib ;
 	SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a .dylib ;
 
