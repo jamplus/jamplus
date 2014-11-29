@@ -1121,7 +1121,7 @@ rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL : ITUNES_
 		if $(ITUNES_ARTWORK) {
 			Depends $(archiveTarget) : $(ipaTarget) : $(ITUNES_ARTWORK) ;
 		}
-		Depends $(archiveTarget) : $(ipaTarget) : $(linkTarget) ;
+		Depends $(archiveTarget) : $(ipaTarget) : $(TARGET:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
 		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(ipaTarget) ;
 		BUNDLE_PATH on $(ipaTarget) = $(bundlePath) ;
 		PROVISIONING_PROFILE on $(ipaTarget) = $(PROVISIONING_PROFILE) ;
