@@ -116,31 +116,31 @@ rule C.MacOSX_SDK SDK_VERSION {
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk ;
 					sdkroot = iphoneos6.1 ;
-					architecture = armv7s ;
+					architecture = armv7 ;
 
 				case 7.0 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
 					sdkroot = iphoneos7.0 ;
-					architecture = armv7s ;
+					architecture = armv7 ;
 
 				case 7.1 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk ;
 					sdkroot = iphoneos7.1 ;
-					architecture = armv7s ;
+					architecture = armv7 ;
 
 				case 8.0 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk ;
 					sdkroot = iphoneos8.0 ;
-					architecture = armv7s ;
+					architecture = armv7 ;
 
 				case 8.1 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.1.sdk ;
 					sdkroot = iphoneos8.1 ;
-					architecture = armv7s ;
+					architecture = armv7 ;
 
 				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
