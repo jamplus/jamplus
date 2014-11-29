@@ -974,7 +974,7 @@ rule C.Provision TARGET : PROFILE_ID {
 
 	# See if provided provision is a filename that exists.
 	local _profileDir = $(PROFILE_ID:P/) ;
-	local _profileFilename = [ C.GristFiles : $(PROFILE_ID:BS/) ] ;
+	local _profileFilename = $(PROFILE_ID:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 	
 	if $(_profileDir) && $(_profileDir) != "" && $(_profileFilename) && $(_profileFilename) != ""
 	{
