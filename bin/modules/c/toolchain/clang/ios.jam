@@ -31,16 +31,16 @@ rule C.Toolchain.clang.ios.Detect {
 	SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dylib ;
 	SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a .dylib ;
 
-	C.Toolchain.$(C.COMPILER_SUITE).macosx-shared ;
+	C.Toolchain.$(C.COMPILER_SUITE).ios-shared ;
 
-	C._ApplicationFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._ApplicationFromObjects_LinkFlags ;
-	C._ApplicationFromObjects_PostBuild on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._ApplicationFromObjects_PostBuild ;
-	C._Inherits on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._Inherits ;
-	C._LibraryFromObjects_LibFlags on $(C.COMPILER_SUITE_SYMBOL) += C.macosx._LibraryFromObjects_LibFlags ;
-	C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._MultiCppCompile_SetupFlags ;
-	C._SharedLibraryFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._SharedLibraryFromObjects_LinkFlags ;
+	C._ApplicationFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.ios._ApplicationFromObjects_LinkFlags ;
+	C._ApplicationFromObjects_PostBuild on $(C.COMPILER_SUITE_SYMBOL) = C.ios._ApplicationFromObjects_PostBuild ;
+	C._Inherits on $(C.COMPILER_SUITE_SYMBOL) = C.ios._Inherits ;
+	C._LibraryFromObjects_LibFlags on $(C.COMPILER_SUITE_SYMBOL) += C.ios._LibraryFromObjects_LibFlags ;
+	C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.ios._MultiCppCompile_SetupFlags ;
+	C._SharedLibraryFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.ios._SharedLibraryFromObjects_LinkFlags ;
 
-	C.MacOSX_SDK $(SDK_VERSION) ;
+	C.ios.SDK $(SDK_VERSION) ;
 
 	C.Toolchain.$(C.COMPILER_SUITE).ios-$(C.CONFIG) ;
 
