@@ -651,6 +651,21 @@ rule C.macosx._ApplicationFromObjects_PostBuild {
 			Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
 			ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 		}
+
+		if $(C.PLATFORM) in ipad ipadsimulator iphone iphonesimulator {
+			local provisionFilename = $(PROVISION_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			local embedded.mobileprovision = @(embedded.mobileprovision:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+			MakeLocate $(embedded.mobileprovision) : $(bundlePath) ;
+
+			# Copy provision into the bundle and name it embedded.mobileprovision
+			Depends $(bundleTarget) : $(embedded.mobileprovision) ;
+			CopyFile $(TARGET) : $(embedded.mobileprovision) : $(provisionFilename) ;
+
+			# Without this, if we change between profiles, the copy will not always
+			# work due to destination time stamp being newer than source (despite
+			# coming from a different file).
+			UseCommandLine $(embedded.mobileprovision) : $(provisionFilename) ;
+		}
 	}
 	
 	if $(C.PLATFORM) in ipad ipadsimulator iphone iphonesimulator {
@@ -947,41 +962,16 @@ actions CompileXIB
 }
 
 
-rule C.ProvisionFile TARGET : PROFILE_FILENAME {
+rule C.ProvisionFile TARGET : FILENAME {
 	TARGET = [ C.ActiveTarget $(TARGET) ] ;
 
 	# See if provided provision is a filename that exists.
-	local _profileDir = $(PROFILE_FILENAME:P/) ;
-	local _profileFilename = $(PROFILE_FILENAME:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+	local _provisionDir = $(FILENAME:P/) ;
+	local _provisionFilename = $(FILENAME:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 
-	SEARCH on $(_profileFilename) = $(_profileDir) ;
-	local _matchingProvision = $(_profileFilename) ;
+	SEARCH on $(_provisionFilename) = $(_provisionDir) ;
 
-	# Get bundle path.
-	local _bundlePath ;
-	local _bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-	local _bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-
-	if ! $(_bundlePath) {
-		Echo *** C.ProvisionFile $(TARGET) \: $(PROFILE_ID) ;
-		Exit *** Bundle path not setup for target $(TARGET) ;
-	}
-	if ! $(_bundleTarget) {
-		Echo *** C.ProvisionFile $(TARGET) \: $(PROFILE_ID) ;
-		Exit *** Bundle target not setup for target $(TARGET) ;
-	}
-
-	local _dstProvision = @(embedded.mobileprovision:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-	MakeLocate $(_dstProvision) : $(_bundlePath) ;
-
-	# Copy provision into the bundle and name it embedded.mobileprovision
-	CopyFile $(TARGET) : $(_dstProvision) : $(_matchingProvision) ;
-	Depends $(_bundleTarget) : $(_dstProvision) ;
-
-	# Without this, if we change between profiles, the copy will not always
-	# work due to destination time stamp being newer than source (despite
-	# coming from a different file).
-	UseCommandLine $(_dstProvision) : $(_matchingProvision) ;
+	PROVISION_FILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_provisionFilename) ;
 }
 
 
