@@ -9,9 +9,13 @@ rule C.FrameworkDirectories TARGET : FRAMEWORKDIRS {
 }
 
 
-rule C.LinkFrameworks TARGET : FRAMEWORKS {
-	TARGET = [ ActiveTarget $(TARGET) ] ;
-	C.LinkFlags $(TARGET) : "-framework $(FRAMEWORKS)" ;
+rule C.LinkFrameworks TARGET : FRAMEWORKS : OPTIONS {
+	C.ActiveTarget $(TARGET) ;
+	FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FRAMEWORKS) ;
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FRAMEWORKS) ;
+	}
 }
 
 
@@ -657,6 +661,17 @@ rule C.macosx._ApplicationFromObjects_PostBuild {
 }
 
 
+rule C.macosx._Inherits {
+	local publicFrameworks = $(PUBLIC_FRAMEWORKS:Z=$(inheritsTarget)) ;
+	if $(publicFrameworks) {
+		FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicFrameworks) ;
+		if $(public) {
+			PUBLIC_FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicFrameworks) ;
+		}
+	}
+}
+
+
 rule C.macosx._MultiCppCompile_SetupFlags {
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
@@ -767,6 +782,8 @@ rule C.macosx._ApplicationFromObjects_LinkFlags {
 				linkFlags += -miphoneos-version-min=$(minimumsdkversion) ;
 		}
 	}
+
+	linkFlags += "-framework $(FRAMEWORKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))" ;
 
 	if bundle in $(OPTIONS) {
 		local outputName = [ C._retrieveOutputName ] ;
