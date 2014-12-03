@@ -1049,7 +1049,7 @@ if $(NT) {
     #"$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S:: -E"" $(LINK_TARGET:CT)
 actions C._CodeSign
 {
-    "$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S:: -E"" $(1:C)
+    "$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S$(CERTIFICATE_CHAIN) -E"" $(1:C)
 }
 
 } else {
@@ -1065,7 +1065,7 @@ actions C._CodeSign
 }
 
 
-rule C.CodeSign TARGET : PROVISIONING_PROFILE {
+rule C.CodeSign TARGET : PROVISIONING_PROFILE : CERTIFICATE_CHAIN {
 	ActiveTarget $(TARGET) ;
 
 	if $(C.PLATFORM) in ipad iphone {
@@ -1088,6 +1088,11 @@ rule C.CodeSign TARGET : PROVISIONING_PROFILE {
 			Depends $(bundleTarget) : $(codeResources) $(resourceRulesPlist) : $(dependsList) ;
 			Clean $(cleanBundleTarget) : $(codeResources) $(resourceRulesPlist) ;
 
+			if $(CERTIFICATE_CHAIN) {
+				CERTIFICATE_CHAIN on $(linkTarget) = $(CERTIFICATE_CHAIN) ;
+			} else {
+				CERTIFICATE_CHAIN on $(linkTarget) = "::" ;
+			}
 			C._CodeSign $(linkTarget) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
 		} else {
 			local codeResourcesSymbolicLink = [ C.GristFiles : CodeResourcesLink ] ;
