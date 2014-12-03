@@ -1397,6 +1397,12 @@ rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
 			NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicNeedLibs) ;
 			PUBLIC_NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicNeedLibs) ;
 		}
+
+		local theRule ;
+		for theRule in $(C._Inherits:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+			$(theRule) ;
+		}
+
 	}
 
 	if $(TARGETINFO_LOCATE) {
