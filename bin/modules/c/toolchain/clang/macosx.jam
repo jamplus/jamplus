@@ -29,7 +29,7 @@ rule C.Toolchain.clang.macosx.Detect {
 	C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._MultiCppCompile_SetupFlags ;
 	C._SharedLibraryFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._SharedLibraryFromObjects_LinkFlags ;
 
-	C.MacOSX_SDK $(SDK_VERSION) ;
+	C.macosx.SDK $(SDK_VERSION) ;
 
 	C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) ;
 

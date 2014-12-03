@@ -385,8 +385,8 @@ else
 		Platform = 'macosx'
 		PlatformDir = 'macosx32'
 		COMPILER = 'clang'
-		C_ARCHIVE = 'C.clang-apple.Archive'
-		C_LINK = 'C.clang-apple.Link'
+		C_ARCHIVE = 'C.macosx.clang.Archive'
+		C_LINK = 'C.macosx.clang.Link'
 	elseif uname == 'linux' then
 		Platform = 'linux'
 		PlatformDir = 'linux32'

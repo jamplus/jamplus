@@ -2,14 +2,14 @@ rule C.Toolchain.clang.macosx-shared {
 }
 
 
-rule C.FrameworkDirectories TARGET : FRAMEWORKDIRS {
+rule C.macosx.FrameworkDirectories TARGET : FRAMEWORKDIRS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	C.Flags $(TARGET) : CC C++ M MM : -F\"$(FRAMEWORKDIRS)\" ;
 	C.LinkFlags $(TARGET) : -F\"$(FRAMEWORKDIRS)\" ;
 }
 
 
-rule C.LinkFrameworks TARGET : FRAMEWORKS : OPTIONS {
+rule C.macosx.LinkFrameworks TARGET : FRAMEWORKS : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FRAMEWORKS) ;
 	if public in $(OPTIONS) {
@@ -19,31 +19,25 @@ rule C.LinkFrameworks TARGET : FRAMEWORKS : OPTIONS {
 }
 
 
-rule C.WeakLinkFrameworks TARGET : FRAMEWORKS {
+rule C.macosx.WeakLinkFrameworks TARGET : FRAMEWORKS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	C.LinkFlags $(TARGET) : "-weak_framework $(FRAMEWORKS)" ;
 }
 
 
-actions C.clang-apple.Archive {
+actions C.macosx.clang.Archive {
 	$(C.AR:C) -static $(LIBFLAGS) -o $(<:C) -filelist ^^^($(>:J=$(NEWLINE)))
 }
 
 
-actions C.clang-apple.Link {
+actions C.macosx.clang.Link {
 	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) $(NEEDLIBS:TC) $(LINKLIBS:TC)
 }
 
 
-if ! $(NT) {
-
-rule C.MacOSX_SDK SDK_VERSION {
+rule C.macosx.SDK SDK_VERSION {
 	local SDK_PLATFORM ;
 	SDK_PLATFORM ?= $(C.PLATFORM) ;
-
-	if $(SDK_PLATFORM) in macosx32 macosx64 {
-		SDK_PLATFORM = macosx ;
-	}
 
 	local COMPILER_BIN_PATH = $(COMPILER_BIN_PATH:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local developerRoot ;
@@ -52,256 +46,42 @@ rule C.MacOSX_SDK SDK_VERSION {
 	local sdkroot ;
 	local architecture ;
 
-	switch $(SDK_PLATFORM) {
-		case macosx :
-			developerRoot = /Developer/SDKs ;
-			SDK_VERSION ?= 10.9 ;
-			switch $(SDK_VERSION) {
-				case 10.4 :
-					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
-					sdkroot = macosx10.4 ;
+	developerRoot = /Developer/SDKs ;
+	SDK_VERSION ?= 10.9 ;
+	switch $(SDK_VERSION) {
+		case 10.4 :
+			isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
+			sdkroot = macosx10.4 ;
 
-				case 10.4u :
-					isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
-					sdkroot = macosx10.4 ;
+		case 10.4u :
+			isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
+			sdkroot = macosx10.4 ;
 
-				case 10.5 :
-					isysroot = $(developerRoot)/MacOSX10.5.sdk ;
-					sdkroot = macosx10.5 ;
+		case 10.5 :
+			isysroot = $(developerRoot)/MacOSX10.5.sdk ;
+			sdkroot = macosx10.5 ;
 
-				case 10.6 :
-					isysroot = $(developerRoot)/MacOSX10.6.sdk ;
-					sdkroot = macosx10.6 ;
-				
-				case 10.7 :
-					isysroot = $(developerRoot)/MacOSX10.7.sdk ;
-					sdkroot = macosx10.7 ;
-				
-				case 10.8 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk ;
-					sdkroot = macosx10.8 ;
+		case 10.6 :
+			isysroot = $(developerRoot)/MacOSX10.6.sdk ;
+			sdkroot = macosx10.6 ;
+		
+		case 10.7 :
+			isysroot = $(developerRoot)/MacOSX10.7.sdk ;
+			sdkroot = macosx10.7 ;
+		
+		case 10.8 :
+			developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+			isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk ;
+			sdkroot = macosx10.8 ;
 
-				case 10.9 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk ;
-					sdkroot = macosx10.9 ;
+		case 10.9 :
+			developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+			isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk ;
+			sdkroot = macosx10.9 ;
 
-				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
-			}
-			developerRoot = $(isysroot) ;
-
-		case iphone :
-			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 8.1 ;
-			switch $(SDK_VERSION) {
-				case 4.3 :
-					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
-					architecture = armv6 ;
-					sdkroot = iphoneos4.3 ;
-
-				case 5.0 :
-					isysroot = $(developerRoot)/SDKs/iPhoneOS5.0.sdk ;
-					architecture = armv6 ;
-					sdkroot = iphoneos5.0 ;
-
-				case 5.1 :
-					isysroot = @(../../SDKs/iPhoneOS5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
-					architecture = armv6 ;
-					sdkroot = iphoneos5.1 ;
-
-				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk ;
-					sdkroot = iphoneos6.0 ;
-					architecture = armv7 ;
-
-				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk ;
-					sdkroot = iphoneos6.1 ;
-					architecture = armv7 ;
-
-				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
-					sdkroot = iphoneos7.0 ;
-					architecture = armv7 ;
-
-				case 7.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk ;
-					sdkroot = iphoneos7.1 ;
-					architecture = armv7 ;
-
-				case 8.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk ;
-					sdkroot = iphoneos8.0 ;
-					architecture = armv7 ;
-
-				case 8.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.1.sdk ;
-					sdkroot = iphoneos8.1 ;
-					architecture = armv7 ;
-
-				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
-			}
-			flags += -fvisibility=hidden ;
-
-		case iphonesimulator :
-			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 8.1 ;
-			switch $(SDK_VERSION) {
-				case 4.3 :
-					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
-					#flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 ;
-					sdkroot = iphoneos4.3 ;
-
-				case 5.0 :
-					isysroot = $(developerRoot)/SDKs/iPhoneSimulator5.0.sdk ;
-					sdkroot = iphoneos5.0 ;
-
-				case 5.1 :
-					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
-					sdkroot = iphoneos5.1 ;
-
-				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk ;
-					sdkroot = iphoneos6.0 ;
-
-				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.1.sdk ;
-					sdkroot = iphoneos6.1 ;
-
-				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk ;
-					sdkroot = iphoneos7.0 ;
-
-				case 7.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk ;
-					sdkroot = iphoneos7.1 ;
-
-				case 8.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.0.sdk ;
-					sdkroot = iphoneos8.0 ;
-
-				case 8.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.1.sdk ;
-					sdkroot = iphoneos8.1 ;
-
-				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
-			}
-			architecture = i386 ;
-
-		case ipadsimulator :
-			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 8.1 ;
-			switch $(SDK_VERSION) {
-				case 4.3 :
-					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
-					#flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 ;
-					sdkroot = iphoneos4.3 ;
-
-				case 5.0 :
-					isysroot = $(developerRoot)/SDKs/iPhoneSimulator5.0.sdk ;
-					sdkroot = iphoneos5.0 ;
-
-				case 5.1 :
-					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
-					sdkroot = iphoneos5.1 ;
-
-				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk ;
-					sdkroot = iphoneos6.0 ;
-
-				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.1.sdk ;
-					sdkroot = iphoneos6.1 ;
-
-				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk ;
-					sdkroot = iphoneos7.0 ;
-
-				case 7.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk ;
-					sdkroot = iphoneos7.1 ;
-
-				case 8.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.0.sdk ;
-					sdkroot = iphoneos8.0 ;
-
-				case 8.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.0.sdk ;
-					sdkroot = iphoneos8.1 ;
-
-				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
-			}
-			architecture = i386 ;
-
-		case ipad :
-			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 8.1 ;
-			switch $(SDK_VERSION) {
-				case 4.3 :
-					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
-					sdkroot = iphoneos4.3 ;
-
-				case 5.0 :
-					isysroot = $(developerRoot)/SDKs/iPhoneOS5.0.sdk ;
-					sdkroot = iphoneos5.0 ;
-
-				case 5.1 :
-					isysroot = @(../../SDKs/iPhoneOS5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
-					sdkroot = iphoneos5.1 ;
-
-				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk ;
-					sdkroot = iphoneos6.0 ;
-
-				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk ;
-					sdkroot = iphoneos6.1 ;
-
-				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
-					sdkroot = iphoneos7.0 ;
-
-				case 7.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk ;
-					sdkroot = iphoneos7.1 ;
-
-				case 8.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk ;
-					sdkroot = iphoneos8.0 ;
-
-				case 8.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.1.sdk ;
-					sdkroot = iphoneos8.1 ;
-
-				case * :		Exit "* MacOSX_SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
-			}
-			architecture = armv7 ;
+		case * :		Exit "* C.macosx.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 	}
+	developerRoot = $(isysroot) ;
 
 	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.AR:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
 	C.CC on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.CC:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
@@ -310,9 +90,7 @@ rule C.MacOSX_SDK SDK_VERSION {
 	C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = ;
 
 	C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(architecture) ;
-	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;	
-	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
-	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
+	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;
 	XCODE_SDKROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sdkroot) ;
 
 	#flags += -gdwarf-2 ;
@@ -324,52 +102,9 @@ rule C.MacOSX_SDK SDK_VERSION {
 	}
 }
 
-} else {
-
-rule C.MacOSX_SDK SDK_VERSION {
-	local SDK_PLATFORM ;
-	SDK_PLATFORM ?= $(C.PLATFORM) ;
-
-	local COMPILER_BIN_PATH = $(COMPILER_BIN_PATH:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
-	local sysroot = $(IOSBUILDENV_PATH)/SDK ;
-	SDK_VERSION ?= 5.0 ;
-
-	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.AR:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
-	C.CC on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.CC:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
-	C.C++ on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.C++:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
-	C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.LINK:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
-	C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = ;
-
-	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sysroot) ;
-	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
-	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
-}
-
-} # if ! $(NT)
 
 
-rule C.MinimumOSVersion TARGET : SDK_VERSION_MIN {
-	TARGET = [ ActiveTarget $(TARGET) ] ;
-
-	local SDK_PLATFORM ;
-	SDK_PLATFORM ?= $(C.PLATFORM) ;
-
-	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION_MIN) ;
-
-	if $(TARGETINFO_LOCATE) {
-		if $(SDK_PLATFORM) in iphone iphonesimulator ipad ipadsimulator {
-			Contents += "Projects[ [[C.*]] ].IOS_SDK_VERSION_MIN[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(SDK_VERSION_MIN)]]
-
-" ;
-		} else if $(SDK_PLATFORM) in macosx32 macosx64 {
-			Contents += "Projects[ [[C.*]] ].OSX_SDK_VERSION_MIN[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(SDK_VERSION_MIN)]]
-
-" ;
-		}
-	}
-}
-
-rule C._BundleInfoArray KEY : VALUE {
+rule C.macosx._BundleInfoArray KEY : VALUE {
 	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
 	}
@@ -378,7 +113,7 @@ rule C._BundleInfoArray KEY : VALUE {
 }
 
 
-rule C._BundleInfoIntegerArray KEY : VALUE {
+rule C.macosx._BundleInfoIntegerArray KEY : VALUE {
 	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
 	}
@@ -387,7 +122,7 @@ rule C._BundleInfoIntegerArray KEY : VALUE {
 }
 
 
-rule C._BundleInfoBoolean KEY : VALUE {
+rule C.macosx._BundleInfoBoolean KEY : VALUE {
 	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
 	}
@@ -396,7 +131,7 @@ rule C._BundleInfoBoolean KEY : VALUE {
 }
 
 
-rule C._BundleInfoString KEY : VALUE {
+rule C.macosx._BundleInfoString KEY : VALUE {
 	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
 	}
@@ -405,7 +140,7 @@ rule C._BundleInfoString KEY : VALUE {
 }
 
 
-rule C.BundleInfo TARGET : TYPE : VALUE {
+rule C.macosx.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
 		C._BundleInfoString CFBundleDevelopmentRegion : en ;
@@ -413,44 +148,11 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 		C._BundleInfoString CFBundleInfoDictionaryVersion : 6.0 ;
 		C._BundleInfoString CFBundlePackageType : APPL ;
 		C._BundleInfoString CFBundleSignature : ???? ;
-		if ! $(NT) {
-			C._BundleInfoString CFBundleResourceSpecification : ResourceRules.plist ;
-		}
+		C._BundleInfoString CFBundleResourceSpecification : ResourceRules.plist ;
 
 		switch $(C.PLATFORM) {
 			case macosx32 :			VALUE = "" ;
 			case macosx64 :			VALUE = "" ;
-			case iphone :
-				C._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C._BundleInfoIntegerArray UIDeviceFamily : 1 ;
-				C._BundleInfoString DTPlatformName : iphoneos ;
-				C._BundleInfoString DTSDKName : iphoneos$(IPHONEOS_SDK_VERSION) ;
-				C._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
-				C._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
-
-			case iphonesimulator :
-				C._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C._BundleInfoIntegerArray UIDeviceFamily : 1 ;
-				C._BundleInfoString DTPlatformName : iphonesimulator ;
-				C._BundleInfoString DTSDKName : iphonesimulator$(IPHONEOS_SDK_VERSION) ;
-				C._BundleInfoArray CFBundleSupportedPlatforms : iPhoneSimulator ;
-				C._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
-
-			case ipad :
-				C._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C._BundleInfoIntegerArray UIDeviceFamily : 2 ;
-				C._BundleInfoString DTPlatformName : iphoneos ;
-				C._BundleInfoString DTSDKName : iphoneos$(IPHONEOS_SDK_VERSION) ;
-				C._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
-				C._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
-
-			case ipadsimulator :
-				C._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C._BundleInfoIntegerArray UIDeviceFamily : 2 ;
-				C._BundleInfoString DTPlatformName : iphonesimulator ;
-				C._BundleInfoString DTSDKName : iphonesimulator$(IPHONEOS_SDK_VERSION) ;
-				C._BundleInfoArray CFBundleSupportedPlatforms : iPhoneSimulator ;
-				C._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
 		}
 	}
 
@@ -483,78 +185,15 @@ rule C.BundleInfo TARGET : TYPE : VALUE {
 		case uiprerenderedicon :	C._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
 		case uistatusbarhidden :	C._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
 		case uiviewcontrollerbasedstatusbarappearance : C._BundleInfoBoolean UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
-		case uiinterfaceorientation :	
-			if $(VALUE) = portrait {
-				C._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationPortrait ;
-			}
-			if $(VALUE) = portraitupsidedown {
-				C._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationPortraitUpsideDown ;
-			}
-			if $(VALUE) = landscapeleft {
-				C._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationLandscapeLeft ;
-			}
-			if $(VALUE) = landscaperight {
-				C._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationLandscapeRight ;
-			}
-		case uisupportedinterfaceorientations :
-			local values = ;
-			if portrait in $(VALUE) {
-				values += UIInterfaceOrientationPortrait ;
-			}
-			if portraitupsidedown in $(VALUE) {
-				values += UIInterfaceOrientationPortraitUpsideDown ;
-			}
-			if landscapeleft in $(VALUE) {
-				values += UIInterfaceOrientationLandscapeLeft ;
-			}
-			if landscaperight in $(VALUE) {
-				values += UIInterfaceOrientationLandscapeRight ;
-			}
-			C._BundleInfoArray UISupportedInterfaceOrientations : $(values) ;
 	}
 }
 
 
-actions C._GenerateDSYMFile {
-	@($(COMPILER_BIN_PATH)/dsymutil:C) $(2:C) -o $(OUTPUT_PATH:C)
-}
-
-
-rule C.GenerateDSYMFile TARGET {
-	TARGET = [ ActiveTarget $(TARGET) ] ;
-	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-	local dsymBundlePath = $(bundlePath).dSYM ;
-	local _t.dsym = $(_t).DSYM ;
-	DSYM_NAME on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_t.dsym) ;
-	BINDING on $(_t.dsym) = $(BINDING:Z=$(_t)) ;
-	OUTPUT_PATH on $(_t.dsym) = $(dsymBundlePath) ;
-	MakeLocate $(_t.dsym) : $(dsymBundlePath)/Contents/Resources/DWARF ;
-	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t.dsym) : $(_t) ;
-	CleanTree $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(dsymBundlePath) ;
-	C._GenerateDSYMFile $(_t.dsym) : $(_t) : $(C.COMPILER_SUITE_SYMBOL) ;
-}
-
-
-actions CpResource
-{
-	ditto $(2) $(1:D)
-}
-
-C.__DOLLAR = \\$ ;
-
-actions ProcessEntitlements
-{
-	plutil -convert xml1 -o $(1) $(2)
-	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" -e "s/<key>keychain-access-groups/$(GET_TASK_ALLOW:E="")<key>keychain-access-groups/g" $(1)
-}
-	#plutil -convert binary1 $(1)
-
 rule C.macosx._ApplicationFromObjects_PostBuild {
 	if bundle in $(OPTIONS) {
 		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		if $(C.PLATFORM) in macosx32 macosx64 {
-			bundlePath = $(bundlePath)/Contents ;
-		}
+		bundlePath = $(bundlePath)/Contents ;
+
 		local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -626,52 +265,6 @@ rule C.macosx._ApplicationFromObjects_PostBuild {
 			Depends $(bundleTarget) : $(infoplist) ;
 			Clean $(cleanBundleTarget) : $(infoplist) ;
 		}
-
-		if $(C.PLATFORM) in ipad iphone  &&  ! $(NT) {
-			# Copy ResourceRules.plist.
-			local sourceResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
-			SEARCH on $(sourceResourceRulesPlist) = $(isysroot) ;
-			local destResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-			MakeLocate $(destResourceRulesPlist) : $(bundlePath) ;
-
-			Depends $(bundleTarget) : $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;	
-			Clean $(cleanBundleTarget) : $(destResourceRulesPlist) ;
-			CpResource $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;
-
-			# Create Entitlements.plist.
-			local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
-			SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
-			local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-			MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
-			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destEntitlementsPlist) ;
-			Depends $(bundleTarget) : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
-			local getTaskAllow = "<key>get-task-allow<\\/key><$(getTaskAllowValue)\\/>" ;
-			GET_TASK_ALLOW on $(destEntitlementsPlist) = $(getTaskAllow) ;
-			on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) $(getTaskAllow) ;
-			Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
-			ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
-		}
-
-		if $(C.PLATFORM) in ipad ipadsimulator iphone iphonesimulator {
-			local provisionFilename = $(PROVISION_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-			local embedded.mobileprovision = @(embedded.mobileprovision:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-			MakeLocate $(embedded.mobileprovision) : $(bundlePath) ;
-
-			# Copy provision into the bundle and name it embedded.mobileprovision
-			Depends $(bundleTarget) : $(embedded.mobileprovision) ;
-			CopyFile $(TARGET) : $(embedded.mobileprovision) : $(provisionFilename) ;
-
-			# Without this, if we change between profiles, the copy will not always
-			# work due to destination time stamp being newer than source (despite
-			# coming from a different file).
-			UseCommandLine $(embedded.mobileprovision) : $(provisionFilename) ;
-		}
-	}
-	
-	if $(C.PLATFORM) in ipad ipadsimulator iphone iphonesimulator {
-		if ! $(NT) {
-			C.GenerateDSYMFile $(TARGET) ;
-		}
 	}
 }
 
@@ -701,44 +294,16 @@ rule C.macosx._MultiCppCompile_SetupFlags {
 	architecture ?= $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
 	local extraflags ;
-	if $(IOSBUILDENV_PATH) {
-		architecture ?= armv7 ;
-		extraflags = -target $(architecture)-apple-ios$(sdkversion) ;
-		if $(isysroot) {
-			extraflags += --sysroot $(isysroot:C) ;
-		}
-		local noPeriodVersion = [ Subst $(minimumsdkversion) : %. : "" ] ;
-		extraflags += -miphoneos-version-min=$(minimumsdkversion).0 ;
-		extraflags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=$(noPeriodVersion)000 ;
-		extraflags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;    #"
-	} else {
-		extraflags += "-isysroot $(isysroot:C)" ;
-		extraflags += "-arch $(architecture)" ;
-		switch $(C.PLATFORM) {
-			case macosx32 :
-				# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
-				extraflags += -mmacosx-version-min=$(minimumsdkversion) ;
+	extraflags += "-isysroot $(isysroot:C)" ;
+	extraflags += "-arch $(architecture)" ;
+	switch $(C.PLATFORM) {
+		case macosx32 :
+			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
+			extraflags += -mmacosx-version-min=$(minimumsdkversion) ;
 
-			case macosx64 :
-				# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
-				extraflags += -mmacosx-version-min=$(minimumsdkversion) ;
-
-			case iphone :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				extraflags += -miphoneos-version-min=$(minimumsdkversion) ;
-
-			case iphonesimulator :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				extraflags += -mios-simulator-version-min=$(minimumsdkversion) ;
-
-			case ipadsimulator :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				extraflags += -mios-simulator-version-min=$(minimumsdkversion) ;
-
-			case ipad :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				extraflags += -miphoneos-version-min=$(minimumsdkversion) ;
-		}
+		case macosx64 :
+			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
+			extraflags += -mmacosx-version-min=$(minimumsdkversion) ;
 	}
 
 	_flags = $(_flags[1-4]) $(extraflags) $(_flags[5-]) ;
@@ -748,7 +313,7 @@ rule C.macosx._MultiCppCompile_SetupFlags {
 
 
 rule C.macosx._ApplicationFromObjects_LinkFlags {
-	linkRule = C.clang-apple.Link ;
+	linkRule = C.macosx.clang.Link ;
 
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
@@ -756,46 +321,16 @@ rule C.macosx._ApplicationFromObjects_LinkFlags {
 	local architecture = $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	architecture ?= $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-	local sdkversion = $(IPHONEOS_SDK_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-	sdkversion ?= $(IPHONEOS_SDK_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+	linkFlags += "-isysroot $(isysroot:C)" ;
+	linkFlags += "-arch $(architecture)" ;
+	switch $(C.PLATFORM) {
+		case macosx32 :
+			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
+			linkFlags += -mmacosx-version-min=$(minimumsdkversion) ;
 
-	local minimumsdkversion = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-	minimumsdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-
-	if $(IOSBUILDENV_PATH) {
-		linkFlags += "-syslibroot $(isysroot:C)" ;
-		linkFlags += -ios_version_min $(minimumsdkversion) ;
-		linkFlags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;
-		linkFlags += -lSystem -lcrt1.o -lstdc++ ;
-		#linkFlags += -lSystem -lbundle1.o -lstdc++ ;
-	} else {
-		linkFlags += "-isysroot $(isysroot:C)" ;
-		linkFlags += "-arch $(architecture)" ;
-		switch $(C.PLATFORM) {
-			case macosx32 :
-				# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
-				linkFlags += -mmacosx-version-min=$(minimumsdkversion) ;
-
-			case macosx64 :
-				# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
-				linkFlags += -mmacosx-version-min=$(minimumsdkversion) ;
-
-			case iphone :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				linkFlags += -miphoneos-version-min=$(minimumsdkversion) ;
-
-			case iphonesimulator :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				linkFlags += -mios-simulator-version-min=$(minimumsdkversion) ;
-
-			case ipadsimulator :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				linkFlags += -mios-simulator-version-min=$(minimumsdkversion) ;
-
-			case ipad :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				linkFlags += -miphoneos-version-min=$(minimumsdkversion) ;
-		}
+		case macosx64 :
+			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
+			linkFlags += -mmacosx-version-min=$(minimumsdkversion) ;
 	}
 
 	linkFlags += "-framework $(FRAMEWORKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))" ;
@@ -805,11 +340,7 @@ rule C.macosx._ApplicationFromObjects_LinkFlags {
 		local bundlePath = $(outputPath)/$(outputName).app ;
 		BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
 
-		if $(C.PLATFORM) in macosx32 macosx64 {
-			MakeLocate $(_linkTargets) : $(bundlePath)/Contents/MacOS ;
-		} else {
-			MakeLocate $(_linkTargets) : $(bundlePath) ;
-		}
+		MakeLocate $(_linkTargets) : $(bundlePath)/Contents/MacOS ;
 
 		local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
 		local colon = ":" ;
@@ -826,9 +357,8 @@ rule C.macosx._ApplicationFromObjects_LinkFlags {
 
 
 rule C.macosx._LibraryFromObjects_LibFlags {
-	archiveRule = C.clang-apple.Archive ;
+	archiveRule = C.macosx.clang.Archive ;
 
-	C._LibraryFromObjects_LibFlags on $(C.COMPILER_SUITE_SYMBOL) += C.macosx._LibraryFromObjects_LibFlags ;
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 	if $(isysroot) {
@@ -838,7 +368,7 @@ rule C.macosx._LibraryFromObjects_LibFlags {
 
 
 rule C.macosx._SharedLibraryFromObjects_LinkFlags {
-	linkRule = C.clang-apple.Link ;
+	linkRule = C.macosx.clang.Link ;
 
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
@@ -846,14 +376,8 @@ rule C.macosx._SharedLibraryFromObjects_LinkFlags {
 	local architecture = $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	architecture ?= $(C.ARCHITECTURE:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-	if $(IOSBUILDENV_PATH) {
-		linkFlags += "-syslibroot $(isysroot:C)" ;
-		linkFlags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;
-		linkFlags += -lSystem -lcrt1.o -lstdc++ ;
-	} else {
-		linkFlags += "-isysroot $(isysroot:C)" ;
-		linkFlags += "-arch $(architecture)" ;
-	}
+	linkFlags += "-isysroot $(isysroot:C)" ;
+	linkFlags += "-arch $(architecture)" ;
 
 	if module in $(OPTIONS) {
 		linkFlags += -bundle -undefined dynamic_lookup -fPIC ;
@@ -887,10 +411,6 @@ rule C.SetTaskAllow TARGET : VALUE {
 
 if $(TARGETINFO_LOCATE) {
 
-rule XIB {
-
-}
-
 rule C.SetTaskAllow {
 }
 
@@ -902,369 +422,9 @@ rule C.CodeSign TARGET : PROVISIONING_PROFILE {
 
 
 rule C._ApplicationTargetInfo {
-	if $(C.PLATFORM) in ipad iphone  &&  ! $(NT) {
-		local isysroot $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-		
-		# Create Entitlements.plist.
-		local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
-		SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
-		local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-		MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
-		Depends all : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
-		on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) ;
-		ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
-
-		Contents += "Projects[ [[$(TARGET)]] ].XCODE_ENTITLEMENTS[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(destEntitlementsPlist:T)]]
-
-" ;
-	}
 }
 
 } else {
-
-rule XIB PARENT : SOURCES  {
-	PARENT = [ ActiveTarget $(PARENT) ] ;
-	
-	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-	if ! $(bundlePath)
-	{
-		Echo *** XIB $(PARENT) \: $(SOURCES) ;
-		Exit *** Bundle path not setup for target $(TARGET) ;
-	}
-
-
-	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
-	
-	local targets = $(SOURCES:S=.nib) ;
-	
-	MakeLocate $(targets) : $(bundlePath) ;
-	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(targets) ;	
-	
-	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(targets) ;
-
-	local source ;
-	for source in $(SOURCES) {
-		local target = $(source:S=.nib) ;
-		Depends $(target) : $(source) ;
-	
-		CompileXIB $(target) : $(source) : $(C.COMPILER_SUITE_SYMBOL) ;
-	}
-}
-
-
-	#/Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile $(1:C) $(2:C)
-actions CompileXIB
-{
-	PATH=$(MACOSX_SDK_DEVELOPER_ROOT)/usr/bin:$PATH
-	/Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile $(1:C) $(2:C)
-}
-
-
-rule C.ProvisionFile TARGET : FILENAME {
-	TARGET = [ C.ActiveTarget $(TARGET) ] ;
-
-	# See if provided provision is a filename that exists.
-	local _provisionDir = $(FILENAME:P/) ;
-	local _provisionFilename = $(FILENAME:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-
-	SEARCH on $(_provisionFilename) = $(_provisionDir) ;
-
-	PROVISION_FILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_provisionFilename) ;
-}
-
-
-rule C.Provision TARGET : PROFILE_ID {
-	TARGET = [ ActiveTarget $(TARGET) ] ;
-	local _matchingProvision ;
-
-	# See if provided provision is a filename that exists.
-	local _profileDir = $(PROFILE_ID:P/) ;
-	local _profileFilename = $(PROFILE_ID:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-	
-	if $(_profileDir) && $(_profileDir) != "" && $(_profileFilename) && $(_profileFilename) != ""
-	{
-		SEARCH on $(_profileFilename) = $(_profileDir) ;
-		if $(_profileFilename:TC/) != $(PROFILE_ID:BSTC/)
-		{
-			_matchingProvision = $(_profileFilename) ;
-		}
-	}
-
-	if ! $(_matchingProvision)
-	{
-		# Find profile from GUID.
-		local _profileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
-
-		# Open each profile and search for : "<string>$(PROFILE_ID)</string>"
-		local _mobileProvisions = [ Glob $(_profileDirectory) : *.mobileprovision ] ;
-
-		local _mobileProvision ;
-		for _mobileProvision in $(_mobileProvisions) {
-			local _cmd = "cat \"$(_mobileProvision)\" | grep \"<string>$(PROFILE_ID)</string>\"" ;
-			local result = [ Shell $(_cmd) ] ;
-			if $(result) != "" {
-				_matchingProvision = $(_mobileProvision) ;
-				break ;
-			}
-		}
-	}
-
-	if ! $(_matchingProvision) {
-		Exit *** No mobile provisions found that match PROFILE_ID \: $(PROFILE_ID) ;
-	}
-
-	# Get bundle path.
-	local _bundlePath ;
-	local _bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-	local _bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-
-	if ! $(_bundlePath) {
-		Echo *** C.Provision $(TARGET) \: $(PROFILE_ID) ;
-		Exit *** Bundle path not setup for target $(TARGET) ;
-	}
-	if ! $(_bundleTarget) {
-		Echo *** C.Provision $(TARGET) \: $(PROFILE_ID) ;
-		Exit *** Bundle target not setup for target $(TARGET) ;
-	}
-
-	local _dstProvision = [ C.GristFiles : embedded.mobileprovision ] ;
-	MakeLocate $(_dstProvision) : $(_bundlePath) ;
-
-	# Copy provision into the bundle and name it embedded.mobileprovision
-	IncludeModule copyfile ;
-	CopyFile $(TARGET) : $(_dstProvision) : $(_matchingProvision) ;
-	Depends $(_bundleTarget) : $(_dstProvision) ;
-
-	# Without this, if we change between profiles, the copy will not always
-	# work due to destination time stamp being newer than source (despite
-	# coming from a different file).
-	UseCommandLine $(_dstProvision) : $(_matchingProvision) ;
-}
-
-
-if $(NT) {
-
-    #"$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S:: -E"" $(LINK_TARGET:CT)
-actions C._CodeSign
-{
-    "$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S$(CERTIFICATE_CHAIN) -E"" $(1:C)
-}
-
-} else {
-
-actions C._CodeSign
-{
-	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
-	/usr/bin/codesign --force --sign "$(PROVISIONING_PROFILE)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
-	touch $(1:C)
-	touch $(DSYM_NAME:CT)
-}
-
-}
-
-
-rule C.CodeSign TARGET : PROVISIONING_PROFILE : CERTIFICATE_CHAIN {
-	ActiveTarget $(TARGET) ;
-
-	if $(C.PLATFORM) in ipad iphone {
-		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local linkTarget = $(LINK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-
-		local dependsList = [ DependsList $(bundleTarget) ] $(linkTarget) ;
-
-		local codeResources = @(CodeResources:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-		MakeLocate $(codeResources) : $(bundlePath)/_CodeSignature ;
-
-		if $(IOSBUILDENV_PATH) {
-			local resourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-			MakeLocate $(resourceRulesPlist) : $(bundlePath) ;
-
-			UseCommandLine $(codeResources) $(resourceRulesPlist) : $(dependsList) ;
-			Depends $(bundleTarget) : $(codeResources) $(resourceRulesPlist) : $(dependsList) ;
-			Clean $(cleanBundleTarget) : $(codeResources) $(resourceRulesPlist) ;
-
-			if $(CERTIFICATE_CHAIN) {
-				CERTIFICATE_CHAIN on $(linkTarget) = $(CERTIFICATE_CHAIN) ;
-			} else {
-				CERTIFICATE_CHAIN on $(linkTarget) = "::" ;
-			}
-			C._CodeSign $(linkTarget) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
-		} else {
-			local codeResourcesSymbolicLink = [ C.GristFiles : CodeResourcesLink ] ;
-			BINDING on $(codeResourcesSymbolicLink) = CodeResources ;
-			MakeLocate $(codeResourcesSymbolicLink) : $(bundlePath) ;
-
-			BUNDLE_PATH on $(codeResources) = $(bundlePath) ;
-			LINK_TARGET on $(codeResources) = $(linkTarget) ;
-			ENTITLEMENTS on $(codeResources) = $(entitlements) ;
-			PROVISIONING_PROFILE on $(codeResources) = $(PROVISIONING_PROFILE) ;
-
-			DSYM_NAME on $(codeResources) = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-			C._CodeSign $(codeResources) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
-
-			UseCommandLine $(codeResources) : $(dependsList) ;
-			Depends $(bundleTarget) : $(codeResources) : $(dependsList) ;
-			Clean $(cleanBundleTarget) : $(codeResources) $(codeResourcesSymbolicLink) ;
-		}
-	}
-}
-
-
-rule C.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL : ITUNES_ARTWORK {
-	# Set up the archive support.
-	if $(C.PLATFORM) in ipad iphone {
-		TARGET = [ ActiveTarget $(TARGET) ] ;
-
-		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local linkTarget = $(LINK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-
-		local archiveTarget = archive:$(TARGET) ;
-		NotFile $(archiveTarget) ;
-
-		local ipaTarget = @($(bundlePath:D=:S=).ipa:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-		OUTPUT_PATH ?= $(LOCATE_TARGET) ;
-		MakeLocate $(ipaTarget) : $(OUTPUT_PATH) ;
-
-		if $(ITUNES_ARTWORK) {
-			Depends $(archiveTarget) : $(ipaTarget) : $(ITUNES_ARTWORK) ;
-		}
-		Depends $(archiveTarget) : $(ipaTarget) : $(TARGET:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
-		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(ipaTarget) ;
-		BUNDLE_PATH on $(ipaTarget) = $(bundlePath) ;
-		PROVISIONING_PROFILE on $(ipaTarget) = $(PROVISIONING_PROFILE) ;
-		ITUNES_ARTWORK on $(ipaTarget) = $(ITUNES_ARTWORK) ;
-		C._BundleArchive $(ipaTarget) : $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
-
-		if $(URL) {
-			# Stolen from BetaBuilder:
-
-			# Write manifest.plist.
-			local manifest.plist = @(manifest.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):archive) ;
-			MakeLocate $(manifest.plist) : $(OUTPUT_PATH) ;
-			Depends $(archiveTarget) : $(manifest.plist) ;
-			Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(manifest.plist) ;
-			local contents ;
-			on $(C.ACTIVE_TOOLCHAIN_TARGET) contents =
-"<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-	<key>items</key>
-	<array>
-		<dict>
-			<key>assets</key>
-			<array>
-				<dict>
-					<key>kind</key>
-					<string>software-package</string>
-					<key>url</key>
-					<string>$(URL)/$(ipaTarget:D=:G=)</string>
-				</dict>
-			</array>
-			<key>metadata</key>
-			<dict>
-				<key>bundle-identifier</key>
-				<string>$(CFBundleIdentifier)</string>
-				<key>bundle-version</key>
-				<string>$(CFBundleVersion)</string>
-				<key>kind</key>
-				<string>software</string>
-				<key>title</key>
-				<string>$(CFBundleDisplayName)</string>
-			</dict>
-		</dict>
-	</array>
-</dict>
-</plist>
-" ;
-			CONTENTS on $(manifest.plist) = $(contents) ;
-			WriteFile $(manifest.plist) ;
-			UseCommandLine $(manifest.plist) : $(contents) ;
-
-			local index.html = @(index.html:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):archive) ;
-			MakeLocate $(index.html) : $(OUTPUT_PATH) ;
-			Depends $(archiveTarget) : $(index.html) ;
-			Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(index.html) ;
-			local contents ;
-			on $(C.ACTIVE_TOOLCHAIN_TARGET) contents = "
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-<title>$(CFBundleDisplayName)</title>
-<style type="text/css">
-body {background:#fff;margin:0;padding:0;font-family:arial,helvetica,sans-serif;text-align:center;padding:10px;color:#333;font-size:16px;}
-#container {width:300px;margin:0 auto;}
-h1 {margin:0;padding:0;font-size:14px;}
-p {font-size:13px;}
-.link {background:#ecf5ff;border-top:1px solid #fff;border:1px solid #dfebf8;margin-top:.5em;padding:.3em;}
-.link a {text-decoration:none;font-size:15px;display:block;color:#069;}
-
-</style>
-</head>
-<body>
-
-<div id="container">
-
-<h1>iOS 4.0+ Users:</h1>
-
-<div class="link"><a href="itms-services://?action=download-manifest&url=$(URL)/manifest.plist">Tap Here to Install<br />$(CFBundleDisplayName)<br />On Your Device</a></div>
-
-<p><strong>Link didn't work?</strong><br />
-Make sure you're visiting this page on your device, not your computer.</p>
-
-</div>
-
-</body>
-</html>
-" ;
-			CONTENTS on $(index.html) = $(contents) ;
-			WriteFile $(index.html) ;
-			UseCommandLine $(index.html) : $(contents) ;
-
-		}
-	}
-}
-
-
-if $(NT) {
-
-actions lua C._BundleArchive
-{
-	local ospath = require 'ospath'
-	local filefind = require 'filefind'
-	local filelist = {}
-	local bundlePath = ospath.remove_slash([[$(BUNDLE_PATH)]])
-	local bundleName = ospath.get_filename(bundlePath)
-	for entry in filefind.glob(bundlePath .. '/**') do
-		filelist[#filelist + 1] = {
-			EntryName = 'Payload/' .. bundleName .. '/' .. entry.filename:sub(#bundlePath + 2),
-			SourcePath = entry.filename,
-		}
-	end
-	filelist[#filelist + 1] = { EntryName = 'iTunesArtwork', SourcePath = [[$(ITUNES_ARTWORK:T)]] }
-
-	local ziparchive = require 'ziparchive'
-	local archive = ziparchive.open([[$(1)]], 'a')
-	archive:processfilelist(filelist)
-	archive:close()
-}
-
-} else {
-
-actions C._BundleArchive
-{
-	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
-	/usr/bin/xcrun -sdk iphoneos PackageApplication -v "$(BUNDLE_PATH)" -o "$(1)" --sign "$(PROVISIONING_PROFILE)" --embed "$(BUNDLE_PATH)/embedded.mobileprovision"
-}
-
-}
-
 
 } # TARGETINFO_LOCATE
 
