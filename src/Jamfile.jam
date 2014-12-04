@@ -338,13 +338,28 @@ if $(LUA_BIN)
 	if $(OS) = NT
 	{
 		LUA_SRCS =
+				lua/copas.lua
+				lua/coxpcall.lua
 				lua/expand.lua
 				lua/getopt.lua
 				lua/lanes.lua
 				lua/ospath.lua
 				lua/osprocess.lua
+				lua/socket.lua
+				lua/ssl.lua
+				lua/xavante.lua
 				lua/xmlize.lua
+				lua/socket/http.lua
+				lua/socket/url.lua
 				lua/lxp/lom.lua
+				lua/xavante/encoding.lua
+				lua/xavante/filehandler.lua
+				lua/xavante/httpd.lua
+				lua/xavante/mime.lua
+				lua/xavante/patternhandler.lua
+				lua/xavante/redirecthandler.lua
+				lua/xavante/urlhandler.lua
+				lua/xavante/vhostshandler.lua
 		;
 
 		if $(CONFIG) = debug
@@ -355,11 +370,14 @@ if $(LUA_BIN)
 				lua-tilde.debug.dll
 				modules/filefind.debug.dll
 				modules/lanes/core.debug.dll
+				modules/socket/core.debug.dll
+				modules/lfs.debug.dll
 				modules/lxp.debug.dll
 				modules/md5.debug.dll
 				modules/ospath.debug.dll
 				modules/osprocess.debug.dll
 				modules/prettydump.debug.dll
+				modules/ssl.debug.dll
 				modules/struct.debug.dll
 				modules/uuid.debug.dll
 				modules/ziparchive.debug.dll
@@ -371,13 +389,16 @@ if $(LUA_BIN)
 				lua.exe
 				lua52.dll
 				lua-tilde.dll
+				modules/socket/core.dll
 				modules/filefind.dll
 				modules/lanes/core.dll
+				modules/lfs.dll
 				modules/lxp.dll
 				modules/md5.dll
 				modules/ospath.dll
 				modules/osprocess.dll
 				modules/prettydump.dll
+				modules/ssl.dll
 				modules/struct.dll
 				modules/uuid.dll
 				modules/ziparchive.dll
@@ -394,13 +415,28 @@ if $(LUA_BIN)
 		}
 
 		LUA_SRCS =
+				share/lua/5.2/copas.lua
+				share/lua/5.2/coxpcall.lua
 				share/lua/5.2/expand.lua
 				share/lua/5.2/getopt.lua
 				share/lua/5.2/lanes.lua
 				share/lua/5.2/ospath.lua
 				share/lua/5.2/osprocess.lua
+				share/lua/5.2/socket.lua
+				share/lua/5.2/ssl.lua
+				share/lua/5.2/xavante.lua
 				share/lua/5.2/xmlize.lua
+				share/lua/5.2/socket/http.lua
+				share/lua/5.2/socket/url.lua
 				share/lua/5.2/lxp/lom.lua
+				share/lua/5.2/xavante/encoding.lua
+				share/lua/5.2/xavante/filehandler.lua
+				share/lua/5.2/xavante/httpd.lua
+				share/lua/5.2/xavante/mime.lua
+				share/lua/5.2/xavante/patternhandler.lua
+				share/lua/5.2/xavante/redirecthandler.lua
+				share/lua/5.2/xavante/urlhandler.lua
+				share/lua/5.2/xavante/vhostshandler.lua
 		;
 
 		if $(CONFIG) = debug
@@ -410,12 +446,15 @@ if $(LUA_BIN)
 				liblua52_debug.so
 				lib/lua/5.2/filefind.debug.$(MODULE_EXT)
 				lib/lua/5.2/lanes/core.debug.$(MODULE_EXT)
+				lib/lua/5.2/socket/core.debug.$(MODULE_EXT)
+				lib/lua/5.2/lfs.debug.$(MODULE_EXT)
 				lib/lua/5.2/lxp.debug.$(MODULE_EXT)
 				lib/lua/5.2/md5.debug.$(MODULE_EXT)
 				lib/lua/5.2/ospath.debug.$(MODULE_EXT)
 				lib/lua/5.2/osprocess.debug.$(MODULE_EXT)
-				lib/lua/5.2/struct.debug.$(MODULE_EXT)
 				lib/lua/5.2/prettydump.debug.$(MODULE_EXT)
+				lib/lua/5.2/ssl.debug.$(MODULE_EXT)
+				lib/lua/5.2/struct.debug.$(MODULE_EXT)
 				lib/lua/5.2/uuid.debug.$(MODULE_EXT)
 				lib/lua/5.2/ziparchive.debug.$(MODULE_EXT)
 			;
@@ -427,11 +466,14 @@ if $(LUA_BIN)
 				liblua52.so
 				lib/lua/5.2/filefind.$(MODULE_EXT)
 				lib/lua/5.2/lanes/core.$(MODULE_EXT)
+				lib/lua/5.2/socket/core.$(MODULE_EXT)
+				lib/lua/5.2/lfs.$(MODULE_EXT)
 				lib/lua/5.2/lxp.$(MODULE_EXT)
 				lib/lua/5.2/md5.$(MODULE_EXT)
 				lib/lua/5.2/ospath.$(MODULE_EXT)
 				lib/lua/5.2/osprocess.$(MODULE_EXT)
 				lib/lua/5.2/prettydump.$(MODULE_EXT)
+				lib/lua/5.2/ssl.$(MODULE_EXT)
 				lib/lua/5.2/struct.$(MODULE_EXT)
 				lib/lua/5.2/uuid.$(MODULE_EXT)
 				lib/lua/5.2/ziparchive.$(MODULE_EXT)
