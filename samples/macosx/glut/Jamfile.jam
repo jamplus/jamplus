@@ -2,6 +2,6 @@ SubDir TOP ;
 
 ActiveProject glut ;
 
-C.LinkFrameworks glut : GLUT OpenGL ;
+C.macosx.LinkFrameworks glut : GLUT OpenGL ;
 
 C.Application glut : main.c ;
