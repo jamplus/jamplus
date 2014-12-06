@@ -80,7 +80,7 @@ rule C.OpenSSL TARGET : OPTIONS {
 		C.Defines $(TARGET) : USE_SSLEAY ;
 
 		if link in $(OPTIONS) {
-			C.LinkPrebuiltLibraries $(TARGET) : crypto ;
+			C.LinkPrebuiltLibraries $(TARGET) : crypto ssl ;
 		}
 	}
 
