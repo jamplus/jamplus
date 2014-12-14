@@ -1,0 +1,10 @@
+C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+C.ToolchainHelper linux-gcc Global_RELEASE ;
+
+C.Defines * : _FINAL ;
+C.Flags * : CC	: -g -O3 -fomit-frame-pointer -fstrength-reduce -m32 ;
+C.Flags * : C++	: -g -O3 -fomit-frame-pointer -fstrength-reduce -m32 ;
+C.Flags * : M	: -g -O3 -fomit-frame-pointer -fstrength-reduce -m32 ;
+C.Flags * : MM	: -g -O3 -fomit-frame-pointer -fstrength-reduce -m32 ;
+C.LinkFlags * : -m32 ;
+
