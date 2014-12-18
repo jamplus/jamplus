@@ -56,7 +56,11 @@ rule C.ActiveTarget TARGET {
 }
 
 rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC {
-	TOOLCHAIN_SPEC ?= $(C.ACTIVE_TOOLCHAIN_GRIST) ;
+	if $(TOOLCHAIN_SPEC) {
+		TOOLCHAIN_SPEC = c/$(TOOLCHAIN_SPEC) ;
+	} else {
+		TOOLCHAIN_SPEC = $(C.ACTIVE_TOOLCHAIN_GRIST) ;
+	}
 	local toolChainTarget = $(TARGET:G=$(TOOLCHAIN_SPEC)) ;
 	return $(LINKTARGETS:Z=$(toolChainTarget)) ;
 }
@@ -671,7 +675,7 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 		$(theRule) ;
 	}
 
-	LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(linkTargets) ;
+	LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
 
 	return $(_linkTargets) ;
 }
