@@ -670,12 +670,12 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 	UseFileCache $(_linkTargets) : code ;
 	$(linkRule) $(_linkTargets) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
 
+	LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
+
 	local theRule ;
 	for theRule in $(C._ApplicationFromObjects_PostBuild:Z=$(C.COMPILER_SUITE_SYMBOL)) {
 		$(theRule) ;
 	}
-
-	LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
 
 	return $(_linkTargets) ;
 }
@@ -1632,6 +1632,7 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 	local activeToolchainSpec = $(TOOLCHAIN_SPEC_VALUES) $(TOOLCHAIN_SPEC_OPTIONS) ;
 	C.ACTIVE_TOOLCHAIN_SPEC_PATH = [ Subst $(activeToolchainSpec:J=-) : "=" : "___" ] ;
 	activeToolchainSpec = $(TOOLCHAIN_SPEC_VALUES:J=/) $(TOOLCHAIN_SPEC_OPTIONS) ;
+	C.ACTIVE_TOOLCHAIN = $(activeToolchainSpec:J=@) ;
 	C.ACTIVE_TOOLCHAIN_SPEC = $(activeToolchainSpec:J=@) ;
 	C.ACTIVE_TOOLCHAIN_GRIST = c/$(activeToolchainSpec:J=@) ;
 	C.ACTIVE_TOOLCHAIN_SPEC_VALUES = $(TOOLCHAIN_SPEC_VALUES) ;
