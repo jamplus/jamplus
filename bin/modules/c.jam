@@ -1544,17 +1544,14 @@ rule C.ToolchainSpecKeys TOOLCHAIN_SPEC_KEYS {
 		local keyValue ;
 		for keyValue in $(TOOLCHAIN_SPEC_OPTIONS) {
 			local info = [ Split $(keyValue) : "=" ] ;
-			local found ;
 			for newKeyValue in $(newOptionsList) {
 				local newInfo = [ Split $(newKeyValue) : "=" ] ;
 				if $(info[1]) = $(newInfo[1]) {
-					found = true ;
+					newOptionsList -= $(newKeyValue) ;
 					break ;
 				}
 			}
-			if ! $(found) {
-				newOptionsList += $(keyValue) ;
-			}
+			newOptionsList += $(keyValue) ;
 		}
 
 		# Add C.COMPILER=thecompiler to the newOptionsList.
@@ -1596,21 +1593,48 @@ rule C.OverrideToolchainSpec TOOLCHAIN_SPEC_OPTIONS : OPTIONS {
 
 
 rule C.Toolchain TOOLCHAIN_SPEC {
-	local TOOLCHAIN = [ Split $(TOOLCHAIN_SPEC) : "@" ] ;
-	local TOOLCHAIN_SPEC_OPTIONS = $(TOOLCHAIN[2-]) ;
-	TOOLCHAIN = $(TOOLCHAIN[1]) ;
-	TOOLCHAIN = [ Split $(TOOLCHAIN) : / ] ;
-
+	# Null out any existing toolchain spec options.
 	local keyValue ;
 	for keyValue in $(TOOLCHAIN_SPEC_OPTIONS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
 		local info = [ Split $(keyValue) : "=" ] ;
 		$(info[1]) = ;
 	}
 
-	local activeToolchainSpec = $(TOOLCHAIN) $(TOOLCHAIN_SPEC_OPTIONS) ;
-	C.ACTIVE_TOOLCHAIN_GRIST = c/$(TOOLCHAIN_SPEC) ;
+	local TOOLCHAIN_SPEC_VALUES = [ Split $(TOOLCHAIN_SPEC) : "@" ] ;
+	local TOOLCHAIN_SPEC_OPTIONS ;
+	local test = [ Split $(TOOLCHAIN_SPEC_VALUES[1] : "=" ] ;
+	if $(test[2]) {
+		TOOLCHAIN_SPEC_OPTIONS = $(TOOLCHAIN_SPEC_VALUES) ;
+		TOOLCHAIN_SPEC_VALUES = ;
+	} else {
+		TOOLCHAIN_SPEC_OPTIONS = $(TOOLCHAIN_SPEC_VALUES[2-]) ;
+		TOOLCHAIN_SPEC_VALUES = $(TOOLCHAIN_SPEC_VALUES[1]) ;
+		TOOLCHAIN_SPEC_VALUES = [ Split $(TOOLCHAIN_SPEC_VALUES) : / ] ;
+	}
+
+	# Go through the passed in TOOLCHAIN_SPEC_OPTIONS, and add those to the newSpecOptionsList,
+	# overriding any existing keys of the same name.
+	local newSpecOptionsList ;
+	local keyValue ;
+	for keyValue in $(TOOLCHAIN_SPEC_OPTIONS) {
+		local info = [ Split $(keyValue) : "=" ] ;
+		for newKeyValue in $(newSpecOptionsList) {
+			local newInfo = [ Split $(newKeyValue) : "=" ] ;
+			if $(info[1]) = $(newInfo[1]) {
+				newSpecOptionsList -= $(newKeyValue) ;
+				break ;
+			}
+		}
+		newSpecOptionsList += $(keyValue) ;
+	}
+	TOOLCHAIN_SPEC_OPTIONS = [ ListSort $(newSpecOptionsList) ] ;
+
+	local activeToolchainSpec = $(TOOLCHAIN_SPEC_VALUES) $(TOOLCHAIN_SPEC_OPTIONS) ;
 	C.ACTIVE_TOOLCHAIN_SPEC_PATH = [ Subst $(activeToolchainSpec:J=-) : "=" : "___" ] ;
-	C.ACTIVE_TOOLCHAIN_SPEC_VALUES = $(TOOLCHAIN) ;
+	activeToolchainSpec = $(TOOLCHAIN_SPEC_VALUES:J=/) $(TOOLCHAIN_SPEC_OPTIONS) ;
+	C.ACTIVE_TOOLCHAIN_SPEC = $(activeToolchainSpec:J=@) ;
+	C.ACTIVE_TOOLCHAIN_GRIST = c/$(activeToolchainSpec:J=@) ;
+	C.ACTIVE_TOOLCHAIN_SPEC_VALUES = $(TOOLCHAIN_SPEC_VALUES) ;
 
 	C.ActiveTarget * ;
 
@@ -1625,8 +1649,8 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 	if ! $(INITIALIZED:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
 		INITIALIZED on $(C.ACTIVE_TOOLCHAIN_GRIST) = 1 ;
 
-		local ruleToolchain = [ Subst $(TOOLCHAIN:J=.) : %* : _all_ ] ;
-		if ! [ C.Toolchain.$(ruleToolchain) ] {
+		local ruleToolchain = [ Subst $(TOOLCHAIN_SPEC_VALUES:J=.) : %* : _all_ ] ;
+		if ! [ C.Toolchain.$(ruleToolchain:E=*) ] {
 			if $(C.PLATFORM) != * {
 				Exit "* Requested toolchain [ $(TOOLCHAIN_SPEC) ] was not found!" ;
 			}
@@ -1647,6 +1671,8 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 
 	C.COMPILER_SUITE = $(C.COMPILER_SUITE:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
 	C.COMPILER_SUITE_SYMBOL = $(C.COMPILER_SUITE_SYMBOL:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
+
+	return $(C.ACTIVE_TOOLCHAIN_SPEC) ;
 }
 
 ########################################################################
