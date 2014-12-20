@@ -497,6 +497,7 @@ actions ios.CpResource
 }
 
 C.__DOLLAR = \\$ ;
+C.__COLON = ":" ;
 
 actions ios.ProcessEntitlements
 {
@@ -504,6 +505,23 @@ actions ios.ProcessEntitlements
 	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" -e "s/<key>keychain-access-groups/$(GET_TASK_ALLOW:E="")<key>keychain-access-groups/g" $(1)
 }
 	#plutil -convert binary1 $(1)
+
+actions C.ios._Lipo {
+	$(C.LIPO:C) $(2:C) -output $(1:C) -create
+}
+
+rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	local _t = $(LINK_TARGETS[0]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)$(C.__COLON)lipo) ;
+	BINDING on $(_t) = $(BINDING:Z=$(LINK_TARGETS[0])) ;
+	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t) : $(LINK_TARGETS) ;
+	MakeLocate $(_t) : $(OUTPUT_PATH) ;
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_t) ;
+	C.ios._Lipo $(_t) : $(LINK_TARGETS) : $(C.COMPILER_SUITE_SYMBOL) ;
+	LIPO_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_t) ;
+	return $(linkTargets) ;
+}
+
 
 rule C.ios._ApplicationFromObjects_PostBuild {
 	if bundle in $(OPTIONS) {
