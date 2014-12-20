@@ -273,8 +273,6 @@ rule C.ios.SDK SDK_VERSION {
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
 	XCODE_SDKROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sdkroot) ;
 
-	#flags += -gdwarf-2 ;
-
 	if $(TARGETINFO_LOCATE) {
 		Contents += "Projects[ [[C.*]] ].XCODE_SDKROOT[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(sdkroot)]]
 
