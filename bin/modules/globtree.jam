@@ -1,0 +1,26 @@
+if ! $(TARGETINFO_LOCATE)
+{
+
+rule _GlobTreeRecursiveHelper DIRECTORIES : PATTERNS : PREPEND
+{
+	local files ;
+	for DIRECTORY in $(DIRECTORIES) {		
+		files += [ Glob $(DIRECTORY) : $(PATTERNS) : $(PREPEND) ] ;
+		local dirs = @($(DIRECTORY)/*/:W) ;
+		files += [ _GlobTreeRecursiveHelper $(dirs) : $(PATTERNS) : $(PREPEND) ] ;
+	}
+	return $(files) ;
+}
+
+rule GlobTree DIRECTORIES : PATTERNS : PREPEND
+{
+	return [ _GlobTreeRecursiveHelper $(DIRECTORIES) : $(PATTERNS) : $(PREPEND) ] ;
+}
+
+} else {
+
+rule GlobTree
+{
+}
+
+}
