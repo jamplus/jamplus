@@ -48,22 +48,26 @@ switch $(CSC_COMPILER)
 			local PATHS =
 				"$(Mono_ROOT:J=$(SPACE))"
 			;
-		
-			local PATH_SUFFIXES = "" ;
-		
+
 			if $(NT) {
-				PATH_SUFFIXES +=
-						Mono-2.4
+				if $(monodir) {
+					PATHS += $(monodir) ;
+				}
+
+				local PATH_SUFFIXES =
+							"2.10.9"
+							"3.2.3"
 				;
 
-				local registryRootPath = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Novell Mono 2.4 SdkInstallRoot ] ;
-				PATHS +=
-					"$(ProgramFiles:/J=$(SPACE))/"
-					"$(registryRootPath:/J=$(SPACE))"
-				;
+				for PATH_SUFFIX in $(PATH_SUFFIXES) {
+					local registryRootPath = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE Novell Mono $(PATH_SUFFIX) SdkInstallRoot ] ;
+					PATHS += "$(registryRootPath:/J=$(SPACE))" ;
+					local programFilesPath = $(ProgramFiles:/J=$(SPACE))/Mono-$(PATH_SUFFIX) ;
+					PATHS += "$(programFilesPath:/J=$(SPACE))" ;
+				}
 			}
 
-			local gmcs = [ Glob $(PATHS)$(PATH_SUFFIXES)/bin : gmcs ] ;
+			local gmcs = [ Glob $(PATHS)/bin : gmcs ] ;
 			if ! $(gmcs) {
 				Exit Mono not found. ;
 			}
