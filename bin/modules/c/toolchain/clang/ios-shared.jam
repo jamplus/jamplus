@@ -1056,10 +1056,10 @@ rule C.ios.Provision TARGET : PROFILE_ID {
 
 if $(NT) {
 
-    #"$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S:: -E"" $(LINK_TARGET:CT)
 actions C.ios._CodeSign
 {
     "$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S$(CERTIFICATE_CHAIN) -E"" $(1:C)
+    copy /B $(1:C\\)+,, $(1:C\\) > nul
 }
 
 } else {
