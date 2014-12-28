@@ -294,10 +294,6 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 
 	ALL_SUBDIR_TOKENS = $(SUBDIR_PATH) ;
 
-#	if ! $(ALL_LOCATE_TARGET) {
-#		ALL_LOCATE_TARGET = $(CWD)/.build ;
-#	}
-#
 #	if ! $(DEPCACHE.$(DEPCACHE)) {
 #		DEPCACHE.$(DEPCACHE) = $(ALL_LOCATE_TARGET)/.depcache ;
 #		Clean clean : $(DEPCACHE.$(DEPCACHE)) ;
@@ -445,6 +441,7 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 	# subsequently be redefined.
 
 	local target = /$(TARGET_DIRECTORY) ;
+	ALL_LOCATE_TARGET ?= @(.build:R=$(CWD)) ;
 
 #	local _optionalRoot = $(_top) ;
 	local _optionalRoot ;
