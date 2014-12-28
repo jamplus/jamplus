@@ -621,6 +621,12 @@ int main( int argc, char **argv, char **arg_environ )
 	    getprocesspath(fileName, 4096);
 	    var_set( "JAM_PROCESS_PATH", list_append( L0, fileName, 0 ), VAR_SET );
 	}
+	{
+		char exeName[ 4096 ];
+		getexecutablepath( exeName, 4096 );
+		var_set( "JAM_EXECUTABLE_PATH", list_append( L0, exeName, 0 ), VAR_SET );
+	}
+
 #endif
 
 	/*
