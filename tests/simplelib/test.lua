@@ -36,10 +36,9 @@ function Test()
 		{
 			'app/',
 			'lib-a/',
-			'app/$(TOOLCHAIN_PATH)/',
-			'app/$(TOOLCHAIN_PATH)/app/',
-			'lib-a/$(TOOLCHAIN_PATH)/',
-			'lib-a/$(TOOLCHAIN_PATH)/lib-a/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/app/app/',
+			'$(TOOLCHAIN_PATH)/lib-a/lib-a/',
 		}
 
 		files = {
@@ -47,15 +46,15 @@ function Test()
 			'test.lua',
 			'app/Jamfile.jam',
 			'app/main.c',
-			'app/$(TOOLCHAIN_PATH)/app/app.release.exe',
-			'?app/$(TOOLCHAIN_PATH)/app/app.release.exe.intermediate.manifest',
-			'app/$(TOOLCHAIN_PATH)/app/app.release.pdb',
-			'app/$(TOOLCHAIN_PATH)/app/main.obj',
+			'$(TOOLCHAIN_PATH)/app/app/app.release.exe',
+			'?$(TOOLCHAIN_PATH)/app/app/app.release.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/app/app/app.release.pdb',
+			'$(TOOLCHAIN_PATH)/app/app/main.obj',
 			'lib-a/add.c',
 			'lib-a/add.h',
 			'lib-a/Jamfile.jam',
-			'lib-a/$(TOOLCHAIN_PATH)/lib-a/add.obj',
-			'lib-a/$(TOOLCHAIN_PATH)/lib-a/lib-a.release.lib',
+			'$(TOOLCHAIN_PATH)/lib-a/lib-a/add.obj',
+			'$(TOOLCHAIN_PATH)/lib-a/lib-a/lib-a.release.lib',
 		}
 	
 		patternA = [[

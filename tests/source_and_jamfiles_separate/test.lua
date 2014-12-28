@@ -38,6 +38,7 @@ function Test()
 		files =
 		{
 			'jam/Jamfile.jam',
+			'jam/.build/.depcache',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/createprecomp.obj',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/file.obj',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe',

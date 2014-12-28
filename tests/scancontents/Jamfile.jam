@@ -1,4 +1,4 @@
-if ! $(NO_DEP_CACHE) {
+if ! $(JAM_NO_DEP_CACHE) {
 	DEPCACHE.standard = .jamcache ;
 	DEPCACHE = standard ;
 }

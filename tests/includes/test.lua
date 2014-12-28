@@ -42,10 +42,9 @@ function Test()
 			'common/',
 			'project1/',
 			'shared/',
-			'common/$(TOOLCHAIN_PATH)/',
-			'common/$(TOOLCHAIN_PATH)/common/',
-			'project1/$(TOOLCHAIN_PATH)/',
-			'project1/$(TOOLCHAIN_PATH)/project1/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/common/common/',
+			'$(TOOLCHAIN_PATH)/project1/project1/',
 		}
 
 		local pass1Files =
@@ -55,16 +54,16 @@ function Test()
 			'common/common.jam',
 			'common/print.cpp',
 			'common/print.h',
-			'common/$(TOOLCHAIN_PATH)/common/common.release.lib',
-			'common/$(TOOLCHAIN_PATH)/common/print.obj',
+			'$(TOOLCHAIN_PATH)/common/common/common.release.lib',
+			'$(TOOLCHAIN_PATH)/common/common/print.obj',
 			'project1/adefine.cpp',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/$(TOOLCHAIN_PATH)/project1/adefine.obj',
-			'project1/$(TOOLCHAIN_PATH)/project1/project1.obj',
-			'project1/$(TOOLCHAIN_PATH)/project1/project1.release.exe',
-			'?project1/$(TOOLCHAIN_PATH)/project1/project1.release.exe.intermediate.manifest',
-			'project1/$(TOOLCHAIN_PATH)/project1/project1.release.pdb',
+			'$(TOOLCHAIN_PATH)/project1/project1/adefine.obj',
+			'$(TOOLCHAIN_PATH)/project1/project1/project1.obj',
+			'$(TOOLCHAIN_PATH)/project1/project1/project1.release.exe',
+			'?$(TOOLCHAIN_PATH)/project1/project1/project1.release.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/project1/project1/project1.release.pdb',
 			'shared/adefine.h',
 		}
 

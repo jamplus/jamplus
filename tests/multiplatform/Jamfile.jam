@@ -1,7 +1,7 @@
-SubDir TOP ;
-
 DEPCACHE.standard ?= .jamcache ;
 DEPCACHE ?= standard ;
+
+SubDir TOP ;
 
 C.ActiveTarget platform ;
 

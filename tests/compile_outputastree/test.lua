@@ -60,6 +60,7 @@ function Test()
 	if Platform == 'win32'  and  Compiler ~= 'mingw' then
 		local dirs =
 		{
+			'.build/',
 			'liba/',
 			'libb/',
 			'libc/',
@@ -115,6 +116,7 @@ function Test()
 		{
 			'Jamfile.jam',
 			'Jamrules.jam',
+			'.build/.depcache',
 			'liba/Jamfile.jam',
 			'liba/rootfile.cpp',
 			'liba/lib/win32/release/liba.lib',

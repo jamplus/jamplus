@@ -48,8 +48,8 @@ function Test()
 
 	local pass1Dirs =
 	{
-		'groovyplatform-retail/',
-		'groovyplatform-retail/helloworld/',
+		'.build/groovyplatform-retail/TOP/',
+		'.build/groovyplatform-retail/TOP/helloworld/',
 		'jam/',
 		'jam/c/',
 		'jam/c/toolchain/',
@@ -66,8 +66,8 @@ function Test()
 		'CreateJamVS2012Workspace.bat',
 		'CreateJamVS2012Workspace.config',
 		'helloworld.c',
-		'groovyplatform-retail/helloworld/helloworld.o',
-		'groovyplatform-retail/helloworld/helloworld.retail$(SUFEXE)',
+		'.build/groovyplatform-retail/TOP/helloworld/helloworld.o',
+		'.build/groovyplatform-retail/TOP/helloworld/helloworld.retail$(SUFEXE)',
 		'jam/c/toolchain/groovycompiler/groovyplatform.jam',
 		'jam/c/toolchain/groovycompiler/shared.jam',
 		'jam/c/toolchain/groovyplatform/debug.jam',

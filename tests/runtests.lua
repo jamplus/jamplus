@@ -235,8 +235,8 @@ function TestDirectories(expectedDirs)
 	for _, dirName in ipairs(expectedDirs) do
 		dirName = dirName:gsub('$PlatformDir', PlatformDir)
 		dirName = dirName:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '-release')
---		dirName = dirName:gsub('$%(TOOLCHAIN_PATH%)', '.build/TOP/' .. PlatformDir .. '-release')
-		dirName = dirName:gsub('$%(TOOLCHAIN_PATH%)', PlatformDir .. '-release')
+		dirName = dirName:gsub('$%(TOOLCHAIN_PATH%)', '.build/' .. PlatformDir .. '-release/TOP')
+		--dirName = dirName:gsub('$%(TOOLCHAIN_PATH%)', PlatformDir .. '-release')
 		if dirName:sub(1, 1) == '?' then
 			expectedDirsMap[dirName:sub(2)] = '?'
 		else
@@ -313,8 +313,8 @@ function TestFiles(expectedFiles)
 	for _, fileName in ipairs(expectedFiles) do
 		fileName = fileName:gsub('$PlatformDir', PlatformDir):gsub('$%(SUFEXE%)', SUFEXE)
 		fileName = fileName:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '-release')
---		fileName = fileName:gsub('$%(TOOLCHAIN_PATH%)', '.build/TOP/' .. PlatformDir .. '-release')
-		fileName = fileName:gsub('$%(TOOLCHAIN_PATH%)', PlatformDir .. '-release')
+		fileName = fileName:gsub('$%(TOOLCHAIN_PATH%)', '.build/' .. PlatformDir .. '-release/TOP')
+		--fileName = fileName:gsub('$%(TOOLCHAIN_PATH%)', PlatformDir .. '-release')
 		fileName = fileName:gsub('$%(CWD%)', patterncwd)
 		if fileName:match('vc.pdb$') then fileName = '?' .. fileName end
 		if fileName:sub(1, 1) == '?' then
