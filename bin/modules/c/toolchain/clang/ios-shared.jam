@@ -674,7 +674,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local provisioningProfile = $(PROVISIONING_PROFILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
-		local dependsList = [ DependsList $(bundleTarget) ] $(linkTarget) ;
+		local dependsList = [ DependsList $(bundleTarget) ] ;
 
 		local codeResources = @(CodeResources:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		MakeLocate $(codeResources) : $(bundlePath)/_CodeSignature ;
