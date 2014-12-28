@@ -1,4 +1,5 @@
-build*/
+**/build*/
+**/.build*/
 *.sw?
 *~
 .DS_Store

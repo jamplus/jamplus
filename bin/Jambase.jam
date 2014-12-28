@@ -435,7 +435,6 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 	# directory should not hold object files, LOCATE_TARGET can
 	# subsequently be redefined.
 
-	local target = /$(TARGET_DIRECTORY) ;
 	ALL_LOCATE_TARGET ?= @(.build:R=$(CWD)) ;
 
 	if ! $(DEPCACHE.$(DEPCACHE)) {
@@ -443,17 +442,9 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 		Clean clean : $(DEPCACHE.$(DEPCACHE)) ;
 	}
 
-#	local _optionalRoot = $(_top) ;
-	local _optionalRoot ;
-	if $(ALL_LOCATE_TARGET) {
-		_optionalRoot = $(_top) ;
-	}
-
 	SEARCH_SOURCE = $(SUBDIR) ;
-	LOCATE_SOURCE = [ FDirName $(ALL_LOCATE_TARGET) $(_optionalRoot) $(SUBDIR_DOWN) ] ;
-	LOCATE_SOURCE = $(LOCATE_SOURCE)$(target:E=) ;
-	LOCATE_TARGET = [ FDirName $(ALL_LOCATE_TARGET) $(_optionalRoot) $(SUBDIR_DOWN) ] ;
-	LOCATE_TARGET = $(LOCATE_TARGET)$(target:E=) ;
+	LOCATE_SOURCE = [ FDirName $(ALL_LOCATE_TARGET) $(TARGET_DIRECTORY[1]) $(_top) $(SUBDIR_DOWN) $(TARGET_DIRECTORY[2]) ] ;
+	LOCATE_TARGET = [ FDirName $(ALL_LOCATE_TARGET) $(TARGET_DIRECTORY[1]) $(_top) $(SUBDIR_DOWN) $(TARGET_DIRECTORY[2]) ] ;
 
 	SOURCE_GRIST = [ FGrist $(ALL_SUBDIR_TOKENS) ] ;
 	SOURCE_GRIST = $(SOURCE_GRIST)$(target:E=) ;
