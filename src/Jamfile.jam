@@ -368,6 +368,7 @@ if $(LUA_BIN)
 				lua.debug.exe
 				lua52_debug.dll
 				lua-tilde.debug.dll
+				modules/ffi.debug.dll
 				modules/filefind.debug.dll
 				modules/lanes/core.debug.dll
 				modules/socket/core.debug.dll
@@ -390,6 +391,7 @@ if $(LUA_BIN)
 				lua52.dll
 				lua-tilde.dll
 				modules/socket/core.dll
+				modules/ffi.dll
 				modules/filefind.dll
 				modules/lanes/core.dll
 				modules/lfs.dll
@@ -444,6 +446,7 @@ if $(LUA_BIN)
 			LUA_SRCS +=
 				lua.debug
 				liblua52_debug.so
+				lib/lua/5.2/ffi.debug.$(MODULE_EXT)
 				lib/lua/5.2/filefind.debug.$(MODULE_EXT)
 				lib/lua/5.2/lanes/core.debug.$(MODULE_EXT)
 				lib/lua/5.2/socket/core.debug.$(MODULE_EXT)
@@ -464,6 +467,7 @@ if $(LUA_BIN)
 			LUA_SRCS +=
 				lua
 				liblua52.so
+				lib/lua/5.2/ffi.$(MODULE_EXT)
 				lib/lua/5.2/filefind.$(MODULE_EXT)
 				lib/lua/5.2/lanes/core.$(MODULE_EXT)
 				lib/lua/5.2/socket/core.$(MODULE_EXT)
