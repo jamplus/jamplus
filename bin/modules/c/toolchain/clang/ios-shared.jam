@@ -1108,7 +1108,7 @@ rule C.ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
 }
 
 
-rule C.ios.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL : ITUNES_ARTWORK {
+rule C.ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK {
 	# Set up the archive support.
 	if $(C.PLATFORM) in ipad iphone {
 		TARGET = [ ActiveTarget $(TARGET) ] ;
@@ -1131,7 +1131,9 @@ rule C.ios.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL : ITU
 		BUNDLE_PATH on $(ipaTarget) = $(bundlePath) ;
 		SIGNING_IDENTITY on $(ipaTarget) = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		ITUNES_ARTWORK on $(ipaTarget) = $(ITUNES_ARTWORK) ;
-		C.ios._BundleArchive $(ipaTarget) : $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
+		C.ios._Archive $(ipaTarget) : $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
+	}
+}
 
 		if $(URL) {
 			# Stolen from BetaBuilder:
@@ -1227,7 +1229,8 @@ Make sure you're visiting this page on your device, not your computer.</p>
 
 if $(NT) {
 
-actions lua C.ios._BundleArchive
+
+actions lua C.ios._Archive
 {
 	local ospath = require 'ospath'
 	local filefind = require 'filefind'
@@ -1253,7 +1256,7 @@ actions lua C.ios._BundleArchive
 
 } else {
 
-actions C.ios._BundleArchive
+actions C.ios._Archive
 {
 	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
 	/usr/bin/xcrun -sdk iphoneos PackageApplication -v "$(BUNDLE_PATH)" -o "$(1)" --sign "$(SIGNING_IDENTITY)" --embed "$(BUNDLE_PATH)/embedded.mobileprovision"
