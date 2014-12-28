@@ -1032,11 +1032,11 @@ rule C.ios.Provision TARGET : PROFILE_ID {
 	local _bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
 	if ! $(_bundlePath) {
-		Echo *** C.Provision $(TARGET) \: $(PROFILE_ID) ;
+		Echo *** C.ios.Provision $(TARGET) \: $(PROFILE_ID) ;
 		Exit *** Bundle path not setup for target $(TARGET) ;
 	}
 	if ! $(_bundleTarget) {
-		Echo *** C.Provision $(TARGET) \: $(PROFILE_ID) ;
+		Echo *** C.ios.Provision $(TARGET) \: $(PROFILE_ID) ;
 		Exit *** Bundle target not setup for target $(TARGET) ;
 	}
 
