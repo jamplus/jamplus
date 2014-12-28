@@ -437,7 +437,7 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 
 	ALL_LOCATE_TARGET ?= @(.build:R=$(CWD)) ;
 
-	if ! $(DEPCACHE.$(DEPCACHE)) {
+	if ! $(DEPCACHE.$(DEPCACHE))  &&  ! $(JAM_NO_DEP_CACHE) {
 		DEPCACHE.$(DEPCACHE) = $(ALL_LOCATE_TARGET:E=.)/.depcache ;
 		Clean clean : $(DEPCACHE.$(DEPCACHE)) ;
 	}
