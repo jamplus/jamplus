@@ -496,6 +496,7 @@ actions ios.CpResource
 }
 
 C.__DOLLAR = \\$ ;
+C.__JUST_DOLLAR = $ ;
 C.__COLON = ":" ;
 
 actions ios.ProcessEntitlements
@@ -1236,7 +1237,10 @@ actions lua C.ios._BundleArchive
 			SourcePath = entry.filename,
 		}
 	end
-	filelist[#filelist + 1] = { EntryName = 'iTunesArtwork', SourcePath = [[$(ITUNES_ARTWORK:T)]] }
+	local itunesArtwork = jam_expand('$(C.__JUST_DOLLAR)(ITUNES_ARTWORK:T)')
+	if itunesArtwork then
+		filelist[#filelist + 1] = { EntryName = 'iTunesArtwork', SourcePath = itunesArtwork }
+	end
 
 	local ziparchive = require 'ziparchive'
 	local archive = ziparchive.open([[$(1)]], 'a')
