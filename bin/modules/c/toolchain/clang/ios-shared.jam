@@ -1135,13 +1135,33 @@ rule C.ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK {
 	}
 }
 
+
+rule C.ios.WebServer TARGET {
+	# Set up the archive support.
+	if $(C.PLATFORM) in ipad iphone {
+		TARGET = [ ActiveTarget $(TARGET) ] ;
+
+		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local ipaTarget = @($(bundlePath:D=:S=).ipa:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+		local OUTPUT_PATH = $(LOCATE:Z=$(ipaTarget)) ;
+
+		local archiveTarget = archive:$(TARGET) ;
+		OUTPUT_PATH on $(archiveTarget) = $(OUTPUT_PATH) ;
+
+		if ! $(URL) {
+			URL = [ LuaString "
+				local socket = require 'socket'.udp()
+				socket:setpeername('10.10.10.10', '9999')
+				return 'https://' .. socket:getsockname() .. ':9999'
+			" ] ;
+		}
 		if $(URL) {
 			# Stolen from BetaBuilder:
 
 			# Write manifest.plist.
 			local manifest.plist = @(manifest.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):archive) ;
 			MakeLocate $(manifest.plist) : $(OUTPUT_PATH) ;
-			Depends $(archiveTarget) : $(manifest.plist) ;
+			Depends $(archiveTarget) : $(manifest.plist) : $(ipaTarget) ;
 			Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(manifest.plist) ;
 			local contents ;
 			on $(C.ACTIVE_TOOLCHAIN_TARGET) contents =
@@ -1178,12 +1198,13 @@ rule C.ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK {
 </plist>
 " ;
 			CONTENTS on $(manifest.plist) = $(contents) ;
+			Always $(manifest.plist) ;
 			WriteFile $(manifest.plist) ;
 			UseCommandLine $(manifest.plist) : $(contents) ;
 
 			local index.html = @(index.html:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):archive) ;
 			MakeLocate $(index.html) : $(OUTPUT_PATH) ;
-			Depends $(archiveTarget) : $(index.html) ;
+			Depends $(archiveTarget) : $(index.html) : $(manifest.plist) ;
 			Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(index.html) ;
 			local contents ;
 			on $(C.ACTIVE_TOOLCHAIN_TARGET) contents = "
@@ -1219,13 +1240,19 @@ Make sure you're visiting this page on your device, not your computer.</p>
 </html>
 " ;
 			CONTENTS on $(index.html) = $(contents) ;
+			Always $(index.html) ;
 			WriteFile $(index.html) ;
 			UseCommandLine $(index.html) : $(contents) ;
 
+			C.ios._WebServer $(archiveTarget) ;
 		}
 	}
 }
 
+
+actions screenoutput C.ios._WebServer {
+	$(JAM_EXECUTABLE_PATH:C) --webserver $(OUTPUT_PATH)
+}
 
 if $(NT) {
 
