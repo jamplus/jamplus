@@ -523,11 +523,35 @@ rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH {
 }
 
 
-rule C.ios._ApplicationFromObjects_PostBuild {
-	if bundle in $(OPTIONS) {
-		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+rule C.ios.Bundle TARGET : TOOLCHAINS {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	local outputName = [ C._retrieveOutputName ] ;
+	local outputPath = [ C._retrieveOutputPath ] ;
+	local bundlePath = $(outputPath)/$(outputName).app ;
+	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
+
+	local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
+	local colon = ":" ;
+	local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
+	BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleTarget) ;
+	CLEAN_BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(cleanBundleTarget) ;
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(bundleTarget) ;
+	NotFile $(bundleTarget) ;
+	Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(cleanBundleTarget) ;
+	NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+	Always clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+	NotFile $(cleanBundleTarget) ;
+	Always $(cleanBundleTarget) ;
+
+	local linkTargets ;
+	local toolchain ;
+	for toolchain in $(TOOLCHAINS:E=$(C.ACTIVE_TOOLCHAIN)) {
+		linkTargets += [ C.GetLinkTargets $(TARGET) : $(toolchain) ] ;
+	}
+	C.ios.Lipo $(TARGET) : $(linkTargets) : $(bundlePath) ;
+
+	{
 		local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
@@ -643,6 +667,53 @@ rule C.ios._ApplicationFromObjects_PostBuild {
 		if ! $(NT) {
 			C.ios.GenerateDSYMFile $(TARGET) ;
 		}
+	}
+
+	if $(C.PLATFORM) in ipad iphone {
+		local linkTarget = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local provisioningProfile = $(PROVISIONING_PROFILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+		local dependsList = [ DependsList $(bundleTarget) ] $(linkTarget) ;
+
+		local codeResources = @(CodeResources:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+		MakeLocate $(codeResources) : $(bundlePath)/_CodeSignature ;
+
+		if $(IOSBUILDENV_PATH) {
+			local resourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+			MakeLocate $(resourceRulesPlist) : $(bundlePath) ;
+
+			UseCommandLine $(codeResources) $(resourceRulesPlist) : $(dependsList) ;
+			Depends $(bundleTarget) : $(codeResources) $(resourceRulesPlist) : $(dependsList) ;
+			Clean $(cleanBundleTarget) : $(codeResources) $(resourceRulesPlist) ;
+
+			CERTIFICATE_CHAIN on $(linkTarget) = $(CERTIFICATE_CHAIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			C.ios._CodeSign $(linkTarget) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
+		} else {
+			local codeResourcesSymbolicLink = [ C.GristFiles : CodeResourcesLink ] ;
+			BINDING on $(codeResourcesSymbolicLink) = CodeResources ;
+			MakeLocate $(codeResourcesSymbolicLink) : $(bundlePath) ;
+
+			BUNDLE_PATH on $(codeResources) = $(bundlePath) ;
+			LINK_TARGET on $(codeResources) = $(linkTarget) ;
+			ENTITLEMENTS on $(codeResources) = $(entitlements) ;
+			PROVISIONING_PROFILE on $(codeResources) = $(provisioningProfile) ;
+
+			DSYM_NAME on $(codeResources) = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			C.ios._CodeSign $(codeResources) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+			UseCommandLine $(codeResources) : $(dependsList) ;
+			Depends $(bundleTarget) : $(codeResources) : $(dependsList) ;
+			Clean $(cleanBundleTarget) : $(codeResources) $(codeResourcesSymbolicLink) ;
+		}
+	}
+
+}
+
+
+rule C.ios._ApplicationFromObjects_PostBuild {
+	if bundle in $(OPTIONS) {
+		C.ios.Bundle ;
 	}
 }
 
@@ -762,25 +833,6 @@ rule C.ios._ApplicationFromObjects_LinkFlags {
 	}
 
 	linkFlags += "-framework $(FRAMEWORKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))" ;
-
-	if bundle in $(OPTIONS) {
-		local outputName = [ C._retrieveOutputName ] ;
-		local bundlePath = $(outputPath)/$(outputName).app ;
-		BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
-
-        MakeLocate $(_linkTargets) : $(bundlePath) ;
-
-		local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
-		local colon = ":" ;
-		local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
-		BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleTarget) ;
-		CLEAN_BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(cleanBundleTarget) ;
-		Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(bundleTarget) ;
-		NotFile $(bundleTarget) ;
-		Depends $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(cleanBundleTarget) ;
-		NotFile $(cleanBundleTarget) ;
-		Always $(cleanBundleTarget) ;
-	}
 }
 
 
@@ -1026,47 +1078,28 @@ rule C.ios.CodeSign TARGET : PROVISIONING_PROFILE : CERTIFICATE_CHAIN {
 	ActiveTarget $(TARGET) ;
 
 	if $(C.PLATFORM) in ipad iphone {
-		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local linkTarget = $(LINK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-
-		local dependsList = [ DependsList $(bundleTarget) ] $(linkTarget) ;
-
-		local codeResources = @(CodeResources:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-		MakeLocate $(codeResources) : $(bundlePath)/_CodeSignature ;
-
 		if $(IOSBUILDENV_PATH) {
-			local resourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-			MakeLocate $(resourceRulesPlist) : $(bundlePath) ;
-
-			UseCommandLine $(codeResources) $(resourceRulesPlist) : $(dependsList) ;
-			Depends $(bundleTarget) : $(codeResources) $(resourceRulesPlist) : $(dependsList) ;
-			Clean $(cleanBundleTarget) : $(codeResources) $(resourceRulesPlist) ;
-
 			if $(CERTIFICATE_CHAIN) {
-				CERTIFICATE_CHAIN on $(linkTarget) = $(CERTIFICATE_CHAIN) ;
+				CERTIFICATE_CHAIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CERTIFICATE_CHAIN) ;
 			} else {
-				CERTIFICATE_CHAIN on $(linkTarget) = "::" ;
+				CERTIFICATE_CHAIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = "::" ;
 			}
-			C.ios._CodeSign $(linkTarget) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
 		} else {
-			local codeResourcesSymbolicLink = [ C.GristFiles : CodeResourcesLink ] ;
-			BINDING on $(codeResourcesSymbolicLink) = CodeResources ;
-			MakeLocate $(codeResourcesSymbolicLink) : $(bundlePath) ;
+			#local codeResourcesSymbolicLink = [ C.GristFiles : CodeResourcesLink ] ;
+			#BINDING on $(codeResourcesSymbolicLink) = CodeResources ;
+			#MakeLocate $(codeResourcesSymbolicLink) : $(bundlePath) ;
 
-			BUNDLE_PATH on $(codeResources) = $(bundlePath) ;
-			LINK_TARGET on $(codeResources) = $(linkTarget) ;
-			ENTITLEMENTS on $(codeResources) = $(entitlements) ;
-			PROVISIONING_PROFILE on $(codeResources) = $(PROVISIONING_PROFILE) ;
+			#BUNDLE_PATH on $(codeResources) = $(bundlePath) ;
+			#LINK_TARGET on $(codeResources) = $(linkTarget) ;
+			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(entitlements) ;
+			PROVISIONING_PROFILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(PROVISIONING_PROFILE) ;
 
-			DSYM_NAME on $(codeResources) = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-			C._CodeSign $(codeResources) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
+			#DSYM_NAME on $(codeResources) = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			#C._CodeSign $(codeResources) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
 
-			UseCommandLine $(codeResources) : $(dependsList) ;
-			Depends $(bundleTarget) : $(codeResources) : $(dependsList) ;
-			Clean $(cleanBundleTarget) : $(codeResources) $(codeResourcesSymbolicLink) ;
+			#UseCommandLine $(codeResources) : $(dependsList) ;
+			#Depends $(bundleTarget) : $(codeResources) : $(dependsList) ;
+			#Clean $(cleanBundleTarget) : $(codeResources) $(codeResourcesSymbolicLink) ;
 		}
 	}
 }
