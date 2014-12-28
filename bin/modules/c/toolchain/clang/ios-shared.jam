@@ -648,18 +648,18 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 		}
 
 		{
-			local provisionFilename = $(PROVISION_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			local embedded.mobileprovision = @(embedded.mobileprovision:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 			MakeLocate $(embedded.mobileprovision) : $(bundlePath) ;
 
 			# Copy provision into the bundle and name it embedded.mobileprovision
 			Depends $(bundleTarget) : $(embedded.mobileprovision) ;
-			CopyFile $(TARGET) : $(embedded.mobileprovision) : $(provisionFilename) ;
+			CopyFile $(TARGET) : $(embedded.mobileprovision) : $(provisionFileTarget) ;
 
 			# Without this, if we change between profiles, the copy will not always
 			# work due to destination time stamp being newer than source (despite
 			# coming from a different file).
-			UseCommandLine $(embedded.mobileprovision) : $(provisionFilename) ;
+			UseCommandLine $(embedded.mobileprovision) : $(provisionFileTarget) ;
 		}
 	}
 	
@@ -975,13 +975,14 @@ actions ios.CompileXIB
 rule C.ios.ProvisionFile TARGET : FILENAME {
 	TARGET = [ C.ActiveTarget $(TARGET) ] ;
 
-	# See if provided provision is a filename that exists.
-	local _provisionDir = $(FILENAME:P/) ;
-	local _provisionFilename = $(FILENAME:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+	local _provisionDir = $(FILENAME:D) ;
+	if $(_provisionDir) = "" {
+	    _provisionDir = $(SUBDIR) ;
+	}
 
-	SEARCH on $(_provisionFilename) = $(_provisionDir) ;
-
-	PROVISION_FILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_provisionFilename) ;
+	local _provisionFileTarget = $(FILENAME:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+	SEARCH on $(_provisionFileTarget) = $(_provisionDir) ;
+	PROVISION_FILE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_provisionFileTarget) ;
 }
 
 
