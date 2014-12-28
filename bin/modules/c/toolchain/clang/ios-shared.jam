@@ -672,7 +672,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 	if $(C.PLATFORM) in ipad iphone {
 		local linkTarget = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local provisioningProfile = $(PROVISIONING_PROFILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
 		local dependsList = [ DependsList $(bundleTarget) ] ;
 
@@ -697,7 +697,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 			BUNDLE_PATH on $(codeResources) = $(bundlePath) ;
 			LINK_TARGET on $(codeResources) = $(linkTarget) ;
 			ENTITLEMENTS on $(codeResources) = $(entitlements) ;
-			PROVISIONING_PROFILE on $(codeResources) = $(provisioningProfile) ;
+			SIGNING_IDENTITY on $(codeResources) = $(signingIdentity) ;
 
 			DSYM_NAME on $(codeResources) = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			C.ios._CodeSign $(codeResources) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
@@ -904,8 +904,8 @@ rule ios.XIB {
 rule C.ios.SetTaskAllow {
 }
 
-rule C.ios.CodeSign TARGET : PROVISIONING_PROFILE {
-	Contents += "Projects[ [[C.*]] ].IOS_SIGNING_IDENTITY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(PROVISIONING_PROFILE)]]
+rule C.ios.CodeSign TARGET : SIGNING_IDENTITY {
+	Contents += "Projects[ [[C.*]] ].IOS_SIGNING_IDENTITY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(SIGNING_IDENTITY)]]
 
 " ;
 }
@@ -1067,7 +1067,7 @@ actions C.ios._CodeSign
 actions C.ios._CodeSign
 {
 	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
-	/usr/bin/codesign --force --sign "$(PROVISIONING_PROFILE)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
+	/usr/bin/codesign --force --sign "$(SIGNING_IDENTITY)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
 	touch $(1:C)
 	touch $(DSYM_NAME:CT)
 }
@@ -1075,7 +1075,7 @@ actions C.ios._CodeSign
 }
 
 
-rule C.ios.CodeSign TARGET : PROVISIONING_PROFILE : CERTIFICATE_CHAIN {
+rule C.ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
 	ActiveTarget $(TARGET) ;
 
 	if $(C.PLATFORM) in ipad iphone {
@@ -1093,7 +1093,7 @@ rule C.ios.CodeSign TARGET : PROVISIONING_PROFILE : CERTIFICATE_CHAIN {
 			#BUNDLE_PATH on $(codeResources) = $(bundlePath) ;
 			#LINK_TARGET on $(codeResources) = $(linkTarget) ;
 			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(entitlements) ;
-			PROVISIONING_PROFILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(PROVISIONING_PROFILE) ;
+			SIGNING_IDENTITY on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SIGNING_IDENTITY) ;
 
 			#DSYM_NAME on $(codeResources) = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			#C._CodeSign $(codeResources) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
@@ -1127,7 +1127,7 @@ rule C.ios.BundleArchive TARGET : PROVISIONING_PROFILE : OUTPUT_PATH : URL : ITU
 		Depends $(archiveTarget) : $(ipaTarget) : $(TARGET:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
 		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(ipaTarget) ;
 		BUNDLE_PATH on $(ipaTarget) = $(bundlePath) ;
-		PROVISIONING_PROFILE on $(ipaTarget) = $(PROVISIONING_PROFILE) ;
+		SIGNING_IDENTITY on $(ipaTarget) = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		ITUNES_ARTWORK on $(ipaTarget) = $(ITUNES_ARTWORK) ;
 		C.ios._BundleArchive $(ipaTarget) : $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
 
@@ -1254,7 +1254,7 @@ actions lua C.ios._BundleArchive
 actions C.ios._BundleArchive
 {
 	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
-	/usr/bin/xcrun -sdk iphoneos PackageApplication -v "$(BUNDLE_PATH)" -o "$(1)" --sign "$(PROVISIONING_PROFILE)" --embed "$(BUNDLE_PATH)/embedded.mobileprovision"
+	/usr/bin/xcrun -sdk iphoneos PackageApplication -v "$(BUNDLE_PATH)" -o "$(1)" --sign "$(SIGNING_IDENTITY)" --embed "$(BUNDLE_PATH)/embedded.mobileprovision"
 }
 
 }
