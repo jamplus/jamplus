@@ -479,6 +479,7 @@ rule C.ios.GenerateDSYMFile TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local dsymBundlePath = $(bundlePath).dSYM ;
+	local _t = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local _t.dsym = $(_t).DSYM ;
 	DSYM_NAME on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_t.dsym) ;
 	BINDING on $(_t.dsym) = $(BINDING:Z=$(_t)) ;
@@ -699,11 +700,12 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 			ENTITLEMENTS on $(codeResources) = $(entitlements) ;
 			SIGNING_IDENTITY on $(codeResources) = $(signingIdentity) ;
 
-			DSYM_NAME on $(codeResources) = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			local dsym_name = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			DSYM_NAME on $(codeResources) = $(dsym_name) ;
 			C.ios._CodeSign $(codeResources) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
 
 			UseCommandLine $(codeResources) : $(dependsList) ;
-			Depends $(bundleTarget) : $(codeResources) : $(dependsList) ;
+			Depends $(bundleTarget) : $(codeResources) : $(dependsList) $(dsym_name) ;
 			Clean $(cleanBundleTarget) : $(codeResources) $(codeResourcesSymbolicLink) ;
 		}
 	}
