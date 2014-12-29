@@ -20,13 +20,13 @@ local SRCS =
 		opengles_Prefix.pch
 ;
 
-C.LinkFrameworks : Foundation UIKit OpenGLES QuartzCore ;
+C.ios.LinkFrameworks : Foundation UIKit OpenGLES QuartzCore ;
 
-C.BundleInfo : displayname : opengles ;
-C.BundleInfo : identifier : com.yourcompany.testapp ;
-C.BundleInfo : bundlename : opengles ;
-C.BundleInfo : bundleversion : 1.0 ;
-C.BundleInfo : mainnibfile : MainWindow ;
+C.ios.BundleInfo : displayname : opengles ;
+C.ios.BundleInfo : identifier : com.yourcompany.testapp ;
+C.ios.BundleInfo : bundlename : opengles ;
+C.ios.BundleInfo : bundleversion : 1.0 ;
+C.ios.BundleInfo : mainnibfile : MainWindow ;
 
 C.Application : $(SRCS) : bundle ;
 

@@ -2,21 +2,24 @@ SubDir TOP ;
 
 C.ActiveTarget simple ;
 
-#C.MacOSX_SDK : $(PLATFORM) ;
-
-C.OutputPostfixClear : debug ;
+C.OutputPostfixClear ;
 
 local SRCS =
-		main.m
+        main.m
 ;
 
-C.LinkFrameworks : Foundation UIKit ;
+C.ios.LinkFrameworks : Foundation UIKit ;
 
-C.BundleInfo : displayname : simple ;
-C.BundleInfo : identifier : com.yourcompany.simple ;
-#C.BundleInfo : bundlename : simple ;
-#C.BundleInfo : bundleversion : 1.0 ;
-C.BundleInfo : uistatusbarhidden : true ;
-#C.BundleInfo : uisupportedinterfaceorientations : portrait portraitupsidedown landscapeleft landscaperight ;
+C.ios.BundleInfo : displayname : simple ;
+C.ios.BundleInfo : identifier : * 1234567890 ;
+C.ios.BundleInfo : bundleversion : 1.0 ;
+C.ios.BundleInfo : uistatusbarhidden : true ;
+
+C.ios.ProvisionFile : test.mobileprovision ;
+C.ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
 
 C.Application : $(SRCS) : bundle ;
+
+C.ios.Archive simple : $(ALL_LOCATE_TARGET)/package ;
+C.ios.WebServer simple ;
+

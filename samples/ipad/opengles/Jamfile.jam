@@ -20,25 +20,23 @@ local SRCS =
 		opengles_Prefix.pch
 ;
 
-C.LinkFrameworks : Foundation UIKit OpenGLES QuartzCore ;
+C.ios.LinkFrameworks : Foundation UIKit OpenGLES QuartzCore ;
 
-C.BundleInfo : displayname : opengles ;
-C.BundleInfo : identifier : com.yourcompany.testapp ;
-C.BundleInfo : bundlename : opengles ;
-C.BundleInfo : bundleversion : 1.0 ;
-C.BundleInfo : mainnibfile : MainWindow ;
-C.BundleInfo : uistatusbarhidden : true ;
-C.BundleInfo : uisupportedinterfaceorientations : portrait portraitupsidedown landscapeleft landscaperight ;
+C.ios.BundleInfo : displayname : opengles ;
+C.ios.BundleInfo : identifier : com.yourcompany.testapp ;
+C.ios.BundleInfo : bundlename : opengles ;
+C.ios.BundleInfo : bundleversion : 1.0 ;
+C.ios.BundleInfo : mainnibfile : MainWindow ;
+C.ios.BundleInfo : uistatusbarhidden : true ;
+C.ios.BundleInfo : uisupportedinterfaceorientations : portrait portraitupsidedown landscapeleft landscaperight ;
 
 C.PrecompiledHeader : opengles_Prefix.pch opengles_Prefix.pch : $(SRCS) ;
 
 C.Application : $(SRCS) : bundle ;
 
-XIB opengles : MainWindow.xib ;
+ios.XIB opengles : MainWindow.xib ;
 
 local bundlePath ;
 on opengles bundlePath = $(BUNDLE_PATH) ;
 CopyFile opengles : $(bundlePath)/Shader.fsh : $(SUBDIR)/Shaders/Shader.fsh ;
 CopyFile opengles : $(bundlePath)/Shader.vsh : $(SUBDIR)/Shaders/Shader.vsh ;
-
-#CopyFile opengles : $(bundlePath)/Info.plist : $(SUBDIR)/Info.plist ;
