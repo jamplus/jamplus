@@ -487,7 +487,7 @@ rule FSubDirPath
 	return $(_r:R=$($(<[1])-ROOT)) ;
 }
 
-rule SubInclude
+rule SubInclude TOKENS : FILENAME
 {
 	# SubInclude TOP d1 ... ;
 	#
@@ -496,22 +496,23 @@ rule SubInclude
 	# We use SubDir to get there, in case the included Jamfile
 	# either doesn't have its own SubDir (naughty) or is a subtree
 	# with its own TOP.
-	if ! $($(<[1]))
+	TOKENS ?= $(ALL_SUBDIR_TOKENS) ;
+	if ! $($(TOKENS[1]))
 	{
-	    Exit SubInclude $(<[1]) without prior SubDir $(<[1]) ;
+	    Exit SubInclude $(TOKENS[1]) without prior SubDir $(TOKENS[1]) ;
 	}
 
 	local jamfile ;
-	if $(>)
+	if $(FILENAME)
 	{
-		jamfile = $(>:S=.jam) ;
+		jamfile = $(FILENAME:S=.jam) ;
 	}
 	else
 	{
 		jamfile = $(JAMFILE) ;
 	}
 
-	local include_marker = included_$(<:J=_)_$(jamfile) ;
+	local include_marker = included_$(TOKENS:J=_)_$(jamfile) ;
 	if $($(include_marker))
 	{
 		return ;
@@ -520,7 +521,7 @@ rule SubInclude
 
 	local saveTokens = $(ALL_SUBDIR_TOKENS) ;
 	local saveCurrentJamfile = $(CURRENT_JAMFILE) ;
-	SubDir $(<) ;
+	SubDir $(TOKENS) ;
 
 	CURRENT_JAMFILE = $(jamfile:R=$(SUBDIR)) ;
 	include $(CURRENT_JAMFILE) ;
