@@ -9,6 +9,7 @@ rule C.Toolchain.vc.win32.Detect COMPILER {
     local MSSDK_BINDIR ;
     local MSSDK_STDHDRS ;
     local MSSDK_LINKDIRECTORIES ;
+    local MSVCBIN ;
     local RC ;
     local rc_nologo ;
     switch $(COMPILER) {
@@ -31,6 +32,10 @@ rule C.Toolchain.vc.win32.Detect COMPILER {
             MSSDK_LINKDIRECTORIES = "$(MSVCNT)/lib" "$(MSSDK)/lib/winv6.3/um/x86" ;
             RC = $(MSSDK)/bin/x86/rc ;
             rc_nologo = /nologo ;
+            if [ Glob $(MSVCNT)/bin/amd64_x86 : cl.exe ] {
+                MSVCBIN = $(MSVCNT)/bin/amd64_x86/ ;
+                MSVCNT_BIN_PATH on $(C.COMPILER_SUITE_SYMBOL) += $(MSVCNT)/bin/amd64_x86 $(MSVCNT)/bin/amd64 ;
+            }
 
         case vs2012 :
             local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot ;
@@ -92,20 +97,20 @@ rule C.Toolchain.vc.win32.Detect COMPILER {
             RC = $(MSVCNT)/../Common/MSDev98/Bin/rc ;
     }
 
-    local MSVCBIN = $(MSVCNT)/bin/ ;
+    MSVCBIN ?= $(MSVCNT)/bin/ ;
     MSVCBIN on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCBIN) ;
     MSSDK on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK) ;
     MSSDK_BINDIR on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_BINDIR) ;
     MSSDK_STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_STDHDRS) ;
     MSSDK_LINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
 
-    C.AR on $(C.COMPILER_SUITE_SYMBOL)      = $(MSVCBIN)lib ;
-    C.CC on $(C.COMPILER_SUITE_SYMBOL)      = $(MSVCBIN)cl ;
-    C.C++ on $(C.COMPILER_SUITE_SYMBOL)     = $(MSVCBIN)cl ;
-    C.LINK on $(C.COMPILER_SUITE_SYMBOL)    = $(MSVCBIN)link ;
-    C.MT on $(C.COMPILER_SUITE_SYMBOL)      = $(MSSDK_BINDIR)/mt ;
-    C.RC on $(C.COMPILER_SUITE_SYMBOL)      = $(RC) ;
-    C.RC_NOLOGO on $(C.COMPILER_SUITE_SYMBOL) = $(rc_nologo) ;
+    C.AR on $(C.COMPILER_SUITE_SYMBOL)      ?= $(MSVCBIN)lib ;
+    C.CC on $(C.COMPILER_SUITE_SYMBOL)      ?= $(MSVCBIN)cl ;
+    C.C++ on $(C.COMPILER_SUITE_SYMBOL)     ?= $(MSVCBIN)cl ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL)    ?= $(MSVCBIN)link ;
+    C.MT on $(C.COMPILER_SUITE_SYMBOL)      ?= $(MSSDK_BINDIR)/mt ;
+    C.RC on $(C.COMPILER_SUITE_SYMBOL)      ?= $(RC) ;
+    C.RC_NOLOGO on $(C.COMPILER_SUITE_SYMBOL) ?= $(rc_nologo) ;
     C.STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_STDHDRS) ;
     C.STDLINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
 
