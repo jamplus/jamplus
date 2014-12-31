@@ -794,6 +794,7 @@ rule C._LibraryFromObjects OBJECTS {
 
 	UseFileCache $(_l) : code ;
 	$(archiveRule) $(_l) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
+	__BUILT_LIBRARY on $(_l) = true ;
 
 	if $(C.RANLIB) { C.$(C.COMPILER_SUITE).Ranlib $(_l) : : $(C.COMPILER_SUITE_SYMBOL) ; }
 
@@ -920,6 +921,7 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 
 	UseFileCache $(_linkTargets) : code ;
 	$(linkRule) $(_linkTargets) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
+	__BUILT_LIBRARY on $(_linkTargets) = true ;
 
 	local theRule ;
 	for theRule in $(C._SharedLibraryFromObjects_RegServer:Z=$(C.COMPILER_SUITE_SYMBOL)) {
@@ -1052,7 +1054,7 @@ rule C.LinkFlags TARGET : FLAGS {
 
 
 rule C.LinkLibraries TARGET : LIBRARIES : OPTIONS {
-    C.Inherits $(TARGET) : $(LIBRARIES) : $(OPTIONS) optional ;
+    C.Inherits $(TARGET) : $(LIBRARIES) : $(OPTIONS) optional link ;
 }
 
 
@@ -1353,14 +1355,19 @@ rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
 		public = public ;
 	}
 
+	local link ;
+	if link in $(OPTIONS) {
+	    link = 1 ;
+	}
+
 	local suflib = $(SUFLIB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local gristLibraries ;
+	local lib ;
 	for lib in $(INHERITS_TARGETS) {
 		local grist = $(C.ACTIVE_TOOLCHAIN_GRIST):$(lib) ;
-		if $(lib:G) {
+		lib = $(lib:G=$(grist))$(suflib) ;
+		if $(link) ||  $(__BUILT_LIBRARY:Z=$(lib)) {
 			gristLibraries += $(lib) ;
-		} else {
-			gristLibraries += $(lib:G=$(grist))$(suflib) ;
 		}
 	}
 	NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristLibraries) ;
