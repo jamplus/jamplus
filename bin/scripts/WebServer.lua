@@ -101,10 +101,7 @@ end
 
 print('Certificates are stored at: ' .. outputPath)
 print()
-print('Transfer the Certificate Authority file to your device:')
-print('\t' .. caCerFilename)
-print('For iOS devices, this is easily done by emailing it to yourself.')
-print()
+
 
 -----------------------------------------------------------------------------------------------
 local xavante = require "xavante"
@@ -126,6 +123,12 @@ local rules = {
 		with = redirecthandler,
 		params = {"index.html"}
 	}, 
+
+	{
+		match = "jamplusCA.cer",
+		with = filehandler,
+		params = {baseDir = outputPath}
+	},
 
 	{
 		match = ".",
