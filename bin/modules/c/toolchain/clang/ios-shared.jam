@@ -49,7 +49,7 @@ rule C.ios.SDK SDK_VERSION {
 	local architecture ;
 
 	switch $(SDK_PLATFORM) {
-		case iphone :
+		case ios :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
 			SDK_VERSION ?= 8.1 ;
 			switch $(SDK_VERSION) {
@@ -108,7 +108,7 @@ rule C.ios.SDK SDK_VERSION {
 			}
 			flags += -fvisibility=hidden ;
 
-		case iphonesimulator :
+		case iossimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
 			SDK_VERSION ?= 8.1 ;
 			switch $(SDK_VERSION) {
@@ -158,107 +158,6 @@ rule C.ios.SDK SDK_VERSION {
 				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			architecture = i386 ;
-
-		case ipadsimulator :
-			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 8.1 ;
-			switch $(SDK_VERSION) {
-				case 4.3 :
-					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
-					#flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 ;
-					sdkroot = iphoneos4.3 ;
-
-				case 5.0 :
-					isysroot = $(developerRoot)/SDKs/iPhoneSimulator5.0.sdk ;
-					sdkroot = iphoneos5.0 ;
-
-				case 5.1 :
-					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
-					sdkroot = iphoneos5.1 ;
-
-				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.0.sdk ;
-					sdkroot = iphoneos6.0 ;
-
-				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator6.1.sdk ;
-					sdkroot = iphoneos6.1 ;
-
-				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.0.sdk ;
-					sdkroot = iphoneos7.0 ;
-
-				case 7.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk ;
-					sdkroot = iphoneos7.1 ;
-
-				case 8.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.0.sdk ;
-					sdkroot = iphoneos8.0 ;
-
-				case 8.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.0.sdk ;
-					sdkroot = iphoneos8.1 ;
-
-				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
-			}
-			architecture = i386 ;
-
-		case ipad :
-			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 8.1 ;
-			switch $(SDK_VERSION) {
-				case 4.3 :
-					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
-					sdkroot = iphoneos4.3 ;
-
-				case 5.0 :
-					isysroot = $(developerRoot)/SDKs/iPhoneOS5.0.sdk ;
-					sdkroot = iphoneos5.0 ;
-
-				case 5.1 :
-					isysroot = @(../../SDKs/iPhoneOS5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
-					sdkroot = iphoneos5.1 ;
-
-				case 6.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk ;
-					sdkroot = iphoneos6.0 ;
-
-				case 6.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk ;
-					sdkroot = iphoneos6.1 ;
-
-				case 7.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk ;
-					sdkroot = iphoneos7.0 ;
-
-				case 7.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk ;
-					sdkroot = iphoneos7.1 ;
-
-				case 8.0 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk ;
-					sdkroot = iphoneos8.0 ;
-
-				case 8.1 :
-					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
-					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.1.sdk ;
-					sdkroot = iphoneos8.1 ;
-
-				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
-			}
-			architecture = armv7 ;
 	}
 
 	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.AR:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
@@ -268,7 +167,7 @@ rule C.ios.SDK SDK_VERSION {
 	C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = ;
 
 	C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(C.ARCHITECTURE:E=$(architecture)) ;
-	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;	
+	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;
 	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
 	XCODE_SDKROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sdkroot) ;
@@ -314,7 +213,7 @@ rule C.ios.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION_MIN) ;
 
 	if $(TARGETINFO_LOCATE) {
-		if $(SDK_PLATFORM) in iphone iphonesimulator ipad ipadsimulator {
+		if $(SDK_PLATFORM) in ios iossimulator {
 			Contents += "Projects[ [[C.*]] ].IOS_SDK_VERSION_MIN[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(SDK_VERSION_MIN)]]
 
 " ;
@@ -375,7 +274,7 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 		}
 
 		switch $(C.PLATFORM) {
-			case iphone :
+			case ios :
 				C.ios._BundleInfoBoolean LSRequiresIPhoneOS : true ;
 				C.ios._BundleInfoIntegerArray UIDeviceFamily : 1 ;
 				C.ios._BundleInfoString DTPlatformName : iphoneos ;
@@ -383,23 +282,10 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
 				C.ios._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
 
-			case iphonesimulator :
-				C.ios._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C.ios._BundleInfoIntegerArray UIDeviceFamily : 1 ;
-				C.ios._BundleInfoString DTPlatformName : iphonesimulator ;
-				C.ios._BundleInfoString DTSDKName : iphonesimulator$(IPHONEOS_SDK_VERSION) ;
-				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneSimulator ;
-				C.ios._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
+" ;
+				}
 
-			case ipad :
-				C.ios._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C.ios._BundleInfoIntegerArray UIDeviceFamily : 2 ;
-				C.ios._BundleInfoString DTPlatformName : iphoneos ;
-				C.ios._BundleInfoString DTSDKName : iphoneos$(IPHONEOS_SDK_VERSION) ;
-				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
-				C.ios._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
-
-			case ipadsimulator :
+			case iossimulator :
 				C.ios._BundleInfoBoolean LSRequiresIPhoneOS : true ;
 				C.ios._BundleInfoIntegerArray UIDeviceFamily : 2 ;
 				C.ios._BundleInfoString DTPlatformName : iphonesimulator ;
@@ -623,7 +509,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 			Clean $(cleanBundleTarget) : $(infoplist) ;
 		}
 
-		if $(C.PLATFORM) in ipad iphone  &&  ! $(NT) {
+		if $(C.PLATFORM) in ios  &&  ! $(NT) {
 			# Copy ResourceRules.plist.
 			local sourceResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
 			SEARCH on $(sourceResourceRulesPlist) = $(isysroot) ;
@@ -664,13 +550,13 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 		}
 	}
 	
-	if $(C.PLATFORM) in ipad ipadsimulator iphone iphonesimulator {
+	if $(C.PLATFORM) in ios iossimulator {
 		if ! $(NT) {
 			C.ios.GenerateDSYMFile $(TARGET) ;
 		}
 	}
 
-	if $(C.PLATFORM) in ipad iphone {
+	if $(C.PLATFORM) in ios {
 		local linkTarget = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -768,21 +654,13 @@ rule C.ios._MultiCppCompile_SetupFlags {
 				# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
 				extraflags += -mmacosx-version-min=$(minimumsdkversion) ;
 
-			case iphone :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
+			case ios :
+				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1
 				extraflags += -miphoneos-version-min=$(minimumsdkversion) ;
 
-			case iphonesimulator :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
+			case iossimulator :
+				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1
 				extraflags += -mios-simulator-version-min=$(minimumsdkversion) ;
-
-			case ipadsimulator :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				extraflags += -mios-simulator-version-min=$(minimumsdkversion) ;
-
-			case ipad :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				extraflags += -miphoneos-version-min=$(minimumsdkversion) ;
 		}
 	}
 
@@ -817,21 +695,13 @@ rule C.ios._ApplicationFromObjects_LinkFlags {
 		linkFlags += "-isysroot $(isysroot:C)" ;
 		linkFlags += "-arch $(architecture)" ;
 		switch $(C.PLATFORM) {
-			case iphone :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
+			case ios :
+				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0
 				linkFlags += -miphoneos-version-min=$(minimumsdkversion) ;
 
-			case iphonesimulator :
+			case iossimulator :
 				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
 				linkFlags += -mios-simulator-version-min=$(minimumsdkversion) ;
-
-			case ipadsimulator :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				linkFlags += -mios-simulator-version-min=$(minimumsdkversion) ;
-
-			case ipad :
-				# 4.3, 5.0, 5.1, 6.0 6.1 7.0
-				linkFlags += -miphoneos-version-min=$(minimumsdkversion) ;
 		}
 	}
 
@@ -915,7 +785,7 @@ rule C.ios.CodeSign TARGET : SIGNING_IDENTITY {
 
 
 rule C.ios._ApplicationTargetInfo {
-	if $(C.PLATFORM) in ipad iphone  &&  ! $(NT) {
+	if $(C.PLATFORM) in ios  &&  ! $(NT) {
 		local isysroot $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 		
@@ -1081,7 +951,7 @@ actions C.ios._CodeSign
 rule C.ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
 	ActiveTarget $(TARGET) ;
 
-	if $(C.PLATFORM) in ipad iphone {
+	if $(C.PLATFORM) in ios {
 		if $(IOSBUILDENV_PATH) {
 			if $(CERTIFICATE_CHAIN) {
 				CERTIFICATE_CHAIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CERTIFICATE_CHAIN) ;
@@ -1111,7 +981,7 @@ rule C.ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
 
 rule C.ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK {
 	# Set up the archive support.
-	if $(C.PLATFORM) in ipad iphone {
+	if $(C.PLATFORM) in ios {
 		TARGET = [ ActiveTarget $(TARGET) ] ;
 
 		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -1139,7 +1009,7 @@ rule C.ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK {
 
 rule C.ios.WebServer TARGET {
 	# Set up the archive support.
-	if $(C.PLATFORM) in ipad iphone {
+	if $(C.PLATFORM) in ios {
 		TARGET = [ ActiveTarget $(TARGET) ] ;
 
 		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
