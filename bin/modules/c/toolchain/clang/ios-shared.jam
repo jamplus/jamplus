@@ -1047,12 +1047,15 @@ rule C.ios.WebServer TARGET {
 		local archiveTarget = archive:$(TARGET) ;
 		OUTPUT_PATH on $(archiveTarget) = $(OUTPUT_PATH) ;
 
+		local IP ;
 		if ! $(URL) {
-			URL = [ LuaString "
+			IP = [ LuaString "
 				local socket = require 'socket'.udp()
 				socket:setpeername('10.10.10.10', '9999')
-				return 'https://' .. socket:getsockname() .. ':9999'
+				return socket:getsockname()
 			" ] ;
+			IP = $(IP[1]) ;
+			URL = https://$(IP):9999 ;
 		}
 		if $(URL) {
 			# Stolen from BetaBuilder:
@@ -1134,6 +1137,10 @@ p {font-size:13px;}
 Make sure you're visiting this page on your device, not your computer.</p>
 
 </div>
+
+<h3><strong>Troubleshooting:</strong></h3>
+
+<p>If your iOS device pops up a dialog stating &quot;Cannot connect to $(IP:E="")&quot;, <a href="jamplusCA.cer">install the JamPlus Certificate Authority certificate</a>.</p>
 
 </body>
 </html>
