@@ -414,9 +414,11 @@ static void add_files_to_keepfileshash( void *userdata, HASHDATA *hashdata ) {
 static void clean_unused_files() {
 	LISTITEM *l;
 	LIST* clean_verbose;
+	LIST* clean_noop;
 	LIST* clean_roots;
 	struct hash *keepfileshash;
 	int verbose = 0;
+	int noop = 0;
 
 	keepfileshash = hashinit(sizeof(USEDTARGETSDATA), "usedfiles");
 
@@ -458,6 +460,11 @@ static void clean_unused_files() {
 		verbose = 1;
 	}
 
+	clean_noop = var_get("CLEAN.NOOP");
+	if (clean_noop  &&  list_first(clean_noop)  &&  strcmp(list_value(list_first(clean_noop)), "1") == 0) {
+		noop = 1;
+	}
+
 	clean_roots = var_get("CLEAN.ROOTS");
 	for (l = list_first(clean_roots); l; l = list_next(l)) {
 		fileglob* glob;
@@ -482,7 +489,9 @@ static void clean_unused_files() {
 				if (verbose) {
                     printf("Removing %s...\n", target);
                 }
-				unlink(target);
+				if (!noop) {
+					unlink(target);
+				}
 				emptydirtargets = list_append(emptydirtargets, target, 0);
 			}
 		}
