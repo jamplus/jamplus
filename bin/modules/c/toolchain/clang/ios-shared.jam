@@ -320,7 +320,23 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 		case resourcespec :			C.ios._BundleInfoString CFBundleResourceSpecification : $(VALUE) ;
 		case supportedplatforms :   C.ios._BundleInfoArray CFBundleSupportedPlatforms : $(VALUE) ;
 		case minimumosversion :		C.ios._BundleInfoString MinimumOSVersion : $(VALUE) ;
-		case uidevicefamily :		C.ios._BundleInfoIntegerArray UIDeviceFamily : $(VALUE) ;
+		case uidevicefamily :
+			local actualValues ;
+			local value ;
+			for value in $(VALUE) {
+				if $(value) = iphone {
+					if ! ( 1 in $(actualValues) ) {
+						actualValues += 1 ;
+					}
+				} else if $(value) = ipad {
+					if ! ( 2 in $(actualValues) ) {
+						actualValues += 2 ;
+					}
+				} else if ! ( $(value) in $(actualValues) ) {
+					actualValues += $(value) ;
+				}
+			}
+			C.ios._BundleInfoIntegerArray UIDeviceFamily : $(actualValues) ;
 		case uiprerenderedicon :	C.ios._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
 		case uistatusbarhidden :	C.ios._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
 		case uiviewcontrollerbasedstatusbarappearance : C.ios._BundleInfoBoolean UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
