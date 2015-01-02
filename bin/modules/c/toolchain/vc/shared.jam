@@ -293,6 +293,7 @@ rule C.vc._ApplicationFromObjects_CleanIntermediates {
     local zap = $(_tBINDING:S=$(sufs)) $(_tBINDING).manifest ;
     MakeLocate $(zap) : $(outputPath) ;
     Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(zap) ;
+    CLEAN.KEEP_TARGETS += $(zap) ;
 
     Depends $(zap) : $(_linkTargets) ;
 }
@@ -365,6 +366,7 @@ rule C.vc._SharedLibraryFromObjects_CleanIntermediates {
     local zap = $(_tBINDING:S=$(sufs)) $(_tBINDING).manifest ;
     MakeLocate $(zap) : $(outputPath) ;
     Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(zap) ;
+    CLEAN.KEEP_TARGETS += $(zap) ;
 
     Depends $(zap) : $(_linkTargets) ;
 }
