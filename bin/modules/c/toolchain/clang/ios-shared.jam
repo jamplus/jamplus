@@ -987,21 +987,8 @@ rule C.ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
 				CERTIFICATE_CHAIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = "::" ;
 			}
 		} else {
-			#local codeResourcesSymbolicLink = [ C.GristFiles : CodeResourcesLink ] ;
-			#BINDING on $(codeResourcesSymbolicLink) = CodeResources ;
-			#MakeLocate $(codeResourcesSymbolicLink) : $(bundlePath) ;
-
-			#BUNDLE_PATH on $(codeResources) = $(bundlePath) ;
-			#LINK_TARGET on $(codeResources) = $(linkTarget) ;
 			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(entitlements) ;
 			SIGNING_IDENTITY on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SIGNING_IDENTITY) ;
-
-			#DSYM_NAME on $(codeResources) = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-			#C._CodeSign $(codeResources) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
-
-			#UseCommandLine $(codeResources) : $(dependsList) ;
-			#Depends $(bundleTarget) : $(codeResources) : $(dependsList) ;
-			#Clean $(cleanBundleTarget) : $(codeResources) $(codeResourcesSymbolicLink) ;
 		}
 	}
 }
