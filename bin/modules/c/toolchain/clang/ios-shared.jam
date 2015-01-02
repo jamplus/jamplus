@@ -276,7 +276,7 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 		switch $(C.PLATFORM) {
 			case ios :
 				C.ios._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C.ios._BundleInfoIntegerArray UIDeviceFamily : 1 ;
+				C.ios._BundleInfoIntegerArray UIDeviceFamily : 1 2 ;
 				C.ios._BundleInfoString DTPlatformName : iphoneos ;
 				C.ios._BundleInfoString DTSDKName : iphoneos$(IPHONEOS_SDK_VERSION) ;
 				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
@@ -287,7 +287,7 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 
 			case iossimulator :
 				C.ios._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C.ios._BundleInfoIntegerArray UIDeviceFamily : 2 ;
+				C.ios._BundleInfoIntegerArray UIDeviceFamily : 1 2 ;
 				C.ios._BundleInfoString DTPlatformName : iphonesimulator ;
 				C.ios._BundleInfoString DTSDKName : iphonesimulator$(IPHONEOS_SDK_VERSION) ;
 				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneSimulator ;
