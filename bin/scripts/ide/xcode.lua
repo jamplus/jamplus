@@ -490,7 +490,13 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 			elseif platformName == 'ios'  or  platformName == 'iossimulator' then
 				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
 				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
-				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = 1;\n")
+				local targetedDeviceFamily = "1,2"
+				if subProject.TARGETED_DEVICE_FAMILY  and  subProject.TARGETED_DEVICE_FAMILY[platformName]  and  subProject.TARGETED_DEVICE_FAMILY[platformName][configName] then
+					targetedDeviceFamily = subProject.TARGETED_DEVICE_FAMILY[platformName][configName]
+				elseif Projects['C.*']  and  Projects['C.*'].TARGETED_DEVICE_FAMILY  and  Projects['C.*'].TARGETED_DEVICE_FAMILY[platformName]  and  Projects['C.*'].TARGETED_DEVICE_FAMILY[platformName][configName] then
+					targetedDeviceFamily = Projects['C.*'].TARGETED_DEVICE_FAMILY[platformName][configName]
+				end
+				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = \"" .. targetedDeviceFamily .. "\";\n")
 			end
 			table.insert(self.Contents, "\t\t\t};\n")
 			table.insert(self.Contents, '\t\t\tname = "' .. platformAndConfigText .. '";\n')

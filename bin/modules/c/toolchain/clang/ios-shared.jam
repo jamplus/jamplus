@@ -281,6 +281,8 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 				C.ios._BundleInfoString DTSDKName : iphoneos$(IPHONEOS_SDK_VERSION) ;
 				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
 				C.ios._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
+				if $(TARGETINFO_LOCATE) {
+					Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
 
 " ;
 				}
@@ -292,6 +294,11 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 				C.ios._BundleInfoString DTSDKName : iphonesimulator$(IPHONEOS_SDK_VERSION) ;
 				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneSimulator ;
 				C.ios._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
+				if $(TARGETINFO_LOCATE) {
+					Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
+
+" ;
+				}
 		}
 	}
 
@@ -337,6 +344,11 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 				}
 			}
 			C.ios._BundleInfoIntegerArray UIDeviceFamily : $(actualValues) ;
+			if $(TARGETINFO_LOCATE) {
+				Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
+
+" ;
+			}
 		case uiprerenderedicon :	C.ios._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
 		case uistatusbarhidden :	C.ios._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
 		case uiviewcontrollerbasedstatusbarappearance : C.ios._BundleInfoBoolean UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
