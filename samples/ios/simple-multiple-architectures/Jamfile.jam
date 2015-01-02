@@ -1,0 +1,34 @@
+SubDir TOP ;
+
+rule BuildSimple {
+    C.ActiveTarget simple ;
+
+    C.OutputPostfixClear ;
+
+    C.ios.LinkFrameworks : Foundation UIKit ;
+
+    C.Application : main.m ;
+}
+
+local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
+local toolchainsUsed = [ C.Toolchain $(C.ACTIVE_TOOLCHAIN_SPEC)@C.ARCHITECTURE=armv7s ] ;
+BuildSimple ;
+
+toolchainsUsed += [ C.Toolchain $(saveActiveToolchainSpec)@C.ARCHITECTURE=armv7 ] ;
+BuildSimple ;
+
+C.Toolchain $(saveActiveToolchainSpec) ;
+C.ActiveTarget simple ;
+C.ios.BundleInfo : displayname : simple ;
+C.ios.BundleInfo : identifier : * 1234567890 ;
+C.ios.BundleInfo : bundleversion : 1.0 ;
+C.ios.BundleInfo : uistatusbarhidden : true ;
+
+C.ios.ProvisionFile : test.mobileprovision ;
+
+C.ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
+C.ios.Bundle simple : $(toolchainsUsed) ;
+
+C.ios.Archive simple : $(ALL_LOCATE_TARGET)/package ;
+C.ios.WebServer simple ;
+
