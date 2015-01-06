@@ -421,8 +421,20 @@ actions ios.ProcessEntitlements
 }
 	#plutil -convert binary1 $(1)
 
+if $(NT) {
+
+actions C.ios._Lipo {
+	if exist "$(1:\\).lipo" del /F "$(1:\\).lipo"
+	if exist "$(1:\\)" del /F "$(1:\\)"
+	$(C.LIPO:C) $(2:C) -output $(1:C) -create
+}
+
+} else {
+
 actions C.ios._Lipo {
 	$(C.LIPO:C) $(2:C) -output $(1:C) -create
+}
+
 }
 
 rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH {
