@@ -61,6 +61,7 @@ end
 
 function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	local filename = ospath.join(outputPath, self.ProjectName .. '.vcxproj')
+	local userContents = {}
 
 	local info = ProjectExportInfo[self.ProjectName]
 	if not info then
@@ -152,6 +153,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 				Defines = '',
 				Includes = '',
 				Output = '',
+				OutputPath = '',
 			}
 
 			if project and project.Name and project.Name ~= '!BuildWorkspace' and project.Name ~= '!UpdateWorkspace' then
@@ -163,6 +165,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 				end
 				if project.OutputPaths and project.OutputPaths[platformName] and project.OutputPaths[platformName][configName] 
 					and project.OutputNames and project.OutputNames[platformName] and project.OutputNames[platformName][configName] then
+					configInfo.OutputPath = project.OutputPaths[platformName][configName]
 					configInfo.Output = project.OutputPaths[platformName][configName] .. project.OutputNames[platformName][configName]
 				end
 				if project.DebuggerOutputNames  and  project.DebuggerOutputNames[platformName]  and  project.DebuggerOutputNames[platformName][configName] then
@@ -192,6 +195,14 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
     <NMakePreprocessorDefinitions>$(Defines)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(Includes)</NMakeIncludeSearchPath>
 ]==], configInfo, info, _G))
+
+			userContents[#userContents + 1] = expand([==[
+  <PropertyGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'">
+    <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+]==], configInfo, info, _G)
+
 			if self.Options.vs2012 then
 				self.Contents[#self.Contents + 1] = [[
     <PlatformToolset>v110</PlatformToolset>
@@ -256,6 +267,18 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n'):gsub('\n', '\r\n')
 
 	WriteFileIfModified(filename, self.Contents)
+
+	if userContents[1] then
+		local userFilename = ospath.join(outputPath, self.ProjectName .. '.vcxproj.user')
+		userContents = [[
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+]] .. table.concat(userContents) .. [[
+</Project>
+]]
+		userContents = userContents:gsub('\r\n', '\n'):gsub('\n', '\r\n')
+		WriteFileIfModified(userFilename, userContents)
+	end
 
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------

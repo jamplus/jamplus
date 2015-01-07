@@ -908,7 +908,7 @@ function BuildWorkspaces()
 	locateTargetText =
 	{
 		locateTargetText = [[
-ALL_LOCATE_TARGET = "$(destinationRootPath)$$(C.PLATFORM)-$$(C.CONFIG)" ;
+ALL_LOCATE_TARGET = "$(destinationRootPath)$$(C.PLATFORM)/_intermediates_" ;
 ]],
 		settingsFile = ospath.join(destinationRootPath, 'customsettings.jam'),
 	}
@@ -919,7 +919,7 @@ ALL_LOCATE_TARGET = "$(destinationRootPath)$$(C.PLATFORM)-$$(C.CONFIG)" ;
 	local jamfileText = { expand([[
 # Generated file
 $(locateTargetText)
-DEPCACHE.standard = "$$(ALL_LOCATE_TARGET)/.depcache" ;
+DEPCACHE.standard = "$$(ALL_LOCATE_TARGET)/$$(C.PLATFORM)-$$(C.CONFIG)/.depcache" ;
 DEPCACHE = standard ;
 
 NoCare "$(settingsFile)" ;
