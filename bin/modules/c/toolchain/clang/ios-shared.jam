@@ -986,6 +986,7 @@ actions C.ios._CodeSign
 {
     "$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S$(CERTIFICATE_CHAIN) -E"" $(LINK_TARGET:CT)
     copy /B $(LINK_TARGET:CT\\)+,, $(LINK_TARGET:CT\\) > nul
+    copy /B $(1:C\\)+,, $(1:CT\\) > nul
 }
 
 } else {
