@@ -1380,7 +1380,7 @@ rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
 	PUBLIC_NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristLibraries) ;
 
 	local optional ;
-	if optional in $(OPTIONS) {
+	if optional in $(OPTIONS)  ||  $(C.PLATFORM) = *  ||  $(TARGETINFO_LOCATE) {
 	    optional = true ;
 	}
 
