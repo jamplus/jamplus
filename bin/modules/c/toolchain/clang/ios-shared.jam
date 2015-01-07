@@ -450,6 +450,8 @@ rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH {
 }
 
 
+if ! $(TARGETINFO_LOCATE) {
+
 rule C.ios.Bundle TARGET : TOOLCHAINS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 
@@ -638,6 +640,13 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 	}
 
 }
+
+} else { # TARGETINFO_LOCATE
+
+rule C.ios.Bundle TARGET : TOOLCHAINS {
+}
+
+} # TARGETINFO_LOCATE
 
 
 rule C.ios._ApplicationFromObjects_PostBuild {
