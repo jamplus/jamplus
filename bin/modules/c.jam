@@ -1366,6 +1366,11 @@ rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
 	    link = 1 ;
 	}
 
+	if $(TARGETINFO_LOCATE) {
+		LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(INHERITS_TARGETS) ;
+		PUBLIC_LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(INHERITS_TARGETS) ;
+	}
+
 	local suflib = $(SUFLIB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local gristLibraries ;
 	local lib ;
@@ -1423,9 +1428,9 @@ rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
 	}
 
 	if $(TARGETINFO_LOCATE) {
-		local projectsString = "	'$(INHERITS_TARGETS)',$(NEWLINE)" ;
+		local projectsString = "	'$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))',$(NEWLINE)" ;
 		Contents += "Projects['$(C.ACTIVE_TARGET)'].Libraries = concat(Projects['$(C.ACTIVE_TARGET)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
-		Contents += "$(projectsString:J=$(EMPTY))})$(NEWLINE)" ;
+		Contents += "$(projectsString:J=$(EMPTY):E="")})$(NEWLINE)" ;
 	}
 }
 
