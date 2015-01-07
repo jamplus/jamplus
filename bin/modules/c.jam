@@ -1029,6 +1029,12 @@ rule C.ForceFileType TARGET : SOURCES : FILE_TYPE {
 }
 
 
+rule C.ForcePublic TARGET {
+    C.ActiveTarget $(TARGET) ;
+    __PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+}
+
+
 rule C.InstallNamePath TARGET : INSTALL_NAME_PATH {
 	C.ActiveTarget $(TARGET) ;
 	INSTALL_NAME_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(INSTALL_NAME_PATH) ;
