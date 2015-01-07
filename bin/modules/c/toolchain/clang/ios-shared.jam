@@ -455,16 +455,9 @@ if ! $(TARGETINFO_LOCATE) {
 rule C.ios.Bundle TARGET : TOOLCHAINS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 
-	local outputName = [ C._retrieveOutputName ] ;
-	local outputPath = [ C._retrieveOutputPath ] ;
-	local bundlePath = $(outputPath)/$(outputName).app ;
-	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
-
-	local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
-	local colon = ":" ;
-	local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
-	BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleTarget) ;
-	CLEAN_BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(cleanBundleTarget) ;
+	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(bundleTarget) ;
 	NotFile $(bundleTarget) ;
 	Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(cleanBundleTarget) ;
@@ -650,6 +643,17 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 
 
 rule C.ios._ApplicationFromObjects_PostBuild {
+	local outputName = [ C._retrieveOutputName ] ;
+	local outputPath = [ C._retrieveOutputPath ] ;
+	local bundlePath = $(outputPath)/$(outputName).app ;
+	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
+
+	local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
+	local colon = ":" ;
+	local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
+	BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleTarget) ;
+	CLEAN_BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(cleanBundleTarget) ;
+
 	if bundle in $(OPTIONS) {
 		C.ios.Bundle ;
 	}
