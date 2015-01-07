@@ -435,7 +435,17 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 	# directory should not hold object files, LOCATE_TARGET can
 	# subsequently be redefined.
 
-	ALL_LOCATE_TARGET ?= @(.build:R=$(CWD)) ;
+	if ! $(ALL_LOCATE_TARGET) {
+		ALL_LOCATE_TARGET = @(.build:R=$(CWD)) ;
+		if [ Glob $(ALL_LOCATE_TARGET) : buildenvironment.config ] {
+			Echo "* A Jam workspace has already been created at:" ;
+			Echo ;
+			Echo "    " $(ALL_LOCATE_TARGET) ;
+			Echo ;
+			Echo * Please run Jam from within that directory. ;
+			Exit ;
+		}
+	}
 
 	if ! $(DEPCACHE.$(DEPCACHE))  &&  ! $(JAM_NO_DEP_CACHE) {
 		DEPCACHE.$(DEPCACHE) = $(ALL_LOCATE_TARGET:E=.)/.depcache ;
