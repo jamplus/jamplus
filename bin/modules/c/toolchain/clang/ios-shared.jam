@@ -637,6 +637,10 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 } else { # TARGETINFO_LOCATE
 
 rule C.ios.Bundle TARGET : TOOLCHAINS {
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
+	local project = "Projects['$(TARGET)']" ;
+	Contents += "if not $(project).Options then $(project).Options = {} end$(NEWLINE)" ;
+	Contents += "$(project).Options['bundle'] = true$(NEWLINE)" ;
 }
 
 } # TARGETINFO_LOCATE
