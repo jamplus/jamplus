@@ -542,7 +542,9 @@ function BuildSourceTree(project)
 	project.Sources = newSources
 
 	-- Add Jamfile.jam.
-	sourcesMap[project.Jamfile:lower()] = project.Jamfile
+	if project.Jamfile then
+		sourcesMap[project.Jamfile:lower()] = project.Jamfile
+	end
 
 	if project.SourceGroups then
 		for sourceGroupName, sourceGroup in pairs(project.SourceGroups) do
