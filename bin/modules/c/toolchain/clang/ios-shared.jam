@@ -864,7 +864,7 @@ rule C.ios._ApplicationTargetInfo {
 } else {
 
 rule ios.XIB PARENT : SOURCES  {
-	PARENT = [ ActiveTarget $(PARENT) ] ;
+	PARENT = [ C.ActiveTarget $(PARENT) ] ;
 	
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	if ! $(bundlePath)
@@ -875,7 +875,7 @@ rule ios.XIB PARENT : SOURCES  {
 
 
 	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-	SEARCH on $(SOURCES) = $(SEARCH_SOURCE) ;
+	SEARCH on $(SOURCES) += $(SEARCH_SOURCE) ;
 	
 	local targets = $(SOURCES:S=.nib) ;
 	
