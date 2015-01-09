@@ -143,59 +143,108 @@ rule C.macosx._BundleInfoString KEY : VALUE {
 rule C.macosx.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
-		C._BundleInfoString CFBundleDevelopmentRegion : en ;
-		C._BundleInfoString CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
-		C._BundleInfoString CFBundleInfoDictionaryVersion : 6.0 ;
-		C._BundleInfoString CFBundlePackageType : APPL ;
-		C._BundleInfoString CFBundleSignature : ???? ;
-		C._BundleInfoString CFBundleResourceSpecification : ResourceRules.plist ;
-
-		switch $(C.PLATFORM) {
-			case macosx32 :			VALUE = "" ;
-			case macosx64 :			VALUE = "" ;
-		}
+		C.macosx._BundleInfoString CFBundleDevelopmentRegion : en ;
+		C.macosx._BundleInfoString CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
+		C.macosx._BundleInfoString CFBundleInfoDictionaryVersion : 6.0 ;
+		C.macosx._BundleInfoString CFBundlePackageType : APPL ;
+		C.macosx._BundleInfoString CFBundleSignature : ???? ;
+		C.macosx._BundleInfoString CFBundleResourceSpecification : ResourceRules.plist ;
 	}
 
 	switch $(TYPE:L) {
-		case info :					C._BundleInfoString CFBundleGetInfoString : $(VALUE) ;
-		case iconfile :				C._BundleInfoString CFBundleIconFile : $(VALUE) ;
-		case iconfiles :			C._BundleInfoArray CFBundleIconFiles : $(VALUE) ;
-		case longversion :			C._BundleInfoString CFBundleLongVersionString : $(VALUE) ;
+		case info :					C.macosx._BundleInfoString CFBundleGetInfoString : $(VALUE) ;
+		case iconfile :				C.macosx._BundleInfoString CFBundleIconFile : $(VALUE) ;
+		case iconfiles :			C.macosx._BundleInfoArray CFBundleIconFiles : $(VALUE) ;
+		case longversion :			C.macosx._BundleInfoString CFBundleLongVersionString : $(VALUE) ;
 		case bundlename :
-			C._BundleInfoString CFBundleName : $(VALUE) ;
+			C.macosx._BundleInfoString CFBundleName : $(VALUE) ;
 			CFBundleName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case displayname :
-			C._BundleInfoString CFBundleDisplayName : $(VALUE) ;
+			C.macosx._BundleInfoString CFBundleDisplayName : $(VALUE) ;
 			CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-		case executable :			C._BundleInfoString CFBundleExecutable : $(VALUE) ;
+		case executable :			C.macosx._BundleInfoString CFBundleExecutable : $(VALUE) ;
 		case identifier :
-			C._BundleInfoString CFBundleIdentifier : $(VALUE[1]) ;
+			C.macosx._BundleInfoString CFBundleIdentifier : $(VALUE[1]) ;
 			CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE[1]) ;
 			AppIdentifierPrefix on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE[2]) ;
-		case shortversion :			C._BundleInfoString CFShortVersionString : $(VALUE) ;
+		case shortversion :			C.macosx._BundleInfoString CFShortVersionString : $(VALUE) ;
 		case bundleversion :
-			C._BundleInfoString CFBundleVersion : $(VALUE) ;
+			C.macosx._BundleInfoString CFBundleVersion : $(VALUE) ;
 			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-		case copyright :			C._BundleInfoString NSHumanReadableCopyright : $(VALUE) ;
-		case mainnibfile :			C._BundleInfoString NSMainNibFile : $(VALUE) ;
-		case resourcespec :			C._BundleInfoString CFBundleResourceSpecification : $(VALUE) ;
-		case supportedplatforms :   C._BundleInfoArray CFBundleSupportedPlatforms : $(VALUE) ;
-		case minimumosversion :		C._BundleInfoString MinimumOSVersion : $(VALUE) ;
-		case uidevicefamily :		C._BundleInfoIntegerArray UIDeviceFamily : $(VALUE) ;
-		case uiprerenderedicon :	C._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
-		case uistatusbarhidden :	C._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
-		case uiviewcontrollerbasedstatusbarappearance : C._BundleInfoBoolean UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
+		case copyright :			C.macosx._BundleInfoString NSHumanReadableCopyright : $(VALUE) ;
+		case mainnibfile :			C.macosx._BundleInfoString NSMainNibFile : $(VALUE) ;
+		case resourcespec :			C.macosx._BundleInfoString CFBundleResourceSpecification : $(VALUE) ;
+		case supportedplatforms :   C.macosx._BundleInfoArray CFBundleSupportedPlatforms : $(VALUE) ;
+		case minimumosversion :		C.macosx._BundleInfoString MinimumOSVersion : $(VALUE) ;
+		case uidevicefamily :		C.macosx._BundleInfoIntegerArray UIDeviceFamily : $(VALUE) ;
+		case uiprerenderedicon :	C.macosx._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
+		case uistatusbarhidden :	C.macosx._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
+		case uiviewcontrollerbasedstatusbarappearance : C.macosx._BundleInfoBoolean UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
 	}
 }
 
 
-rule C.macosx._ApplicationFromObjects_PostBuild {
-	if bundle in $(OPTIONS) {
-		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		bundlePath = $(bundlePath)/Contents ;
+actions C.macosx._GenerateDSYMFile {
+	@($(COMPILER_BIN_PATH)/dsymutil:C) $(2:C) -o $(OUTPUT_PATH:C)
+}
 
-		local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+rule C.macosx.GenerateDSYMFile TARGET {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local dsymBundlePath = $(bundlePath).dSYM ;
+	local _t = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local _t.dsym = $(_t).DSYM ;
+	DSYM_NAME on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_t.dsym) ;
+	BINDING on $(_t.dsym) = $(BINDING:Z=$(_t)) ;
+	OUTPUT_PATH on $(_t.dsym) = $(dsymBundlePath) ;
+	MakeLocate $(_t.dsym) : $(dsymBundlePath)/Contents/Resources/DWARF ;
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t.dsym) : $(_t) ;
+	CleanTree $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(dsymBundlePath) ;
+	C.macosx._GenerateDSYMFile $(_t.dsym) : $(_t) : $(C.COMPILER_SUITE_SYMBOL) ;
+}
+
+
+actions C.macosx._Lipo {
+	$(C.LIPO:C) $(2:C) -output $(1:C) -create
+}
+
+rule C.macosx.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	local C.__COLON = ":" ;
+	local _t = $(LINK_TARGETS[0]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)$(C.__COLON)lipo) ;
+	BINDING on $(_t) = $(BINDING:Z=$(LINK_TARGETS[0])) ;
+	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t) : $(LINK_TARGETS) ;
+	MakeLocate $(_t) : $(OUTPUT_PATH) ;
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_t) ;
+	C.macosx._Lipo $(_t) : $(LINK_TARGETS) : $(C.COMPILER_SUITE_SYMBOL) ;
+	LIPO_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_t) ;
+	return $(linkTargets) ;
+}
+
+
+rule C.macosx.Bundle TARGET : TOOLCHAINS {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(bundleTarget) ;
+	NotFile $(bundleTarget) ;
+	Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(cleanBundleTarget) ;
+	NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+	Always clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+	NotFile $(cleanBundleTarget) ;
+	Always $(cleanBundleTarget) ;
+
+	local linkTargets ;
+	local toolchain ;
+	for toolchain in $(TOOLCHAINS:E=$(C.ACTIVE_TOOLCHAIN)) {
+		linkTargets += [ C.GetLinkTargets $(TARGET) : $(toolchain) ] ;
+	}
+	C.macosx.Lipo $(TARGET) : $(linkTargets) : $(bundlePath) ;
+
+	{
 		local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
@@ -265,6 +314,44 @@ rule C.macosx._ApplicationFromObjects_PostBuild {
 			Depends $(bundleTarget) : $(infoplist) ;
 			Clean $(cleanBundleTarget) : $(infoplist) ;
 		}
+
+		{
+			local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			local embedded.mobileprovision = @(embedded.mobileprovision:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+			MakeLocate $(embedded.mobileprovision) : $(bundlePath) ;
+
+			# Copy provision into the bundle and name it embedded.mobileprovision
+			Depends $(bundleTarget) : $(embedded.mobileprovision) ;
+			#CopyFile $(TARGET) : $(embedded.mobileprovision) : $(provisionFileTarget) ;
+
+			# Without this, if we change between profiles, the copy will not always
+			# work due to destination time stamp being newer than source (despite
+			# coming from a different file).
+			UseCommandLine $(embedded.mobileprovision) : $(provisionFileTarget) ;
+		}
+	}
+
+	if $(C.PLATFORM) in macosx32 macosx64 {
+		if ! $(NT) {
+			C.macosx.GenerateDSYMFile $(TARGET) ;
+		}
+	}
+}
+
+rule C.macosx._ApplicationFromObjects_PostBuild {
+	local outputName = [ C._retrieveOutputName ] ;
+	local outputPath = [ C._retrieveOutputPath ] ;
+	local bundlePath = $(outputPath)/$(outputName).app ;
+	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
+
+	local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
+	local colon = ":" ;
+	local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
+	BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleTarget) ;
+	CLEAN_BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(cleanBundleTarget) ;
+
+	if bundle in $(OPTIONS) {
+		C.macosx.Bundle ;
 	}
 }
 
@@ -334,25 +421,6 @@ rule C.macosx._ApplicationFromObjects_LinkFlags {
 	}
 
 	linkFlags += "-framework $(FRAMEWORKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))" ;
-
-	if bundle in $(OPTIONS) {
-		local outputName = [ C._retrieveOutputName ] ;
-		local bundlePath = $(outputPath)/$(outputName).app ;
-		BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
-
-		MakeLocate $(_linkTargets) : $(bundlePath)/Contents/MacOS ;
-
-		local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
-		local colon = ":" ;
-		local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
-		BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleTarget) ;
-		CLEAN_BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(cleanBundleTarget) ;
-		Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(bundleTarget) ;
-		NotFile $(bundleTarget) ;
-		Depends $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(cleanBundleTarget) ;
-		NotFile $(cleanBundleTarget) ;
-		Always $(cleanBundleTarget) ;
-	}
 }
 
 
