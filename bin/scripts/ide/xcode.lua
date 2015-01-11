@@ -578,7 +578,7 @@ function XcodeProjectMetaTable:Write(outputPath)
 
 	-- Build all targets
 	local allTargets = { project }
-	if project.Name ~= buildWorkspaceName  and  project.Name ~= updateWorkspaceName then
+	if false  and  project.Name ~= buildWorkspaceName  and  project.Name ~= updateWorkspaceName then
 		local jamProject = deepcopy(project)
 		jamProject.Name = '!clean:' .. project.Name
 		Projects[jamProject.Name] = project
@@ -914,7 +914,7 @@ EndProject
 		local curProject = Projects[projectName]
 		allTargets[#allTargets + 1] = curProject
 
-		if projectName ~= buildWorkspaceName  and  projectName ~= updateWorkspaceName then
+		if false  and  projectName ~= buildWorkspaceName  and  projectName ~= updateWorkspaceName then
 			local jamProject = deepcopy(curProject)
 			jamProject.Name = '!clean:' .. jamProject.Name
 			Projects[jamProject.Name] = jamProject
