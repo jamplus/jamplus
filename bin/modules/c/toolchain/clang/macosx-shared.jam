@@ -148,7 +148,7 @@ rule C.macosx.BundleInfo TARGET : TYPE : VALUE {
 		C.macosx._BundleInfoString CFBundleInfoDictionaryVersion : 6.0 ;
 		C.macosx._BundleInfoString CFBundlePackageType : APPL ;
 		C.macosx._BundleInfoString CFBundleSignature : ???? ;
-		C.macosx._BundleInfoString CFBundleResourceSpecification : ResourceRules.plist ;
+		#C.macosx._BundleInfoString CFBundleResourceSpecification : ResourceRules.plist ;
 	}
 
 	switch $(TYPE:L) {
@@ -173,6 +173,7 @@ rule C.macosx.BundleInfo TARGET : TYPE : VALUE {
 			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case copyright :			C.macosx._BundleInfoString NSHumanReadableCopyright : $(VALUE) ;
 		case mainnibfile :			C.macosx._BundleInfoString NSMainNibFile : $(VALUE) ;
+		case nsprincipalclass :		C.macosx._BundleInfoString NSPrrincipalClass : $(VALUE) ;
 		case resourcespec :			C.macosx._BundleInfoString CFBundleResourceSpecification : $(VALUE) ;
 		case supportedplatforms :   C.macosx._BundleInfoArray CFBundleSupportedPlatforms : $(VALUE) ;
 		case minimumosversion :		C.macosx._BundleInfoString MinimumOSVersion : $(VALUE) ;
@@ -242,7 +243,7 @@ rule C.macosx.Bundle TARGET : TOOLCHAINS {
 	for toolchain in $(TOOLCHAINS:E=$(C.ACTIVE_TOOLCHAIN)) {
 		linkTargets += [ C.GetLinkTargets $(TARGET) : $(toolchain) ] ;
 	}
-	C.macosx.Lipo $(TARGET) : $(linkTargets) : $(bundlePath) ;
+	C.macosx.Lipo $(TARGET) : $(linkTargets) : $(bundlePath)/MacOS ;
 
 	{
 		local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -332,9 +333,7 @@ rule C.macosx.Bundle TARGET : TOOLCHAINS {
 	}
 
 	if $(C.PLATFORM) in macosx32 macosx64 {
-		if ! $(NT) {
-			C.macosx.GenerateDSYMFile $(TARGET) ;
-		}
+#		C.macosx.GenerateDSYMFile $(TARGET) ;
 	}
 }
 
@@ -342,7 +341,7 @@ rule C.macosx._ApplicationFromObjects_PostBuild {
 	local outputName = [ C._retrieveOutputName ] ;
 	local outputPath = [ C._retrieveOutputPath ] ;
 	local bundlePath = $(outputPath)/$(outputName).app ;
-	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
+	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath)/Contents ;
 
 	local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
 	local colon = ":" ;
@@ -466,7 +465,7 @@ rule C.macosx._SharedLibraryFromObjects_LinkFlags {
 }
 
 
-rule C.SetTaskAllow TARGET : VALUE {
+rule C.macosx.SetTaskAllow TARGET : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 
 	# If true/false isn't specific, assume true, as 'setting' could be thought of enabling.
@@ -479,10 +478,14 @@ rule C.SetTaskAllow TARGET : VALUE {
 
 if $(TARGETINFO_LOCATE) {
 
-rule C.SetTaskAllow {
+rule C.macosx.XIB {
+
 }
 
-rule C.CodeSign TARGET : PROVISIONING_PROFILE {
+rule C.macosx.SetTaskAllow {
+}
+
+rule C.macosx.CodeSign TARGET : PROVISIONING_PROFILE {
 	Contents += "Projects[ [[C.*]] ].IOS_SIGNING_IDENTITY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(PROVISIONING_PROFILE)]]
 
 " ;
@@ -493,6 +496,37 @@ rule C._ApplicationTargetInfo {
 }
 
 } else {
+
+rule C.macosx.XIB PARENT : SOURCES : TARGET_DIRECTORY {
+	PARENT = [ C.ActiveTarget $(PARENT) ] ;
+
+	SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+	SEARCH on $(SOURCES) += $(SEARCH_SOURCE) ;
+
+	local targets = $(SOURCES:S=.nib) ;
+
+	MakeLocate $(targets) : $(TARGET_DIRECTORY) ;
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(targets) ;
+
+	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(targets) ;
+
+	local source ;
+	for source in $(SOURCES) {
+		local target = $(source:S=.nib) ;
+		Depends $(target) : $(source) ;
+
+		C.macosx._CompileXIB $(target) : $(source) : $(C.COMPILER_SUITE_SYMBOL) ;
+	}
+}
+
+
+	#/Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile $(1:C) $(2:C)
+actions C.macosx._CompileXIB
+{
+	PATH=$(MACOSX_SDK_DEVELOPER_ROOT)/usr/bin:$PATH
+	/Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile $(1:C) $(2:C)
+}
+
 
 } # TARGETINFO_LOCATE
 
