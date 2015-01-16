@@ -473,27 +473,32 @@ static void clean_unused_files() {
 		while (fileglob_Next(glob)) {
 			const char *target = fileglob_FileName(glob);
 			USEDTARGETSDATA usedtargetsdata, *c = &usedtargetsdata;
-# ifdef DOWNSHIFT_PATHS
 			char path[MAXJPATH];
 			char *p = path;
 
+# ifdef DOWNSHIFT_PATHS
 			do *p++ = (char)tolower(*target);
 			while (*target++);
-
-			target = path;
+# else
+			strcpy(path, target);
 # endif
+			target = path;
 
 			c->name = target;
 
-			if (!hashcheck(keepfileshash, (HASHDATA **)&c)) {
-				if (verbose) {
-                    printf("Removing %s...\n", target);
-                }
-				if (!noop) {
-					unlink(target);
+			if (fileglob_IsDirectory(glob)) {
+				strcat(path, "\x01");
+			} else {
+				if (!hashcheck(keepfileshash, (HASHDATA **)&c)) {
+					if (verbose) {
+						printf("Removing %s...\n", target);
+					}
+					if (!noop) {
+						unlink(target);
+					}
 				}
-				emptydirtargets = list_append(emptydirtargets, target, 0);
 			}
+			emptydirtargets = list_append(emptydirtargets, target, 0);
 		}
 		fileglob_Destroy(glob);
 	}
