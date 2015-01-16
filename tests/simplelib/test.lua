@@ -84,13 +84,13 @@ function Test()
 ]]
 
 	else
-		dirs = {
+		dirs =
+		{
 			'app/',
 			'lib-a/',
-			'app/$(TOOLCHAIN_PATH)/',
-			'app/$(TOOLCHAIN_PATH)/app/',
-			'lib-a/$(TOOLCHAIN_PATH)/',
-			'lib-a/$(TOOLCHAIN_PATH)/lib-a/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/app/app/',
+			'$(TOOLCHAIN_PATH)/lib-a/lib-a/',
 		}
 
 		files = {
@@ -98,15 +98,15 @@ function Test()
 			'test.lua',
 			'app/Jamfile.jam',
 			'app/main.c',
-			'app/$(TOOLCHAIN_PATH)/app/app.release',
-			'app/$(TOOLCHAIN_PATH)/app/main.o',
+			'$(TOOLCHAIN_PATH)/app/app/app.release',
+			'$(TOOLCHAIN_PATH)/app/app/main.o',
 			'lib-a/add.c',
 			'lib-a/add.h',
 			'lib-a/Jamfile.jam',
-			'lib-a/$(TOOLCHAIN_PATH)/lib-a/add.o',
-			'lib-a/$(TOOLCHAIN_PATH)/lib-a/lib-a.release.a',
+			'$(TOOLCHAIN_PATH)/lib-a/lib-a/add.o',
+			'$(TOOLCHAIN_PATH)/lib-a/lib-a/lib-a.release.a',
 		}
-
+	
 		patternA = [[
 *** found 12 target(s)...
 *** updating 6 target(s)...

@@ -103,6 +103,7 @@ project1.cpp
 
 		local pass1Files =
 		{
+			'.build/.depcache',
 			'Jamfile.jam',
 			'test.lua',
 			'source/Jamfile.jam',
@@ -114,6 +115,7 @@ project1.cpp
 
 		local pass1Directories =
 		{
+			'.build/',
 			'source/',
 			'source/project1/',
 			'source/project1/lib/',

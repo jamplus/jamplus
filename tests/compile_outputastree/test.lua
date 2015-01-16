@@ -215,6 +215,7 @@ function Test()
 	else
 		local dirs =
 		{
+			'.build/',
 			'liba/',
 			'libb/',
 			'libc/',

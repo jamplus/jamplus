@@ -92,16 +92,14 @@ function Test()
 
 		TestPattern(pattern, RunJam())
 
-		local pass1Dirs = {
+		local pass1Directories = {
 			'common/',
 			'libA/',
 			'project1/',
-			'common/$(TOOLCHAIN_PATH)/',
-			'common/$(TOOLCHAIN_PATH)/common/',
-			'libA/$(TOOLCHAIN_PATH)/',
-			'libA/$(TOOLCHAIN_PATH)/libA/',
-			'project1/$(TOOLCHAIN_PATH)/',
-			'project1/$(TOOLCHAIN_PATH)/project1/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/common/common/',
+			'$(TOOLCHAIN_PATH)/libA/libA/',
+			'$(TOOLCHAIN_PATH)/project1/project1/',
 		}
 
 		local pass1Files =
@@ -111,20 +109,20 @@ function Test()
 			'common/common.jam',
 			'common/print.cpp',
 			'common/print.h',
-			'common/$(TOOLCHAIN_PATH)/common/common.release.a',
-			'common/$(TOOLCHAIN_PATH)/common/print.o',
+			'$(TOOLCHAIN_PATH)/common/common/common.release.a',
+			'$(TOOLCHAIN_PATH)/common/common/print.o',
 			'libA/libA.cpp',
 			'libA/libA.jam',
-			'libA/$(TOOLCHAIN_PATH)/libA/libA.o',
-			'libA/$(TOOLCHAIN_PATH)/libA/libA.release.a',
+			'$(TOOLCHAIN_PATH)/libA/libA/libA.o',
+			'$(TOOLCHAIN_PATH)/libA/libA/libA.release.a',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/$(TOOLCHAIN_PATH)/project1/project1.o',
-			'project1/$(TOOLCHAIN_PATH)/project1/project1.release',
+			'$(TOOLCHAIN_PATH)/project1/project1/project1.o',
+			'$(TOOLCHAIN_PATH)/project1/project1/project1.release',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(pass1Dirs)
+		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
 *** found 18 target(s)...

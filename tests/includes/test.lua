@@ -118,35 +118,35 @@ function Test()
 
 		TestPattern(pattern, RunJam())
 
-		local pass1Dirs = {
+		local pass1Directories = {
 			'common/',
 			'project1/',
 			'shared/',
-			'common/$(TOOLCHAIN_PATH)/',
-			'common/$(TOOLCHAIN_PATH)/common/',
-			'project1/$(TOOLCHAIN_PATH)/',
-			'project1/$(TOOLCHAIN_PATH)/project1/',
+			'$(TOOLCHAIN_PATH)/',
+			'$(TOOLCHAIN_PATH)/common/common/',
+			'$(TOOLCHAIN_PATH)/project1/project1/',
 		}
 
-		local pass1Files = {
+		local pass1Files =
+		{
 			'Jamfile.jam',
 			'test.lua',
 			'common/common.jam',
 			'common/print.cpp',
 			'common/print.h',
-			'common/$(TOOLCHAIN_PATH)/common/common.release.a',
-			'common/$(TOOLCHAIN_PATH)/common/print.o',
+			'$(TOOLCHAIN_PATH)/common/common/common.release.a',
+			'$(TOOLCHAIN_PATH)/common/common/print.o',
 			'project1/adefine.cpp',
 			'project1/project1.cpp',
 			'project1/project1.jam',
-			'project1/$(TOOLCHAIN_PATH)/project1/adefine.o',
-			'project1/$(TOOLCHAIN_PATH)/project1/project1.o',
-			'project1/$(TOOLCHAIN_PATH)/project1/project1.release',
+			'$(TOOLCHAIN_PATH)/project1/project1/adefine.o',
+			'$(TOOLCHAIN_PATH)/project1/project1/project1.o',
+			'$(TOOLCHAIN_PATH)/project1/project1/project1.release',
 			'shared/adefine.h',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(pass1Dirs)
+		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
 *** found 17 target(s)...
@@ -165,7 +165,7 @@ function Test()
 ]]
 		TestPattern(pattern3, RunJam())
 		TestFiles(pass1Files)
-		TestDirectories(pass1Dirs)
+		TestDirectories(pass1Directories)
 
 		osprocess.sleep(1.0)
 		ospath.touch('shared/adefine.h')
@@ -179,7 +179,7 @@ function Test()
 ]]
 		TestPattern(pattern4, RunJam())
 		TestFiles(pass1Files)
-		TestDirectories(pass1Dirs)
+		TestDirectories(pass1Directories)
 
 	end
 

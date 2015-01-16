@@ -108,7 +108,7 @@ function Test()
 			'includes/',
 			'$(TOOLCHAIN_PATH)/',
 			'$(TOOLCHAIN_PATH)/main/',
-			'macosx32%-release/main/mypch%-%x+/',
+			'.build/macosx32%-release/TOP/main/mypch%-%x+/',
 		}
 
 		pass1Files = {
@@ -121,7 +121,7 @@ function Test()
 			'$(TOOLCHAIN_PATH)/main/main.o',
 			'$(TOOLCHAIN_PATH)/main/main.release',
 			'$(TOOLCHAIN_PATH)/main/mypch.o',
-			'macosx32%-release/main/mypch%-%x+/mypch.h.gch',
+			'.build/macosx32%-release/TOP/main/mypch%-%x+/mypch.h.gch',
 		}
 
 		pass1Pattern = [[

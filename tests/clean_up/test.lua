@@ -301,5 +301,7 @@ function Test()
     RunJam()
     TestFiles(allFiles)
     TestDirectories(allDirectories)
+
+    RunJam{ 'clean' }
 end
 
