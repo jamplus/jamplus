@@ -18,7 +18,7 @@ typedef struct _MEMPOOL {
 				 * called. */
     long free_count;		/* # of times mempool_free() called. */
     MEMPOOL_FREE_BLOCK* free_list;
-};
+} _MEMPOOL;
 
 static MEMPOOL_FREE_BLOCK*
 mempool_alloc_chunk(MEMPOOL* pool)
