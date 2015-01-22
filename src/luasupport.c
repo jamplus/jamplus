@@ -180,7 +180,6 @@ static ls_lua_State *L;
 
 static LIST *luahelper_addtolist(ls_lua_State *L, LIST *list, int index)
 {
-    int type = ls_lua_type(L, index);
     if (ls_lua_isboolean(L, index))
         return list_append(list, ls_lua_toboolean(L, index) ? "true" : "false", 0);
 
@@ -651,8 +650,7 @@ static int pmain (ls_lua_State *L)
     ls_lua_setfield(L, -2, "on_state_create");          /* lanes configure table */
     ret = ls_lua_pcall(L, 1, 0, 0);                     /* lanes */
     if (ret != 0) {
-        const char* err = ls_lua_tostring(L, -1);
-        int hi = 5;
+        const char* err = ls_lua_tostring(L, -1);  (void)err;
 	}
     ls_lua_pop(L, 2);
 
