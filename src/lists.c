@@ -613,7 +613,7 @@ LIST* list_sort(LIST* list, int caseSensitive)
 	}
 #endif
 
-	newHead = list_sort_helper(list_first(list), 0, caseSensitive? &compare_case : &compare_nocase, NULL, NULL);
+	newHead = list_sort_helper(list_first(list), 0, (int (*)(void*, void*, void*))(caseSensitive? &compare_case : &compare_nocase), NULL, NULL);
 
 	newLast = newHead;
 	for(; list_next(newLast); newLast = list_next(newLast));
