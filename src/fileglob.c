@@ -1100,8 +1100,9 @@ Top:
             case MATCH_DIR:
                 context->match_dir = 1;
                 break;
-                //case RECURSIVE:
+            case RECURSIVE:
                 //rb_bug("continuous RECURSIVEs");
+                break;
 		}
 	}
 
