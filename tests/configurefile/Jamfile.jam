@@ -1,0 +1,13 @@
+SubDir TOP ;
+
+#IS_AWESOME = 1 ;
+#IS_NOT_AWESOME = 1 ;
+C.ConfigureFile test : config.h : config.h.in : addinclude ;
+EXE = [ C.Application test : main.c ] ;
+
+actions RunExecutable {
+    $(1:C)
+}
+
+RunExecutable $(EXE) ;
+

@@ -1,0 +1,9 @@
+/* This is one example of a #cmakedefine. */
+#cmakedefine PLATFORM "${C.PLATFORM}"
+
+/* This is a simple #define. */
+#cmakedefine IS_AWESOME
+
+/* This is another simple #define. */
+#cmakedefine IS_NOT_AWESOME
+
