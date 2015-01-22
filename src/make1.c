@@ -1650,9 +1650,9 @@ make1list(
 
 	if( flags & RULE_TOGETHER )
 	{
-	    LISTITEM *m = list_first(l);
+	    LISTITEM *m;
 
-	    for( m; m; m = list_next(m) )
+	    for( m = list_first(l); m; m = list_next(m) )
 		if( !strcmp( list_value(m), t->boundname ) )
 		    break;
 
@@ -1702,9 +1702,9 @@ make1list_unbound(
 
 	if( flags & RULE_TOGETHER )
 	{
-	    LISTITEM *m = list_first(l);
+	    LISTITEM *m;
 
-	    for( m; m; m = list_next(m) )
+	    for( m = list_first(l); m; m = list_next(m) )
 		if( !strcmp( list_value(m), t->boundname ) )
 		    break;
 
