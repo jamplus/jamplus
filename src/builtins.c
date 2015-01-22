@@ -46,6 +46,8 @@
 # include "variable.h"
 # include "search.h"
 
+# include "expand.h"
+
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 # include "luasupport.h"
 #endif
@@ -58,6 +60,7 @@
 # include "compile.h"
 #endif
 
+#include "timestamp.h"
 #include "fileglob.h"
 
 /*
@@ -129,6 +132,7 @@ LIST* builtin_listsort( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_dependslist( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp);
+LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp);
 
 int glob( const char *s, const char *c );
 
@@ -295,6 +299,9 @@ load_builtins()
 
 	bindrule( "RuleExists" )->procedure =
 		parse_make( builtin_ruleexists, P0, P0, P0, C0, C0, 0 );
+
+	bindrule( "ConfigureFileHelper" )->procedure =
+		parse_make( builtin_configurefilehelper, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -1461,6 +1468,182 @@ LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp)
 		list_free( result );
 	}
 #endif /* OPT_LOAD_MISSING_RULE_EXT */
+
+	return L0;
+}
+
+
+extern char leftParen;
+extern char rightParen;
+LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp)
+{
+	TARGET* target;
+	TARGET* source;
+	LIST* targetName;
+	LIST* sourceName;
+	LIST* options;
+	LISTITEM* item;
+	FILE* file;
+	const char* sourceFilename;
+	LIST* newLines = L0;
+	int mustWrite;
+	int expand;
+	time_t time;
+
+	targetName = lol_get(args, 0);
+	if (!list_first(targetName))
+		return L0;
+
+	sourceName = lol_get(args, 1);
+	if (!list_first(sourceName))
+		return L0;
+
+	options = lol_get(args, 2);
+
+	expand = 1;
+	if (options) {
+		for (item = list_first(options); item; item = list_next(item)) {
+			const char* option = list_value(item);
+			if (strcmp(option, "noexpand") == 0) {
+				expand = 0;
+			}
+		}
+	}
+
+	source = bindtarget(list_value(list_first(sourceName)));
+	sourceFilename = search_using_target_settings(source, source->name, &time);
+	file = fopen(sourceFilename, "rt");
+
+	if (file) {
+		while (!feof(file)) {
+			LIST *list = L0;
+			LOL lol;
+			char* cmakeDefine;
+			char line[10000];
+
+			if (!fgets(line, 10000, file))
+				break;
+
+			if (expand) {
+				lol_init(&lol);
+				leftParen = '{';
+				rightParen = '}';
+				list = var_expand(L0, line, line + strlen(line), &lol, 0);
+				leftParen = '(';
+				rightParen = ')';
+				strcpy(line, list_value(list_first(list)));
+				cmakeDefine = strstr(line, "#cmakedefine ");
+				if (cmakeDefine) {
+					char newLine[10000];
+					char saveCh;
+					char* key = cmakeDefine + 13;
+					LIST* value;
+					char* rest;
+					while ((*key == ' '  ||  * key == '\t')  &&  *key != 0) {
+						++key;
+					}
+					if (*key == 0) {
+						/* invalid */
+					}
+					rest = key;
+					while (*rest != 0  &&  *rest != ' '  &&  *rest != '\t'  &&  *rest != '\n') {
+						++rest;
+					}
+
+					saveCh = *rest;
+					*rest = 0;
+					value = var_get(key);
+
+					if (value) {
+						*rest = saveCh;
+						sprintf(newLine, "#define %s", key);
+						newLines = list_append(newLines, newLine, 0);
+					} else {
+						sprintf(newLine, "/* #undef %s */\n", key);
+						newLines = list_append(newLines, newLine, 0);
+					}
+				} else {
+					char* undef = strstr(line, "#undef ");
+					if (undef) {
+						char newLine[10000];
+						char saveCh;
+						char* key = undef + 7;
+						LIST* value;
+						char* rest;
+						while ((*key == ' '  ||  * key == '\t')  &&  *key != 0) {
+							++key;
+						}
+						if (*key == 0) {
+							/* invalid */
+						}
+						rest = key;
+						while (*rest != 0  &&  *rest != ' '  &&  *rest != '\t'  &&  *rest != '\n') {
+							++rest;
+						}
+
+						saveCh = *rest;
+						*rest = 0;
+						value = var_get(key);
+
+						if (value) {
+							sprintf(newLine, "#define %s ", key);
+							strcat(newLine, list_value(list_first(value)));
+							*rest = saveCh;
+							strcat(newLine, rest);
+							newLines = list_append(newLines, newLine, 0);
+						} else {
+							sprintf(newLine, "/* #undef %s */\n", key);
+							*rest = saveCh;
+							newLines = list_append(newLines, newLine, 0);
+						}
+					} else {
+						newLines = list_append(newLines, line, 0);
+					}
+				}
+
+				list_free(list);
+				lol_free(&lol);
+			} else {
+				newLines = list_append(newLines, line, 0);
+			}
+		}
+	}
+	fclose(file);
+
+	target = bindtarget(list_value(list_first(targetName)));
+	mustWrite = 1;
+	if (target) {
+		LISTITEM* newLine = list_first(newLines);
+		const char* destinationFilename = search_using_target_settings(target, target->name, &time);
+		file_mkdir(destinationFilename);
+		file = fopen(destinationFilename, "rt");
+		if (file) {
+			mustWrite = 0;
+			while (!mustWrite  &&  !feof(file)) {
+				char line[10000];
+				if (!fgets(line, 10000, file)) {
+					break;
+				}
+				mustWrite = strcmp(list_value(newLine), line) != 0;
+				newLine = list_next(newLine);
+			}
+			fclose(file);
+		}
+	}
+
+	if (mustWrite) {
+		LISTITEM* newLine = list_first(newLines);
+		const char* destinationFilename = search_using_target_settings(target, target->name, &time);
+		file = fopen(destinationFilename, "wb");
+		while (newLine) {
+			fputs(list_value(newLine), file);
+			//fputc('\n', file);
+			newLine = list_next(newLine);
+		}
+		fclose(file);
+		timestamp( destinationFilename, &time, 1 );
+		target->binding = T_BIND_UNBOUND;
+	}
 
 	return L0;
 }
