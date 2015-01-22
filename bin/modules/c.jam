@@ -943,6 +943,22 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 ########################################################################
 ########################################################################
 
+rule C.ConfigureFile TARGET : DESTINATION : SOURCE : OPTIONS {
+	C.ActiveTarget $(TARGET) ;
+	SEARCH on $(SOURCE) ?= $(SEARCH_SOURCE) ;
+	LOCATE on $(DESTINATION) ?= $(LOCATE_SOURCE) ;
+
+	if addinclude in $(OPTIONS) {
+		C.IncludeDirectories $(TARGET) : $(LOCATE:Z=$(DESTINATION)) ;
+	} else if addpublicinclude in $(OPTIONS) {
+		C.IncludeDirectories $(TARGET) : $(LOCATE:Z=$(DESTINATION)) : public ;
+	}
+
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(DESTINATION) ;
+	ConfigureFileHelper $(DESTINATION) : $(SOURCE) : $(OPTIONS) ;
+}
+
+
 rule C.CreatePrecompiledHeader TARGET : NAME : HEADER {
 	C.ActiveTarget $(TARGET) ;
 	HEADER ?= $(NAME[1]:S=.h) ;
