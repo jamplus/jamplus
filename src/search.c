@@ -68,7 +68,7 @@ search_helper(
 		if( DEBUG_SEARCH )
 			printf( "locate %s: %s\n", target, buf );
 		
-		timestamp( buf, time );
+		timestamp( buf, time, 0 );
 		
 		return newstr( buf );
 	}
@@ -90,7 +90,7 @@ search_helper(
 			if( DEBUG_SEARCH )
 				printf( "search %s: %s\n", target, buf );
 			
-			timestamp( buf, time );
+			timestamp( buf, time, 0 );
 			
 			if( *time )
 				return newstr( buf );
@@ -119,7 +119,7 @@ search_helper(
 					if( DEBUG_SEARCH )
 						printf( "search %s: %s\n", target, buf );
 					
-					timestamp( buf, time );
+					timestamp( buf, time, 0 );
 					
 					if( *time )
 						return newstr( buf );
@@ -146,7 +146,7 @@ search_helper(
 	if( DEBUG_SEARCH )
 		printf( "search %s: %s\n", target, buf );
 	
-	timestamp( buf, time );
+	timestamp( buf, time, 0 );
 	
 	return newstr( buf );
 }

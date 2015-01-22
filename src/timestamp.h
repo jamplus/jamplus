@@ -8,5 +8,5 @@
  * timestamp.h - get the timestamp of a file or archive member
  */
 
-void timestamp( char *target, time_t *time );
+void timestamp( const char *target, time_t *time, int force );
 void donestamps();

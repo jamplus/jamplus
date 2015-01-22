@@ -65,8 +65,9 @@ static const char *time_progress[] =
 
 void
 timestamp( 
-	char	*target,
-	time_t	*time )
+	const char	*target,
+	time_t	*time,
+	int      force )
 {
 	PATHNAME f1, f2;
 	BINDING	binding, *b = &binding;
@@ -93,6 +94,12 @@ timestamp(
 
 	if( hashenter( bindhash, (HASHDATA **)&b ) )
 	    b->name = newstr( target );		/* never freed */
+
+	if ( force )
+	{
+		b->progress = BIND_INIT;
+		b->time = b->flags = 0;
+	}
 
 	if( b->progress != BIND_INIT )
 	    goto afterscanning;
@@ -125,6 +132,12 @@ timestamp(
 	    if( hashenter( bindhash, (HASHDATA **)&b ) )
 		b->name = newstr( buf );	/* never freed */
 
+		if ( force )
+		{
+			b->progress = BIND_INIT;
+			b->time = b->flags = 0;
+		}
+
 	    if( !( b->flags & BIND_SCANNED ) )
 	    {
 		file_dirscan( buf, time_enter, bindhash );
@@ -135,6 +148,12 @@ timestamp(
 #ifdef OPT_TIMESTAMP_IMMEDIATE_PARENT_CHECK_EXT
 		if( hashenter( bindhash, (HASHDATA **)&b ) )
 			b->name = newstr( buf );	/* never freed */
+
+		if ( force )
+		{
+			b->progress = BIND_INIT;
+			b->time = b->flags = 0;
+		}
 
 		if( !( b->flags & BIND_SCANNED ) )
 		{
@@ -194,6 +213,12 @@ timestamp(
 		{
 			/* See if the directory has already been entered into the hash table. */
 			int found = hashcheck( bindhash, (HASHDATA **)&b );
+
+			if ( force )
+			{
+				b->progress = BIND_INIT;
+				b->time = b->flags = 0;
+			}
 
 			/* If it wasn't there or hasn't been scanned yet... */
 			if( !found  ||  !( b->flags & BIND_SCANNED ) )
