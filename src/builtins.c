@@ -1513,6 +1513,8 @@ LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp)
 	source = bindtarget(list_value(list_first(sourceName)));
 	sourceFilename = search_using_target_settings(source, source->name, &time);
 	file = fopen(sourceFilename, "rt");
+	if (!file)
+		return L0;
 
 	if (file) {
 		while (!feof(file)) {
@@ -1607,8 +1609,8 @@ LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp)
 				newLines = list_append(newLines, line, 0);
 			}
 		}
+		fclose(file);
 	}
-	fclose(file);
 
 	target = bindtarget(list_value(list_first(targetName)));
 	mustWrite = 1;
