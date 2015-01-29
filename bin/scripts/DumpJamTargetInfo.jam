@@ -301,5 +301,12 @@ end
 JAMFILE = Jamfile.jam ;
 include $(JAMFILE) ;
 
+# Write project info
 WriteTargetInfoFile $(TargetInfoFile) ;
-WriteTagsFile $(TagsFile) ;
+
+# Write filelist
+if $(PLATFORM) = * && $(CONFIG) = *
+{
+	WriteTagsFile $(TagsFile) ;
+}
+
