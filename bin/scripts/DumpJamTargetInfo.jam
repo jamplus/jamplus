@@ -298,6 +298,19 @@ end
 " ;
 #}
 
+####################
+# UserAddFileToList
+# 
+# Allows the individual project to add custom files to the filelist
+####################
+rule UserAddToFileList FILES
+{
+	TagFileList += $(FILES) ;
+}
+
+####################
+# Include project Jamfile.jam
+####################
 JAMFILE = Jamfile.jam ;
 include $(JAMFILE) ;
 
