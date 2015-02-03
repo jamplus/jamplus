@@ -212,36 +212,33 @@ rule C.vc._MultiCppCompile_SetupFlags {
         _flags += $(postREFERENCEDIRECTORIES) ;
     }
 
-    local forceIncludeHeader ;
-    if $(_pch[2]) && ! $(_nopch) {
-        forceIncludeHeader = $(_pch[2]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|force) ;
+    if ! $(_nopch)  &&  $(_pch[1]) {
+        local forceIncludeHeader = $(_pch[2]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|force) ;
         BINDING on $(forceIncludeHeader) = $(_pch[3]) ;
         SEARCH on $(forceIncludeHeader) = $(_hdrs) ;
-        objectForceIncludes = $(objectForceIncludes) $(forceIncludeHeader) ;
-    }
+        objectForceIncludes += $(forceIncludeHeader) ;
 
-    if $(_pch[4]) {
-        # add extra flags to enable pch creation
         local _pchFilename = $(_pch[3]:LBS).pch ;
         local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
-        _flags += /Fp\"$(_pchDiskFilename:\\)\" /Yc\"$(_pch[2])\" /Yl\"__jp__$(TARGET)\" ;
-        # mark that it will be created by compilation through srcref
         _pchFilename = $(_pchFilename:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-        BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
-        MakeLocate $(_pchFilename) ;
-        Depends $(_pchFilename) : $(_src) ;
-        Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_pchFilename) ;
-        DeletePCHFile $(_pchFilename) : $(_pchFilename) ;
 
-    # if the source should use pch
-    } else if $(_pch[2]) && ! $(_nopch) {
-        # add extra flags to enable pch loading
-        local _pchFilename = $(_pch[3]:LBS).pch ;
-        local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
-        _flags += /Fp\"$(_pchDiskFilename:\\)\" /Yu\"$(_pch[2])\" ;
-        # mark that compilation will depend on it
-        _pchFilename = $(_pchFilename:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-        Includes $(_src) : $(_pchFilename) ;
+        if $(_pch[4]) {
+            # add extra flags to enable pch creation
+            _flags += /Fp\"$(_pchDiskFilename:\\)\" /Yc\"$(_pch[2])\" /Yl\"__jp__$(TARGET)\" ;
+            # mark that it will be created by compilation through srcref
+            BINDING on $(_pchFilename) = $(_pchFilename:BS) ;
+            MakeLocate $(_pchFilename) ;
+            Depends $(_pchFilename) : $(_src) ;
+            Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_pchFilename) ;
+            DeletePCHFile $(_pchFilename) : $(_pchFilename) ;
+
+        # if the source should use pch
+        } else if $(_pch[2]) {
+            # add extra flags to enable pch loading
+            _flags += /Fp\"$(_pchDiskFilename:\\)\" /Yu\"$(_pch[2])\" ;
+            # mark that compilation will depend on it
+            Includes $(_src) : $(_pchFilename) ;
+        }
     }
 
     if $(objectForceIncludes[1]) {
