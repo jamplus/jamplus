@@ -329,14 +329,14 @@ function Test()
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>../outerb/outer.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libb>libb.a 
 *** updated 10 target(s)...
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Loading/Loading.o 
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/Saving1.o 
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/Saving3.o 
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/SavingB.o 
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memorya.o 
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memoryb.o 
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/integral/integral1.o 
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/integral/integral2.o 
+!OOOGROUP!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Loading/Loading.o 
+!OOOGROUP!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/Saving1.o 
+!OOOGROUP!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/Saving3.o 
+!OOOGROUP!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/SavingB.o 
+!OOOGROUP!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memorya.o 
+!OOOGROUP!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memoryb.o 
+!OOOGROUP!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/integral/integral1.o 
+!OOOGROUP!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/integral/integral2.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libc>libc.a 
 *** updated 14 target(s)...
 ]]

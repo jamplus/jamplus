@@ -1,5 +1,6 @@
 SubDir TOP project1 ;
 
 C.ForceInclude project1 : ../common/print.h ;
+C.IncludeDirectories project1 : . ;
 C.LinkLibraries project1 : common libA ;
 C.Application project1 : project1.cpp ;

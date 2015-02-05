@@ -66,7 +66,7 @@ function Test()
 			'src/',
 			'jam/$(TOOLCHAIN_PATH)/',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/',
-			'jam/.build/macosx32%-release/TOP/helloworld/precomp%-%x+/',
+			'jam/$(TOOLCHAIN_PATH)/helloworld/precomp%-%x+/',
 		}
 
 		files = {
@@ -80,7 +80,7 @@ function Test()
 			'jam/$(TOOLCHAIN_PATH)/helloworld/file.o',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/helloworld.release',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/main.o',
-			'jam/.build/macosx32%-release/TOP/helloworld/precomp%-%x+/precomp.h.gch',
+			'jam/$(TOOLCHAIN_PATH)/helloworld/precomp%-%x+/precomp.h.gch',
 			'src/createprecomp.c',
 			'src/file.c',
 			'src/main.c',

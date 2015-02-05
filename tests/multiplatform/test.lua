@@ -69,6 +69,16 @@ function Test()
 @ $(C_LINK) <$(TOOLCHAIN_GRIST):platform>platform
 *** updated 5 target(s)...
 ]]
+			elseif Platform == 'linux' then
+				pattern = [[
+*** found 12 target(s)...
+*** updating 5 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>platform.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>linux.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>filerelease.o 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):platform>platform
+*** updated 5 target(s)...
+]]
 			else
 				pattern = [[
 *** found 11 target(s)...
@@ -98,7 +108,6 @@ function Test()
 				'test.lua',
 				'win32.c',
 				'$(TOOLCHAIN_PATH)/platform/filerelease.o',
-				'$(TOOLCHAIN_PATH)/platform/macosx.o',
 				'$(TOOLCHAIN_PATH)/platform/platform.o',
 				'$(TOOLCHAIN_PATH)/platform/platform.release',
 			}
@@ -106,7 +115,7 @@ function Test()
 			if Platform == 'macosx' then
 				pass1Files[#pass1Files + 1] = '$(TOOLCHAIN_PATH)/platform/macosx.o'
 			else
-				pass1Files[#pass1Files + 1] = 'linux.o'
+				pass1Files[#pass1Files + 1] = '$(TOOLCHAIN_PATH)/platform/linux.o'
 			end
 
 		end
@@ -152,7 +161,7 @@ RELEASE: What's up?!
 		TestPattern(pattern2, osprocess.collectlines{'./.build/linux32-release/TOP/platform/platform.release'})
 
 		pattern3 = [[
-*** found 11 target(s)...
+*** found 12 target(s)...
 ]]
 
 	end
