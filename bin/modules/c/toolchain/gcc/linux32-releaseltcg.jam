@@ -1,4 +1,4 @@
-rule C.Toolchain.gcc.linux32-release {
+rule C.Toolchain.gcc.linux32-releaseltcg {
     C.Flags * : CC	: -g -O3 -m32 ;
     C.Flags * : C++	: -g -O3 -m32 ;
     C.Flags * : M	: -g -O3 -m32 ;

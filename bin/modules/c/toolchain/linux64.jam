@@ -3,14 +3,15 @@ rule C.Toolchain.linux64.* {
 
     if $(C.COMPILER) {
         if ! [ C.Toolchain.$(C.COMPILER).$(C.PLATFORM).Detect ] {
-            Exit * Unable to detect $(C.COMPILER) compiler. ;
+            return ;
         }
     } else {
         if ! [ C.Toolchain.gcc.$(C.PLATFORM).Detect ] {
-            Exit * Unable to detect gcc compiler. ;
+            return ;
         }
-        return ;
     }
-    C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) ;
+    if [ RuleExists C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) : 1 ] {
+        C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) ;
+    }
 }
 

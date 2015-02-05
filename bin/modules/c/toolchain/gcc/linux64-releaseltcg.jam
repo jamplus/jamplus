@@ -6,4 +6,4 @@ rule C.Toolchain.gcc.linux64-releaseltcg {
     C.LinkFlags * : -m64 ;
 
     C.Toolchain.Helper.ReleaseSettings ;
-}]
+}
