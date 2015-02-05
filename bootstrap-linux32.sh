@@ -1,3 +1,4 @@
+git submodule update --init
 cd src
 make linux32
 cd luaplus

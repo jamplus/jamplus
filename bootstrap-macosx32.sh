@@ -1,3 +1,4 @@
+git submodule update --init
 cd src
 rm -rf bin.macosxx86 jam0
 make macosx32
