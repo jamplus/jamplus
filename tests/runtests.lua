@@ -234,6 +234,7 @@ function TestDirectories(expectedDirs)
 	TestNumberUpdate()
 
 	local expectedDirsMap = {}
+	local newExpectedDirs = {}
 	for _, dirName in ipairs(expectedDirs) do
 		dirName = dirName:gsub('$PlatformDir', PlatformDir)
 		dirName = dirName:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '-release')
@@ -244,6 +245,7 @@ function TestDirectories(expectedDirs)
 		else
 			expectedDirsMap[dirName] = true
 		end
+		newExpectedDirs[#newExpectedDirs + 1] = dirName
 	end
 
 	local foundDirsMap = {}
@@ -272,9 +274,15 @@ function TestDirectories(expectedDirs)
 	for foundDir in pairs(foundDirsMap) do
 		if not expectedDirsMap[foundDir] then
 			local found = false
-			for _, dirName in ipairs(expectedDirs) do
+			for _, dirName in ipairs(newExpectedDirs) do
+				local origDirName = dirName
+				dirName = dirName:gsub('%%%-', '\x02')
+				dirName = dirName:gsub('%%', '\x01')
+				dirName = dirName:gsub('%-', '%%-')
+				dirName = dirName:gsub('\x02', '%%-')
+				dirName = dirName:gsub('\x01', '%%')
 				if foundDir:match('^' .. dirName .. '$') then
-					expectedDirsMap[dirName] = nil
+					expectedDirsMap[origDirName] = nil
 					found = true
 					break
 				end
@@ -312,6 +320,7 @@ function TestFiles(expectedFiles)
 
 	local expectedFilesMap = {}
 	expectedFiles[#expectedFiles + 1] = '?.build/.depcache'
+	local newExpectedFiles = {}
 	for _, fileName in ipairs(expectedFiles) do
 		fileName = fileName:gsub('$PlatformDir', PlatformDir):gsub('$%(SUFEXE%)', SUFEXE)
 		fileName = fileName:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '-release')
@@ -324,6 +333,7 @@ function TestFiles(expectedFiles)
 		else
 			expectedFilesMap[fileName] = true
 		end
+		newExpectedFiles[#newExpectedFiles + 1] = fileName
 	end
 
 	local foundFilesMap = {}
@@ -337,9 +347,15 @@ function TestFiles(expectedFiles)
 				and  not foundFile:match('~$')  and  not foundFile:match('%.swo') then
 			if not expectedFilesMap[foundFile] then
 				local found = false
-				for _, fileName in ipairs(expectedFiles) do
+				for _, fileName in ipairs(newExpectedFiles) do
+					local origFileName = fileName
+					fileName = fileName:gsub('%%%-', '\x02')
+					fileName = fileName:gsub('%%', '\x01')
+					fileName = fileName:gsub('%-', '%%-')
+					fileName = fileName:gsub('\x02', '%%-')
+					fileName = fileName:gsub('\x01', '%%')
 					if foundFile:match('^' .. fileName .. '$') then
-						expectedFilesMap[fileName] = nil
+						expectedFilesMap[origFileName] = nil
 						found = true
 						break
 					end
@@ -459,6 +475,7 @@ for _, dir in ipairs(dirs) do
 				err = err:gsub('^runtests.lua:%d-: ', '')
 				io.write('\t' .. err .. '\n')
 				print(ErrorTraceback)
+os.exit()
 			else
 				io.write('OK\n')
 			end
