@@ -299,8 +299,6 @@ rule C._MultiCppCompile SOURCES {
 	local newsrcs ;
 	local _src ;
 
-	local FIncludes_dot = ; # [ C.$(C.COMPILER_SUITE).FIncludes . ] ;
-
 	for _src in $(sources) {
 		local forceFileType ;
 		local _nopch ;
@@ -387,7 +385,7 @@ rule C._MultiCppCompile SOURCES {
 			_flags += [ C.$(C.COMPILER_SUITE).FIncludes $(LOCATE_SOURCE) ] ;
 		}
 
-		_flags += $(FIncludes_dot) [ C.$(C.COMPILER_SUITE).FIncludes $(_hdrs) ] ;
+		_flags += [ C.$(C.COMPILER_SUITE).FIncludes $(_hdrs) ] ;
 		_hdrs = $(SEARCH_SOURCE) $(_hdrs) ;
 
 		_flags += $(preDEFINES) ;
