@@ -287,7 +287,16 @@ rule C._MultiCppCompile SOURCES {
 	local dollar = $ ;
 	local colon = ":" ;
 	local listIncludes = @(I=\\$(C.BUILD_EXTENSIONS)$:J=$(colon)) ;
+
+	local newsrcs ;
+
+	while 1 {
+	if ! $(SOURCES) {
+		break ;
+	}
+
 	local sources = @($(dollar)(SOURCES$(colon)$(listIncludes)):A:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+	SOURCES = ;
 
 	# source needs to be scanned for header dependencies
 	HDRRULE on $(sources) = C.HdrRule ;
@@ -296,7 +305,6 @@ rule C._MultiCppCompile SOURCES {
 
 	SEARCH on $(sources) = $(SEARCH_SOURCE) ;
 
-	local newsrcs ;
 	local _src ;
 
 	for _src in $(sources) {
@@ -415,6 +423,7 @@ rule C._MultiCppCompile SOURCES {
 		HDREXTRA on $(_src) += $(objectForceIncludes) ;
 
 		MFLAGS on $(_src) = $(_flags) ;
+	}
 	}
 
 	#
