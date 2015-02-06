@@ -1,0 +1,5 @@
+SubDir TOP ;
+
+C.PrecompiledHeader main : includes/mypch.h : main.cpp ;
+
+C.Application main : main.cpp includes/mypch.h ;
