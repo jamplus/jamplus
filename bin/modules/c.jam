@@ -382,7 +382,7 @@ rule C._MultiCppCompile SOURCES {
 
 		# if the source should create pch
 		if $(_pch[1]) {
-			_flags += [ C.$(C.COMPILER_SUITE).FIncludes $(LOCATE_SOURCE) ] ;
+			_flags += [ C.$(C.COMPILER_SUITE).FIncludes $(LOCATE_SOURCE) $(SEARCH_SOURCE) ] ;
 		}
 
 		_flags += [ C.$(C.COMPILER_SUITE).FIncludes $(_hdrs) ] ;
