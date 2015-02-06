@@ -991,8 +991,13 @@ rule C.UsePrecompiledHeader TARGET : NAME : HEADER : FILES {
 rule C.PrecompiledHeader TARGET : NAME : FILES {
 	C.ActiveTarget $(TARGET) ;
 
+	local buildExtensions =
+			$(C.C_STYLE_BUILD_EXTENSIONS:Z=$(C.COMPILER_SUITE_SYMBOL))
+			$(C.CPP_STYLE_BUILD_EXTENSIONS:Z=$(C.COMPILER_SUITE_SYMBOL))
+	;
+
 	local SOURCE = $(NAME[1]) ;
-	if ! $(SOURCE:S) {
+	if ! $(SOURCE:S) in $(buildExtensions) {
 		SOURCE = $(SOURCE:S=.cpp) ;
 	}
 	local HEADER = $(NAME[2]:E=$(SOURCE:S=.h)) ;
