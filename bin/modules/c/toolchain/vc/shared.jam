@@ -218,6 +218,25 @@ rule C.vc._MultiCppCompile_SetupFlags {
         SEARCH on $(forceIncludeHeader) = $(_hdrs) ;
         objectForceIncludes += $(forceIncludeHeader) ;
 
+        local _pchSourceFilename = $(_pch[1]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+        if ! [ Search $(_pchSourceFilename) ] {
+            BINDING on $(_pchSourceFilename) = $(_pch[1]:BS) ;
+
+            if ! $(built-$(_pchSourceFilename)) {
+                built-$(_pchSourceFilename) = 1 ;
+
+                local pchext = $(_pchSourceFilename:S) ;
+
+                MakeLocate $(_pchSourceFilename) : $(LOCATE_TARGET) ;
+
+                CONTENTS on $(_pchSourceFilename) = "" ;
+                WriteFile $(_pchSourceFilename) ;
+                Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_pchSourceFilename) ;
+
+                SOURCES += $(_pchSourceFilename) ;
+            }
+        }
+
         local _pchFilename = $(_pch[3]:LBS).pch ;
         local _pchDiskFilename = [ FDirName $(LOCATE_TARGET) $(_pchFilename:BS) ] ;
         _pchFilename = $(_pchFilename:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
