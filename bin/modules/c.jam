@@ -270,6 +270,16 @@ rule C._MultiCppCompile SOURCES {
 
 	preDEFINES = [ C.$(C.COMPILER_SUITE).FDefines $(preDEFINES) ] ;
 
+	# choose the right output method
+	local makeobj_pass1 ;
+	if $(__MultiCppCompile_OutputAsTree) != 0 {
+		makeobj_pass1 = C._MultiCppCompile_ObjName_Pass1_OutputAsTree ;
+	} else {
+		makeobj_pass1 = C._MultiCppCompile_ObjName_Pass1 ;
+
+		MkDir $(LOCATE_TARGET[1]:G=!dir!) ;
+	}
+
 	# start with empty list of all generated objects
 	local _allobjs = ;
 
@@ -288,15 +298,6 @@ rule C._MultiCppCompile SOURCES {
 
 	local newsrcs ;
 	local _src ;
-
-	local makeobj_pass1 ;
-	if $(__MultiCppCompile_OutputAsTree) != 0 {
-		makeobj_pass1 = C._MultiCppCompile_ObjName_Pass1_OutputAsTree ;
-	} else {
-		makeobj_pass1 = C._MultiCppCompile_ObjName_Pass1 ;
-
-		MkDir $(LOCATE_TARGET[1]:G=!dir!) ;
-	}
 
 	local FIncludes_dot = ; # [ C.$(C.COMPILER_SUITE).FIncludes . ] ;
 
