@@ -927,7 +927,11 @@ The output suffix is the file extension of the generated target.  By default, th
 \section rule_C_PrecompiledHeader rule C.PrecompiledHeader TARGET : NAME : FILES
 \addindex rule_C_PrecompiledHeader
 
-Creates a precompiled header and uses it on the specified \c FILES.
+Creates a precompiled header based around \c NAME and uses it on the specified \c FILES.
+
+Under Visual C++, <tt>NAME.cpp</tt> is expected to exist as part of the build.  If <tt>NAME.cpp</tt> is not provided by the user, JamPlus will create an empty one automatically tied to the <tt>.cpp</tt> extension.  If another extension is desired, the first parameter to \c NAME should be the alternate filename.
+
+Under GCC-based compilers, the precompiled header name is automatic based on the flags and file extensions going into the build.
 
 \param TARGET The target to which the precompiled header belongs.  This is needed to properly grist the precompiled header filenames.
 \param NAME This parameter is made up of either one or two filenames.  The first filename is the <tt>.cpp</tt> file used to create the precompiled header.  If it does not contain an extension, <tt>.cpp</tt> is added.  If the second filename is not specified, the default is to use the first filename with its suffix modified to <tt>.h</tt>.  If the second filename is specified, it will represent the header file used for the precompilation.
