@@ -392,6 +392,15 @@ actions C.ios._GenerateDSYMFile {
 rule C.ios.GenerateDSYMFile TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    
+    # When making a fat binary (with multiple architectures), bundle path is not set.
+    if ! $(bundlePath)
+    {
+        local outputName = [ C._retrieveOutputName ] ;
+        local outputPath = [ C._retrieveOutputPath ] ;
+        bundlePath = $(outputPath)/$(outputName).app ;
+    }
+
 	local dsymBundlePath = $(bundlePath).dSYM ;
 	local _t = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local _t.dsym = $(_t).DSYM ;
