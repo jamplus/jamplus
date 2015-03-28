@@ -91,6 +91,7 @@ rule C.macosx.SDK SDK_VERSION {
 
 	C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(architecture) ;
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;
+	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) ?= $(SDK_VERSION) ;
 	XCODE_SDKROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sdkroot) ;
 
 	#flags += -gdwarf-2 ;
@@ -102,6 +103,20 @@ rule C.macosx.SDK SDK_VERSION {
 	}
 }
 
+rule C.macosx.MinimumOSVersion TARGET : SDK_VERSION_MIN {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	local SDK_PLATFORM ;
+	SDK_PLATFORM ?= $(C.PLATFORM) ;
+
+	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION_MIN) ;
+
+	if $(TARGETINFO_LOCATE) {
+		Contents += "Projects[ [[C.*]] ].OSX_SDK_VERSION_MIN[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(SDK_VERSION_MIN)]]
+
+" ;
+	}
+}
 
 
 rule C.macosx._BundleInfoArray KEY : VALUE {
@@ -143,11 +158,13 @@ rule C.macosx._BundleInfoString KEY : VALUE {
 rule C.macosx.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
+		IOS_SDK_VERSION_MIN ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 		C.macosx._BundleInfoString CFBundleDevelopmentRegion : en ;
 		C.macosx._BundleInfoString CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
 		C.macosx._BundleInfoString CFBundleInfoDictionaryVersion : 6.0 ;
 		C.macosx._BundleInfoString CFBundlePackageType : APPL ;
 		C.macosx._BundleInfoString CFBundleSignature : ???? ;
+		C.macosx._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
 		#C.macosx._BundleInfoString CFBundleResourceSpecification : ResourceRules.plist ;
 	}
 
