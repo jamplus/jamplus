@@ -51,7 +51,7 @@ rule C.ios.SDK SDK_VERSION {
 	switch $(SDK_PLATFORM) {
 		case ios :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 8.1 ;
+			SDK_VERSION ?= 8.2 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -104,13 +104,19 @@ rule C.ios.SDK SDK_VERSION {
 					sdkroot = iphoneos8.1 ;
 					architecture = armv7 ;
 
+				case 8.2 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.2.sdk ;
+					sdkroot = iphoneos8.2 ;
+					architecture = armv7 ;
+
 				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -fvisibility=hidden ;
 
 		case iossimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 8.1 ;
+			SDK_VERSION ?= 8.2 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -154,6 +160,11 @@ rule C.ios.SDK SDK_VERSION {
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.1.sdk ;
 					sdkroot = iphoneos8.1 ;
+
+				case 8.2 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.2.sdk ;
+					sdkroot = iphoneos8.2 ;
 
 				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -264,6 +275,8 @@ rule C.ios._BundleInfoString KEY : VALUE {
 rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
+		IOS_SDK_VERSION_MIN ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+		IPHONEOS_SDK_VERSION ?= $(IPHONEOS_SDK_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 		C.ios._BundleInfoString CFBundleDevelopmentRegion : en ;
 		C.ios._BundleInfoString CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
 		C.ios._BundleInfoString CFBundleInfoDictionaryVersion : 6.0 ;
@@ -278,7 +291,14 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 				C.ios._BundleInfoBoolean LSRequiresIPhoneOS : true ;
 				C.ios._BundleInfoIntegerArray UIDeviceFamily : 1 2 ;
 				C.ios._BundleInfoString DTPlatformName : iphoneos ;
+				C.ios._BundleInfoString DTXcode : 0620 ;
 				C.ios._BundleInfoString DTSDKName : iphoneos$(IPHONEOS_SDK_VERSION) ;
+				C.ios._BundleInfoString DTSDKBuild : 12D508 ;
+				C.ios._BundleInfoString BuildMachineOSBuild : 13F34 ;
+				C.ios._BundleInfoString DTCompiler : com.apple.compilers.llvm.clang.1_0 ;
+				C.ios._BundleInfoString DTPlatformVersion : $(IPHONEOS_SDK_VERSION) ;
+				C.ios._BundleInfoString DTXcodeBuild : 6C131e ;
+				C.ios._BundleInfoString DTPlatformBuild : 12D508 ;
 				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
 				C.ios._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
 				if $(TARGETINFO_LOCATE) {
@@ -322,6 +342,8 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 		case bundleversion :
 			C.ios._BundleInfoString CFBundleVersion : $(VALUE) ;
 			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
+		case bundleshortversion :
+			C.ios._BundleInfoString CFBundleShortVersionString : $(VALUE) ;
 		case copyright :			C.ios._BundleInfoString NSHumanReadableCopyright : $(VALUE) ;
 		case mainnibfile :			C.ios._BundleInfoString NSMainNibFile : $(VALUE) ;
 		case resourcespec :			C.ios._BundleInfoString CFBundleResourceSpecification : $(VALUE) ;
@@ -392,15 +414,6 @@ actions C.ios._GenerateDSYMFile {
 rule C.ios.GenerateDSYMFile TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-    
-    # When making a fat binary (with multiple architectures), bundle path is not set.
-    if ! $(bundlePath)
-    {
-        local outputName = [ C._retrieveOutputName ] ;
-        local outputPath = [ C._retrieveOutputPath ] ;
-        bundlePath = $(outputPath)/$(outputName).app ;
-    }
-
 	local dsymBundlePath = $(bundlePath).dSYM ;
 	local _t = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local _t.dsym = $(_t).DSYM ;
@@ -423,12 +436,23 @@ C.__DOLLAR = \\$ ;
 C.__JUST_DOLLAR = $ ;
 C.__COLON = ":" ;
 
+# 1. Make copy of incoming entitlements file to destination file.
+# 2. If "<key>aps-environment</key>" and "<string>development</string>" is in file, then set "aps-environment" to "development" in destination file (required for push notifications).
+# 3. If "<key>aps-environment</key>" and "<string>production</string>" is in file, then set "aps-environment" to "production" in destination file (required for push notifications).
+# 4. If "<key>beta-reports-active</key>" exists, and next line is "<true/>", then set "beta-reports-active" to "true" in destination file (required for push notifications).
+# 5. Set "get-task-allow" as per get-task-allow settings in provisioning profile (these must match).
+# 6. Set 'keychain-access-groups:" as per $(AppIdentifierPrefix) and $(CFBundleIdentifier).
+# 7. Set 'application-identifier' as per $(AppIdentifierPrefix) and $(CFBundleIdentifier).
 actions ios.ProcessEntitlements
 {
-	plutil -convert xml1 -o $(1) $(2)
-	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" -e "s/<key>keychain-access-groups/$(GET_TASK_ALLOW:E="")<key>keychain-access-groups/g" $(1)
+	cp $(2) $(1)
+	cat "$(PROVISION)" | grep "<key>aps-environment</key>" > /dev/null && cat "$(PROVISION)" | grep "<string>development</string>" > /dev/null && /usr/libexec/PlistBuddy -c "Add :aps-environment string development" $(1)
+	cat "$(PROVISION)" | grep "<key>aps-environment</key>" > /dev/null && cat "$(PROVISION)" | grep "<string>production</string>" > /dev/null && /usr/libexec/PlistBuddy -c "Add :aps-environment string production" $(1)
+	cat "$(PROVISION)" | awk '/<key>beta-reports-active<\/key>/,/\/>/' | grep '<key>beta-reports-active</key>' -A1 | grep '<true/>' > /dev/null && /usr/libexec/PlistBuddy -c "Add :beta-reports-active bool true" $(1)
+	/usr/libexec/PlistBuddy -c "Add :get-task-allow bool `cat '$(PROVISION)' | egrep -a '<key>get-task-allow</key>' -A1 | awk 'NR==2' | sed 's/.*<\(.*\)\/>/\1/g'`" $(1)
+	/usr/libexec/PlistBuddy -c "Set 'keychain-access-groups:0' $(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*).$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)" $(1)
+	/usr/libexec/PlistBuddy -c "Set application-identifier $(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*).$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)" $(1)
 }
-	#plutil -convert binary1 $(1)
 
 if $(NT) {
 
@@ -446,15 +470,27 @@ actions C.ios._Lipo {
 
 }
 
+actions C.ios._Strip {
+	$(C.STRIP:C) $(2:C) -o $(1:C)
+}
+
 rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local _t = $(LINK_TARGETS[0]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)$(C.__COLON)lipo) ;
 	BINDING on $(_t) = $(BINDING:Z=$(LINK_TARGETS[0])) ;
-	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t) : $(LINK_TARGETS) ;
-	MakeLocate $(_t) : $(OUTPUT_PATH) ;
+	MakeLocate $(_t) ; # : $(OUTPUT_PATH) ;
 	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_t) ;
 	C.ios._Lipo $(_t) : $(LINK_TARGETS) : $(C.COMPILER_SUITE_SYMBOL) ;
 	LIPO_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_t) ;
+	
+	local _s = $(LINK_TARGETS[0]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)$(C.__COLON)strip) ;
+	BINDING on $(_s) = $(BINDING:Z=$(LINK_TARGETS[0])) ;
+	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_s) : $(_t) : $(LINK_TARGETS) ;
+	MakeLocate $(_s) : $(OUTPUT_PATH) ;
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_s) ;
+	C.ios._Strip $(_s) : $(_t) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+	STRIPPED_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_s) ;
 	return $(linkTargets) ;
 }
 
@@ -571,10 +607,11 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 			MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destEntitlementsPlist) ;
 			Depends $(bundleTarget) : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
-			local getTaskAllow = "<key>get-task-allow<\\/key><$(getTaskAllowValue)\\/>" ;
-			GET_TASK_ALLOW on $(destEntitlementsPlist) = $(getTaskAllow) ;
+			GET_TASK_ALLOW on $(destEntitlementsPlist) = $(getTaskAllowValue) ;
 			on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) $(getTaskAllow) ;
 			Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
+			local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			PROVISION on $(destEntitlementsPlist) = $(provisionFileTarget:TC/) ;
 			ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 		}
 
@@ -601,7 +638,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 	}
 
 	if $(C.PLATFORM) in ios {
-		local linkTarget = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local linkTarget = $(STRIPPED_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
@@ -660,7 +697,6 @@ rule C.ios._ApplicationFromObjects_PostBuild {
 	local outputPath = [ C._retrieveOutputPath ] ;
 	local bundlePath = $(outputPath)/$(outputName).app ;
 	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
-
 	local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
 	local colon = ":" ;
 	local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
@@ -721,11 +757,11 @@ rule C.ios._MultiCppCompile_SetupFlags {
 				extraflags += -mmacosx-version-min=$(minimumsdkversion) ;
 
 			case ios :
-				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1
+				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1 8.2
 				extraflags += -miphoneos-version-min=$(minimumsdkversion) ;
 
 			case iossimulator :
-				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1
+				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1 8.2
 				extraflags += -mios-simulator-version-min=$(minimumsdkversion) ;
 		}
 	}
@@ -836,7 +872,7 @@ rule C.ios.SetTaskAllow TARGET : VALUE {
 
 if $(TARGETINFO_LOCATE) {
 
-rule ios.XIB {
+rule C.ios.XIB {
 
 }
 
@@ -862,7 +898,7 @@ rule C.ios._ApplicationTargetInfo {
 		MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 		Depends all : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
 		on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) ;
-		ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+		ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 
 		Contents += "Projects[ [[$(TARGET)]] ].XCODE_ENTITLEMENTS[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(destEntitlementsPlist:T)]]
 
@@ -872,7 +908,7 @@ rule C.ios._ApplicationTargetInfo {
 
 } else {
 
-rule ios.XIB PARENT : SOURCES  {
+rule C.ios.XIB PARENT : SOURCES  {
 	PARENT = [ C.ActiveTarget $(PARENT) ] ;
 	
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
