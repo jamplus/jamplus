@@ -1,0 +1,453 @@
+{
+
+SubDir LUAPLUS Src LuaPlus ;
+
+rule LuaSharedLibrary TARGET : LUA_SOURCES : OUTPUT_NAME {
+	ActiveTarget $(TARGET) ;
+
+	SourceGroup : $(TARGET) : $(LUA_SOURCES) ;
+	SourceGroup : LuaPlus : $(LUAPLUS_SRCS) ;
+
+	C.IncludeDirectories : $(TARGET)/src ;
+	C.InstallNamePath : @rpath ;
+
+	C.Defines : LUA_OPNAMES ;
+	if $(NT) {
+		C.Defines : LUA_BUILD_AS_DLL ;
+	}
+
+	if $(MSVCNT) {
+	    if $(PLATFORM) = win32 {
+            C.CFlags : /arch:SSE2 ;
+            C.C++Flags : /arch:SSE2 ;
+            C.Defines : __SSE2__ ;
+        }
+		C.OutputName : $(OUTPUT_NAME) ;
+	} else if $(UNIX) {
+		C.LinkPrebuiltLibraries : dl ;
+		if ! $(OS) in MACOS MACOSX {
+			C.LinkFlags : -Wl,-soname,lib$(OUTPUT_NAME).so ;
+		}
+		C.OutputName : lib$(OUTPUT_NAME) ;
+	}
+
+	LuaPlusFixUpTarget $(TARGET) ;
+
+	if $(CONFIG) = debug {
+		C.OutputPostfix : _debug ;
+	}
+
+	C.Library : $(LUA_SOURCES) $(LUAPLUS_SRCS) : shared ;
+
+}
+
+local LUAPLUS_SRCS =
+		LuaAutoBlock.h
+		LuaCall.h
+		LuaCall.inl
+		LuaFunction.h
+		LuaHelper.h
+		LuaHelper_Object.h
+		LuaHelper_StackObject.h
+		LuaLink.h
+		LuaObject.h
+		LuaObject.inl
+		LuaPlus.cpp
+		LuaPlus.h
+		LuaPlusAddons.c
+		LuaPlusCD.h
+		LuaPlusConfig.h
+		LuaPlusInternal.h
+		LuaStackObject.h
+		LuaStackObject.inl
+		LuaStackTableIterator.h
+		LuaStackTableIterator.inl
+		LuaState.h
+		LuaState.inl
+		LuaStateOutFile.h
+		LuaStateOutString.h
+		LuaState_DumpObject.cpp
+		LuaTableIterator.h
+;
+
+###############################################################################
+local LUA51_SRCS =
+		lua51/src/lapi.c
+		lua51/src/lapi.h
+		lua51/src/lauxlib.c
+		lua51/src/lauxlib.h
+		lua51/src/lbaselib.c
+		lua51/src/lcode.c
+		lua51/src/lcode.h
+		lua51/src/ldblib.c
+		lua51/src/ldebug.c
+		lua51/src/ldebug.h
+		lua51/src/ldo.c
+		lua51/src/ldo.h
+		lua51/src/ldump.c
+		lua51/src/lfunc.c
+		lua51/src/lfunc.h
+		lua51/src/lgc.c
+		lua51/src/lgc.h
+		lua51/src/linit.c
+		lua51/src/liolib.c
+		lua51/src/llex.c
+		lua51/src/llex.h
+		lua51/src/llimits.h
+		lua51/src/lmathlib.c
+		lua51/src/lmem.c
+		lua51/src/lmem.h
+		lua51/src/loadlib.c
+		lua51/src/lobject.c
+		lua51/src/lobject.h
+		lua51/src/lopcodes.c
+		lua51/src/lopcodes.h
+		lua51/src/loslib.c
+		lua51/src/lparser.c
+		lua51/src/lparser.h
+		lua51/src/lstate.c
+		lua51/src/lstate.h
+		lua51/src/lstring.c
+		lua51/src/lstring.h
+		lua51/src/lstrlib.c
+		lua51/src/ltable.c
+		lua51/src/ltable.h
+		lua51/src/ltablib.c
+		lua51/src/ltm.c
+		lua51/src/ltm.h
+		lua51/src/lua.h
+		lua51/src/luaconf.h
+		lua51/src/lualib.h
+		lua51/src/lundump.c
+		lua51/src/lundump.h
+		lua51/src/lvm.c
+		lua51/src/lvm.h
+		lua51/src/lzio.c
+		lua51/src/lzio.h
+		lua51/src/print.c
+;
+
+LuaSharedLibrary lua51 : $(LUA51_SRCS) : lua51 ;
+
+###############################################################################
+local LUA51_LUAPLUS_SRCS =
+		lua51-luaplus/src/lapi.c
+		lua51-luaplus/src/lapi.h
+		lua51-luaplus/src/lauxlib.c
+		lua51-luaplus/src/lauxlib.h
+		lua51-luaplus/src/lbaselib.c
+		lua51-luaplus/src/lcode.c
+		lua51-luaplus/src/lcode.h
+		lua51-luaplus/src/ldblib.c
+		lua51-luaplus/src/ldebug.c
+		lua51-luaplus/src/ldebug.h
+		lua51-luaplus/src/ldo.c
+		lua51-luaplus/src/ldo.h
+		lua51-luaplus/src/ldump.c
+		lua51-luaplus/src/lfunc.c
+		lua51-luaplus/src/lfunc.h
+		lua51-luaplus/src/lgc.c
+		lua51-luaplus/src/lgc.h
+		lua51-luaplus/src/linit.c
+		lua51-luaplus/src/liolib.c
+		lua51-luaplus/src/llex.c
+		lua51-luaplus/src/llex.h
+		lua51-luaplus/src/llimits.h
+		lua51-luaplus/src/lmathlib.c
+		lua51-luaplus/src/lmem.c
+		lua51-luaplus/src/lmem.h
+		lua51-luaplus/src/loadlib.c
+		lua51-luaplus/src/lobject.c
+		lua51-luaplus/src/lobject.h
+		lua51-luaplus/src/lopcodes.c
+		lua51-luaplus/src/lopcodes.h
+		lua51-luaplus/src/loslib.c
+		lua51-luaplus/src/lparser.c
+		lua51-luaplus/src/lparser.h
+		lua51-luaplus/src/lstate.c
+		lua51-luaplus/src/lstate.h
+		lua51-luaplus/src/lstring.c
+		lua51-luaplus/src/lstring.h
+		lua51-luaplus/src/lstrlib.c
+		lua51-luaplus/src/ltable.c
+		lua51-luaplus/src/ltable.h
+		lua51-luaplus/src/ltablib.c
+		lua51-luaplus/src/ltm.c
+		lua51-luaplus/src/ltm.h
+		lua51-luaplus/src/lua.h
+		lua51-luaplus/src/luaconf.h
+		lua51-luaplus/src/lualib.h
+		lua51-luaplus/src/lundump.c
+		lua51-luaplus/src/lundump.h
+		lua51-luaplus/src/lvm.c
+		lua51-luaplus/src/lvm.h
+		lua51-luaplus/src/lzio.c
+		lua51-luaplus/src/lzio.h
+		lua51-luaplus/src/print.c
+;
+
+LuaSharedLibrary lua51-luaplus : $(LUA51_LUAPLUS_SRCS) : lua51 ;
+
+##################################################################
+local LUA52_SRCS =
+		lua52/src/lapi.c
+		lua52/src/lapi.h
+		lua52/src/lauxlib.c
+		lua52/src/lauxlib.h
+		lua52/src/lbaselib.c
+		lua52/src/lbitlib.c
+		lua52/src/lcode.c
+		lua52/src/lcode.h
+		lua52/src/lcorolib.c
+		lua52/src/lctype.c
+		lua52/src/lctype.h
+		lua52/src/ldblib.c
+		lua52/src/ldebug.c
+		lua52/src/ldebug.h
+		lua52/src/ldo.c
+		lua52/src/ldo.h
+		lua52/src/ldump.c
+		lua52/src/lfunc.c
+		lua52/src/lfunc.h
+		lua52/src/lgc.c
+		lua52/src/lgc.h
+		lua52/src/linit.c
+		lua52/src/liolib.c
+		lua52/src/llex.c
+		lua52/src/llex.h
+		lua52/src/llimits.h
+		lua52/src/lmathlib.c
+		lua52/src/lmem.c
+		lua52/src/lmem.h
+		lua52/src/loadlib.c
+		lua52/src/lobject.c
+		lua52/src/lobject.h
+		lua52/src/lopcodes.c
+		lua52/src/lopcodes.h
+		lua52/src/loslib.c
+		lua52/src/lparser.c
+		lua52/src/lparser.h
+		lua52/src/lstate.c
+		lua52/src/lstate.h
+		lua52/src/lstring.c
+		lua52/src/lstring.h
+		lua52/src/lstrlib.c
+		lua52/src/ltable.c
+		lua52/src/ltable.h
+		lua52/src/ltablib.c
+		lua52/src/ltm.c
+		lua52/src/ltm.h
+		#lua52/src/lua.c
+		lua52/src/lua.h
+		lua52/src/lua.hpp
+		#lua52/src/luac.c
+		lua52/src/luaconf.h
+		lua52/src/lualib.h
+		lua52/src/lundump.c
+		lua52/src/lundump.h
+		lua52/src/lvm.c
+		lua52/src/lvm.h
+		lua52/src/lzio.c
+		lua52/src/lzio.h
+;
+
+LuaSharedLibrary lua52 : $(LUA52_SRCS) : lua52 ;
+
+##################################################################
+local LUA52_LUAPLUS_SRCS =
+		lua52-luaplus/src/lapi.c
+		lua52-luaplus/src/lapi.h
+		lua52-luaplus/src/lauxlib.c
+		lua52-luaplus/src/lauxlib.h
+		lua52-luaplus/src/lbaselib.c
+		lua52-luaplus/src/lbitlib.c
+		lua52-luaplus/src/lcode.c
+		lua52-luaplus/src/lcode.h
+		lua52-luaplus/src/lcorolib.c
+		lua52-luaplus/src/lctype.c
+		lua52-luaplus/src/lctype.h
+		lua52-luaplus/src/ldblib.c
+		lua52-luaplus/src/ldebug.c
+		lua52-luaplus/src/ldebug.h
+		lua52-luaplus/src/ldo.c
+		lua52-luaplus/src/ldo.h
+		lua52-luaplus/src/ldump.c
+		lua52-luaplus/src/lfunc.c
+		lua52-luaplus/src/lfunc.h
+		lua52-luaplus/src/lgc.c
+		lua52-luaplus/src/lgc.h
+		lua52-luaplus/src/linit.c
+		lua52-luaplus/src/liolib.c
+		lua52-luaplus/src/llex.c
+		lua52-luaplus/src/llex.h
+		lua52-luaplus/src/llimits.h
+		lua52-luaplus/src/lmathlib.c
+		lua52-luaplus/src/lmem.c
+		lua52-luaplus/src/lmem.h
+		lua52-luaplus/src/loadlib.c
+		lua52-luaplus/src/lobject.c
+		lua52-luaplus/src/lobject.h
+		lua52-luaplus/src/lopcodes.c
+		lua52-luaplus/src/lopcodes.h
+		lua52-luaplus/src/loslib.c
+		lua52-luaplus/src/lparser.c
+		lua52-luaplus/src/lparser.h
+		lua52-luaplus/src/lstate.c
+		lua52-luaplus/src/lstate.h
+		lua52-luaplus/src/lstring.c
+		lua52-luaplus/src/lstring.h
+		lua52-luaplus/src/lstrlib.c
+		lua52-luaplus/src/ltable.c
+		lua52-luaplus/src/ltable.h
+		lua52-luaplus/src/ltablib.c
+		lua52-luaplus/src/ltm.c
+		lua52-luaplus/src/ltm.h
+		#lua52-luaplus/src/lua.c
+		lua52-luaplus/src/lua.h
+		lua52-luaplus/src/lua.hpp
+		#lua52-luaplus/src/luac.c
+		lua52-luaplus/src/luaconf.h
+		lua52-luaplus/src/lualib.h
+		lua52-luaplus/src/lundump.c
+		lua52-luaplus/src/lundump.h
+		lua52-luaplus/src/lvm.c
+		lua52-luaplus/src/lvm.h
+		lua52-luaplus/src/lzio.c
+		lua52-luaplus/src/lzio.h
+;
+
+LuaSharedLibrary lua52-luaplus : $(LUA52_LUAPLUS_SRCS) : lua52 ;
+
+##################################################################
+local LUA53_SRCS =
+		lua53/src/lapi.c
+		lua53/src/lapi.h
+		lua53/src/lauxlib.c
+		lua53/src/lauxlib.h
+		lua53/src/lbaselib.c
+		lua53/src/lbitlib.c
+		lua53/src/lcode.c
+		lua53/src/lcode.h
+		lua53/src/lcorolib.c
+		lua53/src/lctype.c
+		lua53/src/lctype.h
+		lua53/src/ldblib.c
+		lua53/src/ldebug.c
+		lua53/src/ldebug.h
+		lua53/src/ldo.c
+		lua53/src/ldo.h
+		lua53/src/ldump.c
+		lua53/src/lfunc.c
+		lua53/src/lfunc.h
+		lua53/src/lgc.c
+		lua53/src/lgc.h
+		lua53/src/linit.c
+		lua53/src/liolib.c
+		lua53/src/llex.c
+		lua53/src/llex.h
+		lua53/src/llimits.h
+		lua53/src/lmathlib.c
+		lua53/src/lmem.c
+		lua53/src/lmem.h
+		lua53/src/loadlib.c
+		lua53/src/lobject.c
+		lua53/src/lobject.h
+		lua53/src/lopcodes.c
+		lua53/src/lopcodes.h
+		lua53/src/loslib.c
+		lua53/src/lparser.c
+		lua53/src/lparser.h
+		lua53/src/lstate.c
+		lua53/src/lstate.h
+		lua53/src/lstring.c
+		lua53/src/lstring.h
+		lua53/src/lstrlib.c
+		lua53/src/ltable.c
+		lua53/src/ltable.h
+		lua53/src/ltablib.c
+		lua53/src/ltm.c
+		lua53/src/ltm.h
+		#lua53/src/lua.c
+		lua53/src/lua.h
+		lua53/src/lua.hpp
+		#lua53/src/luac.c
+		lua53/src/luaconf.h
+		lua53/src/lualib.h
+		lua53/src/lundump.c
+		lua53/src/lundump.h
+		lua53/src/lutf8lib.c
+		lua53/src/lvm.c
+		lua53/src/lvm.h
+		lua53/src/lzio.c
+		lua53/src/lzio.h
+;
+
+LuaSharedLibrary lua53 : $(LUA53_SRCS) : lua53 ;
+
+##################################################################
+local LUA53_LUAPLUS_SRCS =
+		lua53-luaplus/src/lapi.c
+		lua53-luaplus/src/lapi.h
+		lua53-luaplus/src/lauxlib.c
+		lua53-luaplus/src/lauxlib.h
+		lua53-luaplus/src/lbaselib.c
+		lua53-luaplus/src/lbitlib.c
+		lua53-luaplus/src/lcode.c
+		lua53-luaplus/src/lcode.h
+		lua53-luaplus/src/lcorolib.c
+		lua53-luaplus/src/lctype.c
+		lua53-luaplus/src/lctype.h
+		lua53-luaplus/src/ldblib.c
+		lua53-luaplus/src/ldebug.c
+		lua53-luaplus/src/ldebug.h
+		lua53-luaplus/src/ldo.c
+		lua53-luaplus/src/ldo.h
+		lua53-luaplus/src/ldump.c
+		lua53-luaplus/src/lfunc.c
+		lua53-luaplus/src/lfunc.h
+		lua53-luaplus/src/lgc.c
+		lua53-luaplus/src/lgc.h
+		lua53-luaplus/src/linit.c
+		lua53-luaplus/src/liolib.c
+		lua53-luaplus/src/llex.c
+		lua53-luaplus/src/llex.h
+		lua53-luaplus/src/llimits.h
+		lua53-luaplus/src/lmathlib.c
+		lua53-luaplus/src/lmem.c
+		lua53-luaplus/src/lmem.h
+		lua53-luaplus/src/loadlib.c
+		lua53-luaplus/src/lobject.c
+		lua53-luaplus/src/lobject.h
+		lua53-luaplus/src/lopcodes.c
+		lua53-luaplus/src/lopcodes.h
+		lua53-luaplus/src/loslib.c
+		lua53-luaplus/src/lparser.c
+		lua53-luaplus/src/lparser.h
+		lua53-luaplus/src/lstate.c
+		lua53-luaplus/src/lstate.h
+		lua53-luaplus/src/lstring.c
+		lua53-luaplus/src/lstring.h
+		lua53-luaplus/src/lstrlib.c
+		lua53-luaplus/src/ltable.c
+		lua53-luaplus/src/ltable.h
+		lua53-luaplus/src/ltablib.c
+		lua53-luaplus/src/ltm.c
+		lua53-luaplus/src/ltm.h
+		#lua53-luaplus/src/lua.c
+		lua53-luaplus/src/lua.h
+		lua53-luaplus/src/lua.hpp
+		#lua53-luaplus/src/luac.c
+		lua53-luaplus/src/luaconf.h
+		lua53-luaplus/src/lualib.h
+		lua53-luaplus/src/lundump.c
+		lua53-luaplus/src/lundump.h
+		lua53-luaplus/src/lutf8lib.c
+		lua53-luaplus/src/lvm.c
+		lua53-luaplus/src/lvm.h
+		lua53-luaplus/src/lzio.c
+		lua53-luaplus/src/lzio.h
+;
+
+LuaSharedLibrary lua53-luaplus : $(LUA53_LUAPLUS_SRCS) : lua53 ;
+
+}

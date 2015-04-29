@@ -1,0 +1,27 @@
+{
+
+local SRCS =
+		src/compat.c
+		src/compat.h
+		src/deep.c
+		src/deep.h
+		src/keeper.c
+		src/keeper.h
+		src/threading.c
+		src/threading.h
+		src/lanes.c
+		src/lanes.lua
+		src/tools.c
+		src/tools.h
+;
+
+CopyFiles lanes : $(LUA_LDIR) : $(SUBDIR)/src/lanes.lua ;
+
+if $(PLATFORM) = linux32
+{
+	C.LinkPrebuiltLibraries lanes : pthread ;
+}
+
+Lua.CModule lanes : lanes/core : $(SRCS) ;
+
+}

@@ -1,0 +1,38 @@
+This is a message digest library for Lua 5.2. It is based on the digest routines
+provided by OpenSSL. The library can be built to compute the following digests:
+md2, md4, md5, sha1, sha224, sha256, sha384, sha512, ripemd160, mdc2.
+For more information on these digests, see
+	http://en.wikipedia.org/wiki/MD2_(cryptography)
+	http://en.wikipedia.org/wiki/MD4
+	http://en.wikipedia.org/wiki/MD5
+	http://en.wikipedia.org/wiki/SHA_hash_functions
+	http://en.wikipedia.org/wiki/RIPEMD-160
+	http://en.wikipedia.org/wiki/MDC2
+	http://en.wikipedia.org/wiki/Message_digest
+
+OpenSSL is available at
+	http://www.openssl.org/
+If you're running Unix, you probably already have OpenSSL installed.
+
+If you have trouble finding C source code for MD5 or SHA1 digests that
+does not depend on OpenSSL, please send me a note.
+
+To try the library, edit Makefile to reflect your installation of Lua and
+then run make. This will build the library and run a simple test.
+For detailed installation instructions, see
+	http://www.tecgraf.puc-rio.br/~lhf/ftp/lua/install.html
+
+There is no manual but the library is simple and intuitive; see the summary
+below. Read also test.lua, which shows the library in action.
+
+This code is hereby placed in the public domain.
+Please send comments, suggestions, and bug reports to lhf@tecgraf.puc-rio.br .
+
+-------------------------------------------------------------------------------
+
+digest library:
+ __tostring(c) 		 new() 			 version 
+ clone(c) 		 reset(c) 
+ digest(c or s,[raw]) 	 update(c,s) 
+
+-------------------------------------------------------------------------------

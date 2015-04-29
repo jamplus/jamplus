@@ -1,0 +1,131 @@
+Documentation is available online at http://lualanes.github.io/lanes/
+(should be the same as what is in the docs folder of the distribution).
+
+=====================
+  Usage on Windows:
+=====================
+
+For once, Win32 thread prioritazion scheme is actually a good one, and
+it works. :)  Windows users, feel yourself as VIP citizens!!
+
+-------------------
+  Windows / MSYS:
+-------------------
+
+On MSYS, 'stderr' output seems to be buffered. You might want to make
+it auto-flush, to help you track & debug your scripts. Like this:
+
+    io.stderr:setvbuf "no"
+
+Even after this, MSYS insists on linewise buffering; it will flush at
+each newline only.
+
+
+===================
+  Usage on Linux:
+===================
+
+Linux NTPL 2.5 (Ubuntu 7.04) was used in the testing of Lua Lanes.
+
+This document (http://www.icir.org/gregor/tools/pthread-scheduling.html)
+describes fairly well, what (all) is wrong with Linux threading, even today.
+
+For other worthy links:
+    http://kerneltrap.org/node/6080
+    http://en.wikipedia.org/wiki/Native_POSIX_Thread_Library
+
+In short, you cannot use thread prioritation in Linux. Unless you run as
+root, and I _truly_ would not recommend that. Lobby for yet-another thread
+implementation for Linux, and mail -> akauppi@gmail.com about it. :)
+
+CAVEAT: Anyone sufficiently knowledgeable with pthread scheduling is free to
+contact me bnt DOT germain AT gmail DOT com)  with a suitable edit
+if this no longer applies on more recent kernels.
+
+
+======================
+  Usage on Mac OS X:
+======================
+
+No real problems in OS X, _once_ everything is set up right...
+
+In short, have your Lua core compiled with LUA_USE_DLOPEN and LUA_USE_POSIX
+instead of the (default as of 5.1) LUA_DL_DYLD and LUA_USE_MACOSX. This is
+crucial to have each module loaded only once (even if initialized separately
+for each thread) and for the static & global variables within the modules to
+actually be process-wide. Lua Lanes cannot live without...
+Lua 5.2 is fine in that regard (check luaconf.h to be safe).
+
+Another issue is making sure you only have _one_ Lua core. Your 'lua' binary
+must link dynamically to a .dylib, it must _not_ carry a personal copy of Lua
+core with itself. If it does, you will gain many mysterious malloc errors
+when entering multithreading realm.
+
+<<
+lua-xcode2(9473,0xa000ed88) malloc: ***  Deallocation of a pointer not malloced: 0xe9fc0; This could be a double free(), or free() called with the middle of an allocated block; Try setting environment variable MallocHelp to see tools to help debug
+<<
+
+rm lua.o luac.o
+gcc -dynamiclib -install_name /usr/local/lib/liblua.5.1.dylib \
+    -compatibility_version 5.1 -current_version 5.1.2 \
+    -o liblua.5.1.2.dylib *.o
+
+gcc -fno-common -DLUA_USE_POSIX -DLUA_USE_DLOPEN -DLUA_USE_READLINE -lreadline -L. -llua.5.1.2 lua.c -o lua
+
+That should be it. :)
+
+Fink 'lua51' packaging has the necessary changes since 5.1.2-3.
+
+
+=====================
+  Usage on FreeBSD:
+=====================
+
+Unlike in Linux, also the Lua engine used with Lanes needs to be compiled with
+'-lpthread'. Otherwise, the following malloc errors are received:
+
+    <<
+    lua in free(): warning: recursive call
+    PANIC: unprotected error in call to Lua API (not enough memory)
+    <<
+
+Here are the Lua compilation steps that proved to work (FreeBSD 6.2 i386):
+
+    gmake freebsd
+    rm lua.o luac.o liblua.a
+    gcc -shared -lm -Wl,-E -o liblua.5.1.2.so *.o
+    gcc -O2 -Wall -DLUA_USE_LINUX -lm -Wl,-E -lpthread -lreadline -L. -llua.5.1.2 lua.c -o lua
+
+To compile Lanes, use 'gmake' or simply:
+
+    cc -O2 -Wall -llua.5.1.2 -lpthread -shared -o out/bsd-x86/lua51-lanes.so \
+        -DGLUA_LUA51 gluax.c lanes.c
+
+To place Lua into ~/local, set the following environment variables (this is
+just a reminder for myself...):
+
+    export CPATH=.../local/include
+    export LIBRARY_PATH=.../local/lib
+    export LD_LIBRARY_PATH=.../local/lib
+
+=======================
+  Manual installation
+=======================
+
+After running GNU make, in directory `src` you will find files
+`lanes.lua` and `lanes/core.so`.  The first goes into a directory on
+your LUA_PATH, and the `lanes` directory goes into a directory on your
+LUA_CPATH.  If you are not sure how this works, try creating
+
+   /usr/local/share/lua/5.1/lanes.lua
+   /usr/local/lib/lua/5.1/lanes/core.so
+
+=======================
+  Note about LuaJIT
+=======================
+By default LuaJIT2 provides an non-thread-safe memory allocator to improve performance.
+Of course this will break when running several Lua states concurrently.
+Don't forget to initialize Lanes with the 'protect_allocator' option (see documentation)
+if you experience random crash issues.
+
+(end)

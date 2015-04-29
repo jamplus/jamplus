@@ -1,0 +1,66 @@
+if $(C.PLATFORM) in * win32 win64 macosx32 macosx64 linux32 linux64 # For now
+{
+
+local SRCS =
+		call.c
+		ctype.c
+		ffi.c
+		ffi.h
+		parser.c
+;
+
+C.ActiveTarget luaffi ;
+
+#if $(C.PLATFORM) = win64 {
+#	C.Defines luaffi : X86_64 ;
+#}
+
+if $(MSVCNT)  &&  $(C.COMPILER) in vs2008 vs2010 vs2012 {
+	C.IncludeDirectories luaffi : msvc ;
+}
+
+actions _DynAsm {
+	$(LUA_EXE:CT) $(DYNASM.LUA:C) $(ARCHITECTURE_DEFINE) -LNE -o $(1) $(2)
+}
+
+rule DynAsm TARGET : ARCHITECTURE_DEFINE : OUTPUT_HEADER : DASC_FILE {
+	DASC_FILE = [ C.GristFiles $(TARGET) : $(DASC_FILE) ] ;
+	SEARCH on $(DASC_FILE) = $(SEARCH_SOURCE) ;
+
+	OUTPUT_HEADER = [ C.GristFiles $(TARGET) : $(OUTPUT_HEADER) ] ;
+
+	Depends $(OUTPUT_HEADER) : $(DASC_FILE) $(LUA_EXE) ;
+	MakeLocate $(OUTPUT_HEADER) : $(LOCATE_TARGET) ;
+	UseCommandLine $(OUTPUT_HEADER) : $(ARCHITECTURE_DEFINE) v2 ;
+	ForceCare $(OUTPUT_HEADER) ;
+
+	ARCHITECTURE_DEFINE on $(OUTPUT_HEADER) = "-D $(ARCHITECTURE_DEFINE)" ;
+	DYNASM.LUA on $(OUTPUT_HEADER) = $(SUBDIR)/dynasm/dynasm.lua ;
+	_DynAsm $(OUTPUT_HEADER) : $(DASC_FILE) ;
+	Clean clean:$(TARGET) : $(OUTPUT_HEADER) ;
+}
+
+C.IncludeDirectories luaffi : $(LOCATE_TARGET) ;
+
+if $(C.PLATFORM) = win32 {
+    C.Defines luaffi : _WIN32 LUA_FFI_BUILD_AS_DLL ;
+	C.LinkPrebuiltLibraries luaffi : kernel32 user32 gdi32 ;
+}
+
+Lua.CModule luaffi : ffi : $(SRCS) ;
+
+if $(C.PLATFORM) = win32 {
+    DynAsm luaffi : X32WIN : call_x86.h : call_x86.dasc ;
+} else if $(C.PLATFORM) = win64 {
+    DynAsm luaffi : X64 X64WIN : call_x64win.h : call_x86.dasc ;
+} else if $(C.PLATFORM) in macosx32 {
+    DynAsm luaffi : X32 : call_x86.h : call_x86.dasc ;
+} else if $(C.PLATFORM) in macosx64 {
+    DynAsm luaffi : X64 : call_x64.h : call_x86.dasc ;
+} else if $(C.PLATFORM) in linux32 {
+    DynAsm luaffi : X32 : call_x86.h : call_x86.dasc ;
+} else if $(C.PLATFORM) in linux64 {
+    DynAsm luaffi : X64 : call_x64.h : call_x86.dasc ;
+}
+
+}
