@@ -1,4 +1,4 @@
-git submodule update --init
+setlocal
 cd src
 call clean
 call jmake
@@ -7,4 +7,4 @@ cd luaplus
 cd ..
 set LUA_BIN=%~dp0src/luaplus/.build/bin.lua52-luaplus.vs2013.win32
 call jmake
-
+cd ..

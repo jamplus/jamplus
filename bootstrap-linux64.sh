@@ -1,4 +1,3 @@
-git submodule update --init
 cd src
 make linux64
 cd luaplus
@@ -6,4 +5,6 @@ cd luaplus
 cd ..
 export LUA_BIN=luaplus/.build/bin.lua52-luaplus.gcc.linux64
 make linux64
+export LUA_BIN=
+cd ..
 
