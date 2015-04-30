@@ -1,5 +1,5 @@
 setlocal
-cd src
+cd %~dp0src
 call clean-win32
 call jmake-win32
 cd luaplus
