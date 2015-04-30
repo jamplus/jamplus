@@ -43,20 +43,28 @@ In order to build a fully working JamPlus directory, certain Lua binaries are re
 
 The Visual C++ build uses Visual Studio's Link Time Code Generation support to create a highly optimized executable.
 
-In order to build JamPlus using the Visual C++ compiler, do the following:
+In order to build JamPlus for Win32 using the Visual C++ compiler, run the following:
 
 \code
     cd src
-    jmake
+    jmake-win32
 \endcode
 
-<tt>jmake</tt> selects the most recent Visual Studio version available and uses that compiler to build the Jam executable.  When finished, the Jam executable will have been built as <tt>bin/win32/jam.exe</tt>
+To build JamPlus for Win64 using the Visual C++ compiler, run the following:
+
+\code
+    cd src
+    jmake-win64
+\endcode
+
+<tt>jmake-win32</tt> or <tt>jmake-win64</tt> selects the most recent Visual Studio version available and uses that compiler to build the Jam executable.  When finished, the Jam executable will have been built as <tt>bin/win32/jam.exe</tt> or <tt>bin/win64/jam.exe</tt>.
 
 To clean the Visual C++ build, run:
 
 \code
     cd src
-    clean
+    clean-win32
+    clean-win64
 \endcode
 
 Visual Studio 2010, 2012, and 2013 solutions are maintained for easy debugging of Jam.  Open <tt>src/jam.VS201?.sln</tt> to build within the appropriate IDE.  Note: The Release build of the Jam executable built via the IDE is nowhere near as fast as the command-line generated Link Time Code Generated version.
