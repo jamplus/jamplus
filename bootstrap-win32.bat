@@ -1,10 +1,10 @@
 setlocal
 cd src
-call clean
-call jmake
+call clean-win32
+call jmake-win32
 cd luaplus
-..\..\bin\win32\jam LUA_VERSION=lua52-luaplus
+..\..\bin\win32\jam C.TOOLCHAIN=win32/releaseltcg
 cd ..
-set LUA_BIN=%~dp0src/luaplus/.build/bin.lua52-luaplus.vs2013.win32
-call jmake
+set LUA_BIN=%~dp0src/luaplus/.build/win32/bin
+call jmake-win32
 cd ..

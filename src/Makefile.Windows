@@ -1,9 +1,0 @@
-CC = cl /nologo
-CFLAGS = -DNT -EHsc -Foobj\\
-TARGET = /Feobj\\jam0
-LINKLIBS = advapi32.lib
-EXENAME = .\obj\jam0.exe
-MKDIR_OBJ = if not exist obj mkdir obj
-EXTRA_SOURCES = w32_getreg.c w32_shortname.c
-PLATFORM = win32
-!include Makefile.Common

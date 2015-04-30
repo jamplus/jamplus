@@ -1,5 +1,4 @@
 @echo off
-setlocal
 
 REM Determine command line variables (/V or /v for verbose output)
 
@@ -219,7 +218,5 @@ if %VERBOSE% == 1 echo.Found Visual Studio %VS%
 if %VERBOSE% == 1 echo.
 
 if "%VCINSTALLDIR%" == "" call %COMNTOOLS%
-
-nmake /f Makefile.Windows
 
 :end
