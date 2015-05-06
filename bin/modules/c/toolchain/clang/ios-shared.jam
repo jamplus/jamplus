@@ -425,12 +425,23 @@ C.__DOLLAR = \\$ ;
 C.__JUST_DOLLAR = $ ;
 C.__COLON = ":" ;
 
+# 1. Make copy of incoming entitlements file to destination file.
+# 2. If "<key>aps-environment</key>" and "<string>development</string>" is in file, then set "aps-environment" to "development" in destination file (required for push notifications).
+# 3. If "<key>aps-environment</key>" and "<string>production</string>" is in file, then set "aps-environment" to "production" in destination file (required for push notifications).
+# 4. If "<key>beta-reports-active</key>" exists, and next line is "<true/>", then set "beta-reports-active" to "true" in destination file (required for push notifications).
+# 5. Set "get-task-allow" as per get-task-allow settings in provisioning profile (these must match).
+# 6. Set 'keychain-access-groups:" as per $(AppIdentifierPrefix) and $(CFBundleIdentifier).
+# 7. Set 'application-identifier' as per $(AppIdentifierPrefix) and $(CFBundleIdentifier).
 actions ios.ProcessEntitlements
 {
-	plutil -convert xml1 -o $(1) $(2)
-	sed -i "" -e "s/$(C.__DOLLAR)(CFBundleIdentifier)/$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)/g" -e "s/$(C.__DOLLAR)(AppIdentifierPrefix)/$(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*)./g" -e "s/<key>keychain-access-groups/$(GET_TASK_ALLOW:E="")<key>keychain-access-groups/g" $(1)
+	cp $(2) $(1)
+	cat "$(PROVISION)" | grep "<key>aps-environment</key>" > /dev/null && cat "$(PROVISION)" | grep "<string>development</string>" > /dev/null && /usr/libexec/PlistBuddy -c "Add :aps-environment string development" $(1)
+	cat "$(PROVISION)" | grep "<key>aps-environment</key>" > /dev/null && cat "$(PROVISION)" | grep "<string>production</string>" > /dev/null && /usr/libexec/PlistBuddy -c "Add :aps-environment string production" $(1)
+	cat "$(PROVISION)" | awk '/<key>beta-reports-active<\/key>/,/\/>/' | grep '<key>beta-reports-active</key>' -A1 | grep '<true/>' > /dev/null && /usr/libexec/PlistBuddy -c "Add :beta-reports-active bool true" $(1)
+	/usr/libexec/PlistBuddy -c "Add :get-task-allow bool `cat '$(PROVISION)' | egrep -a '<key>get-task-allow</key>' -A1 | awk 'NR==2' | sed 's/.*<\(.*\)\/>/\1/g'`" $(1)
+	/usr/libexec/PlistBuddy -c "Set 'keychain-access-groups:0' $(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*).$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)" $(1)
+	/usr/libexec/PlistBuddy -c "Set application-identifier $(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*).$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)" $(1)
 }
-	#plutil -convert binary1 $(1)
 
 if $(NT) {
 
@@ -573,10 +584,11 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 			MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destEntitlementsPlist) ;
 			Depends $(bundleTarget) : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
-			local getTaskAllow = "<key>get-task-allow<\\/key><$(getTaskAllowValue)\\/>" ;
-			GET_TASK_ALLOW on $(destEntitlementsPlist) = $(getTaskAllow) ;
+			GET_TASK_ALLOW on $(destEntitlementsPlist) = $(getTaskAllowValue) ;
 			on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) $(getTaskAllow) ;
 			Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
+			local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			PROVISION on $(destEntitlementsPlist) = $(provisionFileTarget:TC/) ;
 			ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 		}
 
