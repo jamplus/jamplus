@@ -850,7 +850,7 @@ rule C.ios.SetTaskAllow TARGET : VALUE {
 
 if $(TARGETINFO_LOCATE) {
 
-rule ios.XIB {
+rule C.ios.XIB {
 
 }
 
@@ -886,7 +886,7 @@ rule C.ios._ApplicationTargetInfo {
 
 } else {
 
-rule ios.XIB PARENT : SOURCES  {
+rule C.ios.XIB PARENT : SOURCES  {
 	PARENT = [ C.ActiveTarget $(PARENT) ] ;
 	
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
