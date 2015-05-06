@@ -876,7 +876,7 @@ rule C.ios._ApplicationTargetInfo {
 		MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 		Depends all : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
 		on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) ;
-		ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+		ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 
 		Contents += "Projects[ [[$(TARGET)]] ].XCODE_ENTITLEMENTS[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(destEntitlementsPlist:T)]]
 
