@@ -11,6 +11,9 @@ TargetInfoFile = targetinfo.$(platformName).$(configName).lua ;
 
 MakeLocate $(TargetInfoFile) : $(TARGETINFO_LOCATE) ;
 
+TagsFile = filelist ;
+MakeLocate $(TagsFile) : $(TARGETINFO_LOCATE) ;
+
 EMPTY = "" ;
 
 rule DumpSources prefix : SOURCES
@@ -19,8 +22,9 @@ rule DumpSources prefix : SOURCES
 	Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
 			Contents += "$(TAB)[[$(SOURCES:TR=$(subdir))]],$(NEWLINE)" ;
 	Contents += "})$(NEWLINE)" ;
-}
 
+	TagFileList += $(SOURCES:TR=$(subdir)) ;
+}
 
 rule ProjectGroup TARGET : FOLDERNAME : PROJECTS
 {
@@ -151,6 +155,7 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	DumpSources $(project) : $(SOURCES) ;
 
 	Depends $(TARGET) : $(TargetInfoFile) ;
+	Depends $(TARGET) : $(TagsFile) ;
 }
 
 
@@ -181,6 +186,7 @@ Assign NoWorkspace to one of the two to prevent the conflict." ;
 
 	Depends all : $(TARGETS) ;
 	Depends $(TARGETS) : $(TargetInfoFile) ;
+	Depends $(TARGETS) : $(TagsFile) ;
 
 	Contents += "VALID_PLATFORMS = {$(NEWLINE)" ;
 	Contents += "$(TAB)$(TAB)[[$(VALID_PLATFORMS)]],$(NEWLINE)" ;
@@ -229,6 +235,16 @@ actions WriteTargetInfoFileHelper
 	^^($(1)|$(Contents:J=))
 }
 
+rule WriteTagsFile FILENAME
+{
+	Always $(FILENAME) ;
+	WriteTagsFileHelper $(FILENAME) ;
+}
+
+actions WriteTagsFileHelper
+{
+	^^($(1)|$(TagFileList:J=$(NEWLINE)))
+}
 
 Contents += "-- This file is generated.  Do not modify.$(NEWLINE)$(NEWLINE)" ;
 
@@ -282,7 +298,28 @@ end
 " ;
 #}
 
+####################
+# UserAddFileToList
+# 
+# Allows the individual project to add custom files to the filelist
+####################
+rule UserAddToFileList FILES
+{
+	TagFileList += $(FILES) ;
+}
+
+####################
+# Include project Jamfile.jam
+####################
 JAMFILE = Jamfile.jam ;
 include $(JAMFILE) ;
 
+# Write project info
 WriteTargetInfoFile $(TargetInfoFile) ;
+
+# Write filelist
+if $(PLATFORM) = * && $(CONFIG) = *
+{
+	WriteTagsFile $(TagsFile) ;
+}
+
