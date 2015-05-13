@@ -411,9 +411,40 @@ actions C.ios._GenerateDSYMFile {
 }
 
 
-rule C.ios.GenerateDSYMFile TARGET {
+rule C.ios.BundlePath TARGET : BUNDLE_PATH {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	C.ios._SetDefaultBundlePath ;
+	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(BUNDLE_PATH) ;
+}
+
+
+rule C.ios.GetBundlePath TARGET : BUNDLE_PATH {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	if ! $(bundlePath) {
+		C.ios._SetDefaultBundlePath ;
+		return $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	} else {
+		return $(bundlePath) ;
+	}
+}
+
+
+rule C.ios.GetBundleTarget TARGET {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	if ! $(bundleTarget) {
+		C.ios._SetDefaultBundlePath ;
+		return $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	} else {
+		return $(bundleTarget) ;
+	}
+}
+
+
+rule C.ios.GenerateDSYMFile TARGET {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	local bundlePath = [ C.ios.GetBundlePath $(TARGET) ] ;
 	local dsymBundlePath = $(bundlePath).dSYM ;
 	local _t = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local _t.dsym = $(_t).DSYM ;
@@ -488,8 +519,8 @@ if ! $(TARGETINFO_LOCATE) {
 rule C.ios.Bundle TARGET : TOOLCHAINS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 
-	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-	local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local bundlePath = [ C.ios.GetBundlePath ] ;
+	local bundleTarget = [ C.ios.GetBundleTarget ] ;
 	local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(bundleTarget) ;
 	NotFile $(bundleTarget) ;
@@ -680,7 +711,11 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 } # TARGETINFO_LOCATE
 
 
-rule C.ios._ApplicationFromObjects_PostBuild {
+rule C.ios._SetDefaultBundlePath {
+	if $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+		return ;
+	}
+
 	local outputName = [ C._retrieveOutputName ] ;
 	local outputPath = [ C._retrieveOutputPath ] ;
 	local bundlePath = $(outputPath)/$(outputName).app ;
@@ -691,6 +726,11 @@ rule C.ios._ApplicationFromObjects_PostBuild {
 	local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
 	BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleTarget) ;
 	CLEAN_BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(cleanBundleTarget) ;
+}
+
+
+rule C.ios._ApplicationFromObjects_PostBuild {
+	C.ios._SetDefaultBundlePath ;
 
 	if bundle in $(OPTIONS) {
 		C.ios.Bundle ;
@@ -900,7 +940,7 @@ rule C.ios._ApplicationTargetInfo {
 rule C.ios.XIB PARENT : SOURCES  {
 	PARENT = [ C.ActiveTarget $(PARENT) ] ;
 	
-	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local bundlePath = [ C.ios.GetBundlePath ] ;
 	if ! $(bundlePath)
 	{
 		Echo *** XIB $(PARENT) \: $(SOURCES) ;
@@ -991,9 +1031,8 @@ rule C.ios.Provision TARGET : PROFILE_ID {
 	}
 
 	# Get bundle path.
-	local _bundlePath ;
-	local _bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-	local _bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local _bundlePath = [ C.ios.GetBundlePath ] ;
+	local _bundleTarget = [ C.ios.GetBundleTarget ] ;
 
 	if ! $(_bundlePath) {
 		Echo *** C.ios.Provision $(TARGET) \: $(PROFILE_ID) ;
@@ -1063,7 +1102,7 @@ rule C.ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK {
 	if $(C.PLATFORM) in ios {
 		TARGET = [ ActiveTarget $(TARGET) ] ;
 
-		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local bundlePath = [ C.ios.GetBundlePath ] ;
 		local linkTarget = $(LINK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
 		local archiveTarget = archive:$(TARGET) ;
@@ -1091,7 +1130,7 @@ rule C.ios.WebServer TARGET {
 	if $(C.PLATFORM) in ios {
 		TARGET = [ ActiveTarget $(TARGET) ] ;
 
-		local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local bundlePath = [ C.ios.GetBundlePath ] ;
 		local ipaTarget = @($(bundlePath:D=:S=).ipa:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		local OUTPUT_PATH = $(LOCATE:Z=$(ipaTarget)) ;
 
