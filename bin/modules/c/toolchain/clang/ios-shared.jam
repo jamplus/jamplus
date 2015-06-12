@@ -465,6 +465,14 @@ actions ios.ProcessEntitlements
 	/usr/libexec/PlistBuddy -c "Set application-identifier $(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*).$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)" $(1)
 }
 
+rule C.ios.UserPlist TARGET : PLIST
+{
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+	SearchSource $(PLIST) ;
+	USER_INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(PLIST) ;
+}
+
 if $(NT) {
 
 actions C.ios._Lipo {
@@ -507,6 +515,16 @@ rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH {
 
 
 if ! $(TARGETINFO_LOCATE) {
+
+actions MergeUserInfoPlist
+{
+	if [ " $(USER_PLIST) " == "  " ]; then
+		cp $(BASE_PLIST:TC/) $(1)
+	else
+		cp $(BASE_PLIST:TC/) $(1)
+		/usr/libexec/PlistBuddy -c "Merge $(USER_PLIST:TC/)" $(1) 
+	fi
+}
 
 rule C.ios.Bundle TARGET : TOOLCHAINS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
@@ -590,12 +608,22 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 " ;
 			infoplistcontents = $(infoplistcontents:J="") ;
 
+			local infoplisttemp = @(Info.plist.temp:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+			MakeLocate $(infoplisttemp) ;
+			CONTENTS on $(infoplisttemp) = $(infoplistcontents) ;
+			WriteFile $(infoplisttemp) ;
+			UseCommandLine $(infoplisttemp) : $(infoplistcontents) ;
+
 			local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 			MakeLocate $(infoplist) : $(bundlePath) ;
-			CONTENTS on $(infoplist) = $(infoplistcontents) ;
-			WriteFile $(infoplist) ;
+			Depends $(infoplist) : $(infoplisttemp) ;
 
-			UseCommandLine $(infoplist) : $(infoplistcontents) ;
+			local userInfoPlist = $(USER_INFO_PLIST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+			BASE_PLIST on $(infoplist) = $(infoplisttemp) ;
+			USER_PLIST on $(infoplist) = $(userInfoPlist:E="") ;
+			MergeUserInfoPlist $(infoplist) ;
+			Depends $(infoplist) : $(infoplisttemp) $(userInfoPlist) ;
 			Depends $(bundleTarget) : $(infoplist) ;
 			Clean $(cleanBundleTarget) : $(infoplist) ;
 		}
