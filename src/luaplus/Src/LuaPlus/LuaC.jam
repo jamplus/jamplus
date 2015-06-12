@@ -1,0 +1,29 @@
+SubDir LUAPLUS Src LuaPlus ;
+
+{
+
+local SRCS =
+		$(LUA_VERSION)/src/luac.c
+;
+
+if $(LUA_VERSION) in lua51 lua51-luaplus {
+    SRCS += $(LUA_SOURCE_DIRECTORY_NAME)/src/print.c ;
+}
+
+rule LuaCApplication TARGET {
+	ActiveTarget $(TARGET) ;
+
+	SubInclude LUAPLUS Src LuaPlus : LuaPlusStaticLib ;
+
+	C.IncludeDirectories $(TARGET) : $(LUAPLUS_INCLUDE_DIRECTORIES) ;
+	C.LinkLibraries $(TARGET) : $(LUA_VERSION)-static ;
+	LuaPlusFixUpTarget $(TARGET) ;
+	local exe = [ C.Application $(TARGET) : $(SRCS) ] ;
+	NoWorkspace $(TARGET) ;
+	return $(exe) ;
+}
+
+LUAC_EXE = [ LuaCApplication luac ] ;
+
+}
+

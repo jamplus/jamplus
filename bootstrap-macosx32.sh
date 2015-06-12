@@ -1,10 +1,11 @@
-git submodule update --init
+rm -rf bin/macosx32 src/bin.macosxx86 src/jam0 src/luaplus/.build/macosx32
 cd src
-rm -rf bin.macosxx86 jam0
 make macosx32
 cd luaplus
-../../bin/macosx32/jam LUA_VERSION=lua52-luaplus
+../../bin/macosx32/jam C.TOOLCHAIN=macosx32/releaseltcg
 cd ..
-export LUA_BIN=luaplus/.build/bin.lua52-luaplus.clang.macosx32
+export LUA_BIN=luaplus/.build/macosx32/bin
 make macosx32
+export LUA_BIN=
+cd ..
 

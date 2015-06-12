@@ -1,12 +1,41 @@
 /*! \page building Bootstrapping/Building
 
-\section building_overview Overview
+\section building_bootstrapping Quick bootstrapping of Jam
+
+The directions in the sections below describe the build process in better detail, but if you just need a working copy of JamPlus with its dependencies, run the following:
+
+\code
+    # If you are on Linux and want a 32-bit build:
+    ./bootstrap-linux32.sh
+
+    # If you are on Linux and want a 64-bit build:
+    ./bootstrap-linux64.sh
+
+    # If you are on Mac OS X and want a 32-bit build:
+    ./bootstrap-macosx32.sh
+
+    # If you are on Mac OS X and want a 64-bit build:
+    ./bootstrap-macosx64.sh
+
+    # If you are on Windows and want a 32-bit build:
+    bootstrap-win32.bat
+
+    # If you are on Windows and want a 64-bit build:
+    bootstrap-win64.bat
+\endcode
+
+The instructions below are unnecessary if the bootstrap scripts are used.
+
+
+
+\section building_overview Advanced Overview
 
 JamPlus comes with some simple makefiles to bootstrap the initial build of the JamPlus executable.  A good portion of the makefile contents in <tt>Makefile.Common</tt> are shared between the Visual C++ NMake-based build and the GCC-based make build.
 
-Binaries are built into a platform specific directory under the <tt>bin/</tt> directory, such as <tt>bin/win32/</tt> or <tt>bin/macosx32/</tt>.  All associated scripts and optional Lua binaries are also within this platform directory.  In doing this, multiple JamPlus platform binaries can be deployed within the same directory tree, making it easy to check into your source control system.
+Binaries are built into a platform specific directory under the <tt>bin/</tt> directory, such as <tt>bin/win32/</tt> or <tt>bin/macosx32/</tt>.  All associated scripts and optional Lua binaries are also within this platform directory.  Multiple JamPlus platform binaries can be deployed within the same directory tree, making it easy to check into your source control system.
 
 In order to build a fully working JamPlus directory, certain Lua binaries are required.  By setting the environment variable <tt>LUA_BIN</tt> to the directory containing the appropriate LuaPlus binaries, the build processes described below will automatically populate the JamPlus bin/ directory with the Lua binaries.
+
 
 
 
@@ -14,20 +43,28 @@ In order to build a fully working JamPlus directory, certain Lua binaries are re
 
 The Visual C++ build uses Visual Studio's Link Time Code Generation support to create a highly optimized executable.
 
-In order to build JamPlus using the Visual C++ compiler, do the following:
+In order to build JamPlus for Win32 using the Visual C++ compiler, run the following:
 
 \code
     cd src
-    jmake
+    jmake-win32
 \endcode
 
-<tt>jmake</tt> selects the most recent Visual Studio version available and uses that compiler to build the Jam executable.  When finished, the Jam executable will have been built as <tt>bin/win32/jam.exe</tt>
+To build JamPlus for Win64 using the Visual C++ compiler, run the following:
+
+\code
+    cd src
+    jmake-win64
+\endcode
+
+<tt>jmake-win32</tt> or <tt>jmake-win64</tt> selects the most recent Visual Studio version available and uses that compiler to build the Jam executable.  When finished, the Jam executable will have been built as <tt>bin/win32/jam.exe</tt> or <tt>bin/win64/jam.exe</tt>.
 
 To clean the Visual C++ build, run:
 
 \code
     cd src
-    clean
+    clean-win32
+    clean-win64
 \endcode
 
 Visual Studio 2010, 2012, and 2013 solutions are maintained for easy debugging of Jam.  Open <tt>src/jam.VS201?.sln</tt> to build within the appropriate IDE.  Note: The Release build of the Jam executable built via the IDE is nowhere near as fast as the command-line generated Link Time Code Generated version.
@@ -38,7 +75,7 @@ Visual Studio 2010, 2012, and 2013 solutions are maintained for easy debugging o
 
 \section building_macosx Building for Mac OS X
 
-In order to build JamPlus on Mac OS X, do the following:
+In order to build JamPlus for Mac OS X 32-bit, run:
 
 \code
     cd src
@@ -46,6 +83,15 @@ In order to build JamPlus on Mac OS X, do the following:
 \endcode
 
 When finished, the Jam executable will have been built as <tt>bin/macosx32/jam</tt>.
+
+In order to build JamPlus for Mac OS X 64-bit, run:
+
+\code
+    cd src
+    make macosx64
+\endcode
+
+When finished, the Jam executable will have been built as <tt>bin/macosx64/jam</tt>.
 
 Alternatively, an Xcode project for debugging Jam is maintained.  Open <tt>src/jam.xcodeproj</tt> to build within Xcode.  Please note that the Release build does not currently work.  Build a Release build using the makefile instructions above.
 
@@ -55,7 +101,7 @@ Alternatively, an Xcode project for debugging Jam is maintained.  Open <tt>src/j
 
 \section building_macosx Building for Linux
 
-In order to build JamPlus on Linux, do the following:
+In order to build JamPlus for Linux 32-bit, run:
 
 \code
     cd src
@@ -64,47 +110,71 @@ In order to build JamPlus on Linux, do the following:
 
 When finished, the Jam executable will have been built as <tt>bin/linux32/jam</tt>.
 
+Alternatively, in order to build JamPlus for Linux 64-bit, run:
+
+\code
+    cd src
+    make linux64
+\endcode
+
+When finished, the Jam executable will have been built as <tt>bin/linux64/jam</tt>.
+
+
 
 
 \section build_luaplus Building and Copying the LuaPlus Binaries
 
-The JamPlus Git repository has LuaPlus as a submodule residing at <tt>src/luaplus/</tt>.  To clone or update the repository, run the following command at the root of the JamPlus tree:
+The JamPlus Git repository has stripped down copy of LuaPlus.
 
-\code
-    git submodule update --init
-\endcode
-
-Change directories into <tt>src/luaplus/</tt>.
+To build the LuaPlus subset necessary for JamPlus' extended feature set, first change directories into <tt>src/luaplus/</tt>.
 
 \code
     cd src
     cd luaplus
 \endcode
 
-Build LuaPlus by running:
+Build LuaPlus by running one of the following:
 
 \code
-    # On Windows:
-    ..\..\bin\win32\jam.exe LUA_VERSION=lua52-luaplus
+    # For Windows 32-bit:
+    ..\..\bin\win32\jam.exe
 
-    # On Linux:
-    ../../bin/linux32/jam LUA_VERSION=lua52-luaplus
+    # For Windows 64-bit:
+    ..\..\bin\win64\jam.exe
 
-    # On Mac:
-    ../../bin/macosx32/jam LUA_VERSION=lua52-luaplus
+    # For Linux 32-bit:
+    ../../bin/linux32/jam
+
+    # For Linux 64-bit:
+    ../../bin/linux64/jam
+
+    # For Mac OS X 32-bit:
+    ../../bin/macosx32/jam
+
+    # For Mac OS X 64-bit:
+    ../../bin/macosx64/jam
 \endcode
 
-When finished a <tt>.build/bin.lua51-luaplus/bin.lua52-luaplus.COMPILER.PLATFORM/</tt> directory will have been created.  Set the <tt>LUA_BIN</tt> environment variable to point to the directory.
+When finished a <tt>src/luaplus/.build/PLATFORM/bin/</tt> directory will have been created.  Set the <tt>LUA_BIN</tt> environment variable to point to the directory using one of the following approaches:
 
 \code
-    # On Windows:
-    set LUA_BIN=d:/jamplus/src/luaplus/.build/bin.lua52-luaplus.COMPILER.PLATFORM
+    # For Windows 32-bit:
+    set LUA_BIN=c:/jamplus/src/luaplus/.build/win32/bin
 
-    # On Linux:
-    export LUA_BIN=~/jamplus/src/luaplus/.build/bin.lua52-luaplus.COMPILER.PLATFORM
+    # For Windows 64-bit:
+    set LUA_BIN=c:/jamplus/src/luaplus/.build/win64/bin
 
-    # On Mac:
-    export LUA_BIN=~/jamplus/src/luaplus/.build/bin.lua52-luaplus.COMPILER.PLATFORM
+    # For Linux 32-bit:
+    export LUA_BIN=~/jamplus/src/luaplus/.build/linux32/bin
+
+    # For Linux 64-bit:
+    export LUA_BIN=~/jamplus/src/luaplus/.build/linux64/bin
+
+    # For Mac OS X 32-bit:
+    export LUA_BIN=~/jamplus/src/luaplus/.build/macosx32/bin
+
+    # For Mac OS X 64-bit:
+    export LUA_BIN=~/jamplus/src/luaplus/.build/macosx64/bin
 \endcode
 
 Change directories back to the <tt>jamplus/src/</tt> directory.

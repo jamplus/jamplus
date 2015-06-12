@@ -1,0 +1,42 @@
+if ! [ C.OpenSSL : test ] {
+	Echo * Not building md5, sha1, sha256, sha384, and sha512, because OpenSSL is not installed. ;
+
+} else {
+
+local SRCS =
+		lmd5.c
+		lmd5.h
+;
+
+#######################
+ActiveTarget md5 ;
+C.Defines : USE_MD5_OPENSSL ;
+C.OpenSSL : link ;
+Lua.CModule : : $(SRCS) ;
+
+#######################
+ActiveTarget sha1 ;
+C.Defines : USE_SHA1_OPENSSL ;
+C.OpenSSL : link ;
+Lua.CModule : : $(SRCS) ;
+
+#######################
+ActiveTarget sha256 ;
+C.Defines : USE_SHA256_OPENSSL ;
+C.OpenSSL : link ;
+Lua.CModule : : $(SRCS) ;
+
+#######################
+ActiveTarget sha384 ;
+C.Defines : USE_SHA384_OPENSSL ;
+C.OpenSSL : link ;
+Lua.CModule : : $(SRCS) ;
+
+#######################
+ActiveTarget sha512 ;
+C.Defines : USE_SHA512_OPENSSL ;
+C.OpenSSL : link ;
+Lua.CModule : : $(SRCS) ;
+
+}
+

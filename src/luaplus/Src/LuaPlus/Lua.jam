@@ -1,0 +1,109 @@
+SubDir LUAPLUS Src LuaPlus ;
+
+{
+
+if $(LUA_VERSION) in lua51-luaplus lua52-luaplus {
+    if $(NT) {
+        local TILDE_SRCS =
+            ../tilde/HostConfig.cpp
+            ../tilde/HostConfig.h
+            ../tilde/LuaDebugger.cpp
+            ../tilde/LuaDebugger.h
+            ../tilde/LuaDebuggerComms.cpp
+            ../tilde/LuaDebuggerComms.h
+            ../tilde/LuaDebuggerProtocol.h
+            ../tilde/LuaHostWindows.cpp
+            ../tilde/LuaHostWindows.h
+            ../tilde/LuaTilde.cpp
+            ../tilde/LuaTilde.h
+            ../tilde/ReceiveMessageBuffer.h
+            ;
+
+        Depends all : lua-tilde ;
+        C.Defines lua-tilde : LUA_TILDE_DEBUGGER=1 ;
+        C.IncludeDirectories lua-tilde : $(LUAPLUS_INCLUDE_DIRECTORIES) ;
+        C.LinkLibraries lua-tilde : $(LUA_VERSION) ;
+        LuaPlusFixUpTarget lua-tilde ;
+        C.LinkFlags lua-tilde : /EXPORT:LuaTilde_Command ;
+        C.Library lua-tilde : $(TILDE_SRCS) : shared ;
+        Workspace LuaPlus : lua-tilde ;
+    }
+}
+
+local SRCS ;
+
+if $(LUA_VERSION) in lua51-luaplus {
+	SRCS += lua51-luaplus/src/lua.cpp ;
+
+	#if $(NT)  &&  $(COMPILER) != vc6
+	#{
+		#SRCS += $(TILDE_SRCS) ;
+	#}
+} else {
+	SRCS += $(LUA_VERSION)/src/lua.c ;
+}
+
+rule LuaApplication TARGET : OPTIONS
+{
+	ActiveTarget $(TARGET) ;
+
+	SubInclude LUAPLUS Src LuaPlus : LuaPlusSharedLib ;
+
+	if $(MSVCNT)
+	{
+		if $(LUA_VERSION) in lua51 lua51-luaplus {
+			switch $(CONFIG) {
+				case debug :		C.LinkFlags : /DELAYLOAD:lua51_debug.dll ;
+				case release :		C.LinkFlags : /DELAYLOAD:lua51.dll ;
+				case releaseltcg :	C.LinkFlags : /DELAYLOAD:lua51.dll ;
+			}
+		} else if $(LUA_VERSION) in lua52 {
+			switch $(CONFIG) {
+				case debug :		C.LinkFlags : /DELAYLOAD:lua52_debug.dll ;
+				case release :		C.LinkFlags : /DELAYLOAD:lua52.dll ;
+				case releaseltcg :	C.LinkFlags : /DELAYLOAD:lua52.dll ;
+			}
+		} else if $(LUA_VERSION) in lua53 {
+			switch $(CONFIG) {
+				case debug :		C.LinkFlags : /DELAYLOAD:lua53_debug.dll ;
+				case release :		C.LinkFlags : /DELAYLOAD:lua53.dll ;
+				case releaseltcg :	C.LinkFlags : /DELAYLOAD:lua53.dll ;
+			}
+		}
+		C.LinkPrebuiltLibraries : DelayImp ;
+	}
+	C.IncludeDirectories : $(LUAPLUS_INCLUDE_DIRECTORIES) ;
+	C.LinkLibraries : $(LUA_VERSION) ;
+	if $(OS) = LINUX
+	{
+		C.LinkFlags : -Wl,-E -lreadline ;
+		C.LinkFlags : -Wl,--rpath=\\$ORIGIN -z origin ;
+	}
+	else if $(OS) in MACOS MACOSX
+	{
+		C.LinkFlags : -Wl,-rpath,@loader_path/ ;
+		C.LinkPrebuiltLibraries : readline ;
+	}
+	else if $(OS) = NT {
+		C.LinkPrebuiltLibraries $(TARGET) : wsock32 ;
+	}
+	LuaPlusFixUpTarget $(TARGET) ;
+	C.Application : $(SRCS) : $(OPTIONS) ;
+}
+
+NoWorkspace "lua" ;
+LuaApplication "lua" ;
+
+if $(NT)  &&  $(LUA_VERSION) in lua51-luaplus
+{
+	C.Defines "luaw" : USE_WINMAIN ;
+	LuaApplication "luaw" : windows ;
+	NoWorkspace "luaw" ;
+}
+
+on @(lua:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) LUA_EXE = $(LINK_TARGET) ;
+if ! $(LUA_EXE) {
+	on @(lua:G=$(C.ACTIVE_TOOLCHAIN)) LUA_EXE = $(LINK_TARGET) ;
+}
+
+}

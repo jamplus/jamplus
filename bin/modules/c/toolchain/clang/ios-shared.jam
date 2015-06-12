@@ -51,7 +51,7 @@ rule C.ios.SDK SDK_VERSION {
 	switch $(SDK_PLATFORM) {
 		case ios :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 8.2 ;
+			SDK_VERSION ?= 8.3 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -110,13 +110,19 @@ rule C.ios.SDK SDK_VERSION {
 					sdkroot = iphoneos8.2 ;
 					architecture = armv7 ;
 
+				case 8.3 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.3.sdk ;
+					sdkroot = iphoneos8.3 ;
+					architecture = armv7 ;
+
 				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -fvisibility=hidden ;
 
 		case iossimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 8.2 ;
+			SDK_VERSION ?= 8.3 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -165,6 +171,11 @@ rule C.ios.SDK SDK_VERSION {
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.2.sdk ;
 					sdkroot = iphoneos8.2 ;
+
+				case 8.3 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.3.sdk ;
+					sdkroot = iphoneos8.3 ;
 
 				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -757,11 +768,11 @@ rule C.ios._MultiCppCompile_SetupFlags {
 				extraflags += -mmacosx-version-min=$(minimumsdkversion) ;
 
 			case ios :
-				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1 8.2
+				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1, 8.2, 8.3
 				extraflags += -miphoneos-version-min=$(minimumsdkversion) ;
 
 			case iossimulator :
-				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1 8.2
+				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1, 8.2, 8.3
 				extraflags += -mios-simulator-version-min=$(minimumsdkversion) ;
 		}
 	}
