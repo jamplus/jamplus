@@ -398,6 +398,8 @@ rule C.ios.BundleInfoArrayString TARGET : KEY : VALUE {
 rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
+		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+
 		C.ios.BundleInfoString : CFBundleDevelopmentRegion : en ;
 		C.ios.BundleInfoString : CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
 		C.ios.BundleInfoString : CFBundleInfoDictionaryVersion : 6.0 ;
