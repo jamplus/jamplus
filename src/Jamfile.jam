@@ -345,6 +345,7 @@ if $(LUA_BIN)
 				lua/lanes.lua
 				lua/ospath.lua
 				lua/osprocess.lua
+				lua/plist.lua
 				lua/socket.lua
 				lua/ssl.lua
 				lua/xavante.lua
@@ -426,6 +427,7 @@ if $(LUA_BIN)
 				share/lua/5.2/lanes.lua
 				share/lua/5.2/ospath.lua
 				share/lua/5.2/osprocess.lua
+				share/lua/5.2/plist.lua
 				share/lua/5.2/socket.lua
 				share/lua/5.2/ssl.lua
 				share/lua/5.2/xavante.lua
