@@ -1,4 +1,7 @@
 rule LuaSupport {
-	LuaFile "$(JAM_MODULES_PATH)/luasupport.lua" ;
+	if ! $(LUASUPPORT_LOADED) {
+		LuaFile "$(JAM_MODULES_PATH)/luasupport.lua" ;
+		LUASUPPORT_LOADED = 1 ;
+	}
 }
 
