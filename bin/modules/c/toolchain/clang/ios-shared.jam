@@ -765,7 +765,7 @@ rule C.ios._MultiCppCompile_SetupFlags {
 	local extraflags ;
 	if $(IOSBUILDENV_PATH) {
 		architecture ?= armv7 ;
-		extraflags = -target $(architecture)-apple-ios$(sdkversion) ;
+		extraflags = -target $(architecture)-apple-ios$(minimumsdkversion) ;
 		if $(isysroot) {
 			extraflags += --sysroot $(isysroot:C) ;
 		}
