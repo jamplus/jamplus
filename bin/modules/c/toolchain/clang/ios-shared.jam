@@ -247,62 +247,180 @@ rule C.ios.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 	}
 }
 
-rule C.ios._BundleInfoArray KEY : VALUE {
-	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
-		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
-	}
-	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = ArrayString ;
-	INFO_PLIST_KEYS.$(KEY).VALUE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
+LuaString "
+function GetInfoPlistCurrentLevel()
+	if not plist then
+		plist = require 'plist'
+	end
+	local plistName = jam_getvar('C.ACTIVE_TOOLCHAIN_TARGET_GRIST')[1] .. ':Info.plist'
+	if not _G[plistName] then
+		_G[plistName] = plist.newdict()
+	end
+	return _G[plistName]
+end
+
+
+function PushInfoPlistLevel(key, value)
+	local currentLevel = GetInfoPlistCurrentLevel()
+	local newLevel = value
+	rawset(newLevel, '__previous', currentLevel)
+	local plistName = jam_getvar('C.ACTIVE_TOOLCHAIN_TARGET_GRIST')[1] .. ':Info.plist'
+	_G[plistName] = newLevel
+	return newLevel
+end
+
+
+function PopInfoPlistLevel()
+	local currentLevel = GetInfoPlistCurrentLevel()
+	local previousLevel = rawget(currentLevel, '__previous')
+	if previousLevel then
+		rawset(currentLevel, '__previous', nil)
+		local plistName = jam_getvar('C.ACTIVE_TOOLCHAIN_TARGET_GRIST')[1] .. ':Info.plist'
+		_G[plistName] = previousLevel
+		return previousLevel
+	end
+	return currentLevel
+end
+" ;
+
+
+rule C.ios.BundleInfoBoolean TARGET : KEY : VALUE {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')[1] == 'true'" ;
 }
 
 
-rule C.ios._BundleInfoIntegerArray KEY : VALUE {
-	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
-		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
-	}
-	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = ArrayInteger ;
-	INFO_PLIST_KEYS.$(KEY).VALUE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
+rule C.ios.BundleInfoInteger TARGET : KEY : VALUE {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = tonumber(jam_getvar('VALUE')[1])" ;
 }
 
 
-rule C.ios._BundleInfoBoolean KEY : VALUE {
-	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
-		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
-	}
-	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = Boolean ;
-	INFO_PLIST_KEYS.$(KEY).VALUE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
+rule C.ios.BundleInfoString TARGET : KEY : VALUE {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')[1]" ;
 }
 
 
-rule C.ios._BundleInfoString KEY : VALUE {
-	if ! $(KEY) in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
-		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(KEY) ;
+rule C.ios.BundleInfoArrayBegin TARGET : KEY {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	LuaString "
+		local currentLevel = GetInfoPlistCurrentLevel()
+		local newLevel = plist.newarray()
+		currentLevel[jam_getvar('KEY')[1]] = newLevel
+		rawset(newLevel, '__previous', currentLevel)
+		local plistName = jam_getvar('C.ACTIVE_TOOLCHAIN_TARGET_GRIST')[1] .. ':Info.plist'
+		_G[plistName] = newLevel
+" ;
+}
+
+
+rule C.ios.BundleInfoArrayEnd TARGET {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	LuaString "PopInfoPlistLevel()" ;
+}
+
+
+rule C.ios.BundleInfoArrayDictBegin TARGET : KEY {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	LuaString "
+		local currentLevel = GetInfoPlistCurrentLevel()
+		local newLevel = plist.newdict()
+		currentLevel[#currentLevel + 1] = newLevel
+		rawset(newLevel, '__previous', currentLevel)
+		local plistName = jam_getvar('C.ACTIVE_TOOLCHAIN_TARGET_GRIST')[1] .. ':Info.plist'
+		_G[plistName] = newLevel
+" ;
+}
+
+
+rule C.ios.BundleInfoArrayDictEnd TARGET {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	LuaString "PopInfoPlistLevel()" ;
+}
+
+
+rule C.ios.BundleInfoArrayBoolean TARGET : KEY : VALUE {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	if $(VALUE) {
+		LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')" ;
+	} else {
+		LuaString "
+			local currentLevel = GetInfoPlistCurrentLevel()
+			local key = jam_getvar('KEY')
+			local values = jam_getvar('VALUE')
+			for index, value in ipairs(values) do
+				currentLevel[#currentLevel + 1] = value
+			end
+" ;
 	}
-	INFO_PLIST_KEYS.$(KEY).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = String ;
-	INFO_PLIST_KEYS.$(KEY).VALUE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
+}
+
+
+rule C.ios.BundleInfoArrayInteger TARGET : KEY : VALUE {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	if $(VALUE) {
+		LuaString "
+			local values = jam_getvar('VALUE')
+			for index, value in ipairs(values) do
+				values[index] = tonumber(value)
+			end
+			GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = values
+" ;
+	} else {
+		LuaString "
+			local currentLevel = GetInfoPlistCurrentLevel()
+			local values = jam_getvar('KEY')
+			for index, value in ipairs(values) do
+				currentLevel[#currentLevel + 1] = tonumber(value)
+			end
+" ;
+	}
+}
+
+
+rule C.ios.BundleInfoArrayString TARGET : KEY : VALUE {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	if $(VALUE) {
+		LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')" ;
+	} else {
+		LuaString "
+			local currentLevel = GetInfoPlistCurrentLevel()
+			local values = jam_getvar('KEY')
+			for index, value in ipairs(values) do
+				currentLevel[#currentLevel + 1] = value
+			end
+" ;
+	}
 }
 
 
 rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
-		C.ios._BundleInfoString CFBundleDevelopmentRegion : en ;
-		C.ios._BundleInfoString CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
-		C.ios._BundleInfoString CFBundleInfoDictionaryVersion : 6.0 ;
-		C.ios._BundleInfoString CFBundlePackageType : APPL ;
-		C.ios._BundleInfoString CFBundleSignature : ???? ;
+		C.ios.BundleInfoString : CFBundleDevelopmentRegion : en ;
+		C.ios.BundleInfoString : CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
+		C.ios.BundleInfoString : CFBundleInfoDictionaryVersion : 6.0 ;
+		C.ios.BundleInfoString : CFBundlePackageType : APPL ;
+		C.ios.BundleInfoString : CFBundleSignature : ???? ;
 		if ! $(NT) {
-			C.ios._BundleInfoString CFBundleResourceSpecification : ResourceRules.plist ;
+			C.ios.BundleInfoString : CFBundleResourceSpecification : ResourceRules.plist ;
 		}
 
 		switch $(C.PLATFORM) {
 			case ios :
-				C.ios._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C.ios._BundleInfoIntegerArray UIDeviceFamily : 1 2 ;
-				C.ios._BundleInfoString DTPlatformName : iphoneos ;
-				C.ios._BundleInfoString DTSDKName : iphoneos$(IPHONEOS_SDK_VERSION) ;
-				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
-				C.ios._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
+				local sdkversion = $(IPHONEOS_SDK_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				sdkversion ?= $(IPHONEOS_SDK_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+				local minimumsdkversion = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				minimumsdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+				C.ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
+				C.ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 ;
+				C.ios.BundleInfoString : DTPlatformName : iphoneos ;
+				C.ios.BundleInfoString : DTSDKName : iphoneos$(sdkversion) ;
+				C.ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneOS ;
+				C.ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) ;
 				if $(TARGETINFO_LOCATE) {
 					Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
 
@@ -310,12 +428,18 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 				}
 
 			case iossimulator :
-				C.ios._BundleInfoBoolean LSRequiresIPhoneOS : true ;
-				C.ios._BundleInfoIntegerArray UIDeviceFamily : 1 2 ;
-				C.ios._BundleInfoString DTPlatformName : iphonesimulator ;
-				C.ios._BundleInfoString DTSDKName : iphonesimulator$(IPHONEOS_SDK_VERSION) ;
-				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneSimulator ;
-				C.ios._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
+				local sdkversion = $(IPHONEOS_SDK_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				sdkversion ?= $(IPHONEOS_SDK_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+				local minimumsdkversion = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				minimumsdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+				C.ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
+				C.ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 ;
+				C.ios.BundleInfoString : DTPlatformName : iphonesimulator ;
+				C.ios.BundleInfoString : DTSDKName : iphonesimulator$(sdkversion) ;
+				C.ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneSimulator ;
+				C.ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) ;
 				if $(TARGETINFO_LOCATE) {
 					Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
 
@@ -325,30 +449,30 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 	}
 
 	switch $(TYPE:L) {
-		case info :					C.ios._BundleInfoString CFBundleGetInfoString : $(VALUE) ;
-		case iconfile :				C.ios._BundleInfoString CFBundleIconFile : $(VALUE) ;
-		case iconfiles :			C.ios._BundleInfoArray CFBundleIconFiles : $(VALUE) ;
-		case longversion :			C.ios._BundleInfoString CFBundleLongVersionString : $(VALUE) ;
+		case info :					C.ios.BundleInfoString : CFBundleGetInfoString : $(VALUE) ;
+		case iconfile :				C.ios.BundleInfoString : CFBundleIconFile : $(VALUE) ;
+		case iconfiles :			C.ios.BundleInfoArrayString : CFBundleIconFiles : $(VALUE) ;
+		case longversion :			C.ios.BundleInfoString : CFBundleLongVersionString : $(VALUE) ;
 		case bundlename :
-			C.ios._BundleInfoString CFBundleName : $(VALUE) ;
+			C.ios.BundleInfoString : CFBundleName : $(VALUE) ;
 			CFBundleName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case displayname :
-			C.ios._BundleInfoString CFBundleDisplayName : $(VALUE) ;
+			C.ios.BundleInfoString : CFBundleDisplayName : $(VALUE) ;
 			CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-		case executable :			C.ios._BundleInfoString CFBundleExecutable : $(VALUE) ;
+		case executable :			C.ios.BundleInfoString CFBundleExecutable : $(VALUE) ;
 		case identifier :
-			C.ios._BundleInfoString CFBundleIdentifier : $(VALUE[1]) ;
+			C.ios.BundleInfoString : CFBundleIdentifier : $(VALUE[1]) ;
 			CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE[1]) ;
 			AppIdentifierPrefix on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE[2]) ;
-		case shortversion :			C.ios._BundleInfoString CFShortVersionString : $(VALUE) ;
+		case shortversion :			C.ios.BundleInfoString : CFShortVersionString : $(VALUE) ;
 		case bundleversion :
-			C.ios._BundleInfoString CFBundleVersion : $(VALUE) ;
+			C.ios.BundleInfoString : CFBundleVersion : $(VALUE) ;
 			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-		case copyright :			C.ios._BundleInfoString NSHumanReadableCopyright : $(VALUE) ;
-		case mainnibfile :			C.ios._BundleInfoString NSMainNibFile : $(VALUE) ;
-		case resourcespec :			C.ios._BundleInfoString CFBundleResourceSpecification : $(VALUE) ;
-		case supportedplatforms :   C.ios._BundleInfoArray CFBundleSupportedPlatforms : $(VALUE) ;
-		case minimumosversion :		C.ios._BundleInfoString MinimumOSVersion : $(VALUE) ;
+		case copyright :			C.ios.BundleInfoString : NSHumanReadableCopyright : $(VALUE) ;
+		case mainnibfile :			C.ios.BundleInfoString : NSMainNibFile : $(VALUE) ;
+		case resourcespec :			C.ios.BundleInfoString : CFBundleResourceSpecification : $(VALUE) ;
+		case supportedplatforms :   C.ios.BundleInfoArrayString : CFBundleSupportedPlatforms : $(VALUE) ;
+		case minimumosversion :		C.ios.BundleInfoString : MinimumOSVersion : $(VALUE) ;
 		case uidevicefamily :
 			local actualValues ;
 			local value ;
@@ -365,27 +489,27 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 					actualValues += $(value) ;
 				}
 			}
-			C.ios._BundleInfoIntegerArray UIDeviceFamily : $(actualValues) ;
+			C.ios.BundleInfoArrayInteger : UIDeviceFamily : $(actualValues) ;
 			if $(TARGETINFO_LOCATE) {
 				Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
 
 " ;
 			}
-		case uiprerenderedicon :	C.ios._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
-		case uistatusbarhidden :	C.ios._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
-		case uiviewcontrollerbasedstatusbarappearance : C.ios._BundleInfoBoolean UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
-		case uiinterfaceorientation :	
+		case uiprerenderedicon :	C.ios.BundleInfoBoolean : UIPrerenderedIcon : $(VALUE) ;
+		case uistatusbarhidden :	C.ios.BundleInfoBoolean : UIStatusBarHidden : $(VALUE) ;
+		case uiviewcontrollerbasedstatusbarappearance : C.ios.BundleInfoBoolean : UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
+		case uiinterfaceorientation :
 			if $(VALUE) = portrait {
-				C.ios._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationPortrait ;
+				C.ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationPortrait ;
 			}
 			if $(VALUE) = portraitupsidedown {
-				C.ios._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationPortraitUpsideDown ;
+				C.ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationPortraitUpsideDown ;
 			}
 			if $(VALUE) = landscapeleft {
-				C.ios._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationLandscapeLeft ;
+				C.ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationLandscapeLeft ;
 			}
 			if $(VALUE) = landscaperight {
-				C.ios._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationLandscapeRight ;
+				C.ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationLandscapeRight ;
 			}
 		case uisupportedinterfaceorientations :
 			local values = ;
@@ -401,8 +525,46 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 			if landscaperight in $(VALUE) {
 				values += UIInterfaceOrientationLandscapeRight ;
 			}
-			C.ios._BundleInfoArray UISupportedInterfaceOrientations : $(values) ;
+			C.ios.BundleInfoArrayString : UISupportedInterfaceOrientations : $(values) ;
 	}
+}
+
+
+rule C.ios.MergeInfoPList TARGET : SOURCE {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):source ;
+	local source = $(SOURCE:BSG=$(grist)) ;
+	if $(SOURCE:D) != "" {
+		SEARCH on $(source) ?= $(SOURCE:D) ;
+	}
+	SEARCH on $(source) ?= $(SEARCH_SOURCE) ;
+
+	local sourcePath = $(source:T) ;
+	LuaString "
+		if not plist then
+			plist = require 'plist'
+		end
+		local left = plist.read(jam_getvar('sourcePath')[1])
+		plist.merge(left, GetInfoPlistCurrentLevel())
+" ;
+}
+
+
+rule C.ios.InfoPListFile TARGET : SOURCE {
+	#TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):intermediate ;
+	local destination = @(Info.plist:G=$(grist)) ;
+	MakeLocate $(destination) : $(LOCATE_SOURCE) ;
+
+	grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):source ;
+	local source = $(SOURCE:BSG=$(grist)) ;
+	SEARCH on $(source) ?= $(SEARCH_SOURCE) ;
+
+	local EXECUTABLE_NAME = [ C._retrieveOutputName $(TARGET) ] ;
+	C.ConfigureFile $(TARGET) : $(destination) : $(source) ;
+	INFO_PLIST_FILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destination) ;
 }
 
 
@@ -555,57 +717,25 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 		Depends $(bundleTarget) : $(pkginfo) ;
 		Clean $(cleanBundleTarget) : $(pkginfo) ;
 
-		if $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+		# Handle the Info.plist file.
+		local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+		MakeLocate $(infoplist) : $(bundlePath) ;
+		Depends $(bundleTarget) : $(infoplist) ;
+		Clean $(cleanBundleTarget) : $(infoplist) ;
 
-			# Set up Info.plist file header.
-			local infoplistcontents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-" ;
-			# Set up each key/value pair based on the type (Array/Boolean/String).
-			for _key in $(INFO_PLIST_KEYS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-			{
-				switch $(INFO_PLIST_KEYS.$(_key).TYPE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-				{
-					case ArrayInteger :
-						infoplistcontents += "$(TAB)<key>$(_key)</key>$(NEWLINE)$(TAB)<array>$(NEWLINE)" ;
-						for value in $(INFO_PLIST_KEYS.$(_key).VALUE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
-							infoplistcontents += "$(TAB)$(TAB)<integer>$(value)</integer>$(NEWLINE)" ;
-						}
-						infoplistcontents += "$(TAB)</array>$(NEWLINE)" ;
-					case ArrayString :
-						infoplistcontents += "$(TAB)<key>$(_key)</key>$(NEWLINE)$(TAB)<array>$(NEWLINE)" ;
-						for value in $(INFO_PLIST_KEYS.$(_key).VALUE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
-							infoplistcontents += "$(TAB)$(TAB)<string>$(value)</string>$(NEWLINE)" ;
-						}
-						infoplistcontents += "$(TAB)</array>$(NEWLINE)" ;
-					case Boolean :
-						infoplistcontents += "$(TAB)<key>$(_key)</key>$(NEWLINE)$(TAB)" ;
-						if $(INFO_PLIST_KEYS.$(_key).VALUE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) = true {
-							infoplistcontents += "<true/>$(NEWLINE)" ;
-						} else {
-							infoplistcontents += "<false/>$(NEWLINE)" ;
-						}
-					case String :
-						infoplistcontents += "$(TAB)<key>$(_key)</key>$(NEWLINE)$(TAB)<string>$(INFO_PLIST_KEYS.$(_key).VALUE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))</string>$(NEWLINE)" ;
-				}
+		if $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+			CopyFile $(bundleTarget) : $(infoplist) : $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		} else {
+			local infoplistcontents = [ LuaString "
+				local currentLevel = GetInfoPlistCurrentLevel()
+				return plist.dump(currentLevel)
+" ] ;
+			if $(infoplistcontents) {
+				CONTENTS on $(infoplist) = $(infoplistcontents) ;
+				WriteFile $(infoplist) ;
+
+				UseCommandLine $(infoplist) : $(infoplistcontents) ;
 			}
-
-			# Set up Info.plist file footer.
-			infoplistcontents += "</dict>
-</plist>
-" ;
-			infoplistcontents = $(infoplistcontents:J="") ;
-
-			local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-			MakeLocate $(infoplist) : $(bundlePath) ;
-			CONTENTS on $(infoplist) = $(infoplistcontents) ;
-			WriteFile $(infoplist) ;
-
-			UseCommandLine $(infoplist) : $(infoplistcontents) ;
-			Depends $(bundleTarget) : $(infoplist) ;
-			Clean $(cleanBundleTarget) : $(infoplist) ;
 		}
 
 		if $(C.PLATFORM) in ios  &&  ! $(NT) {
