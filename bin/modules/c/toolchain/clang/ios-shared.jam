@@ -422,9 +422,6 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 		C.ios.BundleInfoString : CFBundleInfoDictionaryVersion : 6.0 ;
 		C.ios.BundleInfoString : CFBundlePackageType : APPL ;
 		C.ios.BundleInfoString : CFBundleSignature : ???? ;
-		if ! $(NT) {
-			C.ios.BundleInfoString : CFBundleResourceSpecification : ResourceRules.plist ;
-		}
 
 		switch $(C.PLATFORM) {
 			case ios :
@@ -489,7 +486,6 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case copyright :			C.ios.BundleInfoString : NSHumanReadableCopyright : $(VALUE) ;
 		case mainnibfile :			C.ios.BundleInfoString : NSMainNibFile : $(VALUE) ;
-		case resourcespec :			C.ios.BundleInfoString : CFBundleResourceSpecification : $(VALUE) ;
 		case supportedplatforms :   C.ios.BundleInfoArrayString : CFBundleSupportedPlatforms : $(VALUE) ;
 		case minimumosversion :		C.ios.BundleInfoString : MinimumOSVersion : $(VALUE) ;
 		case uidevicefamily :
@@ -639,11 +635,6 @@ rule C.ios.GenerateDSYMFile TARGET {
 }
 
 
-actions ios.CpResource
-{
-	ditto $(2) $(1:D)
-}
-
 C.__DOLLAR = \\$ ;
 C.__JUST_DOLLAR = $ ;
 C.__COLON = ":" ;
@@ -758,16 +749,6 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 		}
 
 		if $(C.PLATFORM) in ios  &&  ! $(NT) {
-			# Copy ResourceRules.plist.
-			local sourceResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
-			SEARCH on $(sourceResourceRulesPlist) = $(isysroot) ;
-			local destResourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-			MakeLocate $(destResourceRulesPlist) : $(bundlePath) ;
-
-			Depends $(bundleTarget) : $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;	
-			Clean $(cleanBundleTarget) : $(destResourceRulesPlist) ;
-			ios.CpResource $(destResourceRulesPlist) : $(sourceResourceRulesPlist) ;
-
 			# Create Entitlements.plist.
 			local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
 			SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
@@ -1340,7 +1321,7 @@ actions C.ios._CodeSign
 actions C.ios._CodeSign
 {
 	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
-	/usr/bin/codesign --force --sign "$(SIGNING_IDENTITY)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
+	/usr/bin/codesign --force --no-strict --sign "$(SIGNING_IDENTITY)" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
 	touch $(1:C)
 	touch $(DSYM_NAME:CT)
 }
