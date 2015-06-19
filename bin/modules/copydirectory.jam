@@ -15,7 +15,7 @@ rule _CopyDirectoryRecursiveHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEA
 	local dir ;
 	for dir in $(dirs) {
 		local parent = $(dir:P) ;
-		_CopyDirectoryRecursiveHelper $(PARENT) : $(parent:BR=$(DESTINATION_PATH)) : $(dir) : $(SEARCH_STRING) : $(RECURSIVE) ;
+		_CopyDirectoryRecursiveHelper $(PARENT) : $(parent:BSR=$(DESTINATION_PATH)) : $(dir) : $(SEARCH_STRING) : $(RECURSIVE) ;
 	}
 }
 
