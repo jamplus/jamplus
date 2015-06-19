@@ -976,6 +976,126 @@ actions ios.CompileXIB
 }
 
 
+actions C.ios._ImageResize {
+	$(IMCONVERT:C) $(2:C) -quiet -resize $(IMAGE_SIZE) $(1:C)
+}
+
+
+actions C.ios._ImageCopy {
+	copy $(2:C\\) $(1:C\\)
+}
+
+
+rule C.ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH {
+    local assetName = $(SOURCE_PATH:B) ;
+    local assetType = $(SOURCE_PATH:S) ;
+
+    LuaString "
+        local ospath = require 'ospath'
+        local contentsJsonFilename = ospath.join(jam_getvar('SOURCE_PATH')[1], 'Contents.json')
+        local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+        local parent = jam_getvar('PARENT')[1]
+        local targetGrist = jam_getvar('TARGET_GRIST')[1]
+        local assetName = jam_getvar('assetName')[1]
+        local assetType = jam_getvar('assetType')[1]
+        local sourcePath = jam_getvar('SOURCE_PATH')[1]
+        local destinationPath = jam_getvar('DESTINATION_PATH')[1]
+
+        if assetType == '.appiconset' then
+            for _, entry in ipairs(contents.images) do
+                local filename = assetName .. entry.size
+                if entry.scale  and  entry.scale ~= '1x' then
+                    filename = filename .. '@' .. entry.scale
+                end
+                if entry.idiom  and  entry.idiom ~= 'iphone' then
+                    filename = filename .. '~' .. entry.idiom
+                end
+                filename = filename .. '.png'
+
+                local inputTarget = '<' .. targetGrist .. ':source>' .. entry.filename
+                local outputTarget = '<' .. targetGrist .. '>' .. filename
+                jam_setvar(inputTarget, 'SEARCH', sourcePath)
+                jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
+                jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
+                jam_evaluaterule('Clean', outputTarget)
+
+                jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
+                jam_evaluaterule('C.ios._ImageResize', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
+            end
+
+        elseif assetType == '.launchimage' then
+            local activeFilenames = {}
+            local function MakeLaunchImageFilename(entry, build)
+                local filename = assetName
+                local minimumSystemVersion = entry['minimum-system-version']
+                if minimumSystemVersion == '7.0' then
+                    filename = filename .. '-700'
+                elseif minimumSystemVersion == '8.0' then
+                    filename = filename .. '-800'
+                end
+
+                if entry.orientation == 'portrait' then
+                    if not build then
+                        entry.orientation = 'landscape'
+                        local alternateFilename = MakeLaunchImageFilename(entry)
+                        if activeFilenames[alternateFilename] then
+                            filename = filename .. '-Portrait'
+                        end
+                        entry.orientation = 'portrait'
+                    else
+                        filename = filename .. '-Portrait'
+                    end
+                elseif entry.orientation == 'landscape' then
+                    filename = filename .. '-Landscape'
+                end
+
+                if entry.subtype then
+                    if entry.subtype == 'retina4' then
+                        filename = filename .. '-568h'
+                    else
+                        filename = filename .. '-' .. entry.subtype
+                    end
+                end
+
+                if entry.scale  and  entry.scale ~= '1x' then
+                    filename = filename .. '@' .. entry.scale
+                end
+
+                if entry.idiom  and  entry.idiom ~= 'iphone' then
+                    filename = filename .. '~' .. entry.idiom
+                end
+
+                if build then
+                    activeFilenames[filename] = true
+                end
+
+                return filename
+            end
+
+            for _, entry in ipairs(contents.images) do
+                MakeLaunchImageFilename(entry, true)
+            end
+
+            for _, entry in ipairs(contents.images) do repeat
+                local filename = MakeLaunchImageFilename(entry)
+                if not filename then break end
+                filename = filename .. '.png'
+
+                local inputTarget = '<' .. targetGrist .. ':source>' .. entry.filename
+                local outputTarget = '<' .. targetGrist .. '>' .. filename
+                jam_setvar(inputTarget, 'SEARCH', sourcePath)
+                jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
+                jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
+                jam_evaluaterule('Clean', outputTarget)
+
+                jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
+                jam_evaluaterule('C.ios._ImageCopy', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
+            until true end
+        end
+" ;
+}
+
+
 rule C.ios.ProvisionFile TARGET : FILENAME {
 	TARGET = [ C.ActiveTarget $(TARGET) ] ;
 
