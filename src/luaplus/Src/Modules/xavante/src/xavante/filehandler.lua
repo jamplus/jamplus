@@ -171,6 +171,7 @@ end
 return function (baseDir)
          if type(baseDir) == "table" then baseDir = baseDir.baseDir end
          return function (req, res)
+                  print(req.cmdline)
                   return filehandler (req, res, baseDir)
                 end
        end
