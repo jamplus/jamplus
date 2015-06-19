@@ -476,10 +476,7 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 			C.ios.BundleInfoString : CFBundleDisplayName : $(VALUE) ;
 			CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case executable :			C.ios.BundleInfoString CFBundleExecutable : $(VALUE) ;
-		case identifier :
-			C.ios.BundleInfoString : CFBundleIdentifier : $(VALUE[1]) ;
-			CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE[1]) ;
-			AppIdentifierPrefix on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE[2]) ;
+		case identifier :			C.ios.BundleInfoString : CFBundleIdentifier : $(VALUE[1]) ;
 		case shortversion :			C.ios.BundleInfoString : CFShortVersionString : $(VALUE) ;
 		case bundleversion :
 			C.ios.BundleInfoString : CFBundleVersion : $(VALUE) ;
@@ -644,17 +641,20 @@ C.__COLON = ":" ;
 # 3. If "<key>aps-environment</key>" and "<string>production</string>" is in file, then set "aps-environment" to "production" in destination file (required for push notifications).
 # 4. If "<key>beta-reports-active</key>" exists, and next line is "<true/>", then set "beta-reports-active" to "true" in destination file (required for push notifications).
 # 5. Set "get-task-allow" as per get-task-allow settings in provisioning profile (these must match).
-# 6. Set 'keychain-access-groups:" as per $(AppIdentifierPrefix) and $(CFBundleIdentifier).
-# 7. Set 'application-identifier' as per $(AppIdentifierPrefix) and $(CFBundleIdentifier).
-actions ios.ProcessEntitlements
+# 6. Set 'keychain-access-groups:" as per keychain-access-groups settings in provisioning profile (these must match).
+# 7. Set 'application-identifier' as per application-identifier setting in provisioning profile (these must match).
+actions C.ios.ProcessEntitlements
 {
-	cp $(2) $(1)
+	cp $(2[1]) $(1)
 	cat "$(PROVISION)" | grep "<key>aps-environment</key>" > /dev/null && cat "$(PROVISION)" | grep "<string>development</string>" > /dev/null && /usr/libexec/PlistBuddy -c "Add :aps-environment string development" $(1)
 	cat "$(PROVISION)" | grep "<key>aps-environment</key>" > /dev/null && cat "$(PROVISION)" | grep "<string>production</string>" > /dev/null && /usr/libexec/PlistBuddy -c "Add :aps-environment string production" $(1)
 	cat "$(PROVISION)" | awk '/<key>beta-reports-active<\/key>/,/\/>/' | grep '<key>beta-reports-active</key>' -A1 | grep '<true/>' > /dev/null && /usr/libexec/PlistBuddy -c "Add :beta-reports-active bool true" $(1)
-	/usr/libexec/PlistBuddy -c "Add :get-task-allow bool `cat '$(PROVISION)' | egrep -a '<key>get-task-allow</key>' -A1 | awk 'NR==2' | sed 's/.*<\(.*\)\/>/\1/g'`" $(1)
-	/usr/libexec/PlistBuddy -c "Set 'keychain-access-groups:0' $(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*).$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)" $(1)
-	/usr/libexec/PlistBuddy -c "Set application-identifier $(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*).$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)" $(1)
+	security cms -D -i "$(PROVISION)" > $(1:D)/tmp.plist
+	/usr/libexec/PlistBuddy -c "Add :get-task-allow bool" $(1)
+	/usr/libexec/PlistBuddy -c "Set :get-task-allow `/usr/libexec/PlistBuddy -c "Print :Entitlements:get-task-allow" $(1:D)/tmp.plist`" $(1)
+	/usr/libexec/PlistBuddy -c "Set :keychain-access-groups:0 `/usr/libexec/PlistBuddy -c "Print :Entitlements:keychain-access-groups:0" $(1:D)/tmp.plist`" $(1)
+	/usr/libexec/PlistBuddy -c "Set :application-identifier `/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" $(1:D)/tmp.plist`" $(1)
+	rm $(1:D)/tmp.plist
 }
 
 if $(NT) {
@@ -713,11 +713,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 		local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-		# Get task allow value - trying target first, if not set falling back to configuration, if not set defaulting to true.
-		local getTaskAllowValue = $(GET_TASK_ALLOW:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		getTaskAllowValue ?= $(GET_TASK_ALLOW:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-		getTaskAllowValue ?= true ;
-
+		# Handle the PkgInfo file
 		local pkginfo = @(PkgInfo:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		MakeLocate $(pkginfo) : $(bundlePath) ;
 		local contents = APPL???? ;
@@ -736,6 +732,8 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 		if $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 			CopyFile $(bundleTarget) : $(infoplist) : $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		} else {
+			C.ios.BundleInfoString : CFBundleIdentifier : $(CFBundleIdentifier:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
 			local infoplistcontents = [ LuaString "
 				local currentLevel = GetInfoPlistCurrentLevel()
 				return plist.dump(currentLevel)
@@ -755,13 +753,11 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 			local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 			MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destEntitlementsPlist) ;
-			Depends $(bundleTarget) : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
-			GET_TASK_ALLOW on $(destEntitlementsPlist) = $(getTaskAllowValue) ;
-			on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) $(getTaskAllow) ;
+			Depends $(bundleTarget) : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
 			local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			PROVISION on $(destEntitlementsPlist) = $(provisionFileTarget:TC/) ;
-			ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+			C.ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 		}
 
 		{
@@ -1018,17 +1014,6 @@ rule C.ios._SharedLibraryFromObjects_LinkFlags {
 }
 
 
-rule C.ios.SetTaskAllow TARGET : VALUE {
-	TARGET = [ ActiveTarget $(TARGET) ] ;
-
-	# If true/false isn't specific, assume true, as 'setting' could be thought of enabling.
-	VALUE ?= true ;
-
-	# Save value passed, we'll later check both $(TARGET) and C.* so we can have config defaults and support overrides.
-	GET_TASK_ALLOW on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-}
-
-
 if $(TARGETINFO_LOCATE) {
 
 rule C.ios.XIB {
@@ -1055,9 +1040,8 @@ rule C.ios._ApplicationTargetInfo {
 		SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
 		local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
-		Depends all : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) ;
-		on $(C.ACTIVE_TOOLCHAIN_TARGET) UseCommandLine $(destEntitlementsPlist) : $(CFBundleIdentifier) $(AppIdentifierPrefix) ;
-		ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+		Depends all : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		C.ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 
 		Contents += "Projects[ [[$(TARGET)]] ].XCODE_ENTITLEMENTS[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(destEntitlementsPlist:T)]]
 
@@ -1237,6 +1221,10 @@ rule C.ios.ProvisionFile TARGET : FILENAME {
 	local _provisionFileTarget = $(FILENAME:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 	SEARCH on $(_provisionFileTarget) = $(_provisionDir) ;
 	PROVISION_FILE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_provisionFileTarget) ;
+
+	_provisionFileTarget = $(_provisionFileTarget:T) ;
+	CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = [ LuaString "return require 'plist'.read(jam_getvar('_provisionFileTarget')[1])[\"ApplicationIdentifierPrefix\"]" ] ;
+
 }
 
 
