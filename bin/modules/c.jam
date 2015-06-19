@@ -1017,8 +1017,7 @@ rule C.PrecompiledHeader TARGET : NAME : FILES {
 
 	local file ;
 	for file in $(FILES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) {
-		if $(file:S) in $(C.C_STYLE_BUILD_EXTENSIONS:Z=$(C.COMPILER_SUITE_SYMBOL))
-				$(C.CPP_STYLE_BUILD_EXTENSIONS:Z=$(C.COMPILER_SUITE_SYMBOL))  &&  $(file) != $(cppPchFilename) {
+		if $(file:S) in $(buildExtensions)  &&  $(file) != $(cppPchFilename) {
 			PCH on $(file) = $(SOURCE) $(HEADER) $(NAME[3]:E=$(HEADER)) ;
 		}
 	}
