@@ -1,6 +1,8 @@
 SubDir TOP ;
 
-rule BuildSimple {
+rule BuildSimple TOOLCHAIN {
+    TOOLCHAIN = [ C.Toolchain $(TOOLCHAIN) ] ;
+
     C.ActiveTarget simple ;
 
     C.OutputPostfixClear ;
@@ -8,16 +10,15 @@ rule BuildSimple {
     C.ios.LinkFrameworks : Foundation UIKit ;
 
     C.Application : main.m ;
+
+    return $(TOOLCHAIN) ;
 }
 
 local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
-local toolchainsUsed = [ C.Toolchain $(C.ACTIVE_TOOLCHAIN_SPEC)@C.ARCHITECTURE=armv7s ] ;
-BuildSimple ;
-
-toolchainsUsed += [ C.Toolchain $(saveActiveToolchainSpec)@C.ARCHITECTURE=armv7 ] ;
-BuildSimple ;
-
+local toolchainsUsed = [ BuildSimple $(C.ACTIVE_TOOLCHAIN_SPEC)@C.ARCHITECTURE=armv7s ] ;
+toolchainsUsed += [ BuildSimple $(saveActiveToolchainSpec)@C.ARCHITECTURE=armv7 ] ;
 C.Toolchain $(saveActiveToolchainSpec) ;
+
 C.ActiveTarget simple ;
 C.ios.BundleInfo : displayname : simple ;
 C.ios.BundleInfo : identifier : * 1234567890 ;
