@@ -21,7 +21,6 @@ C.Toolchain $(saveActiveToolchainSpec) ;
 
 C.ActiveTarget simple ;
 C.ios.BundleInfo : displayname : simple ;
-C.ios.BundleInfo : identifier : * 1234567890 ;
 C.ios.BundleInfo : bundleversion : 1.0 ;
 C.ios.BundleInfo : uistatusbarhidden : true ;
 

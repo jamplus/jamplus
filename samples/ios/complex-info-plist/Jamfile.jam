@@ -18,7 +18,6 @@ USE_JAM_INFO_PLIST_BUILDER = 1 ;
 if $(USE_CONFIGURE_INFO_PLIST_BUILDER) {
     # Merge in DefaultInfo.plist the disk first and then assign some overrides.
     C.ios.BundleInfo : displayname : simple ;
-    C.ios.BundleInfo : identifier : * 1234567890 ;
     C.ios.BundleInfo : bundlename : simple ;
     C.ios.BundleInfo : bundleversion : 1.0 ;
     C.ios.BundleInfo : uistatusbarhidden : true ;
@@ -31,7 +30,6 @@ if $(USE_MERGE_INFO_PLIST_BUILDER) {
     # Merge in DefaultInfo.plist the disk first and then assign some overrides.
     C.ios.MergeInfoPList : "DefaultInfo.plist" ;
     C.ios.BundleInfo : displayname : simple ;
-    C.ios.BundleInfo : identifier : * 1234567890 ;
     C.ios.BundleInfo : bundlename : simple ;
     C.ios.BundleInfo : bundleversion : 1.0 ;
     C.ios.BundleInfo : uistatusbarhidden : true ;
