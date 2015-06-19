@@ -71,7 +71,7 @@ function M.read(filename)
     local file = io.open(filename, 'rb')
     local buffer = file:read('*a')
     file:close()
-    local info, err = lom.parse(buffer)
+    local info, err = lom.parse(buffer:match('(<%?xml .+</plist>)'))
 
     if info.tag == 'plist' then
         for _, entry in ipairs(info) do
