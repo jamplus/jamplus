@@ -1,0 +1,188 @@
+SubDir TOP ;
+
+C.ActiveTarget simple ;
+
+C.OutputPostfixClear ;
+
+local SRCS =
+        main.m
+;
+
+C.ios.LinkFrameworks : Foundation UIKit ;
+
+#USE_CONFIGURE_INFO_PLIST_BUILDER = 1 ;
+#USE_MERGE_INFO_PLIST_BUILDER = 1 ;
+#USE_LUA_INFO_PLIST_BUILDER = 1 ;
+USE_JAM_INFO_PLIST_BUILDER = 1 ;
+
+if $(USE_CONFIGURE_INFO_PLIST_BUILDER) {
+    # Merge in DefaultInfo.plist the disk first and then assign some overrides.
+    C.ios.BundleInfo : displayname : simple ;
+    C.ios.BundleInfo : identifier : * 1234567890 ;
+    C.ios.BundleInfo : bundlename : simple ;
+    C.ios.BundleInfo : bundleversion : 1.0 ;
+    C.ios.BundleInfo : uistatusbarhidden : true ;
+
+    local PRODUCT_NAME = "MyProductName" ;
+    C.ios.InfoPListFile : "DefaultInfo.plist" ;
+}
+
+if $(USE_MERGE_INFO_PLIST_BUILDER) {
+    # Merge in DefaultInfo.plist the disk first and then assign some overrides.
+    C.ios.MergeInfoPList : "DefaultInfo.plist" ;
+    C.ios.BundleInfo : displayname : simple ;
+    C.ios.BundleInfo : identifier : * 1234567890 ;
+    C.ios.BundleInfo : bundlename : simple ;
+    C.ios.BundleInfo : bundleversion : 1.0 ;
+    C.ios.BundleInfo : uistatusbarhidden : true ;
+}
+
+if $(USE_LUA_INFO_PLIST_BUILDER) {
+    LuaString "
+        local dict = GetInfoPlistCurrentLevel()
+        dict.CFBundleDevelopmentRegion = 'en'
+        dict.CFBundleDisplayName = 'simple'
+        dict.CFBundleExecutable = 'simple.debug'
+        dict.CFBundleIconFiles = { 'AppIcon57x57.png', 'AppIcon57x57@2x.png', 'AppIcon60x60@2x.png', 'AppIcon72x72@2x~ipad.png', 'AppIcon72x72~ipad.png', 'AppIcon76x76@2x~ipad.png', 'AppIcon76x76~ipad.png', }
+        dict.CFBundleIdentifier = '*'
+        dict.CFBundleInfoDictionaryVersion = '6.0'
+        dict.CFBundleName = 'simple'
+        dict.CFBundlePackageType = 'APPL'
+        dict.CFBundleShortVersionString = '1.0'
+        dict.CFBundleVersion = '1.0'
+        dict.LSRequiresIPhoneOS = true
+        dict.NSLocationWhenInUseUsageDescription = ''
+        dict.UIApplicationExitsOnSuspend = false
+
+        dict.UILaunchImages = plist.newarray()
+        local images = dict.UILaunchImages
+        local function Image(version, name, orientation, size)
+            local image = plist.newdict()
+            images[#images + 1] = image
+            image.UILaunchImageMinimumOSVersion = version
+            image.UILaunchImageName = name
+            image.UILaunchImageOrientation = orientation
+            image.UILaunchImageSize = size
+        end
+        Image('7.0', 'LaunchImage-700', 'Portrait', '{320, 480}')
+        Image('7.0', 'LaunchImage-700', 'Landscape', '{320, 480}')
+        Image('7.0', 'LaunchImage-700-568h', 'Portrait', '{320, 568}')
+        Image('7.0', 'LaunchImage-700-568h', 'Landscape', '{320, 568}')
+        Image('8.0', 'LaunchImage-800-667h', 'Portrait', '{375, 667}')
+        Image('8.0', 'LaunchImage-800-667h', 'Landscape', '{375, 667}')
+        Image('8.0', 'LaunchImage-800-Portrait-736h', 'Portrait', '{414, 736}')
+        Image('8.0', 'LaunchImage-800-Landscape-736h', 'Landscape', '{414, 736}')
+        Image('7.0', 'LaunchImage-700-Portrait', 'Portrait', '{768, 1024}')
+        Image('7.0', 'LaunchImage-700-Landscape', 'Landscape', '{768, 1024}')
+
+        dict['UILaunchStoryboardName~iphone'] = 'LaunchScreen'
+        dict.UIPrerenderedIcon = false
+        dict.UIRequiredDeviceCapabilities = { 'armv7' }
+        dict.UIRequiresPersistentWiFi = false
+        dict.UIStatusBarHidden = true
+        dict.UIStatusBarStyle = 'UIStatusBarStyleDefault'
+        dict.UISupportedInterfaceOrientations = { 'UIInterfaceOrientationPortrait', 'UIInterfaceOrientationPortraitUpsideDown', 'UIInterfaceOrientationLandscapeRight', 'UIInterfaceOrientationLandscapeLeft', }
+        dict.Unity_LoadingActivityIndicatorStyle = -1
+    " ;
+}
+
+if $(USE_JAM_INFO_PLIST_BUILDER) {
+    C.ios.BundleInfoString : CFBundleDevelopmentRegion : en ;
+    C.ios.BundleInfoString : CFBundleDisplayName : simple ;
+    C.ios.BundleInfoString : CFBundleExecutable : simple.debug ;
+    C.ios.BundleInfoArrayString : CFBundleIconFiles : AppIcon57x57.png AppIcon57x57@2x.png AppIcon60x60@2x.png AppIcon72x72@2x~ipad.png AppIcon72x72~ipad.png AppIcon76x76@2x~ipad.png AppIcon76x76~ipad.png ;
+    C.ios.BundleInfoString : CFBundleIdentifier : * ;
+    C.ios.BundleInfoString : CFBundleInfoDictionaryVersion : 6.0 ;
+    C.ios.BundleInfoString : CFBundleName : simple ;
+    C.ios.BundleInfoString : CFBundlePackageType : APPL ;
+    C.ios.BundleInfoString : CFBundleShortVersionString : 1.0 ;
+    C.ios.BundleInfoString : CFBundleVersion : 1.0 ;
+    C.ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
+    C.ios.BundleInfoString : NSLocationWhenInUseUsageDescription : "" ;
+    C.ios.BundleInfoBoolean : UIApplicationExitsOnSuspend : false ;
+    C.ios.BundleInfoArrayBegin : UILaunchImages ;
+        C.ios.BundleInfoArrayDictBegin ;
+            C.ios.BundleInfoString : UILaunchImageMinimumOSVersion : 7.0 ;
+            C.ios.BundleInfoString : UILaunchImageName : LaunchImage-700 ;
+            C.ios.BundleInfoString : UILaunchImageOrientation : Portrait ;
+            C.ios.BundleInfoString : UILaunchImageSize : "{320, 480}" ;
+        C.ios.BundleInfoArrayDictEnd ;
+        C.ios.BundleInfoArrayDictBegin ;
+            C.ios.BundleInfoString : UILaunchImageMinimumOSVersion : 7.0 ;
+            C.ios.BundleInfoString : UILaunchImageName : LaunchImage-700 ;
+            C.ios.BundleInfoString : UILaunchImageOrientation : Landscape ;
+            C.ios.BundleInfoString : UILaunchImageSize : "{320, 480}" ;
+        C.ios.BundleInfoArrayDictEnd ;
+        C.ios.BundleInfoArrayDictBegin ;
+            C.ios.BundleInfoString : UILaunchImageMinimumOSVersion : 7.0 ;
+            C.ios.BundleInfoString : UILaunchImageName : LaunchImage-700-568h ;
+            C.ios.BundleInfoString : UILaunchImageOrientation : Portrait ;
+            C.ios.BundleInfoString : UILaunchImageSize : "{320, 568}" ;
+        C.ios.BundleInfoArrayDictEnd ;
+        C.ios.BundleInfoArrayDictBegin ;
+            C.ios.BundleInfoString : UILaunchImageMinimumOSVersion : 7.0 ;
+            C.ios.BundleInfoString : UILaunchImageName : LaunchImage-700-568h ;
+            C.ios.BundleInfoString : UILaunchImageOrientation : Landscape ;
+            C.ios.BundleInfoString : UILaunchImageSize : "{320, 568}" ;
+        C.ios.BundleInfoArrayDictEnd ;
+        C.ios.BundleInfoArrayDictBegin ;
+            C.ios.BundleInfoString : UILaunchImageMinimumOSVersion : 8.0 ;
+            C.ios.BundleInfoString : UILaunchImageName : LaunchImage-800-667h ;
+            C.ios.BundleInfoString : UILaunchImageOrientation : Portrait ;
+            C.ios.BundleInfoString : UILaunchImageSize : "{375, 667}" ;
+        C.ios.BundleInfoArrayDictEnd ;
+        C.ios.BundleInfoArrayDictBegin ;
+            C.ios.BundleInfoString : UILaunchImageMinimumOSVersion : 8.0 ;
+            C.ios.BundleInfoString : UILaunchImageName : LaunchImage-800-667h ;
+            C.ios.BundleInfoString : UILaunchImageOrientation : Landscape ;
+            C.ios.BundleInfoString : UILaunchImageSize : "{375, 667}" ;
+        C.ios.BundleInfoArrayDictEnd ;
+        C.ios.BundleInfoArrayDictBegin ;
+            C.ios.BundleInfoString : UILaunchImageMinimumOSVersion : 8.0 ;
+            C.ios.BundleInfoString : UILaunchImageName : LaunchImage-800-Portrait-736h ;
+            C.ios.BundleInfoString : UILaunchImageOrientation : Portrait ;
+            C.ios.BundleInfoString : UILaunchImageSize : "{414, 736}" ;
+        C.ios.BundleInfoArrayDictEnd ;
+        C.ios.BundleInfoArrayDictBegin ;
+            C.ios.BundleInfoString : UILaunchImageMinimumOSVersion : 8.0 ;
+            C.ios.BundleInfoString : UILaunchImageName : LaunchImage-800-Landscape-736h ;
+            C.ios.BundleInfoString : UILaunchImageOrientation : Landscape ;
+            C.ios.BundleInfoString : UILaunchImageSize : "{414, 736}" ;
+        C.ios.BundleInfoArrayDictEnd ;
+        C.ios.BundleInfoArrayDictBegin ;
+            C.ios.BundleInfoString : UILaunchImageMinimumOSVersion : 7.0 ;
+            C.ios.BundleInfoString : UILaunchImageName : LaunchImage-700-Portrait ;
+            C.ios.BundleInfoString : UILaunchImageOrientation : Portrait ;
+            C.ios.BundleInfoString : UILaunchImageSize : "{768, 1024}" ;
+        C.ios.BundleInfoArrayDictEnd ;
+        C.ios.BundleInfoArrayDictBegin ;
+            C.ios.BundleInfoString : UILaunchImageMinimumOSVersion : 7.0 ;
+            C.ios.BundleInfoString : UILaunchImageName : LaunchImage-700-Landscape ;
+            C.ios.BundleInfoString : UILaunchImageOrientation : Landscape ;
+            C.ios.BundleInfoString : UILaunchImageSize : "{768, 1024}" ;
+        C.ios.BundleInfoArrayDictEnd ;
+    C.ios.BundleInfoArrayEnd ;
+    C.ios.BundleInfoString : UILaunchStoryboardName~iphone : LaunchScreen ;
+    C.ios.BundleInfoBoolean : UIPrerenderedIcon : false ;
+    C.ios.BundleInfoArrayString : UIRequiredDeviceCapabilities : armv7 ;
+    C.ios.BundleInfoBoolean : UIRequiresPersistentWiFi : false ;
+    C.ios.BundleInfoBoolean : UIStatusBarHidden : true ;
+    C.ios.BundleInfoString : UIStatusBarStyle : UIStatusBarStyleDefault ;
+    C.ios.BundleInfoArrayBegin : UISupportedInterfaceOrientations ;
+        C.ios.BundleInfoArrayString : UIInterfaceOrientationPortrait ;
+        C.ios.BundleInfoArrayString : UIInterfaceOrientationPortraitUpsideDown ;
+        C.ios.BundleInfoArrayString : UIInterfaceOrientationLandscapeRight ;
+        C.ios.BundleInfoArrayString : UIInterfaceOrientationLandscapeLeft ;
+    C.ios.BundleInfoArrayEnd ;
+    #C.ios.BundleInfoArrayString : UISupportedInterfaceOrientations : UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeRight UIInterfaceOrientationLandscapeLeft ;
+    C.ios.BundleInfoInteger : Unity_LoadingActivityIndicatorStyle : -1 ;
+}
+
+C.ios.ProvisionFile : test.mobileprovision ;
+C.ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
+
+C.Application : $(SRCS) : bundle ;
+
+C.ios.Archive simple : $(ALL_LOCATE_TARGET)/package ;
+C.ios.WebServer simple ;
+
