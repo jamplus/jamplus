@@ -241,7 +241,7 @@ end
 local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projectsPath)
 	for curProject in ivalues(allTargets) do
 		if not curProject.XcodeProjectType then
-			if curProject.Name == buildWorkspaceName  or  curProject.Name == updateWorkspaceName then
+			if curProject.Name == buildWorkspaceName  or  curProject.Name == updateWorkspaceName  or  curProject.Options.project then
 				curProject.XcodeProjectType = 'legacy'
 			else
 				curProject.XcodeProjectType = 'native'

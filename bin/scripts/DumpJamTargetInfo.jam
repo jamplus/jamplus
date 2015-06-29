@@ -157,7 +157,7 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 rule Project PROJECT_NAME : SOURCES
 {
 	PROJECT_NAME = [ C.ActiveTarget $(PROJECT_NAME) ] ;
-	DumpProjectInfo $(PROJECT_NAME) : $(SOURCES) ;
+	DumpProjectInfo $(PROJECT_NAME) : $(SOURCES) : project ;
 }
 
 
