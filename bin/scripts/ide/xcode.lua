@@ -380,15 +380,27 @@ local function XcodeHelper_WritePBXProject(self, info, allTargets)
 	table.insert(self.Contents, '/* End PBXProject section */\n\n')
 end
 
-local function XcodeHelper_WriteProjectXCBuildConfiguration(self, info)
+local function XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectName)
+	local subProject = Projects[projectName]
+
 	-- Write project configurations.
 	for _, platformName in ipairs(Config.Platforms) do
 		for _, configName in ipairs(Config.Configurations) do
+			local configInfo = subProject.ConfigInfo[platformName][configName]
+
 			local platformAndConfigText = platformName .. ' - ' .. configName
 			table.insert(self.Contents, "\t\t" .. info.ProjectConfigUuids[platformName][configName] .. ' /* ' .. platformAndConfigText .. ' */ = {\n')
 			table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
 			table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
 	--			table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
+			local productName = configInfo.OutputName
+--[[			if subProject.Options  and  subProject.Options.app then
+				if subProject.Options.bundle then
+					productName = productName .. '.app'
+				end
+			end
+]]
+			table.insert(self.Contents, "\t\t\t\tPRODUCT_NAME = \"" .. ((productName and productName ~= '') and productName or projectName) .. "\";\n")
 			table.insert(self.Contents, "\t\t\t};\n")
 			table.insert(self.Contents, '\t\t\tname = "' .. platformAndConfigText .. '";\n')
 			table.insert(self.Contents, "\t\t};\n")
@@ -505,7 +517,7 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 	end
 
 	-- Write project configurations.
-	XcodeHelper_WriteProjectXCBuildConfiguration(self, info)
+	XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectName)
 	
 	table.insert(self.Contents, '/* End XCBuildConfiguration section */\n\n')
 end
@@ -543,7 +555,7 @@ local function XcodeHelper_WriteXCConfigurationLists(self, info, projectName)
 	end
 	table.insert(self.Contents, "\t\t\t);\n")
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
-	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = \"" .. Config.Platforms[1] .. ' - ' .. Config.Configurations[1] .. "\";\n")
+	--table.insert(self.Contents, "\t\t\tdefaultConfigurationName = \"" .. Config.Platforms[1] .. ' - ' .. Config.Configurations[1] .. "\";\n")
 	table.insert(self.Contents, "\t\t};\n\n")
 
 	XcodeHelper_WriteProjectXCConfigurationList(self, info)
@@ -554,8 +566,9 @@ end
 local XcodeProjectMetaTable = {  __index = XcodeProjectMetaTable  }
 
 function XcodeProjectMetaTable:Write(outputPath)
-	local projectsPath = ospath.join(outputPath, self.ProjectName .. '.xcodeproj/')
-	local filename = ospath.join(outputPath, projectsPath .. 'project.pbxproj')
+	local projectName = self.ProjectName
+	local projectPath = ospath.join(outputPath, self.ProjectName .. '.xcodeproj')
+	local filename = ospath.join(outputPath, projectPath, 'project.pbxproj')
 
 	local info = XcodeHelper_GetProjectExportInfo(self.ProjectName)
 	info.Filename = filename
@@ -635,6 +648,122 @@ function XcodeProjectMetaTable:Write(outputPath)
 	self.Contents = table.concat(self.Contents):gsub('\r\n', '\n')
 	WriteFileIfModified(filename, self.Contents)
 
+	---------------------------------------------------------------------------
+	-- Write the schemes
+	---------------------------------------------------------------------------
+	local subProjectInfo = XcodeHelper_GetProjectExportInfo(projectName)
+	local subProject = Projects[projectName]
+
+	for _, platformName in ipairs(Config.Platforms) do
+		for _, configName in ipairs(Config.Configurations) do
+			local configInfo = subProject.ConfigInfo[platformName][configName]
+			local filename = ospath.join(projectPath, 'xcshareddata', 'xcschemes', projectName .. '-' .. platformName .. '-' .. configName .. '.xcscheme')
+			local subProjectInfo = XcodeHelper_GetProjectExportInfo(projectName)
+
+			local contents = {}
+
+			local expandData = {
+				BuildConfiguration = platformName .. ' - ' .. configName,
+				ProductIdentifier = subProjectInfo.LegacyTargetUuid,
+				ExecutableName = configInfo.OutputName,
+				ProjectName = self.ProjectName,
+				XcodeProjName = self.ProjectName .. '.xcodeproj',
+			}
+			contents[#contents + 1] = expand([[
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "0630"
+   version = "1.3">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "$(ProductIdentifier)"
+               BuildableName = "$(ExecutableName)"
+               BlueprintName = "$(ProjectName)"
+               ReferencedContainer = "container:$(XcodeProjName)">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      buildConfiguration = "$(BuildConfiguration)">
+      <Testables>
+      </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "$(ProductIdentifier)"
+            BuildableName = "$(ExecutableName)"
+            BlueprintName = "$(ProjectName)"
+            ReferencedContainer = "container:$(XcodeProjName)">
+         </BuildableReference>
+      </MacroExpansion>
+   </TestAction>
+   <LaunchAction
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      buildConfiguration = "$(BuildConfiguration)"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "$(ProductIdentifier)"
+            BuildableName = "$(ExecutableName)"
+            BlueprintName = "$(ProjectName)"
+            ReferencedContainer = "container:$(XcodeProjName)">
+         </BuildableReference>
+      </BuildableProductRunnable>
+      <AdditionalOptions>
+      </AdditionalOptions>
+   </LaunchAction>
+   <ProfileAction
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      buildConfiguration = "$(BuildConfiguration)"
+      debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "$(ProductIdentifier)"
+            BuildableName = "$(ExecutableName)"
+            BlueprintName = "$(ProjectName)"
+            ReferencedContainer = "container:$(XcodeProjName)">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "$(BuildConfiguration)">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "$(BuildConfiguration)"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>
+]], expandData, _G)
+
+			contents = table.concat(contents):gsub('\r\n', '\n')
+			WriteFileIfModified(filename, contents)
+		end
+	end
 	return
 	---------------------------------------------------------------------------
 	-- Write username.pbxuser with the executable settings
