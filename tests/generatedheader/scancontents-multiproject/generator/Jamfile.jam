@@ -1,0 +1,95 @@
+{
+
+# To keep things fairly simply, let's use a Lua action to generate a stripped
+# version of the source input to GenerateHFile.  Any one-line C-style comments
+# found will be removed, and the resultant line will be written to the output
+# file.
+actions lua GenerateHFile {
+    local lines = {}
+    for line in io.lines([[$(2)]]) do
+        line = line:gsub('//.*', '')
+        lines[#lines + 1] = line .. '\n'
+    end
+    lines = table.concat(lines)
+
+    local outputFile = io.open([[$(1)]], 'wb')
+    outputFile:write(lines)
+    outputFile:close()
+}
+
+
+# BuildGeneratedHeader encapsulates the build instructions to write out generatedheader.h.
+rule BuildGeneratedHeader {
+    # Set the gristed name for generatedheader.h globally to be used in AccessGeneratedHeader.
+    generatedheader.h = [ C.GristFiles generator : generatedheader.h ] ;
+
+    # Let's write the generatedheader.h out of source.
+    MakeLocate $(generatedheader.h) : $(LOCATE_SOURCE) ;
+
+    # Set up the gristed name for generatedheader.input.
+    local generatedheader.input = [ C.GristFiles : generatedheader.input ] ;
+
+    # Tell Jam where to find it (side-by-side with this Jamfile).
+    SEARCH on $(generatedheader.input) = $(SUBDIR) ;
+
+    # If generatedheader.input changes, then generatedheader.h needs to be built.
+    Depends $(generatedheader.h) : $(generatedheader.input) ;
+
+    # Set the ScanContents flag on generatedheader.h, so that it can be written for every
+    # generatedheader.input change, but any .c files relying on generatedheader.h will only
+    # build if the contents of generatedheader.h has actually changed.
+    ScanContents $(generatedheader.h) ;
+
+    # Queue up the generatedheader.h build.
+    GenerateHFile $(generatedheader.h) : $(generatedheader.input) ;
+    C.Clean : $(generatedheader.h) ;
+}
+
+
+# Any users of the generatedheader.h file need to call this rule to get access to
+# generatedheader.h.
+rule AccessGeneratedHeaderHelper SRCS {
+    # Set a dependency between the passed in SRCS and generatedheader.h.  ScanContents
+    # cannot work without the direct dependency.  At some point in the future, it would
+    # be nice to have ScanContents take the Includes rule into account.
+    Depends [ C.GristFiles : $(SRCS) ] : $(generatedheader.h) ;
+
+    # Tell the SRCS where to find the generatedheader.h file.
+    C.ObjectIncludeDirectories : $(SRCS) : $(LOCATE:Z=$(generatedheader.h)) ;
+}
+
+
+# Any users of the generatedheader.h file need to call this rule to get access to
+# generatedheader.h.
+rule AccessGeneratedHeader SRCS {
+    # Through rule HdrRule, header files are gristed according to the current project's grist.
+    # That is, if a #include <generatedheader.h> is found in the current project, it will
+    # create a grist like <app>generatedheader.h.  However, BuildGeneratedHeader created the
+    # grist <generator>generatedheader.h.  If the 'app' target builds first in Jam (and
+    # always assume the order is indeterminate), there is no dependency between
+    # <app>generatedheader.h and <generator>generatedheader.h, so the build will fail.
+    #
+    # The code below sets that dependency.
+    local projectLocalGristedGeneratedHeader = [ C.GristFiles : generatedheader.h ] ;
+    Depends $(projectLocalGristedGeneratedHeader) : $(generatedheader.h) ;
+    NotFile $(projectLocalGristedGeneratedHeader) ;
+    ScanContents $(projectLocalGristedGeneratedHeader) ;
+
+    # Set a dependency between the passed in SRCS and generatedheader.h.  ScanContents
+    # cannot work without the direct dependency.  At some point in the future, it would
+    # be nice to have ScanContents take the Includes rule into account.
+    Depends [ C.GristFiles : $(SRCS) ] : $(generatedheader.h) ;
+    ScanContents $(projectLocalGristedGeneratedHeader) ;
+
+    # Tell the SRCS where to find the generatedheader.h file.
+    C.ObjectIncludeDirectories : $(SRCS) : $(LOCATE:Z=$(generatedheader.h)) ;
+}
+
+
+BuildGeneratedHeader ;
+
+AccessGeneratedHeaderHelper file.c ;
+C.Library generator : file.c ;
+
+}
+

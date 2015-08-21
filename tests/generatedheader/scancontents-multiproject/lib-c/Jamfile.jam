@@ -1,0 +1,11 @@
+{
+
+local SRCS =
+        lib-c.c
+;
+
+C.ActiveTarget lib-c ;
+AccessGeneratedHeader $(SRCS) ;
+C.Library : $(SRCS) ;
+
+}

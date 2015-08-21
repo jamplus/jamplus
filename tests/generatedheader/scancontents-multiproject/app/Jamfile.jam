@@ -1,0 +1,12 @@
+{
+
+local SRCS =
+        main.c
+;
+
+C.ActiveTarget app ;
+AccessGeneratedHeader $(SRCS) ;
+C.LinkLibraries app : lib-a lib-b lib-c generator ;
+C.Application app : $(SRCS) ;
+
+}

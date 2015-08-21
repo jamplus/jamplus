@@ -1,0 +1,7 @@
+SubDir TOP ;
+
+SubInclude TOP generator ;
+SubInclude TOP app ;
+SubInclude TOP lib-a ;
+SubInclude TOP lib-b ;
+SubInclude TOP lib-c ;
