@@ -1,0 +1,26 @@
+SubDir TOP ;
+
+C.Application test : main.c test1.c test2.c test3.c ;
+
+actions lua GenerateHFile {
+    local lines = {}
+    for line in io.lines([[$(2)]]) do
+        line = line:gsub('//.*', '')
+        lines[#lines + 1] = line .. '\n'
+    end
+    lines = table.concat(lines)
+
+    local outputFile = io.open([[$(1)]], 'wb')
+    outputFile:write(lines)
+    outputFile:close()
+}
+
+local test.h = [ C.GristFiles test : test.h ] ;
+local test.input = [ C.GristFiles : test.input ] ;
+
+Depends [ C.GristFiles : main.c test1.c test2.c test3.c ] : $(test.h) ;
+Depends $(test.h) : $(test.input) ;
+ScanContents $(test.h) ;
+SEARCH on $(test.input) = $(SUBDIR) ;
+GenerateHFile $(test.h) : $(test.input) ;
+C.Clean : $(test.h) ;
