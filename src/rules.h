@@ -191,6 +191,10 @@ struct _target {
 	char		buildmd5sum_calculated;
 	char		filecache_use;
 	char		filecache_generate;
+#ifdef OPT_USE_CHECKSUMS_EXT
+	char		contentmd5sum_file_dirty;
+	char		leafmd5filedirty;
+#endif /* OPT_USE_CHECKSUMS_EXT */
 #endif	
 #ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
 	int			epoch;

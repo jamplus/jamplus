@@ -132,6 +132,10 @@ void write_string( FILE *f, const char *s );
 extern int actionpass;
 #endif
 
+#ifdef OPT_USE_CHECKSUMS_EXT
+extern int usechecksums;
+#endif /* OPT_USE_CHECKSUMS_EXT */
+
 /*
  * make1() - execute commands to update a TARGET and all its dependents
  */
@@ -351,7 +355,13 @@ make1b( TARGET *t )
 		    /* Grab the generated target's timestamp. */
 		    if ( file_time( c->target->boundname, &timestamp ) == 0 ) {
 			/* If the child's timestamp is greater that the target's timestamp, then it updated. */
-				if ( timestamp > t->time ) {
+				if (
+#ifdef OPT_USE_CHECKSUMS_EXT
+					(usechecksums ? t->contentmd5sum_file_dirty : timestamp > t->time)
+#else
+					timestamp > t->time
+#endif /* OPT_USE_CHECKSUMS_EXT */
+					) {
 					if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
 						childscancontents = 1;
 						if ( getcachedmd5sum( c->target, 1 ) )
@@ -1067,6 +1077,13 @@ make1d(
 	    for(target = list_first(targets) ; target; target = list_next( target ) )
 	    {
 		TARGET *t = bindtarget( list_value(target) );
+#ifdef OPT_USE_CHECKSUMS_EXT
+		if (usechecksums && !(t->flags & T_FLAG_NOTFILE)) {
+			t->time = 0;
+			t->contentmd5sum_calculated = 0;
+			getcachedmd5sum(t, 1);
+		}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 		filecache_update( t );
 	    }
 	}
@@ -1241,6 +1258,14 @@ make1cmds( ACTIONS *a0 )
 					/* try to get it from the cache */
 					if (copyfile(t->boundname, cachedname, NULL)) {
 					    printf( "Using cached %s\n", t->name );
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+						if (usechecksums) {
+							file_time( t->boundname, &t->time );
+							t->contentmd5sum_calculated = 0;
+							getcachedmd5sum( t, 1 );
+						}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 					    continue;
 					} else {
 					    printf( "Cannot retrieve %s from cache (will build normally)\n", t->name );

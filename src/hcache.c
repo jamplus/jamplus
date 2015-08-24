@@ -107,6 +107,10 @@ static int hits = 0;
 #define CACHE_FILE_VERSION "version 1"
 #endif
 
+#ifdef OPT_USE_CHECKSUMS_EXT
+extern int usechecksums;
+#endif /* OPT_USE_CHECKSUMS_EXT */
+
 /*
  * Return the name of the header cache file.  May return NULL.
  *
@@ -749,6 +753,10 @@ int getcachedmd5sum( TARGET *t, int source )
 		memset(&t->contentmd5sum, 0, sizeof(t->contentmd5sum));
 		t->contentmd5sum_calculated = 1;
 		t->contentmd5sum_changed = 0;
+#ifdef OPT_USE_CHECKSUMS_EXT
+		//t->contentmd5sum_calculated = 0;
+		t->buildmd5sum_calculated = 0;
+#endif /* OPT_USE_CHECKSUMS_EXT */
 		return t->contentmd5sum_changed;
 	}
 
@@ -787,6 +795,9 @@ int getcachedmd5sum( TARGET *t, int source )
 			t->contentmd5sum_changed = 0;
 			memcpy(&t->contentmd5sum, &c->contentmd5sum, sizeof(t->contentmd5sum));
 			t->contentmd5sum_calculated = 1;
+#ifdef OPT_USE_CHECKSUMS_EXT
+			t->contentmd5sum_file_dirty = 0;
+#endif /* OPT_USE_CHECKSUMS_EXT */
 			return t->contentmd5sum_changed;
 		}
 		else {
@@ -845,6 +856,19 @@ int getcachedmd5sum( TARGET *t, int source )
 	memcpy(&t->contentmd5sum, &c->contentmd5sum, sizeof(t->contentmd5sum));
 	t->contentmd5sum_calculated = (char)(memcmp(md5sumempty, &t->contentmd5sum, sizeof(t->contentmd5sum)) != 0);
 	memset(&t->buildmd5sum, 0, sizeof(t->buildmd5sum));
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+	if (usechecksums) {
+		memset(&c->rulemd5sum, 0, MD5_SUMSIZE);
+		//    t->contentmd5sum_calculated = memcmp(md5sumempty, &t->contentmd5sum, sizeof(t->contentmd5sum)) != 0;
+		t->contentmd5sum_calculated = 1;
+		if (!t->buildmd5sum_calculated)
+			memset(&t->buildmd5sum, 0, sizeof(t->buildmd5sum));
+		t->contentmd5sum_file_dirty = memcmp(c->currentcontentmd5sum, t->contentmd5sum, sizeof(MD5SUM)) != 0;
+		if (t->contentmd5sum_file_dirty)
+			t->contentmd5sum_file_dirty = memcmp(md5sumempty, &t->contentmd5sum, sizeof(t->contentmd5sum)) != 0;
+	}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 	return t->contentmd5sum_changed;
 }
