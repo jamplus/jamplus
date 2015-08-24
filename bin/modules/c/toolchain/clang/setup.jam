@@ -39,7 +39,7 @@ rule C.Toolchain.clang.Setup COMPILER_BIN_PATH : SUFFIXES {
     PCHMFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x objective-c-header ;
     PCHMMFLAGS on $(C.COMPILER_SUITE_SYMBOL) = -x objective-c++-header ;
 
-    C.Flags * : CC  : -x c -Wno-unused-parameter ;
+    C.Flags * : CC  : -Wno-unused-parameter ;
     C.Flags * : C++ : -x c++ -Wno-unused-parameter ;
     C.Flags * : M   : -x objective-c -Wno-unused-parameter ;
     C.Flags * : MM  : -x objective-c++ -Wno-unused-parameter ;
