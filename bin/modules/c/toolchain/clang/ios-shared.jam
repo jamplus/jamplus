@@ -1116,8 +1116,10 @@ rule C.ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH {
         if assetType == '.appiconset' then
             for _, entry in ipairs(contents.images) do
                 local filename = assetName .. entry.size
+                local scale = 1
                 if entry.scale  and  entry.scale ~= '1x' then
                     filename = filename .. '@' .. entry.scale
+                    scale = tonumber(entry.scale:match('(%d+)x'))
                 end
                 if entry.idiom  and  entry.idiom ~= 'iphone' then
                     filename = filename .. '~' .. entry.idiom
@@ -1131,7 +1133,8 @@ rule C.ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH {
                 jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
                 jam_evaluaterule('Clean', outputTarget)
 
-                jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
+                local width, height = entry.size:match('(%d+)x(%d+)')
+                jam_setvar(outputTarget, 'IMAGE_SIZE', (width * scale) .. 'x' .. (height * scale))
                 jam_evaluaterule('C.ios._ImageResize', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
             end
 
