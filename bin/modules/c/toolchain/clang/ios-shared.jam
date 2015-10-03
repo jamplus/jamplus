@@ -1328,7 +1328,7 @@ actions C.ios._CodeSign
 actions C.ios._CodeSign
 {
 	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
-	/usr/bin/codesign --force --no-strict --sign "$(SIGNING_IDENTITY)" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
+	/usr/bin/codesign --force --no-strict --sign "$(SIGNING_IDENTITY)" --entitlements $(ENTITLEMENTS:CT) --timestamp=none $(BUNDLE_PATH)
 	touch $(1[1]:C)
 	touch $(DSYM_NAME:CT)
 }
