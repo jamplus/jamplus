@@ -23,6 +23,7 @@ local plistDictMetatable = {
 }
 
 local function RecurseEntry(entry)
+    local isDictionary = false
     local output = {}
     local key
     local value
@@ -45,7 +46,6 @@ local function RecurseEntry(entry)
             end
         end
 
-        local isDictionary = false
         if value ~= nil then
             if key then
                 output[#output + 1] = { key = key, value = value }
