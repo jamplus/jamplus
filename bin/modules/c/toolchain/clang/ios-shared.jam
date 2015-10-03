@@ -52,7 +52,7 @@ rule C.ios.SDK SDK_VERSION {
 	switch $(SDK_PLATFORM) {
 		case ios :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 8.3 ;
+			SDK_VERSION ?= 9.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -125,6 +125,13 @@ rule C.ios.SDK SDK_VERSION {
 					architecture = armv7 ;
 					minimumVersion = 6.0 ;
 
+				case 9.0 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS9.0.sdk ;
+					sdkroot = iphoneos9.0 ;
+					architecture = armv7 ;
+					minimumVersion = 6.0 ;
+
 				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -fvisibility=hidden ;
@@ -192,6 +199,12 @@ rule C.ios.SDK SDK_VERSION {
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.3.sdk ;
 					sdkroot = iphoneos8.3 ;
+					minimumVersion = 6.0 ;
+
+				case 9.0 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator9.0.sdk ;
+					sdkroot = iphoneos9.0 ;
 					minimumVersion = 6.0 ;
 
 				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
