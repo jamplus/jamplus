@@ -61,6 +61,12 @@ rule C.OpenSSL TARGET : OPTIONS {
 				/usr
 			;
 
+			if $(PLATFORM) in macosx32 macosxx64 {
+				PATHS +=
+					/usr/local/opt/openssl
+				;
+			}
+
 			local ssl.h = [ Glob $(PATHS)/include/openssl : ssl.h ] ;
 			if $(ssl.h) {
 				OPENSSL$(bits)_ROOT = [ Match (.+)/include/openssl/ : $(ssl.h[1]) ] ;
@@ -79,7 +85,10 @@ rule C.OpenSSL TARGET : OPTIONS {
 
 		C.Defines $(TARGET) : USE_SSLEAY ;
 
+		C.IncludeDirectories $(TARGET) : $(OPENSSL$(bits)_ROOT)/include ;
+
 		if link in $(OPTIONS) {
+			C.LinkDirectories $(TARGET) : $(OPENSSL$(bits)_ROOT)/lib ;
 			C.LinkPrebuiltLibraries $(TARGET) : crypto ssl ;
 		}
 	}
