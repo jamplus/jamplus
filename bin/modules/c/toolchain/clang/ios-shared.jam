@@ -1224,8 +1224,13 @@ rule C.ios.ProvisionFile TARGET : FILENAME {
 	PROVISION_FILE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_provisionFileTarget) ;
 
 	_provisionFileTarget = $(_provisionFileTarget:T) ;
-	CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = [ LuaString "return require 'plist'.read(jam_getvar('_provisionFileTarget')[1])[\"ApplicationIdentifierPrefix\"]" ] ;
-
+	CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = [ LuaString "
+		local pl = require 'plist'.read(jam_getvar('_provisionFileTarget')[1])
+		local prefix = pl.ApplicationIdentifierPrefix
+		local identifier = pl.Entitlements[\"application-identifier\"]
+		identifier = identifier:sub(#prefix[1] + 2)
+		return identifier
+	" ] ;
 }
 
 
