@@ -772,13 +772,14 @@ make0(
 	{
 		t->boundname = search( t->name, &t->time );
 		t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
-#ifdef OPT_USE_CHECKSUMS_EXT
-		if ( usechecksums && !( t->flags & T_FLAG_NOUPDATE ) )
-		{
-			getcachedmd5sum(t, 1);
-		}
-#endif /* OPT_USE_CHECKSUMS_EXT */
 	}
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+	if ( usechecksums && !( t->flags & T_FLAG_NOUPDATE ) )
+	{
+		getcachedmd5sum(t, 1);
+	}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 	/* INTERNAL, NOTFILE header nodes have the time of their parents */
 
