@@ -775,7 +775,7 @@ make0(
 	}
 
 #ifdef OPT_USE_CHECKSUMS_EXT
-	if ( usechecksums && !( t->flags & T_FLAG_NOUPDATE ) )
+	if ( usechecksums && !( t->flags & ( T_FLAG_NOUPDATE | T_FLAG_NOTFILE ) ) )
 	{
 		getcachedmd5sum(t, 1);
 	}

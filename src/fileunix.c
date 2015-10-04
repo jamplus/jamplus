@@ -882,6 +882,13 @@ const char *md5tostring(MD5SUM sum)
 void md5file(const char *filename, MD5SUM sum)
 {
     MD5_CTX context;
+    struct stat statbuf;
+
+    if( stat( filename, &statbuf ) < 0 && S_ISDIR( statbuf.st_mode ) ) {
+        memset(sum, 0, sizeof(MD5SUM));
+        return;
+    }
+
 #define BLOCK_SIZE 1024 /* file is read in blocks of custom size, just so we don't have to read the whole file at once */
     FILE *f = fopen( filename, "rb" );
 
