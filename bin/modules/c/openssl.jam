@@ -52,7 +52,7 @@ rule C.OpenSSL TARGET : OPTIONS {
 		}
 	} else {
 		local bits = 32 ;
-		if $(PLATFORM) in linux64 macosxx64 {
+		if $(PLATFORM) in linux64 macosx64 {
 			bits = 64 ;
 		}
 
@@ -61,7 +61,7 @@ rule C.OpenSSL TARGET : OPTIONS {
 				/usr
 			;
 
-			if $(PLATFORM) in macosx32 macosxx64 {
+			if $(PLATFORM) in macosx32 macosx64 {
 				PATHS +=
 					/usr/local/opt/openssl
 				;
