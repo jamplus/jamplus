@@ -16,7 +16,7 @@ builtin_luafile(
 	LOL		*args,
 	int		*jmp );
 
-int luahelper_taskadd(const char* taskscript);
+int luahelper_taskadd(const char* taskscript, LOL* args);
 int luahelper_taskisrunning(int taskid, int* returnValue);
 void luahelper_taskcancel(int taskid);
 

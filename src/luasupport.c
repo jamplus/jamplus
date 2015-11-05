@@ -833,12 +833,13 @@ void ls_lua_init()
 }
 
 
-int luahelper_taskadd(const char* taskscript)
+int luahelper_taskadd(const char* taskscript, LOL* args)
 {
     int ret;
     int ref;
     size_t taskscriptlen = strlen(taskscript);
     char* newTaskScript;
+	int i;
 
     ls_lua_init();
 
@@ -876,7 +877,20 @@ int luahelper_taskadd(const char* taskscript)
         return -1;
     }
 
-    ret = ls_lua_pcall(L, 0, 1, 0);                        /* lanes ret */
+    for (i = 0; i < args->count; ++i)
+    {
+        LIST* list = lol_get(args, i);
+        LISTITEM *l2;
+        int index = 0;
+        ls_lua_newtable(L);
+		for (l2 = list_first(list); l2; l2 = list_next(l2))
+		{
+			ls_lua_pushstring(L, list_value(l2));
+			ls_lua_rawseti(L, -2, ++index);
+		}
+    }
+
+    ret = ls_lua_pcall(L, args->count, 1, 0);                        /* lanes ret */
     if (ret != 0)
     {
         if (ls_lua_isstring(L, -1))

@@ -28,6 +28,7 @@ void execcmd(
 void
 execlua( 
 	char *string,
+	LOL *args,
 #ifdef OPT_SERIAL_OUTPUT_EXT
 	void (*func)( const char* outputname, void *closure, int status ),
 #else

@@ -662,7 +662,24 @@ make1c( TARGET *t )
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 	    if ( cmd->rule->flags & RULE_LUA )
 	    {
-		execlua( cmd->luastring, make1d, t );
+            int i;
+            LOL boundargs;
+            lol_init(&boundargs);
+            for (i = 0; i < cmd->args.count; ++i)
+            {
+                LIST* list = lol_get(&cmd->args, i);
+                LIST* newlist = L0;
+                LISTITEM *l2;
+                int index = 0;
+                for (l2 = list_first(list); l2; l2 = list_next(l2))
+                {
+                    TARGET* t = bindtarget(list_value(l2));
+                    newlist = list_append(newlist, t->boundname, 0);
+                }
+                lol_add(&boundargs, newlist);
+            }
+            execlua( cmd->luastring, &boundargs, make1d, t );
+            lol_free(&boundargs);
 	    }
 	    else
 #endif
