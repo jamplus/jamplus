@@ -389,7 +389,7 @@ end
 -- Detect OS
 if os.getenv("OS") == "Windows_NT" then
  	Platform = 'win32'
-	PlatformDir = 'win32'
+	PlatformDir = 'win64'
 	SUFEXE = '.exe'
 	COMPILER = 'vc'
 	C_ARCHIVE = 'C.vc.Archive'
