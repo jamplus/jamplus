@@ -46,7 +46,7 @@ function Test()
 		pass1Pattern = [[
 			*** found 21 target(s)...
 			*** updating 6 target(s)...
-			@ WriteFile <c/win32/release:main>includes/mypch.cpp
+			@ WriteFile <$(TOOLCHAIN_GRIST):main>includes/mypch.cpp
             @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.h.pch
 			mypch.cpp
 			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.obj

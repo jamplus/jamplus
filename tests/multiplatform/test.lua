@@ -134,7 +134,7 @@ Using win32
 This is a Win32 build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, osprocess.collectlines{'.build\\win32-release\\TOP\\platform\\platform.release.exe'})
+		TestPattern(pattern2, osprocess.collectlines{'.build\\' .. PlatformDir .. '-release\\TOP\\platform\\platform.release.exe'})
 
 		pattern3 = [[
 *** found 20 target(s)...

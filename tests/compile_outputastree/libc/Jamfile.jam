@@ -8,15 +8,20 @@ ProjectSubDir libc ;
 
 SOURCE_EXTENSIONS ?= *.cpp *.c ;
 
+local SCAN_PLATFORM = $(PLATFORM) ;
+if $(SCAN_PLATFORM) = win64 {
+    SCAN_PLATFORM = win32 ;
+}
+
 local SOURCE_DIRECTORIES =
     src
     src/Loading
     src/Saving
     src/memory
     src/integral
-    src/$(PLATFORM)
-    src/$(PLATFORM)/Loading
-    src/$(PLATFORM)/Saving
+    src/$(SCAN_PLATFORM)
+    src/$(SCAN_PLATFORM)/Loading
+    src/$(SCAN_PLATFORM)/Saving
 ;
 
 local SOURCE_FILES = [ Glob $(SUBDIR)/$(SOURCE_DIRECTORIES) : $(SOURCE_EXTENSIONS) ] ;
