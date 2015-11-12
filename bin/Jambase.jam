@@ -801,7 +801,7 @@ switch $(OS)
 		VALID_PLATFORMS ?= win64 win32 ;
 
 	case MACOSX :
-		VALID_PLATFORMS ?= macosx32 macosx64 ;
+		VALID_PLATFORMS ?= macosx64 macosx32 ;
 
 	case LINUX :
 		VALID_PLATFORMS ?= linux32 linux64 ;
