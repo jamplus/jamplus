@@ -237,12 +237,12 @@ Contents += "-- This file is generated.  Do not modify.$(NEWLINE)$(NEWLINE)" ;
 	function concat(l, r)
 		local out = {}
 		if l then
-			for _, v in ipairs(l) do
-				table.insert(out, v)
+			for index = 1, #l do
+				out[#out + 1] = l[index]
 			end
 		end
-		for _, v in ipairs(r) do
-			table.insert(out, v)
+		for index = 1, #r do
+			out[#out + 1] = r[index]
 		end
 		return out
 	end
