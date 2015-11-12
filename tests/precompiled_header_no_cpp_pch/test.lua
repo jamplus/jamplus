@@ -81,13 +81,13 @@ function Test()
 			'test.lua',
 			'includes/mypch.pch',
 			'includes/usefuldefine.h',
-			'mypch%-%x+/mypch.h.gch',
+			'mypch%-%x+/mypch.pch.gch',
 		}
 
 		pass1Pattern = [[
 			*** found 14 target(s)...
 			*** updating 5 target(s)...
-			&@ C.PCH <main%-%x+>mypch.h.gch
+			&@ C.PCH <main%-%x+>mypch.pch.gch
 			@ C.C++ <main>main.o 
 			@ C.C++ <main>mypch.o 
 			@ C.Link <main>main.release.exe
@@ -97,7 +97,7 @@ function Test()
 		pass2Pattern = [[
 			*** found 14 target(s)...
 			*** updating 5 target(s)...
-			&@ C.PCH <main%-%x+>mypch.h.gch
+			&@ C.PCH <main%-%x+>mypch.pch.gch
 			@ C.C++ <main>main.o 
 			@ C.C++ <main>mypch.o 
 			@ C.Link <main>main.release.exe
@@ -115,17 +115,17 @@ function Test()
 			'Jamfile.jam',
 			'main.cpp',
 			'test.lua',
-			'includes/mypch.h',
+			'includes/mypch.pch',
 			'includes/usefuldefine.h',
 			'$(TOOLCHAIN_PATH)/main/main.o',
 			'$(TOOLCHAIN_PATH)/main/main.release',
-			'.build/$(PLATFORM_CONFIG)/TOP/main/mypch%-%x+/mypch.h.gch',
+			'.build/$(PLATFORM_CONFIG)/TOP/main/mypch%-%x+/mypch.pch.gch',
 		}
 
 		pass1Pattern = [[
 			*** found 13 target(s)...
 			*** updating 5 target(s)...
-			&@ C.$(COMPILER).PCH <$(TOOLCHAIN_GRIST):main%-%x+>mypch.h.gch
+			&@ C.$(COMPILER).PCH <$(TOOLCHAIN_GRIST):main%-%x+>mypch.pch.gch
 			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.o 
 			@ $(C_LINK) <$(TOOLCHAIN_GRIST):main>main
 			*** updated 5 target(s)...
@@ -134,7 +134,7 @@ function Test()
 		pass2Pattern = [[
 			*** found 13 target(s)...
 			*** updating 3 target(s)...
-			&@ C.$(COMPILER).PCH <$(TOOLCHAIN_GRIST):main%-%x+>mypch.h.gch
+			&@ C.$(COMPILER).PCH <$(TOOLCHAIN_GRIST):main%-%x+>mypch.pch.gch
 			@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.o 
 			@ $(C_LINK) <$(TOOLCHAIN_GRIST):main>main
 			*** updated 3 target(s)...

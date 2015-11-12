@@ -108,7 +108,7 @@ function Test()
 			'includes/',
 			'$(TOOLCHAIN_PATH)/',
 			'$(TOOLCHAIN_PATH)/main/',
-			'.build/macosx32%-release/TOP/main/mypch%-%x+/',
+			'.build/$(PLATFORM_CONFIG)/TOP/main/mypch%-%x+/',
 		}
 
 		pass1Files = {
@@ -119,7 +119,7 @@ function Test()
 			'includes/usefuldefine.h',
 			'$(TOOLCHAIN_PATH)/main/main.o',
 			'$(TOOLCHAIN_PATH)/main/main.release',
-			'.build/macosx32%-release/TOP/main/mypch%-%x+/mypch.h.gch',
+			'.build/$(PLATFORM_CONFIG)/TOP/main/mypch%-%x+/mypch.h.gch',
 		}
 
 		pass1Pattern = [[

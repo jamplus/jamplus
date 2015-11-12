@@ -146,7 +146,7 @@ Using macosx
 This is a Mac OS X build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, osprocess.collectlines{'./.build/macosx32-release/TOP/platform/platform.release'})
+		TestPattern(pattern2, osprocess.collectlines{'./.build/' .. PlatformDir .. '-release/TOP/platform/platform.release'})
 
 		pattern3 = [[
 *** found 12 target(s)...
@@ -158,7 +158,7 @@ Using linux
 This is a Linux build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, osprocess.collectlines{'./.build/linux32-release/TOP/platform/platform.release'})
+		TestPattern(pattern2, osprocess.collectlines{'./.build/' .. PlatformDir .. '-release/TOP/platform/platform.release'})
 
 		pattern3 = [[
 *** found 12 target(s)...

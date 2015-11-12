@@ -1,9 +1,6 @@
 actions lua RunLuaScript
 {
     local target, source = ...
-    print('target', target)
-    jam_print(target)
-    jam_print(source)
     process = require 'osprocess'; process.sleep($(SLEEP)); jam_print([[$(TEXT)]])
 }
 

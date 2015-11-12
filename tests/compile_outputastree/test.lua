@@ -259,9 +259,9 @@ function Test()
 			'libc/src/Saving/',
 			'libc/src/integral/',
 			'libc/src/memory/',
-			'libc/src/$PlatformDir/',
-			'libc/src/$PlatformDir/Loading/',
-			'libc/src/$PlatformDir/Saving/',
+			'libc/src/win32/',
+			'libc/src/win32/Loading/',
+			'libc/src/win32/Saving/',
 		}
 	
 		local files =
@@ -305,10 +305,10 @@ function Test()
 			'libc/src/integral/integral2.cpp',
 			'libc/src/memory/memorya.cpp',
 			'libc/src/memory/memoryb.cpp',
-			'libc/src/$PlatformDir/Loading/Loading.cpp',
-			'libc/src/$PlatformDir/Saving/Saving1.cpp',
-			'libc/src/$PlatformDir/Saving/Saving3.cpp',
-			'libc/src/$PlatformDir/Saving/SavingB.cpp',
+			'libc/src/win32/Loading/Loading.cpp',
+			'libc/src/win32/Saving/Saving1.cpp',
+			'libc/src/win32/Saving/Saving3.cpp',
+			'libc/src/win32/Saving/SavingB.cpp',
 			'outer/outer.cpp',
 			'outerb/outer.cpp',
 		}
