@@ -20,25 +20,186 @@
 #include <stddef.h>
 
 /*
-@@ LUAI_BITSINT defines the number of bits in an int.
-** CHANGE here if Lua cannot automatically detect the number of bits of
-** your machine. Probably you do not need to change this.
+@@ LUAI_BITSINT defines the (minimum) number of bits in an 'int'.
 */
-/* avoid overflows in comparison */
-#if INT_MAX-20 < 32760		/* { */
-#define LUAI_BITSINT	16
-#elif INT_MAX > 2147483640L	/* }{ */
-/* int has at least 32 bits */
+/* avoid undefined shifts */
+#if ((INT_MAX >> 15) >> 15) >= 1
 #define LUAI_BITSINT	32
-#else				/* }{ */
-#error "you must define LUA_BITSINT with number of bits in an integer"
+#else
+/* 'int' always must have at least 16 bits */
+#define LUAI_BITSINT	16
+#endif
+
+
+/*
+@@ LUA_INT_TYPE defines the type for Lua integers.
+@@ LUA_FLOAT_TYPE defines the type for Lua floats.
+** Lua should work fine with any mix of these options (if supported
+** by your C compiler). The usual configurations are 64-bit integers
+** and 'double' (the default), 32-bit integers and 'float' (for
+** restricted platforms), and 'long'/'double' (for C compilers not
+** compliant with C99, which may not have support for 'long long').
+*/
+
+/* predefined options for LUA_INT_TYPE */
+#define LUA_INT_INT		1
+#define LUA_INT_LONG		2
+#define LUA_INT_LONGLONG	3
+
+/* predefined options for LUA_FLOAT_TYPE */
+#define LUA_FLOAT_FLOAT		1
+#define LUA_FLOAT_DOUBLE	2
+#define LUA_FLOAT_LONGDOUBLE	3
+
+#if defined(LUA_32BITS)		/* { */
+/*
+** 32-bit integers and 'float'
+*/
+#if LUAI_BITSINT >= 32  /* use 'int' if big enough */
+#define LUA_INT_TYPE	LUA_INT_INT
+#else  /* otherwise use 'long' */
+#define LUA_INT_TYPE	LUA_INT_LONG
+#endif
+#define LUA_FLOAT_TYPE	LUA_FLOAT_FLOAT
+
+#elif defined(LUA_C89_NUMBERS)	/* }{ */
+/*
+** largest types available for C89 ('long' and 'double')
+*/
+#define LUA_INT_TYPE	LUA_INT_LONG
+#define LUA_FLOAT_TYPE	LUA_FLOAT_DOUBLE
+
 #endif				/* } */
+
+
+/*
+** default configuration for 64-bit Lua ('long long' and 'double')
+*/
+#if !defined(LUA_INT_TYPE)
+#define LUA_INT_TYPE	LUA_INT_LONGLONG
+#endif
+
+#if !defined(LUA_FLOAT_TYPE)
+#define LUA_FLOAT_TYPE	LUA_FLOAT_DOUBLE
+#endif								/* } */
+
+/* }================================================================== */
+
+
+/*
+@@ LUA_NUMBER is the floating-point type used by Lua.
+*/
+
+#if LUA_FLOAT_TYPE == LUA_FLOAT_FLOAT		/* { single float */
+
+#define LUA_NUMBER	float
+
+
+#elif LUA_FLOAT_TYPE == LUA_FLOAT_LONGDOUBLE	/* }{ long double */
+
+#define LUA_NUMBER	long double
+
+
+#elif LUA_FLOAT_TYPE == LUA_FLOAT_DOUBLE	/* }{ double */
+
+#define LUA_NUMBER	double
+
+#else						/* }{ */
+
+#error "numeric float type not defined"
+
+#endif					/* } */
+
+
+/*
+@@ LUA_INTEGER is the integer type used by Lua.
+**
+@@ LUA_UNSIGNED is the unsigned version of LUA_INTEGER.
+*/
+
+
+#define LUAI_UACINT		LUA_INTEGER
+
+/*
+** use LUAI_UACINT here to avoid problems with promotions (which
+** can turn a comparison between unsigneds into a signed comparison)
+*/
+#define LUA_UNSIGNED		unsigned LUAI_UACINT
+
+
+/* now the variable definitions */
+
+#if LUA_INT_TYPE == LUA_INT_INT		/* { int */
+
+#define LUA_INTEGER		int
+
+#define LUA_MAXINTEGER		INT_MAX
+#define LUA_MININTEGER		INT_MIN
+
+#elif LUA_INT_TYPE == LUA_INT_LONG	/* }{ long */
+
+#define LUA_INTEGER		long
+
+#define LUA_MAXINTEGER		LONG_MAX
+#define LUA_MININTEGER		LONG_MIN
+
+#elif LUA_INT_TYPE == LUA_INT_LONGLONG	/* }{ long long */
+
+#if defined(LLONG_MAX)		/* { */
+/* use ISO C99 stuff */
+
+#define LUA_INTEGER		long long
+
+#define LUA_MAXINTEGER		LLONG_MAX
+#define LUA_MININTEGER		LLONG_MIN
+
+#elif defined(LUA_USE_WINDOWS) /* }{ */
+/* in Windows, can use specific Windows types */
+
+#define LUA_INTEGER		__int64
+
+#define LUA_MAXINTEGER		_I64_MAX
+#define LUA_MININTEGER		_I64_MIN
+
+#else				/* }{ */
+
+#error "Compiler does not support 'long long'. Use option '-DLUA_32BITS' \
+  or '-DLUA_C89_NUMBERS' (see file 'luaconf.h' for details)"
+
+#endif				/* } */
+
+#else				/* }{ */
+
+#error "numeric integer type not defined"
+
+#endif				/* } */
+
+/* }================================================================== */
+
+/*
+@@ LUA_KCONTEXT is the type of the context ('ctx') for continuation
+** functions.  It must be a numerical type; Lua will use 'intptr_t' if
+** available, otherwise it will use 'ptrdiff_t' (the nearest thing to
+** 'intptr_t' in C89)
+*/
+#define LUA_KCONTEXT	ptrdiff_t
+
+#if !defined(LUA_USE_C89) && defined(__STDC_VERSION__) && \
+    __STDC_VERSION__ >= 199901L
+#include <stdint.h>
+#if defined(INTPTR_MAX)  /* even in C99 this type is optional */
+#undef LUA_KCONTEXT
+#define LUA_KCONTEXT	intptr_t
+#endif
+#endif
+
+
 
 
 /*
 @@ LUAI_MAXSTACK limits the size of the Lua stack.
 ** CHANGE it if you need a different limit. This limit is arbitrary;
-** its only purpose is to stop Lua to consume unlimited stack
+** its only purpose is to stop Lua from consuming unlimited stack
 ** space (and to reserve some numbers for pseudo-indices).
 */
 #if LUAI_BITSINT >= 32
@@ -47,18 +208,15 @@
 #define LUAI_MAXSTACK		15000
 #endif
 
-/* reserve some space for error handling */
-#define LUAI_FIRSTPSEUDOIDX	(-LUAI_MAXSTACK - 1000)
-
 /* Declarations from lua.h. */
 /*
 ** pseudo-indices
+** (-LUAI_MAXSTACK is the minimum valid index; we keep some free empty
+** space after that to help overflow detection)
 */
-#define LUA_REGISTRYINDEX	LUAI_FIRSTPSEUDOIDX
+#define LUA_REGISTRYINDEX	(-LUAI_MAXSTACK - 1000)
 
 typedef struct ls_lua_State ls_lua_State;
-
-typedef int (*ls_lua_CFunction) (ls_lua_State *L);
 
 /*
 ** basic types
@@ -74,22 +232,32 @@ typedef int (*ls_lua_CFunction) (ls_lua_State *L);
 #define LUA_TFUNCTION		6
 #define LUA_TUSERDATA		7
 #define LUA_TTHREAD		8
-#define LUA_TNONE        (-1)
+
+#define LUA_NUMTAGS		9
 
 /* type of numbers in Lua */
-#define LUA_NUMBER	double
 typedef LUA_NUMBER ls_lua_Number;
 
 /* type for integer functions */
-#define LUA_INTEGER	ptrdiff_t
 typedef LUA_INTEGER ls_lua_Integer;
 
+/* unsigned integer type */
+typedef LUA_UNSIGNED ls_lua_Unsigned;
+
+/* type for continuation-function contexts */
+typedef LUA_KCONTEXT ls_lua_KContext;
+
+typedef int (*ls_lua_CFunction) (ls_lua_State *L);
+
+ls_lua_State *(*ls_luaL_newstate) (void);
 void (*ls_lua_close) (ls_lua_State *L);
 
 int   (*ls_lua_gettop) (ls_lua_State *L);
 void  (*ls_lua_settop) (ls_lua_State *L, int idx);
 void (*ls_lua_pushvalue) (ls_lua_State *L, int idx);
-void (*ls_lua_remove) (ls_lua_State *L, int idx);
+void (*ls_lua_rotate) (ls_lua_State *L, int idx, int n);
+
+#define ls_lua_remove(L,idx)	(ls_lua_rotate(L, (idx), -1), ls_lua_pop(L, 1))
 
 #define ls_lua_isfunction(L,n)    (ls_lua_type(L, (n)) == LUA_TFUNCTION)
 #define ls_lua_istable(L,n)    (ls_lua_type(L, (n)) == LUA_TTABLE)
@@ -100,7 +268,8 @@ int             (*ls_lua_isstring) (ls_lua_State *L, int idx);
 int             (*ls_lua_isuserdata) (ls_lua_State *L, int idx);
 int             (*ls_lua_type) (ls_lua_State *L, int idx);
 
-ls_lua_Number      (*ls_lua_tonumberx) (ls_lua_State *L, int idx, int *isnum);
+ls_lua_Number   (*ls_lua_tonumberx) (ls_lua_State *L, int idx, int *isnum);
+ls_lua_Integer  (*ls_lua_tointegerx) (ls_lua_State *L, int idx, int *isnum);
 int             (*ls_lua_toboolean) (ls_lua_State *L, int idx);
 #define ls_lua_tostring(L,i)    ls_lua_tolstring(L, (i), NULL)
 const char     *(*ls_lua_tolstring) (ls_lua_State *L, int idx, size_t *len);
@@ -109,7 +278,7 @@ size_t          (*ls_lua_rawlen) (ls_lua_State *L, int idx);
 void  (*ls_lua_pushnil) (ls_lua_State *L);
 void  (*ls_lua_pushnumber) (ls_lua_State *L, ls_lua_Number n);
 void  (*ls_lua_pushinteger) (ls_lua_State *L, ls_lua_Integer n);
-const char *(*ls_lua_pushlstring) (ls_lua_State *L, const char *s, size_t l);
+const char *(*ls_lua_pushlstring) (ls_lua_State *L, const char *s, size_t len);
 const char *(*ls_lua_pushstring) (ls_lua_State *L, const char *s);
 void  (*ls_lua_pushcclosure) (ls_lua_State *L, ls_lua_CFunction fn, int n);
 void  (*ls_lua_pushboolean) (ls_lua_State *L, int b);
@@ -117,16 +286,16 @@ void  (*ls_lua_pushboolean) (ls_lua_State *L, int b);
 void  (*ls_lua_getglobal) (ls_lua_State *L, const char *var);
 void  (*ls_lua_gettable) (ls_lua_State *L, int idx);
 void  (*ls_lua_getfield) (ls_lua_State *L, int idx, const char *k);
-void  (*ls_lua_rawgeti) (ls_lua_State *L, int idx, int n);
+void  (*ls_lua_rawgeti) (ls_lua_State *L, int idx, ls_lua_Integer n);
 void  (*ls_lua_createtable) (ls_lua_State *L, int narr, int nrec);
 
-void  (*ls_lua_setglobal) (ls_lua_State *L, const char *var);
+void  (*ls_lua_setglobal) (ls_lua_State *L, const char *name);
 void  (*ls_lua_settable) (ls_lua_State *L, int idx);
 void  (*ls_lua_setfield) (ls_lua_State *L, int idx, const char *k);
-void  (*ls_lua_rawseti) (ls_lua_State *L, int idx, int n);
+void  (*ls_lua_rawseti) (ls_lua_State *L, int idx, ls_lua_Integer n);
 
 int   (*ls_lua_pcallk) (ls_lua_State *L, int nargs, int nresults, int errfunc,
-                            int ctx, ls_lua_CFunction k);
+                            ls_lua_KContext ctx, ls_lua_CFunction k);
 #define ls_lua_pcall(L,n,r,f)	ls_lua_pcallk(L, (n), (r), (f), 0, NULL)
 
 int   (*ls_lua_next) (ls_lua_State *L, int idx);
@@ -169,7 +338,6 @@ int (*ls_luaL_loadstring) (ls_lua_State *L, const char *s);
 int (*ls_luaL_loadfilex) (ls_lua_State *L, const char *filename, const char *mode);
 #define ls_luaL_loadfile(L,f)	ls_luaL_loadfilex(L,f,NULL)
 
-ls_lua_State *(*ls_luaL_newstate) (void);
 int (*ls_luaL_ref) (ls_lua_State *L, int t);
 void (*ls_luaL_unref) (ls_lua_State *L, int t, int ref);
 
@@ -723,15 +891,15 @@ void ls_lua_init()
 
 #ifdef OS_NT
 #ifdef _DEBUG
-        strcat(fileName, "/lua/lua52_debug.dll");
+        strcat(fileName, "/lua/lua53_debug.dll");
 #else
-        strcat(fileName, "/lua/lua52.dll");
+        strcat(fileName, "/lua/lua53.dll");
 #endif
 #else
 #ifdef _DEBUG
-        strcat(fileName, "/lua/liblua52_debug.so");
+        strcat(fileName, "/lua/liblua53_debug.so");
 #else
-        strcat(fileName, "/lua/liblua52.so");
+        strcat(fileName, "/lua/liblua53.so");
 #endif
 #endif
         handle = ls_lua_loadlibrary(fileName);
@@ -748,7 +916,7 @@ void ls_lua_init()
     ls_lua_gettop = (int (*)(ls_lua_State *))ls_lua_loadsymbol(handle, "lua_gettop");
     ls_lua_settop = (void (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_settop");
     ls_lua_pushvalue = (void (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_pushvalue");
-    ls_lua_remove = (void (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_remove");
+    ls_lua_rotate = (void (*)(ls_lua_State *, int, int))ls_lua_loadsymbol(handle, "lua_rotate");
 
     ls_lua_isnumber = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isnumber");
     ls_lua_isstring = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_isstring");
@@ -771,15 +939,15 @@ void ls_lua_init()
     ls_lua_getglobal = (void (*) (ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "lua_getglobal");
     ls_lua_gettable = (void (*) (ls_lua_State *, int id))ls_lua_loadsymbol(handle, "lua_gettable");
     ls_lua_getfield = (void (*)(ls_lua_State *, int, const char *))ls_lua_loadsymbol(handle, "lua_getfield");
-    ls_lua_rawgeti = (void  (*) (ls_lua_State *, int, int))ls_lua_loadsymbol(handle, "lua_rawgeti");
+    ls_lua_rawgeti = (void  (*) (ls_lua_State *, int, ls_lua_Integer))ls_lua_loadsymbol(handle, "lua_rawgeti");
     ls_lua_createtable = (void (*)(ls_lua_State *, int, int))ls_lua_loadsymbol(handle, "lua_createtable");
 
     ls_lua_setglobal = (void (*)(ls_lua_State *, const char *))ls_lua_loadsymbol(handle, "lua_setglobal");
     ls_lua_settable = (void (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_settable");
     ls_lua_setfield = (void (*)(ls_lua_State *, int, const char *))ls_lua_loadsymbol(handle, "lua_setfield");
-    ls_lua_rawseti = (void (*)(ls_lua_State *, int, int))ls_lua_loadsymbol(handle, "lua_rawseti");
+    ls_lua_rawseti = (void (*)(ls_lua_State *, int, ls_lua_Integer))ls_lua_loadsymbol(handle, "lua_rawseti");
 
-    ls_lua_pcallk = (int (*)(ls_lua_State *, int, int, int, int, ls_lua_CFunction))ls_lua_loadsymbol(handle, "lua_pcallk");
+    ls_lua_pcallk = (int (*)(ls_lua_State *, int, int, int, ls_lua_Integer, ls_lua_CFunction))ls_lua_loadsymbol(handle, "lua_pcallk");
 
     ls_lua_next = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_next");
 
