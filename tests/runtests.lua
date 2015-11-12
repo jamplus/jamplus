@@ -475,7 +475,7 @@ for _, dir in ipairs(dirs) do
 				err = err:gsub('^runtests.lua:%d-: ', '')
 				io.write('\t' .. err .. '\n')
 				print(ErrorTraceback)
-os.exit()
+--os.exit()
 			else
 				io.write('OK\n')
 			end
