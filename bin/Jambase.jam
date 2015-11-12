@@ -798,7 +798,7 @@ VALID_CONFIGS ?= release releaseltcg debug ;
 switch $(OS)
 {
 	case NT :
-		VALID_PLATFORMS ?= win32 win64 ;
+		VALID_PLATFORMS ?= win64 win32 ;
 
 	case MACOSX :
 		VALID_PLATFORMS ?= macosx32 macosx64 ;
