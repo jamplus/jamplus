@@ -13,10 +13,19 @@ switch $(PLATFORM) {
 	case win32 :
 		C.Defines : USING_WIN32 ;
 		SRCS += win32.c ;
+	case win64 :
+		C.Defines : USING_WIN32 ;
+		SRCS += win32.c ;
 	case macosx32 :
 		C.Defines : USING_MACOSX ;
 		SRCS += macosx.c ;
+	case macosx64 :
+		C.Defines : USING_MACOSX ;
+		SRCS += macosx.c ;
 	case linux32 :
+		C.Defines : USING_LINUX ;
+		SRCS += linux.c ;
+	case linux64 :
 		C.Defines : USING_LINUX ;
 		SRCS += linux.c ;
 }
