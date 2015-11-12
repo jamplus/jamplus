@@ -421,29 +421,29 @@ if $(LUA_BIN)
 		}
 
 		LUA_SRCS =
-				share/lua/5.2/copas.lua
-				share/lua/5.2/coxpcall.lua
-				share/lua/5.2/expand.lua
-				share/lua/5.2/getopt.lua
-				share/lua/5.2/lanes.lua
-				share/lua/5.2/ospath.lua
-				share/lua/5.2/osprocess.lua
-				share/lua/5.2/plist.lua
-				share/lua/5.2/socket.lua
-				share/lua/5.2/ssl.lua
-				share/lua/5.2/xavante.lua
-				share/lua/5.2/xmlize.lua
-				share/lua/5.2/socket/http.lua
-				share/lua/5.2/socket/url.lua
-				share/lua/5.2/lxp/lom.lua
-				share/lua/5.2/xavante/encoding.lua
-				share/lua/5.2/xavante/filehandler.lua
-				share/lua/5.2/xavante/httpd.lua
-				share/lua/5.2/xavante/mime.lua
-				share/lua/5.2/xavante/patternhandler.lua
-				share/lua/5.2/xavante/redirecthandler.lua
-				share/lua/5.2/xavante/urlhandler.lua
-				share/lua/5.2/xavante/vhostshandler.lua
+				share/lua/5.3/copas.lua
+				share/lua/5.3/coxpcall.lua
+				share/lua/5.3/expand.lua
+				share/lua/5.3/getopt.lua
+				share/lua/5.3/lanes.lua
+				share/lua/5.3/ospath.lua
+				share/lua/5.3/osprocess.lua
+				share/lua/5.3/plist.lua
+				share/lua/5.3/socket.lua
+				share/lua/5.3/ssl.lua
+				share/lua/5.3/xavante.lua
+				share/lua/5.3/xmlize.lua
+				share/lua/5.3/socket/http.lua
+				share/lua/5.3/socket/url.lua
+				share/lua/5.3/lxp/lom.lua
+				share/lua/5.3/xavante/encoding.lua
+				share/lua/5.3/xavante/filehandler.lua
+				share/lua/5.3/xavante/httpd.lua
+				share/lua/5.3/xavante/mime.lua
+				share/lua/5.3/xavante/patternhandler.lua
+				share/lua/5.3/xavante/redirecthandler.lua
+				share/lua/5.3/xavante/urlhandler.lua
+				share/lua/5.3/xavante/vhostshandler.lua
 		;
 
 		if $(CONFIG) = debug
