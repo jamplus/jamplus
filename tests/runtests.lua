@@ -34,6 +34,8 @@ function RunJam(commandLine)
 		table.insert(commandLine, 3, 'COMPILER=' .. Compiler)
 	end
 
+    commandLine[#commandLine + 1] = 'c.toolchain=' .. PlatformDir .. '/release'
+
 	commandLine.stderr_to_stdout = true
 
 	return osprocess.collectlines(commandLine)
@@ -419,13 +421,27 @@ end
 
 local dirs
 
-if arg and arg[1] == '--compiler' then
+local arg = { ... }
+if arg[1] == '--platform' then
+    PlatformDir = arg[2]
+    if PlatformDir == 'win64' then
+        Platform = 'win32'
+    elseif PlatformDir == 'macosx32'  or  PlatformDir == 'macosx64' then
+        Platform = 'macosx'
+    elseif PlatformDir == 'linux32'  or  PlatformDir == 'linux64' then
+        Platform = 'linux'
+    end
+    table.remove(arg, 1)
+    table.remove(arg, 1)
+end
+
+if arg[1] == '--compiler' then
 	Compiler = arg[2]
 	table.remove(arg, 1)
 	table.remove(arg, 1)
 end
 
-if arg and arg[1] then
+if arg[1] then
 	dirs = arg
 else
 	dirs = {}
