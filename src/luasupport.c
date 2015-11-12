@@ -947,7 +947,7 @@ void ls_lua_init()
     ls_lua_setfield = (void (*)(ls_lua_State *, int, const char *))ls_lua_loadsymbol(handle, "lua_setfield");
     ls_lua_rawseti = (void (*)(ls_lua_State *, int, ls_lua_Integer))ls_lua_loadsymbol(handle, "lua_rawseti");
 
-    ls_lua_pcallk = (int (*)(ls_lua_State *, int, int, int, ls_lua_Integer, ls_lua_CFunction))ls_lua_loadsymbol(handle, "lua_pcallk");
+    ls_lua_pcallk = (int (*)(ls_lua_State *, int, int, int, ls_lua_KContext, ls_lua_CFunction))ls_lua_loadsymbol(handle, "lua_pcallk");
 
     ls_lua_next = (int (*)(ls_lua_State *, int))ls_lua_loadsymbol(handle, "lua_next");
 
