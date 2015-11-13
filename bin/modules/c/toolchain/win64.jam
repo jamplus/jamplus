@@ -16,6 +16,8 @@ rule C.Toolchain.win64.* {
                 ! [ C.Toolchain.mingw.$(C.PLATFORM).Detect ] {
         return ;
     }
-    C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) ;
+    if [ RuleExists C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) : 1 ] {
+        C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) ;
+    }
 }
 
