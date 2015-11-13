@@ -1,6 +1,6 @@
 rule C.OpenSSL TARGET : OPTIONS {
 	if $(NT) {
-		if $(MSVCNT) {
+		if $(C.COMPILER) in vs2015 {
 			local bits = "" ;
 			if $(PLATFORM) = win64 {
 				bits = 64 ;
@@ -35,6 +35,7 @@ rule C.OpenSSL TARGET : OPTIONS {
 				return true ;
 			}
 
+			TARGET = [ C.ActiveTarget $(TARGET) ] ;
 			C.Defines $(TARGET) : USE_SSLEAY ;
 
 			C.IncludeDirectories $(TARGET) : $(opensslRoot)/include$(bits) $(opensslRoot)/include$(bits)/openssl ;
@@ -49,7 +50,9 @@ rule C.OpenSSL TARGET : OPTIONS {
 			}
 
 			return ;
-		} else if $(MINGW) {
+		}
+
+		{
 			local bits = 32 ;
 			if $(PLATFORM) = win64 {
 				bits = 64 ;
