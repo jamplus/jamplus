@@ -2,6 +2,8 @@ ospath = require 'ospath'
 osprocess = require 'osprocess'
 local filefind = require 'filefind'
 
+scriptPath = ospath.simplify(ospath.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()))
+
 function io.writeall(filename, buffer)
     local file = io.open(filename, 'wb')
     file:write(buffer)
@@ -27,7 +29,7 @@ end
 
 function RunJam(commandLine)
 	if not commandLine then commandLine = {} end
-	table.insert(commandLine, 1, 'jam')
+	table.insert(commandLine, 1, JAM_EXECUTABLE)
 	table.insert(commandLine, 2, '-j1')
 
 	if Compiler then
@@ -426,7 +428,7 @@ end
 
 -- Detect OS
 if os.getenv("OS") == "Windows_NT" then
- 	Platform = 'win32'
+	Platform = 'win32'
 	PlatformDir = 'win64'
 	SUFEXE = '.exe'
 	COMPILER = 'vc'
@@ -435,10 +437,15 @@ if os.getenv("OS") == "Windows_NT" then
 	C_LINK = 'C.vc.Link'
 else
 	local f = io.popen('uname')
-	uname = f:read('*a'):lower():gsub('\n', '')
-	f:close()
+	if f then
+		uname = f:read('*a')
+		if uname then
+			uname = uname:lower():gsub('\n', '')
+		end
+		f:close()
+	end
 
-	if uname == 'darwin' then
+	if not uname  or  uname == 'darwin' then
 		Platform = 'macosx'
 		PlatformDir = 'macosx32'
 		COMPILER = 'clang'
@@ -489,6 +496,12 @@ else
 	end
 end
 table.sort(dirs)
+
+if Platform == 'macosx' then
+	JAM_EXECUTABLE = ospath.join(scriptPath, '..', 'bin', PlatformDir, 'jam')
+else
+	JAM_EXECUTABLE = "jam"
+end
 
 function ErrorHandler(inMessage)
 	local message = {}
