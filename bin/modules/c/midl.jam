@@ -74,7 +74,7 @@ rule C.Midl.Compiler PARENT : SOURCE
 	SOURCE = [ C.GristFiles $(PARENT) : $(SOURCE) ] ;
 	SearchSource $(SOURCE) ;
 
-	local targets = [ C.MidlFlags $(PARENT) : $(SOURCE) ] ;
+	local targets = [ C.Midl.Flags $(PARENT) : $(SOURCE) ] ;
 	Depends $(targets) : $(SOURCE) ;
 
 	local MIDL ;
