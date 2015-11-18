@@ -131,6 +131,16 @@ rule C.Midl.Compiler PARENT : SOURCE
 				case release :
 					MIDLFLAGS = /D "NDEBUG" /char signed /env win32 ;
 			}
+
+		case vs2015 :
+			LINK_PATHS += $(MSSDK_BINDIR) ;
+			MIDL = "$(MSSDK_BINDIR:Z=$(C.COMPILER_SUITE_SYMBOL))/midl" ;
+			switch $(CONFIG) {
+				case debug :
+					MIDLFLAGS = /D "_DEBUG" /char signed /env win32 /Oicf ;
+				case release :
+					MIDLFLAGS = /D "NDEBUG" /char signed /env win32 ;
+			}
 	}
 
 	MIDL on $(C.COMPILER_SUITE_SYMBOL) = $(MIDL) ;
