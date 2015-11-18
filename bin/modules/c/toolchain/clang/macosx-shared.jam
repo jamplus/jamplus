@@ -47,7 +47,7 @@ rule C.macosx.SDK SDK_VERSION {
 	local architecture ;
 
 	developerRoot = /Developer/SDKs ;
-	SDK_VERSION ?= 10.9 ;
+	SDK_VERSION ?= 10.11 ;
 	switch $(SDK_VERSION) {
 		case 10.4 :
 			isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
@@ -78,6 +78,11 @@ rule C.macosx.SDK SDK_VERSION {
 			developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 			isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk ;
 			sdkroot = macosx10.9 ;
+
+		case 10.11 :
+			developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+			isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk ;
+			sdkroot = macosx10.11 ;
 
 		case * :		Exit "* C.macosx.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 	}
@@ -401,11 +406,11 @@ rule C.macosx._MultiCppCompile_SetupFlags {
 	extraflags += "-arch $(architecture)" ;
 	switch $(C.PLATFORM) {
 		case macosx32 :
-			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
+			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9 10.11
 			extraflags += -mmacosx-version-min=$(minimumsdkversion) ;
 
 		case macosx64 :
-			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
+			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9 10.11
 			extraflags += -mmacosx-version-min=$(minimumsdkversion) ;
 	}
 
@@ -428,11 +433,11 @@ rule C.macosx._ApplicationFromObjects_LinkFlags {
 	linkFlags += "-arch $(architecture)" ;
 	switch $(C.PLATFORM) {
 		case macosx32 :
-			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
+			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9 10.11
 			linkFlags += -mmacosx-version-min=$(minimumsdkversion) ;
 
 		case macosx64 :
-			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9
+			# 10.4, 10.5, 10.6, 10.7, 10.8 10.9 10.11
 			linkFlags += -mmacosx-version-min=$(minimumsdkversion) ;
 	}
 
