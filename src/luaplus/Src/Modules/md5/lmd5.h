@@ -6,7 +6,9 @@
 * This code is hereby placed in the public domain.
 */
 
+#ifndef USE_MD5_RIVEST
 #include <openssl/opensslv.h>
+#endif
 
 #undef MYNAME
 #undef luaopen_md5
@@ -85,6 +87,32 @@
 #define MD5Update		MD5_Update
 #define MD5Final		MD5_Final
 #define N			MD5_DIGEST_LENGTH
+#ifdef USE_MULTIPLE
+#define Pget			md5_Pget
+#define Pnew			md5_Pnew
+#define Lclone			md5_Lclone
+#define Ldigest			md5_Ldigest
+#define Lnew			md5_Lnew
+#define Lreset			md5_Lreset
+#define Ltostring		md5_Ltostring
+#define Lupdate			md5_Lupdate
+#define Lupdatefile		md5_Lupdatefile
+#define R			md5_R
+#endif
+#endif
+
+#ifdef USE_MD5_RIVEST
+#include "md5global.h"
+#include "md5.h"
+#define MYNAME			"md5"
+#define luaopen_md5		luaopen_md5
+#define AUTHOR			"Rivest"
+//#define MD5_CTX			MD5_CTX
+//#define MD5Init			MD5_Init
+//#define MD5Update		MD5_Update
+//#define MD5Final		MD5_Final
+
+#define N			16
 #ifdef USE_MULTIPLE
 #define Pget			md5_Pget
 #define Pnew			md5_Pnew
