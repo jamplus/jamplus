@@ -15,9 +15,20 @@ SubIncludeRelative Src LuaPlus : LuaC ;
 
 if $(OS) = NT
 {
+	SubInclude LUAPLUS Src ManagedLuaPlus : ManagedLuaPlus ;
+#	SubInclude LUAPLUS Src ManagedLuaPlus : LuaPlusClrPure ;
+
     if $(LUA_VERSION) in lua51 lua51-luaplus {
         SubInclude LUAPLUS Src Lua51Proxy : Lua51Proxy ;
     }
+	SubInclude LUAPLUS Tools LuaPlusDebuggerAddin ;
+
+	Workspace LuaPlus :
+#			LuaPlusClrPure
+			LuaPlusDebuggerAddin
+			LuaPlusDebuggerControls
+			ManagedLuaPlus
+	;
 }
 
 {

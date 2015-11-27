@@ -51,7 +51,7 @@ rule C.ios.SDK SDK_VERSION {
 	switch $(SDK_PLATFORM) {
 		case ios :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 8.3 ;
+			SDK_VERSION ?= 9.2 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -116,13 +116,25 @@ rule C.ios.SDK SDK_VERSION {
 					sdkroot = iphoneos8.3 ;
 					architecture = armv7 ;
 
+				case 8.4 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.4.sdk ;
+					sdkroot = iphoneos8.4 ;
+					architecture = armv7 ;
+
+				case 9.2 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS9.2.sdk ;
+					sdkroot = iphoneos9.2 ;
+					architecture = armv7 ;
+
 				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -fvisibility=hidden ;
 
 		case iossimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 8.3 ;
+			SDK_VERSION ?= 9.2 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -176,6 +188,16 @@ rule C.ios.SDK SDK_VERSION {
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.3.sdk ;
 					sdkroot = iphoneos8.3 ;
+
+				case 8.4 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.4.sdk ;
+					sdkroot = iphoneos8.4 ;
+
+				case 9.2 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator9.2.sdk ;
+					sdkroot = iphoneos9.2 ;
 
 				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -286,13 +308,16 @@ rule C.ios._BundleInfoString KEY : VALUE {
 rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
+		IOS_SDK_VERSION_MIN ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+		IPHONEOS_SDK_VERSION ?= $(IPHONEOS_SDK_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 		C.ios._BundleInfoString CFBundleDevelopmentRegion : en ;
 		C.ios._BundleInfoString CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
 		C.ios._BundleInfoString CFBundleInfoDictionaryVersion : 6.0 ;
 		C.ios._BundleInfoString CFBundlePackageType : APPL ;
 		C.ios._BundleInfoString CFBundleSignature : ???? ;
 		if ! $(NT) {
-			C.ios._BundleInfoString CFBundleResourceSpecification : ResourceRules.plist ;
+			# ERROR ITMS-90339: "This bundle is invalid. The Info.plist contains an invalid key 'CFBundleResourceSpecification' in bundle <app> [<app.app>]"
+			#C.ios._BundleInfoString CFBundleResourceSpecification : ResourceRules.plist ;
 		}
 
 		switch $(C.PLATFORM) {
@@ -300,7 +325,14 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 				C.ios._BundleInfoBoolean LSRequiresIPhoneOS : true ;
 				C.ios._BundleInfoIntegerArray UIDeviceFamily : 1 2 ;
 				C.ios._BundleInfoString DTPlatformName : iphoneos ;
+				C.ios._BundleInfoString DTXcode : 0620 ;
 				C.ios._BundleInfoString DTSDKName : iphoneos$(IPHONEOS_SDK_VERSION) ;
+				C.ios._BundleInfoString DTSDKBuild : 12D508 ;
+				C.ios._BundleInfoString BuildMachineOSBuild : 13F34 ;
+				C.ios._BundleInfoString DTCompiler : com.apple.compilers.llvm.clang.1_0 ;
+				C.ios._BundleInfoString DTPlatformVersion : $(IPHONEOS_SDK_VERSION) ;
+				C.ios._BundleInfoString DTXcodeBuild : 6C131e ;
+				C.ios._BundleInfoString DTPlatformBuild : 12D508 ;
 				C.ios._BundleInfoArray CFBundleSupportedPlatforms : iPhoneOS ;
 				C.ios._BundleInfoString MinimumOSVersion : $(IOS_SDK_VERSION_MIN) ;
 				if $(TARGETINFO_LOCATE) {
@@ -344,6 +376,8 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 		case bundleversion :
 			C.ios._BundleInfoString CFBundleVersion : $(VALUE) ;
 			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
+		case bundleshortversion :
+			C.ios._BundleInfoString CFBundleShortVersionString : $(VALUE) ;
 		case copyright :			C.ios._BundleInfoString NSHumanReadableCopyright : $(VALUE) ;
 		case mainnibfile :			C.ios._BundleInfoString NSMainNibFile : $(VALUE) ;
 		case resourcespec :			C.ios._BundleInfoString CFBundleResourceSpecification : $(VALUE) ;
@@ -374,6 +408,7 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 		case uiprerenderedicon :	C.ios._BundleInfoBoolean UIPrerenderedIcon : $(VALUE) ;
 		case uistatusbarhidden :	C.ios._BundleInfoBoolean UIStatusBarHidden : $(VALUE) ;
 		case uiviewcontrollerbasedstatusbarappearance : C.ios._BundleInfoBoolean UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
+		case uirequiresfullscreen :	C.ios._BundleInfoBoolean UIRequiresFullScreen : $(VALUE) ;
 		case uiinterfaceorientation :	
 			if $(VALUE) = portrait {
 				C.ios._BundleInfoString UIInterfaceOrientation : UIInterfaceOrientationPortrait ;
@@ -454,6 +489,14 @@ actions ios.ProcessEntitlements
 	/usr/libexec/PlistBuddy -c "Set application-identifier $(AppIdentifierPrefix:E=*needs-AppIdentifierPrefix*).$(CFBundleIdentifier:E=*needs-CFBundleIdenfier*)" $(1)
 }
 
+rule C.ios.UserPlist TARGET : PLIST
+{
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+	SearchSource $(PLIST) ;
+	USER_INFO_PLIST on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(PLIST) ;
+}
+
 if $(NT) {
 
 actions C.ios._Lipo {
@@ -470,20 +513,42 @@ actions C.ios._Lipo {
 
 }
 
+actions C.ios._Strip {
+	$(C.STRIP:C) $(2:C) -o $(1:C)
+}
+
 rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local _t = $(LINK_TARGETS[0]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)$(C.__COLON)lipo) ;
 	BINDING on $(_t) = $(BINDING:Z=$(LINK_TARGETS[0])) ;
-	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t) : $(LINK_TARGETS) ;
-	MakeLocate $(_t) : $(OUTPUT_PATH) ;
+	MakeLocate $(_t) ; # : $(OUTPUT_PATH) ;
 	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_t) ;
 	C.ios._Lipo $(_t) : $(LINK_TARGETS) : $(C.COMPILER_SUITE_SYMBOL) ;
 	LIPO_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_t) ;
+	
+	local _s = $(LINK_TARGETS[0]:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)$(C.__COLON)strip) ;
+	BINDING on $(_s) = $(BINDING:Z=$(LINK_TARGETS[0])) ;
+	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_s) : $(_t) : $(LINK_TARGETS) ;
+	MakeLocate $(_s) : $(OUTPUT_PATH) ;
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_s) ;
+	C.ios._Strip $(_s) : $(_t) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+	STRIPPED_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_s) ;
 	return $(linkTargets) ;
 }
 
 
 if ! $(TARGETINFO_LOCATE) {
+
+actions MergeUserInfoPlist
+{
+	if [ " $(USER_PLIST) " == "  " ]; then
+		cp $(BASE_PLIST:TC/) $(1)
+	else
+		cp $(BASE_PLIST:TC/) $(1)
+		/usr/libexec/PlistBuddy -c "Merge $(USER_PLIST:TC/)" $(1) 
+	fi
+}
 
 rule C.ios.Bundle TARGET : TOOLCHAINS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
@@ -567,12 +632,22 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 " ;
 			infoplistcontents = $(infoplistcontents:J="") ;
 
+			local infoplisttemp = @(Info.plist.temp:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+			MakeLocate $(infoplisttemp) ;
+			CONTENTS on $(infoplisttemp) = $(infoplistcontents) ;
+			WriteFile $(infoplisttemp) ;
+			UseCommandLine $(infoplisttemp) : $(infoplistcontents) ;
+
 			local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 			MakeLocate $(infoplist) : $(bundlePath) ;
-			CONTENTS on $(infoplist) = $(infoplistcontents) ;
-			WriteFile $(infoplist) ;
+			Depends $(infoplist) : $(infoplisttemp) ;
 
-			UseCommandLine $(infoplist) : $(infoplistcontents) ;
+			local userInfoPlist = $(USER_INFO_PLIST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+			BASE_PLIST on $(infoplist) = $(infoplisttemp) ;
+			USER_PLIST on $(infoplist) = $(userInfoPlist:E="") ;
+			MergeUserInfoPlist $(infoplist) ;
+			Depends $(infoplist) : $(infoplisttemp) $(userInfoPlist) ;
 			Depends $(bundleTarget) : $(infoplist) ;
 			Clean $(cleanBundleTarget) : $(infoplist) ;
 		}
@@ -626,7 +701,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 	}
 
 	if $(C.PLATFORM) in ios {
-		local linkTarget = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local linkTarget = $(STRIPPED_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
@@ -685,7 +760,6 @@ rule C.ios._ApplicationFromObjects_PostBuild {
 	local outputPath = [ C._retrieveOutputPath ] ;
 	local bundlePath = $(outputPath)/$(outputName).app ;
 	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
-
 	local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
 	local colon = ":" ;
 	local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
@@ -746,11 +820,11 @@ rule C.ios._MultiCppCompile_SetupFlags {
 				extraflags += -mmacosx-version-min=$(minimumsdkversion) ;
 
 			case ios :
-				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1, 8.2, 8.3
+				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1, 8.2, 8.3 8.4 9.2
 				extraflags += -miphoneos-version-min=$(minimumsdkversion) ;
 
 			case iossimulator :
-				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1, 8.2, 8.3
+				# 4.3, 5.0, 5.1, 6.0, 6.1, 7.0, 7.1, 8.0, 8.1, 8.2, 8.3 8.4 9.2
 				extraflags += -mios-simulator-version-min=$(minimumsdkversion) ;
 		}
 	}
@@ -1032,10 +1106,11 @@ actions C.ios._CodeSign
 actions C.ios._CodeSign
 {
 	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
-	/usr/bin/codesign --force --sign "$(SIGNING_IDENTITY)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
+	/usr/bin/codesign --force --sign "$(SIGNING_IDENTITY)" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
 	touch $(1:C)
 	touch $(DSYM_NAME:CT)
 }
+# /usr/bin/codesign --force --sign "$(SIGNING_IDENTITY)" --resource-rules="$(BUNDLE_PATH)/ResourceRules.plist" --entitlements $(ENTITLEMENTS:CT) $(BUNDLE_PATH)
 
 }
 

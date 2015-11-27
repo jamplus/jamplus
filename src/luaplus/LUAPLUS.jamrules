@@ -2,15 +2,12 @@ if ! $(LUA_VERSION) {
     local dirs = [ Glob $(LUAPLUS)/Src/LuaPlus : */ : 1 ] ;
     dirs = $(dirs:P) ;
     dirs = $(dirs:B) ;
-    if $(dirs[2]) {
-        Echo LUA_VERSION needs to be passed in from the command-line. ;
-        Echo ;
-        Echo "    jam LUA_VERSION=lua51-luaplus" ;
-        Echo ;
-        Echo "Available versions:" $(dirs) ;
-        Exit ;
-    }
-    LUA_VERSION = $(dirs[1]) ;
+    Echo LUA_VERSION needs to be passed in from the command-line. ;
+    Echo ;
+    Echo "    jam LUA_VERSION=lua51-luaplus" ;
+    Echo ;
+    Echo "Available versions:" $(dirs) ;
+    Exit ;
 }
 
 LUA_VERSION ?= lua51-luaplus ;
@@ -18,8 +15,8 @@ LUA_VERSION ?= lua51-luaplus ;
 
 ###############################################################################
 # Set these if the user didn't use jam --workspace.
-ALL_LOCATE_TARGET ?= $(LUAPLUS)/.build/$(PLATFORM)/obj.$(LUA_VERSION).$(C.COMPILER).$(PLATFORM).$(CONFIG) ;
-LUAPLUS_OUTPUT_DIRECTORY ?= $(LUAPLUS)/.build/$(PLATFORM)/bin ;
+ALL_LOCATE_TARGET ?= $(LUAPLUS)/.build/obj.$(LUA_VERSION).$(C.COMPILER).$(PLATFORM).$(CONFIG) ;
+LUAPLUS_OUTPUT_DIRECTORY ?= $(LUAPLUS)/.build/bin.$(LUA_VERSION).$(C.COMPILER).$(PLATFORM) ;
 
 DEPCACHE.standard ?= $(ALL_LOCATE_TARGET)/.depcache ;
 DEPCACHE ?= standard ;
