@@ -13,6 +13,7 @@ C.ios.LinkFrameworks : Foundation UIKit ;
 C.ios.BundleInfo : displayname : simple ;
 C.ios.BundleInfo : bundleversion : 1.0 ;
 C.ios.BundleInfo : uistatusbarhidden : true ;
+C.ios.BundleInfo : identifier : com.jamplus.simple ;
 
 C.ios.ProvisionFile : test.mobileprovision ;
 C.ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
