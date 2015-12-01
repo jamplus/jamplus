@@ -1500,7 +1500,7 @@ p {font-size:13px;}
 
 <div id="container">
 
-<h1>iOS 4.0+ Users:</h1>
+<h1>iOS $(minimumsdkversion:E=4.0)+ Users:</h1>
 
 <div class="link"><a href="itms-services://?action=download-manifest&url=$(URL)/manifest.plist">Tap Here to Install<br />$(CFBundleDisplayName)<br />On Your Device</a></div>
 
