@@ -261,7 +261,7 @@ rule C.ios.SDK SDK_VERSION {
 	C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.LINK:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
 	C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = ;
 
-	C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(C.ARCHITECTURE) ;
+	C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(C.ARCHITECTURE:E=armv7) ;
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sysroot) ;
 	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
@@ -968,6 +968,7 @@ rule C.ios._ApplicationFromObjects_LinkFlags {
 	minimumsdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
 	if $(IOSBUILDENV_PATH) {
+		linkFlags += "-arch $(architecture)" ;
 		linkFlags += "-syslibroot $(isysroot:C)" ;
 		linkFlags += -ios_version_min $(minimumsdkversion) ;
 		linkFlags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;
