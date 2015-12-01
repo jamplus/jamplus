@@ -817,11 +817,6 @@ rule C._LibraryFromObjects OBJECTS {
 
 
 rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
-	local theRule ;
-	for theRule in $(C._SharedLibraryFromObjects_LinkFlags:Z=$(C.COMPILER_SUITE_SYMBOL)) {
-		$(theRule) ;
-	}
-
 	local TARGET = $(C.ACTIVE_TARGET) ;
 	local _s = $(OBJECTS:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 
@@ -875,7 +870,14 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) linkDirectories += $(LINKDIRECTORIES) ;
 	on @(C.ACTIVE_TOOLCHAIN_*) linkDirectories += $(LINKDIRECTORIES) ;
 
+	local linkRule = C.$(C.COMPILER_SUITE).Link ;
+
 	local linkFlags ;
+	local theRule ;
+	for theRule in $(C._SharedLibraryFromObjects_LinkFlags:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+		$(theRule) ;
+	}
+
 	linkFlags +=
 		[ C.$(C.COMPILER_SUITE).FLibraryPaths $(linkDirectories) $(C.STDLINKDIRECTORIES) ]
 		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_*))
