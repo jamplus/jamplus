@@ -157,10 +157,12 @@ end
 
 function M.merge(sourceDict, destinationDict)
     local destinationKeys = {}
-    for destinationIndex, destinationKey in ipairs(destinationDict) do
+    for destinationIndex = 1, #destinationDict do
+        local destinationKey = destinationDict[destinationIndex]
         destinationKeys[destinationKey.key] = destinationIndex
     end
-    for _, sourceEntry in ipairs(sourceDict) do
+    for sourceIndex = 1, #sourceDict do
+        local sourceEntry = sourceDict[sourceIndex]
         local destinationIndex = destinationKeys[sourceEntry.key]
         if not destinationIndex then
             destinationIndex = #destinationDict + 1
@@ -183,7 +185,8 @@ function M.merge(sourceDict, destinationDict)
                         destinationArray = M.newarray()
                         destinationEntry.value = destinationArray
                     end
-                    for sourceListIndex, sourceListEntry in ipairs(sourceEntry.value) do
+                    for sourceListIndex = 1, #sourceEntry.value do
+                        local sourceListEntry = sourceEntry.value[sourceListIndex]
                         if not destinationArray[sourceListIndex] then
                             destinationArray[sourceListIndex] = M.newdict()
                         end
@@ -193,13 +196,15 @@ function M.merge(sourceDict, destinationDict)
                 elseif type(sourceArrayValue) == 'string' then
                     local destinationArray = {}
                     destinationEntry.value = destinationArray
-                    for _, sourceListEntry in ipairs(sourceEntry.value) do
+                    for sourceListIndex = 1, #sourceEntry.value do
+                        local sourceListEntry = sourceEntry.value[sourceListIndex]
                         destinationArray[#destinationArray + 1] = sourceListEntry
                     end
                 elseif type(sourceArrayValue) == 'number' then
                     local destinationArray = {}
                     destinationEntry.value = destinationArray
-                    for _, sourceListEntry in ipairs(sourceEntry.value) do
+                    for sourceListIndex = 1, #sourceEntry.value do
+                        local sourceListEntry = sourceEntry.value[sourceListIndex]
                         destinationArray[#destinationArray + 1] = sourceListEntry
                     end
                 end
