@@ -3,7 +3,8 @@ local M = {}
 local plistDictMetatable = {
     __index = function(self, key)
         local lowerKey = key:lower()
-        for _, entry in ipairs(self) do
+        for index = 1, #self do
+            local entry = rawget(self, index)
             if entry.key:lower() == lowerKey then
                 return entry.value
             end
@@ -12,7 +13,8 @@ local plistDictMetatable = {
 
     __newindex = function(self, key, value)
         local lowerKey = key:lower()
-        for _, entry in ipairs(self) do
+        for index = 1, #self do
+            local entry = rawget(self, index)
             if entry.key:lower() == lowerKey then
                 entry.value = value
                 return
@@ -89,7 +91,8 @@ local function ExportDict(entry, out, spaces)
     local origSpaces = spaces
     out[#out + 1] = origSpaces .. '<dict>\n'
     spaces = spaces .. '  '
-    for _, subEntry in ipairs(entry) do
+    for index = 1, #entry do
+        local subEntry = entry[index]
         out[#out + 1] = spaces .. '<key>' .. subEntry.key .. '</key>\n'
         if type(subEntry.value) == 'string' then
             out[#out + 1] = spaces .. '<string>' .. subEntry.value .. '</string>\n'
@@ -106,15 +109,18 @@ local function ExportDict(entry, out, spaces)
             local subValue = subEntry.value[1]
             if subValue then
                 if type(subValue) == 'table' then
-                    for _, dictEntry in ipairs(subEntry.value) do
+                    for dictIndex = 1, #subEntry.value do
+                        local dictEntry = subEntry.value[dictIndex]
                         ExportDict(dictEntry, out, spaces .. '  ')
                     end
                 elseif type(subValue) == 'string' then
-                    for _, listEntry in ipairs(subEntry.value) do
+                    for listIndex = 1, #subEntry.value do
+                        local listEntry = subEntry.value[listIndex]
                         out[#out + 1] = spaces .. '  <string>' .. listEntry .. '</string>\n'
                     end
                 elseif type(subValue) == 'number' then
-                    for _, listEntry in ipairs(subEntry.value) do
+                    for listIndex = 1, #subEntry.value do
+                        local listEntry = subEntry.value[listIndex]
                         out[#out + 1] = spaces .. '  <integer>' .. tostring(listEntry) .. '</integer>\n'
                     end
                 end
