@@ -253,7 +253,7 @@ rule C.ios.SDK SDK_VERSION {
 
 	local COMPILER_BIN_PATH = $(COMPILER_BIN_PATH:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local sysroot = $(IOSBUILDENV_PATH)/SDK ;
-	SDK_VERSION ?= 5.0 ;
+	SDK_VERSION ?= 6.0 ;
 
 	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.AR:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
 	C.CC on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.CC:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
@@ -1474,6 +1474,9 @@ rule C.ios.WebServer TARGET {
 			Always $(manifest.plist) ;
 			WriteFile $(manifest.plist) ;
 			UseCommandLine $(manifest.plist) : $(contents) ;
+
+			local minimumsdkversion = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			minimumsdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
 			local index.html = @(index.html:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):archive) ;
 			MakeLocate $(index.html) : $(OUTPUT_PATH) ;
