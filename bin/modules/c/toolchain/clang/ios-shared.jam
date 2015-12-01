@@ -1120,8 +1120,14 @@ actions C.ios._ImageResize {
 }
 
 
-actions C.ios._ImageCopy {
-	copy $(2:C\\) $(1:C\\)
+if $(NT) {
+    actions C.ios._ImageCopy {
+        copy $(2:C\\) $(1:C\\)
+    }
+} else {
+    actions C.ios._ImageCopy {
+        cp $(2:C) $(1:C)
+    }
 }
 
 
