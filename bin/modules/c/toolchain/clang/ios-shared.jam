@@ -502,8 +502,10 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 		case displayname :
 			C.ios.BundleInfoString : CFBundleDisplayName : $(VALUE) ;
 			CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-		case executable :			C.ios.BundleInfoString CFBundleExecutable : $(VALUE) ;
-		case identifier :			C.ios.BundleInfoString : CFBundleIdentifier : $(VALUE[1]) ;
+		case executable :			C.ios.BundleInfoString : CFBundleExecutable : $(VALUE) ;
+		case identifier :
+			C.ios.BundleInfoString : CFBundleIdentifier : $(VALUE) ;
+			CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case shortversion :			C.ios.BundleInfoString : CFShortVersionString : $(VALUE) ;
 		case bundleversion :
 			C.ios.BundleInfoString : CFBundleVersion : $(VALUE) ;
@@ -759,8 +761,6 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 		if $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 			CopyFile $(bundleTarget) : $(infoplist) : $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		} else {
-			C.ios.BundleInfoString : CFBundleIdentifier : $(CFBundleIdentifier:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-
 			local infoplistcontents = [ LuaString "
 				local currentLevel = GetInfoPlistCurrentLevel()
 				return plist.dump(currentLevel)
@@ -1251,13 +1251,17 @@ rule C.ios.ProvisionFile TARGET : FILENAME {
 	PROVISION_FILE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_provisionFileTarget) ;
 
 	_provisionFileTarget = $(_provisionFileTarget:T) ;
-	CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = [ LuaString "
+	local bundleIdentifier = [ LuaString "
 		local pl = require 'plist'.read(jam_getvar('_provisionFileTarget')[1])
 		local prefix = pl.ApplicationIdentifierPrefix
 		local identifier = pl.Entitlements[\"application-identifier\"]
 		identifier = identifier:sub(#prefix[1] + 2)
 		return identifier
 	" ] ;
+	if $(bundleIdentifier) != * {
+		C.ios.BundleInfoString $(TARGET) : CFBundleIdentifier : $(bundleIdentifier) ;
+		CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleIdentifier) ;
+	}
 }
 
 
