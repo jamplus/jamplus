@@ -884,12 +884,7 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
 	;
 
-	local linkRule = C.$(C.COMPILER_SUITE).Link ;
-
 	for theRule in $(C._SharedLibraryFromObjects_CleanIntermediates:Z=$(C.COMPILER_SUITE_SYMBOL)) {
-		$(theRule) ;
-	}
-	for theRule in $(C._SharedLibraryFromObjects_LinkFlags:Z=$(C.COMPILER_SUITE_SYMBOL)) {
 		$(theRule) ;
 	}
 
