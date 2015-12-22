@@ -1107,8 +1107,9 @@ Top:
             case MATCH_DIR:
                 context->match_dir = 1;
                 break;
-                //case RECURSIVE:
+            case RECURSIVE:
                 //rb_bug("continuous RECURSIVEs");
+                break;
 		}
 	}
 
@@ -1186,7 +1187,7 @@ TopContinue:
         buffer_addstring(&wildcardBuff, "\\*.*", 5);
         context->handle = FindFirstFile(buffer_ptr(&wildcardBuff), &context->fd);
         buffer_free(&wildcardBuff);
-		if (context->handle == NULL) return 0;
+        if (context->handle == INVALID_HANDLE_VALUE) return 0;
 #else
 		context->dirp = opendir(path);
         if (context->dirp == NULL) return 0;
