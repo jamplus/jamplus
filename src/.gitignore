@@ -10,6 +10,7 @@
 *.wwdb
 *.obj
 *.exe
+*.VC.opendb
 Debug/*
 Release/*
 bin.*/*
