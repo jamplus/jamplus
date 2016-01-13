@@ -203,7 +203,7 @@ rule C.vc._MultiCppCompile_PreCompile {
 
     if $(__MultiCppCompile_OutputAsTree) = 0 {
         local combinedLocateTarget = [ FDirName $(LOCATE_TARGET) ] ;
-        _postmflags = "/c /Fo\"$(combinedLocateTarget:\\)\\\\\" /Fd\"$(_VCPDB:T)\"" ;
+        _postmflags = /c /Fo\"$(combinedLocateTarget:\\)\\\\\" /Fd\"$(_VCPDB:T)\" ;
     }
 }
 
