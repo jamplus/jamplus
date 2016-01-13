@@ -1,6 +1,6 @@
 {
 
-# To keep things fairly simply, let's use a Lua action to generate a stripped
+# To keep things fairly simple, let's use a Lua action to generate a stripped
 # version of the source input to GenerateHFile.  Any one-line C-style comments
 # found will be removed, and the resultant line will be written to the output
 # file.
