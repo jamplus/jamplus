@@ -609,8 +609,17 @@ int main( int argc, char **argv, char **arg_environ )
         {
             char filebuf[4096];
             if (getcwd(filebuf, sizeof(filebuf))) {
-                var_set( "CWD", list_append( L0, filebuf, 0 ),
-			 VAR_SET );
+#ifdef NT
+                /*
+                    Under the Visual Studio debugger, the drive letter is capitalized. At the Command Prompt,
+                    the drive letter is lowercase. This causes issues with the command-line MD5sums, so make
+                    the drive letter lowercase all of the time.
+                */
+                if (filebuf[1] == ':') {
+                    filebuf[0] = tolower(filebuf[0]);
+                }
+#endif /* NT */
+                var_set( "CWD", list_append( L0, filebuf, 0 ), VAR_SET );
             }
         }
 #endif
