@@ -20,8 +20,12 @@ function Test()
 	TestFiles(originalFiles)
 
 	-- First build
-	local cwd = ospath.getcwd():gsub(':', '--'):gsub('\\', '/')
-	local cwdNoDashes = ospath.getcwd():gsub('\\', '/')
+	local cwd = ospath.getcwd()
+	if cwd:sub(2, 2) == ':' then
+		cwd = cwd:sub(1, 2):lower() .. cwd:sub(3)
+	end
+	local cwdNoDashes = cwd:gsub('\\', '/')
+	cwd = cwd:gsub(':', '--'):gsub('\\', '/')
 	
 	if Platform == 'win32' then
 		local pattern = [[
