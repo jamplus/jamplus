@@ -129,6 +129,10 @@ function TestPattern(patterns, lines)
 			hi = 5
 		end
 
+		if pattern  and  pattern:match('%*%*%* found %d+ target%(s%)%.%.%.') then
+			pattern = '&%*%*%* found %d+ target%(s%)%.%.%.'
+		end
+
 		local patternMatches = false
 		if pattern then
 			if pattern:sub(1, 1) == '&' then
