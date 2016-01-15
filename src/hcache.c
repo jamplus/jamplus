@@ -778,8 +778,22 @@ int getcachedmd5sum( TARGET *t, int source )
 	{
 		if ( t->time == 0 ) {
 			/* This file was generated.  Grab its timestamp. */
-			file_time( c->boundname, &c->mtime );
-		} else if( c->mtime != t->time )
+			if ( file_time( c->boundname, &c->mtime ) == -1 ) {
+				c->age = 0; /* The entry has been used, its young again */
+				++hits;
+				c->time = 0;
+				c->mtime = 0;
+				t->contentmd5sum_changed = 1;
+				memcpy(&t->contentmd5sum, &md5sumempty, sizeof(t->contentmd5sum));
+				t->contentmd5sum_calculated = 1;
+#ifdef OPT_USE_CHECKSUMS_EXT
+				t->contentmd5sum_file_dirty = 1;
+#endif /* OPT_USE_CHECKSUMS_EXT */
+				return t->contentmd5sum_changed;
+			}
+		}
+
+		if( c->mtime != t->time )
 			use_cache = 0;
 
 		if ( use_cache ) {
