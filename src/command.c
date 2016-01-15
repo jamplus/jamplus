@@ -44,6 +44,8 @@ cmd_new(
 	RULE	*rule,
 	LIST	*targets,
 	LIST	*sources,
+	LIST	*targetsunbound,
+	LIST	*sourcesunbound,
 	LIST	*shell,
 	int	maxline )
 {
@@ -60,6 +62,8 @@ cmd_new(
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 	cmd->luastring = 0;
 #endif
+	cmd->targetsunbound = targetsunbound;
+	cmd->sourcesunbound = sourcesunbound;
 
 	lol_init( &cmd->args );
 	lol_add( &cmd->args, targets );
@@ -132,6 +136,8 @@ cmd_new(
 void
 cmd_free( CMD *cmd )
 {
+	list_free( cmd->targetsunbound );
+	list_free( cmd->sourcesunbound );
 	lol_free( &cmd->args );
 	list_free( cmd->shell );
 #ifdef OPT_RESPONSE_FILES

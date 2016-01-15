@@ -1159,6 +1159,7 @@ make1cmds( ACTIONS *a0 )
 	    RULE    *rule = a0->action->rule;
 	    SETTINGS *boundvars;
 	    LIST    *nt, *ns;
+	    LIST    *ntunbound, *nsunbound;
 	    ACTIONS *a1;
 	    int	    start, chunk, length, maxline;
 		TARGETS *autosettingsreverse = 0;
@@ -1231,6 +1232,8 @@ make1cmds( ACTIONS *a0 )
 
 		nt = L0;
 		ns = L0;
+		ntunbound = L0;
+		nsunbound = L0;
 
 		if ( strncmp( rule->name, "batched_", 8 ) == 0 )
 		{
@@ -1304,7 +1307,9 @@ make1cmds( ACTIONS *a0 )
 
 		    if ( !anycacheable ) {
 			nt = make1list( L0, a0->action->targets, 0 );
+			ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
 			ns = make1list( L0, a0->action->sources, rule->flags );
+			nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
 		    }
 		}
 		else
@@ -1415,7 +1420,9 @@ make1cmds( ACTIONS *a0 )
 
 		    if ( !allcached ) {
 			nt = make1list( L0, a0->action->targets, 0 );
+			ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
 			ns = make1list( L0, a0->action->sources, rule->flags );
+			nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
 		    }
 		}
 		list_free( targets );
@@ -1488,7 +1495,9 @@ make1cmds( ACTIONS *a0 )
 		} else {
 #endif
 			nt = make1list( L0, a0->action->targets, 0 );
+			ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
 			ns = make1list( L0, a0->action->sources, rule->flags );
+			nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
 #if 0
 	    }
 #endif
@@ -1496,6 +1505,8 @@ make1cmds( ACTIONS *a0 )
 #else
 	    nt = make1list( L0, a0->action->targets, 0 );
 	    ns = make1list( L0, a0->action->sources, rule->flags );
+	    ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
+	    nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
 #endif
 
 	    if( rule->flags & RULE_TOGETHER )
@@ -1507,6 +1518,7 @@ make1cmds( ACTIONS *a0 )
 #endif
 	    {
 		ns = make1list( ns, a1->action->sources, rule->flags );
+		nsunbound = make1list_unbound( ns, a1->action->sources, rule->flags );
 		a1->action->running = 1;
 #ifdef OPT_ACTIONS_WAIT_FIX
 		a1->action->run_tgt = t;
@@ -1589,6 +1601,8 @@ make1cmds( ACTIONS *a0 )
 		CMD *cmd = cmd_new( rule,
 			list_copy( L0, nt ),
 			list_sublist( ns, start, thischunk ),
+			list_copy( L0, ntunbound ),
+			list_sublist( nsunbound, start, thischunk ),
 			list_copy( L0, shell ),
 			maxline );
 /* commented so jamgram.y can compile #else
