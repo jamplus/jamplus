@@ -362,7 +362,7 @@ make1b( TARGET *t )
 					timestamp > t->time
 #endif /* OPT_USE_CHECKSUMS_EXT */
 					) {
-					if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
+					if ( usechecksums || ( c->target->flags & T_FLAG_SCANCONTENTS ) ) {
 						childscancontents = 1;
 						if ( getcachedmd5sum( c->target, 1 ) )
 							childupdated = 1;
@@ -375,14 +375,36 @@ make1b( TARGET *t )
 		}
 		/* If it didn't have the MightNotUpdate flag but did update, mark it. */
 		else if ( c->target->fate > T_FATE_STABLE  &&  !c->needs ) {
-			if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
-				childscancontents = 1;
-				if ( getcachedmd5sum( c->target, 1 ) )
-					childupdated = 1;
+#ifdef OPT_USE_CHECKSUMS_EXT
+			if ( usechecksums ) {
+				if ( c->target->actions ) {
+					//childscancontents = 1;
+					if ( getcachedmd5sum( c->target, 1 ) )
+						childupdated = 1;
+				} else {
+					if ( c->target->includes ) {
+						if ( c->target->includes->fate > T_FATE_STABLE ) {
+							childupdated = 1;
+						}
+						//if ( c->target->fate == T_FATE_NEWER ) {
+							//childupdated = 1;
+						//}
+					} else {
+						childupdated = 1;
+					}
+				}
 			} else
-				childupdated = 1;
-		}
+#endif /* OPT_USE_CHECKSUMS_EXT */
+			{
+				if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
+					childscancontents = 1;
+					if ( getcachedmd5sum( c->target, 1 ) )
+						childupdated = 1;
+				} else
+					childupdated = 1;
+			}
 	    }
+		}
 #endif
 
 	    if( c->target->status > t->status )
@@ -421,6 +443,16 @@ make1b( TARGET *t )
 #endif
 	}
 
+#ifdef OPT_USE_CHECKSUMS_EXT
+	/* The fact is, if the target is missing, it needs to be built. The state of the */
+	/* children is irrelevant. */
+	if (usechecksums) {
+		if (t->binding == T_BIND_MISSING) {
+			childupdated = 1;
+		}
+	}
+#endif /* OPT_USE_CHECKSUMS_EXT */
+
 #ifdef OPT_BUILTIN_NEEDS_EXT
 	/* If we found a MightNotUpdate flag and there was an update, mark the fate as updated. */
 	if ( childmightnotupdate  &&  childupdated  &&  t->fate == T_FATE_STABLE )
@@ -443,11 +475,15 @@ make1b( TARGET *t )
 				}
 			}
 
-			if ( !childupdated )
-				t->fate = T_FATE_STABLE;
+			//if ( !childupdated )
+				//t->fate = T_FATE_STABLE;
 		} else if ( t->fate == T_FATE_STABLE )
 			t->fate = T_FATE_UPDATE;
 	}
+
+//	if ( childupdated  &&  t->fate == T_FATE_STABLE )
+//		t->fate = T_FATE_UPDATE;
+//	if ( ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
 	if ( t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
 		if ( md5matchescommandline( t ) )
 		    t->fate = T_FATE_STABLE;
@@ -1091,18 +1127,26 @@ make1d(
 		LISTITEM* target;
 	    LIST *targets = lol_get( &cmd->args, 0 );
 
-	    for(target = list_first(targets) ; target; target = list_next( target ) )
-	    {
-		TARGET *t = bindtarget( list_value(target) );
+		for (target = list_first(targets); target; target = list_next(target))
+		{
+			TARGET *t = bindtarget(list_value(target));
+			if (!(t->flags & T_FLAG_NOTFILE)) {
+				filecache_update(t);
+			}
+	}
+
 #ifdef OPT_USE_CHECKSUMS_EXT
-		if (usechecksums && !(t->flags & T_FLAG_NOTFILE)) {
-			t->time = 0;
-			t->contentmd5sum_calculated = 0;
-			getcachedmd5sum(t, 1);
+		if (usechecksums) {
+			for (target = list_first(cmd->targetsunbound); target; target = list_next(target)) {
+				TARGET *t = bindtarget(list_value(target));
+				if (!(t->flags & T_FLAG_NOTFILE)) {
+					t->time = 0;
+					t->contentmd5sum_calculated = 0;
+					getcachedmd5sum(t, 1);
+				}
+			}
 		}
 #endif /* OPT_USE_CHECKSUMS_EXT */
-		filecache_update( t );
-	    }
 	}
 #endif
 
@@ -1159,6 +1203,7 @@ make1cmds( ACTIONS *a0 )
 	    RULE    *rule = a0->action->rule;
 	    SETTINGS *boundvars;
 	    LIST    *nt, *ns;
+	    LIST    *ntunbound, *nsunbound;
 	    ACTIONS *a1;
 	    int	    start, chunk, length, maxline;
 		TARGETS *autosettingsreverse = 0;
@@ -1193,6 +1238,17 @@ make1cmds( ACTIONS *a0 )
 			}
 		}
 #endif
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+		if (usechecksums) {
+			for (a1 = a0; a1; a1 = a1->next) {
+				TARGETS* targets;
+				for (targets = a1->action->targets; targets; targets = targets->next) {
+					targets->target->contentmd5sum_calculated = 0;
+				}
+			}
+		}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 		for ( autot = a0->action->autosettings; autot; autot = autot->next ) {
 			if ( autot->target != t )
@@ -1231,6 +1287,8 @@ make1cmds( ACTIONS *a0 )
 
 		nt = L0;
 		ns = L0;
+		ntunbound = L0;
+		nsunbound = L0;
 
 		if ( strncmp( rule->name, "batched_", 8 ) == 0 )
 		{
@@ -1304,7 +1362,9 @@ make1cmds( ACTIONS *a0 )
 
 		    if ( !anycacheable ) {
 			nt = make1list( L0, a0->action->targets, 0 );
+			ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
 			ns = make1list( L0, a0->action->sources, rule->flags );
+			nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
 		    }
 		}
 		else
@@ -1415,7 +1475,9 @@ make1cmds( ACTIONS *a0 )
 
 		    if ( !allcached ) {
 			nt = make1list( L0, a0->action->targets, 0 );
+			ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
 			ns = make1list( L0, a0->action->sources, rule->flags );
+			nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
 		    }
 		}
 		list_free( targets );
@@ -1488,14 +1550,27 @@ make1cmds( ACTIONS *a0 )
 		} else {
 #endif
 			nt = make1list( L0, a0->action->targets, 0 );
+			ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
+#ifdef OPT_USE_CHECKSUMS_EXT
+			if (usechecksums) {
+				ns = make1list( L0, a0->action->sources, t->binding == T_BIND_MISSING ? ( rule->flags & ~RULE_UPDATED ) : rule->flags );
+				nsunbound = make1list_unbound( L0, a0->action->sources, t->binding == T_BIND_MISSING ? ( rule->flags & ~RULE_UPDATED ) : rule->flags );
+			} else {
+#endif /* OPT_USE_CHECKSUMS_EXT */
 			ns = make1list( L0, a0->action->sources, rule->flags );
+			nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
+#ifdef OPT_USE_CHECKSUMS_EXT
+			}
+#endif /* OPT_USE_CHECKSUMS_EXT */
+
 #if 0
 	    }
 #endif
 		}
 #else
 	    nt = make1list( L0, a0->action->targets, 0 );
-	    ns = make1list( L0, a0->action->sources, rule->flags );
+	    ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
+	    nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
 #endif
 
 	    if( rule->flags & RULE_TOGETHER )
@@ -1507,6 +1582,7 @@ make1cmds( ACTIONS *a0 )
 #endif
 	    {
 		ns = make1list( ns, a1->action->sources, rule->flags );
+		nsunbound = make1list_unbound( ns, a1->action->sources, rule->flags );
 		a1->action->running = 1;
 #ifdef OPT_ACTIONS_WAIT_FIX
 		a1->action->run_tgt = t;
@@ -1589,6 +1665,8 @@ make1cmds( ACTIONS *a0 )
 		CMD *cmd = cmd_new( rule,
 			list_copy( L0, nt ),
 			list_sublist( ns, start, thischunk ),
+			list_copy( L0, ntunbound ),
+			list_sublist( nsunbound, start, thischunk ),
 			list_copy( L0, shell ),
 			maxline );
 /* commented so jamgram.y can compile #else

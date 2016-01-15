@@ -58,6 +58,8 @@ struct _cmd
 	RULE	*rule;		/* rule->actions contains shell script */
 	LIST	*shell;		/* $(SHELL) value */
 	LOL	args;		/* LISTs for $(<), $(>) */
+	LIST *targetsunbound;
+	LIST *sourcesunbound;
 #ifdef OPT_RESPONSE_FILES
 	TMPLIST *response_files;
 #endif
@@ -71,6 +73,8 @@ CMD *cmd_new(
 	RULE	*rule,		/* rule (referenced) */
 	LIST	*targets,	/* $(<) (freed) */
 	LIST	*sources,	/* $(>) (freed) */
+	LIST	*targetsunbound,	/* $(<) (freed) */
+	LIST	*sourcesunbound,	/* $(<) (freed) */
 	LIST	*shell,		/* $(SHELL) (freed) */
 	int	maxline );	/* max line length */
 
