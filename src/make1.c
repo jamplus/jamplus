@@ -362,7 +362,11 @@ make1b( TARGET *t )
 					timestamp > t->time
 #endif /* OPT_USE_CHECKSUMS_EXT */
 					) {
-					if ( usechecksums || ( c->target->flags & T_FLAG_SCANCONTENTS ) ) {
+					if (
+#ifdef OPT_USE_CHECKSUMS_EXT
+						usechecksums ||
+#endif /* OPT_USE_CHECKSUMS_EXT */
+						( c->target->flags & T_FLAG_SCANCONTENTS ) ) {
 						childscancontents = 1;
 						if ( getcachedmd5sum( c->target, 1 ) )
 							childupdated = 1;
