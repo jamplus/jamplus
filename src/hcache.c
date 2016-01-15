@@ -824,7 +824,7 @@ int getcachedmd5sum( TARGET *t, int source )
 		LIST *md5callback;
 #endif
 
-		memcpy( &origmd5sum, &c->contentmd5sum, sizeof( MD5SUM ) );
+		memcpy( &origmd5sum, &t->contentmd5sum, sizeof( MD5SUM ) );
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 		pushsettings( t->settings );
 		md5callback = var_get( "MD5CALLBACK" );
