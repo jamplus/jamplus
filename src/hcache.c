@@ -767,8 +767,7 @@ int getcachedmd5sum( TARGET *t, int source )
 # ifdef DOWNSHIFT_PATHS
 	p = path;
 
-	do *p++ = (char)tolower( *target );
-	while( *target++ );
+	do *p++ = (char)tolower( *target ); while( *target++ );
 
 	target = path;
 # endif
