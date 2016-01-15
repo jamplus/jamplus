@@ -1134,7 +1134,7 @@ make1d(
 		for (target = list_first(targets); target; target = list_next(target))
 		{
 			TARGET *t = bindtarget(list_value(target));
-			if (!(t->flags & T_FLAG_NOTFILE)) {
+			if (!(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
 				filecache_update(t);
 			}
 	}
@@ -1143,7 +1143,7 @@ make1d(
 		if (usechecksums) {
 			for (target = list_first(cmd->targetsunbound); target; target = list_next(target)) {
 				TARGET *t = bindtarget(list_value(target));
-				if (!(t->flags & T_FLAG_NOTFILE)) {
+				if (!(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
 					t->time = 0;
 					t->contentmd5sum_calculated = 0;
 					getcachedmd5sum(t, 1);
