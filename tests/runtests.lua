@@ -189,7 +189,9 @@ function TestPattern(patterns, lines)
 						patternMatches = line == testPattern
 					end
 
-					if oooPatternsToFind[1]  and  not patternMatches then
+					if not next  and  not ooo  and  not oooPatternsToFind[1]  and  pattern  and  not patternMatches then
+						error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or oooGroupPatternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
+					elseif oooPatternsToFind[1]  and  not patternMatches then
 						if not ooo  and  pattern then
 							error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or oooGroupPatternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
 						else
