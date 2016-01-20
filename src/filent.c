@@ -528,7 +528,7 @@ FILE* file_popen(const char *cmd, const char *mode)
 
     if (mode[0] == 'r')
     {
-	file = _fdopen(_open_osfhandle((long)hOut, _O_RDONLY | _O_TEXT), "rt");
+	file = _fdopen(_open_osfhandle((intptr_t)hOut, _O_RDONLY | _O_TEXT), "rt");
 	if (hIn != INVALID_HANDLE_VALUE)
 	    CloseHandle(hIn);
 	if (hErr != INVALID_HANDLE_VALUE)
@@ -536,7 +536,7 @@ FILE* file_popen(const char *cmd, const char *mode)
     }
     else
     {
-	file = _fdopen(_open_osfhandle((long)hIn, _O_WRONLY | _O_TEXT), "wt");
+	file = _fdopen(_open_osfhandle((intptr_t)hIn, _O_WRONLY | _O_TEXT), "wt");
 	if (hOut != INVALID_HANDLE_VALUE)
 	    CloseHandle(hOut);
 	if (hErr != INVALID_HANDLE_VALUE)
