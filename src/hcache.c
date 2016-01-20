@@ -809,7 +809,9 @@ int getcachedmd5sum( TARGET *t, int source )
 			memcpy(&t->contentmd5sum, &c->contentmd5sum, sizeof(t->contentmd5sum));
 			t->contentmd5sum_calculated = 1;
 #ifdef OPT_USE_CHECKSUMS_EXT
-			t->contentmd5sum_file_dirty = 0;
+			t->contentmd5sum_file_dirty = memcmp(c->currentcontentmd5sum, t->contentmd5sum, sizeof(MD5SUM)) != 0;
+			if (t->contentmd5sum_file_dirty)
+				t->contentmd5sum_file_dirty = memcmp(md5sumempty, &t->contentmd5sum, sizeof(t->contentmd5sum)) != 0;
 #endif /* OPT_USE_CHECKSUMS_EXT */
 			return t->contentmd5sum_changed;
 		}
