@@ -34,7 +34,10 @@ function RunJam(commandLine)
 		table.insert(commandLine, 3, 'COMPILER=' .. Compiler)
 	end
 
-    commandLine[#commandLine + 1] = 'c.toolchain=' .. PlatformDir .. '/release'
+	commandLine[#commandLine + 1] = 'c.toolchain=' .. PlatformDir .. '/release'
+	if useChecksums then
+		commandLine[#commandLine + 1] = 'JAM_USE_CHECKSUMS=1'
+	end
 
 	commandLine.stderr_to_stdout = true
 
@@ -474,42 +477,57 @@ for _, dir in ipairs(dirs) do
 --	patterncwd = ospath.add_slash(ospath.make_slash(ospath.getcwd()))
 	patterncwd = ""
 	if ospath.exists('test.lua') then
-		local text = 'Running tests for ' .. dir:gsub('[\\/]$', '') .. '...'
-		io.write(('%-60s'):format(text))
-		io.flush()
-
 		local chunk, err = loadfile(ospath.make_absolute('test.lua'))
-		if chunk then
-			testNumber = 0
-
-			chunk()
-			local ret, err = xpcall(Test, ErrorHandler)
-			if not ret then
-				io.write('FAILED!\n')
-				io.write('\tFailed test #' .. testNumber)
-
-				local lineNumber = ErrorTraceback:match('test.lua:(%d-):')
-				if lineNumber then
-					io.write(' at line number ' .. lineNumber)
-				end
-				io.write('.\n\n')
-
-				err = err:gsub('^runtests.lua:%d-: ', '')
-				io.write('\t' .. err .. '\n')
-				print(ErrorTraceback)
---os.exit()
-			else
-				io.write('OK\n')
-			end
-
-			if PostErrorMessage then
-				io.write('\t' .. PostErrorMessage .. '\n')
-				PostErrorMessage = nil
-			end
-		else
+		if not chunk then
 			io.write('FAILED!\n')
 			io.write('\tError compiling test.lua!\n')
 			io.write('\t' .. err .. '\n')
+		else
+			function RunTest(whichKind)
+				Test = nil
+				TestChecksum = nil
+				useChecksums = whichKind == 'checksum'
+				chunk()
+				if whichKind == 'timestamp'  and  not Test then
+					return
+				end
+				if whichKind == 'checksum'  and  not TestChecksum then
+					return
+				end
+
+				local text = ('[%-9s]'):format(whichKind) .. ' Running tests for ' .. dir:gsub('[\\/]$', '')
+				io.write(('%-60s'):format(text))
+				io.flush()
+
+				testNumber = 0
+
+				local ret, err = xpcall(whichKind == 'checksum'  and  TestChecksum  or  Test, ErrorHandler)
+				if not ret then
+					io.write('FAILED!\n')
+					io.write('\tFailed test #' .. testNumber)
+
+					local lineNumber = ErrorTraceback:match('test.lua:(%d-):')
+					if lineNumber then
+						io.write(' at line number ' .. lineNumber)
+					end
+					io.write('.\n\n')
+
+					err = err:gsub('^runtests.lua:%d-: ', '')
+					io.write('\t' .. err .. '\n')
+					print(ErrorTraceback)
+	--os.exit()
+				else
+					io.write('OK\n')
+				end
+
+				if PostErrorMessage then
+					io.write('\t' .. PostErrorMessage .. '\n')
+					PostErrorMessage = nil
+				end
+			end
+
+			RunTest('timestamp')
+			RunTest('checksum')
 		end
 	end
 	ospath.chdir(cwd)
