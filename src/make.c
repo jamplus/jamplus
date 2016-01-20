@@ -528,7 +528,10 @@ make(
 #ifdef OPT_USE_CHECKSUMS_EXT
 	LIST *usechecksumslist = var_get("JAM_USE_CHECKSUMS");
 	if (usechecksumslist  &&  list_first(usechecksumslist)  &&  strcmp(list_value(list_first(usechecksumslist)), "1") == 0) {
-		usechecksums = 1;
+		LIST *nodepcachelist = var_get("JAM_NO_DEP_CACHE");
+		if (!nodepcachelist  ||  !list_first(nodepcachelist)  ||  strcmp(list_value(list_first(nodepcachelist)), "1") != 0) {
+			usechecksums = 1;
+		}
 	}
 #endif /* OPT_USE_CHECKSUMS_EXT */
 
@@ -734,6 +737,11 @@ make0(
 #ifdef OPT_GRAPH_DEBUG_EXT
 	int	savedFate, oldTimeStamp;
 #endif
+	int localusechecksums =
+#ifdef OPT_USE_CHECKSUMS_EXT
+	        usechecksums  ||
+#endif /* OPT_USE_CHECKSUMS_EXT */
+            ( t->flags & T_FLAG_SCANCONTENTS );
 
 	/*
 	 * Step 1: initialize
@@ -775,7 +783,7 @@ make0(
 	}
 
 #ifdef OPT_USE_CHECKSUMS_EXT
-	if ( usechecksums && !( t->flags & ( T_FLAG_NOUPDATE | T_FLAG_NOTFILE ) ) )
+	if ( localusechecksums && !( t->flags & ( T_FLAG_NOUPDATE | T_FLAG_NOTFILE ) ) )
 	{
 		getcachedmd5sum(t, 1);
 	}
@@ -881,7 +889,7 @@ make0(
 #ifdef OPT_FIX_UPDATED
 		else if( ptime && ptime->binding != T_BIND_UNBOUND &&
 #ifdef OPT_USE_CHECKSUMS_EXT
-			(usechecksums ? c->target->contentmd5sum_file_dirty : c->target->time > ptime->time) &&
+			(localusechecksums ? c->target->contentmd5sum_file_dirty : c->target->time > ptime->time) &&
 #else
 			c->target->time > ptime->time &&
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -1005,7 +1013,7 @@ make0(
 				correctly will include the original target in the $(<) variable. */
 			if(
 #ifdef OPT_USE_CHECKSUMS_EXT
-				(usechecksums ? c->target->includes->contentmd5sum_file_dirty : c->target->includes->time > ptime->time)
+				(localusechecksums ? c->target->includes->contentmd5sum_file_dirty : c->target->includes->time > ptime->time)
 #else
 				c->target->includes->time > ptime->time
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -1178,7 +1186,7 @@ make0(
 	}
 	else if( t->binding == T_BIND_EXISTS
 #ifdef OPT_USE_CHECKSUMS_EXT
-		&& (usechecksums ? lastmd5filedirty : last > t->time)
+		&& (localusechecksums ? lastmd5filedirty : last > t->time)
 #else
 		&& last > t->time
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -1192,7 +1200,7 @@ make0(
 	else if(
 		t->binding == T_BIND_PARENTS
 #ifdef OPT_USE_CHECKSUMS_EXT
-		&& (usechecksums ? lastmd5filedirty : last > p->time)
+		&& (localusechecksums ? lastmd5filedirty : last > p->time)
 #else
 		&& last > p->time
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -1203,7 +1211,7 @@ make0(
 	else if(
 		t->binding == T_BIND_PARENTS
 #ifdef OPT_USE_CHECKSUMS_EXT
-		&& (usechecksums ? hmd5filedirty : hlast > p->time)
+		&& (localusechecksums ? hmd5filedirty : hlast > p->time)
 #else
 		&& hlast > p->time
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -1230,7 +1238,7 @@ make0(
 	else if( t->binding == T_BIND_EXISTS && p &&
 		p->binding != T_BIND_UNBOUND
 #ifdef OPT_USE_CHECKSUMS_EXT
-		&& (usechecksums ? t->contentmd5sum_file_dirty : t->time > p->time)
+		&& (localusechecksums ? t->contentmd5sum_file_dirty : t->time > p->time)
 #else
 		&& t->time > p->time
 #endif /* OPT_USE_CHECKSUMS_EXT */

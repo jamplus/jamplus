@@ -357,12 +357,16 @@ make1b( TARGET *t )
 			/* If the child's timestamp is greater that the target's timestamp, then it updated. */
 				if (
 #ifdef OPT_USE_CHECKSUMS_EXT
-					(usechecksums ? t->contentmd5sum_file_dirty : timestamp > t->time)
+					(usechecksums ? c->target->contentmd5sum_file_dirty : timestamp > t->time)
 #else
 					timestamp > t->time
 #endif /* OPT_USE_CHECKSUMS_EXT */
 					) {
-					if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
+					if (
+#ifdef OPT_USE_CHECKSUMS_EXT
+						usechecksums ||
+#endif /* OPT_USE_CHECKSUMS_EXT */
+						( c->target->flags & T_FLAG_SCANCONTENTS ) ) {
 						childscancontents = 1;
 						if ( getcachedmd5sum( c->target, 1 ) )
 							childupdated = 1;
@@ -375,14 +379,40 @@ make1b( TARGET *t )
 		}
 		/* If it didn't have the MightNotUpdate flag but did update, mark it. */
 		else if ( c->target->fate > T_FATE_STABLE  &&  !c->needs ) {
-			if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
-				childscancontents = 1;
-				if ( getcachedmd5sum( c->target, 1 ) )
-					childupdated = 1;
+#ifdef OPT_USE_CHECKSUMS_EXT
+			if ( usechecksums ) {
+				if ( c->target->actions ) {
+					//childscancontents = 1;
+					if ( !( c->target->flags & ( T_FLAG_NOTFILE | T_FLAG_NOUPDATE ) ) ) {
+						if ( getcachedmd5sum( c->target, 1 ) ) {
+							childupdated = 1;
+						}
+					}
+				} else {
+					if ( c->target->includes ) {
+						if ( c->target->includes->fate > T_FATE_STABLE ) {
+							childupdated = 1;
+						}
+						//if ( c->target->fate == T_FATE_NEWER ) {
+							//childupdated = 1;
+						//}
+					} else {
+						childupdated = 1;
+					}
+				}
 			} else
-				childupdated = 1;
-		}
+#endif /* OPT_USE_CHECKSUMS_EXT */
+			{
+				if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
+					childscancontents = 1;
+					if ( getcachedmd5sum( c->target, 1 ) )
+						childupdated = 1;
+				} else {
+					childupdated = 1;
+				}
+			}
 	    }
+		}
 #endif
 
 	    if( c->target->status > t->status )
@@ -421,6 +451,16 @@ make1b( TARGET *t )
 #endif
 	}
 
+#ifdef OPT_USE_CHECKSUMS_EXT
+	/* The fact is, if the target is missing, it needs to be built. The state of the */
+	/* children is irrelevant. */
+	//if (usechecksums) {
+		if (t->binding == T_BIND_MISSING) {
+			childupdated = 1;
+		}
+	//}
+#endif /* OPT_USE_CHECKSUMS_EXT */
+
 #ifdef OPT_BUILTIN_NEEDS_EXT
 	/* If we found a MightNotUpdate flag and there was an update, mark the fate as updated. */
 	if ( childmightnotupdate  &&  childupdated  &&  t->fate == T_FATE_STABLE )
@@ -448,9 +488,31 @@ make1b( TARGET *t )
 		} else if ( t->fate == T_FATE_STABLE )
 			t->fate = T_FATE_UPDATE;
 	}
-	if ( t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
-		if ( md5matchescommandline( t ) )
-		    t->fate = T_FATE_STABLE;
+
+//	if ( childupdated  &&  t->fate == T_FATE_STABLE )
+//		t->fate = T_FATE_UPDATE;
+//	if ( ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
+#ifdef OPT_USE_CHECKSUMS_EXT
+	if (usechecksums) {
+		//if ( !( t->flags & T_FLAG_NOTFILE )  &&  t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
+		//if ( ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
+		if ( t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
+			if ( md5matchescommandline( t ) )
+				t->fate = T_FATE_STABLE;
+	} else {
+#endif /* OPT_USE_CHECKSUMS_EXT */
+		if ( ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )  &&  t->status != EXEC_CMD_NEXTPASS ) {
+			if ( t->flags & T_FLAG_SCANCONTENTS ) {
+				if ( md5matchescommandline( t ) ) {
+					t->fate = T_FATE_STABLE;
+				}
+			} else {
+				t->fate = T_FATE_STABLE;
+			}
+		}
+#ifdef OPT_USE_CHECKSUMS_EXT
+	}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 	if ( t->flags & ( T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS )  &&  t->actions ) {
 #ifdef OPT_ACTIONS_WAIT_FIX
 	    /* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
@@ -1091,18 +1153,24 @@ make1d(
 		LISTITEM* target;
 	    LIST *targets = lol_get( &cmd->args, 0 );
 
-	    for(target = list_first(targets) ; target; target = list_next( target ) )
-	    {
-		TARGET *t = bindtarget( list_value(target) );
+		for (target = list_first(targets); target; target = list_next(target))
+		{
+			TARGET *t = bindtarget(list_value(target));
+			if (!(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
+				filecache_update(t);
+			}
+		}
+
 #ifdef OPT_USE_CHECKSUMS_EXT
-		if (usechecksums && !(t->flags & T_FLAG_NOTFILE)) {
-			t->time = 0;
-			t->contentmd5sum_calculated = 0;
-			getcachedmd5sum(t, 1);
+		for (target = list_first(cmd->targetsunbound); target; target = list_next(target)) {
+			TARGET *t = bindtarget(list_value(target));
+			if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
+				t->time = 0;
+				t->contentmd5sum_calculated = 0;
+				getcachedmd5sum(t, 1);
+			}
 		}
 #endif /* OPT_USE_CHECKSUMS_EXT */
-		filecache_update( t );
-	    }
 	}
 #endif
 
@@ -1194,6 +1262,17 @@ make1cmds( ACTIONS *a0 )
 			}
 		}
 #endif
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+		if (usechecksums) {
+			for (a1 = a0; a1; a1 = a1->next) {
+				TARGETS* targets;
+				for (targets = a1->action->targets; targets; targets = targets->next) {
+					targets->target->contentmd5sum_calculated = 0;
+				}
+			}
+		}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 		for ( autot = a0->action->autosettings; autot; autot = autot->next ) {
 			if ( autot->target != t )
@@ -1496,8 +1575,18 @@ make1cmds( ACTIONS *a0 )
 #endif
 			nt = make1list( L0, a0->action->targets, 0 );
 			ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
+#ifdef OPT_USE_CHECKSUMS_EXT
+			if (usechecksums) {
+				ns = make1list( L0, a0->action->sources, t->binding == T_BIND_MISSING ? ( rule->flags & ~RULE_UPDATED ) : rule->flags );
+				nsunbound = make1list_unbound( L0, a0->action->sources, t->binding == T_BIND_MISSING ? ( rule->flags & ~RULE_UPDATED ) : rule->flags );
+			} else {
+#endif /* OPT_USE_CHECKSUMS_EXT */
 			ns = make1list( L0, a0->action->sources, rule->flags );
 			nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
+#ifdef OPT_USE_CHECKSUMS_EXT
+			}
+#endif /* OPT_USE_CHECKSUMS_EXT */
+
 #if 0
 	    }
 #endif
