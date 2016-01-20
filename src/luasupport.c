@@ -1073,7 +1073,7 @@ int luahelper_taskadd(const char* taskscript, LOL* args)
 }
 
 
-int luahelper_taskisrunning(int taskid, int* returnValue)
+int luahelper_taskisrunning(intptr_t taskid, int* returnValue)
 {
     const char* status;
     ls_lua_init();
@@ -1144,7 +1144,7 @@ int luahelper_taskisrunning(int taskid, int* returnValue)
 }
 
 
-void luahelper_taskcancel(int taskid)
+void luahelper_taskcancel(intptr_t taskid)
 {
     int ret;
 
