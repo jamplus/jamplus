@@ -785,9 +785,15 @@ int getcachedmd5sum( TARGET *t, int source )
 				c->mtime = 0;
 				t->contentmd5sum_changed = 1;
 				memcpy(&t->contentmd5sum, &md5sumempty, sizeof(t->contentmd5sum));
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
+				memset( &c->currentrulemd5sum, 0, MD5_SUMSIZE );
+				memset( &c->rulemd5sum, 0, MD5_SUMSIZE );
+				memset( &c->currentcontentmd5sum, 0, MD5_SUMSIZE );
+				memset( &c->contentmd5sum, 0, MD5_SUMSIZE );
+#endif /* OPT_BUILTIN_MD5CACHE_EXT */
 				t->contentmd5sum_calculated = 1;
 #ifdef OPT_USE_CHECKSUMS_EXT
-				t->contentmd5sum_file_dirty = 1;
+				t->contentmd5sum_file_dirty = 0;
 #endif /* OPT_USE_CHECKSUMS_EXT */
 				return t->contentmd5sum_changed;
 			}
@@ -824,9 +830,17 @@ int getcachedmd5sum( TARGET *t, int source )
 			c->boundname = newstr( c->boundname );
 			c->next = file->hcachelist;
 			file->hcachelist = c;
+			c->mtime = 0;
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
+			memset( &c->currentrulemd5sum, 0, MD5_SUMSIZE );
+			memset( &c->rulemd5sum, 0, MD5_SUMSIZE );
+			memset( &c->currentcontentmd5sum, 0, MD5_SUMSIZE );
+			memset( &c->contentmd5sum, 0, MD5_SUMSIZE );
+#endif /* OPT_BUILTIN_MD5CACHE_EXT */
 			c->time = 0;
 			c->includes = NULL;
 			c->hdrscan = NULL;
+			c->age = 0;
 		}
 	}
 
