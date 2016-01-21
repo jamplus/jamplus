@@ -1,0 +1,24 @@
+#JAM_USE_CHECKSUMS = 1 ;
+
+SubDir TOP ;
+
+if $(NT) {
+    actions GenerateHeader {
+        type $(2:C) > $(1:C)
+    }
+} else {
+    actions GenerateHeader {
+        cat $(2:C) > $(1:C)
+    }
+}
+
+local generated.h = [ C.GristFiles test : generated.h ] ;
+GenerateHeader $(generated.h) : $(TOP)/template ;
+Depends $(generated.h) : $(TOP)/template ;
+MakeLocate $(generated.h) : $(TOP) ;
+Clean clean : $(generated.h) ;
+#Depends [ C.GristFiles test : main.c ] : $(g) ;
+
+ScanContents $(generated.h) ;
+
+C.Application test : main.c ;
