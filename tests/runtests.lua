@@ -68,6 +68,11 @@ function TestPattern(patterns, lines)
 		patterns = splitLines
 	end
 
+	local finishedPattern = '%*%*%* finished in [%d%.]+ sec'
+	if patterns[#patterns]  and  not patterns[#patterns]:match(finishedPattern) then
+		patterns[#patterns + 1] = '&' .. finishedPattern
+	end
+
 	local lineIndex = 1
 	local patternIndex = 1
 	local oooGroupPatternsToFind = {}
@@ -134,6 +139,10 @@ function TestPattern(patterns, lines)
 
 		if pattern  and  pattern:match('%*%*%* found %d+ target%(s%)%.%.%.') then
 			pattern = '&%*%*%* found %d+ target%(s%)%.%.%.'
+		end
+
+		if pattern  and  pattern:match(finishedPattern) then
+			pattern = '&' .. finishedPattern
 		end
 
 		local patternMatches = false
@@ -225,15 +234,17 @@ function TestPattern(patterns, lines)
  		error('\nExpecting the following output:\n' .. table.concat(oooPatternsToFind, '\n'))
  	end
 	if patternIndex <= #patterns then
-		local patternsExpected = {}
-		for index = patternIndex, #patterns do
-			patternsExpected[#patternsExpected + 1] = patterns[index]
+		if patterns[patternIndex] ~= '&' .. finishedPattern then
+			local patternsExpected = {}
+			for index = patternIndex, #patterns do
+				patternsExpected[#patternsExpected + 1] = patterns[index]
+			end
+			local linesExpected = {}
+			for index = lastMatchedLineIndex + 1, #lines do
+				linesExpected[#linesExpected + 1] = lines[index]
+			end
+			error('\nExpected:\n' .. table.concat(patternsExpected, '\n') .. '\n\nFull output:\n' .. table.concat(linesExpected, '\n'))
 		end
-		local linesExpected = {}
-		for index = lastMatchedLineIndex + 1, #lines do
-			linesExpected[#linesExpected + 1] = lines[index]
-		end
-		error('\nExpected:\n' .. table.concat(patternsExpected, '\n') .. '\n\nFull output:\n' .. table.concat(linesExpected, '\n'))
 	end
 
 	TestSucceeded()
