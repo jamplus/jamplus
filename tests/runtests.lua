@@ -90,8 +90,9 @@ function TestPattern(patterns, lines)
 			if pattern then
 				pattern = pattern:gsub('$%(SUFEXE%)', SUFEXE)
 				pattern = pattern:gsub('$%(COMPILER%)', COMPILER)
-				pattern = pattern:gsub('$%(C.ARCHIVE%)', C_ARCHIVE)
-				pattern = pattern:gsub('$%(C.LINK%)', C_LINK)
+				pattern = pattern:gsub('$%(C_CC%)', C_CC)
+				pattern = pattern:gsub('$%(C_ARCHIVE%)', C_ARCHIVE)
+				pattern = pattern:gsub('$%(C_LINK%)', C_LINK)
 				pattern = pattern:gsub('$%(PLATFORM%)', PlatformDir)
 				pattern = pattern:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '!release')
 				pattern = pattern:gsub('$%(TOOLCHAIN_GRIST%)', 'c/' .. PlatformDir .. '/release')
@@ -112,8 +113,9 @@ function TestPattern(patterns, lines)
 					pattern = pattern:sub(11)
 					pattern = pattern:gsub('$%(SUFEXE%)', SUFEXE)
 					pattern = pattern:gsub('$%(COMPILER%)', COMPILER)
-					pattern = pattern:gsub('$%(C.ARCHIVE%)', C_ARCHIVE)
-					pattern = pattern:gsub('$%(C.LINK%)', C_LINK)
+					pattern = pattern:gsub('$%(C_CC%)', C_CC)
+					pattern = pattern:gsub('$%(C_ARCHIVE%)', C_ARCHIVE)
+					pattern = pattern:gsub('$%(C_LINK%)', C_LINK)
 					pattern = pattern:gsub('$%(PLATFORM%)', PlatformDir)
 					pattern = pattern:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '!release')
 					pattern = pattern:gsub('$%(TOOLCHAIN_GRIST%)', 'c/' .. PlatformDir .. '/release')
@@ -414,6 +416,7 @@ if os.getenv("OS") == "Windows_NT" then
 	PlatformDir = 'win64'
 	SUFEXE = '.exe'
 	COMPILER = 'vc'
+	C_CC = 'C.vc.CC'
 	C_ARCHIVE = 'C.vc.Archive'
 	C_LINK = 'C.vc.Link'
 else
@@ -425,12 +428,14 @@ else
 		Platform = 'macosx'
 		PlatformDir = 'macosx32'
 		COMPILER = 'clang'
+		C_CC = 'C.clang.CC'
 		C_ARCHIVE = 'C.macosx.clang.Archive'
 		C_LINK = 'C.macosx.clang.Link'
 	elseif uname == 'linux' then
 		Platform = 'linux'
 		PlatformDir = 'linux32'
 		COMPILER = 'gcc'
+		C_CC = 'C.gcc.CC'
 		C_ARCHIVE = 'C.gcc.Archive'
 		C_LINK = 'C.gcc.Link'
 	end
