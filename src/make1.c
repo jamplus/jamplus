@@ -451,16 +451,6 @@ make1b( TARGET *t )
 #endif
 	}
 
-#ifdef OPT_USE_CHECKSUMS_EXT
-	/* The fact is, if the target is missing, it needs to be built. The state of the */
-	/* children is irrelevant. */
-	//if (usechecksums) {
-		if (t->binding == T_BIND_MISSING) {
-			childupdated = 1;
-		}
-	//}
-#endif /* OPT_USE_CHECKSUMS_EXT */
-
 #ifdef OPT_BUILTIN_NEEDS_EXT
 	/* If we found a MightNotUpdate flag and there was an update, mark the fate as updated. */
 	if ( childmightnotupdate  &&  childupdated  &&  t->fate == T_FATE_STABLE )
@@ -496,12 +486,12 @@ make1b( TARGET *t )
 	if (usechecksums) {
 		//if ( !( t->flags & T_FLAG_NOTFILE )  &&  t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
 		//if ( ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
-		if ( t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
+		if ( t->binding != T_BIND_MISSING  &&  t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
 			if ( md5matchescommandline( t ) )
 				t->fate = T_FATE_STABLE;
 	} else {
 #endif /* OPT_USE_CHECKSUMS_EXT */
-		if ( ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )  &&  t->status != EXEC_CMD_NEXTPASS ) {
+		if ( t->binding != T_BIND_MISSING  &&  ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )  &&  t->status != EXEC_CMD_NEXTPASS ) {
 			if ( t->flags & T_FLAG_SCANCONTENTS ) {
 				if ( md5matchescommandline( t ) ) {
 					t->fate = T_FATE_STABLE;
