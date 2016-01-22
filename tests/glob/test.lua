@@ -22,8 +22,12 @@ Files Only - ../copydirectory/Jamfile.jam ../copydirectory/test.lua
 All - Jamfile.jam source/ test.lua 
 Dirs Only - source/ 
 Files Only - Jamfile.jam test.lua 
+don't know how to make all
+*** found 1 target(s)...
+*** can't find 1 target(s)...
 ]]
 
 	TestPattern(pattern, RunJam{'-f', 'glob.jam'})
 end
 
+TestChecksum = Test

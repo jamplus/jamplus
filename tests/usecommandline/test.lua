@@ -83,3 +83,5 @@ Executing test action for 1
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
 end
+
+TestChecksum = Test

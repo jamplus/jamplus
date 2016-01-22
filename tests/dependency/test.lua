@@ -13,3 +13,4 @@ function Test()
 	TestPattern(pattern, RunJam{ '-fmore_than_one_target.jam' })
 end
 
+TestChecksum = Test

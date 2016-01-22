@@ -1,4 +1,3 @@
-Echo Here! ;
 ALL_LOCATE_TARGET = $(CWD)/image ;
 
 SubDir TOP ;

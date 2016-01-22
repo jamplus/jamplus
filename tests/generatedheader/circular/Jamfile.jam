@@ -1,3 +1,9 @@
+if $(JAM_USE_CHECKSUMS) = 1 {
+	DEPCACHE.standard = .jamcache ;
+	DEPCACHE = standard ;
+	Clean clean : $(DEPCACHE.standard) ;
+}
+
 rule SleepThenTouch
 {
     Clean clean : $(<) ;
@@ -6,9 +12,8 @@ rule SleepThenTouch
 actions lua SleepThenTouch
 {
     require 'osprocess'.sleep(5)
-	print([[Writing $(<)]])
+	jam_print([[Writing $(<)]])
     local file = io.open([[$(<)]], 'wb')
-	print(file)
 	file:close()
 }
 

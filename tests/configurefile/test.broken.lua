@@ -314,3 +314,4 @@ This is not awesome... :(
 	end
 end
 
+TestChecksum = Test

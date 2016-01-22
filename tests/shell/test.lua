@@ -3,6 +3,7 @@ function Test()
 **test.lua
 ** **Jamfile.jam
 **
+*** found 1 target(s)...
 ]]
 
 	TestPattern(pattern, RunJam{})

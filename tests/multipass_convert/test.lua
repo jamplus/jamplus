@@ -25,6 +25,7 @@ function Test()
 @ ConvertAlternateInputToJam alternate_input1.txt.jam
 @ ConvertInputToJam input2.txt.jam
 *** updated 3 target(s)...
+*** executing pass 2...
 WriteOutput all - output1.dat
 WriteOutput all - output2.dat
 WriteOutput all - output3.dat
@@ -77,6 +78,7 @@ WriteAlternateOutput alternate_output2.dat
 	---------------------------------------------------------------------------
 	local pattern2 = [[
 *** found 7 target(s)...
+*** executing pass 2...
 WriteOutput all - output1.dat
 WriteOutput all - output2.dat
 WriteOutput all - output3.dat
@@ -95,6 +97,7 @@ WriteAlternateOutput alternate_output2.dat
 	---------------------------------------------------------------------------
 	local cleanpattern = [[
 *** found 2 target(s)...
+*** executing pass 2...
 WriteOutput all - output1.dat
 WriteOutput all - output2.dat
 WriteOutput all - output3.dat
@@ -124,3 +127,4 @@ WriteAlternateOutput alternate_output2.dat
 	ospath.remove('.depcache')
 end
 
+TestChecksum = Test

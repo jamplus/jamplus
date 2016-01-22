@@ -76,8 +76,11 @@ function Test()
   Could not match any of the following rules:
     -> C.Toolchain.badplatform
     -> C.Toolchain.badplatform.*
+
 ]]
 	TestPattern(pattern3, RunJam{ 'C.TOOLCHAIN=badplatform' })
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
 end
+
+TestChecksum = Test

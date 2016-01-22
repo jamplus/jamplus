@@ -39,9 +39,11 @@ function Test()
 @ C.groovycompiler.CC <c/groovyplatform/retail:helloworld>helloworld.o
 !NEXT!@ C.groovycompiler.Link <c/groovyplatform/retail:helloworld>helloworld$(SUFEXE)
 *** updated 3 target(s)...
+*** finished in 0.00 sec
 ]]
 	pattern2 = [[
-!NEXT!*** found 8 target(s)...
+*** found 8 target(s)...
+*** finished in 0.00 sec
 ]]
 
 	TestPattern(pattern, RunJam{ 'C.TOOLCHAIN=groovyplatform/retail' })
@@ -96,8 +98,11 @@ function Test()
   Could not match any of the following rules:
     -> C.Toolchain.badplatform
     -> C.Toolchain.badplatform.*
+
 ]]
 	TestPattern(pattern3, RunJam{ 'C.TOOLCHAIN=badplatform' })
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
 end
+
+TestChecksum = Test

@@ -1,4 +1,39 @@
 function Test()
+	local function WriteOriginalFiles()
+		ospath.write_file('src/precomp.h', [[
+#ifndef PRECOMP_H
+#define PRECOMP_H
+
+#include <stdio.h>
+
+#endif // PRECOMP_H
+]])
+
+		ospath.write_file('src/createprecomp.c', [[
+#include "precomp.h"
+]])
+	end
+
+	local function WriteModifiedFileA()
+		ospath.write_file('src/precomp.h', [[
+// Modified
+#ifndef PRECOMP_H
+#define PRECOMP_H
+
+#include <stdio.h>
+
+#endif // PRECOMP_H
+]])
+
+	end
+
+	local function WriteModifiedFileB()
+		ospath.write_file('src/createprecomp.c', [[
+// Modified
+#include "precomp.h"
+]])
+	end
+
 	local originalFiles =
 	{
 		'jam/Jamfile.jam',
@@ -16,6 +51,7 @@ function Test()
 
 	do
 		-- Test for a clean directory.
+		WriteOriginalFiles()
 		RunJam{ '-Cjam', 'clean' }
 		TestDirectories(originalDirs)
 		TestFiles(originalFiles)
@@ -107,17 +143,19 @@ function Test()
 	end
 
 	---------------------------------------------------------------------------
+	local noopPattern
+	if Platform == 'win32' then
+		noopPattern = [[
+			*** found 22 target(s)...
+]]
+	else
+		noopPattern = [[
+			*** found 17 target(s)...
+]]
+	end
+
 	do
-		if Platform == 'win32' then
-			pattern = [[
-				*** found 22 target(s)...
-]]
-		else
-			pattern = [[
-				*** found 17 target(s)...
-]]
-		end
-		TestPattern(pattern, RunJam{ '-Cjam' })
+		TestPattern(noopPattern, RunJam{ '-Cjam' })
 		TestDirectories(dirs)
 		TestFiles(files)
 	end
@@ -127,6 +165,13 @@ function Test()
 		osprocess.sleep(1.0)
 		ospath.touch('src/precomp.h')
 
+		if useChecksums then
+			TestPattern(noopPattern, RunJam{ '-Cjam' })
+
+			osprocess.sleep(1.0)
+			WriteModifiedFileA()
+		end
+
 		if Platform == 'win32' then
 			pattern = [[
 *** found 22 target(s)...
@@ -137,16 +182,28 @@ function Test()
 !NEXT!*** updated 5 target(s)...
 ]]
 		else
-			pattern = [[
+			if useChecksums then
+				pattern = [[
 				*** found 17 target(s)...
 				*** updating 5 target(s)...
 				&@ C.$(COMPILER).PCH <$(TOOLCHAIN_GRIST):helloworld%-%x+>precomp.h.gch 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.o 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/main.o 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-				@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld
+				*** updated 4 target(s)...
+]]
+			else
+				pattern = [[
+				*** found 17 target(s)...
+				*** updating 5 target(s)...
+				&@ C.$(COMPILER).PCH <$(TOOLCHAIN_GRIST):helloworld%-%x+>precomp.h.gch 
+				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.o 
+				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/main.o 
+				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld 
 				*** updated 5 target(s)...
 ]]
+			end
 		end
 
 		TestPattern(pattern, RunJam{ '-Cjam' })
@@ -156,16 +213,7 @@ function Test()
 
 	---------------------------------------------------------------------------
 	do
-		if Platform == 'win32' then
-			pattern = [[
-				*** found 22 target(s)...
-]]
-		else
-			pattern = [[
-				*** found 17 target(s)...
-]]
-		end
-		TestPattern(pattern, RunJam{ '-Cjam' })
+		TestPattern(noopPattern, RunJam{ '-Cjam' })
 		TestDirectories(dirs)
 		TestFiles(files)
 	end
@@ -175,6 +223,13 @@ function Test()
 		osprocess.sleep(1.0)
 		ospath.touch('src/createprecomp.c')
 
+		if useChecksums then
+			TestPattern(noopPattern, RunJam{ '-Cjam' })
+
+			osprocess.sleep(1.0)
+			WriteModifiedFileB()
+		end
+
 		if Platform == 'win32' then
 			pattern = [[
 *** found 22 target(s)...
@@ -185,13 +240,22 @@ function Test()
 !NEXT!*** updated 5 target(s)...
 ]]
 		else
-			pattern = [[
+			if useChecksums then
+				pattern = [[
 				*** found 17 target(s)...
 				*** updating 2 target(s)...
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-				@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld
+				*** updated 1 target(s)...
+]]
+			else
+				pattern = [[
+				*** found 17 target(s)...
+				*** updating 2 target(s)...
+				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld 
 				*** updated 2 target(s)...
 ]]
+			end
 		end
 		TestPattern(pattern, RunJam{ '-Cjam' })
 		TestDirectories(dirs)
@@ -199,7 +263,10 @@ function Test()
 	end
 
 	---------------------------------------------------------------------------
+	WriteOriginalFiles()
 	RunJam{ '-Cjam', 'clean' }
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
 end
+
+TestChecksum = Test

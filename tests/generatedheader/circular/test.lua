@@ -22,7 +22,9 @@ function Test()
 	if Platform == 'win32' then
 		-- First build
 		local pattern = [[
-*** found 11 target(s)...
+*** found 12 target(s)...
+*** updating 4 target(s)...
+Writing generated.h
 @ SleepThenTouch <$(TOOLCHAIN_GRIST):foo>generated.h
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.obj
 !NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):foo>foo.lib
@@ -33,6 +35,7 @@ function Test()
 
 		local pass1Files =
 		{
+			'?.jamcache',
 			'Jamfile.jam',
 			'README',
 			'circularA.h',
@@ -58,6 +61,13 @@ function Test()
 		osprocess.sleep(1.0)
 		ospath.touch('generated.h')
 
+		if useChecksums then
+			TestPattern(pattern2, RunJam{ 'foo' })
+
+			osprocess.sleep(1.0)
+			ospath.write_file('generated.h', '//')
+		end
+
 		local pattern3 = [[
 *** found 11 target(s)...
 *** updating 3 target(s)...
@@ -72,6 +82,7 @@ function Test()
 		local pattern = [[
 *** found 11 target(s)...
 *** updating 4 target(s)...
+Writing generated.h
 @ SleepThenTouch <$(TOOLCHAIN_GRIST):foo>generated.h 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceB.o 
@@ -83,6 +94,7 @@ function Test()
 
 		local pass1Files =
 		{
+			'?.jamcache',
 			'Jamfile.jam',
 			'README',
 			'circularA.h',
@@ -107,7 +119,28 @@ function Test()
 		osprocess.sleep(1.0)
 		ospath.touch('generated.h')
 
-		local pattern3 = [[
+		if useChecksums then
+			TestPattern(pattern2, RunJam{ 'foo' })
+
+			osprocess.sleep(1.0)
+			ospath.write_file('generated.h', '//')
+
+			local pattern3 = [[
+*** found 11 target(s)...
+*** updating 3 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceB.o 
+!NEXT!*** updated 2 target(s)...
+]]
+			TestPattern(pattern3, RunJam{ 'foo' })
+
+			TestPattern(pattern2, RunJam{ 'foo' })
+
+			osprocess.sleep(1.0)
+			ospath.write_file('generated.h', 'int GENERATED_H;')
+		end
+
+		local pattern4 = [[
 *** found 11 target(s)...
 *** updating 3 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.o 
@@ -115,7 +148,7 @@ function Test()
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):foo>foo.a 
 !NEXT!*** updated 3 target(s)...
 ]]
-		TestPattern(pattern3, RunJam{ 'foo' })
+		TestPattern(pattern4, RunJam{ 'foo' })
 
 	end
 
@@ -125,3 +158,4 @@ function Test()
 	TestFiles(originalFiles)
 end
 
+TestChecksum = Test

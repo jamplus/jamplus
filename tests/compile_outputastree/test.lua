@@ -366,3 +366,4 @@ function Test()
 	end
 end
 
+TestChecksum = Test

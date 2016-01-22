@@ -64,7 +64,7 @@ function Test()
 *** found 12 target(s)...
 *** updating 5 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>platform.o 
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>macosx.o 
+!NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>macosx.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>filerelease.o 
 @ $(C_LINK) <$(TOOLCHAIN_GRIST):platform>platform
 *** updated 5 target(s)...
@@ -177,3 +177,5 @@ RELEASE: What's up?!
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
 end
+
+TestChecksum = Test

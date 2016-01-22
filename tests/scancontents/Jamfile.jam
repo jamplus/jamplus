@@ -10,7 +10,8 @@ GENERATED_VERSION ?= v2 ;
 C.ActiveTarget test ;
 
 local generated.h = [ C.GristFiles : generated.h ] ;
-CONTENTS on $(generated.h) = "extern void Print(const char*);
+CONTENTS on $(generated.h) = "// $(GENERATED_VERSION)
+extern void Print(const char*);
 " ;
 WriteFile $(generated.h) ;
 Always $(generated.h) ;

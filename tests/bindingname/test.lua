@@ -13,3 +13,5 @@ function Test()
 	return TestPattern(pattern, lines)
 end
 
+TestChecksum = Test
+

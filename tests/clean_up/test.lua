@@ -69,7 +69,7 @@ function Test()
 		'*** found 5 target(s)...',
 		'*** updating 1 target(s)...',
 		'@ WriteExtraFiles all',
-		'*** updated 1 target(s)...',
+		'!NEXT!*** updated 1 target(s)...',
 	}, RunJam())
 
     TestFiles(allFiles)
@@ -80,7 +80,7 @@ function Test()
 		'*** found 5 target(s)...',
 		'*** updating 1 target(s)...',
 		'@ WriteExtraFiles all',
-		'*** updated 1 target(s)...',
+		'!NEXT!*** updated 1 target(s)...',
 		'Removing subdira/extrafile.txt...',
 		'Removing subdira/subdirb/subdirc/subdird/anotherjunk.txt...',
 		'Removing subdira/subdirb/subdirc/subdird/junk.txt...',
@@ -112,7 +112,7 @@ function Test()
 		'*** found 5 target(s)...',
 		'*** updating 1 target(s)...',
 		'@ WriteExtraFiles all',
-		'*** updated 1 target(s)...',
+		'!NEXT!*** updated 1 target(s)...',
 		'Removing subdira/subdirb/subdirc/subdird/anotherjunk.txt...',
 		'Removing subdira/subdirb/subdirc/subdird/junk.txt...',
 		'Removing subdir1/junk.txt...',
@@ -144,7 +144,7 @@ function Test()
 		'*** found 5 target(s)...',
 		'*** updating 1 target(s)...',
 		'@ WriteExtraFiles all',
-		'*** updated 1 target(s)...',
+		'!NEXT!*** updated 1 target(s)...',
 		'Removing subdir1/junk.txt...',
 	}, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_KEEP_WILDCARDS=3'})
 
@@ -177,7 +177,7 @@ function Test()
 		'*** found 5 target(s)...',
 		'*** updating 1 target(s)...',
 		'@ WriteExtraFiles all',
-		'*** updated 1 target(s)...',
+		'!NEXT!*** updated 1 target(s)...',
 		'Removing subdira/extrafile.txt...',
 		'Removing subdira/junk.txt...',
 		'Removing subdira/subdirb/subdirc/subdird/anotherjunk.txt...',
@@ -209,7 +209,7 @@ function Test()
 		'*** found 5 target(s)...',
 		'*** updating 1 target(s)...',
 		'@ WriteExtraFiles all',
-		'*** updated 1 target(s)...',
+		'!NEXT!*** updated 1 target(s)...',
 		'Removing subdira/extrafile.txt...',
 		'Removing subdira/junk.txt...',
 		'Removing subdira/subdirb/subdirc/subdird/anotherjunk.txt...',
@@ -241,7 +241,7 @@ function Test()
 		'*** found 5 target(s)...',
 		'*** updating 1 target(s)...',
 		'@ WriteExtraFiles all',
-		'*** updated 1 target(s)...',
+		'!NEXT!*** updated 1 target(s)...',
 		'Removing subdira/extrafile.txt...',
 		'Removing subdira/subdirb/subdirc/subdird/anotherjunk.txt...',
 		'Removing subdir1/junk.txt...',
@@ -274,7 +274,7 @@ function Test()
 		'*** found 5 target(s)...',
 		'*** updating 1 target(s)...',
 		'@ WriteExtraFiles all',
-		'*** updated 1 target(s)...',
+		'!NEXT!*** updated 1 target(s)...',
 		'Removing subdira/extrafile.txt...',
 		'Removing subdir1/junk.txt...',
 	}, RunJam{'CLEAN.VERBOSE=1', 'TEST_CLEAN_ROOTS=3'})
@@ -305,3 +305,4 @@ function Test()
     RunJam{ 'clean' }
 end
 
+TestChecksum = Test

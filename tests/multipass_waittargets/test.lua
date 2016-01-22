@@ -18,6 +18,7 @@ function Test()
 	local pattern = [[
 Pass 1
 *** found 3 target(s)...
+*** executing pass 2...
 Pass 2
 *** found 3 target(s)...
 *** updating 2 target(s)...
@@ -36,19 +37,24 @@ Pass 2
 		'originalfile.txt',
 	}
 
-	TestDirectories(originalDirs)
+	local pass1Directories = {
+		'?.build/',
+	}
+
+	TestDirectories(pass1Directories)
 	TestFiles(pass1Files)
 
 	---------------------------------------------------------------------------
 	local pattern2 = [[
 Pass 1
 *** found 3 target(s)...
+*** executing pass 2...
 Pass 2
 *** found 3 target(s)...
 ]]
 
 	TestPattern(pattern2, RunJam())
-	TestDirectories(originalDirs)
+	TestDirectories(pass1Directories)
 	TestFiles(pass1Files)
 
 	---------------------------------------------------------------------------
@@ -58,6 +64,7 @@ Pass 1
 *** updating 1 target(s)...
 @ Clean clean
 *** updated 1 target(s)...
+*** executing pass 2...
 Pass 2
 *** found 1 target(s)...
 *** updating 1 target(s)...
@@ -68,3 +75,5 @@ Pass 2
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
 end
+
+TestChecksum = Test

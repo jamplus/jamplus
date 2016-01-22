@@ -8,6 +8,9 @@ $
 $(TEMP) - ]] .. os.getenv("TEMP") .. [[
 
 M__UFFILENAME_UFFILENAME__F
+don't know how to make all
+*** found 1 target(s)...
+*** can't find 1 target(s)...
 ]]
 
 		else
@@ -20,6 +23,9 @@ $
 $(TMPDIR) - ]] .. tmpdir .. [[
 
 M__UFFILENAME_UFFILENAME__F 
+don't know how to make all
+*** found 1 target(s)...
+*** can't find 1 target(s)...
 ]]		
 		end
 
@@ -33,6 +39,9 @@ __/__/dir/__/dir2
 hello hello world world
 hello hello world
 world hello Lua from
+don't know how to make all
+*** found 1 target(s)...
+*** can't find 1 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam{ '-ftestgsub.jam' })
@@ -45,9 +54,13 @@ substitution.jam testgsub.jam testwildcards.jam
 file2.c file2.o file3.c file3.o
 file1.c file2.c file3.c
 file1.c file2.c file3.c file1.o file2.o file3.o
+don't know how to make all
+*** found 1 target(s)...
+*** can't find 1 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam{ '-ftestwildcards.jam' })
 	end
 end
 
+TestChecksum = Test

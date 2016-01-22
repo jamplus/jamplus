@@ -52,3 +52,4 @@ function Test()
 	TestFiles(originalFiles)
 end
 
+TestChecksum = Test

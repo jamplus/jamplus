@@ -81,3 +81,4 @@ Pass 3 written
 	TestDirectories(originalDirs)
 end
 
+TestChecksum = Test

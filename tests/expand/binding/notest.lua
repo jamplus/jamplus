@@ -46,3 +46,4 @@ With LOCATE - /somewhere/on/the/hard/drive/somefile.txt
 	TestFiles(originalFiles)
 end
 
+TestChecksum = Test

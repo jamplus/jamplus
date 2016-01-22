@@ -33,3 +33,4 @@ warning: using independent target xit3.h
 	TestExpression(os.time() - start >= 8, "testluaaction.jam did not take 8 seconds")
 end
 
+TestChecksum = Test

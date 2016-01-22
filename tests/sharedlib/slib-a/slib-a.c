@@ -6,7 +6,7 @@ __declspec(dllexport)
 #endif
 void ExportA()
 {
-	printf("ExportA: 2 + 5 = %d\n", Add(2, 5));
+    printf("ExportA: 2 + 5 = %d\n", Add(2, 5));
 }
 
 
@@ -16,5 +16,5 @@ __declspec(dllexport)
 #endif
 void ExportA2()
 {
-	printf("ExportA2: 3 + 9 = %d\n", Add(3, 9));
+    printf("ExportA2: 3 + 9 = %d\n", Add(3, 9));
 }

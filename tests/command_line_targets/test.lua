@@ -20,7 +20,7 @@ function Test()
 			'!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):appA>appA.exe',
 			'!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):appB>appB.obj',
 			'!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):appB>appB.exe',
-			'*** updated 6 target(s)...',
+			'!NEXT!*** updated 6 target(s)...',
 		}
 
 		TestPattern(run1pattern, RunJam())
@@ -57,7 +57,7 @@ Building appA...
 *** updating 3 target(s)...
 @ C.vc.C++ <$(TOOLCHAIN_GRIST):appA>appA.obj
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):appA>appA.exe
-*** updated 3 target(s)...
+!NEXT!*** updated 3 target(s)...
 ]]
 
 		TestPattern(appAPattern, RunJam{ 'appA' })
@@ -75,7 +75,7 @@ Building appB...
 *** updating 3 target(s)...
 @ C.vc.C++ <$(TOOLCHAIN_GRIST):appB>appB.obj
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):appB>appB.exe
-*** updated 3 target(s)...
+!NEXT!*** updated 3 target(s)...
 ]]
 
 		TestPattern(appBPattern, RunJam{ 'appB' })
@@ -139,6 +139,7 @@ Building appB...
 *** updating 3 target(s)...
 @ Clean <$(TOOLCHAIN_GRIST)>clean:appA 
 @ Clean <$(TOOLCHAIN_GRIST)>clean:appB 
+@ Clean clean
 *** updated 3 target(s)...
 ]]
 		TestPattern(cleanPattern, RunJam{ 'clean' })
@@ -205,3 +206,4 @@ Building appB...
 
 end
 
+TestChecksum = Test

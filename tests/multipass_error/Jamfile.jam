@@ -1,3 +1,7 @@
+if $(JAM_USE_CHECKSUMS) = 1 {
+	SubDir TOP ;
+}
+
 Depends all : file.dat ;
 Depends file.dat : file.txt ;
 

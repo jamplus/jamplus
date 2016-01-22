@@ -1,4 +1,4 @@
 void LibA()
 {
-	Print("test libA\n");
+    Print("test libA\n");
 }

@@ -17,6 +17,7 @@ local file.txt = [ C.GristFiles : file.txt ] ;
 
 Depends $(file.c) : $(file.txt) ;
 SEARCH on $(file.txt) = $(SUBDIR) ;
+MakeLocate $(file.c) : $(SUBDIR) ;
 GenerateCFile $(file.c) : $(file.txt) ;
 C.Clean : $(file.c) ;
 
