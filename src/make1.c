@@ -291,19 +291,19 @@ make1b( TARGET *t )
 
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
 	if (DEBUG_MAKE1) {
-	    printf( "make1b\t--\t%s (asynccnt %d)\n" ,
-		    t->name, t->asynccnt);
+		printf( "make1b\t--\t%s (asynccnt %d)\n" ,
+			t->name, t->asynccnt);
 	}
 #endif
 	/* If any dependents are still outstanding, wait until they */
 	/* call make1b() to signal their completion. */
 
 	if( --t->asynccnt )
-	    return;
+		return;
 
 #ifdef OPT_INTERRUPT_FIX
 	if( intr )
-	    return;
+		return;
 #endif
 
 	failed = "dependents";
@@ -319,18 +319,18 @@ make1b( TARGET *t )
 #ifdef OPT_SEMAPHORE
 	if( t->semaphore && t->semaphore->asynccnt )
 	{
-	    /* We can't launch yet.  Try again when the semaphore is free */
+		/* We can't launch yet.  Try again when the semaphore is free */
 #ifdef OPT_BUILTIN_NEEDS_EXT
-	    t->semaphore->parents = targetentry( t->semaphore->parents, t, 0 );
+		t->semaphore->parents = targetentry( t->semaphore->parents, t, 0 );
 #else
-	    t->semaphore->parents = targetentry( t->semaphore->parents, t );
+		t->semaphore->parents = targetentry( t->semaphore->parents, t );
 #endif
-	    t->asynccnt++;
+		t->asynccnt++;
 
-	    if( DEBUG_EXECCMD )
-		printf( "SEM: %s is busy, delaying launch of %s\n",
-			t->semaphore->name, t->name);
-	    return;
+		if( DEBUG_EXECCMD )
+			printf( "SEM: %s is busy, delaying launch of %s\n",
+				t->semaphore->name, t->name);
+		return;
 	}
 #endif
 	/* Now ready to build target 't'... if dependents built ok. */
@@ -342,119 +342,116 @@ make1b( TARGET *t )
 //			printf("warning: Trying to build '%s' before dependent '%s' is done!\n", t->name, c->target->name);
 		}
 #ifdef OPT_BUILTIN_NEEDS_EXT
-	    /* Only test a target's MightNotUpdate flag if the target's build was successful. */
-	    if( c->target->status == EXEC_CMD_OK ) {
-		/* Skip checking MightNotUpdate children if the target is bound to a missing file, */
-		/* as in this case it should be built anyway */
-		if ( c->target->flags & T_FLAG_MIGHTNOTUPDATE && t->binding != T_BIND_MISSING ) {
-		    time_t timestamp;
+		/* Only test a target's MightNotUpdate flag if the target's build was successful. */
+		if( c->target->status == EXEC_CMD_OK ) {
+			/* Skip checking MightNotUpdate children if the target is bound to a missing file, */
+			/* as in this case it should be built anyway */
+			if ( c->target->flags & T_FLAG_MIGHTNOTUPDATE && t->binding != T_BIND_MISSING ) {
+				time_t timestamp;
 
-		    /* Mark that we've seen a MightNotUpdate flag in this set of children. */
-		    childmightnotupdate = 1;
+				/* Mark that we've seen a MightNotUpdate flag in this set of children. */
+				childmightnotupdate = 1;
 
-		    /* Grab the generated target's timestamp. */
-		    if ( file_time( c->target->boundname, &timestamp ) == 0 ) {
-			/* If the child's timestamp is greater that the target's timestamp, then it updated. */
-				if (
+				/* Grab the generated target's timestamp. */
+				if ( file_time( c->target->boundname, &timestamp ) == 0 ) {
+					/* If the child's timestamp is greater that the target's timestamp, then it updated. */
 #ifdef OPT_USE_CHECKSUMS_EXT
-					(usechecksums ? c->target->contentmd5sum_file_dirty : timestamp > t->time)
+					if ( usechecksums ? c->target->contentmd5sum_file_dirty : timestamp > t->time) {
+						if ( usechecksums || ( c->target->flags & T_FLAG_SCANCONTENTS ) ) {
 #else
-					timestamp > t->time
+					if ( timestamp > t->time ) {
+						if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
 #endif /* OPT_USE_CHECKSUMS_EXT */
-					) {
-					if (
-#ifdef OPT_USE_CHECKSUMS_EXT
-						usechecksums ||
-#endif /* OPT_USE_CHECKSUMS_EXT */
-						( c->target->flags & T_FLAG_SCANCONTENTS ) ) {
-						childscancontents = 1;
-						if ( getcachedmd5sum( c->target, 1 ) )
+							childscancontents = 1;
+							if ( getcachedmd5sum( c->target, 1 ) ) {
+								childupdated = 1;
+							}
+						} else {
 							childupdated = 1;
-					} else
-						childupdated = 1;
-				} else {
-					childscancontents = 1;
+						}
+					} else {
+						childscancontents = 1;
+					}
 				}
-		    }
-		}
-		/* If it didn't have the MightNotUpdate flag but did update, mark it. */
-		else if ( c->target->fate > T_FATE_STABLE  &&  !c->needs ) {
+			}
+			/* If it didn't have the MightNotUpdate flag but did update, mark it. */
+			else if ( c->target->fate > T_FATE_STABLE  &&  !c->needs ) {
 #ifdef OPT_USE_CHECKSUMS_EXT
-			if ( usechecksums ) {
-				if ( c->target->actions ) {
-					//childscancontents = 1;
-					if ( !( c->target->flags & ( T_FLAG_NOTFILE | T_FLAG_NOUPDATE ) ) ) {
-						if ( getcachedmd5sum( c->target, 1 ) ) {
+				if ( usechecksums ) {
+					if ( c->target->actions ) {
+						//childscancontents = 1;
+						if ( !( c->target->flags & ( T_FLAG_NOTFILE | T_FLAG_NOUPDATE ) ) ) {
+							if ( getcachedmd5sum( c->target, 1 ) ) {
+								childupdated = 1;
+							}
+						}
+					} else {
+						if ( c->target->includes ) {
+							if ( c->target->includes->fate > T_FATE_STABLE ) {
+								childupdated = 1;
+							}
+							//if ( c->target->fate == T_FATE_NEWER ) {
+								//childupdated = 1;
+							//}
+						} else {
 							childupdated = 1;
 						}
 					}
-				} else {
-					if ( c->target->includes ) {
-						if ( c->target->includes->fate > T_FATE_STABLE ) {
+				} else
+#endif /* OPT_USE_CHECKSUMS_EXT */
+				{
+					if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
+						childscancontents = 1;
+						if ( getcachedmd5sum( c->target, 1 ) )
 							childupdated = 1;
-						}
-						//if ( c->target->fate == T_FATE_NEWER ) {
-							//childupdated = 1;
-						//}
 					} else {
 						childupdated = 1;
 					}
 				}
-			} else
-#endif /* OPT_USE_CHECKSUMS_EXT */
-			{
-				if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
-					childscancontents = 1;
-					if ( getcachedmd5sum( c->target, 1 ) )
-						childupdated = 1;
-				} else {
-					childupdated = 1;
-				}
 			}
-	    }
 		}
 #endif
 
-	    if( c->target->status > t->status )
-	{
-	    failed = c->target->name;
-	    t->status = c->target->status;
-#ifdef OPT_MULTIPASS_EXT
-		if ( ( c->target->fate == T_FATE_MISSING  &&  ! ( c->target->flags & T_FLAG_NOCARE )  &&  !c->target->actions ) || t->status == EXEC_CMD_NEXTPASS )
+		if( c->target->status > t->status )
 		{
-			missing = 1;
-			if ( queuedjamfiles )
+			failed = c->target->name;
+			t->status = c->target->status;
+#ifdef OPT_MULTIPASS_EXT
+			if ( ( c->target->fate == T_FATE_MISSING  &&  ! ( c->target->flags & T_FLAG_NOCARE )  &&  !c->target->actions ) || t->status == EXEC_CMD_NEXTPASS )
 			{
-				ACTIONS *actions;
-
-				t->status = EXEC_CMD_NEXTPASS;
-
-				for( actions = t->actions; actions; actions = actions->next )
+				missing = 1;
+				if ( queuedjamfiles )
 				{
-					actions->action->pass++;
+					ACTIONS *actions;
+
+					t->status = EXEC_CMD_NEXTPASS;
+
+					for( actions = t->actions; actions; actions = actions->next )
+					{
+						actions->action->pass++;
+					}
 				}
 			}
-		}
 #endif
-	}
+		}
 
 #ifdef OPT_NOCARE_NODES_EXT
-	/* CWM */
-	/* If actions on deps have failed, but if this is a 'nocare' target */
-	/* then continue anyway. */
+		/* CWM */
+		/* If actions on deps have failed, but if this is a 'nocare' target */
+		/* then continue anyway. */
 
-	if( ( t->flags & T_FLAG_NOCARE ) && t->status == EXEC_CMD_FAIL )
-	{
-		printf( "...dependency on %s failed, but don't care...\n", t->name );
-		t->status = EXEC_CMD_OK;
-	}
+		if( ( t->flags & T_FLAG_NOCARE ) && t->status == EXEC_CMD_FAIL )
+		{
+			printf( "...dependency on %s failed, but don't care...\n", t->name );
+			t->status = EXEC_CMD_OK;
+		}
 #endif
 	}
 
 #ifdef OPT_BUILTIN_NEEDS_EXT
 	/* If we found a MightNotUpdate flag and there was an update, mark the fate as updated. */
 	if ( childmightnotupdate  &&  childupdated  &&  t->fate == T_FATE_STABLE )
-	      t->fate = T_FATE_UPDATE;
+		t->fate = T_FATE_UPDATE;
 	if ( childscancontents ) {
 		if ( !childupdated ) {
 			if ( t->includes ) {
@@ -505,13 +502,13 @@ make1b( TARGET *t )
 #endif /* OPT_USE_CHECKSUMS_EXT */
 	if ( t->flags & ( T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS )  &&  t->actions ) {
 #ifdef OPT_ACTIONS_WAIT_FIX
-	    /* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
-	    /* Determine if an action is already running on behalf of another target, and if so, */
-	    /* bail out of make1b() prior to calling make1cmds() by adding more parents to the */
-	    /* in-progress target and incrementing the asynccnt of the new target. */
-	    make1wait( t );
-	    if ( t->asynccnt != 0 )
-		return;
+		/* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
+		/* Determine if an action is already running on behalf of another target, and if so, */
+		/* bail out of make1b() prior to calling make1cmds() by adding more parents to the */
+		/* in-progress target and incrementing the asynccnt of the new target. */
+		make1wait( t );
+		if ( t->asynccnt != 0 )
+			return;
 #endif
 	}
 #endif
@@ -525,112 +522,114 @@ make1b( TARGET *t )
 	if( t->status == EXEC_CMD_FAIL && t->actions )
 #endif
 	{
-	    ++counts->skipped;
-	    printf( "*** skipped %s for lack of %s...\n", t->name, failed );
+		++counts->skipped;
+		printf( "*** skipped %s for lack of %s...\n", t->name, failed );
 	}
 
 	if( t->status == EXEC_CMD_OK )
-	    switch( t->fate )
 	{
-	case T_FATE_INIT:
-	case T_FATE_MAKING:
-	    /* shouldn't happen */
+		switch( t->fate )
+		{
+			case T_FATE_INIT:
+			case T_FATE_MAKING:
+				/* shouldn't happen */
 
-	case T_FATE_STABLE:
-	case T_FATE_NEWER:
-	    break;
+			case T_FATE_STABLE:
+			case T_FATE_NEWER:
+				break;
 
-	case T_FATE_CANTFIND:
-	case T_FATE_CANTMAKE:
-	    t->status = EXEC_CMD_FAIL;
-	    break;
+			case T_FATE_CANTFIND:
+			case T_FATE_CANTMAKE:
+				t->status = EXEC_CMD_FAIL;
+				break;
 
-	case T_FATE_ISTMP:
-	    if( DEBUG_MAKEQ )
-		printf( "*** using %s...\n", t->name );
-	    break;
+			case T_FATE_ISTMP:
+				if( DEBUG_MAKEQ )
+				printf( "*** using %s...\n", t->name );
+				break;
 
-	case T_FATE_TOUCHED:
-	case T_FATE_MISSING:
-	case T_FATE_NEEDTMP:
-	case T_FATE_OUTDATED:
-	case T_FATE_UPDATE:
-	    /* Set "on target" vars, build actions, unset vars */
-	    /* Set "progress" so that make1c() counts this target among */
-	    /* the successes/failures. */
+			case T_FATE_TOUCHED:
+			case T_FATE_MISSING:
+			case T_FATE_NEEDTMP:
+			case T_FATE_OUTDATED:
+			case T_FATE_UPDATE:
+				/* Set "on target" vars, build actions, unset vars */
+				/* Set "progress" so that make1c() counts this target among */
+				/* the successes/failures. */
 
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
-	    if (DEBUG_MAKE1) {
-		printf( "make1b\t--\t%s (has actions)\n" , t->name );
-	    }
+			if (DEBUG_MAKE1) {
+				printf( "make1b\t--\t%s (has actions)\n" , t->name );
+			}
 #endif
-	    if( t->actions )
-	    {
+			if( t->actions )
+			{
 #ifdef OPT_ACTIONS_WAIT_FIX
-		/* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
-		/* Determine if an action is already running on behalf of another target, and if so, */
-		/* bail out of make1b() prior to calling make1cmds() by adding more parents to the */
-		/* in-progress target and incrementing the asynccnt of the new target. */
-		make1wait( t );
-		if ( t->asynccnt != 0 )
-		    return;
+				/* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
+				/* Determine if an action is already running on behalf of another target, and if so, */
+				/* bail out of make1b() prior to calling make1cmds() by adding more parents to the */
+				/* in-progress target and incrementing the asynccnt of the new target. */
+				make1wait( t );
+				if ( t->asynccnt != 0 )
+					return;
 #endif
-		++counts->total;
+				++counts->total;
 
 #ifndef OPT_IMPROVED_PROGRESS_EXT
-		if( DEBUG_MAKE && !( counts->total % 100 ) )
-		    printf( "*** on %dth target...\n", counts->total );
+				if( DEBUG_MAKE && !( counts->total % 100 ) )
+					printf( "*** on %dth target...\n", counts->total );
 #else
-		{
-		    double est_remaining;
+				{
+					double est_remaining;
 
-		    est_remaining =
-			progress_update(globs.progress, counts->total);
+					est_remaining =
+					progress_update(globs.progress, counts->total);
 
-		    if (est_remaining > 0) {
-			int minutes = (int)est_remaining / 60;
-			int seconds = (int)est_remaining % 60;
+					if (est_remaining > 0) {
+						int minutes = (int)est_remaining / 60;
+						int seconds = (int)est_remaining % 60;
 
-			if (minutes > 0 || seconds > 0) {
-			    printf("*** completed %.0f%% (",
-				   ((double)counts->total * 100 /
-				    globs.updating));
-			    if (minutes > 0)
-				printf("%d min ", minutes);
-			    if (seconds >= 0)
-				printf("%d sec ", seconds);
-			    printf("remaining)...\n");
-			}
-		    }
-		}
+						if (minutes > 0 || seconds > 0) {
+							printf("*** completed %.0f%% (",
+							   ((double)counts->total * 100 /
+								globs.updating));
+							if (minutes > 0)
+							printf("%d min ", minutes);
+							if (seconds >= 0)
+							printf("%d sec ", seconds);
+							printf("remaining)...\n");
+						}
+					}
+				}
 #endif
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-		pushsettings( t->settings );
-		filecache_fillvalues( t );
-		popsettings( t->settings );
-		t->cmds = (char *)make1cmds( t, t->actions );
+				pushsettings( t->settings );
+				filecache_fillvalues( t );
+				popsettings( t->settings );
+				t->cmds = (char *)make1cmds( t, t->actions );
 #else
-		pushsettings( t->settings );
-		t->cmds = (char *)make1cmds( t->actions );
-		popsettings( t->settings );
+				pushsettings( t->settings );
+				t->cmds = (char *)make1cmds( t->actions );
+				popsettings( t->settings );
 #endif
 
-		t->progress = T_MAKE_RUNNING;
-	    }
+				t->progress = T_MAKE_RUNNING;
+			}
 
-	    break;
+			break;
+		}
 	}
 
 #ifdef OPT_SEMAPHORE
 	/* If there is a semaphore, indicate that its in use */
 	if( t->semaphore )
 	{
-	    ++(t->semaphore->asynccnt);
+		++(t->semaphore->asynccnt);
 
-	    if( DEBUG_EXECCMD )
-		printf( "SEM: %s now used by %s\n", t->semaphore->name,
-		       t->name );
+		if( DEBUG_EXECCMD )
+			printf( "SEM: %s now used by %s\n", t->semaphore->name,
+				   t->name );
 	}
 #endif
 	/* Call make1c() to begin the execution of the chain of commands */
