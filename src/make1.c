@@ -939,7 +939,7 @@ make1d(
 #endif
 #ifdef OPT_DEBUG_MAKE_PRINT_TARGET_NAME
 		if (globs.printtarget) {
-		    printf("%s ", t->name);
+		    printf("%s ", cmd->targetsunbound ? list_value( list_first( cmd->targetsunbound ) ) : t->name);
 		} else {
 		    list_print( lol_get( &cmd->args, 0 ) );
 		}
