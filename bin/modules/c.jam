@@ -604,25 +604,6 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 
 	local _linkTargets = $(_t) ;
 
-	Depends all : $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_linkTargets) : $(_s) ;
-	NotFile $(TARGET) $(C.ACTIVE_TOOLCHAIN_TARGET) ;
-
-	local outputPath = [ C._retrieveOutputPath ] ;
-	MakeLocate $(_linkTargets) : $(outputPath) ;
-
-	LINK_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
-
-	Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
-	NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
-	Always clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
-	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_linkTargets) ;
-
-	local allcleanActiveToolchainTarget = $(C.ACTIVE_TOOLCHAIN_TARGET:G)all$(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET:G=) ;
-	Depends allclean : allclean:$(TARGET) : $(allcleanActiveToolchainTarget) ;
-	NotFile allclean:$(TARGET) $(allcleanActiveToolchainTarget) ;
-	Always allclean:$(TARGET) $(allcleanActiveToolchainTarget) ;
-	Depends allclean:$(TARGET) : clean:$(TARGET) ;
-
 	local linkDirectories ;
 	linkDirectories += $(LINKDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	linkDirectories += $(LINKDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
@@ -631,16 +612,6 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 		[ C.$(C.COMPILER_SUITE).FLibraryPaths $(linkDirectories) $(C.STDLINKDIRECTORIES) ]
 		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_*))
 		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-
-	local linkRule = C.$(C.COMPILER_SUITE).Link ;
-
-	local theRule ;
-	for theRule in $(C._ApplicationFromObjects_CleanIntermediates:Z=$(C.COMPILER_SUITE_SYMBOL)) {
-		$(theRule) ;
-	}
-	for theRule in $(C._ApplicationFromObjects_LinkFlags:Z=$(C.COMPILER_SUITE_SYMBOL)) {
-		$(theRule) ;
-	}
 
 	local _linkLibs =
 		$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
@@ -663,6 +634,35 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 			needLibs += $(lib) ;
 		}
 	}
+
+	local outputPath = [ C._retrieveOutputPath ] ;
+
+	local linkRule = C.$(C.COMPILER_SUITE).Link ;
+	MakeLocate $(_linkTargets) : $(outputPath) ;
+
+	local theRule ;
+	for theRule in $(C._ApplicationFromObjects_LinkFlags:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+		$(theRule) ;
+	}
+	for theRule in $(C._ApplicationFromObjects_CleanIntermediates:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+		$(theRule) ;
+	}
+
+	LINK_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
+
+	Depends all : $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_linkTargets) : $(_s) ;
+	NotFile $(TARGET) $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+
+	Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+	NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+	Always clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_linkTargets) ;
+
+	local allcleanActiveToolchainTarget = $(C.ACTIVE_TOOLCHAIN_TARGET:G)all$(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET:G=) ;
+	Depends allclean : allclean:$(TARGET) : $(allcleanActiveToolchainTarget) ;
+	NotFile allclean:$(TARGET) $(allcleanActiveToolchainTarget) ;
+	Always allclean:$(TARGET) $(allcleanActiveToolchainTarget) ;
+	Depends allclean:$(TARGET) : clean:$(TARGET) ;
 
 	SEARCH on $(linkLibs) += $(linkDirectories) $(C.STDLINKDIRECTORIES) ;
 	LINKLIBS on $(_linkTargets) = $(linkLibs) ;
@@ -840,6 +840,7 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 	local outputPath = [ C._retrieveOutputPath ] ;
 
 	local _linkTargets = $(_t) ;
+	MakeLocate $(_linkTargets) : $(outputPath) ;
 
 	if ! ( noexportlib in $(OPTIONS) ) {
 		local suflib = $(SUFLIB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
@@ -851,15 +852,35 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 		Depends $(TARGET) : $(_t) ;
 	}
 
-	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t) : $(_s) ;
-	NotFile $(TARGET) $(C.ACTIVE_TOOLCHAIN_TARGET) ;
-
-	MakeLocate $(_linkTargets) : $(outputPath) ;
-
 	local regserver ;
 	for theRule in $(C._SharedLibraryFromObjects_UnRegServer:Z=$(C.COMPILER_SUITE_SYMBOL)) {
 		$(theRule) ;
 	}
+
+	local linkRule = C.$(C.COMPILER_SUITE).Link ;
+
+	local linkDirectories ;
+	on $(C.ACTIVE_TOOLCHAIN_TARGET) linkDirectories += $(LINKDIRECTORIES) ;
+	on @(C.ACTIVE_TOOLCHAIN_*) linkDirectories += $(LINKDIRECTORIES) ;
+
+	local linkFlags ;
+	linkFlags +=
+		[ C.$(C.COMPILER_SUITE).FLibraryPaths $(linkDirectories) $(C.STDLINKDIRECTORIES) ]
+		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+	;
+
+	local theRule ;
+	for theRule in $(C._SharedLibraryFromObjects_LinkFlags:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+		$(theRule) ;
+	}
+
+	for theRule in $(C._SharedLibraryFromObjects_CleanIntermediates:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+		$(theRule) ;
+	}
+
+	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_linkTargets) : $(_s) ;
+	NotFile $(TARGET) $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 
 	Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
 	NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
@@ -871,28 +892,6 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 	NotFile allclean:$(TARGET) $(allcleanActiveToolchainTarget) ;
 	Always allclean:$(TARGET) $(allcleanActiveToolchainTarget) ;
 	Depends allclean:$(TARGET) : clean:$(TARGET) ;
-
-	local linkDirectories ;
-	on $(C.ACTIVE_TOOLCHAIN_TARGET) linkDirectories += $(LINKDIRECTORIES) ;
-	on @(C.ACTIVE_TOOLCHAIN_*) linkDirectories += $(LINKDIRECTORIES) ;
-
-	local linkRule = C.$(C.COMPILER_SUITE).Link ;
-
-	local linkFlags ;
-	local theRule ;
-	for theRule in $(C._SharedLibraryFromObjects_LinkFlags:Z=$(C.COMPILER_SUITE_SYMBOL)) {
-		$(theRule) ;
-	}
-
-	linkFlags +=
-		[ C.$(C.COMPILER_SUITE).FLibraryPaths $(linkDirectories) $(C.STDLINKDIRECTORIES) ]
-		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_*))
-		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-	;
-
-	for theRule in $(C._SharedLibraryFromObjects_CleanIntermediates:Z=$(C.COMPILER_SUITE_SYMBOL)) {
-		$(theRule) ;
-	}
 
 	local _linkLibs ;
 	local _needLibs ;

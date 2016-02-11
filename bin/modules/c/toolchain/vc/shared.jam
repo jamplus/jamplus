@@ -129,13 +129,13 @@ actions existing UnRegSvr32 {
 ########################################################################
 
 rule C.vc._writeManifest {
-    local tempIntermediateManifest = @($(_t[1]).intermediate.manifest:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+    local tempIntermediateManifest = @($(_linkTargets[1]).intermediate.manifest:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
     BINDING on $(tempIntermediateManifest) = $(_tBINDING).intermediate.manifest ;
-    MakeLocate $(tempIntermediateManifest) ;
+    MakeLocate $(tempIntermediateManifest) : $(LOCATE_TARGET) ;
     Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(tempIntermediateManifest) ;
 
     if $(C.LINKER_CONFIG) = debug {
-        local tempEmbeddedManifest = @($(_t[1]).embed.manifest:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+        local tempEmbeddedManifest = @($(_linkTargets[1]).embed.manifest:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
         BINDING on $(tempEmbeddedManifest) = $(_tBINDING).embed.manifest ;
         MakeLocate $(tempEmbeddedManifest) ;
         CONTENTS on $(tempEmbeddedManifest) =
@@ -146,12 +146,12 @@ rule C.vc._writeManifest {
         WriteFile $(tempEmbeddedManifest) ;
         Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(tempEmbeddedManifest) ;
 
-        local tempEmbeddedRc = @($(_t[1]).embed.rc:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+        local tempEmbeddedRc = @($(_linkTargets[1]).embed.rc:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
         BINDING on $(tempEmbeddedRc) = $(_tBINDING).embed.rc ;
         Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
         MakeLocate $(tempEmbeddedRc) ;
         CONTENTS on $(tempEmbeddedRc) =
-            "$(MANIFEST_TYPE) /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ \"$(LOCATE_TARGET)/$(_t[1]:G=).embed.manifest\"" ;
+            "$(MANIFEST_TYPE) /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ \"$(LOCATE_TARGET)/$(_linkTargets[1]:G=).embed.manifest\"" ;
         WriteFile $(tempEmbeddedRc) ;
         Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(tempEmbeddedRc) ;
         Depends $(tempEmbeddedRc) : $(tempEmbeddedManifest) ;
@@ -159,20 +159,20 @@ rule C.vc._writeManifest {
         local tempEmbeddedRes = [ C.Rc : $(tempEmbeddedRc) : quiet ] ;
         _s += $(tempEmbeddedRes) ;
 
-        Depends $(_t[1]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
-        if $(_t[2])
+        Depends $(_linkTargets[1]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
+        if $(_linkTargets[2])
         {
-            Includes $(_t[2]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
+            Includes $(_linkTargets[2]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
         }
     }
 }
 
 rule C.vc._setManifestType  MANIFEST_TYPE {
-    MANIFEST_TYPE on $(_t) = $(MANIFEST_TYPE) ;
+    MANIFEST_TYPE on $(_linkTargets) = $(MANIFEST_TYPE) ;
 }
 
 rule C.vc._linkManifest {
-    MANIFEST on $(_t) = "$(LOCATE_TARGET)/$(_tBINDING:G=)" ;
+    MANIFEST on $(_linkTargets) = "$(LOCATE_TARGET)/$(_tBINDING:G=)" ;
 }
 
 rule C.DefFile TARGET : SOURCES {
@@ -361,6 +361,7 @@ rule C.vc._SharedLibraryFromObjects_ExportLib {
     BINDING on $(_tlib) = [ C._retrieveOutputName : $(suflib) ] ;
     Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_tlib) : $(_t) ;
     MightNotUpdate $(_tlib) ;
+    MakeLocate $(_tlib) : $(outputPath) ;
     _linkTargets += $(_tlib) ;
 }
 
