@@ -36,7 +36,7 @@ if Platform == 'win32' and not Compiler then
 	pass1Pattern = [[
 		*** found 21 target(s)...
 		*** updating 5 target(s)...
-		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.h.pch
+		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.obj
 		mypch.cpp
 		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.obj
 		main.cpp
@@ -47,7 +47,7 @@ if Platform == 'win32' and not Compiler then
 	pass2Pattern = [[
 		*** found 21 target(s)...
 		*** updating 4 target(s)...
-		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.h.pch
+		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.obj
 		mypch.cpp
 		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.obj
 		main.cpp
