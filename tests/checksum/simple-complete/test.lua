@@ -210,14 +210,14 @@ function TestChecksum()
     end
 
     ---------------------------------------------------------------------------
-    if false then
+    if true then
         osprocess.sleep(1.0)
         ospath.touch('test.cs')
         TestNoopPattern()
     end
 
     ---------------------------------------------------------------------------
-    if false then
+    if true then
         osprocess.sleep(1.0)
         WriteTestDotCs()
         TestNoopPattern()
@@ -240,7 +240,7 @@ function TestChecksum()
     ---------------------------------------------------------------------------
     -- Add more comment lines to test.cs. This will cause test.dll and generatedheader.h to
     -- build, but nothing further should happen.
-    if false then
+    if true then
         osprocess.sleep(1.0)
         WriteTestDotCs(3)
         TestPatternForTestDllAndGeneratedHeader()
@@ -249,14 +249,14 @@ function TestChecksum()
     ---------------------------------------------------------------------------
     -- Change VALUE in test.cs. This will cause test.dll, generatedheader.h, main.obj, and
     -- main.exe to build.
-    if false then
+    if true then
         osprocess.sleep(1.0)
         WriteTestDotCs(nil, 10)
         TestPatternForTestCsValueChange()
     end
 
     ---------------------------------------------------------------------------
-    if false then
+    if true then
         osprocess.sleep(1.0)
         ospath.touch('test.cs')
         TestNoopPattern()
@@ -272,7 +272,7 @@ function TestChecksum()
     end
 
     ---------------------------------------------------------------------------
-    if false then
+    if true then
         osprocess.sleep(1.0)
         ospath.touch('test.cs')
         TestNoopPattern()
@@ -289,12 +289,12 @@ function TestChecksum()
 don't know how to make <$(TOOLCHAIN_GRIST):test>test.cs
 *** found 12 target(s)...
 *** can't find 1 target(s)...
-*** can't make 4 target(s)...
+&%*%*%* can't make %d+ target%(s%)%.%.%.
 *** skipped <$(TOOLCHAIN_GRIST):test>test.dll for lack of <$(TOOLCHAIN_GRIST):test>test.cs...
 ...dependency on <$(TOOLCHAIN_GRIST):test>generatedheader.h failed, but don't care...
 *** skipped <$(TOOLCHAIN_GRIST):test>main.obj for lack of <$(TOOLCHAIN_GRIST):test>main.c...
 *** skipped <$(TOOLCHAIN_GRIST):test>test.exe for lack of <$(TOOLCHAIN_GRIST):test>main.obj...
-*** skipped 3 target(s)...
+!NEXT!&%*%*%* skipped %d+ target%(s%)%.%.%.
 ]]
         else
             pattern = [[
