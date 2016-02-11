@@ -428,7 +428,7 @@ make1b( TARGET *t )
 
 					for( actions = t->actions; actions; actions = actions->next )
 					{
-						actions->action->pass++;
+						actions->action->pass = actionpass + 1;
 					}
 				}
 			}
