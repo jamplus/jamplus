@@ -818,6 +818,12 @@ rule C._LibraryFromObjects OBJECTS {
 
 rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 	local TARGET = $(C.ACTIVE_TARGET) ;
+
+	local theRule ;
+	for theRule in $(C._SharedLibraryFromObjects_Setup:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+		$(theRule) ;
+	}
+
 	local _s = $(OBJECTS:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 
 	local suffixName = SUFSHAREDLIB ;
