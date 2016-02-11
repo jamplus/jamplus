@@ -143,6 +143,14 @@ function TestPattern(patterns, lines)
 			pattern = '&%*%*%* found %d+ target%(s%)%.%.%.'
 		end
 
+		if pattern  and  pattern:match('%*%*%* updating %d+ target%(s%)%.%.%.') then
+			pattern = '&%*%*%* updating %d+ target%(s%)%.%.%.'
+		end
+
+		if pattern  and  pattern:match('%*%*%* updated %d+ target%(s%)%.%.%.') then
+			pattern = '&%*%*%* updated %d+ target%(s%)%.%.%.'
+		end
+
 		if pattern  and  pattern:match(finishedPattern) then
 			pattern = '&' .. finishedPattern
 		end
