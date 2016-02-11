@@ -725,7 +725,7 @@ rule C._LibraryFromObjects OBJECTS {
 
 	# library depends on its member objects
 
-	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_linkTargets) : $(_s) ;
+	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_l) : $(_s) ;
 	NotFile $(TARGET) $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 	if $(KEEPOBJS) {
 		Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_s) ;
