@@ -603,6 +603,7 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 	_tBINDING = $(_tBINDING:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 
 	local _linkTargets = $(_t) ;
+	local _extraChecksumTargets ;
 
 	local linkDirectories ;
 	linkDirectories += $(LINKDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -676,7 +677,7 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
 	UseFileCache $(_linkTargets) : code ;
-	$(linkRule) $(_linkTargets) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
+	$(linkRule) $(_linkTargets) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) : $(_extraChecksumTargets) ;
 
 	LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
 
@@ -839,6 +840,7 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 
 	local outputPath = [ C._retrieveOutputPath ] ;
 
+	local _extraChecksumTargets ;
 	local _linkTargets = $(_t) ;
 	MakeLocate $(_linkTargets) : $(outputPath) ;
 
@@ -930,7 +932,7 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
 	UseFileCache $(_linkTargets) : code ;
-	$(linkRule) $(_linkTargets) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
+	$(linkRule) $(_linkTargets) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) : $(_extraChecksumTargets) ;
 	__BUILT_LIBRARY on $(_linkTargets) = true ;
 
 	local theRule ;

@@ -164,7 +164,10 @@ rule C.vc._writeManifest {
         {
             Includes $(_linkTargets[2]) : $(tempIntermediateManifest) $(tempEmbeddedRes) ;
         }
+        _extraChecksumTargets += $(tempEmbeddedRes) $(tempEmbeddedRc) $(tempEmbeddedManifest) ;
     }
+
+    _extraChecksumTargets += $(tempIntermediateManifest) ;
 }
 
 rule C.vc._setManifestType  MANIFEST_TYPE {
