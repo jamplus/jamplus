@@ -1670,6 +1670,15 @@ make1cmds( ACTIONS *a0 )
 	    maxline = maxline && maxline < MAXLINE ? maxline : MAXLINE;
 #endif
 
+#ifdef OPT_USE_CHECKSUMS_EXT
+		{
+			TARGETS* extratarget;
+			for ( extratarget = a0->action->extratargets; extratarget; extratarget = extratarget->next ) {
+				ntunbound = list_append( ntunbound, extratarget->target->name, 1 );
+			}
+		}
+#endif /* OPT_USE_CHECKSUMS_EXT */
+
 	    do
 	    {
 		/* Build cmd: cmd_new consumes its lists. */

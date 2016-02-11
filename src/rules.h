@@ -107,6 +107,9 @@ struct _action {
 	int		pass;
 #endif
 	TARGETS		*autosettings;
+#ifdef OPT_USE_CHECKSUMS_EXT
+	TARGETS		*extratargets;
+#endif /* OPT_USE_CHECKSUMS_EXT */
 } ;
 
 /* SETTINGS - variables to set when executing a TARGET's ACTIONS */
