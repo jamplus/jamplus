@@ -342,8 +342,14 @@ end
 function TestFiles(expectedFiles)
 	TestNumberUpdate()
 
-	local expectedFilesMap = {}
 	expectedFiles[#expectedFiles + 1] = '?.build/.depcache'
+	for _, fileName in ipairs(expectedFiles) do
+		if fileName:match('%.exe$') then
+			 expectedFiles[#expectedFiles + 1] = '?' .. fileName .. '.intermediate.manifest'
+		end
+	end
+
+	local expectedFilesMap = {}
 	local newExpectedFiles = {}
 	for _, fileName in ipairs(expectedFiles) do
 		fileName = fileName:gsub('$PlatformDir', PlatformDir):gsub('$%(SUFEXE%)', SUFEXE)
