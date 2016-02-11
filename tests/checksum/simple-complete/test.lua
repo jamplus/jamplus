@@ -160,6 +160,35 @@ function TestChecksum()
 @ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
+*** updated 4 target(s)...
+]]
+        end
+        TestPattern(pattern, RunJam{})
+        TestDirectories(dirs)
+        TestFiles(files)
+    end
+
+
+    local function TestPatternForTestCsAnotherValueChange()
+        local pattern
+        if Platform == 'win32' then
+            pattern = [[
+*** found 12 target(s)...
+*** updating 4 target(s)...
+@ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
+@ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
+@ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
+!NEXT!*** updated 4 target(s)...
+]]
+        else
+            pattern = [[
+*** found 13 target(s)...
+*** updating 4 target(s)...
+@ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
+@ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
+@ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
 *** updated 3 target(s)...
 ]]
         end
@@ -267,8 +296,9 @@ function TestChecksum()
     -- main.exe to build.
     if true then
         osprocess.sleep(1.0)
-        WriteTestDotCs(nil, nil, 20)
-        TestPatternForTestCsValueChange()
+        WriteTestDotCs(nil, 10, 20)
+        osprocess.sleep(1.0)
+        TestPatternForTestCsAnotherValueChange()
     end
 
     ---------------------------------------------------------------------------
