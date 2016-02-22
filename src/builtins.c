@@ -577,7 +577,7 @@ builtin_glob(
 	    file_dirscan( list_value(l), builtin_glob_back, &globbing );
 	}
 #else
-	for(l = list_furst(dirs) ; l; l = list_next( l ) )
+	for(l = list_first(dirs) ; l; l = list_next( l ) )
 	    file_dirscan( list_value(l), builtin_glob_back, &globbing );
 #endif
 
