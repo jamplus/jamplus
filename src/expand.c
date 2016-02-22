@@ -507,7 +507,7 @@ var_expand(
 
 #else
 				while ( ptr != endptr ) {
-					if ( *ptr == ' '  ||  *ptr == '\\'  ||  *ptr == leftParen  ||  *ptr == rightParen  ||  *ptr == '"' ) {
+					if ( *ptr == ' '  ||  *ptr == '\\'  ||  *ptr == leftParen  ||  *ptr == rightParen  ||  *ptr == '"' ||  *ptr == '$' ) {
 						buffer_addchar( &escapebuff, '\\' );
 					}
 					buffer_addchar( &escapebuff, *ptr );
