@@ -1115,6 +1115,8 @@ function XcodeInitialize()
 	local xcodejamFilename = ospath.join(_getWorkspacePath(), 'xcodejam')
 	ospath.write_file(xcodejamFilename, [[
 #!/bin/sh
+PLATFORM=$1
+CONFIG=$2
 TARGET_NAME=
 if [ "$4" = "" ]; then
 	TARGET_NAME=$3
@@ -1123,7 +1125,7 @@ elif [ "$3" = build ]; then
 elif [ "$3" = clean ]; then
 	TARGET_NAME=$4
 fi
-]] .. ospath.escape(ospath.join(destinationRootPath, 'jam')) .. [[ C.TOOLCHAIN=$1/$2 $TARGET_NAME
+]] .. ospath.escape(ospath.join(destinationRootPath, 'jam')) .. [[ C.TOOLCHAIN=$PLATFORM/$CONFIG $TARGET_NAME
 ]])
 	ospath.chmod(xcodejamFilename, 777)
 end
