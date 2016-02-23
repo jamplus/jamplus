@@ -15,7 +15,7 @@ rule C.OpenSSL TARGET : OPTIONS {
 				;
 
 				local PATH_SUFFIXES =
-					openssl-1.0.2d-$(C.COMPILER)
+					openssl-1.0.2f-$(C.COMPILER)
 				;
 
 				local ssl.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include$(bits)/openssl : ssl.h ] ;
