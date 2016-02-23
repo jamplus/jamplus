@@ -1,0 +1,5 @@
+rule PrintFromOverrideJambase {
+    Echo This is from OverrideJambaseCallRoot.jam. ;
+}
+
+include $(ROOT_JAMBASE) ;

@@ -1,0 +1,5 @@
+rule PrintFromOverrideJambase {
+    Echo This is from OverrideJambase.jam. ;
+}
+
+include Jamfile.jam ;

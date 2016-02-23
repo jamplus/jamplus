@@ -2,6 +2,8 @@
 
 \section jamtoworkspace_overview Overview
 
+This documentation is out of date.
+
 JamPlus has a built-in workspace generator that reads a project's Jamfiles and exports an IDE workspace.  The workspace may then be loaded in the appropriate IDE and represents a read-only view of the contents of the Jamfiles.  Updates to the Jamfiles do not appear automatically in the IDE workspace, although correct Jam builds will continue to function.  JamPlus provides a facility to manually regenerate the workspace when Jamfiles change.
 
 JamPlus generates a completely out-of-source build structure.  This means that all intermediate files, output files, IDE project files, and other miscellaneous Jam related files exist in a directory external to the source code itself.  Since the entire build tree is generated, merely removing the out-of-source build directory will destroy all evidence of the build.
@@ -16,7 +18,7 @@ Out of source build trees also contain special instructions to make the build ru
 Generation of a new IDE workspace is performed by running the command line:
 
 <pre>
-    jam --workspace ...
+    jam --workspace [options] <source-jamfile> <path-to-destination>
 </pre>
 
 Running <b>jam --workspace</b> without any command line options will list the help.
@@ -27,6 +29,7 @@ jam --workspace
     [ -compiler=<i>COMPILER</i> ]
     [ -config=<i>CONFIG</i> ]
     [ -jamflags=<i>KEY=VALUE</i> ]
+    [ -jambase=<i>JAMBASEFULLPATH</i> ]
     <i>source-jamfile</i>
     [ <i>path-to-destination</i> ]
 </pre>
@@ -76,6 +79,14 @@ jam --workspace
 	  <ul>
 	    <li> <tt>CSC_COMPILER=mono</tt> (or <tt>vs2005</tt> or <tt>vs2008</tt>)
       </ul>
+
+  <tr>
+    <td valign=top width=20%><code> -jambase=<i>JAMBASEFULLPATH</i> </code>
+	<td> Overrides the default Jambase.jam that is automatically found near the executable with a user-provided version. \c JAMBASEFULLPATH must be the full path, filename included, of the alternate Jambase.jam.
+
+<pre>
+jam --workspace -jambase=c:/myapp/build/jam/NewJambase.jam ...
+</pre>
 
   <tr>
     <td valign=top width=20%><code> source-jamfile </code>

@@ -1,11 +1,3 @@
-#
-# This is a custom Phone.com builtin Jambase.  All it does is set the
-# DOT, DOTDOT, and SLASH vars and then looks for the Jambase file
-# in the current dir, then its parent, then its grandparent, etc.
-#
-
-JAMBASE ?= Jambase.jam ;
-
 if $(UNIX) {
 	DOT		default	= . ;
 	DOTDOT		default	= .. ;
@@ -24,22 +16,14 @@ if $(UNIX) {
 	SLASH		default = ":" ;
 }
 
-# Search in current dir and 10 dirs up from current dir for Jambase
+ROOT_JAMBASE = $(JAM_PROCESS_PATH)$(SLASH)$(DOTDOT)$(SLASH)Jambase.jam ;
+
+# Search in current dir, the executable path, and one directory higher than the executable path.
+JAMBASE ?= Jambase.jam ;
 SEARCH on $(JAMBASE) =
     $(DOT)
-#    $(DOTDOT)
-#    $(DOTDOT)$(SLASH)$(DOTDOT)
-#    $(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)
-#    $(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)
-#    $(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)
-#    $(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)
-#    $(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)
-#    $(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)
-#    $(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)
-#    $(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)
-#    $(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)$(SLASH)$(DOTDOT)
     $(JAM_PROCESS_PATH)
     $(JAM_PROCESS_PATH)$(SLASH)$(DOTDOT)
-    ;
+;
 
 include $(JAMBASE) ;

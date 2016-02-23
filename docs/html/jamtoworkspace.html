@@ -16,6 +16,7 @@
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="jamtoworkspace_overview"></a>
 Overview</h1>
+<p>This documentation is out of date.</p>
 <p>JamPlus has a built-in workspace generator that reads a project's Jamfiles and exports an IDE workspace. The workspace may then be loaded in the appropriate IDE and represents a read-only view of the contents of the Jamfiles. Updates to the Jamfiles do not appear automatically in the IDE workspace, although correct Jam builds will continue to function. JamPlus provides a facility to manually regenerate the workspace when Jamfiles change.</p>
 <p>JamPlus generates a completely out-of-source build structure. This means that all intermediate files, output files, IDE project files, and other miscellaneous Jam related files exist in a directory external to the source code itself. Since the entire build tree is generated, merely removing the out-of-source build directory will destroy all evidence of the build.</p>
 <p>Out of source build trees also contain special instructions to make the build run faster. Among other things, the dependency cache is set up. The dependency cache is used to track 'include' dependencies, but it is also used to store MD5 command lines and MD5 contents information.</p>
@@ -23,7 +24,7 @@ Overview</h1>
 Usage</h1>
 <p>Generation of a new IDE workspace is performed by running the command line:</p>
 <pre>
-    jam --workspace ...
+    jam --workspace [options] &lt;source-jamfile&gt; &lt;path-to-destination&gt;
 </pre><p>Running <b>jam &ndash;workspace</b> without any command line options will list the help.</p>
 <pre>
 jam --workspace
@@ -31,6 +32,7 @@ jam --workspace
     [ -compiler=<em>COMPILER</em> ]
     [ -config=<em>CONFIG</em> ]
     [ -jamflags=<em>KEY=VALUE</em> ]
+    [ -jambase=<em>JAMBASEFULLPATH</em> ]
     <em>source-jamfile</em>
     [ <em>path-to-destination</em> ]
 </pre><p><b>jam &ndash;workspace</b> may be invoked with the following options:</p>
@@ -88,6 +90,12 @@ jam --workspace
 <code>CSC_COMPILER=mono</code> (or <code>vs2005</code> or <code>vs2008</code>) </li>
 </ul>
 <p class="endtd"></p>
+</td></tr>
+<tr>
+<td valign="top" width="20%"><code> -jambase=<em>JAMBASEFULLPATH</em> </code> </td><td><p class="starttd">Overrides the default Jambase.jam that is automatically found near the executable with a user-provided version. <code>JAMBASEFULLPATH</code> must be the full path, filename included, of the alternate Jambase.jam.</p>
+<pre>
+jam --workspace -jambase=c:/myapp/build/jam/NewJambase.jam ...
+</pre><p class="endtd"></p>
 </td></tr>
 <tr>
 <td valign="top" width="20%"><code> source-jamfile </code> </td><td><p class="starttd">The path to the Jamfile to start building the workspace from. If only the directory is specified, then Jam attempts to load a file named <code>Jamfile.jam</code> from the given directory. If <em>source-jamfile</em> is a directory with filename, such as <code>../Game/Pong.jam</code>, then the specified Jamfile is loaded.</p>

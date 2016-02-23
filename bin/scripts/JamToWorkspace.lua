@@ -180,6 +180,7 @@ function ProcessCommandLine()
 		getopt.Option {{"jambaseflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
 		getopt.Option {{"jamfileflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
 		getopt.Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMEXEPATH' },
+		getopt.Option {{"jambase"}, "The full path to the Jambase.jam", "Req", 'JAMBASEFULLPATH' },
 	}
 
 	function Usage()
@@ -242,6 +243,7 @@ function ProcessCommandLine()
 		ProcessJamfileFlags(opts.jamfileflags)
 	end
 	opts.jamexepath = opts.jamexepath and opts.jamexepath[#opts.jamexepath]
+	opts.jambase = opts.jambase and opts.jambase[#opts.jambase]
 
 	if #errors > 0  or  (#nonOpts ~= 1  and  #nonOpts ~= 2) then
 		Usage()
@@ -622,7 +624,7 @@ function DumpWorkspace(workspace)
 	Projects[buildWorkspaceName] = {}
 	Projects[buildWorkspaceName].Sources =
 	{
-		ospath.join(jamPath, 'Jambase.jam'),
+		mainJambase,
 	}
 	Projects[buildWorkspaceName].SourcesTree = Projects[buildWorkspaceName].Sources
 	Projects[buildWorkspaceName].Name = buildWorkspaceName
@@ -634,7 +636,7 @@ function DumpWorkspace(workspace)
 	Projects[updateWorkspaceName] = {}
 	Projects[updateWorkspaceName].Sources =
 	{
-		ospath.join(jamPath, 'Jambase.jam'),
+		mainJambase,
 		ospath.join(destinationRootPath, 'customsettings.jam'),
 	}
 	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
@@ -776,7 +778,7 @@ function WriteJambase(exporter)
 
 	jambaseText[#jambaseText + 1] = expand([[
 
-include "$(jamPath)Jambase.jam" ;
+include "$(mainJambase)" ;
 ]], exporter.Options, _G)
 	ospath.write_file(ospath.join(destinationRootPath, 'Jambase.jam'), table.concat(jambaseText))
 end
@@ -964,7 +966,7 @@ include "$(settingsFile)" ;
 		expandTable.sourceJamfile = expandTable.sourceJamfile or 'Jamfile.jam' ;
 		jamfileText[#jamfileText + 1] = expand('$(rootNameText) = $(sourceRootPathText) ;\n', expandTable, _G)
 		if subInclude[4] ~= false then
-			jamfileText[#jamfileText + 1] = expand('SubInclude $(rootNameText) : $(sourceJamfileText) ;\n', expandTable, _G)
+			jamfileText[#jamfileText + 1] = expand('if [ RuleExists SubInclude ] { SubInclude $(rootNameText) : $(sourceJamfileText) ; } else { include $$($(rootNameText))$(sourceJamfileText) ; }\n', expandTable, _G)
 		end
 	end
 
@@ -1065,6 +1067,9 @@ if not sourceRootPath or not sourceJamfile then
 	sourceJamfile = 'Jamfile.jam'
 	sourceJamfilePath = sourceRootPath .. '/' .. sourceJamfile
 end
+if sourceJamfile == '' then
+	sourceJamfile = 'Jamfile.jam'
+end
 
 Config.SubIncludes =
 {
@@ -1099,6 +1104,14 @@ if opts.config then
 	end
 
 	Config = table_merge(Config, configFile.Config)
+end
+
+-- Set the paths to the Jambase.jam files.
+if opts.jambase then
+	mainJambase = ospath.join(sourceRootPath, opts.jambase  or  Config.Jambase)
+	Config.Jambase = mainJambase
+else
+	mainJambase = Config.Jambase  or  ospath.join(jamPath, 'Jambase.jam')
 end
 
 local result, message = xpcall(BuildWorkspaces, ErrorHandler)
