@@ -17,7 +17,7 @@ prettydump = require 'prettydump'
 local md5 = require 'md5'
 expand = require 'expand'
 
-scriptPath = ospath.simplify(ospath.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()))
+scriptPath = ospath.simplify(ospath.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/')))
 package.path = scriptPath .. "?.lua;" .. package.path
 FolderTree = require 'FolderTree'
 
