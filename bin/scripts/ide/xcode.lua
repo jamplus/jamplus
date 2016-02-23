@@ -218,6 +218,14 @@ local function _XcodeProjectSortFunction(left, right)
 end
 
 
+local sourcecodeType = {
+	['.cpp'] = '.cpp.cpp',
+	['.c'] = '.c.c',
+	['.h'] = '.c.h',
+	['.m'] = '.c.objc',
+	['.mm'] = '.cpp.objcpp',
+}
+
 function XcodeHelper_WritePBXFileReferences(self, folder)
 	table.sort(folder, _XcodeProjectSortFunction)
 	for entry in ivalues(folder) do
@@ -231,7 +239,7 @@ function XcodeHelper_WritePBXFileReferences(self, folder)
 						self.EntryUuids[entry], strippedEntry, ospath.remove_directory(strippedEntry), strippedEntry))
 			else
 				table.insert(self.Contents, ('\t\t%s /* %s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode%s; name = "%s"; path = "%s"; sourceTree = "<group>"; };\n'):format(
-						self.EntryUuids[entry], entry, ext, ospath.remove_directory(entry), entry))
+						self.EntryUuids[entry], entry, sourcecodeType[ext]  or  ext, ospath.remove_directory(entry), entry))
 			end
 		end
 	end
