@@ -1125,7 +1125,7 @@ elif [ "$3" = build ]; then
 elif [ "$3" = clean ]; then
 	TARGET_NAME=$4
 fi
-]] .. ospath.escape(ospath.join(destinationRootPath, 'jam')) .. [[ C.TOOLCHAIN=$PLATFORM/$CONFIG $TARGET_NAME
+]] .. ospath.escape(ospath.join(destinationRootPath, 'jam')) .. [[ -g C.TOOLCHAIN=$PLATFORM/$CONFIG $TARGET_NAME
 ]])
 	ospath.chmod(xcodejamFilename, 777)
 end

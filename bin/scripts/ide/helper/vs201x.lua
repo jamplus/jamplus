@@ -141,7 +141,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	for platformName in ivalues(Config.Platforms) do
 		for configName in ivalues(Config.Configurations) do
 			local jamCommandLine = ospath.escape(ospath.make_backslash(jamScript)) .. ' ' ..
-					ospath.escape('-C' .. destinationRootPath) .. ' ' ..
+					ospath.escape('-C' .. destinationRootPath) .. ' -g ' ..
 					'C.TOOLCHAIN=' .. platformName .. '/' .. configName
 
 			local configInfo =
