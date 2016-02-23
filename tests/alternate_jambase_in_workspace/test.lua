@@ -11,7 +11,7 @@ function Test()
     end
 
     function RunJamInWorkspace(commandLine)
-        commandLine[#commandLine + 1] = '"-C' .. workspacePath .. '"'
+        commandLine[#commandLine + 1] = '-C' .. workspacePath
         return RunJam(commandLine)
     end
 
