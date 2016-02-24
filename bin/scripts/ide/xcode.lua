@@ -218,6 +218,21 @@ local function _XcodeProjectSortFunction(left, right)
 end
 
 
+function XcodeHelper_SortFoldersAndFiles(self, folder)
+	table.sort(folder, _XcodeProjectSortFunction)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			XcodeHelper_SortFoldersAndFiles(self, entry)
+		end
+	end
+end
+
+
+		end
+	end
+end
+
+
 local sourcecodeType = {
 	['.cpp'] = '.cpp.cpp',
 	['.c'] = '.c.c',
@@ -227,7 +242,6 @@ local sourcecodeType = {
 }
 
 function XcodeHelper_WritePBXFileReferences(self, folder)
-	table.sort(folder, _XcodeProjectSortFunction)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
 			XcodeHelper_WritePBXFileReferences(self, entry)
@@ -619,6 +633,9 @@ function XcodeProjectMetaTable:Write(outputPath)
 	XcodeHelper_AssignEntryUuids(info.EntryUuids, projectTree, '', '')
 	info.GroupUuid = info.EntryUuids[project.Name .. '/']
 	self.EntryUuids = info.EntryUuids
+
+	-- Sort the folders and files.
+	XcodeHelper_SortFoldersAndFiles(self, projectTree)
 
 	-- Write PBXFileReferences.
 	table.insert(self.Contents, [[
