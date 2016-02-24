@@ -187,8 +187,8 @@ local function XcodeHelper_GetProjectExportInfo(projectName)
 			if configInfo.Defines == ''  and  project.Defines  and  project.Defines[platformName]  and  project.Defines[platformName][configName] then
 				configInfo.Defines = table.concat(project.Defines[platformName][configName], ';'):gsub('"', '\\&quot;')
 			end
-			if configInfo.IncludePaths == ''  and  project.IncludePaths  and project.IncludePaths[platformName]  and  project.IncludePaths[platformName][configName]  then
-				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ';')
+			if configInfo.Includes == ''  and  project.IncludePaths  and  project.IncludePaths[platformName]  and  project.IncludePaths[platformName][configName]  then
+				configInfo.Includes = table.concat(project.IncludePaths[platformName][configName], ' ')
 			end
 			if configInfo.OutputPath == ''  and  project.OutputPaths  and project.OutputPaths[platformName]  and  project.OutputPaths[platformName][configName]  then
 				configInfo.OutputPath = project.OutputPaths[platformName][configName]
@@ -540,7 +540,11 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 			if configInfo.OutputPath ~= '' then
 				table.insert(self.Contents, "\t\t\t\tCONFIGURATION_BUILD_DIR = \"" .. ospath.remove_slash(configInfo.OutputPath) .. "\";\n")
 			end
-			
+
+			if configInfo.Includes ~= '' then
+				self.Contents[#self.Contents + 1] = '\t\t\t\tUSER_HEADER_SEARCH_PATHS = "' .. configInfo.Includes .. '";\n'
+			end
+
 			local productName = configInfo.OutputName
 --[[			if subProject.Options  and  subProject.Options.app then
 				if subProject.Options.bundle then
