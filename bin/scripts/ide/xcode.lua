@@ -24,17 +24,17 @@ end
 
 
 -- Assign UUIDs to every entry in the folder tree.
-function XcodeHelper_AssignEntryUuids(entryUuids, folder, fullPath)
+function XcodeHelper_AssignEntryUuids(entryUuids, folder, fullPath, prefix)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
-			local fullFolderName = fullPath .. entry.folder .. '/'
+			local fullFolderName = prefix .. fullPath .. entry.folder .. '/'
 			if not entryUuids[fullFolderName] then
 				entryUuids[fullFolderName] = XcodeUuid()
 			end
-			XcodeHelper_AssignEntryUuids(entryUuids, entry, fullFolderName)
+			XcodeHelper_AssignEntryUuids(entryUuids, entry, fullFolderName, prefix)
 		else
-			if not entryUuids[entry] then
-				entryUuids[entry] = XcodeUuid()
+			if not entryUuids[prefix .. entry] then
+				entryUuids[prefix .. entry] = XcodeUuid()
 			end
 		end
 	end
@@ -616,7 +616,7 @@ function XcodeProjectMetaTable:Write(outputPath)
 
 	project.SourcesTree.folder = project.Name
 	local projectTree = { project.SourcesTree }
-	XcodeHelper_AssignEntryUuids(info.EntryUuids, projectTree, '')
+	XcodeHelper_AssignEntryUuids(info.EntryUuids, projectTree, '', '')
 	info.GroupUuid = info.EntryUuids[project.Name .. '/']
 	self.EntryUuids = info.EntryUuids
 
