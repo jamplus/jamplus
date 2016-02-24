@@ -134,7 +134,7 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) {
 		defines += $(DEFINES) ;
 		hdrs = $(HDRS) $(hdrs) ;
-		forceIncludes = $(FORCE_INCLUDES) ;
+		forceIncludes = $(FORCE_INCLUDES:T) ;
 	}
 
 	local definesString = "'$(defines)'," ;
@@ -147,6 +147,9 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	local hdrsString = "[[$(hdrs)]]," ;
 	hdrsString ?= "" ;
 	Contents += "$(project).IncludePaths['$(PLATFORM)']['$(CONFIG)'] = { $(hdrsString:J= ) }$(NEWLINE)" ;
+
+	local forceIncludesString = "[[$(forceIncludes)]]," ;
+	Contents += "$(project).ForceIncludes['$(PLATFORM)']['$(CONFIG)'] = { $(forceIncludesString:J= ) }$(NEWLINE)" ;
 
 	DumpSources $(project) : $(SOURCES) ;
 

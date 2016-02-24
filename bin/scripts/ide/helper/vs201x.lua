@@ -154,6 +154,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 				Includes = '',
 				Output = '',
 				OutputPath = '',
+				ForceIncludes = '',
 			}
 
 			if project and project.Name and project.Name ~= '!BuildWorkspace' and project.Name ~= '!UpdateWorkspace' then
@@ -174,6 +175,9 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 				configInfo.BuildCommandLine = jamCommandLine .. ' ' .. self.ProjectName
 				configInfo.RebuildCommandLine = jamCommandLine .. ' -a ' .. self.ProjectName
 				configInfo.CleanCommandLine = jamCommandLine .. ' clean:' .. self.ProjectName
+				if project.ForceIncludes  and  project.ForceIncludes[platformName]  and  project.ForceIncludes[platformName][configName] then
+					configInfo.ForceIncludes = table.concat(project.ForceIncludes[platformName][configName], ';')
+				end
 			else
 				configInfo.BuildCommandLine = project.BuildCommandLine and project.BuildCommandLine[1] or jamCommandLine
 				configInfo.RebuildCommandLine = project.RebuildCommandLine and project.RebuildCommandLine[1] or (jamCommandLine .. ' -a')
@@ -195,6 +199,12 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
     <NMakePreprocessorDefinitions>$(Defines)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(Includes)</NMakeIncludeSearchPath>
 ]==], configInfo, info, _G))
+
+			if configInfo.ForceIncludes ~= '' then
+				self.Contents[#self.Contents + 1] = expand([==[
+    <NMakeForcedIncludes>$(ForceIncludes)</NMakeForcedIncludes>
+]==], configInfo, info, _G)
+			end
 
 			userContents[#userContents + 1] = expand([==[
   <PropertyGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'">

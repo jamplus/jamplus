@@ -1268,11 +1268,6 @@ rule C.ForceFileType TARGET {
 }
 
 
-rule C.ForceInclude TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
 rule C.IncludeDirectories TARGET {
 	C.ActiveTarget $(TARGET) ;
 }
