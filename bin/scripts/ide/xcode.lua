@@ -587,10 +587,19 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 				codeSignIdentity = Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName]			
 		   	end
 
-
-			if platformName == 'macosx32'  or  platformName == 'macosx64' then
-				table.insert(self.Contents, "\t\t\t\tARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\";\n");
+			local archs
+			if subProject.XCODE_ARCHITECTURE  and  subProject.XCODE_ARCHITECTURE[platformName]  and  subProject.XCODE_ARCHITECTURE[platformName][configName] then
+				archs = table.concat(subProject.XCODE_ARCHITECTURE[platformName][configName], ' ')
+			elseif Projects['C.*'].XCODE_ARCHITECTURE  and  Projects['C.*'].XCODE_ARCHITECTURE[platformName]  and  Projects['C.*'].XCODE_ARCHITECTURE[platformName][configName] then
+				archs = table.concat(Projects['C.*'].XCODE_ARCHITECTURE[platformName][configName], ' ')
+			elseif platformName == 'macosx32'  or  platformName == 'macosx64' then
+				archs = "$(ARCHS_STANDARD_32_64_BIT)"
 			elseif platformName == 'ios'  or  platformName == 'iossimulator' then
+				archs = "$(ARCHS_UNIVERSAL_IPHONE_OS)"
+			end
+			self.Contents[#self.Contents + 1] = "\t\t\t\tARCHS = \"" .. archs .. "\";\n"
+
+			if platformName == 'ios'  or  platformName == 'iossimulator' then
 				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
 				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
 				local targetedDeviceFamily = "1,2"
