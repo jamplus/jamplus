@@ -108,8 +108,14 @@ local function XcodeHelper_GetProjectExportInfo(projectName)
 	if type(info.LegacyTargetUuid) ~= 'string' then
 		info.LegacyTargetUuid = XcodeUuid()
 	end
+	if type(info.PBXBuildRuleUuid) ~= 'string' then
+		info.PBXBuildRuleUuid = XcodeUuid()
+	end
 	if type(info.ShellScriptUuid) ~= 'string' then
 		info.ShellScriptUuid = XcodeUuid()
+	end
+	if type(info.SourcesUuid) ~= 'string' then
+		info.SourcesUuid = XcodeUuid()
 	end
 	if type(info.LegacyTargetBuildConfigurationListUuid) ~= 'string' then
 		info.LegacyTargetBuildConfigurationListUuid = XcodeUuid()
@@ -228,6 +234,38 @@ function XcodeHelper_SortFoldersAndFiles(self, folder)
 end
 
 
+local buildExtensions = {
+	['.cpp'] = true,
+	['.c'] = true,
+	['.m'] = true,
+	['.mm'] = true,
+}
+
+function XcodeHelper_WritePBXBuildFiles(self, folder)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			XcodeHelper_WritePBXBuildFiles(self, entry)
+		else
+			local ext = ospath.get_extension(entry)
+			if buildExtensions[ext] then
+				table.insert(self.Contents, ('\t\t%s /* %s in Sources */ = {isa = PBXBuildFile; fileRef = %s /* %s */; };\n'):format(
+						self.EntryUuids['PBXBuildFile*' .. entry], ospath.remove_directory(entry), self.EntryUuids[entry], ospath.remove_directory(entry)))
+			end
+		end
+	end
+end
+
+
+function XcodeHelper_WritePBXBuildFileReferences(self, folder)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			XcodeHelper_WritePBXBuildFileReferences(self, entry)
+		else
+			local ext = ospath.get_extension(entry)
+			if buildExtensions[ext] then
+				table.insert(self.Contents, ('\t\t\t\t%s /* %s in Sources */,\n'):format(
+						self.EntryUuids['PBXBuildFile*' .. entry], ospath.remove_directory(entry)))
+			end
 		end
 	end
 end
@@ -300,6 +338,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 				table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. subProjectInfo.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. subProjectInfo.Name .. '" */;\n')
 				table.insert(self.Contents, '\t\t\tbuildPhases = (\n')
 				table.insert(self.Contents, '\t\t\t\t' .. subProjectInfo.ShellScriptUuid .. ' /* ShellScript */,\n')
+				table.insert(self.Contents, '\t\t\t\t' .. subProjectInfo.SourcesUuid .. ' /* Sources */,\n')
 				table.insert(self.Contents, '\t\t\t);\n')
 				if projectType == 'legacy' then
 					if subProject.BuildCommandLine then
@@ -309,6 +348,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 					end
 				end
 				table.insert(self.Contents, '\t\t\tbuildRules = (\n')
+				table.insert(self.Contents, '\t\t\t\t' .. info.PBXBuildRuleUuid .. ' /* PBXBuildRule */,\n')
 				table.insert(self.Contents, '\t\t\t);\n');
 				table.insert(self.Contents, '\t\t\tdependencies = (\n')
 				table.insert(self.Contents, '\t\t\t);\n')
@@ -369,6 +409,29 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 		end
 	end
 	table.insert(self.Contents, expand("/* End PBXShellScriptBuildPhase section */\n\n"))
+
+	table.insert(self.Contents, "/* Begin PBXSourcesBuildPhase section */\n")
+	for curProject in ivalues(allTargets) do
+		if curProject.XcodeProjectType == 'native' then
+            local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
+            local subProject = Projects[curProject.Name]
+            table.insert(self.Contents, expand([[
+		$(SourcesUuid) /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+]], subProjectInfo))
+
+            XcodeHelper_WritePBXBuildFileReferences(self, subProject.SourcesTree)
+
+            table.insert(self.Contents,[[
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+]])
+        end
+	end
+	table.insert(self.Contents, "\n/* End PBXSourcesBuildPhase section */\n\n")
 end
 
 local function XcodeHelper_WritePBXProject(self, info, allTargets)
@@ -631,11 +694,38 @@ function XcodeProjectMetaTable:Write(outputPath)
 	project.SourcesTree.folder = project.Name
 	local projectTree = { project.SourcesTree }
 	XcodeHelper_AssignEntryUuids(info.EntryUuids, projectTree, '', '')
+	XcodeHelper_AssignEntryUuids(info.EntryUuids, projectTree, '', 'PBXBuildFile*')
 	info.GroupUuid = info.EntryUuids[project.Name .. '/']
 	self.EntryUuids = info.EntryUuids
 
 	-- Sort the folders and files.
 	XcodeHelper_SortFoldersAndFiles(self, projectTree)
+
+	-- Write PBXBuildFile section.
+	table.insert(self.Contents, [[
+/* Begin PBXBuildFile section */
+]])
+	XcodeHelper_WritePBXBuildFiles(self, projectTree)
+	table.insert(self.Contents, [[
+/* End PBXBuildFile section */
+
+]])
+
+	table.insert(self.Contents, [[
+/* Begin PBXBuildRule section */
+		]] .. info.PBXBuildRuleUuid .. [[ /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.cpp *.c *.mm *.m";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+			);
+			script = "";
+		};
+/* End PBXBuildRule section */
+
+]])
 
 	-- Write PBXFileReferences.
 	table.insert(self.Contents, [[
