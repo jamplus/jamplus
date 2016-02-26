@@ -151,7 +151,6 @@ BOOL (WINAPI *fnSystemTimeToTzSpecificLocalTime)(LPTIME_ZONE_INFORMATION lpTimeZ
 time_t fileglob_ConvertToTime_t(const FILETIME* fileTime) {
 	SYSTEMTIME universalSystemTime;
 	SYSTEMTIME sysTime;
-	TIME_ZONE_INFORMATION timeZone;
 	struct tm atm;
 
 	FileTimeToSystemTime(fileTime, &universalSystemTime);
