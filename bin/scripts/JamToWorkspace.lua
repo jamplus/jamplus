@@ -926,8 +926,9 @@ $(locateTargetText)
 DEPCACHE.standard = "$$(ALL_LOCATE_TARGET)/$$(C.PLATFORM)-$$(C.CONFIG)/.depcache" ;
 DEPCACHE = standard ;
 
-NoCare "$(settingsFile)" ;
-include "$(settingsFile)" ;
+CUSTOMSETTINGS ?= "$(settingsFile)" ;
+NoCare $$(CUSTOMSETTINGS) ;
+include $$(CUSTOMSETTINGS) ;
 
 ]], locateTargetText, _G) }
 
