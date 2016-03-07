@@ -1,0 +1,4 @@
+Echo Using customsettings_opengl.jam ;
+
+THE_ENGINE = opengl ;
+

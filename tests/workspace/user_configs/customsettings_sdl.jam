@@ -1,0 +1,4 @@
+Echo Using customsettings_sdl.jam ;
+
+THE_ENGINE = sdl ;
+

@@ -7,6 +7,19 @@ local uuid = require 'uuid'
 
 local VisualStudio201xProjectMetaTable = {  __index = VisualStudio201xProjectMetaTable  }
 
+local function GetWorkspaceConfigList(workspace)
+	if not workspace.Configs then
+		return Config.Configurations
+	end
+
+	local workspaceConfigs = {}
+	for configName in pairs(workspace.Configs) do
+		workspaceConfigs[#workspaceConfigs + 1] = configName
+	end
+	table.sort(workspaceConfigs)
+	return workspaceConfigs
+end
+
 local function GetMapPlatformToVSPlatform(platformName)
 	return MapPlatformToVSPlatform and MapPlatformToVSPlatform[platformName] or platformName
 end
@@ -91,13 +104,12 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
   <ItemGroup Label="ProjectConfigurations">
 ]])
 
+	local workspaceConfigs = GetWorkspaceConfigList(self.Workspace)
 	for platformName in ivalues(Config.Platforms) do
-		for configName in ivalues(Config.Configurations) do
-			local configInfo =
-			{
-				VSPlatform = RealVSPlatform(platformName),
-				VSConfig = RealVSConfig(platformName, configName),
-			}
+		for configName in ivalues(workspaceConfigs) do
+			local configInfo = {}
+			configInfo.VSPlatform = RealVSPlatform(platformName)
+			configInfo.VSConfig = workspaceConfigs == Config.Configurations  and  RealVSConfig(platformName, configName)  or  configName
 			table.insert(self.Contents, expand([==[
     <ProjectConfiguration Include="$(VSConfig)|$(VSPlatform)">
       <Configuration>$(VSConfig)</Configuration>
@@ -139,17 +151,28 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 
 	-- Write Configurations.
 	for platformName in ivalues(Config.Platforms) do
-		for configName in ivalues(Config.Configurations) do
+		for workspaceConfigName in ivalues(workspaceConfigs) do
 			local jamCommandLine = ospath.escape(ospath.make_backslash(jamScript)) .. ' ' ..
-					ospath.escape('-C' .. destinationRootPath) .. ' -g ' ..
-					'C.TOOLCHAIN=' .. platformName .. '/' .. configName
+					ospath.escape('-C' .. destinationRootPath) ..
+					' -g'
+
+			local configName = workspaceConfigName
+			local customWorkspaceConfig = self.Workspace  and  self.Workspace.Configs  and  self.Workspace.Configs[workspaceConfigName]
+			if customWorkspaceConfig then
+				jamCommandLine = jamCommandLine .. ' ' .. table.concat(customWorkspaceConfig.CommandLineOptions, ' ')
+				configName = customWorkspaceConfig.ActualConfigName
+			else
+				jamCommandLine = jamCommandLine .. ' C.TOOLCHAIN=' .. platformName .. '/' .. configName
+			end
 
 			local configInfo =
 			{
 				Platform = platformName,
+				PLATFORM = platformName,
 				Config = configName,
+				WorkspaceConfigName = workspaceConfigName,
 				VSPlatform = RealVSPlatform(platformName),
-				VSConfig = RealVSConfig(platformName, configName),
+				VSConfig = workspaceConfigs == Config.Configurations  and  RealVSConfig(platformName, configName)  or  workspaceConfigName,
 				Defines = '',
 				Includes = '',
 				Output = '',
@@ -351,12 +374,13 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	WriteFileIfModified(filename, self.Contents)
 end
 
-function VisualStudio201xProject(projectName, options)
+function VisualStudio201xProject(projectName, options, workspace)
 	return setmetatable(
 		{
 			Contents = {},
 			ProjectName = projectName,
 			Options = options,
+			Workspace = workspace,
 		}, { __index = VisualStudio201xProjectMetaTable }
 	)
 end
@@ -529,13 +553,12 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 ]])
 
+	local workspaceConfigs = GetWorkspaceConfigList(workspace)
 	for platformName in ivalues(Config.Platforms) do
-		for configName in ivalues(Config.Configurations) do
-			local configInfo =
-			{
-				VSPlatform = GetMapPlatformToVSPlatform(platformName),
-				VSConfig = GetMapConfigToVSConfig(configName),
-			}
+		for configName in ivalues(workspaceConfigs) do
+			local configInfo = {}
+			configInfo.VSPlatform = GetMapPlatformToVSPlatform(platformName)
+			configInfo.VSConfig = workspaceConfigs == Config.Configurations  and  GetMapConfigToVSConfig(configName)  or  configName
 			table.insert(self.Contents, expand([[
 		$(VSConfig)|$(VSPlatform) = $(VSConfig)|$(VSPlatform)
 ]], configInfo))
@@ -552,15 +575,13 @@ Global
 ]])
 
 	for platformName in ivalues(Config.Platforms) do
-		for configName in ivalues(Config.Configurations) do
+		for configName in ivalues(workspaceConfigs) do
 			local info = ProjectExportInfo[buildWorkspaceName]
-			local configInfo =
-			{
-				VSPlatform = GetMapPlatformToVSPlatform(platformName),
-				VSConfig = GetMapConfigToVSConfig(configName),
-				RealVSPlatform = RealVSPlatform(platformName),
-				RealVSConfig = RealVSConfig(platformName, configName),
-			}
+			local configInfo = {}
+			configInfo.VSPlatform = GetMapPlatformToVSPlatform(platformName)
+			configInfo.VSConfig = workspaceConfigs == Config.Configurations  and  GetMapConfigToVSConfig(configName)  or  configName
+			configInfo.RealVSPlatform = RealVSPlatform(platformName)
+			configInfo.RealVSConfig = RealVSConfig(platformName, configName)
 			table.insert(self.Contents, expand([[
 		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
 ]], configInfo, info))
@@ -572,15 +593,13 @@ Global
 	end
 
 	for platformName in ivalues(Config.Platforms) do
-		for configName in ivalues(Config.Configurations) do
+		for configName in ivalues(workspaceConfigs) do
 			local info = ProjectExportInfo[updateWorkspaceName]
-			local configInfo =
-			{
-				VSPlatform = GetMapPlatformToVSPlatform(platformName),
-				VSConfig = GetMapConfigToVSConfig(configName),
-				RealVSPlatform = RealVSPlatform(platformName),
-				RealVSConfig = RealVSConfig(platformName, configName),
-			}
+			local configInfo = {}
+			configInfo.VSPlatform = GetMapPlatformToVSPlatform(platformName)
+			configInfo.VSConfig = workspaceConfigs == Config.Configurations  and  GetMapConfigToVSConfig(configName)  or  configName
+			configInfo.RealVSPlatform = RealVSPlatform(platformName)
+			configInfo.RealVSConfig = RealVSConfig(platformName, configName)
 			table.insert(self.Contents, expand([[
 		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
 ]], configInfo, info))
@@ -591,14 +610,12 @@ Global
 		local info = ProjectExportInfo[projectName]
 		if info then
 			for platformName in ivalues(Config.Platforms) do
-				for configName in ivalues(Config.Configurations) do
-					local configInfo =
-					{
-						VSPlatform = GetMapPlatformToVSPlatform(platformName),
-						VSConfig = GetMapConfigToVSConfig(configName),
-						RealVSPlatform = RealVSPlatform(platformName),
-						RealVSConfig = RealVSConfig(platformName, configName),
-					}
+				for configName in ivalues(workspaceConfigs) do
+					local configInfo = {}
+					configInfo.VSPlatform = GetMapPlatformToVSPlatform(platformName)
+					configInfo.VSConfig = workspaceConfigs == Config.Configurations  and  GetMapConfigToVSConfig(configName)  or  configName
+					configInfo.RealVSPlatform = RealVSPlatform(platformName)
+					configInfo.RealVSConfig = RealVSConfig(platformName, configName)
 					table.insert(self.Contents, expand([[
 		$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
 ]], configInfo, info))

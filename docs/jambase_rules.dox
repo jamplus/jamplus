@@ -30,6 +30,7 @@ documentation:
 \refitem rule_SubInclude SubInclude
 \refitem rule_SubIncludeRelative SubIncludeRelative
 \refitem rule_Workspace Workspace
+\refitem rule_WorkspaceConfig WorkspaceConfig
 \refitem rule_WriteFile WriteFile
 \endsecreflist
 
@@ -431,6 +432,51 @@ Workspaces are automatically generated for any executable processed while readin
 
 \code
 	Workspace Project-all : AppA AppB AppC ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_WorkspaceConfig rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : JAM_CONFIG_NAME : COMMAND_LINE
+\addindex rule_WorkspaceConfig
+
+Usually, configurations are created in a workspace according to the \c VALID_CONFIGS variable found within the generated workspace's <tt>Jambase.jam</tt>. These configurations can come from the defaults or from a config file passed to 'jam --workspace'.
+
+Using the \c WorkspaceConfig rule, the default generated configurations can be overridden for a given generated workspace/solution.
+
+Each user-specified workspace config gets its Jam command-line replaced entirely with the one specified on the WorkspaceConfig invocation. For that reason, it is very important to provide the <tt>C.TOOLCHAIN</tt> variable to the command-line, or Jam will not know what compiler, platform, and configuration it is building.
+
+Please make note that workspace configurations are not Jam configurations, so confusion may arise. Assumptions about output and intermediate directories are made based on the platform and config specified via <tt>C.TOOLCHAIN</tt>. Unless Jam rules are altered from the shipping defaults, there is not a unique intermediate and output location per provided \c WorkspaceConfig.
+
+In reality, a \c WorkspaceConfig is a hack. Just modify the generated <tt>customsettings.jam</tt> file instead, as it better represents what is actually happening within the build.
+
+\param WORKSPACE_NAME The name of the workspace to modify.
+\param CONFIG_NAME The name of the new configuration for the workspace.
+\param JAM_CONFIG_NAME The name of the Jam build configuration being built on top of.
+\param COMMAND_LINE Any additional command line parameters to pass on the Jam command-line for this \c CONFIG_NAME.
+
+\code
+    # Generate workspaces with the following configs:
+    #
+    #   * debug_d3d
+    #   * debug_opengl
+    #   * debug_sdl
+    #   * release_d3d
+    #   * release_opengl
+    #   * release_sdl
+    if $(TARGETINFO_LOCATE) {
+        local config ;
+        for config in debug release {
+            local engine ;
+            for engine in d3d opengl sdl {
+                local dollar = $ ;
+                WorkspaceConfig $(THE_WORKSPACE_NAME) : $(config)_$(engine) : $(config) : C.TOOLCHAIN=$(dollar)(PLATFORM)/$(config) THE_ENGINE=$(engine) ;
+            }
+        }
+    }
 \endcode
 
 

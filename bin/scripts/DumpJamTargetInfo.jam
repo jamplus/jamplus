@@ -220,6 +220,20 @@ $(solutionInfo).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'
 }
 
 
+rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND_LINE_OPTIONS {
+    if $(NO_EXPORT_WORKSPACES.$(WORKSPACE_NAME)) {
+        return ;
+    }
+    if $(PLATFORM) = *  &&  $(CONFIG) = * {
+        local solutionInfo = "Workspaces['$(WORKSPACE_NAME)']" ;
+        local configText = "$(solutionInfo).Configs[ [[$(CONFIG_NAME)]] ]" ;
+        local optionLines = "$(TAB)[[$(COMMAND_LINE_OPTIONS)]],$(NEWLINE)" ;
+        Contents += "$(configText).CommandLineOptions = concat($(configText).CommandLineOptions, $(NEWLINE){$(NEWLINE)$(optionLines)})$(NEWLINE)" ;
+        Contents += "$(configText).ActualConfigName = [[$(ACTUAL_CONFIG_NAME)]]$(NEWLINE)" ;
+    }
+}
+
+
 rule WriteTargetInfoFile FILENAME
 {
 	Always $(FILENAME) ;

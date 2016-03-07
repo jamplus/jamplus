@@ -571,12 +571,12 @@ function BuildSourceTree(project)
 end
 
 
-function DumpProject(project)
+function DumpProject(project, workspace)
 	local outPath = ospath.join(_getWorkspaceProjectsPath(), project.RelativePath)
 	ospath.mkdir(ospath.add_slash(outPath))
 
 	local exporter = Exporters[ide]
-	local projectExporter = exporter.ProjectExporter(project.Name, exporter.Options)
+	local projectExporter = exporter.ProjectExporter(project.Name, exporter.Options, workspace)
 	projectExporter:Write(outPath)
 end
 
@@ -629,7 +629,7 @@ function DumpWorkspace(workspace)
 	Projects[buildWorkspaceName].SourcesTree = Projects[buildWorkspaceName].Sources
 	Projects[buildWorkspaceName].Name = buildWorkspaceName
 	Projects[buildWorkspaceName].TargetName = ''
-	local projectExporter = exporter.ProjectExporter(buildWorkspaceName, exporter.Options)
+	local projectExporter = exporter.ProjectExporter(buildWorkspaceName, exporter.Options, workspace)
 	projectExporter:Write(projectsOutPath)
 
 	-- Write the !UpdateWorkspace project
@@ -641,7 +641,7 @@ function DumpWorkspace(workspace)
 	}
 	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
 	Projects[updateWorkspaceName].Name = updateWorkspaceName
-	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options)
+	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options, workspace)
 
 	local updateWorkspaceCommandLines
 	if uname == 'windows' then
@@ -688,7 +688,7 @@ function DumpWorkspace(workspace)
 	for projectName in ivalues(workspace.Projects) do
 		local project = Projects[projectName]
 		if project and project.RelativePath then
-			DumpProject(project)
+			DumpProject(project, workspace)
 		else
 			print('* Attempting to write unknown project [' .. projectName .. '].')
 		end

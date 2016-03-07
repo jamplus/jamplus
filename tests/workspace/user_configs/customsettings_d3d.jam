@@ -1,0 +1,4 @@
+Echo Using customsettings_d3d.jam ;
+
+THE_ENGINE = d3d ;
+

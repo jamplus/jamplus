@@ -17,6 +17,21 @@ function deepcopy(t)
     return res
 end
 
+
+local function GetWorkspaceConfigList(workspace)
+	if not workspace.Configs then
+		return Config.Configurations
+	end
+
+	local workspaceConfigs = {}
+	for configName in pairs(workspace.Configs) do
+		workspaceConfigs[#workspaceConfigs + 1] = configName
+	end
+	table.sort(workspaceConfigs)
+	return workspaceConfigs
+end
+
+
 -- Use the upper 24 characters of a UUID as the Xcode UUID.
 function XcodeUuid()
 	return uuid.new():gsub('%-', ''):upper():sub(1, 24)
@@ -76,7 +91,13 @@ end
 
 
 
-local function XcodeHelper_GetProjectExportInfo(projectName)
+local function GetJamConfigName(workspaceConfigName, workspace)
+	local customWorkspaceConfig = workspace  and  workspace.Configs  and  workspace.Configs[workspaceConfigName]
+	return customWorkspaceConfig  and  customWorkspaceConfig.ActualConfigName  or  configName
+end
+
+
+local function XcodeHelper_GetProjectExportInfo(projectName, workspace)
 	local project = Projects[projectName]
 	local info = ProjectExportInfo[projectName:lower()]
 	if not info then
@@ -131,12 +152,13 @@ local function XcodeHelper_GetProjectExportInfo(projectName)
 		info.LegacyTargetConfigUuids = {}
 	end
 
+	local workspaceConfigs = GetWorkspaceConfigList(workspace)
 	for _, platformName in ipairs(Config.Platforms) do
 		if type(info.ExecutableInfo[platformName]) ~= 'table' then
 			info.ExecutableInfo[platformName] = {}
 		end
 
-		for configName in ivalues(Config.Configurations) do
+		for configName in ivalues(workspaceConfigs) do
 			local executableConfig = info.ExecutableInfo[platformName][configName]
 			if not executableConfig then
 				executableConfig = {}
@@ -150,7 +172,7 @@ local function XcodeHelper_GetProjectExportInfo(projectName)
 		
 		if type(info.LegacyTargetConfigUuids[platformName]) ~= 'table' then
 			info.LegacyTargetConfigUuids[platformName] = {}
-			for configName in ivalues(Config.Configurations) do
+			for configName in ivalues(workspaceConfigs) do
 				info.LegacyTargetConfigUuids[platformName][configName] = XcodeUuid()
 			end
 		end
@@ -161,7 +183,7 @@ local function XcodeHelper_GetProjectExportInfo(projectName)
 
 		if type(info.ProjectConfigUuids[platformName]) ~= 'table' then
 			info.ProjectConfigUuids[platformName] = {}
-			for configName in ivalues(Config.Configurations) do
+			for configName in ivalues(workspaceConfigs) do
 				info.ProjectConfigUuids[platformName][configName] = XcodeUuid()
 			end
 		end
@@ -170,18 +192,22 @@ local function XcodeHelper_GetProjectExportInfo(projectName)
 	if not project.ConfigInfo then project.ConfigInfo = {} end
 	for _, platformName in ipairs(Config.Platforms) do
 		if not project.ConfigInfo[platformName] then project.ConfigInfo[platformName] = {} end
-		for configName in ivalues(Config.Configurations) do
-			local configInfo = project.ConfigInfo[platformName][configName]
+		for workspaceConfigName in ivalues(workspaceConfigs) do
+			local configName = GetJamConfigName(workspaceConfigName, workspace)
+
+			local configInfo = project.ConfigInfo[platformName][workspaceConfigName]
 			if not configInfo then
 				configInfo = {
 					Platform = platformName,
+					PLATFORM = platformName,
 					Config = configName,
+					WorkspaceConfigName = workspaceConfigName,
 					Defines = '',
 					Includes = '',
 					OutputPath = '',
 					OutputName = '',
 				}
-				project.ConfigInfo[platformName][configName] = configInfo
+				project.ConfigInfo[platformName][workspaceConfigName] = configInfo
 			end
 
 			if configInfo.Defines == ''  and  project.Defines  and  project.Defines[platformName]  and  project.Defines[platformName][configName] then
@@ -320,7 +346,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 
 		for curProject in ivalues(allTargets) do
 			if curProject.XcodeProjectType == projectType then
-				local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
+				local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name, self.Workspace)
 				local subProject = Projects[curProject.Name]
 
 				table.insert(self.Contents, ("\t\t%s /* %s */ = {\n"):format(subProjectInfo.LegacyTargetUuid, subProjectInfo.Name))
@@ -332,7 +358,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 					if subProject.BuildCommandLine then
 						table.insert(self.Contents, '\t\t\tbuildArgumentsString = "";\n')
 					else
-						table.insert(self.Contents, '\t\t\tbuildArgumentsString = "$(PLATFORM) $(CONFIG) $(ACTION) $(TARGET_NAME)";\n')
+						table.insert(self.Contents, '\t\t\tbuildArgumentsString = "$(COMMANDLINE)";\n')
 					end
 				end
 				table.insert(self.Contents, '\t\t\tbuildConfigurationList = ' .. subProjectInfo.LegacyTargetBuildConfigurationListUuid .. ' /* Build configuration list for PBXLegacyTarget "' .. subProjectInfo.Name .. '" */;\n')
@@ -344,7 +370,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 					if subProject.BuildCommandLine then
 						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. subProject.BuildCommandLine[1] .. '";\n')
 					else
-						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. ospath.join(_getWorkspacePath(), 'xcodejam') .. '";\n')
+						table.insert(self.Contents, '\t\t\tbuildToolPath = "' .. ospath.join(destinationRootPath, 'jam') .. '";\n')
 					end
 				end
 				table.insert(self.Contents, '\t\t\tbuildRules = (\n')
@@ -385,7 +411,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 	table.insert(self.Contents, "/* Begin PBXShellScriptBuildPhase section */\n")
 	for curProject in ivalues(allTargets) do
 		if curProject.XcodeProjectType == 'native' then
-			local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
+			local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name, self.Workspace)
 			local subProject = Projects[curProject.Name]
 			table.insert(self.Contents, expand([[
 		$(ShellScriptUuid) /* ShellScript */ = {
@@ -403,7 +429,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 			if subProject.BuildCommandLine then
 				table.insert(self.Contents, subProject.BuildCommandLine[1] .. '";\n')
 			else
-				table.insert(self.Contents, ospath.join(_getWorkspacePath(), 'xcodejam') .. [[ $PLATFORM $CONFIG $ACTION $TARGET_NAME";]] .. '\n')
+				table.insert(self.Contents, ospath.join(destinationRootPath, 'jam') .. [[ $COMMANDLINE";]] .. '\n')
 			end
 			table.insert(self.Contents, "\t\t};\n")
 		end
@@ -413,7 +439,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 	table.insert(self.Contents, "/* Begin PBXSourcesBuildPhase section */\n")
 	for curProject in ivalues(allTargets) do
 		if curProject.XcodeProjectType == 'native' then
-            local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
+            local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name, self.Workspace)
             local subProject = Projects[curProject.Name]
             table.insert(self.Contents, expand([[
 		$(SourcesUuid) /* Sources */ = {
@@ -455,7 +481,7 @@ local function XcodeHelper_WritePBXProject(self, info, allTargets)
 			targets = (
 ]], info))
 	for curProject in ivalues(allTargets) do
-		local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name)
+		local subProjectInfo = XcodeHelper_GetProjectExportInfo(curProject.Name, self.Workspace)
 		table.insert(self.Contents, ("\t\t\t\t\t%s /* %s */,\n"):format(subProjectInfo.LegacyTargetUuid, subProjectInfo.Name))
 	end
 	table.insert(self.Contents, [[
@@ -465,12 +491,12 @@ local function XcodeHelper_WritePBXProject(self, info, allTargets)
 	table.insert(self.Contents, '/* End PBXProject section */\n\n')
 end
 
-local function XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectName)
+local function XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectName, workspaceConfigs)
 	local subProject = Projects[projectName]
 
 	-- Write project configurations.
 	for _, platformName in ipairs(Config.Platforms) do
-		for _, configName in ipairs(Config.Configurations) do
+		for _, configName in ipairs(workspaceConfigs) do
 			local configInfo = subProject.ConfigInfo[platformName][configName]
 
 			local platformAndConfigText = platformName .. ' - ' .. configName
@@ -493,19 +519,21 @@ local function XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectN
 	end
 end
 
-local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
-	local subProjectInfo = XcodeHelper_GetProjectExportInfo(projectName)
+local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, workspaceConfigs)
+	local subProjectInfo = XcodeHelper_GetProjectExportInfo(projectName, self.Workspace)
 	local subProject = Projects[projectName]
 
 	-- Write XCBuildConfigurations.
 	table.insert(self.Contents, '/* Begin XCBuildConfiguration section */\n')
 
 	for _, platformName in ipairs(Config.Platforms) do
-		for _, configName in ipairs(Config.Configurations) do
-			local configInfo = subProject.ConfigInfo[platformName][configName]
+		for _, workspaceConfigName in ipairs(workspaceConfigs) do
+			local configName = GetJamConfigName(workspaceConfigName, self.Workspace)
 
-			local platformAndConfigText = platformName .. ' - ' .. configName
-			table.insert(self.Contents, "\t\t" .. subProjectInfo.LegacyTargetConfigUuids[platformName][configName] .. ' /* ' .. platformAndConfigText .. ' */ = {\n')
+			local configInfo = subProject.ConfigInfo[platformName][workspaceConfigName]
+
+			local platformAndConfigText = platformName .. ' - ' .. workspaceConfigName
+			table.insert(self.Contents, "\t\t" .. subProjectInfo.LegacyTargetConfigUuids[platformName][workspaceConfigName] .. ' /* ' .. platformAndConfigText .. ' */ = {\n')
 			table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
 			table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
 			table.insert(self.Contents, "\t\t\t\tTARGET_NAME = \"" .. (subProject.TargetName or projectName) .. "\";\n")
@@ -532,8 +560,17 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 
 			if osxSdkVersionMin then
 				table.insert(self.Contents, "\t\t\t\tMACOSX_DEPLOYMENT_TARGET = \"" .. osxSdkVersionMin .. "\";\n")
-				print( "MACOSX_DEPLOYMENT_TARGET found for " .. platformName .. " - " .. configName )
 			end
+
+			local jamCommandLine = '-g'
+
+			local customWorkspaceConfig = self.Workspace  and  self.Workspace.Configs  and  self.Workspace.Configs[workspaceConfigName]
+			if customWorkspaceConfig then
+				jamCommandLine = jamCommandLine .. ' ' .. expand(table.concat(customWorkspaceConfig.CommandLineOptions, ' '), configInfo, info, _G)
+			else
+				jamCommandLine = jamCommandLine .. ' C.TOOLCHAIN=' .. platformName .. '/' .. configName
+			end
+			table.insert(self.Contents, '\t\t\t\tCOMMANDLINE = "' .. jamCommandLine .. '";\n')
 
 			table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. platformName .. ";\n")
 			table.insert(self.Contents, "\t\t\t\tCONFIG = " .. configName .. ";\n")
@@ -617,29 +654,29 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName)
 	end
 
 	-- Write project configurations.
-	XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectName)
+	XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectName, workspaceConfigs)
 	
 	table.insert(self.Contents, '/* End XCBuildConfiguration section */\n\n')
 end
 
-local function XcodeHelper_WriteProjectXCConfigurationList(self, info)
+local function XcodeHelper_WriteProjectXCConfigurationList(self, info, workspaceConfigs)
 	table.insert(self.Contents, "\t\t" .. info.ProjectBuildConfigurationListUuid .. ' /* Build configuration list for PBXProject "' .. info.Name .. '" */ = {\n')
 	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
 	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
 	for _, platformName in ipairs(Config.Platforms) do
-		for _, config in ipairs(Config.Configurations) do
+		for _, config in ipairs(workspaceConfigs) do
 			local platformAndConfigText = platformName .. ' - ' .. config
 			table.insert(self.Contents, "\t\t\t\t" .. info.ProjectConfigUuids[platformName][config] .. " /* " .. platformAndConfigText .. " */,\n")
 		end
 	end
 	table.insert(self.Contents, "\t\t\t);\n")
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
-	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = \"" .. Config.Platforms[1] .. ' - ' .. Config.Configurations[1] .. "\";\n")
+	table.insert(self.Contents, "\t\t\tdefaultConfigurationName = \"" .. Config.Platforms[1] .. ' - ' .. workspaceConfigs[1] .. "\";\n")
 	table.insert(self.Contents, "\t\t};\n")
 end
 
-local function XcodeHelper_WriteXCConfigurationLists(self, info, projectName)
-	local subProjectInfo = XcodeHelper_GetProjectExportInfo(projectName)
+local function XcodeHelper_WriteXCConfigurationLists(self, info, projectName, workspaceConfigs)
+	local subProjectInfo = XcodeHelper_GetProjectExportInfo(projectName, self.Workspace)
 
 	-- Write XCConfigurationLists.
 	table.insert(self.Contents, "/* Begin XCConfigurationList section */\n")
@@ -648,17 +685,16 @@ local function XcodeHelper_WriteXCConfigurationLists(self, info, projectName)
 	table.insert(self.Contents, "\t\t\tisa = XCConfigurationList;\n")
 	table.insert(self.Contents, "\t\t\tbuildConfigurations = (\n")
 	for _, platformName in ipairs(Config.Platforms) do
-		for _, config in ipairs(Config.Configurations) do
+		for _, config in ipairs(workspaceConfigs) do
 			local platformAndConfigText = platformName .. ' - ' .. config
 			table.insert(self.Contents, "\t\t\t\t" .. subProjectInfo.LegacyTargetConfigUuids[platformName][config] .. " /* " .. platformAndConfigText .. " */,\n")
 		end
 	end
 	table.insert(self.Contents, "\t\t\t);\n")
 	table.insert(self.Contents, "\t\t\tdefaultConfigurationIsVisible = 0;\n")
-	--table.insert(self.Contents, "\t\t\tdefaultConfigurationName = \"" .. Config.Platforms[1] .. ' - ' .. Config.Configurations[1] .. "\";\n")
 	table.insert(self.Contents, "\t\t};\n\n")
 
-	XcodeHelper_WriteProjectXCConfigurationList(self, info)
+	XcodeHelper_WriteProjectXCConfigurationList(self, info, workspaceConfigs)
 
 	table.insert(self.Contents, "/* End XCConfigurationList section */\n\n")
 end
@@ -670,10 +706,12 @@ function XcodeProjectMetaTable:Write(outputPath)
 	local projectPath = ospath.join(outputPath, self.ProjectName .. '.xcodeproj')
 	local filename = ospath.join(outputPath, projectPath, 'project.pbxproj')
 
-	local info = XcodeHelper_GetProjectExportInfo(self.ProjectName)
+	local info = XcodeHelper_GetProjectExportInfo(self.ProjectName, self.Workspace)
 	info.Filename = filename
 
 	local project = Projects[self.ProjectName]
+
+	local workspaceConfigs = GetWorkspaceConfigList(self.Workspace)
 
 	--project._insertedapp = nil
 
@@ -763,8 +801,8 @@ function XcodeProjectMetaTable:Write(outputPath)
 	XcodeHelper_WritePBXProject(self, info, allTargets)
 
 	for curProject in ivalues(allTargets) do
-		XcodeHelper_WriteXCBuildConfigurations(self, info, curProject.Name)
-		XcodeHelper_WriteXCConfigurationLists(self, info, curProject.Name)
+		XcodeHelper_WriteXCBuildConfigurations(self, info, curProject.Name, workspaceConfigs)
+		XcodeHelper_WriteXCConfigurationLists(self, info, curProject.Name, workspaceConfigs)
 	end
 
 	table.insert(self.Contents, "\t};\n")
@@ -777,14 +815,13 @@ function XcodeProjectMetaTable:Write(outputPath)
 	---------------------------------------------------------------------------
 	-- Write the schemes
 	---------------------------------------------------------------------------
-	local subProjectInfo = XcodeHelper_GetProjectExportInfo(projectName)
+	local subProjectInfo = XcodeHelper_GetProjectExportInfo(projectName, self.Workspace)
 	local subProject = Projects[projectName]
 
 	for _, platformName in ipairs(Config.Platforms) do
-		for _, configName in ipairs(Config.Configurations) do
+		for _, configName in ipairs(workspaceConfigs) do
 			local configInfo = subProject.ConfigInfo[platformName][configName]
 			local filename = ospath.join(projectPath, 'xcshareddata', 'xcschemes', projectName .. '-' .. platformName .. '-' .. configName .. '.xcscheme')
-			local subProjectInfo = XcodeHelper_GetProjectExportInfo(projectName)
 
 			local contents = {}
 
@@ -892,12 +929,13 @@ function XcodeProjectMetaTable:Write(outputPath)
 	end
 end
 
-function XcodeProject(projectName, options)
+function XcodeProject(projectName, options, workspace)
 	return setmetatable(
 		{
 			Contents = {},
 			ProjectName = projectName,
 			Options = options,
+			Workspace = workspace,
 		}, { __index = XcodeProjectMetaTable }
 	)
 end
@@ -981,23 +1019,6 @@ function XcodeInitialize()
 	if not ProjectExportInfo then
 		ProjectExportInfo = {}
 	end
-
-	local xcodejamFilename = ospath.join(_getWorkspacePath(), 'xcodejam')
-	ospath.write_file(xcodejamFilename, [[
-#!/bin/sh
-PLATFORM=$1
-CONFIG=$2
-TARGET_NAME=
-if [ "$4" = "" ]; then
-	TARGET_NAME=$3
-elif [ "$3" = build ]; then
-	TARGET_NAME=$4
-elif [ "$3" = clean ]; then
-	TARGET_NAME=$4
-fi
-]] .. ospath.escape(ospath.join(destinationRootPath, 'jam')) .. [[ -g C.TOOLCHAIN=$PLATFORM/$CONFIG $TARGET_NAME
-]])
-	ospath.chmod(xcodejamFilename, 777)
 end
 
 

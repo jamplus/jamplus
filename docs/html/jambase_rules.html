@@ -40,6 +40,7 @@ Introduction</h1>
 <li><a href="jambase_rules.html#rule_SubInclude">SubInclude</a></li>
 <li><a href="jambase_rules.html#rule_SubIncludeRelative">SubIncludeRelative</a></li>
 <li><a href="jambase_rules.html#rule_Workspace">Workspace</a></li>
+<li><a href="jambase_rules.html#rule_WorkspaceConfig">WorkspaceConfig</a></li>
 <li><a href="jambase_rules.html#rule_WriteFile">WriteFile</a></li>
 </ul>
 </div>
@@ -343,6 +344,42 @@ rule Workspace WORKSPACE_NAME : TARGETS</h1>
   </dd>
 </dl>
 <div class="fragment"><div class="line">Workspace Project-all : AppA AppB AppC ;</div>
+</div><!-- fragment --><hr/>
+ <h1><a class="anchor" id="rule_WorkspaceConfig"></a>
+rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : JAM_CONFIG_NAME : COMMAND_LINE</h1>
+<p><a name="rule_%57orkspace%43onfig"></a></p>
+<p>Usually, configurations are created in a workspace according to the <code>VALID_CONFIGS</code> variable found within the generated workspace's <code>Jambase.jam</code>. These configurations can come from the defaults or from a config file passed to 'jam &ndash;workspace'.</p>
+<p>Using the <code>WorkspaceConfig</code> rule, the default generated configurations can be overridden for a given generated workspace/solution.</p>
+<p>Each user-specified workspace config gets its Jam command-line replaced entirely with the one specified on the WorkspaceConfig invocation. For that reason, it is very important to provide the <code>C.TOOLCHAIN</code> variable to the command-line, or Jam will not know what compiler, platform, and configuration it is building.</p>
+<p>Please make note that workspace configurations are not Jam configurations, so confusion may arise. Assumptions about output and intermediate directories are made based on the platform and config specified via <code>C.TOOLCHAIN</code>. Unless Jam rules are altered from the shipping defaults, there is not a unique intermediate and output location per provided <code>WorkspaceConfig</code>.</p>
+<p>In reality, a <code>WorkspaceConfig</code> is a hack. Just modify the generated <code>customsettings.jam</code> file instead, as it better represents what is actually happening within the build.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">WORKSPACE_NAME</td><td>The name of the workspace to modify. </td></tr>
+    <tr><td class="paramname">CONFIG_NAME</td><td>The name of the new configuration for the workspace. </td></tr>
+    <tr><td class="paramname">JAM_CONFIG_NAME</td><td>The name of the Jam build configuration being built on top of. </td></tr>
+    <tr><td class="paramname">COMMAND_LINE</td><td>Any additional command line parameters to pass on the Jam command-line for this <code>CONFIG_NAME</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><div class="line"><span class="preprocessor"># Generate workspaces with the following configs:</span></div>
+<div class="line"><span class="preprocessor">#</span></div>
+<div class="line"><span class="preprocessor">#   * debug_d3d</span></div>
+<div class="line"><span class="preprocessor">#   * debug_opengl</span></div>
+<div class="line"><span class="preprocessor">#   * debug_sdl</span></div>
+<div class="line"><span class="preprocessor">#   * release_d3d</span></div>
+<div class="line"><span class="preprocessor">#   * release_opengl</span></div>
+<div class="line"><span class="preprocessor">#   * release_sdl</span></div>
+<div class="line"><span class="keywordflow">if</span> $(TARGETINFO_LOCATE) {</div>
+<div class="line">    local config ;</div>
+<div class="line">    <span class="keywordflow">for</span> config in debug release {</div>
+<div class="line">        local engine ;</div>
+<div class="line">        <span class="keywordflow">for</span> engine in d3d opengl sdl {</div>
+<div class="line">            local dollar = $ ;</div>
+<div class="line">            WorkspaceConfig $(THE_WORKSPACE_NAME) : $(config)_$(engine) : $(config) : C.TOOLCHAIN=$(dollar)(PLATFORM)/$(config) THE_ENGINE=$(engine) ;</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line">}</div>
 </div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_WriteFile"></a>
 rule WriteFile WORKSPACE_NAME : TARGETS</h1>
