@@ -1156,13 +1156,21 @@ make0(
 					break;
 				}
 			}
-			for ( targets = actions->action->sources; targets; targets = targets->next )
+			if ( !targets->parentcommandlineoutofdate )
 			{
-				for( c = t->depends; c; c = c->next )
+				for ( targets = actions->action->sources; targets; targets = targets->next )
 				{
-					if ( targets->target == c->target )
+					for( c = t->depends; c; c = c->next )
 					{
-						targets->parentcommandlineoutofdate = 1;
+						if ( targets->target == c->target )
+						{
+							targets->parentcommandlineoutofdate = 1;
+							break;
+						}
+					}
+					if ( targets->parentcommandlineoutofdate )
+					{
+						break;
 					}
 				}
 			}
