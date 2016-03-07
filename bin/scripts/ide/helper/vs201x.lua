@@ -191,7 +191,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 			table.insert(self.Contents, expand([==[
   <PropertyGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
-    <BuildLogFile>$(ospath.make_backslash(destinationRootPath))$(Platform)-$(Config)/$$(MSBuildProjectName).log</BuildLogFile>
+    <BuildLogFile>$(ospath.join(_getWorkspacePath(), '_logs_'))/$(Platform)-$(Config)/$$(MSBuildProjectName).log</BuildLogFile>
     <NMakeBuildCommandLine>$(BuildCommandLine)</NMakeBuildCommandLine>
     <NMakeOutput>$(Output)</NMakeOutput>
     <NMakeCleanCommandLine>$(CleanCommandLine)</NMakeCleanCommandLine>
@@ -248,8 +248,11 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 
 			self.Contents[#self.Contents + 1] = expand([==[
     </Link>
+    <BuildLog>
+      <Path>$(ospath.join(_getWorkspacePath(), '_logs_'))/$(Platform)-$(Config)/$$(MSBuildProjectName).log</Path>
+    </BuildLog>
   </ItemDefinitionGroup>
-]==])
+]==], configInfo, info, _G)
 		end
 	end
 
