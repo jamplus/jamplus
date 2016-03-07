@@ -198,6 +198,8 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
     <NMakeReBuildCommandLine>$(RebuildCommandLine)</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>$(Defines)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(Includes)</NMakeIncludeSearchPath>
+    <OutDir>$(OutputPath)</OutDir>
+    <IntDir>$$(SolutionDir)/_intermediates_/$(Platform)-$(Config)/$$(MSBuildProjectName)</IntDir>
 ]==], configInfo, info, _G))
 
 			if configInfo.ForceIncludes ~= '' then
