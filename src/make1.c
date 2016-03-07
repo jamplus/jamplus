@@ -494,7 +494,9 @@ make1b( TARGET *t )
 					t->fate = T_FATE_STABLE;
 				}
 			} else {
-				t->fate = T_FATE_STABLE;
+				if ( md5matchescommandline( t ) ) {
+					t->fate = T_FATE_STABLE;
+				}
 			}
 		}
 #ifdef OPT_USE_CHECKSUMS_EXT
