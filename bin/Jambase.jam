@@ -757,6 +757,10 @@ rule AutoSourceGroup SOURCES
 }
 
 
+rule ExternalProject TARGET : PROJECT_PATH : OPTIONS {
+}
+
+
 rule NoWorkspace WORKSPACE_NAME
 {
 }

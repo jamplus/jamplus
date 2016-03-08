@@ -86,6 +86,21 @@ rule AutoSourceGroup TARGET : SOURCES
 }
 
 
+rule ExternalProject TARGET : PROJECT_PATH : OPTIONS {
+	local project = "Projects['$(TARGET)']" ;
+	Contents += "$(NEWLINE)$(NEWLINE)--------------------------------------------------------------------$(NEWLINE)" ;
+
+	Contents += "$(project).Name = '$(TARGET)'$(NEWLINE)" ;
+	Contents += "$(project).Path = [=[$(PROJECT_PATH)]=]$(NEWLINE)" ;
+	Contents += "$(project).RelativePath = [=[$(PROJECT_PATH)]=]$(NEWLINE)" ;
+	Contents += "$(project).ExternalProject = true$(NEWLINE)" ;
+	Contents += "$(project).Options['$(OPTIONS)'] = true$(NEWLINE)" ;
+
+	Depends all : $(TARGET) ;
+	Depends $(TARGET) : $(TargetInfoFile) ;
+}
+
+
 rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	SOURCES = [ ExpandFileList $(SOURCES) ] ;
 
