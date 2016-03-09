@@ -50,7 +50,7 @@ function Test()
 		'CreateJamVS2008Workspace.config',
 		'helloworld.c',
 		'.build/groovyplatform-release/TOP/helloworld/helloworld.o',
-		'.build/groovyplatform-release/TOP/helloworld/helloworld.release$(SUFEXE)',
+		'.build/groovyplatform-release/TOP/helloworld/helloworld$(SUFEXE)',
 		'jam/c/toolchain/groovyplatform.jam',
 		'Jamfile.jam',
 		'test.lua',

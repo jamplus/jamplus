@@ -184,7 +184,7 @@ function Test()
 			'main.c',
 			'$(TOOLCHAIN_PATH)/test/config.h',
 			'$(TOOLCHAIN_PATH)/test/main.o',
-			'$(TOOLCHAIN_PATH)/test/test.release',
+			'$(TOOLCHAIN_PATH)/test/test',
 		}
 
 		do

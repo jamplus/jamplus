@@ -36,15 +36,15 @@ if Platform == 'win32' then
 		'test.lua',
 		'app/Jamfile.jam',
 		'app/main.c',
-		'$(TOOLCHAIN_PATH)/app/app/app.release.exe',
-		'?$(TOOLCHAIN_PATH)/app/app/app.release.exe.intermediate.manifest',
-		'$(TOOLCHAIN_PATH)/app/app/app.release.pdb',
+		'$(TOOLCHAIN_PATH)/app/app/app.exe',
+		'?$(TOOLCHAIN_PATH)/app/app/app.exe.intermediate.manifest',
+		'$(TOOLCHAIN_PATH)/app/app/app.pdb',
 		'$(TOOLCHAIN_PATH)/app/app/main.obj',
 		'lib-a/add.c',
 		'lib-a/add.h',
 		'lib-a/Jamfile.jam',
 		'$(TOOLCHAIN_PATH)/lib-a/lib-a/add.obj',
-		'$(TOOLCHAIN_PATH)/lib-a/lib-a/lib-a.release.lib',
+		'$(TOOLCHAIN_PATH)/lib-a/lib-a/lib-a.lib',
 	}
 
 	patternA = [[
@@ -90,13 +90,13 @@ else
 		'test.lua',
 		'app/Jamfile.jam',
 		'app/main.c',
-		'$(TOOLCHAIN_PATH)/app/app/app.release',
+		'$(TOOLCHAIN_PATH)/app/app/app',
 		'$(TOOLCHAIN_PATH)/app/app/main.o',
 		'lib-a/add.c',
 		'lib-a/add.h',
 		'lib-a/Jamfile.jam',
 		'$(TOOLCHAIN_PATH)/lib-a/lib-a/add.o',
-		'$(TOOLCHAIN_PATH)/lib-a/lib-a/lib-a.release.a',
+		'$(TOOLCHAIN_PATH)/lib-a/lib-a/lib-a.a',
 	}
 
 	patternA = [[

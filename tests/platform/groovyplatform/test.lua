@@ -69,7 +69,7 @@ function Test()
 		'CreateJamVS2012Workspace.config',
 		'helloworld.c',
 		'.build/groovyplatform-retail/TOP/helloworld/helloworld.o',
-		'.build/groovyplatform-retail/TOP/helloworld/helloworld.retail$(SUFEXE)',
+		'.build/groovyplatform-retail/TOP/helloworld/helloworld$(SUFEXE)',
 		'jam/c/toolchain/groovycompiler/groovyplatform.jam',
 		'jam/c/toolchain/groovycompiler/shared.jam',
 		'jam/c/toolchain/groovyplatform/debug.jam',

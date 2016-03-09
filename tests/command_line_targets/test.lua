@@ -28,11 +28,11 @@ function Test()
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'$(TOOLCHAIN_PATH)/appA/appA.obj',
-			'$(TOOLCHAIN_PATH)/appA/appA.release.exe',
-			'$(TOOLCHAIN_PATH)/appA/appA.release.pdb',
+			'$(TOOLCHAIN_PATH)/appA/appA.exe',
+			'$(TOOLCHAIN_PATH)/appA/appA.pdb',
 			'$(TOOLCHAIN_PATH)/appB/appB.obj',
-			'$(TOOLCHAIN_PATH)/appB/appB.release.exe',
-			'$(TOOLCHAIN_PATH)/appB/appB.release.pdb',
+			'$(TOOLCHAIN_PATH)/appB/appB.exe',
+			'$(TOOLCHAIN_PATH)/appB/appB.pdb',
 			'?vc.pdb',
 		}
 
@@ -64,8 +64,8 @@ Building appA...
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'$(TOOLCHAIN_PATH)/appA/appA.obj',
-			'$(TOOLCHAIN_PATH)/appA/appA.release.exe',
-			'$(TOOLCHAIN_PATH)/appA/appA.release.pdb',
+			'$(TOOLCHAIN_PATH)/appA/appA.exe',
+			'$(TOOLCHAIN_PATH)/appA/appA.pdb',
 --			'?vc.pdb'
 		}
 
@@ -82,11 +82,11 @@ Building appB...
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'$(TOOLCHAIN_PATH)/appA/appA.obj',
-			'$(TOOLCHAIN_PATH)/appA/appA.release.exe',
-			'$(TOOLCHAIN_PATH)/appA/appA.release.pdb',
+			'$(TOOLCHAIN_PATH)/appA/appA.exe',
+			'$(TOOLCHAIN_PATH)/appA/appA.pdb',
 			'$(TOOLCHAIN_PATH)/appB/appB.obj',
-			'$(TOOLCHAIN_PATH)/appB/appB.release.exe',
-			'$(TOOLCHAIN_PATH)/appB/appB.release.pdb',
+			'$(TOOLCHAIN_PATH)/appB/appB.exe',
+			'$(TOOLCHAIN_PATH)/appB/appB.pdb',
 			'?vc.pdb'
 		}
 
@@ -94,8 +94,8 @@ Building appB...
 		TestFiles{
 			'appA.cpp', 'appB.cpp', 'Jamfile.jam',
 			'$(TOOLCHAIN_PATH)/appB/appB.obj',
-			'$(TOOLCHAIN_PATH)/appB/appB.release.exe',
-			'$(TOOLCHAIN_PATH)/appB/appB.release.pdb',
+			'$(TOOLCHAIN_PATH)/appB/appB.exe',
+			'$(TOOLCHAIN_PATH)/appB/appB.pdb',
 			'?vc.pdb'
 		}
 
@@ -126,9 +126,9 @@ Building appB...
 			'Jamfile.jam',
 			'test.lua',
 			'$(TOOLCHAIN_PATH)/appA/appA.o',
-			'$(TOOLCHAIN_PATH)/appA/appA.release',
+			'$(TOOLCHAIN_PATH)/appA/appA',
 			'$(TOOLCHAIN_PATH)/appB/appB.o',
-			'$(TOOLCHAIN_PATH)/appB/appB.release',
+			'$(TOOLCHAIN_PATH)/appB/appB',
 		}
 
 		---------------------------------------------------------------------------
@@ -162,7 +162,7 @@ Building appA...
 			'Jamfile.jam',
 			'test.lua',
 			'$(TOOLCHAIN_PATH)/appA/appA.o',
-			'$(TOOLCHAIN_PATH)/appA/appA.release',
+			'$(TOOLCHAIN_PATH)/appA/appA',
 		}
 
 		---------------------------------------------------------------------------
@@ -182,9 +182,9 @@ Building appB...
 			'Jamfile.jam',
 			'test.lua',
 			'$(TOOLCHAIN_PATH)/appA/appA.o',
-			'$(TOOLCHAIN_PATH)/appA/appA.release',
+			'$(TOOLCHAIN_PATH)/appA/appA',
 			'$(TOOLCHAIN_PATH)/appB/appB.o',
-			'$(TOOLCHAIN_PATH)/appB/appB.release',
+			'$(TOOLCHAIN_PATH)/appB/appB',
 		}
 
 		---------------------------------------------------------------------------
@@ -195,7 +195,7 @@ Building appB...
 			'Jamfile.jam',
 			'test.lua',
 			'$(TOOLCHAIN_PATH)/appB/appB.o',
-			'$(TOOLCHAIN_PATH)/appB/appB.release',
+			'$(TOOLCHAIN_PATH)/appB/appB',
 		}
 
 		---------------------------------------------------------------------------

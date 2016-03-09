@@ -38,9 +38,9 @@ function Test()
 			'Jamfile.jam',
 			'main.c',
 			'$(TOOLCHAIN_PATH)/helloworld/file.obj',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe',
-			'?$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe.intermediate.manifest',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release.pdb',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld.exe',
+			'?$(TOOLCHAIN_PATH)/helloworld/helloworld.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld.pdb',
 			'$(TOOLCHAIN_PATH)/helloworld/main.obj',
 		}
 
@@ -91,7 +91,7 @@ function Test()
 			'main.c',
 			'test.lua',
 			'$(TOOLCHAIN_PATH)/helloworld/file.o',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld',
 			'$(TOOLCHAIN_PATH)/helloworld/main.o',
 		}
 
@@ -188,9 +188,9 @@ void Print()
 			'Jamfile.jam',
 			'main.c',
 			'$(TOOLCHAIN_PATH)/helloworld/file.obj',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe',
-			'?$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe.intermediate.manifest',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release.pdb',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld.exe',
+			'?$(TOOLCHAIN_PATH)/helloworld/helloworld.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld.pdb',
 			'$(TOOLCHAIN_PATH)/helloworld/main.obj',
 		}
 
@@ -246,7 +246,7 @@ void Print()
 			'main.c',
 			'test.lua',
 			'$(TOOLCHAIN_PATH)/helloworld/file.o',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld',
 			'$(TOOLCHAIN_PATH)/helloworld/main.o',
 		}
 

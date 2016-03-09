@@ -1342,12 +1342,6 @@ rule C._retrieveOutputName TARGET : SUFFIX {
 
 	local presuffix = $(OUTPUTPOSTFIX:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	presuffix ?= $(OUTPUTPOSTFIX:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-	if ! $(presuffix) {
-		presuffix = $(C.CONFIG) ;
-		if $(presuffix) {
-			presuffix = .$(presuffix) ;
-		}
-	}
 	if $(presuffix) = *off* {
 		presuffix = ;
 	}
