@@ -17,6 +17,7 @@ SPACE = " " ;
 TAB = "	" ;
 NEWLINE = "
 " ;
+DOLLAR = $ ;
 
 JAMBASE_VERSION = "JamPlus 3.0 Alpha (2014.10.11)" ;
 
