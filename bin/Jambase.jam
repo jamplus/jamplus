@@ -796,8 +796,6 @@ rule Workspace WORKSPACE_NAME : TARGETS
 rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND_LINE_OPTIONS {
 }
 
-INCREDIBUILD ?= off ;
-
 ###############################################################################
 # Toolchain support
 ###############################################################################
