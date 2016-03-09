@@ -124,7 +124,7 @@ A number of Jam built-in variables can be used to identify runtime platform:
 
 <table width=75% align=center>
   <tr><td>CWD<td>The current working directory.
-  <tr><td>JAM_COMMAND_LINE_TARGETS<td>The list of all targets passed into Jam on the command line.  If no targets were passed, \c JAM_COMMAND_LINE_TARGETS defaults to \b all.
+  <tr><td>JAM_COMMAND_LINE_TARGETS<td>The list of all targets passed into Jam on the command line.  If no targets were passed, \c JAM_COMMAND_LINE_TARGETS defaults to \b all.  Note that modifying \c JAM_COMMAND_LINE_TARGETS will override targets specified on the command-line.
   <tr><td>JAM_PROCESS_PATH<td>The path where the Jam executable resides.
   <tr><td>PATHDELIM_OLDSTYLE<td>In JamPlus, the default path separator is a forward slash.  If \c PATHDELIM_OLDSTYLE is set to 1, the default path separator is OS-specific, and the behavior mirrors the original Perforce Jam.
 </table>

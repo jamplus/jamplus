@@ -766,6 +766,21 @@ int main( int argc, char **argv, char **arg_environ )
 	    globs.noexec++;
 	}
 
+#ifdef OPT_SET_JAMCOMMANDLINETARGETS_EXT
+	{
+		LIST *jamCommandLineTargets = var_get("JAM_COMMAND_LINE_TARGETS");
+		num_targets = 0;
+		if ( jamCommandLineTargets )
+		{
+			LISTITEM *item;
+			for ( item = list_first(jamCommandLineTargets); item; item = list_next(item) )
+			{
+				targets[num_targets++] = (char*)list_value(item);
+			}
+		}
+	}
+#endif
+
 	/* Now make target */
 
 	if( !num_targets )
