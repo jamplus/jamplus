@@ -654,9 +654,9 @@ function DumpWorkspace(workspace)
 	else
 		updateWorkspaceCommandLines =
 		{
-			ospath.join(_getWorkspacesPath(), 'updateworkspace'),
-			ospath.join(_getWorkspacesPath(), 'updateworkspace'),
-			ospath.join(_getWorkspacesPath(), 'updateworkspace'),
+			ospath.join(_getWorkspacesPath(), 'updateworkspaces'),
+			ospath.join(_getWorkspacesPath(), 'updateworkspaces'),
+			ospath.join(_getWorkspacesPath(), 'updateworkspaces'),
 		}
 	end
 
