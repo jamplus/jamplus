@@ -1735,8 +1735,32 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 ########################################################################
 ########################################################################
 
-rule ActiveProject PROJECT
-{
-	ACTIVE_PROJECT = $(PROJECT) ;
+if ! $(C.ACTIVE_TOOLCHAIN_GRIST) {
+	VALID_CONFIGS ?= release releaseltcg debug ;
+
+	switch $(OS)
+	{
+		case NT :
+			VALID_PLATFORMS ?= win64 win32 ;
+
+		case MACOSX :
+			VALID_PLATFORMS ?= macosx64 macosx32 ;
+
+		case LINUX :
+			VALID_PLATFORMS ?= linux64 linux32 ;
+	}
+
+	if $(C.TOOLCHAIN) {
+		C.Toolchain $(C.TOOLCHAIN) ;
+	} else if $(c.toolchain) {
+		C.Toolchain $(c.toolchain) ;
+	} else {
+		CONFIG ?= $(VALID_CONFIGS[1]) ;
+
+		if $(PLATFORM) = "" { PLATFORM = ; }
+		PLATFORM ?= $(VALID_PLATFORMS[1]) ;
+
+		C.Toolchain $(PLATFORM)/$(CONFIG) ;
+	}
 }
 
