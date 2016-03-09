@@ -267,12 +267,15 @@ When using the <tt>:W</tt> modifier, the following file globbing syntax is avail
   </tr>
   <tr>
     <td><code>/</code> at end of pattern</td>
-
     <td>Any pattern with a closing slash will start a directory search, instead of the default file search.</td>
   </tr>
   <tr>
     <td><code>**</code></td>
     <td>Search files recursively.</td>
+  </tr>
+  <tr>
+    <td><code>\verbatim **/\endverbatim</code></td>
+    <td>Search directories recursively.</td>
   </tr>
 </table>
 
@@ -311,75 +314,75 @@ When using the <tt>:W</tt> modifier, the following file globbing syntax is avail
     <td>Matches all files (non-recursive).</td>
   </tr>
   <tr>
-    <td><code>*@{@}/</code></td>
+    <td><code>\verbatim */ \endverbatim</code></td>
     <td>Matches all directories (non-recursive).</td>
 
   </tr>
   <tr>
-    <td><code>A*@{@}/</code></td>
+    <td><code>\verbatim A*/ \endverbatim</code></td>
     <td>Matches any directory starting with A (non-recursive).</td>
   </tr>
   <tr>
-    <td><code>**@{@}/@{@}*</code></td>
+    <td><code>\verbatim **/* \endverbatim</code></td>
 
     <td>Matches all files (recursive).</td>
   </tr>
   <tr>
     <td><code>**</code></td>
-    <td>Shortened form of above. Matches all files (recursive). Internally, expands to **@{@}/@{@}*</td>
+    <td>Shortened form of above. Matches all files (recursive). Internally, expands to \verbatim **/*\endverbatim</td>
   </tr>
   <tr>
 
-    <td><code>**@{@}/</code></td>
+    <td><code>\verbatim **/ \endverbatim</code></td>
     <td>Matches all directories (recursive).</td>
   </tr>
   <tr>
     <td><code>**{filename chars}</code></td>
-    <td>Matches {filename chars} recursively. Internally, expands to **@{@}/@{@}*{filename chars}.</td>
+    <td>Matches {filename chars} recursively. Internally, expands to \verbatim **/*{filename chars}\endverbatim.</td>
   </tr>
 
   <tr>
     <td><code>{dirname chars}**</code></td>
-    <td>Expands to {dirname chars}*@{@}/@{@}**.</td>
+    <td>Expands to \verbatim {dirname chars}*/**\endverbatim.</td>
   </tr>
   <tr>
     <td><code>{dirname chars}**{filename chars}</code></td>
-    <td>Expands to {dirname chars}*@{@}/@{@}**@{@}/@{@}*{filename chars}.</td>
+    <td>Expands to \verbatim {dirname chars}*/**/*{filename chars}\endverbatim.</td>
 
   </tr>
   <tr>
     <td><code>**.h</code></td>
-    <td>Matches all *.h files recursively. Expands to **@{@}/@{@}*.h.</td>
+    <td>Matches all *.h files recursively. Expands to \verbatim **/*.h\endverbatim.</td>
   </tr>
   <tr>
     <td><code>**resource.h</code></td>
 
     <td>Matches all *resource.h files recursively.
-    Expands to **@{@}/@{@}*resource.h.</td>
+    Expands to \verbatim **/*resource.h\endverbatim.</td>
   </tr>
   <tr>
     <td><code>BK**</code></td>
-    <td>Matches all files in any directory starting with BK, recursively. Expands to BK*@{@}/@{@}**.</td>
+    <td>Matches all files in any directory starting with BK, recursively. Expands to \verbatim BK*/**\endverbatim.</td>
   </tr>
   <tr>
 
     <td><code>BK**.h</code></td>
-    <td>Matches all *.h files in any directory starting with BK, recursively. Expands to BK*@{@}/@{@}**@{@}/@{@}*.h.</td>
+    <td>Matches all *.h files in any directory starting with BK, recursively. Expands to \verbatim BK*/**/*.h\endverbatim.</td>
   </tr>
   <tr>
-    <td><code>c:/Src/@{@}**@{@}/@{@}*.h</code></td>
+    <td><code>\verbatim c:/Src/**/*.h\endverbatim</code></td>
     <td>Matches all *.h files recursively, starting at c:/Src/.</td>
   </tr>
   <tr>
-    <td><code>c:/Src/@{@}**@{@}/@{@}*Grid/</code></td>
+    <td><code>\verbatim c:/Src/**/*Grid/\endverbatim</code></td>
     <td>Recursively matches all directories under c:/Src/ that end with Grid.</td>
   </tr>
   <tr>
-    <td><code>c:/Src/@{@}**@{@}/@{@}*Grid*@{@}/</code></td>
+    <td><code>\verbatim c:/Src/**/*Grid*/\endverbatim</code></td>
     <td>Recursively matches all directories under c:/Src/ that contain Grid.</td>
   </tr>
   <tr>
-    <td><code>c:/Src/@{@}**@{@}/@{@}*Grid*@{@}/@{@}**@{@}/ABC/@{@}**@{@}/Readme.txt</code></td>
+    <td><code>\verbatim c:/Src/**/*Grid*/**/ABC/**/Readme.txt\endverbatim</code></td>
 
     <td>Recursively matches all directories under c:/Src/ that contain Grid. From the found directory, recursively matches directories until ABC/ is found. From there, the file <i>Readme.txt</i> is searched for recursively. </td>
   </tr>
@@ -393,20 +396,42 @@ When using the <tt>:W</tt> modifier, the following file globbing syntax is avail
     <td width="450"><b>Description</b></td>
   </tr>
   <tr>
-    <td><code>@-pattern</code></td>
-    <td>Adds <code>pattern</code> to the ignore list. Any file matching a pattern in the ignore list is discounted from the search.</td>
+    <td><code>@*</code></td>
+    <td>Search files and directories recursively.</td>
   </tr>
-
+  <tr>
+    <td><code>@-pattern</code></td>
+    <td>Adds <code>pattern</code> to the file ignore list. Any file matching a pattern in the file ignore list is removed from the search.</td>
+  </tr>
+  <tr>
+    <td><code>@-pattern/</code></td>
+    <td>Adds <code>pattern/</code> to the directory ignore list. Any directory matching a pattern in the directory ignore list is removed from the search.</td>
+  </tr>
   <tr>
     <td><code>@=pattern</code></td>
-    <td>Adds <code>pattern</code> to the exclusive file list. Any file not matching a pattern in the exclusive file list is automatically
-    removed from the search.</td>
+    <td>Adds <code>pattern</code> to the exclusive file list. Any file not matching a pattern in the exclusive file list is automatically removed from the search.</td>
+  </tr>
+  <tr>
+    <td><code>@=pattern/</code></td>
+    <td>Adds <code>pattern/</code> to the exclusive directory list. Any directory not matching a pattern in the exclusive file list is automatically removed from the search.</td>
   </tr>
   <tr>
     <td>More than two periods for going up parent directories.</td>
     <td>Similar to 4DOS, each period exceeding two periods goes up one additional parent directory. So, a 4 period path expands to <code>../../../.</code></td>
   </tr>
 </table>
+
+Wildcards may appear anywhere in the pattern, including directories.
+
+    \verbatim */*/*/*.c\endverbatim
+
+Note that *.* only matches files that have an extension.  This is different than standard DOS behavior.  Use * all by itself to match files, extension or not.
+
+Recursive wildcards can be used anywhere:
+
+    \verbatim c:/Dir1/**/A*/**/FileDirs*/**.mp3\endverbatim
+
+This matches all directories under c:/Dir1/ that start with A.  Under all of the directories that start with A, directories starting with FileDirs are matched recursively.  Finally, all files ending with an mp3 extension are matched.
 
 <p>And a few examples:</p>
 
@@ -416,16 +441,20 @@ When using the <tt>:W</tt> modifier, the following file globbing syntax is avail
     <td width="450"><b>Description</b></td>
   </tr>
   <tr>
-    <td><code>Src/**\/@-.git/@-.svn/</code></td>
+    <td><code>\verbatim Src/**/@-.git/@-.svn/\endverbatim</code></td>
     <td>Recursively lists all directories under Src/, but directories called .git/ and .svn/ are filtered.</td>
   </tr>
   <tr>
-    <td><code>Src/**@=*.lua@=README</code></td>
+    <td><code>\verbatim Src/**@=*.lua@=README\endverbatim</code></td>
     <td>Recursively lists all files under Src/ which match *.lua or README. All other files are ignored.</td>
   </tr>
   <tr>
-    <td><code>Src/**\/@-.git/@-.svn/@=*.lua@=README</code></td>
+    <td><code>\verbatim Src/**/@-.git/@-.svn/@=*.lua@=README\endverbatim</code></td>
     <td>Recursively lists all files under Src/ which match *.lua or README. The versions of those files that may exist in .git/ or .svn/ are ignored.</td>
+  </tr>
+  <tr>
+    <td><code>\verbatim ...../StartSearchHere/**\endverbatim</code></td>
+    <td>Expands to: \verbatim ../../../../StartSearchHere/**\endverbatim</td>
   </tr>
 </table>
 
