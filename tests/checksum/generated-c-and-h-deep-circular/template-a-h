@@ -1,0 +1,9 @@
+#ifndef GENERATED_A_H
+#define GENERATED_A_H
+
+#include "notgenerated-b.h"
+#include "generated-c.h"
+
+#define VALUEA 8
+
+#endif // GENERATED_A_H

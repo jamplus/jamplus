@@ -1,0 +1,3 @@
+#include "generated-a.h"
+
+#define VALUEC 8
