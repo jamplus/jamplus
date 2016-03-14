@@ -1,109 +1,55 @@
 rule C.OpenSSL TARGET : OPTIONS {
 	if $(NT) {
-		if $(C.COMPILER) in vs2015 {
-			local bits = "" ;
-			if $(PLATFORM) = win64 {
-				bits = 64 ;
+		local bits = "" ;
+		if $(PLATFORM) = win64 {
+			bits = 64 ;
+		}
+
+		local opensslRoot = $(OPENSSL_ROOT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+		if ! $(opensslRoot) {
+			local PATHS =
+				c:/
+				d:/
+				e:/
+			;
+
+			local PATH_SUFFIXES =
+				# http://www.npcglib.org/~stathis/blog/precompiled-openssl/
+				openssl-1.0.2f-$(C.COMPILER)
+				openssl-1.0.1r-$(C.COMPILER)
+			;
+
+			local ssl.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include$(bits)/openssl : ssl.h ] ;
+			if $(ssl.h) {
+				opensslRoot = [ Match (.+)/include$(bits)/openssl/ : $(ssl.h[1]) ] ;
+			} else {
+				opensslRoot = _ ;
 			}
+			OPENSSL_ROOT on $(C.COMPILER_SUITE_SYMBOL) = $(opensslRoot) ;
+		}
 
-			local opensslRoot = $(OPENSSL_ROOT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
-			if ! $(opensslRoot) {
-				local PATHS =
-					c:/
-					d:/
-					e:/
-				;
-
-				local PATH_SUFFIXES =
-					openssl-1.0.2f-$(C.COMPILER)
-				;
-
-				local ssl.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include$(bits)/openssl : ssl.h ] ;
-				if $(ssl.h) {
-					opensslRoot = [ Match (.+)/include$(bits)/openssl/ : $(ssl.h[1]) ] ;
-				} else {
-					opensslRoot = _ ;
-				}
-				OPENSSL_ROOT on $(C.COMPILER_SUITE_SYMBOL) = $(opensslRoot) ;
-			}
-
-			if $(opensslRoot) = _ {
-				return ;
-			}
-
-			if test in $(OPTIONS) {
-				return true ;
-			}
-
-			TARGET = [ C.ActiveTarget $(TARGET) ] ;
-			C.Defines $(TARGET) : USE_SSLEAY ;
-
-			C.IncludeDirectories $(TARGET) : $(opensslRoot)/include$(bits) $(opensslRoot)/include$(bits)/openssl ;
-
-			if link in $(OPTIONS) {
-				C.LinkDirectories $(TARGET) : $(opensslRoot)/lib$(bits) ;
-				C.LinkPrebuiltLibraries $(TARGET) : libeay32MT ssleay32MT ;
-
-				C.LinkPrebuiltLibraries $(TARGET) : advapi32 gdi32 user32 ;
-
-				C.LinkPrebuiltLibraries $(TARGET) : ws2_32 ;
-			}
-
+		if $(opensslRoot) = _ {
 			return ;
 		}
 
-		{
-			local bits = 32 ;
-			if $(PLATFORM) = win64 {
-				bits = 64 ;
-			}
-
-			if ! $(OPENSSL$(bits)_ROOT) {
-				local PATHS =
-					"$(OPENSSL_ROOT_DIR:J=$(SPACE))/"
-					c:/
-					d:/
-					e:/
-				;
-
-				local PATH_SUFFIXES =
-					OpenSSL-Win$(bits)
-				;
-
-				local ssl.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include/openssl : ssl.h ] ;
-				if $(ssl.h) {
-					OPENSSL$(bits)_ROOT = [ Match (.+)/include/openssl/ : $(ssl.h[1]) ] ;
-				} else {
-					OPENSSL$(bits)_ROOT = _ ;
-				}
-			}
-
-			if $(OPENSSL$(bits)_ROOT) = _ {
-				return ;
-			}
-
-			if test in $(OPTIONS) {
-				return true ;
-			}
-
-			C.Defines $(TARGET) : USE_SSLEAY ;
-
-			C.IncludeDirectories $(TARGET) : $(OPENSSL$(bits)_ROOT)/include $(OPENSSL$(bits)_ROOT)/include/openssl ;
-
-			if link in $(OPTIONS) {
-				if $(MSVCNT) {
-					C.LinkDirectories $(TARGET) : $(OPENSSL$(bits)_ROOT)/lib/VC/static ;
-					C.LinkPrebuiltLibraries $(TARGET) : libeay32MT ssleay32MT ;
-				} else if $(MINGW) {
-					local opensslMinGWLibDirectory = $(OPENSSL$(bits)_ROOT)/lib/MinGW ;
-					C.LinkPrebuiltLibraries : $(opensslMinGWLibDirectory)/libeay32 $(opensslMinGWLibDirectory)/ssleay32 ;
-				}
-
-				C.LinkPrebuiltLibraries $(TARGET) : advapi32 gdi32 user32 ;
-
-				C.LinkPrebuiltLibraries $(TARGET) : ws2_32 ;
-			}
+		if test in $(OPTIONS) {
+			return true ;
 		}
+
+		TARGET = [ C.ActiveTarget $(TARGET) ] ;
+		C.Defines $(TARGET) : USE_SSLEAY ;
+
+		C.IncludeDirectories $(TARGET) : $(opensslRoot)/include$(bits) $(opensslRoot)/include$(bits)/openssl ;
+
+		if link in $(OPTIONS) {
+			C.LinkDirectories $(TARGET) : $(opensslRoot)/lib$(bits) ;
+			C.LinkPrebuiltLibraries $(TARGET) : libeay32MT ssleay32MT ;
+
+			C.LinkPrebuiltLibraries $(TARGET) : advapi32 gdi32 user32 ;
+
+			C.LinkPrebuiltLibraries $(TARGET) : ws2_32 ;
+		}
+
 	} else {
 		local bits = 32 ;
 		if $(PLATFORM) in linux64 macosx64 {
