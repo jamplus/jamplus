@@ -735,7 +735,7 @@ function WriteJambase(exporter)
 
 	if opts.compiler or Config.Compiler then
 		Config.Compiler = Config.Compiler or opts.compiler
-		jambaseText[#jambaseText + 1] = "COMPILER ?= \"" .. Config.Compiler .. "\" ;\n"
+		jambaseText[#jambaseText + 1] = "C.COMPILER ?= \"" .. Config.Compiler .. "\" ;\n"
 	end
 
 	local variablesTable = {
