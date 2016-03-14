@@ -1,3 +1,5 @@
+rule C {
+}
 
 SUBDIRRESET += ASFLAGS HDRS C++FLAGS CCFLAGS ;
 
