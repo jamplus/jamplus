@@ -763,6 +763,9 @@ make0(
 #else
 	t->fate = T_FATE_MAKING;
 #endif
+#ifdef OPT_USE_CHECKSUMS_EXT
+	t->flags &= ~T_FLAG_CHECKSUM_VISITED;
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 	/*
 	 * Step 2: under the influence of "on target" variables,

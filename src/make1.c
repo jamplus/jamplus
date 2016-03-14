@@ -76,6 +76,10 @@
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 # include "luasupport.h"
 #endif
+#ifdef OPT_USE_CHECKSUMS_EXT
+#include "headers.h"
+#include "timestamp.h"
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 static void make1a( TARGET *t, TARGET *parent );
 static void make1b( TARGET *t );
@@ -105,6 +109,10 @@ static int verifyIsRealOutput (char *input, int len);
 #endif
 #ifdef OPT_RESPONSE_FILES
 static void printResponseFiles(CMD *cmd);
+#endif
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+void make1d_checksum_update( TARGET *t );
 #endif
 
 #ifdef OPT_MULTIPASS_EXT
@@ -1156,9 +1164,11 @@ make1d(
 		for (target = list_first(cmd->targetsunbound); target; target = list_next(target)) {
 			TARGET *t = bindtarget(list_value(target));
 			if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
+				t->flags &= ~T_FLAG_CHECKSUM_VISITED;
 				t->time = 0;
 				t->contentmd5sum_calculated = 0;
 				getcachedmd5sum(t, 1);
+				make1d_checksum_update(t);
 			}
 		}
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -1174,6 +1184,93 @@ make1d(
 
 	make1c( t );
 }
+
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+
+/*
+  make1d_checksum_update() - Update a target's dependency chain when the target has
+    been updated and has a HDRRULE applied. This handles 'appearing' dependency chains
+    for generated files and HDRRULE and checksum support.
+
+  In the case of a generated file being part of a HDRRULE chain, it is
+    necessary to discover the checksums of the dependencies after the generated
+    file has been written in order to have a proper no-op build for the next
+    Jam invocation.
+
+  Take the case of generated.c including nongenerated.h which includes generated.h.
+    Where generated.c did not exist when Jam was collecting HDRRULE dependencies,
+    nongenerated.h and generated.h are not known dependencies of generated.c.
+
+    generated.c -> nongenerated.h -> generated.h
+
+  In a timestamp-based Jam build, this is not a problem, as nongenerated.h and
+    generated.h will both have timestamps earlier than the resultant generated.obj.
+
+  For a checksum-based build, things are different. Without a call to
+    make1d_checksum_update(), the depcache database will store no information
+    about nongenerated.h and generated.h during the first run of Jam. For the
+    second run of Jam, generated.c, already on the disk, will have its HDRRULE
+    applied and nongenerated.h will be discovered. 'nongenerated.h' did not
+    exist in the database before, so JamPlus assumes the file is new, and the
+    build is treated as if the timestamp for nongenerated.h is newer than
+    generated.obj. Of course, nongenerated.h already existed on the disk, but
+    since the build could not infer that, there was no other safe option than
+    to cause the build to occur. That is why the second run of Jam results in
+    an apparent rebuild of generated.obj. The third run of Jam is a no-op, because
+    the database now contains information about nongenerated.h and generated.h
+    and knows they didn't change.
+
+  With a call to make1d_checksum_update() on the target that was just generated,
+    generated.c, a header scan occurs and discovers nongenerated.h needs to
+    be looked at more closely. Its timestamp, checksum, and even scanned headers
+    (which include generated.h) are inserted into the database. Upon running
+    Jam for a second time, nongenerated.h is discovered in the database and is
+    without change, so no build occurs, just as it should.
+*/
+void make1d_checksum_update( TARGET *t ) {
+	TARGETS	*c;
+
+	if ( t->flags & T_FLAG_CHECKSUM_VISITED ) {
+		return;
+	}
+	t->flags |= T_FLAG_CHECKSUM_VISITED;
+
+	if( ( t->binding == T_BIND_UNBOUND || t->binding == T_BIND_MISSING ) && !( t->flags & T_FLAG_NOTFILE ) ) {
+		/* Under the influence of "on target" variables, bind the target and search for headers. */
+		SETTINGS *s = copysettings( t->settings );
+		pushsettings( s );
+
+		if ( t->binding == T_BIND_UNBOUND ) {
+			t->boundname = search( t->name, &t->time );
+		}
+		if ( t->time == 0 ) {
+			file_time( t->boundname, &t->time );
+		}
+		t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
+
+		if ( !( t->flags & ( T_FLAG_NOUPDATE | T_FLAG_NOTFILE ) ) ) {
+			getcachedmd5sum(t, 1);
+		}
+
+		headers( t );
+
+		popsettings( s );
+		freesettings( s );
+	}
+
+	for( c = t->depends; c; c = c->next )
+	{
+		int internal = t->flags & T_FLAG_INTERNAL;
+
+		make1d_checksum_update( c->target );
+	}
+
+	if( t->includes )
+	    make1d_checksum_update( t->includes );
+}
+
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 /*
  * make1cmds() - turn ACTIONS into CMDs, grouping, splitting, etc
