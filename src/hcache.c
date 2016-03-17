@@ -743,6 +743,7 @@ int ismd5empty( MD5SUM md5sum )
 int getcachedmd5sum( TARGET *t, int source )
 {
 	HCACHEDATA cachedata, *c = &cachedata;
+	int cachedataexists;
 	int  use_cache = 1;
 	HCACHEFILE *file;
 	const char *target = t->boundname;
@@ -750,21 +751,6 @@ int getcachedmd5sum( TARGET *t, int source )
 	char path[ MAXJPATH ];
 	char *p;
 #endif
-
-	if ( t->contentmd5sum_calculated )
-		return t->contentmd5sum_changed;
-
-	if (!source) {
-		memset(&t->buildmd5sum, 0, sizeof(t->buildmd5sum));
-		memset(&t->contentmd5sum, 0, sizeof(t->contentmd5sum));
-		t->contentmd5sum_calculated = 1;
-		t->contentmd5sum_changed = 0;
-#ifdef OPT_USE_CHECKSUMS_EXT
-		//t->contentmd5sum_calculated = 0;
-		t->buildmd5sum_calculated = 0;
-#endif /* OPT_USE_CHECKSUMS_EXT */
-		return t->contentmd5sum_changed;
-	}
 
 	file = hcachefile_get( t );
 
@@ -780,8 +766,27 @@ int getcachedmd5sum( TARGET *t, int source )
 
 	c->boundname = target;
 
-	if( hashcheck( hcachehash, (HASHDATA **) &c ) )
-	{
+	cachedataexists = hashcheck( hcachehash, (HASHDATA **) &c );
+
+	if ( t->contentmd5sum_calculated ) {
+		if ( cachedataexists  &&  t->time == c->mtime ) {
+			return t->contentmd5sum_changed;
+		}
+	}
+
+	if (!source) {
+		memset(&t->buildmd5sum, 0, sizeof(t->buildmd5sum));
+		memset(&t->contentmd5sum, 0, sizeof(t->contentmd5sum));
+		t->contentmd5sum_calculated = 1;
+		t->contentmd5sum_changed = 0;
+#ifdef OPT_USE_CHECKSUMS_EXT
+		//t->contentmd5sum_calculated = 0;
+		t->buildmd5sum_calculated = 0;
+#endif /* OPT_USE_CHECKSUMS_EXT */
+		return t->contentmd5sum_changed;
+	}
+
+	if ( cachedataexists ) {
 		if ( t->time == 0 ) {
 			/* This file was generated.  Grab its timestamp. */
 			if ( file_time( c->boundname, &c->mtime ) == -1 ) {
