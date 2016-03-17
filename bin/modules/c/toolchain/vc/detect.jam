@@ -1,21 +1,72 @@
 #VISUAL_STUDIO_FORCE_VERSION = 10.0 ;
 
 rule FindVisualStudioHelper VERSION : COMPILER {
+	local is_clang = 0 ;
+	VC14_TOOLSET ?= cl ;
+	
     switch $(VERSION) {
-        case vs2015 :
-            local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
-            MSVCNT ?= [ W32_GETREG $(key) ] ;
+		case vs2015 :
+			
+			if $(VC14_TOOLSET) = clang {
+				# Is the an environment variable overide path for VC14 compiler
+				if $(VC14_ROOT) {
+					MSVCNT = $(VC14_ROOT)/VC ;
+					MSVCNT_BIN_PATH = 
+						"$(MSVCNT)/bin" 
+						"$(MSVCNT)/bin/amd64" 
+						"$(MSVCNT)/Clang 3.7/bin/x86" 
+						"$(MSVCNT)/Clang 3.7/bin/x86/amd64" 
+						;
+				}
+				else {
+					local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+					MSVCNT ?= [ W32_GETREG $(key) ] ;
 
-            VS140COMNTOOLS = $(VS140COMNTOOLS:J=" ") ;
-            if ! $(MSVCNT) && $(VS140COMNTOOLS) {
-                MSVCNT = $(VS140COMNTOOLS) ;
-            }
-            if $(MSVCNT) {
-                MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
-                MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
-                COMPILER = vs2015 ;
-            }
+					VS140COMNTOOLS = $(VS140COMNTOOLS:J=" ") ;
+					if ! $(MSVCNT) && $(VS140COMNTOOLS) {
+						MSVCNT = $(VS140COMNTOOLS) ;
+					}
+					if $(MSVCNT) {
+						MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+						MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+					}
+				}
+				
+				# Check the compiler exe is where it is expected
+				local clang = "$(MSVCNT)/Clang 3.7/bin/x86" ;
+				local foundPath = [ Glob $(clang:/) : clang.exe ] ;
+				if ! $(foundPath) {
+					#Exit ** clang.exe not found at $(clang:/). ;
+					return ;
+				}	
+				
+				COMPILER = vs2015 ;
+				is_clang = 1 ;
+			}
 
+			if $(VC14_TOOLSET) = cl {
+				# Is the an environment variable overide path for VC14 compiler
+				if $(VC14_ROOT) {
+					MSVCNT = $(VC14_ROOT)/VC ;
+					#MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+					COMPILER = vs2015 ;
+				}
+				else {
+					local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
+					MSVCNT ?= [ W32_GETREG $(key) ] ;
+
+					VS140COMNTOOLS = $(VS140COMNTOOLS:J=" ") ;
+					if ! $(MSVCNT) && $(VS140COMNTOOLS) {
+						MSVCNT = $(VS140COMNTOOLS) ;
+					}
+					if $(MSVCNT) {
+						MSVCNT = @(..\\..\\vc:R=$(MSVCNT)) ;
+						MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+						COMPILER = vs2015 ;
+					}
+				}
+			}
+			
         case vs2013 :
             local key = HKEY_CURRENT_USER SOFTWARE Microsoft VisualStudio $(VERSION)_Config InstallDir ;
             MSVCNT ?= [ W32_GETREG $(key) ] ;
@@ -122,6 +173,13 @@ rule FindVisualStudioHelper VERSION : COMPILER {
     }
 
     C.COMPILER_SUITE = vc ;
+	
+	if $(is_clang) = 0 {
+		C.COMPILER_TOOLSET = cl ;
+	}
+	else {
+		C.COMPILER_TOOLSET = clang ;
+	}
 
     local SUFOBJ = .obj ;
     SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = .exe ;
@@ -142,11 +200,17 @@ rule FindVisualStudioHelper VERSION : COMPILER {
     }
 
     C.BUILD_EXTENSIONS on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) .res ;
-    C.AddBuildExtensions CC : .c .s : C.vc.CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
-    C.AddBuildExtensions C++ : .cc .cpp .cxx : C.vc.C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
+	C.AddBuildExtensions CC : .c .s : C.$(C.COMPILER_SUITE).CC : $(SUFOBJ) "" : 1 1 0 : 1 ;
+	C.AddBuildExtensions C++ : .cc .cpp .cxx : C.$(C.COMPILER_SUITE).C++ : $(SUFOBJ) "" : 1 0 1 : 1 ;
 
-    C.Flags * : CC  : /TC ;
-    C.Flags * : C++ : /TP ;
+	if $(is_clang) = 0 {
+		C.Flags * : CC  : /TC ;
+		C.Flags * : C++ : /TP ;
+	}
+	else {
+		C.Flags * : CC  : -x c ;
+		C.Flags * : C++ : -x c++ ;
+	}
 
     TOOLCHAIN_COMPILER_KEYS on $(C.COMPILER_SUITE_SYMBOL) += MSVCNT ;
 
@@ -205,7 +269,7 @@ rule C.Toolchain.vc.Detect THE_COMPILER : OPTIONS {
         }
     }
 
-    C.COMPILER_SUITE = vc ;
+    #C.COMPILER_SUITE = vc ;
 
     return $(C.COMPILER) ;
 }

@@ -10,25 +10,41 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
     local MSSDK_STDHDRS ;
     local MSSDK_LINKDIRECTORIES ;
     switch $(COMPILER) {
+
         case vs2015 :
-            local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot81 ;
-            MSSDK81 = [ W32_GETREG $(key) ] ;
-            key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot10 ;
-            MSSDK = [ W32_GETREG $(key) ] ;
-            MSSDK ?= $(MSVCNT) ;
-            MSSDK_BINDIR = "$(MSSDK)/bin/x64" ;
-            MSSDK_STDHDRS =
-                $(MSVCNT)/include
-                $(MSSDK)/Include/10.0.10150.0/ucrt
-                $(MSSDK81)/Include/shared
-                $(MSSDK81)/Include/um
-                $(MSSDK81)/Include/winrt
-            ;
-            MSSDK_LINKDIRECTORIES =
-                $(MSVCNT)/lib/amd64
-                $(MSSDK)/lib/10.0.10150.0/ucrt/x64
-                $(MSSDK81)/lib/winv6.3/um/x64
-            ;
+			if $(VC14_ROOT) {
+				MSSDK81 = $(VC14_ROOT)/8.1 ;
+				MSSDK = $(VC14_ROOT)/10 ;
+			}
+			else {
+				local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot81 ;
+				MSSDK81 = [ W32_GETREG $(key) ] ;
+				key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot10 ;
+				MSSDK = [ W32_GETREG $(key) ] ;
+				MSSDK ?= $(MSVCNT) ;
+			}
+			
+			MSSDK_BINDIR = "$(MSSDK)/bin/x64" ;
+			
+			local inc_dir ;
+			if $(C.COMPILER_TOOLSET) = clang {
+				inc_dir = "$(MSVCNT)/Clang 3.7/include" ;
+			}
+			
+			MSSDK_STDHDRS =
+				$(inc_dir)
+				$(MSVCNT)/include
+				$(MSSDK)/Include/10.0.10150.0/ucrt
+				$(MSSDK81)/Include/shared
+				$(MSSDK81)/Include/um
+				$(MSSDK81)/Include/winrt
+			;
+				
+			MSSDK_LINKDIRECTORIES =
+				$(MSVCNT)/lib/amd64
+				$(MSSDK)/lib/10.0.10150.0/ucrt/x64
+				$(MSSDK81)/lib/winv6.3/um/x64
+			;
 
         case vs2013 :
             local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot81 ;
@@ -67,15 +83,24 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
     }
 
     local MSVCBIN = "$(MSVCNT)/bin/amd64/" ;
+	local CLANGBIN = "$(MSVCNT)/Clang 3.7/bin/x86/" ;
     MSVCBIN on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCBIN) ;
+	CLANGBIN on $(C.COMPILER_SUITE_SYMBOL) = $(CLANGBIN) ;
     MSSDK on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK) ;
     MSSDK_BINDIR on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_BINDIR) ;
     MSSDK_STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_STDHDRS) ;
     MSSDK_LINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
-
+	
+	if $(C.COMPILER_TOOLSET) = clang {
+	    C.CC on $(C.COMPILER_SUITE_SYMBOL)		= $(CLANGBIN)clang ;
+		C.C++ on $(C.COMPILER_SUITE_SYMBOL)     = $(CLANGBIN)clang ;
+	}
+	else {
+		C.CC on $(C.COMPILER_SUITE_SYMBOL)      = $(MSVCBIN)cl ;
+		C.C++ on $(C.COMPILER_SUITE_SYMBOL)     = $(MSVCBIN)cl ;
+	}
+	
     C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(MSVCBIN)lib ;
-    C.CC on $(C.COMPILER_SUITE_SYMBOL)          = $(MSVCBIN)cl ;
-    C.C++ on $(C.COMPILER_SUITE_SYMBOL)         = $(MSVCBIN)cl ;
     C.LINK on $(C.COMPILER_SUITE_SYMBOL)        = $(MSVCBIN)link ;
     C.MT on $(C.COMPILER_SUITE_SYMBOL)          = $(MSSDK_BINDIR)/mt ;
     C.RC on $(C.COMPILER_SUITE_SYMBOL)          = $(MSSDK_BINDIR)/RC ;
@@ -90,10 +115,17 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
     C._C++Exceptions on $(C.COMPILER_SUITE_SYMBOL) = C.vc._C++Exceptions ;
     C._LibraryFromObjects_LibFlags on $(C.COMPILER_SUITE_SYMBOL) = ;
     C._LinkPrebuiltLibraries on $(C.COMPILER_SUITE_SYMBOL) = ;
-    C._MultiCppCompile_PchDeps on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_PchDeps ;
-    C._MultiCppCompile_PostCompile on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_PostCompile ;
-    C._MultiCppCompile_PreCompile on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_PreCompile ;
-    C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_SetupFlags ;
+			
+	if $(C.COMPILER_TOOLSET) = cl {
+		C._MultiCppCompile_PchDeps on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_PchDeps ;
+		C._MultiCppCompile_PostCompile on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_PostCompile ;
+		C._MultiCppCompile_PreCompile on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_PreCompile ;
+		C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_SetupFlags ;
+	}
+	if $(C.COMPILER_TOOLSET) = clang {
+		C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.vcclang._MultiCppCompile_SetupFlags ;
+	}
+	
     C._RuntimeTypeHelper on $(C.COMPILER_SUITE_SYMBOL) = C.vc._RuntimeTypeHelper ;
     C._SharedLibraryFromObjects_CleanIntermediates on $(C.COMPILER_SUITE_SYMBOL) = C.vc._SharedLibraryFromObjects_CleanIntermediates ;
     C._SharedLibraryFromObjects_ExportLib on $(C.COMPILER_SUITE_SYMBOL) = C.vc._SharedLibraryFromObjects_ExportLib ;
