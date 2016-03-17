@@ -42,6 +42,6 @@ SubDir TOP ;
 
 Depends [ C.GristFiles test : generated.c ] : $(generated.c) ;
 LOCATE on [ C.GristFiles test : generated.c ] = $(TOP)/generateme ;
-C.IncludeDirectories test : . ;
+C.IncludeDirectories test : . generateme ;
 
 C.Application test : main.c generated.c ;

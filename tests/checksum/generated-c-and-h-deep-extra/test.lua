@@ -71,10 +71,6 @@ function TestChecksum()
 ]]
     else
         files = {
-            'generated-a.h',
-            'generated-b.h',
-            'generated-c.h',
-            'generated.c',
             'Jamfile.jam',
             'main.c',
             'notgenerated-a.h',
@@ -84,6 +80,10 @@ function TestChecksum()
             'template-b-h',
             'template-c',
             'template-c-h',
+            'generateme/generated-a.h',
+            'generateme/generated-b.h',
+            'generateme/generated-c.h',
+            'generateme/generated.c',
             '$(TOOLCHAIN_PATH)/test/generated.o',
             '$(TOOLCHAIN_PATH)/test/main.o',
             '$(TOOLCHAIN_PATH)/test/test',
@@ -91,15 +91,15 @@ function TestChecksum()
 
         pattern = [[
 *** found 17 target(s)...
-*** updating 8 target(s)...
+*** updating 9 target(s)...
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
-@ GenerateH <$(TOOLCHAIN_GRIST):test>generated-a.h
-@ GenerateH <$(TOOLCHAIN_GRIST):test>generated-b.h
-@ GenerateH <$(TOOLCHAIN_GRIST):test>generated-c.h
-@ GenerateC <$(TOOLCHAIN_GRIST):test>generated.c
+@ GenerateH <$(TOOLCHAIN_GRIST):generateme>generated-a.h
+@ GenerateH <$(TOOLCHAIN_GRIST):generateme>generated-b.h
+@ GenerateH <$(TOOLCHAIN_GRIST):generateme>generated-c.h
+@ GenerateC <$(TOOLCHAIN_GRIST):generateme>generated.c
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>generated.o
 @ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
-*** updated 8 target(s)...
+*** updated 9 target(s)...
 ]]
     end
 

@@ -59,13 +59,13 @@ function TestChecksum()
 ]]
     else
         files = {
-            'generated.c',
-            'generated.h',
             'Jamfile.jam',
             'main.c',
             'notgenerated.h',
             'template-c',
             'template-h',
+            'generateme/generated.c',
+            'generateme/generated.h',
             '$(TOOLCHAIN_PATH)/test/generated.o',
             '$(TOOLCHAIN_PATH)/test/main.o',
             '$(TOOLCHAIN_PATH)/test/test',
@@ -73,13 +73,13 @@ function TestChecksum()
 
         pattern = [[
 *** found 13 target(s)...
-*** updating 6 target(s)...
+*** updating 7 target(s)...
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o
-@ GenerateH <$(TOOLCHAIN_GRIST):test>generated.h
-@ GenerateC <$(TOOLCHAIN_GRIST):test>generated.c
+@ GenerateH <$(TOOLCHAIN_GRIST):generateme>generated.h
+@ GenerateC <$(TOOLCHAIN_GRIST):generateme>generated.c
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>generated.o
 @ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
-*** updated 6 target(s)...
+*** updated 7 target(s)...
 ]]
     end
 
