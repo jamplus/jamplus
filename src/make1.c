@@ -352,6 +352,13 @@ make1b( TARGET *t )
 #ifdef OPT_BUILTIN_NEEDS_EXT
 		/* Only test a target's MightNotUpdate flag if the target's build was successful. */
 		if( c->target->status == EXEC_CMD_OK ) {
+#ifdef OPT_USE_CHECKSUMS_EXT
+			if ((c->target->fate == T_FATE_OUTDATED  ||  c->target->fate == T_FATE_UPDATE)  &&  (usechecksums  ||  (c->target->flags & T_FLAG_SCANCONTENTS))  &&  !(c->target->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
+				getcachedmd5sum( c->target, 1 );
+				make1d_checksum_update(c->target);
+			}
+#endif /* OPT_USE_CHECKSUMS_EXT */
+
 			/* Skip checking MightNotUpdate children if the target is bound to a missing file, */
 			/* as in this case it should be built anyway */
 			if ( c->target->flags & T_FLAG_MIGHTNOTUPDATE && t->binding != T_BIND_MISSING ) {
@@ -398,9 +405,9 @@ make1b( TARGET *t )
 							if ( c->target->includes->fate > T_FATE_STABLE ) {
 								childupdated = 1;
 							}
-							//if ( c->target->fate == T_FATE_NEWER ) {
-								//childupdated = 1;
-							//}
+							if ( c->target->fate == T_FATE_UPDATE ) {
+								childupdated = 1;
+							}
 						} else {
 							childupdated = 1;
 						}
@@ -1166,9 +1173,8 @@ make1d(
 			if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
 				t->flags &= ~T_FLAG_CHECKSUM_VISITED;
 				t->time = 0;
-				t->contentmd5sum_calculated = 0;
-				getcachedmd5sum(t, 1);
-				make1d_checksum_update(t);
+				getcachedmd5sum( t, 1 );
+				file_time( t->boundname, &t->time );
 			}
 		}
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -1236,7 +1242,7 @@ void make1d_checksum_update( TARGET *t ) {
 	}
 	t->flags |= T_FLAG_CHECKSUM_VISITED;
 
-	if( ( t->binding == T_BIND_UNBOUND || t->binding == T_BIND_MISSING ) && !( t->flags & T_FLAG_NOTFILE ) ) {
+	if( !( t->flags & T_FLAG_NOTFILE ) ) {
 		/* Under the influence of "on target" variables, bind the target and search for headers. */
 		SETTINGS *s = copysettings( t->settings );
 		pushsettings( s );
@@ -1244,16 +1250,19 @@ void make1d_checksum_update( TARGET *t ) {
 		if ( t->binding == T_BIND_UNBOUND ) {
 			t->boundname = search( t->name, &t->time );
 		}
-		if ( t->time == 0 ) {
-			file_time( t->boundname, &t->time );
-		}
-		t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
 
 		if ( !( t->flags & ( T_FLAG_NOUPDATE | T_FLAG_NOTFILE ) ) ) {
 			getcachedmd5sum(t, 1);
 		}
 
-		headers( t );
+		if ( t->time == 0 ) {
+			file_time( t->boundname, &t->time );
+		}
+		t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
+
+		//if ( t->contentmd5sum_changed ) {
+			headers( t );
+		//}
 
 		popsettings( s );
 		freesettings( s );
