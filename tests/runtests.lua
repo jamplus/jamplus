@@ -492,7 +492,12 @@ if arg[1] == '--compiler' then
 end
 
 if arg[1] then
-	dirs = arg
+	dirs = {}
+	for _, thedir in ipairs(arg) do
+		for entry in filefind.glob(ospath.add_slash(thedir)) do
+			dirs[#dirs + 1] = entry.filename
+		end
+	end
 else
 	dirs = {}
 	for entry in filefind.glob('**/') do
