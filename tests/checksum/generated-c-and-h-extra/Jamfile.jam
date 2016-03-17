@@ -1,0 +1,47 @@
+JAM_USE_CHECKSUMS = 1 ;
+SubDir TOP ;
+
+if $(NT) {
+    actions GenerateC {
+        type $(2:C) > $(1:C)
+    }
+} else {
+    actions GenerateC {
+        cat $(2:C) > $(1:C)
+    }
+}
+
+actions lua GenerateH {
+    --require 'osprocess'.sleep(2)
+    local file = io.open([[$(2)]], 'rb')
+    local buffer = file:read('*a')
+    file:close()
+
+    file = io.open([[$(1)]], 'wb')
+    file:write(buffer)
+    file:close()
+}
+
+SubDir TOP generateme ;
+
+local generated.c = [ C.GristFiles generateme : generated.c ] ;
+GenerateC $(generated.c) : $(TOP)/template-c ;
+Depends $(generated.c) : $(TOP)/template-c ;
+MakeLocate $(generated.c) : $(TOP)/generateme ;
+Clean clean : $(generated.c) ;
+
+local generated.h = [ C.GristFiles generateme : generated.h ] ;
+GenerateH $(generated.h) : $(TOP)/template-h ;
+Depends $(generated.h) : $(TOP)/template-h ;
+MakeLocate $(generated.h) : $(TOP)/generateme ;
+Clean clean : $(generated.h) ;
+
+Needs $(generated.c) : $(generated.h) ;
+
+SubDir TOP ;
+
+Depends [ C.GristFiles test : generated.c ] : $(generated.c) ;
+LOCATE on [ C.GristFiles test : generated.c ] = $(TOP)/generateme ;
+C.IncludeDirectories test : . ;
+
+C.Application test : main.c generated.c ;
