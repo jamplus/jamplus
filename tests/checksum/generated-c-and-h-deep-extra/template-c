@@ -1,0 +1,6 @@
+#include "notgenerated-a.h"
+
+void PrintValue()
+{
+// printf("%d\n", VALUE);
+}
