@@ -884,7 +884,7 @@ void md5file(const char *filename, MD5SUM sum)
     MD5_CTX context;
     struct stat statbuf;
 
-    if( stat( filename, &statbuf ) < 0 && S_ISDIR( statbuf.st_mode ) ) {
+    if( stat( filename, &statbuf ) < 0 || S_ISDIR( statbuf.st_mode ) ) {
         memset(sum, 0, sizeof(MD5SUM));
         return;
     }

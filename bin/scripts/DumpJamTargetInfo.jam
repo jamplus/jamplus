@@ -1,3 +1,5 @@
+C ;
+
 JAM_MODULES_PATH += $(JAMFILE_ROOT) ;
 
 PLATFORM ?= $(C.PLATFORM) ;
@@ -86,6 +88,21 @@ rule AutoSourceGroup TARGET : SOURCES
 }
 
 
+rule ExternalProject TARGET : PROJECT_PATH : OPTIONS {
+	local project = "Projects['$(TARGET)']" ;
+	Contents += "$(NEWLINE)$(NEWLINE)--------------------------------------------------------------------$(NEWLINE)" ;
+
+	Contents += "$(project).Name = '$(TARGET)'$(NEWLINE)" ;
+	Contents += "$(project).Path = [=[$(PROJECT_PATH)]=]$(NEWLINE)" ;
+	Contents += "$(project).RelativePath = [=[$(PROJECT_PATH)]=]$(NEWLINE)" ;
+	Contents += "$(project).ExternalProject = true$(NEWLINE)" ;
+	Contents += "$(project).Options['$(OPTIONS)'] = true$(NEWLINE)" ;
+
+	Depends all : $(TARGET) ;
+	Depends $(TARGET) : $(TargetInfoFile) ;
+}
+
+
 rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	SOURCES = [ ExpandFileList $(SOURCES) ] ;
 
@@ -134,7 +151,7 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) {
 		defines += $(DEFINES) ;
 		hdrs = $(HDRS) $(hdrs) ;
-		forceIncludes = $(FORCE_INCLUDES) ;
+		forceIncludes = $(FORCE_INCLUDES:T) ;
 	}
 
 	local definesString = "'$(defines)'," ;
@@ -147,6 +164,9 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 	local hdrsString = "[[$(hdrs)]]," ;
 	hdrsString ?= "" ;
 	Contents += "$(project).IncludePaths['$(PLATFORM)']['$(CONFIG)'] = { $(hdrsString:J= ) }$(NEWLINE)" ;
+
+	local forceIncludesString = "[[$(forceIncludes)]]," ;
+	Contents += "$(project).ForceIncludes['$(PLATFORM)']['$(CONFIG)'] = { $(forceIncludesString:J= ) }$(NEWLINE)" ;
 
 	DumpSources $(project) : $(SOURCES) ;
 
@@ -214,6 +234,20 @@ $(solutionInfo).RelativePath = '$(SUBDIR_DOWN:E=.:J=/)'
 
 	local projectLines = "$(TAB)'$(TARGETS)',$(NEWLINE)" ;
 	Contents += "$(solutionInfo).Projects = concat($(solutionInfo).Projects, $(NEWLINE){$(NEWLINE)$(projectLines)})$(NEWLINE)" ;
+}
+
+
+rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND_LINE_OPTIONS {
+    if $(NO_EXPORT_WORKSPACES.$(WORKSPACE_NAME)) {
+        return ;
+    }
+    if $(PLATFORM) = *  &&  $(CONFIG) = * {
+        local solutionInfo = "Workspaces['$(WORKSPACE_NAME)']" ;
+        local configText = "$(solutionInfo).Configs[ [[$(CONFIG_NAME)]] ]" ;
+        local optionLines = "$(TAB)[[$(COMMAND_LINE_OPTIONS)]],$(NEWLINE)" ;
+        Contents += "$(configText).CommandLineOptions = concat($(configText).CommandLineOptions, $(NEWLINE){$(NEWLINE)$(optionLines)})$(NEWLINE)" ;
+        Contents += "$(configText).ActualConfigName = [[$(ACTUAL_CONFIG_NAME)]]$(NEWLINE)" ;
+    }
 }
 
 

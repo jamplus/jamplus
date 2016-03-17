@@ -763,6 +763,9 @@ make0(
 #else
 	t->fate = T_FATE_MAKING;
 #endif
+#ifdef OPT_USE_CHECKSUMS_EXT
+	t->flags &= ~T_FLAG_CHECKSUM_VISITED;
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 	/*
 	 * Step 2: under the influence of "on target" variables,
@@ -1156,13 +1159,21 @@ make0(
 					break;
 				}
 			}
-			for ( targets = actions->action->sources; targets; targets = targets->next )
+			if ( !targets->parentcommandlineoutofdate )
 			{
-				for( c = t->depends; c; c = c->next )
+				for ( targets = actions->action->sources; targets; targets = targets->next )
 				{
-					if ( targets->target == c->target )
+					for( c = t->depends; c; c = c->next )
 					{
-						targets->parentcommandlineoutofdate = 1;
+						if ( targets->target == c->target )
+						{
+							targets->parentcommandlineoutofdate = 1;
+							break;
+						}
+					}
+					if ( targets->parentcommandlineoutofdate )
+					{
+						break;
 					}
 				}
 			}

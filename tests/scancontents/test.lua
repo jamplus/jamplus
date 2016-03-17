@@ -39,9 +39,9 @@ function Test()
 			'test.c',
 			'$(TOOLCHAIN_PATH)/test/main.obj',
 			'$(TOOLCHAIN_PATH)/test/test.obj',
-			'$(TOOLCHAIN_PATH)/test/test.release.exe',
-			'?$(TOOLCHAIN_PATH)/test/test.release.exe.intermediate.manifest',
-			'$(TOOLCHAIN_PATH)/test/test.release.pdb',
+			'$(TOOLCHAIN_PATH)/test/test.exe',
+			'?$(TOOLCHAIN_PATH)/test/test.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/test/test.pdb',
 		}
 		
 		patternA = [[
@@ -81,7 +81,7 @@ function Test()
 			'test.lua',
 			'$(TOOLCHAIN_PATH)/test/main.o',
 			'$(TOOLCHAIN_PATH)/test/test.o',
-			'$(TOOLCHAIN_PATH)/test/test.release',
+			'$(TOOLCHAIN_PATH)/test/test',
 		}
 		
 		patternA = [[
@@ -152,9 +152,9 @@ function Test()
 			'test.c',
 			'$(TOOLCHAIN_PATH)/test/main.obj',
 			'$(TOOLCHAIN_PATH)/test/test.obj',
-			'$(TOOLCHAIN_PATH)/test/test.release.exe',
-			'?$(TOOLCHAIN_PATH)/test/test.release.exe.intermediate.manifest',
-			'$(TOOLCHAIN_PATH)/test/test.release.pdb',
+			'$(TOOLCHAIN_PATH)/test/test.exe',
+			'?$(TOOLCHAIN_PATH)/test/test.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/test/test.pdb',
 		}
 		
 		patternA = [[
@@ -209,7 +209,7 @@ function Test()
 			'test.lua',
 			'$(TOOLCHAIN_PATH)/test/main.o',
 			'$(TOOLCHAIN_PATH)/test/test.o',
-			'$(TOOLCHAIN_PATH)/test/test.release',
+			'$(TOOLCHAIN_PATH)/test/test',
 		}
 		
 		patternA = [[

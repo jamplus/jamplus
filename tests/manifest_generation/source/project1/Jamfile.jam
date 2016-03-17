@@ -5,8 +5,8 @@ SRCS =
 ;
 C.CompileOptions outputastree ;
 
-LocateTarget project1 : $(SUBDIR)/obj/$(PLATFORM)/$(CONFIG) ;
 C.OutputPath project1 : $(SUBDIR)/lib/$(PLATFORM)/$(CONFIG) ;
+LocateTarget project1 : $(SUBDIR)/obj/$(PLATFORM)/$(CONFIG) ;
 C.OutputPostfix project1 : ;
 
 C.Application project1 : $(SRCS) ;

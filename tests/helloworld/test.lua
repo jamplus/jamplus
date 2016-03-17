@@ -38,9 +38,9 @@ function Test()
 			'Jamfile.jam',
 			'main.c',
 			'$(TOOLCHAIN_PATH)/helloworld/file.obj',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe',
-			'?$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe.intermediate.manifest',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release.pdb',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld.exe',
+			'?$(TOOLCHAIN_PATH)/helloworld/helloworld.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld.pdb',
 			'$(TOOLCHAIN_PATH)/helloworld/main.obj',
 		}
 
@@ -58,7 +58,7 @@ function Test()
 		local pattern3 = [[
 *** found 18 target(s)...
 *** updating 2 target(s)...
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>file.obj
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>main.obj
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 2 target(s)...
 ]]
@@ -91,7 +91,7 @@ function Test()
 			'main.c',
 			'test.lua',
 			'$(TOOLCHAIN_PATH)/helloworld/file.o',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld',
 			'$(TOOLCHAIN_PATH)/helloworld/main.o',
 		}
 
@@ -188,9 +188,9 @@ void Print()
 			'Jamfile.jam',
 			'main.c',
 			'$(TOOLCHAIN_PATH)/helloworld/file.obj',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe',
-			'?$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe.intermediate.manifest',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release.pdb',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld.exe',
+			'?$(TOOLCHAIN_PATH)/helloworld/helloworld.exe.intermediate.manifest',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld.pdb',
 			'$(TOOLCHAIN_PATH)/helloworld/main.obj',
 		}
 
@@ -213,7 +213,7 @@ void Print()
 		local pattern3 = [[
 *** found 18 target(s)...
 *** updating 2 target(s)...
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>file.obj
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>main.obj
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 2 target(s)...
 ]]
@@ -246,7 +246,7 @@ void Print()
 			'main.c',
 			'test.lua',
 			'$(TOOLCHAIN_PATH)/helloworld/file.o',
-			'$(TOOLCHAIN_PATH)/helloworld/helloworld.release',
+			'$(TOOLCHAIN_PATH)/helloworld/helloworld',
 			'$(TOOLCHAIN_PATH)/helloworld/main.o',
 		}
 

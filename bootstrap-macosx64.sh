@@ -1,4 +1,4 @@
-rm -rf bin/macosx64 src/bin.macosxx86 src/jam0 src/luaplus/.build/macosx64
+rm -rf bin/macosx64 src/bin.macosx64 src/jam0 src/luaplus/.build/macosx64
 cd src
 make macosx64
 cd luaplus

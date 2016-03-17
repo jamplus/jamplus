@@ -17,7 +17,7 @@ prettydump = require 'prettydump'
 local md5 = require 'md5'
 expand = require 'expand'
 
-scriptPath = ospath.simplify(ospath.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/'):lower()))
+scriptPath = ospath.simplify(ospath.make_absolute(((debug.getinfo(1, "S").source:match("@(.+)[\\/]") or '.') .. '\\'):gsub('\\', '/')))
 package.path = scriptPath .. "?.lua;" .. package.path
 FolderTree = require 'FolderTree'
 
@@ -177,9 +177,10 @@ function ProcessCommandLine()
 		getopt.Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
 		getopt.Option {{"postfix"}, "Extra text for the IDE project name"},
 		getopt.Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
-		getopt.Option {{"jambaseflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
-		getopt.Option {{"jamfileflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJamFlags },
+		getopt.Option {{"jambaseflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJambaseFlags },
+		getopt.Option {{"jamfileflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMFILE_FLAGS', ProcessJamfileFlags },
 		getopt.Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMEXEPATH' },
+		getopt.Option {{"jambase"}, "The full path to the Jambase.jam", "Req", 'JAMBASEFULLPATH' },
 	}
 
 	function Usage()
@@ -242,6 +243,7 @@ function ProcessCommandLine()
 		ProcessJamfileFlags(opts.jamfileflags)
 	end
 	opts.jamexepath = opts.jamexepath and opts.jamexepath[#opts.jamexepath]
+	opts.jambase = opts.jambase and opts.jambase[#opts.jambase]
 
 	if #errors > 0  or  (#nonOpts ~= 1  and  #nonOpts ~= 2) then
 		Usage()
@@ -569,12 +571,12 @@ function BuildSourceTree(project)
 end
 
 
-function DumpProject(project)
+function DumpProject(project, workspace)
 	local outPath = ospath.join(_getWorkspaceProjectsPath(), project.RelativePath)
 	ospath.mkdir(ospath.add_slash(outPath))
 
 	local exporter = Exporters[ide]
-	local projectExporter = exporter.ProjectExporter(project.Name, exporter.Options)
+	local projectExporter = exporter.ProjectExporter(project.Name, exporter.Options, workspace)
 	projectExporter:Write(outPath)
 end
 
@@ -622,24 +624,24 @@ function DumpWorkspace(workspace)
 	Projects[buildWorkspaceName] = {}
 	Projects[buildWorkspaceName].Sources =
 	{
-		ospath.join(jamPath, 'Jambase.jam'),
+		mainJambase,
 	}
 	Projects[buildWorkspaceName].SourcesTree = Projects[buildWorkspaceName].Sources
 	Projects[buildWorkspaceName].Name = buildWorkspaceName
 	Projects[buildWorkspaceName].TargetName = ''
-	local projectExporter = exporter.ProjectExporter(buildWorkspaceName, exporter.Options)
+	local projectExporter = exporter.ProjectExporter(buildWorkspaceName, exporter.Options, workspace)
 	projectExporter:Write(projectsOutPath)
 
 	-- Write the !UpdateWorkspace project
 	Projects[updateWorkspaceName] = {}
 	Projects[updateWorkspaceName].Sources =
 	{
-		ospath.join(jamPath, 'Jambase.jam'),
+		mainJambase,
 		ospath.join(destinationRootPath, 'customsettings.jam'),
 	}
 	Projects[updateWorkspaceName].SourcesTree = Projects[updateWorkspaceName].Sources
 	Projects[updateWorkspaceName].Name = updateWorkspaceName
-	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options)
+	local projectExporter = exporter.ProjectExporter(updateWorkspaceName, exporter.Options, workspace)
 
 	local updateWorkspaceCommandLines
 	if uname == 'windows' then
@@ -652,9 +654,9 @@ function DumpWorkspace(workspace)
 	else
 		updateWorkspaceCommandLines =
 		{
-			ospath.join(_getWorkspacesPath(), 'updateworkspace'),
-			ospath.join(_getWorkspacesPath(), 'updateworkspace'),
-			ospath.join(_getWorkspacesPath(), 'updateworkspace'),
+			ospath.join(_getWorkspacesPath(), 'updateworkspaces'),
+			ospath.join(_getWorkspacesPath(), 'updateworkspaces'),
+			ospath.join(_getWorkspacesPath(), 'updateworkspaces'),
 		}
 	end
 
@@ -686,7 +688,7 @@ function DumpWorkspace(workspace)
 	for projectName in ivalues(workspace.Projects) do
 		local project = Projects[projectName]
 		if project and project.RelativePath then
-			DumpProject(project)
+			DumpProject(project, workspace)
 		else
 			print('* Attempting to write unknown project [' .. projectName .. '].')
 		end
@@ -733,7 +735,7 @@ function WriteJambase(exporter)
 
 	if opts.compiler or Config.Compiler then
 		Config.Compiler = Config.Compiler or opts.compiler
-		jambaseText[#jambaseText + 1] = "COMPILER ?= \"" .. Config.Compiler .. "\" ;\n"
+		jambaseText[#jambaseText + 1] = "C.COMPILER ?= \"" .. Config.Compiler .. "\" ;\n"
 	end
 
 	local variablesTable = {
@@ -776,7 +778,7 @@ function WriteJambase(exporter)
 
 	jambaseText[#jambaseText + 1] = expand([[
 
-include "$(jamPath)Jambase.jam" ;
+include "$(mainJambase)" ;
 ]], exporter.Options, _G)
 	ospath.write_file(ospath.join(destinationRootPath, 'Jambase.jam'), table.concat(jambaseText))
 end
@@ -924,8 +926,9 @@ $(locateTargetText)
 DEPCACHE.standard = "$$(ALL_LOCATE_TARGET)/$$(C.PLATFORM)-$$(C.CONFIG)/.depcache" ;
 DEPCACHE = standard ;
 
-NoCare "$(settingsFile)" ;
-include "$(settingsFile)" ;
+CUSTOMSETTINGS ?= "$(settingsFile)" ;
+NoCare $$(CUSTOMSETTINGS) ;
+include $$(CUSTOMSETTINGS) ;
 
 ]], locateTargetText, _G) }
 
@@ -964,7 +967,7 @@ include "$(settingsFile)" ;
 		expandTable.sourceJamfile = expandTable.sourceJamfile or 'Jamfile.jam' ;
 		jamfileText[#jamfileText + 1] = expand('$(rootNameText) = $(sourceRootPathText) ;\n', expandTable, _G)
 		if subInclude[4] ~= false then
-			jamfileText[#jamfileText + 1] = expand('SubInclude $(rootNameText) : $(sourceJamfileText) ;\n', expandTable, _G)
+			jamfileText[#jamfileText + 1] = expand('if [ RuleExists SubInclude ] { SubInclude $(rootNameText) : $(sourceJamfileText) ; } else { include $$($(rootNameText))$(sourceJamfileText) ; }\n', expandTable, _G)
 		end
 	end
 
@@ -1065,6 +1068,9 @@ if not sourceRootPath or not sourceJamfile then
 	sourceJamfile = 'Jamfile.jam'
 	sourceJamfilePath = sourceRootPath .. '/' .. sourceJamfile
 end
+if sourceJamfile == '' then
+	sourceJamfile = 'Jamfile.jam'
+end
 
 Config.SubIncludes =
 {
@@ -1099,6 +1105,14 @@ if opts.config then
 	end
 
 	Config = table_merge(Config, configFile.Config)
+end
+
+-- Set the paths to the Jambase.jam files.
+if opts.jambase then
+	mainJambase = ospath.join(sourceRootPath, opts.jambase  or  Config.Jambase)
+	Config.Jambase = mainJambase
+else
+	mainJambase = Config.Jambase  or  ospath.join(jamPath, 'Jambase.jam')
 end
 
 local result, message = xpcall(BuildWorkspaces, ErrorHandler)

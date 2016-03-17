@@ -52,9 +52,9 @@ function Test()
 				'win32.c',
 				'$(TOOLCHAIN_PATH)/platform/filerelease.obj',
 				'$(TOOLCHAIN_PATH)/platform/platform.obj',
-				'$(TOOLCHAIN_PATH)/platform/platform.release.exe',
-				'?$(TOOLCHAIN_PATH)/platform/platform.release.exe.intermediate.manifest',
-				'$(TOOLCHAIN_PATH)/platform/platform.release.pdb',
+				'$(TOOLCHAIN_PATH)/platform/platform.exe',
+				'?$(TOOLCHAIN_PATH)/platform/platform.exe.intermediate.manifest',
+				'$(TOOLCHAIN_PATH)/platform/platform.pdb',
 				'$(TOOLCHAIN_PATH)/platform/win32.obj',
 			}
 
@@ -109,7 +109,7 @@ function Test()
 				'win32.c',
 				'$(TOOLCHAIN_PATH)/platform/filerelease.o',
 				'$(TOOLCHAIN_PATH)/platform/platform.o',
-				'$(TOOLCHAIN_PATH)/platform/platform.release',
+				'$(TOOLCHAIN_PATH)/platform/platform',
 			}
 
 			if Platform == 'macosx' then
@@ -134,7 +134,7 @@ Using win32
 This is a Win32 build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, osprocess.collectlines{'.build\\' .. PlatformDir .. '-release\\TOP\\platform\\platform.release.exe'})
+		TestPattern(pattern2, osprocess.collectlines{'.build\\' .. PlatformDir .. '-release\\TOP\\platform\\platform.exe'})
 
 		pattern3 = [[
 *** found 20 target(s)...
@@ -146,7 +146,7 @@ Using macosx
 This is a Mac OS X build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, osprocess.collectlines{'./.build/' .. PlatformDir .. '-release/TOP/platform/platform.release'})
+		TestPattern(pattern2, osprocess.collectlines{'./.build/' .. PlatformDir .. '-release/TOP/platform/platform'})
 
 		pattern3 = [[
 *** found 12 target(s)...
@@ -158,7 +158,7 @@ Using linux
 This is a Linux build.
 RELEASE: What's up?!
 ]]
-		TestPattern(pattern2, osprocess.collectlines{'./.build/' .. PlatformDir .. '-release/TOP/platform/platform.release'})
+		TestPattern(pattern2, osprocess.collectlines{'./.build/' .. PlatformDir .. '-release/TOP/platform/platform'})
 
 		pattern3 = [[
 *** found 12 target(s)...

@@ -1,0 +1,7 @@
+SubDir TOP ;
+
+C.Application testapp : main.c ;
+
+ExternalProject MyClassLibrary : s:/tests11/MyClassLibrary/MyClassLibrary.csproj ;
+Workspace testapp : MyClassLibrary ;
+

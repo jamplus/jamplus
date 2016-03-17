@@ -23,7 +23,7 @@ C.MFC : link shared ;
 
 C.Lump : SRCS : SimpleMFCLump : stdafx.cpp stdafx.h 1 ;
 
-SRCS += [ C.ResourceCompiler : SimpleMFC.rc ] ;
+SRCS += [ C.Rc : SimpleMFC.rc ] ;
 
 C.PrecompiledHeader : stdafx : $(SRCS) ;
 

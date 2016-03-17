@@ -1,7 +1,6 @@
 SubDir TOP ;
 
 C.IncludeDirectories glob : ../../src ;
-C.OutputPostfix glob : ;
 C.RuntimeType glob : static ;
 
 C.Application glob : glob.c ../../src/buffer.c ../../src/buffer.h ../../src/fileglob.c ../../src/fileglob.h ;

@@ -26,9 +26,9 @@ if Platform == 'win32' and not Compiler then
 		'includes/mypch.h',
 		'includes/usefuldefine.h',
 		'$(TOOLCHAIN_PATH)/main/main.obj',
-		'$(TOOLCHAIN_PATH)/main/main.release.exe',
-		'?$(TOOLCHAIN_PATH)/main/main.release.exe.intermediate.manifest',
-		'$(TOOLCHAIN_PATH)/main/main.release.pdb',
+		'$(TOOLCHAIN_PATH)/main/main.exe',
+		'?$(TOOLCHAIN_PATH)/main/main.exe.intermediate.manifest',
+		'$(TOOLCHAIN_PATH)/main/main.pdb',
 		'$(TOOLCHAIN_PATH)/main/mypch.h.pch',
 		'$(TOOLCHAIN_PATH)/main/mypch.obj',
 	}
@@ -36,7 +36,7 @@ if Platform == 'win32' and not Compiler then
 	pass1Pattern = [[
 		*** found 21 target(s)...
 		*** updating 5 target(s)...
-		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.h.pch
+		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.obj
 		mypch.cpp
 		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.obj
 		main.cpp
@@ -47,7 +47,7 @@ if Platform == 'win32' and not Compiler then
 	pass2Pattern = [[
 		*** found 21 target(s)...
 		*** updating 4 target(s)...
-		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.h.pch
+		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.obj
 		mypch.cpp
 		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.obj
 		main.cpp
@@ -64,7 +64,7 @@ elseif Compiler == 'mingw' then
 		'Jamfile.jam',
 		'main.cpp',
 		'main.o',
-		'main.release.exe',
+		'main.exe',
 		'mypch.cpp',
 		'mypch.o',
 		'test.lua',
@@ -79,7 +79,7 @@ elseif Compiler == 'mingw' then
 		&@ C.PCH <main%-%x+>mypch.h.gch
 		@ C.C++ <main>main.o 
 		@ C.C++ <main>mypch.o 
-		@ C.Link <main>main.release.exe
+		@ C.Link <main>main.exe
 		*** updated 5 target(s)...
 ]]
 
@@ -89,7 +89,7 @@ elseif Compiler == 'mingw' then
 		&@ C.PCH <main%-%x+>mypch.h.gch
 		@ C.C++ <main>main.o 
 		@ C.C++ <main>mypch.o 
-		@ C.Link <main>main.release.exe
+		@ C.Link <main>main.exe
 		*** updated 5 target(s)...
 ]]
 else
@@ -108,7 +108,7 @@ else
 		'includes/mypch.h',
 		'includes/usefuldefine.h',
 		'$(TOOLCHAIN_PATH)/main/main.o',
-		'$(TOOLCHAIN_PATH)/main/main.release',
+		'$(TOOLCHAIN_PATH)/main/main',
 		'$(TOOLCHAIN_PATH)/main/mypch.o',
 		'$(TOOLCHAIN_PATH)/main/mypch%-%x+/mypch.h.gch',
 	}

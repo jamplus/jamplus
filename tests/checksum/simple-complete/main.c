@@ -1,10 +1,8 @@
 #include "testheader.h"
-//#include <stdio.h>
+#include <stdio.h>
 
 
 int main()
 {
-   //printf("Hello, %d\n", VALUE );
-
-   int v = VALUE;
+   printf("Hello, %d\n", VALUE );
 }

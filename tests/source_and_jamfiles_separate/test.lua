@@ -77,9 +77,9 @@ function Test()
 			'jam/.build/.depcache',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/createprecomp.obj',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/file.obj',
-			'jam/$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe',
-			'?jam/$(TOOLCHAIN_PATH)/helloworld/helloworld.release.exe.intermediate.manifest',
-			'jam/$(TOOLCHAIN_PATH)/helloworld/helloworld.release.pdb',
+			'jam/$(TOOLCHAIN_PATH)/helloworld/helloworld.exe',
+			'?jam/$(TOOLCHAIN_PATH)/helloworld/helloworld.exe.intermediate.manifest',
+			'jam/$(TOOLCHAIN_PATH)/helloworld/helloworld.pdb',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/main.obj',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/precomp.h.pch',
 			'src/createprecomp.c',
@@ -91,7 +91,7 @@ function Test()
 		pattern = [[
 *** found 22 target(s)...
 *** updating 6 target(s)...
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>precomp.h.pch
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.obj
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.obj
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 6 target(s)...
@@ -114,7 +114,7 @@ function Test()
 			'jam/.build/.depcache',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/createprecomp.o',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/file.o',
-			'jam/$(TOOLCHAIN_PATH)/helloworld/helloworld.release',
+			'jam/$(TOOLCHAIN_PATH)/helloworld/helloworld',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/main.o',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/precomp%-%x+/precomp.h.gch',
 			'src/createprecomp.c',
@@ -176,7 +176,7 @@ function Test()
 			pattern = [[
 *** found 22 target(s)...
 *** updating 5 target(s)...
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>precomp.h.pch
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.obj
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.obj
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 5 target(s)...
@@ -234,7 +234,7 @@ function Test()
 			pattern = [[
 *** found 22 target(s)...
 *** updating 5 target(s)...
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>precomp.h.pch
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.obj
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.obj
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 5 target(s)...

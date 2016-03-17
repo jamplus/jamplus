@@ -240,6 +240,7 @@ rule C.ios.SDK SDK_VERSION {
 
 	if $(TARGETINFO_LOCATE) {
 		Contents += "Projects[ [[C.*]] ].XCODE_SDKROOT[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(sdkroot)]]
+--Projects[ [[C.*]] ].XCODE_ARCHITECTURE[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = { [[$(architecture)]] }
 
 " ;
 	}

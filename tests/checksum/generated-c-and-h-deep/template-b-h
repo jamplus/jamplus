@@ -1,0 +1,3 @@
+#include "notgenerated-c.h"
+
+#define VALUEB 8

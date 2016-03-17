@@ -1,0 +1,62 @@
+# Provide THE_ENGINE with a reasonable default.
+THE_ENGINE ?= sdl ;
+
+# Start the subdir strategy.
+SubDir TOP ;
+
+# Set the active target to save on typing.
+C.ActiveTarget user_configs ;
+
+# All files are in the SRCS list for ease of access within an IDE.
+local SRCS =
+        main.c
+        engine_d3d.c
+        engine_opengl.c
+        engine_sdl.c
+;
+
+# Exclude the files that shouldn't be part of this build.
+if $(THE_ENGINE) != d3d {
+    C.ExcludeFromBuild : engine_d3d.c ;
+}
+if $(THE_ENGINE) != opengl {
+    C.ExcludeFromBuild : engine_opengl.c ;
+}
+if $(THE_ENGINE) != sdl {
+    C.ExcludeFromBuild : engine_sdl.c ;
+}
+
+C.Application : $(SRCS) ;
+
+# Generate workspaces with the following configs:
+#
+#   * debug_d3d
+#   * debug_opengl
+#   * debug_sdl
+#   * release_d3d
+#   * release_opengl
+#   * release_sdl
+#   * debug_customsettings_d3d
+#   * debug_customsettings_opengl
+#   * debug_customsettings_sdl
+#   * release_customsettings_d3d
+#   * release_customsettings_opengl
+#   * release_customsettings_sdl
+#
+# Please make note that workspace configurations are not Jam configurations. Assumptions about
+# output and intermediate directories are made based on the platform and config specified.
+# Changing THE_ENGINE below will still build files into a location based on $(PLATFORM) and
+# $(CONFIG). There is not a unique intermediate and output location.
+if $(TARGETINFO_LOCATE) {
+    local dollar = $ ;
+    local config ;
+    for config in debug release {
+        local engine ;
+        for engine in d3d opengl sdl {
+            WorkspaceConfig user_configs : $(config)_$(engine) : $(config) : C.TOOLCHAIN=$(dollar)(PLATFORM)/$(config) THE_ENGINE=$(engine) ;
+
+            WorkspaceConfig user_configs : $(config)_customsettings_$(engine) : $(config) : CUSTOMSETTINGS=$(TOP)/customsettings_$(engine).jam C.TOOLCHAIN=$(dollar)(PLATFORM)/$(config) ;
+        }
+    }
+}
+

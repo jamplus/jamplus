@@ -298,6 +298,7 @@ if $(CONFIG) in release releaseltcg {
 }
 
 mkjambase.exe = [ C.Application mkjambase : mkjambase.c ] ;
+mkjambase.exe = $(mkjambase.exe[1]) ;
 
 if $(VMS)
 {

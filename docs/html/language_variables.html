@@ -171,11 +171,11 @@ Patterns and Wildcards</h1>
 <tr>
 <td><code>*</code> </td><td>Matches 0 or more characters of the file name or directory name.  </td></tr>
 <tr>
-<td><p class="starttd"><code>/</code> at end of pattern</p>
-<p class="endtd"></p>
-</td><td>Any pattern with a closing slash will start a directory search, instead of the default file search.  </td></tr>
+<td><code>/</code> at end of pattern </td><td>Any pattern with a closing slash will start a directory search, instead of the default file search.  </td></tr>
 <tr>
 <td><code>**</code> </td><td>Search files recursively.  </td></tr>
+<tr>
+<td><code><pre class="fragment">**/</pre></code> </td><td>Search directories recursively.  </td></tr>
 </table>
 <p>Some examples follow:</p>
 <table  border="1" width="75%" align="center">
@@ -200,8 +200,210 @@ Patterns and Wildcards</h1>
 <tr>
 <td><code>*</code> </td><td>Matches all files (non-recursive).  </td></tr>
 <tr>
-<td><code>* </code></td></tr>
+<td><code><pre class="fragment">*/ </pre></code> </td><td><p class="starttd">Matches all directories (non-recursive).</p>
+<p class="endtd"></p>
+</td></tr>
+<tr>
+<td><code><pre class="fragment">A*/ </pre></code> </td><td>Matches any directory starting with A (non-recursive).  </td></tr>
+<tr>
+<td><p class="starttd"><code></p><pre class="fragment">**/* </pre><p></code></p>
+<p class="endtd"></p>
+</td><td>Matches all files (recursive).  </td></tr>
+<tr>
+<td><code>**</code> </td><td>Shortened form of above. Matches all files (recursive). Internally, expands to<pre class="fragment">**/*</pre>  </td></tr>
+<tr>
+<td><code><pre class="fragment">**/ </pre></code> </td><td>Matches all directories (recursive).  </td></tr>
+<tr>
+<td><code>**{filename chars}</code> </td><td><p class="starttd">Matches {filename chars} recursively. Internally, expands to</p><pre class="fragment">**/*{filename chars}</pre><p>. </p>
+<p class="endtd"></p>
+</td></tr>
+<tr>
+<td><code>{dirname chars}**</code> </td><td>Expands to<pre class="fragment">{dirname chars}*/**</pre>.  </td></tr>
+<tr>
+<td><code>{dirname chars}**{filename chars}</code> </td><td><p class="starttd">Expands to</p><pre class="fragment">{dirname chars}*/**/*{filename chars}</pre><p>.</p>
+<p class="endtd"></p>
+</td></tr>
+<tr>
+<td><code>**.h</code> </td><td>Matches all *.h files recursively. Expands to<pre class="fragment">**/*.h</pre>.  </td></tr>
+<tr>
+<td><p class="starttd"><code>**resource.h</code></p>
+<p class="endtd"></p>
+</td><td>Matches all *resource.h files recursively. Expands to<pre class="fragment">**/*resource.h</pre>.  </td></tr>
+<tr>
+<td><code>BK**</code> </td><td>Matches all files in any directory starting with BK, recursively. Expands to<pre class="fragment">BK*/**</pre>.  </td></tr>
+<tr>
+<td><code>BK**.h</code> </td><td>Matches all *.h files in any directory starting with BK, recursively. Expands to<pre class="fragment">BK*/**/*.h</pre>.  </td></tr>
+<tr>
+<td><code><pre class="fragment">c:/Src/**/*.h</pre></code> </td><td>Matches all *.h files recursively, starting at c:/Src/.  </td></tr>
+<tr>
+<td><code><pre class="fragment">c:/Src/**/*Grid/</pre></code> </td><td>Recursively matches all directories under c:/Src/ that end with Grid.  </td></tr>
+<tr>
+<td><code><pre class="fragment">c:/Src/**/*Grid*/</pre></code> </td><td>Recursively matches all directories under c:/Src/ that contain Grid.  </td></tr>
+<tr>
+<td><p class="starttd"><code></p><pre class="fragment">c:/Src/**/*Grid*/**/ABC/**/Readme.txt</pre><p></code></p>
+<p class="endtd"></p>
+</td><td>Recursively matches all directories under c:/Src/ that contain Grid. From the found directory, recursively matches directories until ABC/ is found. From there, the file <em>Readme.txt</em> is searched for recursively.   </td></tr>
 </table>
-</div></div><!-- contents -->
+<p>Finally, a couple flags are available. Flags are appended at the end of the pattern line. Each flag begins with an @ character. Spaces should not be inserted between flags unless they are intended as part of the string literal.</p>
+<table  border="1" width="75%" align="center">
+<tr>
+<td width="150"><b>Flags and Other Expansions</b> </td><td width="450"><b>Description</b>  </td></tr>
+<tr>
+<td><code>@*</code> </td><td>Search files and directories recursively.  </td></tr>
+<tr>
+<td><code>@-pattern</code> </td><td>Adds <code>pattern</code> to the file ignore list. Any file matching a pattern in the file ignore list is removed from the search.  </td></tr>
+<tr>
+<td><code>@-pattern/</code> </td><td>Adds <code>pattern/</code> to the directory ignore list. Any directory matching a pattern in the directory ignore list is removed from the search.  </td></tr>
+<tr>
+<td><code>@=pattern</code> </td><td>Adds <code>pattern</code> to the exclusive file list. Any file not matching a pattern in the exclusive file list is automatically removed from the search.  </td></tr>
+<tr>
+<td><code>@=pattern/</code> </td><td>Adds <code>pattern/</code> to the exclusive directory list. Any directory not matching a pattern in the exclusive file list is automatically removed from the search.  </td></tr>
+<tr>
+<td>More than two periods for going up parent directories. </td><td>Similar to 4DOS, each period exceeding two periods goes up one additional parent directory. So, a 4 period path expands to <code>../../../.</code>  </td></tr>
+</table>
+<p>Wildcards may appear anywhere in the pattern, including directories.</p>
+<pre class="fragment">*/*/*/*.c</pre><p>Note that *.* only matches files that have an extension. This is different than standard DOS behavior. Use * all by itself to match files, extension or not.</p>
+<p>Recursive wildcards can be used anywhere:</p>
+<pre class="fragment">c:/Dir1/**/A*/**/FileDirs*/**.mp3</pre><p>This matches all directories under c:/Dir1/ that start with A. Under all of the directories that start with A, directories starting with FileDirs are matched recursively. Finally, all files ending with an mp3 extension are matched.</p>
+<p>And a few examples:</p>
+<table  border="1" width="75%" align="center">
+<tr>
+<td width="150"><b>Example Pattern</b> </td><td width="450"><b>Description</b>  </td></tr>
+<tr>
+<td><code><pre class="fragment">Src/**/@-.git/@-.svn/</pre></code> </td><td>Recursively lists all directories under Src/, but directories called .git/ and .svn/ are filtered.  </td></tr>
+<tr>
+<td><code><pre class="fragment">Src/**@=*.lua@=README</pre></code> </td><td>Recursively lists all files under Src/ which match *.lua or README. All other files are ignored.  </td></tr>
+<tr>
+<td><code><pre class="fragment">Src/**/@-.git/@-.svn/@=*.lua@=README</pre></code> </td><td>Recursively lists all files under Src/ which match *.lua or README. The versions of those files that may exist in .git/ or .svn/ are ignored.  </td></tr>
+<tr>
+<td><code><pre class="fragment">...../StartSearchHere/**</pre></code> </td><td>Expands to:<pre class="fragment">../../../../StartSearchHere/**</pre>  </td></tr>
+</table>
+<h1><a class="anchor" id="variable_expansion_examples"></a>
+Variable Expansion Examples</h1>
+<div class="fragment"><div class="line">var = ab cd ef gh ij kl ;</div>
+<div class="line"></div>
+<div class="line">Echo $(var) ;                     # ab cd ef gh ij kl</div>
+<div class="line">Echo $(var[0]) ;                  # ab</div>
+<div class="line">Echo $(var[2]) ;                  # cd</div>
+<div class="line">Echo $(var[6]) ;                  # kl</div>
+<div class="line">Echo $(var[7]) ;                  #</div>
+<div class="line"></div>
+<div class="line">Echo $(var[1-]) ;                 # ab cd ef gh ij kl</div>
+<div class="line">Echo $(var[2-]) ;                 # cd ef gh ij kl</div>
+<div class="line">Echo $(var[6-]) ;                 # kl</div>
+<div class="line">Echo $(var[7-]) ;                 #</div>
+<div class="line"></div>
+<div class="line">Echo $(var[1-7]) ;                # ab cd ef gh ij kl</div>
+<div class="line">Echo $(var[2-6]) ;                # cd ef gh ij kl</div>
+<div class="line">Echo $(var[3-5]) ;                # ef gh ij</div>
+<div class="line">Echo $(var[6-4]) ;                # kl</div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#------------------------------------------------------------------------------</span></div>
+<div class="line">Echo $(VAR:E=**empty**) ;         # empty</div>
+<div class="line"></div>
+<div class="line">EMPTY_TEXT = some empty text ;</div>
+<div class="line">Echo $(VAR:E=$(EMPTY_TEXT)) ;     # some empty text</div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#------------------------------------------------------------------------------</span></div>
+<div class="line">list = list of characters to put stuff in between ;</div>
+<div class="line">local var1 = $ ;</div>
+<div class="line">local var2 = (list) ;</div>
+<div class="line">local var1_var2 = $(var1)$(var2) ;</div>
+<div class="line">Echo $(var1_var2) ;               # $(list)</div>
+<div class="line">Echo $(var1_var2:A) ;             # list of characters to put stuff in between</div>
+<div class="line">Echo @($(var1)$(var2):A) ;        # list of characters to put stuff in between</div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#------------------------------------------------------------------------------</span></div>
+<div class="line">FILE = somefile.txt ;</div>
+<div class="line">Echo $(FILE:T) ;                  # somefile.txt</div>
+<div class="line"></div>
+<div class="line">LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;</div>
+<div class="line">Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/somefile.txt</div>
+<div class="line"></div>
+<div class="line">BINDING on $(FILE) = newname.txt ;</div>
+<div class="line">Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/newname.txt</div>
+<div class="line"></div>
+<div class="line">BINDING on $(FILE) = ;</div>
+<div class="line">SEARCH on $(FILE) = data ;</div>
+<div class="line">LOCATE on $(FILE) = /somewhere/on/the/hard/drive ;</div>
+<div class="line">Echo $(FILE:T) ;                  # /somewhere/on/the/hard/drive/somefile.txt</div>
+<div class="line"></div>
+<div class="line">LOCATE on $(FILE) = ;</div>
+<div class="line">Echo $(FILE:T) ;                  # data/somefile.txt</div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#------------------------------------------------------------------------------</span></div>
+<div class="line">FILENAME = &lt;thegrist&gt;c:/some/directory/filename.txt ;</div>
+<div class="line">Echo $(FILENAME:B) ;              # filename</div>
+<div class="line">Echo $(FILENAME:B=anothername) ;  # &lt;thegrist&gt;c:/some/directory/anothername.txt</div>
+<div class="line">Echo $(FILENAME:S) ;              # .txt</div>
+<div class="line">Echo $(FILENAME:S=.dat) ;         # &lt;thegrist&gt;c:/some/directory/filename.dat</div>
+<div class="line">Echo $(FILENAME:BS) ;             # filename.txt</div>
+<div class="line">Echo $(FILENAME:B=anothername:S=.dat) ;  # &lt;thegrist&gt;c:/some/directory/anothername.dat</div>
+<div class="line">Echo $(FILENAME:D) ;              # c:/some/directory</div>
+<div class="line">Echo $(FILENAME:D=/usr/bin) ;     # &lt;thegrist&gt;/usr/bin/filename.txt</div>
+<div class="line">Echo $(FILENAME:P) ;              # &lt;thegrist&gt;c:/some/directory</div>
+<div class="line">Echo @($(FILENAME:P):P) ;         # &lt;thegrist&gt;c:/some</div>
+<div class="line"></div>
+<div class="line">Echo $(FILENAME:G) ;              # &lt;thegrist&gt;</div>
+<div class="line">Echo $(FILENAME:G=anothergrist) ; # &lt;anothergrist&gt;c:/some/directory/filename.txt</div>
+<div class="line"></div>
+<div class="line">NEW_ROOT = d:/root/directory ;</div>
+<div class="line">Echo $(FILENAME:R=<span class="stringliteral">&quot;d:/root/directory&quot;</span>) ; # &lt;thegrist&gt;c:/some/directory/filename.txt</div>
+<div class="line">Echo @(filename.txt:R=$(NEW_ROOT)) ;     # d:/root/directory/filename.txt</div>
+<div class="line"></div>
+<div class="line">Echo @(lowercase_now_uppercase:U) ;      # LOWERCASE_NOW_UPPERCASE</div>
+<div class="line">Echo @(UPPERCASE_NOW_LOWERCASE:L) ;      # uppercase_now_lowercase ;</div>
+<div class="line"></div>
+<div class="line">Echo @(backslash\\path\\:/) ;            # backslash/path/</div>
+<div class="line">Echo $(FILENAME:\\) ;                    # &lt;thegrist&gt;c:\\some\\directory\\filename.txt</div>
+<div class="line"></div>
+<div class="line">Echo $(FILENAME:DBS) ;                   # c:/some/directory/filename.txt</div>
+<div class="line"></div>
+<div class="line">VAR = /home/stuff/file.txt ;</div>
+<div class="line">Echo $(VAR:DB:U) ;                       # /HOME/STUFF/FILE</div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#------------------------------------------------------------------------------</span></div>
+<div class="line"><span class="preprocessor"># Assuming ../sharedlib/app has the files Jamfile.jam and main.c:</span></div>
+<div class="line">Echo @(../sharedlib/app<span class="comment">/*:WBS) ;         # Jamfile.jam main.c</span></div>
+<div class="line"><span class="comment">Echo @(@(../sharedlib/app/*:W):BS) ;     # Jamfile.jam main.c</span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment">Echo @(../sharedlib/app</span><span class="comment">/**:WB=more\\dir\\file:\\) ;</span></div>
+<div class="line"><span class="comment">                                        # ..\\sharedlib\\app\\more\\dir\\file.jam</span></div>
+<div class="line"><span class="comment">                                        # ..\\sharedlib\\app\\more\\dir\\file.c</span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment">Echo @(../sharedlib/app</span><span class="comment">/**:W=../sharedlib/:B=more\\dir\\file:\\) ;</span></div>
+<div class="line"><span class="comment">                                        # app\\more\\dir\\file.jam</span></div>
+<div class="line"><span class="comment">                                        # app\\more\\dir\\file.c</span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment">#------------------------------------------------------------------------------</span></div>
+<div class="line"><span class="comment">top = AppRoot ;</span></div>
+<div class="line"><span class="comment">jamfile = Jamfile.jam ;</span></div>
+<div class="line"><span class="comment">Echo included_$(top:J=_)_$(jamfile) ;    # included_AppRoot_Jamfile.jam</span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment">#------------------------------------------------------------------------------</span></div>
+<div class="line"><span class="comment">top = AppRoot With Directories ;</span></div>
+<div class="line"><span class="comment">jamfile = SomeFile.jam ;</span></div>
+<div class="line"><span class="comment">Echo included_$(top:J=_)_$(jamfile) ;    # included_AppRoot_With_Directories_SomeFile.jam</span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment">#------------------------------------------------------------------------------</span></div>
+<div class="line"><span class="comment">Echo $(list:J=!) ;                # list!of!characters!to!put!stuff!in!between</span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment">#------------------------------------------------------------------------------</span></div>
+<div class="line"><span class="comment">FILES = file1.c file2.c file3.c file1.h file2.h file3.h file1.obj file2.obj file3.obj ;</span></div>
+<div class="line"><span class="comment">Echo $(FILES:I=\\.c$) ;           # file1.c file2.c file3.c</span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment">Echo $(FILES:I=\\.c$:I=\\.obj:X=&quot;^file1&quot;) ;</span></div>
+<div class="line"><span class="comment">                                # file2.c file3.c file2.obj file3.obj</span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment">Echo $(FILES:I=\\.c$:I=\\.obj:X=&quot;^file1&quot;:X=\\.c$:I=\\.c$) ;</span></div>
+<div class="line"><span class="comment">                                # file1.c file2.c file3.c file2.obj file3.obj</span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment">Echo $(FILES:I=\\.c$:I=\\.obj:X=&quot;^file1&quot;:X=\\.c$) ;</span></div>
+<div class="line"><span class="comment">                                # file2.obj file3.obj</span></div>
+<div class="line"><span class="comment"></span></div>
+<div class="line"><span class="comment">Echo $(FILES:X=&quot;^file1&quot;:X=\\.obj$:I=\\.h$) ;</span></div>
+<div class="line"><span class="comment">                                # file1.h file2.h file3.h</span></div>
+</div><!-- fragment --> </div></div><!-- contents -->
 </body>
 </html>

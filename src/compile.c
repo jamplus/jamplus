@@ -640,6 +640,9 @@ evaluate_rule(
 	    action->targets = targetlist( (TARGETS *)0, lol_get( args, 0 ) );
 	    action->sources = targetlist( (TARGETS *)0, lol_get( args, 1 ) );
 #endif
+#ifdef OPT_USE_CHECKSUMS_EXT
+	    action->extratargets = targetlist( (TARGETS *)0, lol_get( args, 3 ), 0 );
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 #ifdef OPT_CLEAN_GLOBS_EXT
 		{

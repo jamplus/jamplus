@@ -1,0 +1,34 @@
+#include "notgenerated.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       
+
+
+
+
+
+
+
+void PrintValue()
+{
+// printf("%d\n", VALUE);
+}

@@ -107,6 +107,9 @@ struct _action {
 	int		pass;
 #endif
 	TARGETS		*autosettings;
+#ifdef OPT_USE_CHECKSUMS_EXT
+	TARGETS		*extratargets;
+#endif /* OPT_USE_CHECKSUMS_EXT */
 } ;
 
 /* SETTINGS - variables to set when executing a TARGET's ACTIONS */
@@ -167,6 +170,9 @@ struct _target {
 # define 	T_FLAG_MIGHTNOTUPDATE    0x4000	/* MightNotUpdate applied */
 #endif
 # define 	T_FLAG_FORCECARE 	0x8000	/* ForceCare applied */
+#ifdef OPT_USE_CHECKSUMS_EXT
+# define	T_FLAG_CHECKSUM_VISITED	0x10000	/*  */
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 	char		binding;	/* how target relates to real file */
 

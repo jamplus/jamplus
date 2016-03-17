@@ -80,9 +80,9 @@ function TestChecksum()
             '$(TOOLCHAIN_PATH)/test/generatedheader.h',
             '$(TOOLCHAIN_PATH)/test/main.obj',
             '$(TOOLCHAIN_PATH)/test/test.dll',
-            '$(TOOLCHAIN_PATH)/test/test.release.exe',
-            '?$(TOOLCHAIN_PATH)/test/test.release.exe.intermediate.manifest',
-            '$(TOOLCHAIN_PATH)/test/test.release.pdb',
+            '$(TOOLCHAIN_PATH)/test/test.exe',
+            '?$(TOOLCHAIN_PATH)/test/test.exe.intermediate.manifest',
+            '$(TOOLCHAIN_PATH)/test/test.pdb',
         }
     else
         files = {
@@ -98,7 +98,7 @@ function TestChecksum()
             '$(TOOLCHAIN_PATH)/test/generatedheader.h',
             '$(TOOLCHAIN_PATH)/test/main.o',
             '$(TOOLCHAIN_PATH)/test/test.dll',
-            '$(TOOLCHAIN_PATH)/test/test.release',
+            '$(TOOLCHAIN_PATH)/test/test',
         }
     end
 
@@ -142,6 +142,35 @@ function TestChecksum()
 
 
     local function TestPatternForTestCsValueChange()
+        local pattern
+        if Platform == 'win32' then
+            pattern = [[
+*** found 12 target(s)...
+*** updating 4 target(s)...
+@ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
+@ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
+@ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
+!NEXT!*** updated 4 target(s)...
+]]
+        else
+            pattern = [[
+*** found 13 target(s)...
+*** updating 4 target(s)...
+@ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
+@ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
+@ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
+*** updated 4 target(s)...
+]]
+        end
+        TestPattern(pattern, RunJam{})
+        TestDirectories(dirs)
+        TestFiles(files)
+    end
+
+
+    local function TestPatternForTestCsAnotherValueChange()
         local pattern
         if Platform == 'win32' then
             pattern = [[
@@ -210,14 +239,14 @@ function TestChecksum()
     end
 
     ---------------------------------------------------------------------------
-    if false then
+    if true then
         osprocess.sleep(1.0)
         ospath.touch('test.cs')
         TestNoopPattern()
     end
 
     ---------------------------------------------------------------------------
-    if false then
+    if true then
         osprocess.sleep(1.0)
         WriteTestDotCs()
         TestNoopPattern()
@@ -240,7 +269,7 @@ function TestChecksum()
     ---------------------------------------------------------------------------
     -- Add more comment lines to test.cs. This will cause test.dll and generatedheader.h to
     -- build, but nothing further should happen.
-    if false then
+    if true then
         osprocess.sleep(1.0)
         WriteTestDotCs(3)
         TestPatternForTestDllAndGeneratedHeader()
@@ -249,14 +278,14 @@ function TestChecksum()
     ---------------------------------------------------------------------------
     -- Change VALUE in test.cs. This will cause test.dll, generatedheader.h, main.obj, and
     -- main.exe to build.
-    if false then
+    if true then
         osprocess.sleep(1.0)
         WriteTestDotCs(nil, 10)
         TestPatternForTestCsValueChange()
     end
 
     ---------------------------------------------------------------------------
-    if false then
+    if true then
         osprocess.sleep(1.0)
         ospath.touch('test.cs')
         TestNoopPattern()
@@ -267,12 +296,13 @@ function TestChecksum()
     -- main.exe to build.
     if true then
         osprocess.sleep(1.0)
-        WriteTestDotCs(nil, nil, 20)
-        TestPatternForTestCsValueChange()
+        WriteTestDotCs(nil, 10, 20)
+        osprocess.sleep(1.0)
+        TestPatternForTestCsAnotherValueChange()
     end
 
     ---------------------------------------------------------------------------
-    if false then
+    if true then
         osprocess.sleep(1.0)
         ospath.touch('test.cs')
         TestNoopPattern()
@@ -289,12 +319,12 @@ function TestChecksum()
 don't know how to make <$(TOOLCHAIN_GRIST):test>test.cs
 *** found 12 target(s)...
 *** can't find 1 target(s)...
-*** can't make 4 target(s)...
+&%*%*%* can't make %d+ target%(s%)%.%.%.
 *** skipped <$(TOOLCHAIN_GRIST):test>test.dll for lack of <$(TOOLCHAIN_GRIST):test>test.cs...
 ...dependency on <$(TOOLCHAIN_GRIST):test>generatedheader.h failed, but don't care...
 *** skipped <$(TOOLCHAIN_GRIST):test>main.obj for lack of <$(TOOLCHAIN_GRIST):test>main.c...
 *** skipped <$(TOOLCHAIN_GRIST):test>test.exe for lack of <$(TOOLCHAIN_GRIST):test>main.obj...
-*** skipped 3 target(s)...
+!NEXT!&%*%*%* skipped %d+ target%(s%)%.%.%.
 ]]
         else
             pattern = [[
