@@ -525,6 +525,8 @@ rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_FILENAMES : EXTRA_I
 	local cpp_style_build_extensions = $(C.CPP_STYLE_BUILD_EXTENSIONS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local file ;
 	local gristedSourceFiles = [ C.GristFiles : $($(SOURCES_VARIABLE_NAME)) ] ;
+	local includedSourceFiles ;
+	
 	for file in $(gristedSourceFiles) {
 		local excludedFromBuild = $(EXCLUDED_FROM_BUILD:Z=$(file))) ;
 		if $(excludedFromBuild) = true {
@@ -532,6 +534,7 @@ rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_FILENAMES : EXTRA_I
 		}
 		if $(file:S) in $(c_style_build_extensions) $(cpp_style_build_extensions)  &&  $(file:G=) != $(PCH_SOURCE_FILENAME) {
 			contents += "#include \"$(file:G=)\"$(NEWLINE)" ;
+			includedSourceFiles += $(file:G=) ;
 		}
 	}
 
@@ -542,9 +545,9 @@ rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME : PCH_FILENAMES : EXTRA_I
 	MakeLocate $(gristedFileName) : $(LOCATE_SOURCE) ;
 	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(gristedFileName) ;
 
-	Includes $(gristedFileName) : $(gristedSourceFiles) ;
-	NoCare $(gristedSourceFiles) ;
-	SEARCH on $(gristedSourceFiles) = $(SEARCH_SOURCE) ;
+	Includes $(gristedFileName) : $(includedSourceFiles) ;
+	NoCare $(includedSourceFiles) ;
+	SEARCH on $(includedSourceFiles) = $(SEARCH_SOURCE) ;
 
 	$(SOURCES_VARIABLE_NAME) = ;
 	if $(PCH_FILENAMES[3]) {
