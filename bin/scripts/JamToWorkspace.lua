@@ -302,7 +302,7 @@ function CreateTargetInfoFiles(outPath)
 			'-S'
 		}
 
-		print('    Parsing toolchain c/' .. platform .. '/' .. config .. '...')
+		print('    Parsing toolchain ' .. platform .. '/' .. config .. '...')
 		--print(table.concat(collectConfigurationArgs, ' '))
 		for line in osprocess.lines(collectConfigurationArgs) do
 			print(line)

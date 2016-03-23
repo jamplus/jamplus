@@ -25,20 +25,20 @@ rule C.ActiveTarget TARGET {
 	# C.ACTIVE_TARGET = ProjectName
 	C.ACTIVE_TARGET = $(TARGET) ;
 
-	# C.ACTIVE_TOOLCHAIN_TARGET = <c/win32/debug>ProjectName
+	# C.ACTIVE_TOOLCHAIN_TARGET = <win32/debug>ProjectName
 	C.ACTIVE_TOOLCHAIN_TARGET = $(TARGET:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
 
-	# C.ACTIVE_TOOLCHAIN_TARGET_GRIST = c/win32/debug:ProjectName
+	# C.ACTIVE_TOOLCHAIN_TARGET_GRIST = win32/debug:ProjectName
 	C.ACTIVE_TOOLCHAIN_TARGET_GRIST = $(C.ACTIVE_TOOLCHAIN_GRIST):$(TARGET) ;
 
-	# C.ACTIVE_TOOLCHAIN_CLEAN_TARGET = <c/win32/debug>clean:ProjectName
+	# C.ACTIVE_TOOLCHAIN_CLEAN_TARGET = <win32/debug>clean:ProjectName
 	local colon = ":" ;
 	C.ACTIVE_TOOLCHAIN_CLEAN_TARGET = @(clean$(colon)$(TARGET):G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
 
-	# C.ACTIVE_TOOLCHAIN_ALLCLEAN_TARGET = <c/win32/debug>allclean:ProjectName
+	# C.ACTIVE_TOOLCHAIN_ALLCLEAN_TARGET = <win32/debug>allclean:ProjectName
 	C.ACTIVE_TOOLCHAIN_ALLCLEAN_TARGET = @(allclean$(colon)$(TARGET):G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
 
-	# C.ACTIVE_TOOLCHAIN_* = <c/win32/debug>C.*
+	# C.ACTIVE_TOOLCHAIN_* = <win32/debug>C.*
 	C.ACTIVE_TOOLCHAIN_* = @(C.*:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
 
 #	if ! $(ALL_SUBDIR_TOKENS) {
@@ -58,11 +58,7 @@ rule C.ActiveTarget TARGET {
 }
 
 rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC {
-	if $(TOOLCHAIN_SPEC) {
-		TOOLCHAIN_SPEC = c/$(TOOLCHAIN_SPEC) ;
-	} else {
-		TOOLCHAIN_SPEC = $(C.ACTIVE_TOOLCHAIN_GRIST) ;
-	}
+	TOOLCHAIN_SPEC ?= $(C.ACTIVE_TOOLCHAIN_GRIST) ;
 	local toolChainTarget = $(TARGET:G=$(TOOLCHAIN_SPEC)) ;
 	return $(LINKTARGETS:Z=$(toolChainTarget)) ;
 }
@@ -1570,8 +1566,7 @@ rule C.ToolchainSpecKeys TOOLCHAIN_SPEC_KEYS {
 		local newOptionsList ;
 
 		# First, convert the passed in TOOLCHAIN_SPEC_KEYS into the TOOLCHAIN_SPEC_OPTIONS
-		# format.  C.ACTIVE_TOOLCHAIN_SPEC_VALUES will contain the 'win32/debug' part from
-		# the TOOLCHAIN=c/win32/debug command line as a string list.
+		# format.
 		#
 		#     C.ACTIVE_TOOLCHAIN_SPEC_VALUES = win32 debug ;
 		#     TOOLCHAIN_SPEC_OPTIONS = C.COMPILER=vs2013 ;
@@ -1686,7 +1681,7 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 	activeToolchainSpec = $(TOOLCHAIN_SPEC_VALUES:J=/) $(TOOLCHAIN_SPEC_OPTIONS) ;
 	C.ACTIVE_TOOLCHAIN = $(activeToolchainSpec:J=@) ;
 	C.ACTIVE_TOOLCHAIN_SPEC = $(activeToolchainSpec:J=@) ;
-	C.ACTIVE_TOOLCHAIN_GRIST = c/$(activeToolchainSpec:J=@) ;
+	C.ACTIVE_TOOLCHAIN_GRIST = $(activeToolchainSpec:J=@) ;
 	C.ACTIVE_TOOLCHAIN_SPEC_VALUES = $(TOOLCHAIN_SPEC_VALUES) ;
 
 	C.ActiveTarget * ;
