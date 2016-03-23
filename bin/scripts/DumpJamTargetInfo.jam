@@ -154,7 +154,7 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 		forceIncludes = $(FORCE_INCLUDES:T) ;
 	}
 
-	local definesString = "'$(defines)'," ;
+	local definesString = "[[$(defines)]]," ;
 	definesString ?= "" ;
 	Contents += "$(project).Defines['$(PLATFORM)']['$(CONFIG)'] = { $(definesString:J= ) }$(NEWLINE)" ;
 
