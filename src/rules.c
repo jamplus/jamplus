@@ -74,6 +74,7 @@ bindrule( const char *rulename )
 	    r->bindlist = L0;
 	    r->params = L0;
 	    r->flags = 0;
+	    r->maxline = 0;
 	}
 
 	return r;
