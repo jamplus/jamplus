@@ -1159,7 +1159,7 @@ make0(
 					break;
 				}
 			}
-			if ( !targets->parentcommandlineoutofdate )
+			//if ( !targets->parentcommandlineoutofdate )
 			{
 				for ( targets = actions->action->sources; targets; targets = targets->next )
 				{
