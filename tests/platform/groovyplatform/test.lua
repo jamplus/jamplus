@@ -36,8 +36,8 @@ function Test()
 	pattern = [[
 *** found 8 target(s)...
 *** updating 3 target(s)...
-@ C.groovycompiler.CC <c/groovyplatform/retail:helloworld>helloworld.o
-!NEXT!@ C.groovycompiler.Link <c/groovyplatform/retail:helloworld>helloworld$(SUFEXE)
+@ C.groovycompiler.CC <groovyplatform/retail:helloworld>helloworld.o
+!NEXT!@ C.groovycompiler.Link <groovyplatform/retail:helloworld>helloworld$(SUFEXE)
 *** updated 3 target(s)...
 *** finished in 0.00 sec
 ]]

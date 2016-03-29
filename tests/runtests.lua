@@ -97,7 +97,7 @@ function TestPattern(patterns, lines)
 				pattern = pattern:gsub('$%(C_LINK%)', C_LINK)
 				pattern = pattern:gsub('$%(PLATFORM%)', PlatformDir)
 				pattern = pattern:gsub('$%(PLATFORM_CONFIG%)', PlatformDir .. '!release')
-				pattern = pattern:gsub('$%(TOOLCHAIN_GRIST%)', 'c/' .. PlatformDir .. '/release')
+				pattern = pattern:gsub('$%(TOOLCHAIN_GRIST%)', PlatformDir .. '/release')
 				pattern = pattern:gsub('$%(CWD%)', patterncwd)
 			end
 		end

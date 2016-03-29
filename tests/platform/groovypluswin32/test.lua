@@ -25,8 +25,8 @@ function Test()
 	local pattern = [[
 *** found 8 target(s)...
 *** updating 3 target(s)...
-@ C.groovycompiler.CC <c/groovyplatform/release:helloworld>helloworld.o
-!NEXT!@ C.groovycompiler.Link <c/groovyplatform/release:helloworld>helloworld$(SUFEXE)
+@ C.groovycompiler.CC <groovyplatform/release:helloworld>helloworld.o
+!NEXT!@ C.groovycompiler.Link <groovyplatform/release:helloworld>helloworld$(SUFEXE)
 *** updated 3 target(s)...
 ]]
 	local pattern2 = [[
