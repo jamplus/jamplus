@@ -503,7 +503,7 @@ make1b( TARGET *t )
 				t->fate = T_FATE_STABLE;
 	} else {
 #endif /* OPT_USE_CHECKSUMS_EXT */
-		if ( t->binding != T_BIND_MISSING  &&  ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )  &&  t->status != EXEC_CMD_NEXTPASS ) {
+		if ( !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))  && t->binding != T_BIND_MISSING  &&  ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )  &&  t->status != EXEC_CMD_NEXTPASS ) {
 			if ( t->flags & T_FLAG_SCANCONTENTS ) {
 				if ( md5matchescommandline( t ) ) {
 					t->fate = T_FATE_STABLE;
