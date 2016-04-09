@@ -593,17 +593,17 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 --			table.insert(self.Contents, '\t\t\t\tINFOPLIST_FILE = "myopengl-Info.plist";\n');
 
 			-- Write SDKROOT.
-			if false then
+			if true then
 				local sdkRoot
 				if subProject.XCODE_SDKROOT  and  subProject.XCODE_SDKROOT[platformName]  and  subProject.XCODE_SDKROOT[platformName][configName] then
 					sdkRoot = subProject.XCODE_SDKROOT[platformName][configName]
-					elseif Projects['C.*']  and  Projects['C.*'].XCODE_SDKROOT  and  Projects['C.*'].XCODE_SDKROOT[platformName]  and  Projects['C.*'].XCODE_SDKROOT[platformName][configName] then
-						sdkRoot = Projects['C.*'].XCODE_SDKROOT[platformName][configName]			
-					end
-					if sdkRoot then
-						table.insert(self.Contents, "\t\t\t\tSDKROOT = " .. sdkRoot .. ";\n")
-					end
+				elseif Projects['C.*']  and  Projects['C.*'].XCODE_SDKROOT  and  Projects['C.*'].XCODE_SDKROOT[platformName]  and  Projects['C.*'].XCODE_SDKROOT[platformName][configName] then
+					sdkRoot = Projects['C.*'].XCODE_SDKROOT[platformName][configName]			
 				end
+				if sdkRoot then
+					table.insert(self.Contents, "\t\t\t\tSDKROOT = " .. sdkRoot .. ";\n")
+				end
+			end
 
 			-- Write CODE_SIGN_ENTITLEMENTS.
 			local codeSignEntitlements
