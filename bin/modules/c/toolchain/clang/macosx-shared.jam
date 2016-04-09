@@ -82,7 +82,7 @@ rule C.macosx.SDK SDK_VERSION {
 		case 10.11 :
 			developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 			isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk ;
-			sdkroot = macosx10.9 ;
+			sdkroot = macosx ;
 
 		case * :		Exit "* C.macosx.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 	}
