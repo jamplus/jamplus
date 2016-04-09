@@ -93,7 +93,7 @@ end
 
 local function GetJamConfigName(workspaceConfigName, workspace)
 	local customWorkspaceConfig = workspace  and  workspace.Configs  and  workspace.Configs[workspaceConfigName]
-	return customWorkspaceConfig  and  customWorkspaceConfig.ActualConfigName  or  configName
+	return customWorkspaceConfig  and  customWorkspaceConfig.ActualConfigName  or  workspaceConfigName
 end
 
 
