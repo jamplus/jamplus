@@ -1020,7 +1020,7 @@ make1d(
 					{
 						++ptr;
 					}
-					count = ptr - startPtr;
+					count = (int)( ptr - startPtr );
 					if ( count == 0 )
 					{
 						buffer_reset( &lineBuffer );
