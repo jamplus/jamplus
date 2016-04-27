@@ -9,6 +9,7 @@
 *.obj
 *.exe
 *.VC.opendb
+*.VC.db
 Debug/*
 Release/*
 bin.*/*
