@@ -53,6 +53,7 @@ function Test()
 		-- Test for a clean directory.
 		WriteOriginalFiles()
 		RunJam{ '-Cjam', 'clean' }
+		ospath.remove('jam/.jamchecksums')
 		TestDirectories(originalDirs)
 		TestFiles(originalFiles)
 	end
@@ -75,6 +76,7 @@ function Test()
 		{
 			'jam/Jamfile.jam',
 			'jam/.build/.depcache',
+			'?jam/.build/.jamchecksums',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/createprecomp.obj',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/file.obj',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/helloworld.exe',
@@ -112,6 +114,7 @@ function Test()
 			'src/precomp.h',
 			'jam/Jamfile.jam',
 			'jam/.build/.depcache',
+			'?jam/.build/.jamchecksums',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/createprecomp.o',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/file.o',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/helloworld',
@@ -265,6 +268,7 @@ function Test()
 	---------------------------------------------------------------------------
 	WriteOriginalFiles()
 	RunJam{ '-Cjam', 'clean' }
+	ospath.remove('jam/.jamchecksums')
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)
 end

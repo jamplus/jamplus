@@ -208,6 +208,15 @@ make_fixprogress(
 	t->parents = NULL;
 	t->flags &= ~T_FLAG_VISITED;
 	t->status = 0;
+	t->time = 0;
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
+	t->contentmd5sum_calculated = 0;
+	t->contentmd5sum_changed = 0;
+	t->contentmd5sum_file_dirty = 0;
+#endif /* OPT_BUILTIN_MD5CACHE_EXT */
+#ifdef OPT_USE_CHECKSUMS_EXT
+	t->leafmd5filedirty = 0;
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 	for ( actions = t->actions; actions; actions = actions->next )
 	{
@@ -525,16 +534,6 @@ make(
 	COUNTS counts[1];
 	int status = 0;		/* 1 if anything fails */
 
-#ifdef OPT_USE_CHECKSUMS_EXT
-	LIST *usechecksumslist = var_get("JAM_USE_CHECKSUMS");
-	if (usechecksumslist  &&  list_first(usechecksumslist)  &&  strcmp(list_value(list_first(usechecksumslist)), "1") == 0) {
-		LIST *nodepcachelist = var_get("JAM_NO_DEP_CACHE");
-		if (!nodepcachelist  ||  !list_first(nodepcachelist)  ||  strcmp(list_value(list_first(nodepcachelist)), "1") != 0) {
-			usechecksums = 1;
-		}
-	}
-#endif /* OPT_USE_CHECKSUMS_EXT */
-
 #ifdef OPT_INTERRUPT_FIX
 	signal( SIGINT, onintr );
 #endif
@@ -606,6 +605,9 @@ pass:
 		for( i = 0; i < n_targets; i++ )
 			make_fixprogress( bindtarget( targets[i] ) );
 
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
+		checksums_nextpass();
+#endif /* OPT_BUILTIN_MD5CACHE_EXT */
 		donestamps();
 		++actionpass;
 
@@ -651,6 +653,19 @@ pass:
 #endif
 
     donestamps();
+
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
+	for ( i = 0; i < n_targets; i++ )
+	{
+		if ( strcmp( targets[i], "clean" ) == 0 ) {
+			LIST *var = var_get( "JAM_CHECKSUMS_KEEPCACHE" );
+			if ( !var  ||  !list_first( var )  ||  strcmp( list_value( list_first( var ) ), "1") != 0 ) {
+				unlink( checksums_filename() );
+			}
+			break;
+		}
+	}
+#endif /* OPT_BUILTIN_MD5CACHE_EXT */
 
 #ifdef OPT_CLEAN_GLOBS_EXT
 	clean_unused_files();
@@ -788,7 +803,7 @@ make0(
 #ifdef OPT_USE_CHECKSUMS_EXT
 	if ( localusechecksums && !( t->flags & ( T_FLAG_NOUPDATE | T_FLAG_NOTFILE ) ) )
 	{
-		getcachedmd5sum(t, 1);
+		getcachedmd5sum(t, 0);
 	}
 #endif /* OPT_USE_CHECKSUMS_EXT */
 
@@ -1505,7 +1520,7 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t )
 		}
 		if ( !( c->target->flags & T_FLAG_NOTFILE ) && !( c->target->flags & T_FLAG_INTERNAL ) && !( c->target->flags & T_FLAG_NOUPDATE ) )
 		{
-			getcachedmd5sum( c->target, 1 );
+			getcachedmd5sum( c->target, 0 );
 			if ( c->target->contentmd5sum_calculated )
 			{
 				MD5Update( context, c->target->contentmd5sum, sizeof( c->target->contentmd5sum ) );
@@ -1536,7 +1551,7 @@ void make0calcmd5sum( TARGET *t, int source )
 		return;
 	}
 
-	getcachedmd5sum( t, 1 );
+	getcachedmd5sum( t, 0 );
 
 	if ( !source )
 	{

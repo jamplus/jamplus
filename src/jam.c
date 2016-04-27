@@ -216,6 +216,10 @@ extern char **environ;
 # endif
 # endif
 
+#ifdef OPT_USE_CHECKSUMS_EXT
+extern int usechecksums;
+#endif /* OPT_USE_CHECKSUMS_EXT */
+
 int main( int argc, char **argv, char **arg_environ )
 {
 	int		n, num_targets;
@@ -780,6 +784,19 @@ int main( int argc, char **argv, char **arg_environ )
 		}
 	}
 #endif
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+	LIST *usechecksumslist = var_get("JAM_CHECKSUMS");
+	if (!usechecksumslist) {
+		usechecksumslist = var_get("JAM_USE_CHECKSUMS");
+	}
+	if (usechecksumslist  &&  list_first(usechecksumslist)) {
+		LIST *nodepcachelist = var_get("JAM_NO_DEP_CACHE");
+		if (!nodepcachelist  ||  !list_first(nodepcachelist)  ||  strcmp(list_value(list_first(nodepcachelist)), "1") != 0) {
+			usechecksums = 1;
+		}
+	}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 
 	/* Now make target */
 

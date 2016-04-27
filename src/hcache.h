@@ -13,8 +13,10 @@ const char* hcache_filename(void);
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 int read_md5sum_string( const char* str, MD5SUM sum);
 int ismd5empty( MD5SUM md5sum );
-int getcachedmd5sum( TARGET *t, int source );
+int getcachedmd5sum( TARGET *t, int forcetimecheck );
 void setcachedmd5sum( TARGET *t );
+const char *checksums_filename();
+void checksums_nextpass();
 /* Get a filename in cache for given md5sum. */
 const char *filecache_getpath(TARGET *t);
 const char *filecache_getfilename(TARGET *t, MD5SUM sum, const char* extension);

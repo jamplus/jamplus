@@ -30,7 +30,7 @@ function Test()
 
 	local pass1Files =
 	{
-		'.depcache',
+		'?.depcache',
 		'Jamfile.jam',
 		'file1.image',
 		'file1.tga',
@@ -58,7 +58,7 @@ function Test()
 
 	local pass2Files =
 	{
-		'.depcache',
+		'?.depcache',
 		'Jamfile.jam',
 		'file1.tga',
 		'file2.tga',
@@ -137,7 +137,7 @@ function TestChecksum()
 	TestPattern(pattern, RunJam())
 
 	local pass1Files = {
-		'.depcache',
+		'?.depcache',
 		'Jamfile.jam',
 		'file1.image',
 		'file1.tga',
@@ -163,7 +163,7 @@ function TestChecksum()
 	RunJam{ 'clean' }
 
 	local pass2Files = {
-		'.depcache',
+		'?.depcache',
 		'Jamfile.jam',
 		'file1.tga',
 		'file2.tga',
@@ -220,7 +220,7 @@ Using cached file2.image
 	}
 
 	local pass3Files = {
-		'.depcache',
+		'?.depcache',
 		'Jamfile.jam',
 		'file1.image',
 		'file1.tga',

@@ -11,6 +11,7 @@ function Test()
 	{
 	}
 
+	ospath.remove('.build/')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -123,15 +124,19 @@ Pass 2
 *** executing pass 3...
 Pass 3
 *** found 3 target(s)...
-*** updating 1 target(s)...
-*** updated 1 target(s)...
 ]]
 
 	TestPattern(pattern, RunJam())
 
-	local pass1Directories = {
-		'.build/',
-	}
+	local pass1Directories
+	if useChecksums then
+		pass1Directories = {
+			'.build/',
+		}
+	else
+		pass1Directories = {
+		}
+	end
 
 	local pass1Files = {
 		'Jamfile.jam',

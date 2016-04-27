@@ -354,7 +354,7 @@ make1b( TARGET *t )
 		if( c->target->status == EXEC_CMD_OK ) {
 #ifdef OPT_USE_CHECKSUMS_EXT
 			if ((c->target->fate == T_FATE_OUTDATED  ||  c->target->fate == T_FATE_UPDATE)  &&  (usechecksums  ||  (c->target->flags & T_FLAG_SCANCONTENTS))  &&  !(c->target->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
-				getcachedmd5sum( c->target, 1 );
+				getcachedmd5sum( c->target, 0 );
 				make1d_checksum_update(c->target);
 			}
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -378,7 +378,7 @@ make1b( TARGET *t )
 						if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
 #endif /* OPT_USE_CHECKSUMS_EXT */
 							childscancontents = 1;
-							if ( getcachedmd5sum( c->target, 1 ) ) {
+							if ( getcachedmd5sum( c->target, 0 ) ) {
 								childupdated = 1;
 							}
 						} else {
@@ -396,7 +396,7 @@ make1b( TARGET *t )
 					if ( c->target->actions ) {
 						//childscancontents = 1;
 						if ( !( c->target->flags & ( T_FLAG_NOTFILE | T_FLAG_NOUPDATE ) ) ) {
-							if ( getcachedmd5sum( c->target, 1 ) ) {
+							if ( getcachedmd5sum( c->target, 0 ) ) {
 								childupdated = 1;
 							}
 						}
@@ -417,7 +417,7 @@ make1b( TARGET *t )
 				{
 					if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
 						childscancontents = 1;
-						if ( getcachedmd5sum( c->target, 1 ) )
+						if ( getcachedmd5sum( c->target, 0 ) )
 							childupdated = 1;
 					} else {
 						childupdated = 1;
@@ -473,7 +473,7 @@ make1b( TARGET *t )
 				for( c = t->includes->depends; c; c = c->next ) {
 					if ( c->target->fate > T_FATE_STABLE  &&  !c->needs ) {
 						if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
-							if ( getcachedmd5sum( c->target, 1 )  ||  !md5matchescommandline( c->target ) ) {
+							if ( getcachedmd5sum( c->target, 0 )  ||  !md5matchescommandline( c->target ) ) {
 								childupdated = 1;
 								break;
 							}
@@ -1177,6 +1177,17 @@ make1d(
 				file_time( t->boundname, &t->time );
 			}
 		}
+/*
+		for (target = list_first(cmd->sourcesunbound); target; target = list_next(target)) {
+			TARGET *t = bindtarget(list_value(target));
+			if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
+				t->flags &= ~T_FLAG_CHECKSUM_VISITED;
+				//t->time = 0;
+				getcachedmd5sum( t, 1 );
+				file_time( t->boundname, &t->time );
+			}
+		}
+*/
 #endif /* OPT_USE_CHECKSUMS_EXT */
 	}
 #endif
@@ -1252,7 +1263,7 @@ void make1d_checksum_update( TARGET *t ) {
 		}
 
 		if ( !( t->flags & ( T_FLAG_NOUPDATE | T_FLAG_NOTFILE ) ) ) {
-			getcachedmd5sum(t, 1);
+			getcachedmd5sum(t, 0);
 		}
 
 		if ( t->time == 0 ) {
@@ -1459,7 +1470,7 @@ make1cmds( ACTIONS *a0 )
 						if (usechecksums) {
 							file_time( t->boundname, &t->time );
 							t->contentmd5sum_calculated = 0;
-							getcachedmd5sum( t, 1 );
+							getcachedmd5sum( t, 0 );
 						}
 #endif /* OPT_USE_CHECKSUMS_EXT */
 					    continue;
