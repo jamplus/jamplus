@@ -1332,33 +1332,33 @@ make1cmds( ACTIONS *a0 )
 
 	for( ; a0; a0 = a0->next )
 	{
-	    RULE    *rule = a0->action->rule;
-	    SETTINGS *boundvars;
-	    LIST    *nt, *ns;
-	    LIST    *ntunbound, *nsunbound;
-	    ACTIONS *a1;
-	    int	    start, chunk, length, maxline;
+		RULE    *rule = a0->action->rule;
+		SETTINGS *boundvars;
+		LIST    *nt, *ns;
+		LIST    *ntunbound, *nsunbound;
+		ACTIONS *a1;
+		int	    start, chunk, length, maxline;
 		TARGETS *autosettingsreverse = 0;
 		TARGETS *autot;
 
 #ifdef OPT_MULTIPASS_EXT
-	    if ( a0->action->pass != actionpass )
-		continue;
+		if ( a0->action->pass != actionpass )
+			continue;
 #endif
 
-	    /* Only do rules with commands to execute. */
-	    /* If this action has already been executed, use saved status */
+		/* Only do rules with commands to execute. */
+		/* If this action has already been executed, use saved status */
 
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
-	    if (DEBUG_MAKE1) {
+		if (DEBUG_MAKE1) {
 		printf( "make1cmds\t--\t%s (actions %s, running %s)\n" ,
 			rule->name,
 			rule->actions ? "yes" : "no",
 			a0->action->running ? "yes" : "no" );
-	    }
+		}
 #endif
-	    if( !rule->actions || a0->action->running )
-		continue;
+		if( !rule->actions || a0->action->running )
+			continue;
 
 #ifdef OPT_REMOVE_EMPTY_DIRS_EXT
 		if ( rule->flags & RULE_REMOVEEMPTYDIRS ) {
@@ -1388,405 +1388,402 @@ make1cmds( ACTIONS *a0 )
 			autosettingsreverse = targetentryhead( autosettingsreverse, autot->target, 0 );
 		}
 		pushsettings( t->settings );
-	    a0->action->running = 1;
+		a0->action->running = 1;
 #ifdef OPT_ACTIONS_WAIT_FIX
-	    a0->action->run_tgt = t;
+		a0->action->run_tgt = t;
 #endif
 
-	    /* Make LISTS of targets and sources */
-	    /* If `execute together` has been specified for this rule, tack */
-	    /* on sources from each instance of this rule for this target. */
+		/* Make LISTS of targets and sources */
+		/* If `execute together` has been specified for this rule, tack */
+		/* on sources from each instance of this rule for this target. */
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
-	    if (DEBUG_MAKE1) {
-		LIST *list = make1list(L0, a0->action->targets, 0);
-		printf("make1cmds\t--\ttargets: ");
-		list_print(list);
-		list_free(list);
-		printf("\n");
-		list = make1list(L0, a0->action->sources, 0);
-		printf("make1cmds\t--\tsources: ");
-		list_print(list);
-		list_free(list);
-		printf("\n");
-	    }
+		if (DEBUG_MAKE1) {
+			LIST *list = make1list(L0, a0->action->targets, 0);
+			printf("make1cmds\t--\ttargets: ");
+			list_print(list);
+			list_free(list);
+			printf("\n");
+			list = make1list(L0, a0->action->sources, 0);
+			printf("make1cmds\t--\tsources: ");
+			list_print(list);
+			list_free(list);
+			printf("\n");
+		}
 #endif
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-	    if (t->filecache_generate  ||  t->filecache_use)
-	    {
-		LIST* targets = make1list_unbound( L0, a0->action->targets, 0 );
-		LIST* sources = make1list_unbound( L0, a0->action->sources, rule->flags );
-
-		nt = L0;
-		ns = L0;
-		ntunbound = L0;
-		nsunbound = L0;
-
-		if ( strncmp( rule->name, "batched_", 8 ) == 0 )
+		if (t->filecache_generate  ||  t->filecache_use)
 		{
-		    int anycacheable = 0;
-			LISTITEM* target = list_first(targets);
-			LISTITEM* source = list_first(sources);
-		    for( ; target; target = list_next(target), source = ( source == NULL ? source : list_next(source) ) )
-		    {
-			TARGET *t = bindtarget(list_value(target));
-			TARGET *s = source!=NULL ? bindtarget(list_value(source)) : NULL;
+			LIST* targets = make1list_unbound( L0, a0->action->targets, 0 );
+			LIST* sources = make1list_unbound( L0, a0->action->sources, rule->flags );
 
-			/* if this target could be cacheable */
-			if ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) {
-			    /* find its final md5sum */
-			    MD5_CTX context;
-			    MD5SUM buildsumorg;
-			    anycacheable = 1;
-			    memcpy(&buildsumorg, &t->buildmd5sum, sizeof(t->buildmd5sum));
-			    MD5Init( &context );
-			    MD5Update( &context, t->buildmd5sum, sizeof( t->buildmd5sum ) );
-			    {
-				TARGET *outt = bindtarget( t->boundname );
-				outt->flags |= T_FLAG_USEFILECACHE;
-				MD5Final( outt->buildmd5sum, &context );
-				memcpy(&t->buildmd5sum, &outt->buildmd5sum, sizeof(t->buildmd5sum));
-			    }
-			    if (DEBUG_MD5HASH) {
-				printf( "Cacheable: %s buildmd5: %s org: %s\n",
-				    t->boundname, md5tostring(t->buildmd5sum), md5tostring(buildsumorg) );
-			    }
+			nt = L0;
+			ns = L0;
+			ntunbound = L0;
+			nsunbound = L0;
 
-			    /* if using cache is allowed */
-			    if (t->filecache_use) {
-				const char *cachedname;
+			if ( strncmp( rule->name, "batched_", 8 ) == 0 )
+			{
+				int anycacheable = 0;
+				LISTITEM* target = list_first(targets);
+				LISTITEM* source = list_first(sources);
+				for( ; target; target = list_next(target), source = ( source == NULL ? source : list_next(source) ) )
+				{
+					TARGET *t = bindtarget(list_value(target));
+					TARGET *s = source!=NULL ? bindtarget(list_value(source)) : NULL;
 
-				/* if the target is available in the cache */
-				cachedname = filecache_getfilename(t, t->buildmd5sum, ".doesntwork");
-				if (cachedname!=NULL) {
-				    time_t cachedtime;
-				    if ( file_time( cachedname, &cachedtime ) == 0 )
-				    {
-					/* try to get it from the cache */
-					if (copyfile(t->boundname, cachedname, NULL)) {
-					    printf( "Using cached %s\n", t->name );
+					/* if this target could be cacheable */
+					if ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) {
+						/* find its final md5sum */
+						MD5_CTX context;
+						MD5SUM buildsumorg;
+						anycacheable = 1;
+						memcpy(&buildsumorg, &t->buildmd5sum, sizeof(t->buildmd5sum));
+						MD5Init( &context );
+						MD5Update( &context, t->buildmd5sum, sizeof( t->buildmd5sum ) );
+						{
+							TARGET *outt = bindtarget( t->boundname );
+							outt->flags |= T_FLAG_USEFILECACHE;
+							MD5Final( outt->buildmd5sum, &context );
+							memcpy(&t->buildmd5sum, &outt->buildmd5sum, sizeof(t->buildmd5sum));
+						}
+						if (DEBUG_MD5HASH) {
+							printf( "Cacheable: %s buildmd5: %s org: %s\n",
+								t->boundname, md5tostring(t->buildmd5sum), md5tostring(buildsumorg) );
+						}
+
+						/* if using cache is allowed */
+						if (t->filecache_use) {
+							const char *cachedname;
+
+							/* if the target is available in the cache */
+							cachedname = filecache_getfilename(t, t->buildmd5sum, ".doesntwork");
+							if (cachedname!=NULL) {
+								time_t cachedtime;
+								if ( file_time( cachedname, &cachedtime ) == 0 )
+								{
+									/* try to get it from the cache */
+									if (copyfile(t->boundname, cachedname, NULL)) {
+										printf( "Using cached %s\n", t->name );
 
 #ifdef OPT_USE_CHECKSUMS_EXT
-						if (usechecksums) {
-							file_time( t->boundname, &t->time );
-							t->contentmd5sum_calculated = 0;
-							getcachedmd5sum( t, 0 );
-						}
+										if (usechecksums) {
+											file_time( t->boundname, &t->time );
+											t->contentmd5sum_calculated = 0;
+											getcachedmd5sum( t, 0 );
+										}
 #endif /* OPT_USE_CHECKSUMS_EXT */
-					    continue;
-					} else {
-					    printf( "Cannot retrieve %s from cache (will build normally)\n", t->name );
+										continue;
+									} else {
+										printf( "Cannot retrieve %s from cache (will build normally)\n", t->name );
+									}
+								} else {
+									if( DEBUG_MD5HASH) {
+										printf( "Cannot find %s in cache as %s\n", t->name, cachedname );
+									}
+								}
+							}
+						}
+
+						/* Build new lists */
+
+						nt = list_append( nt, t->boundname, 1 );
+						if (s)
+							ns = list_append( ns, s->boundname, 1 );
 					}
-				    } else {
-					if( DEBUG_MD5HASH) {
-					    printf( "Cannot find %s in cache as %s\n", t->name, cachedname );
-					}
-				    }
-				}
-			    }
-			    /* Build new lists */
-
-			    nt = list_append( nt, t->boundname, 1 );
-			    if (s)
-				ns = list_append( ns, s->boundname, 1 );
-			}
-		    }
-
-		    if ( !anycacheable ) {
-			nt = make1list( L0, a0->action->targets, 0 );
-			ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
-			ns = make1list( L0, a0->action->sources, rule->flags );
-			nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
-		    }
-		}
-		else
-		{
-		    int allcached = 1;
-		    LISTITEM* target;
-		    popsettings( t->settings );
-		    for(target = list_first(targets) ; target; target = list_next(target) )
-		    {
-			TARGET *t = bindtarget(list_value(target));
-//			TARGET *s = sources!=NULL ? bindtarget(sources->string) : NULL;
-			TARGETS *c;
-			TARGET *outt;
-			LIST *filecache = 0;
-
-			if ( t->flags & T_FLAG_USEFILECACHE )
-			{
-			    pushsettings( t->settings );
-			    filecache = filecache_fillvalues( t );
-			    popsettings( t->settings );
-			}
-
-			/* if this target could be cacheable */
-			if ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) {
-			    /* find its final md5sum */
-			    MD5_CTX context;
-
-			    if( DEBUG_MD5HASH ) {
-				printf( "------------------------------------------------\n" );
-				printf( "------------------------------------------------\n" );
-				printf( "------------------------------------------------\n" );
-			    }
-
-			    /* sort all dependents by name, so we can make reliable md5sums */
-			    t->depends = make0sortbyname( t->depends );
-
-			    MD5Init( &context );
-
-			    /* add the path of the file to the sum - it is significant because one command can create more than one file */
-			    MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
-
-			    /* add in the COMMANDLINE */
-			    if ( t->flags & T_FLAG_USECOMMANDLINE )
-			    {
-				SETTINGS *vars;
-				for ( vars = t->settings; vars; vars = vars->next )
-				{
-				    if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
-				    {
-					LISTITEM *list;
-					for ( list = list_first(vars->value); list; list = list_next(list) )
-					{
-					    MD5Update( &context, (unsigned char*)list_value(list), (unsigned int)strlen( list_value(list) ) );
-					    if( DEBUG_MD5HASH )
-						printf( "\t\tCOMMANDLINE: %s\n", list_value(list) );
-					}
-
-					break;
-				    }
-				}
-			    }
-
-			    /* for each dependencies */
-			    for( c = t->depends; c; c = c->next )
-			    {
-				/* If this is a "Needs" dependency, don't care about its contents. */
-				if (c->needs)
-				{
-				    continue;
 				}
 
-				/* add name of the dependency and its contents */
-				make0calcmd5sum( c->target, 1 );
-				if ( c->target->buildmd5sum_calculated )
-				{
-				    MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
-				    MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+				if ( !anycacheable ) {
+					nt = make1list( L0, a0->action->targets, 0 );
+					ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
+					ns = make1list( L0, a0->action->sources, rule->flags );
+					nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
 				}
-			    }
-
-			    outt = bindtarget( t->boundname );
-			    outt->flags |= T_FLAG_USEFILECACHE;
-			    outt->filecache_generate = t->filecache_generate;
-			    outt->filecache_use = t->filecache_use;
-			    outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_append( L0, list_value(list_first(filecache)), 1 ) );
-			    MD5Final( outt->buildmd5sum, &context );
-			    if (DEBUG_MD5HASH)
-			    {
-				printf( "Cacheable: %s buildmd5: %s\n", t->boundname, md5tostring(outt->buildmd5sum) );
-			    }
-
-			    /* if using cache is allowed */
-			    if ( t->filecache_use  &&  allcached )
-			    {
-				allcached = filecache_retrieve( t, outt->buildmd5sum );
-			    }
-			    else
-			    {
-				allcached = 0;
-			    }
 			}
 			else
 			{
-			    allcached = 0;
-			}
-		    }
-		    pushsettings( t->settings );
+				int allcached = 1;
+				LISTITEM* target;
+				popsettings( t->settings );
+				for(target = list_first(targets) ; target; target = list_next(target) )
+				{
+					TARGET *t = bindtarget(list_value(target));
+//					TARGET *s = sources!=NULL ? bindtarget(sources->string) : NULL;
+					TARGETS *c;
+					TARGET *outt;
+					LIST *filecache = 0;
 
-		    if ( !allcached ) {
-			nt = make1list( L0, a0->action->targets, 0 );
-			ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
-			ns = make1list( L0, a0->action->sources, rule->flags );
-			nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
-		    }
-		}
-		list_free( targets );
-		list_free( sources );
+					if ( t->flags & T_FLAG_USEFILECACHE )
+					{
+						pushsettings( t->settings );
+						filecache = filecache_fillvalues( t );
+						popsettings( t->settings );
+					}
 
-		/* if no targets survived (all were retrieved from the cache)
-		or no sources survived (all are up to date) */
-		if (nt==NULL) { // || ns==NULL) {
-		    /* skip this action */
-		    list_free(ns);
-			popsettings( t->settings );
-			for ( autot = autosettingsreverse; autot; autot = autot->next ) {
-				if ( autot->target != t )
-					pushsettings( autot->target->settings );
+					/* if this target could be cacheable */
+					if ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) {
+						/* find its final md5sum */
+						MD5_CTX context;
+
+						if( DEBUG_MD5HASH ) {
+							printf( "------------------------------------------------\n" );
+							printf( "------------------------------------------------\n" );
+							printf( "------------------------------------------------\n" );
+						}
+
+						/* sort all dependents by name, so we can make reliable md5sums */
+						t->depends = make0sortbyname( t->depends );
+
+						MD5Init( &context );
+
+						/* add the path of the file to the sum - it is significant because one command can create more than one file */
+						MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
+
+						/* add in the COMMANDLINE */
+						if ( t->flags & T_FLAG_USECOMMANDLINE )
+						{
+							SETTINGS *vars;
+							for ( vars = t->settings; vars; vars = vars->next )
+							{
+								if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
+								{
+									LISTITEM *list;
+									for ( list = list_first(vars->value); list; list = list_next(list) )
+									{
+										MD5Update( &context, (unsigned char*)list_value(list), (unsigned int)strlen( list_value(list) ) );
+										if( DEBUG_MD5HASH )
+											printf( "\t\tCOMMANDLINE: %s\n", list_value(list) );
+									}
+
+									break;
+								}
+							}
+						}
+
+						/* for each dependencies */
+						for( c = t->depends; c; c = c->next )
+						{
+							/* If this is a "Needs" dependency, don't care about its contents. */
+							if (c->needs)
+							{
+								continue;
+							}
+
+							/* add name of the dependency and its contents */
+							make0calcmd5sum( c->target, 1 );
+							if ( c->target->buildmd5sum_calculated )
+							{
+								MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
+								MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+							}
+						}
+
+						outt = bindtarget( t->boundname );
+						outt->flags |= T_FLAG_USEFILECACHE;
+						outt->filecache_generate = t->filecache_generate;
+						outt->filecache_use = t->filecache_use;
+						outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_append( L0, list_value(list_first(filecache)), 1 ) );
+						MD5Final( outt->buildmd5sum, &context );
+						if (DEBUG_MD5HASH)
+						{
+							printf( "Cacheable: %s buildmd5: %s\n", t->boundname, md5tostring(outt->buildmd5sum) );
+						}
+
+						/* if using cache is allowed */
+						if ( t->filecache_use  &&  allcached )
+						{
+							allcached = filecache_retrieve( t, outt->buildmd5sum );
+						}
+						else
+						{
+							allcached = 0;
+						}
+					}
+					else
+					{
+						allcached = 0;
+					}
+				}
+				pushsettings( t->settings );
+
+				if ( !allcached ) {
+					nt = make1list( L0, a0->action->targets, 0 );
+					ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
+					ns = make1list( L0, a0->action->sources, rule->flags );
+					nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
+				}
 			}
-		    continue;
-		}
+			list_free( targets );
+			list_free( sources );
+
+			/* if no targets survived (all were retrieved from the cache)
+			or no sources survived (all are up to date) */
+			if (nt==NULL) { // || ns==NULL) {
+				/* skip this action */
+				list_free(ns);
+				popsettings( t->settings );
+				for ( autot = autosettingsreverse; autot; autot = autot->next ) {
+					if ( autot->target != t )
+						pushsettings( autot->target->settings );
+				}
+				continue;
+			}
 	    }
 	    else
 	    {
 #if 0
-		if ( strncmp( rule->name, "batched_", 8 ) == 0 )
-		{
-			TARGETS* targets = a0->action->targets;
-			TARGETS* sources = a0->action->sources;
-		    int anycacheable = 0;
-
-			nt = L0;
-			ns = L0;
-
-			/* walk sources and targets simultaneously */
-			for( ; targets; targets = targets->next, sources = (sources==NULL?sources:sources->next) )
+			if ( strncmp( rule->name, "batched_", 8 ) == 0 )
 			{
-				TARGET *t = targets->target;
-				TARGET *s = sources!=NULL ? sources->target : NULL;
+				TARGETS* targets = a0->action->targets;
+				TARGETS* sources = a0->action->sources;
+				int anycacheable = 0;
 
-				/* Sources to 'actions existing' are never in the dependency */
-				/* graph (if they were, they'd get built and 'existing' would */
-				/* be superfluous, so throttle warning message about independent */
-				/* targets. */
+				nt = L0;
+				ns = L0;
 
-				if( t->binding == T_BIND_UNBOUND )
-					make1bind( t, 0 );
-				if( s!=NULL) {
-					if ( s->binding == T_BIND_UNBOUND )
-						make1bind( s, !( rule->flags & RULE_EXISTING ) );
-					if ( s->binding == T_BIND_UNBOUND )
-						printf("Warning using unbound source %s for batched action.\n", s->name);
+				/* walk sources and targets simultaneously */
+				for( ; targets; targets = targets->next, sources = (sources==NULL?sources:sources->next) )
+				{
+					TARGET *t = targets->target;
+					TARGET *s = sources!=NULL ? sources->target : NULL;
+
+					/* Sources to 'actions existing' are never in the dependency */
+					/* graph (if they were, they'd get built and 'existing' would */
+					/* be superfluous, so throttle warning message about independent */
+					/* targets. */
+
+					if( t->binding == T_BIND_UNBOUND )
+						make1bind( t, 0 );
+					if( s!=NULL) {
+						if ( s->binding == T_BIND_UNBOUND )
+							make1bind( s, !( rule->flags & RULE_EXISTING ) );
+						if ( s->binding == T_BIND_UNBOUND )
+							printf("Warning using unbound source %s for batched action.\n", s->name);
+					}
+
+
+					if( ( rule->flags & RULE_EXISTING ) && s!=NULL && s->binding != T_BIND_EXISTS )
+						continue;
+
+					if( t->fate < T_FATE_BUILD )
+						continue;
+
+					/* Build new lists */
+
+					nt = list_new( nt, t->boundname, 1 );
+					if (s!=NULL) {
+						ns = list_new( ns, s->boundname, 1 );
+					}
 				}
 
+				if (sources!=NULL) {
+					printf("warning: more sources than targets in a batched action!\n");
+				}
 
-				if( ( rule->flags & RULE_EXISTING ) && s!=NULL && s->binding != T_BIND_EXISTS )
-					continue;
-
-				if( t->fate < T_FATE_BUILD )
-					continue;
-
-				/* Build new lists */
-
-				nt = list_new( nt, t->boundname, 1 );
-				if (s!=NULL) {
-					ns = list_new( ns, s->boundname, 1 );
+			} else
+#endif
+			{
+				nt = make1list( L0, a0->action->targets, 0 );
+				ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
+#ifdef OPT_USE_CHECKSUMS_EXT
+				if (usechecksums) {
+					ns = make1list( L0, a0->action->sources, t->binding == T_BIND_MISSING ? ( rule->flags & ~RULE_UPDATED ) : rule->flags );
+					nsunbound = make1list_unbound( L0, a0->action->sources, t->binding == T_BIND_MISSING ? ( rule->flags & ~RULE_UPDATED ) : rule->flags );
+				} else
+#endif /* OPT_USE_CHECKSUMS_EXT */
+				{
+					ns = make1list( L0, a0->action->sources, rule->flags );
+					nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
 				}
 			}
-
-			if (sources!=NULL) {
-				printf("warning: more sources than targets in a batched action!\n");
-			}
-
-		} else {
-#endif
-			nt = make1list( L0, a0->action->targets, 0 );
-			ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
-#ifdef OPT_USE_CHECKSUMS_EXT
-			if (usechecksums) {
-				ns = make1list( L0, a0->action->sources, t->binding == T_BIND_MISSING ? ( rule->flags & ~RULE_UPDATED ) : rule->flags );
-				nsunbound = make1list_unbound( L0, a0->action->sources, t->binding == T_BIND_MISSING ? ( rule->flags & ~RULE_UPDATED ) : rule->flags );
-			} else {
-#endif /* OPT_USE_CHECKSUMS_EXT */
-			ns = make1list( L0, a0->action->sources, rule->flags );
-			nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
-#ifdef OPT_USE_CHECKSUMS_EXT
-			}
-#endif /* OPT_USE_CHECKSUMS_EXT */
-
-#if 0
-	    }
-#endif
 		}
 #else
-	    nt = make1list( L0, a0->action->targets, 0 );
-	    ns = make1list( L0, a0->action->sources, rule->flags );
-	    ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
-	    nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
+		nt = make1list( L0, a0->action->targets, 0 );
+		ns = make1list( L0, a0->action->sources, rule->flags );
+		ntunbound = make1list_unbound( L0, a0->action->targets, 0 );
+		nsunbound = make1list_unbound( L0, a0->action->sources, rule->flags );
 #endif
 
-	    if( rule->flags & RULE_TOGETHER )
-		for( a1 = a0->next; a1; a1 = a1->next )
+		if( rule->flags & RULE_TOGETHER )
+			for( a1 = a0->next; a1; a1 = a1->next )
 #ifdef OPT_MULTIPASS_EXT
-		    if( a1->action->pass == actionpass && a1->action->rule == rule && !a1->action->running )
+				if( a1->action->pass == actionpass && a1->action->rule == rule && !a1->action->running )
 #else
-		    if( a1->action->rule == rule && !a1->action->running )
+				if( a1->action->rule == rule && !a1->action->running )
 #endif
-	    {
-		ns = make1list( ns, a1->action->sources, rule->flags );
-		nsunbound = make1list_unbound( ns, a1->action->sources, rule->flags );
-		a1->action->running = 1;
+				{
+					ns = make1list( ns, a1->action->sources, rule->flags );
+					nsunbound = make1list_unbound( ns, a1->action->sources, rule->flags );
+					a1->action->running = 1;
 #ifdef OPT_ACTIONS_WAIT_FIX
-		a1->action->run_tgt = t;
+					a1->action->run_tgt = t;
 #endif
-	    }
+				}
 
-	    /* If doing only updated (or existing) sources, but none have */
-	    /* been updated (or exist), skip this action. */
+		/* If doing only updated (or existing) sources, but none have */
+		/* been updated (or exist), skip this action. */
 
-	    if( !ns && ( rule->flags & ( RULE_UPDATED | RULE_EXISTING ) ) )
-	    {
-		list_free( nt );
+		if( !ns && ( rule->flags & ( RULE_UPDATED | RULE_EXISTING ) ) )
+		{
+			list_free( nt );
 #ifdef OPT_DEBUG_MAKE1_LOG_EXT
-		if (DEBUG_MAKE1) {
-		    const char* desc = 0;
-		    if ((rule->flags & (RULE_UPDATED | RULE_EXISTING))
-			== (RULE_UPDATED | RULE_EXISTING)) {
-			desc = "updated/existing";
-		    } else if (rule->flags & RULE_UPDATED) {
-			desc = "updated";
-		    } else if (rule->flags & RULE_EXISTING) {
-			desc = "existing";
-		    }
-		    printf( "make1cmds\t--\t%s (skipping actions by %s)\n" ,
-			    rule->name, desc );
-		}
+			if (DEBUG_MAKE1) {
+				const char* desc = 0;
+				if ((rule->flags & (RULE_UPDATED | RULE_EXISTING)) == (RULE_UPDATED | RULE_EXISTING)) {
+					desc = "updated/existing";
+				} else if (rule->flags & RULE_UPDATED) {
+					desc = "updated";
+				} else if (rule->flags & RULE_EXISTING) {
+					desc = "existing";
+				}
+				printf( "make1cmds\t--\t%s (skipping actions by %s)\n" ,
+					rule->name, desc );
+			}
 #endif /* OPT_DEBUG_MAKE1_LOG_EXT */
 			popsettings( t->settings );
 			for ( autot = autosettingsreverse; autot; autot = autot->next ) {
 				if ( autot->target != t )
 					pushsettings( autot->target->settings );
 			}
-		continue;
-	    }
+			continue;
+		}
 
-	    /* If we had 'actions xxx bind vars' we bind the vars now */
+		/* If we had 'actions xxx bind vars' we bind the vars now */
 
-	    boundvars = make1settings( rule->bindlist );
-	    pushsettings( boundvars );
+		boundvars = make1settings( rule->bindlist );
+		pushsettings( boundvars );
 
-	    /*
-	     * Build command, starting with all source args.
-	     *
-	     * If cmd_new returns 0, it's because the resulting command
-	     * length is > MAXLINE.  In this case, we'll slowly reduce
-	     * the number of source arguments presented until it does
-	     * fit.  This only applies to actions that allow PIECEMEAL
-	     * commands.
-	     *
-	     * While reducing slowly takes a bit of compute time to get
-	     * things just right, it's worth it to get as close to MAXLINE
-	     * as possible, because launching the commands we're executing
-	     * is likely to be much more compute intensive!
-	     *
-	     * Note we loop through at least once, for sourceless actions.
-	     *
-	     * Max line length is the action specific maxline or, if not
-	     * given or bigger than MAXLINE, MAXLINE.
-	     */
+		/*
+		 * Build command, starting with all source args.
+		 *
+		 * If cmd_new returns 0, it's because the resulting command
+		 * length is > MAXLINE.  In this case, we'll slowly reduce
+		 * the number of source arguments presented until it does
+		 * fit.  This only applies to actions that allow PIECEMEAL
+		 * commands.
+		 *
+		 * While reducing slowly takes a bit of compute time to get
+		 * things just right, it's worth it to get as close to MAXLINE
+		 * as possible, because launching the commands we're executing
+		 * is likely to be much more compute intensive!
+		 *
+		 * Note we loop through at least once, for sourceless actions.
+		 *
+		 * Max line length is the action specific maxline or, if not
+		 * given or bigger than MAXLINE, MAXLINE.
+		 */
 
-	    start = 0;
-	    chunk = length = list_length( ns );
+		start = 0;
+		chunk = length = list_length( ns );
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
-	    maxline = rule->maxline;
+		maxline = rule->maxline;
 /* commented so jamgram.y can compile #else
 	    maxline = rule->flags / RULE_MAXLINE;
 #endif */
 #ifdef OPT_PIECEMEAL_PUNT_EXT
-	    maxline = maxline && maxline < CMDBUF ? maxline : CMDBUF;
+		maxline = maxline && maxline < CMDBUF ? maxline : CMDBUF;
 #else
-	    maxline = maxline && maxline < MAXLINE ? maxline : MAXLINE;
+		maxline = maxline && maxline < MAXLINE ? maxline : MAXLINE;
 #endif
 
 #ifdef OPT_USE_CHECKSUMS_EXT
@@ -1798,73 +1795,73 @@ make1cmds( ACTIONS *a0 )
 		}
 #endif /* OPT_USE_CHECKSUMS_EXT */
 
-	    do
-	    {
-		/* Build cmd: cmd_new consumes its lists. */
+		do
+		{
+			/* Build cmd: cmd_new consumes its lists. */
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
-		int thischunk = rule->maxtargets != 0 ? (chunk < rule->maxtargets ? chunk : rule->maxtargets) : chunk;
+			int thischunk = rule->maxtargets != 0 ? (chunk < rule->maxtargets ? chunk : rule->maxtargets) : chunk;
 
-		CMD *cmd = cmd_new( rule,
-			list_copy( L0, nt ),
-			list_sublist( ns, start, thischunk ),
-			list_copy( L0, ntunbound ),
-			list_sublist( nsunbound, start, thischunk ),
-			list_copy( L0, shell ),
-			maxline );
+			CMD *cmd = cmd_new( rule,
+				list_copy( L0, nt ),
+				list_sublist( ns, start, thischunk ),
+				list_copy( L0, ntunbound ),
+				list_sublist( nsunbound, start, thischunk ),
+				list_copy( L0, shell ),
+				maxline );
 /* commented so jamgram.y can compile #else
-		CMD *cmd = cmd_new( rule,
-			list_copy( L0, nt ),
-			list_sublist( ns, start, chunk ),
-			list_copy( L0, shell ),
-			maxline );
+			CMD *cmd = cmd_new( rule,
+				list_copy( L0, nt ),
+				list_sublist( ns, start, chunk ),
+				list_copy( L0, shell ),
+				maxline );
 #endif */
 
-		if( cmd )
-		{
-		    /* It fit: chain it up. */
+			if( cmd )
+			{
+				/* It fit: chain it up. */
 
-		    if( !cmds ) cmds = cmd;
-		    else cmds->tail->next = cmd;
-		    cmds->tail = cmd;
+				if( !cmds ) cmds = cmd;
+				else cmds->tail->next = cmd;
+				cmds->tail = cmd;
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
-		    start += thischunk;
+				start += thischunk;
 /* commented out so jamgram.y can compile #else
-		    start += chunk;
+				start += chunk;
 #endif */
-		}
-		else if( ( rule->flags & RULE_PIECEMEAL ) && chunk > 1 )
-		{
-		    /* Reduce chunk size slowly. */
+			}
+			else if( ( rule->flags & RULE_PIECEMEAL ) && chunk > 1 )
+			{
+				/* Reduce chunk size slowly. */
 
-		    chunk = chunk * 9 / 10;
-		}
-		else
-		{
-		    /* Too long and not splittable. */
+				chunk = chunk * 9 / 10;
+			}
+			else
+			{
+				/* Too long and not splittable. */
 
 #ifdef OPT_PIECEMEAL_PUNT_EXT
-		    if (maxline < CMDBUF) {
-			maxline = CMDBUF;
-			continue;
-		    }
+				if (maxline < CMDBUF) {
+					maxline = CMDBUF;
+					continue;
+				}
 #endif
-		    printf( "%s actions too long (max %d)!\n",
-			rule->name, maxline );
-		    exit( EXITBAD );
+				printf( "%s actions too long (max %d)!\n",
+				rule->name, maxline );
+				exit( EXITBAD );
+			}
 		}
-	    }
-	    while( start < length );
+		while( start < length );
 
-	    /* These were always copied when used. */
+		/* These were always copied when used. */
 
-	    list_free( nt );
-	    list_free( ns );
+		list_free( nt );
+		list_free( ns );
 
-	    /* Free the variables whose values were bound by */
-	    /* 'actions xxx bind vars' */
+		/* Free the variables whose values were bound by */
+		/* 'actions xxx bind vars' */
 
-	    popsettings( boundvars );
-	    freesettings( boundvars );
+		popsettings( boundvars );
+		freesettings( boundvars );
 
 		popsettings( t->settings );
 		for ( autot = autosettingsreverse; autot; autot = autot->next ) {
