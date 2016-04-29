@@ -218,10 +218,14 @@ function TestPattern(patterns, lines)
 					end
 
 					if not next  and  not ooo  and  not oooPatternsToFind[1]  and  pattern  and  not patternMatches then
-						error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or oooGroupPatternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
+						if not line:match('^JAMDEBUG: ') then
+							error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or oooGroupPatternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
+						end
 					elseif oooPatternsToFind[1]  and  not patternMatches then
 						if not ooo  and  pattern then
-							error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or oooGroupPatternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
+							if not line:match('^JAMDEBUG: ') then
+								error('Found: ' .. line .. '\n\tExpected: ' .. (pattern or oooGroupPatternsToFind[1]) .. '\n\nFull output:\n' .. table.concat(lines, '\n'))
+							end
 						else
 							if pattern then
 								lineIndex = lineIndex - 1
