@@ -170,9 +170,8 @@ struct _target {
 # define 	T_FLAG_MIGHTNOTUPDATE    0x4000	/* MightNotUpdate applied */
 #endif
 # define 	T_FLAG_FORCECARE 	0x8000	/* ForceCare applied */
-#ifdef OPT_USE_CHECKSUMS_EXT
-# define	T_FLAG_CHECKSUM_VISITED	0x10000	/*  */
-#endif /* OPT_USE_CHECKSUMS_EXT */
+# define	T_FLAG_IGNORECONTENTS	    0x10000 /* ignore the checksum generated for this target */
+# define	T_FLAG_FORCECONTENTSONLY    0x20000 /* */
 
 	char		binding;	/* how target relates to real file */
 
@@ -187,20 +186,14 @@ struct _target {
 	time_t		time;		/* update time */
 	time_t		leaf;		/* update time of leaf sources */
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-	MD5SUM		contentmd5sum; 	/* existing md5sum - either direct (for sources) or indirect (for those that have actions) */
+	struct checksumdata *contentchecksum; /* existing md5sum - either direct (for sources) or indirect (for those that have actions) */
 	MD5SUM		buildmd5sum;	/* new indirect md5sum calculated from actions */
 	MD5SUM		rulemd5sum;	/*  */
 	char		rulemd5sumchecked;
 	char		rulemd5sumclean;
-	char		contentmd5sum_calculated;
-	char		contentmd5sum_changed;
 	char		buildmd5sum_calculated;
 	char		filecache_use;
 	char		filecache_generate;
-#ifdef OPT_USE_CHECKSUMS_EXT
-	char		contentmd5sum_file_dirty;
-	char		leafmd5filedirty;
-#endif /* OPT_USE_CHECKSUMS_EXT */
 #endif	
 #ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
 	int			epoch;

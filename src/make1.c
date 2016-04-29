@@ -111,8 +111,10 @@ static int verifyIsRealOutput (char *input, int len);
 static void printResponseFiles(CMD *cmd);
 #endif
 
-#ifdef OPT_USE_CHECKSUMS_EXT
-void make1d_checksum_update( TARGET *t );
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
+extern int make0calcmd5sum_epoch;
+void make0calcmd5sum( TARGET *t, int source, int depth );
+void make1buildchecksum( TARGET *t, MD5SUM buildmd5sum );
 #endif
 
 #ifdef OPT_MULTIPASS_EXT
@@ -352,13 +354,6 @@ make1b( TARGET *t )
 #ifdef OPT_BUILTIN_NEEDS_EXT
 		/* Only test a target's MightNotUpdate flag if the target's build was successful. */
 		if( c->target->status == EXEC_CMD_OK ) {
-#ifdef OPT_USE_CHECKSUMS_EXT
-			if ((c->target->fate == T_FATE_OUTDATED  ||  c->target->fate == T_FATE_UPDATE)  &&  (usechecksums  ||  (c->target->flags & T_FLAG_SCANCONTENTS))  &&  !(c->target->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
-				getcachedmd5sum( c->target, 0 );
-				make1d_checksum_update(c->target);
-			}
-#endif /* OPT_USE_CHECKSUMS_EXT */
-
 			/* Skip checking MightNotUpdate children if the target is bound to a missing file, */
 			/* as in this case it should be built anyway */
 			if ( c->target->flags & T_FLAG_MIGHTNOTUPDATE && t->binding != T_BIND_MISSING ) {
@@ -370,13 +365,8 @@ make1b( TARGET *t )
 				/* Grab the generated target's timestamp. */
 				if ( file_time( c->target->boundname, &timestamp ) == 0 ) {
 					/* If the child's timestamp is greater that the target's timestamp, then it updated. */
-#ifdef OPT_USE_CHECKSUMS_EXT
-					if ( usechecksums ? c->target->contentmd5sum_file_dirty : timestamp > t->time) {
-						if ( usechecksums || ( c->target->flags & T_FLAG_SCANCONTENTS ) ) {
-#else
 					if ( timestamp > t->time ) {
 						if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
-#endif /* OPT_USE_CHECKSUMS_EXT */
 							childscancontents = 1;
 							if ( getcachedmd5sum( c->target, 0 ) ) {
 								childupdated = 1;
@@ -391,37 +381,12 @@ make1b( TARGET *t )
 			}
 			/* If it didn't have the MightNotUpdate flag but did update, mark it. */
 			else if ( c->target->fate > T_FATE_STABLE  &&  !c->needs ) {
-#ifdef OPT_USE_CHECKSUMS_EXT
-				if ( usechecksums ) {
-					if ( c->target->actions ) {
-						//childscancontents = 1;
-						if ( !( c->target->flags & ( T_FLAG_NOTFILE | T_FLAG_NOUPDATE ) ) ) {
-							if ( getcachedmd5sum( c->target, 0 ) ) {
-								childupdated = 1;
-							}
-						}
-					} else {
-						if ( c->target->includes ) {
-							if ( c->target->includes->fate > T_FATE_STABLE ) {
-								childupdated = 1;
-							}
-							if ( c->target->fate == T_FATE_UPDATE ) {
-								childupdated = 1;
-							}
-						} else {
-							childupdated = 1;
-						}
-					}
-				} else
-#endif /* OPT_USE_CHECKSUMS_EXT */
-				{
-					if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
-						childscancontents = 1;
-						if ( getcachedmd5sum( c->target, 0 ) )
-							childupdated = 1;
-					} else {
+				if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
+					childscancontents = 1;
+					if ( getcachedmd5sum( c->target, 0 ) )
 						childupdated = 1;
-					}
+				} else {
+					childupdated = 1;
 				}
 			}
 		}
@@ -490,33 +455,17 @@ make1b( TARGET *t )
 		} else if ( t->fate == T_FATE_STABLE )
 			t->fate = T_FATE_UPDATE;
 	}
-
-//	if ( childupdated  &&  t->fate == T_FATE_STABLE )
-//		t->fate = T_FATE_UPDATE;
-//	if ( ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
-#ifdef OPT_USE_CHECKSUMS_EXT
-	if (usechecksums) {
-		//if ( !( t->flags & T_FLAG_NOTFILE )  &&  t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
-		//if ( ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
-		if ( t->binding != T_BIND_MISSING  &&  t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
-			if ( md5matchescommandline( t ) )
+	if ( !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))  && t->binding != T_BIND_MISSING  &&  ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )  &&  t->status != EXEC_CMD_NEXTPASS ) {
+		if ( t->flags & T_FLAG_SCANCONTENTS ) {
+			if ( md5matchescommandline( t ) ) {
 				t->fate = T_FATE_STABLE;
-	} else {
-#endif /* OPT_USE_CHECKSUMS_EXT */
-		if ( !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))  && t->binding != T_BIND_MISSING  &&  ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )  &&  t->status != EXEC_CMD_NEXTPASS ) {
-			if ( t->flags & T_FLAG_SCANCONTENTS ) {
-				if ( md5matchescommandline( t ) ) {
-					t->fate = T_FATE_STABLE;
-				}
-			} else {
-				if ( md5matchescommandline( t ) ) {
-					t->fate = T_FATE_STABLE;
-				}
+			}
+		} else {
+			if ( md5matchescommandline( t ) ) {
+				t->fate = T_FATE_STABLE;
 			}
 		}
-#ifdef OPT_USE_CHECKSUMS_EXT
 	}
-#endif /* OPT_USE_CHECKSUMS_EXT */
 	if ( t->flags & ( T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS )  &&  t->actions ) {
 #ifdef OPT_ACTIONS_WAIT_FIX
 		/* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
@@ -1159,36 +1108,24 @@ make1d(
 		LISTITEM* target;
 	    LIST *targets = lol_get( &cmd->args, 0 );
 
-		for (target = list_first(targets); target; target = list_next(target))
-		{
-			TARGET *t = bindtarget(list_value(target));
-			if (!(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
-				filecache_update(t);
-			}
-		}
-
-#ifdef OPT_USE_CHECKSUMS_EXT
 		for (target = list_first(cmd->targetsunbound); target; target = list_next(target)) {
+			MD5SUM buildmd5sum;
 			TARGET *t = bindtarget(list_value(target));
-			if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
-				t->flags &= ~T_FLAG_CHECKSUM_VISITED;
+			//if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
+			if (!(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
 				t->time = 0;
 				getcachedmd5sum( t, 1 );
-				file_time( t->boundname, &t->time );
-			}
-		}
-/*
-		for (target = list_first(cmd->sourcesunbound); target; target = list_next(target)) {
-			TARGET *t = bindtarget(list_value(target));
-			if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
-				t->flags &= ~T_FLAG_CHECKSUM_VISITED;
-				//t->time = 0;
-				getcachedmd5sum( t, 1 );
-				file_time( t->boundname, &t->time );
-			}
-		}
-*/
+				t->time = t->contentchecksum->mtime;
+				++make0calcmd5sum_epoch;
+				make0calcmd5sum( t, 1, 1 );
+				make1buildchecksum( t, buildmd5sum );
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+				checksum_update(t, buildmd5sum);
 #endif /* OPT_USE_CHECKSUMS_EXT */
+				filecache_update(t, buildmd5sum);
+			}
+		}
 	}
 #endif
 
@@ -1202,95 +1139,6 @@ make1d(
 	make1c( t );
 }
 
-
-#ifdef OPT_USE_CHECKSUMS_EXT
-
-/*
-  make1d_checksum_update() - Update a target's dependency chain when the target has
-    been updated and has a HDRRULE applied. This handles 'appearing' dependency chains
-    for generated files and HDRRULE and checksum support.
-
-  In the case of a generated file being part of a HDRRULE chain, it is
-    necessary to discover the checksums of the dependencies after the generated
-    file has been written in order to have a proper no-op build for the next
-    Jam invocation.
-
-  Take the case of generated.c including nongenerated.h which includes generated.h.
-    Where generated.c did not exist when Jam was collecting HDRRULE dependencies,
-    nongenerated.h and generated.h are not known dependencies of generated.c.
-
-    generated.c -> nongenerated.h -> generated.h
-
-  In a timestamp-based Jam build, this is not a problem, as nongenerated.h and
-    generated.h will both have timestamps earlier than the resultant generated.obj.
-
-  For a checksum-based build, things are different. Without a call to
-    make1d_checksum_update(), the depcache database will store no information
-    about nongenerated.h and generated.h during the first run of Jam. For the
-    second run of Jam, generated.c, already on the disk, will have its HDRRULE
-    applied and nongenerated.h will be discovered. 'nongenerated.h' did not
-    exist in the database before, so JamPlus assumes the file is new, and the
-    build is treated as if the timestamp for nongenerated.h is newer than
-    generated.obj. Of course, nongenerated.h already existed on the disk, but
-    since the build could not infer that, there was no other safe option than
-    to cause the build to occur. That is why the second run of Jam results in
-    an apparent rebuild of generated.obj. The third run of Jam is a no-op, because
-    the database now contains information about nongenerated.h and generated.h
-    and knows they didn't change.
-
-  With a call to make1d_checksum_update() on the target that was just generated,
-    generated.c, a header scan occurs and discovers nongenerated.h needs to
-    be looked at more closely. Its timestamp, checksum, and even scanned headers
-    (which include generated.h) are inserted into the database. Upon running
-    Jam for a second time, nongenerated.h is discovered in the database and is
-    without change, so no build occurs, just as it should.
-*/
-void make1d_checksum_update( TARGET *t ) {
-	TARGETS	*c;
-
-	if ( t->flags & T_FLAG_CHECKSUM_VISITED ) {
-		return;
-	}
-	t->flags |= T_FLAG_CHECKSUM_VISITED;
-
-	if( !( t->flags & T_FLAG_NOTFILE ) ) {
-		/* Under the influence of "on target" variables, bind the target and search for headers. */
-		SETTINGS *s = copysettings( t->settings );
-		pushsettings( s );
-
-		if ( t->binding == T_BIND_UNBOUND ) {
-			t->boundname = search( t->name, &t->time );
-		}
-
-		if ( !( t->flags & ( T_FLAG_NOUPDATE | T_FLAG_NOTFILE ) ) ) {
-			getcachedmd5sum(t, 0);
-		}
-
-		if ( t->time == 0 ) {
-			file_time( t->boundname, &t->time );
-		}
-		t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
-
-		//if ( t->contentmd5sum_changed ) {
-			headers( t );
-		//}
-
-		popsettings( s );
-		freesettings( s );
-	}
-
-	for( c = t->depends; c; c = c->next )
-	{
-		int internal = t->flags & T_FLAG_INTERNAL;
-
-		make1d_checksum_update( c->target );
-	}
-
-	if( t->includes )
-	    make1d_checksum_update( t->includes );
-}
-
-#endif /* OPT_USE_CHECKSUMS_EXT */
 
 /*
  * make1cmds() - turn ACTIONS into CMDs, grouping, splitting, etc
@@ -1306,7 +1154,73 @@ void make1d_checksum_update( TARGET *t ) {
 TARGETS *
 make0sortbyname( TARGETS *chain );
 
-void make0calcmd5sum( TARGET *t, int source );
+void make1buildchecksum( TARGET *t, MD5SUM buildmd5sum )
+{
+	TARGETS *c;
+	MD5_CTX context;
+
+	if( DEBUG_MD5HASH ) {
+		printf( "------------------------------------------------\n" );
+		printf( "------------------------------------------------\n" );
+		printf( "------------------------------------------------\n" );
+	}
+
+	/* sort all dependents by name, so we can make reliable md5sums */
+	t->depends = make0sortbyname( t->depends );
+
+	MD5Init( &context );
+
+	/* add the path of the file to the sum - it is significant because one command can create more than one file */
+	MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
+
+	/* add in the COMMANDLINE */
+	if ( t->flags & T_FLAG_USECOMMANDLINE )
+	{
+		SETTINGS *vars = quicksettingslookup( t, "COMMANDLINE" );
+		if ( vars )
+		{
+			LISTITEM *list;
+			for ( list = list_first(vars->value); list; list = list_next(list) )
+			{
+				MD5Update( &context, (unsigned char*)list_value(list), (unsigned int)strlen( list_value(list) ) );
+				if( DEBUG_MD5HASH )
+					printf( "\t\tCOMMANDLINE: %s\n", list_value(list) );
+			}
+		}
+	}
+
+	/* for each dependencies */
+	for( c = t->depends; c; c = c->next )
+	{
+		/* If this is a "Needs" dependency, don't care about its contents. */
+		if (c->needs)
+		{
+			continue;
+		}
+
+		/* add name of the dependency and its contents */
+		make0calcmd5sum_epoch++;
+		make0calcmd5sum( c->target, 1, 2 );
+		if ( c->target->buildmd5sum_calculated )
+		{
+			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
+			if ( c->target->flags & T_FLAG_FORCECONTENTSONLY )
+			{
+				if ( !( c->target->flags & T_FLAG_IGNORECONTENTS )  &&  c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
+				{
+					MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
+				}
+			}
+			else
+			{
+				MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+			}
+		}
+	}
+
+	MD5Final( buildmd5sum, &context );
+}
+
 #endif
 
 
@@ -1371,17 +1285,6 @@ make1cmds( ACTIONS *a0 )
 		}
 #endif
 
-#ifdef OPT_USE_CHECKSUMS_EXT
-		if (usechecksums) {
-			for (a1 = a0; a1; a1 = a1->next) {
-				TARGETS* targets;
-				for (targets = a1->action->targets; targets; targets = targets->next) {
-					targets->target->contentmd5sum_calculated = 0;
-				}
-			}
-		}
-#endif /* OPT_USE_CHECKSUMS_EXT */
-
 		for ( autot = a0->action->autosettings; autot; autot = autot->next ) {
 			if ( autot->target != t )
 				pushsettings( autot->target->settings );
@@ -1412,7 +1315,11 @@ make1cmds( ACTIONS *a0 )
 #endif
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-		if (t->filecache_generate  ||  t->filecache_use)
+		if (
+#ifdef OPT_USE_CHECKSUMS_EXT
+				usechecksums  ||
+#endif /* OPT_USE_CHECKSUMS_EXT */
+				t->filecache_generate  ||  t->filecache_use)
 		{
 			LIST* targets = make1list_unbound( L0, a0->action->targets, 0 );
 			LIST* sources = make1list_unbound( L0, a0->action->sources, rule->flags );
@@ -1469,8 +1376,8 @@ make1cmds( ACTIONS *a0 )
 #ifdef OPT_USE_CHECKSUMS_EXT
 										if (usechecksums) {
 											file_time( t->boundname, &t->time );
-											t->contentmd5sum_calculated = 0;
-											getcachedmd5sum( t, 0 );
+											//t->contentmd5sum_calculated = 0;
+											getcachedmd5sum( t, 1 );
 										}
 #endif /* OPT_USE_CHECKSUMS_EXT */
 										continue;
@@ -1509,7 +1416,7 @@ make1cmds( ACTIONS *a0 )
 				{
 					TARGET *t = bindtarget(list_value(target));
 //					TARGET *s = sources!=NULL ? bindtarget(sources->string) : NULL;
-					TARGETS *c;
+					//TARGETS *c;
 					TARGET *outt;
 					LIST *filecache = 0;
 
@@ -1521,78 +1428,50 @@ make1cmds( ACTIONS *a0 )
 					}
 
 					/* if this target could be cacheable */
-					if ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) {
+					if (
+#ifdef OPT_USE_CHECKSUMS_EXT
+							usechecksums ||
+#endif /* OPT_USE_CHECKSUMS_EXT */
+							( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) ) {
 						/* find its final md5sum */
-						MD5_CTX context;
-
-						if( DEBUG_MD5HASH ) {
-							printf( "------------------------------------------------\n" );
-							printf( "------------------------------------------------\n" );
-							printf( "------------------------------------------------\n" );
-						}
-
-						/* sort all dependents by name, so we can make reliable md5sums */
-						t->depends = make0sortbyname( t->depends );
-
-						MD5Init( &context );
-
-						/* add the path of the file to the sum - it is significant because one command can create more than one file */
-						MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
-
-						/* add in the COMMANDLINE */
-						if ( t->flags & T_FLAG_USECOMMANDLINE )
-						{
-							SETTINGS *vars;
-							for ( vars = t->settings; vars; vars = vars->next )
-							{
-								if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
-								{
-									LISTITEM *list;
-									for ( list = list_first(vars->value); list; list = list_next(list) )
-									{
-										MD5Update( &context, (unsigned char*)list_value(list), (unsigned int)strlen( list_value(list) ) );
-										if( DEBUG_MD5HASH )
-											printf( "\t\tCOMMANDLINE: %s\n", list_value(list) );
-									}
-
-									break;
-								}
-							}
-						}
-
-						/* for each dependencies */
-						for( c = t->depends; c; c = c->next )
-						{
-							/* If this is a "Needs" dependency, don't care about its contents. */
-							if (c->needs)
-							{
-								continue;
-							}
-
-							/* add name of the dependency and its contents */
-							make0calcmd5sum( c->target, 1 );
-							if ( c->target->buildmd5sum_calculated )
-							{
-								MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
-								MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
-							}
-						}
-
-						outt = bindtarget( t->boundname );
+						outt = bindtarget( t->name );
 						outt->flags |= T_FLAG_USEFILECACHE;
 						outt->filecache_generate = t->filecache_generate;
 						outt->filecache_use = t->filecache_use;
-						outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_append( L0, list_value(list_first(filecache)), 1 ) );
-						MD5Final( outt->buildmd5sum, &context );
+						if ( filecache ) {
+							outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_append( L0, list_value(list_first(filecache)), 1 ) );
+						}
+						make1buildchecksum( t, outt->buildmd5sum );
+
 						if (DEBUG_MD5HASH)
 						{
 							printf( "Cacheable: %s buildmd5: %s\n", t->boundname, md5tostring(outt->buildmd5sum) );
 						}
 
 						/* if using cache is allowed */
-						if ( t->filecache_use  &&  allcached )
+						if ( (
+#ifdef OPT_USE_CHECKSUMS_EXT
+								usechecksums  ||
+#endif /* OPT_USE_CHECKSUMS_EXT */
+								t->filecache_use )  &&  allcached )
 						{
-							allcached = filecache_retrieve( t, outt->buildmd5sum );
+							if ( t->filecache_use )
+							{
+								allcached = filecache_retrieve( t, outt->buildmd5sum );
+#ifdef OPT_USE_CHECKSUMS_EXT
+								if ( usechecksums ) {
+									getcachedmd5sum(t, 1);
+									checksum_update(t, outt->buildmd5sum);
+								}
+#endif /* OPT_USE_CHECKSUMS_EXT */
+							}
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+							else if ( usechecksums )
+							{
+								allcached = checksum_retrieve( t, outt->buildmd5sum );
+							}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 						}
 						else
 						{
@@ -1628,9 +1507,9 @@ make1cmds( ACTIONS *a0 )
 				}
 				continue;
 			}
-	    }
-	    else
-	    {
+		}
+		else
+		{
 #if 0
 			if ( strncmp( rule->name, "batched_", 8 ) == 0 )
 			{
@@ -1778,7 +1657,7 @@ make1cmds( ACTIONS *a0 )
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 		maxline = rule->maxline;
 /* commented so jamgram.y can compile #else
-	    maxline = rule->flags / RULE_MAXLINE;
+		maxline = rule->flags / RULE_MAXLINE;
 #endif */
 #ifdef OPT_PIECEMEAL_PUNT_EXT
 		maxline = maxline && maxline < CMDBUF ? maxline : CMDBUF;

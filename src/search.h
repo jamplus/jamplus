@@ -12,3 +12,5 @@
 
 const char *search( const char *target, time_t *time );
 const char *search_using_target_settings( TARGET *t, const char *target, time_t *time );
+const char *search_uncached( const char *target, time_t	*time );
+

@@ -22,12 +22,15 @@
 # include "variable.h"
 # include "newstr.h"
 
+# include "filesys.h"
+
 static const char *
 search_helper( 
 	   const char *target,
 	   time_t	*time,
 	   LIST *(*varget)( const char*, void* ),
-	   void *userData )
+	   void *userData,
+	   int uncached )
 {
 	PATHNAME f[1];
 	LIST	*varlist;
@@ -68,7 +71,14 @@ search_helper(
 		if( DEBUG_SEARCH )
 			printf( "locate %s: %s\n", target, buf );
 		
-		timestamp( buf, time, 0 );
+		if ( uncached )
+		{
+			file_time( buf, time );
+		}
+		else
+		{
+			timestamp( buf, time, 0 );
+		}
 		
 		return newstr( buf );
 	}
@@ -90,7 +100,14 @@ search_helper(
 			if( DEBUG_SEARCH )
 				printf( "search %s: %s\n", target, buf );
 			
-			timestamp( buf, time, 0 );
+			if ( uncached )
+			{
+				file_time( buf, time );
+			}
+			else
+			{
+				timestamp( buf, time, 0 );
+			}
 			
 			if( *time )
 				return newstr( buf );
@@ -119,7 +136,14 @@ search_helper(
 					if( DEBUG_SEARCH )
 						printf( "search %s: %s\n", target, buf );
 					
-					timestamp( buf, time, 0 );
+					if ( uncached )
+					{
+						file_time( buf, time );
+					}
+					else
+					{
+						timestamp( buf, time, 0 );
+					}
 					
 					if( *time )
 						return newstr( buf );
@@ -146,7 +170,14 @@ search_helper(
 	if( DEBUG_SEARCH )
 		printf( "search %s: %s\n", target, buf );
 	
-	timestamp( buf, time, 0 );
+	if ( uncached )
+	{
+		file_time( buf, time );
+	}
+	else
+	{
+		timestamp( buf, time, 0 );
+	}
 	
 	return newstr( buf );
 }
@@ -157,7 +188,7 @@ static LIST *standard_search_var_get( const char *symbol, void *userData ) {
 }
 
 const char *search( const char *target, time_t	*time ) {
-	return search_helper( target, time, standard_search_var_get, NULL );
+	return search_helper( target, time, standard_search_var_get, NULL, 0 );
 }
 
 static LIST *search_using_target_settings_var_get( const char *symbol, void *userData ) {
@@ -166,5 +197,9 @@ static LIST *search_using_target_settings_var_get( const char *symbol, void *use
 }
 
 const char *search_using_target_settings( TARGET *t, const char *target, time_t *time ) {
-	return search_helper( target, time, search_using_target_settings_var_get, t );
+	return search_helper( target, time, search_using_target_settings_var_get, t, 0 );
+}
+
+const char *search_uncached( const char *target, time_t	*time ) {
+	return search_helper( target, time, standard_search_var_get, NULL, 1 );
 }
