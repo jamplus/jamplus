@@ -276,7 +276,7 @@ rule C.vc._MultiCppCompile_PchDeps {
     if $(_pch1[4]) {
         local _pchFilename = $(_pch1[3]:LBS).pch ;
         _pchFilename = $(_pchFilename:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-        Depends $(objects) : $(_pchFilename) ;
+        #Depends $(objects) : $(_pchFilename) ;
         # add that pch as output
         objects += $(_pchFilename) ;
     }
