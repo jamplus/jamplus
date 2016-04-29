@@ -231,6 +231,21 @@ function TestChecksum()
 	TestFiles(pass1Files)
 	
 	---------------------------------------------------------------------------
+	if useChecksums then
+		if Platform == 'win32' then
+			pattern2 = [[
+*** found 22 target(s)...
+*** updating 4 target(s)...
+*** updated 4 target(s)...
+]]
+		else
+			pattern2 = [[
+*** found 22 target(s)...
+*** updating 3 target(s)...
+*** updated 3 target(s)...
+]]
+		end
+	end
 	osprocess.sleep(1)
 	ospath.touch('includes/usefuldefine.h')
 	TestPattern(pattern2, RunJam{})
@@ -242,6 +257,9 @@ function TestChecksum()
 	TestFiles(pass1Files)
 
 	---------------------------------------------------------------------------
+		pattern2 = [[
+*** found 22 target(s)...
+]]
 	TestPattern(pattern2, RunJam{})
 	TestDirectories(pass1Directories)
 	TestFiles(pass1Files)

@@ -156,6 +156,11 @@ function Test()
 			*** found 17 target(s)...
 ]]
 	end
+	local noopPattern2 = [[
+		*** found 22 target(s)...
+		*** updating 5 target(s)...
+		*** updated 5 target(s)...
+]]
 
 	do
 		TestPattern(noopPattern, RunJam{ '-Cjam' })
@@ -169,7 +174,7 @@ function Test()
 		ospath.touch('src/precomp.h')
 
 		if useChecksums then
-			TestPattern(noopPattern, RunJam{ '-Cjam' })
+			TestPattern(noopPattern2, RunJam{ '-Cjam' })
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileA()
@@ -193,7 +198,7 @@ function Test()
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.o 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/main.o 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-				*** updated 4 target(s)...
+				*** updated 5 target(s)...
 ]]
 			else
 				pattern = [[
@@ -227,7 +232,22 @@ function Test()
 		ospath.touch('src/createprecomp.c')
 
 		if useChecksums then
-			TestPattern(noopPattern, RunJam{ '-Cjam' })
+			local noopPattern2
+			if Platform == 'win32' then
+				noopPattern2 = [[
+*** found 17 target(s)...
+*** updating 5 target(s)...
+*** updated 5 target(s)...
+]]
+			else
+				noopPattern2 = [[
+*** found 17 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
+]]
+			end
+			osprocess.sleep(1.0)
+			TestPattern(noopPattern2, RunJam{ '-Cjam' })
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileB()
@@ -248,7 +268,7 @@ function Test()
 				*** found 17 target(s)...
 				*** updating 2 target(s)...
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-				*** updated 1 target(s)...
+				*** updated 2 target(s)...
 ]]
 			else
 				pattern = [[

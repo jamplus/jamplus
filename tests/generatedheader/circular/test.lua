@@ -15,6 +15,7 @@ function Test()
 	{
 	}
 
+	os.remove('.jamcache')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -62,6 +63,11 @@ Writing generated.h
 		ospath.touch('generated.h')
 
 		if useChecksums then
+			pattern2 = [[
+*** found 11 target(s)...
+*** updating 3 target(s)...
+*** updated 3 target(s)...
+]]
 			TestPattern(pattern2, RunJam{ 'foo' })
 
 			osprocess.sleep(1.0)
@@ -120,6 +126,11 @@ Writing generated.h
 		ospath.touch('generated.h')
 
 		if useChecksums then
+		local pattern2 = [[
+*** found 11 target(s)...
+*** updating 3 target(s)...
+*** updated 3 target(s)...
+]]
 			TestPattern(pattern2, RunJam{ 'foo' })
 
 			osprocess.sleep(1.0)
@@ -130,10 +141,13 @@ Writing generated.h
 *** updating 3 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceB.o 
-!NEXT!*** updated 2 target(s)...
+!NEXT!*** updated 3 target(s)...
 ]]
 			TestPattern(pattern3, RunJam{ 'foo' })
 
+		local pattern2 = [[
+*** found 11 target(s)...
+]]
 			TestPattern(pattern2, RunJam{ 'foo' })
 
 			osprocess.sleep(1.0)

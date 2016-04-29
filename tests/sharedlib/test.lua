@@ -230,7 +230,7 @@ else
 		*** updating 7 target(s)...
 		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.o 
 		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.o 
-		*** updated 2 target(s)...
+		*** updated 7 target(s)...
 ]]
 
 	pass4Pattern = [[
@@ -255,7 +255,7 @@ else
 		@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.a 
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
-		*** updated 6 target(s)...
+		*** updated 7 target(s)...
 ]]
 
 	pass6Pattern = [[
@@ -276,7 +276,7 @@ else
 		*** updating 4 target(s)...
 		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.o 
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
-		*** updated 3 target(s)...
+		*** updated 4 target(s)...
 ]]
 
 	pass8Pattern = [[
@@ -392,7 +392,22 @@ void ExportA2()
 		ospath.touch('lib-c/add.h')
 
 		if useChecksums then
-			TestPattern(pass2Pattern, RunJam{})
+			local noopPattern
+			if Platform == 'win32' then
+				noopPattern = [[
+*** found 26 target(s)...
+*** updating 4 target(s)...
+*** updated 5 target(s)...
+]]
+			else
+				noopPattern = [[
+*** found 28 target(s)...
+*** updating 7 target(s)...
+*** updated 7 target(s)...
+]]
+			end
+
+			TestPattern(noopPattern, RunJam{})
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileA()
@@ -416,7 +431,22 @@ void ExportA2()
 		ospath.touch('lib-c/add.c')
 
 		if useChecksums then
-			TestPattern(pass4Pattern, RunJam{})
+			local noopPattern
+			if Platform == 'win32' then
+				noopPattern = [[
+*** found 26 target(s)...
+*** updating 4 target(s)...
+*** updated 5 target(s)...
+]]
+			else
+				noopPattern = [[
+*** found 28 target(s)...
+*** updating 7 target(s)...
+*** updated 7 target(s)...
+]]
+			end
+
+			TestPattern(noopPattern, RunJam{})
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileB()
@@ -440,7 +470,22 @@ void ExportA2()
 		ospath.touch('slib-a/slib-a.c')
 
 		if useChecksums then
-			TestPattern(pass6Pattern, RunJam{})
+			local noopPattern
+			if Platform == 'win32' then
+				noopPattern = [[
+*** found 26 target(s)...
+*** updating 2 target(s)...
+*** updated 3 target(s)...
+]]
+			else
+				noopPattern = [[
+*** found 28 target(s)...
+*** updating 4 target(s)...
+*** updated 4 target(s)...
+]]
+			end
+
+			TestPattern(noopPattern, RunJam{})
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileC()

@@ -193,6 +193,9 @@ Using cached file2.image
 
 	local pattern3 = [[
 *** found 5 target(s)...
+*** updating 1 target(s)...
+file1.image is already the proper cached target.
+*** updated 1 target(s)...
 ]]
 	TestPattern(pattern3, RunJam())
 

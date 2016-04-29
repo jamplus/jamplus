@@ -17,7 +17,6 @@ function TestChecksum()
 
     -- Clean up everything.
     WriteOriginalFiles()
-    ospath.remove('.jamcache')
     RunJam{ 'clean' }
     TestDirectories(originalDirs)
     TestFiles(originalFiles)
@@ -29,6 +28,17 @@ function TestChecksum()
     }
 
     local function TestNoopPattern()
+        local noopPattern = [[
+*** found 10 target(s)...
+*** updating 3 target(s)...
+*** updated 3 target(s)...
+]]
+        TestPattern(noopPattern, RunJam{})
+        TestDirectories(dirs)
+        TestFiles(files)
+    end
+
+    local function TestNoopPattern2()
         local noopPattern = [[
 *** found 10 target(s)...
 ]]
@@ -89,12 +99,12 @@ function TestChecksum()
 
     ---------------------------------------------------------------------------
     do
-        TestNoopPattern()
+        TestNoopPattern2()
     end
 
     ---------------------------------------------------------------------------
     do
-        TestNoopPattern()
+        TestNoopPattern2()
     end
 
     ---------------------------------------------------------------------------
@@ -122,7 +132,7 @@ function TestChecksum()
 *** updating 3 target(s)...
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generated.h
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
-*** updated 2 target(s)...
+*** updated 3 target(s)...
 ]]
         end
 
@@ -135,7 +145,7 @@ function TestChecksum()
 
     ---------------------------------------------------------------------------
     do
-        TestNoopPattern()
+        TestNoopPattern2()
     end
 
     ---------------------------------------------------------------------------

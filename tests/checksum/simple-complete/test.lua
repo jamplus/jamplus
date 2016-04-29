@@ -116,6 +116,28 @@ function TestChecksum()
         TestFiles(files)
     end
 
+    local function TestNoopPattern2()
+        local noopPattern = [[
+*** found 12 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
+]]
+        TestPattern(noopPattern, RunJam{})
+        TestDirectories(dirs)
+        TestFiles(files)
+    end
+
+    local function TestNoopPattern4()
+        local noopPattern = [[
+*** found 12 target(s)...
+*** updating 4 target(s)...
+*** updated 4 target(s)...
+]]
+        TestPattern(noopPattern, RunJam{})
+        TestDirectories(dirs)
+        TestFiles(files)
+    end
+
     local function TestPatternForTestDllAndGeneratedHeader()
         local pattern
         if Platform == 'win32' then
@@ -124,7 +146,7 @@ function TestChecksum()
 *** updating 4 target(s)...
 @ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
-*** updated 2 target(s)...
+*** updated 4 target(s)...
 ]]
         else
             pattern = [[
@@ -132,7 +154,7 @@ function TestChecksum()
 *** updating 4 target(s)...
 @ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
-*** updated 2 target(s)...
+*** updated 4 target(s)...
 ]]
         end
         TestPattern(pattern, RunJam{})
@@ -189,7 +211,7 @@ function TestChecksum()
 @ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
-*** updated 3 target(s)...
+*** updated 4 target(s)...
 ]]
         end
         TestPattern(pattern, RunJam{})
@@ -242,14 +264,14 @@ function TestChecksum()
     if true then
         osprocess.sleep(1.0)
         ospath.touch('test.cs')
-        TestNoopPattern()
+        TestNoopPattern4()
     end
 
     ---------------------------------------------------------------------------
     if true then
         osprocess.sleep(1.0)
         WriteTestDotCs()
-        TestNoopPattern()
+        TestNoopPattern4()
     end
 
     ---------------------------------------------------------------------------
@@ -288,7 +310,7 @@ function TestChecksum()
     if true then
         osprocess.sleep(1.0)
         ospath.touch('test.cs')
-        TestNoopPattern()
+        TestNoopPattern4()
     end
 
     ---------------------------------------------------------------------------
@@ -305,7 +327,7 @@ function TestChecksum()
     if true then
         osprocess.sleep(1.0)
         ospath.touch('test.cs')
-        TestNoopPattern()
+        TestNoopPattern4()
     end
 
     ---------------------------------------------------------------------------
@@ -363,14 +385,14 @@ don't know how to make <$(TOOLCHAIN_GRIST):test>test.cs
 *** found 12 target(s)...
 *** updating 3 target(s)...
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
-*** updated 1 target(s)...
+*** updated 3 target(s)...
 ]]
         else
             pattern = [[
 *** found 12 target(s)...
 *** updating 3 target(s)...
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
-*** updated 1 target(s)...
+*** updated 3 target(s)...
 ]]
         end
 
@@ -396,7 +418,7 @@ don't know how to make <$(TOOLCHAIN_GRIST):test>test.cs
     if true then
         osprocess.sleep(1.0)
         ospath.touch(generatedHeaderPath)
-        TestNoopPattern()
+        TestNoopPattern2()
     end
 
     if true then
@@ -435,7 +457,29 @@ don't know how to make <$(TOOLCHAIN_GRIST):test>test.cs
     if true then
         osprocess.sleep(1.0)
         WriteTestDotCs()
-        TestNoopPattern()
+        local pattern
+        if Platform == 'win32' then
+            pattern = [[
+*** found 12 target(s)...
+*** updating 4 target(s)...
+@ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
+@ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
+!NEXT!*** updated 4 target(s)...
+]]
+        else
+            pattern = [[
+*** found 13 target(s)...
+*** updating 4 target(s)...
+@ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
+@ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
+*** updated 4 target(s)...
+]]
+        end
+        TestPattern(pattern, RunJam{})
+        TestDirectories(dirs)
+        TestFiles(files)
     end
 
     ---------------------------------------------------------------------------

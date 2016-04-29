@@ -202,6 +202,13 @@ void Print()
 ]]
 		TestPattern(pattern2, RunJam())
 	
+		if useChecksums then
+			pattern2 = [[
+*** found 19 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
+]]
+		end
 		osprocess.sleep(1.0)
 		ospath.touch('file.c')
 
@@ -261,6 +268,11 @@ void Print()
 		osprocess.sleep(1.0)
 		ospath.touch('file.c')
 
+		local pattern2 = [[
+*** found 10 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
+]]
 		TestPattern(pattern2, RunJam())
 
 		osprocess.sleep(1.0)

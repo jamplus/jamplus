@@ -201,11 +201,21 @@ void Print()
 		TestDirectories(pass1Dirs)
 
 		local pattern2 = [[
-*** found 19 target(s)...
-*** finished in 0.01 sec
+*** found 21 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 
+		if useChecksums then
+			pattern2 = [[
+*** found 21 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
+]]
+		else
+			pattern2 = [[
+*** found 21 target(s)...
+]]
+		end
 		osprocess.sleep(1.0)
 		ospath.touch('file.c')
 		TestPattern(pattern2, RunJam())
@@ -269,6 +279,14 @@ file.c
 
 		osprocess.sleep(1.0)
 		ospath.touch('file.c')
+		if useChecksums then
+			pattern2 = [[
+*** found 11 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
+*** finished in 0.01 sec
+]]
+		end
 		TestPattern(pattern2, RunJam())
 
 		osprocess.sleep(1.0)
