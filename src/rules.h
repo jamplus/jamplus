@@ -170,9 +170,6 @@ struct _target {
 # define 	T_FLAG_MIGHTNOTUPDATE    0x4000	/* MightNotUpdate applied */
 #endif
 # define 	T_FLAG_FORCECARE 	0x8000	/* ForceCare applied */
-#ifdef OPT_USE_CHECKSUMS_EXT
-# define	T_FLAG_CHECKSUM_VISITED	0x10000	/*  */
-#endif /* OPT_USE_CHECKSUMS_EXT */
 
 	char		binding;	/* how target relates to real file */
 
@@ -192,15 +189,11 @@ struct _target {
 	MD5SUM		rulemd5sum;	/*  */
 	char		rulemd5sumchecked;
 	char		rulemd5sumclean;
-	char		contentmd5sum_calculated;
-	char		contentmd5sum_changed;
+	//char		contentmd5sum_calculated;
+	//char		contentmd5sum_changed;
 	char		buildmd5sum_calculated;
 	char		filecache_use;
 	char		filecache_generate;
-#ifdef OPT_USE_CHECKSUMS_EXT
-	char		contentmd5sum_file_dirty;
-	char		leafmd5filedirty;
-#endif /* OPT_USE_CHECKSUMS_EXT */
 #endif	
 #ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
 	int			epoch;
