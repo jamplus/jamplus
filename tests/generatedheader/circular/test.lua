@@ -15,6 +15,7 @@ function Test()
 	{
 	}
 
+	os.remove('.jamcache')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -62,6 +63,11 @@ Writing generated.h
 		ospath.touch('generated.h')
 
 		if useChecksums then
+			pattern2 = [[
+*** found 11 target(s)...
+*** updating 3 target(s)...
+*** updated 3 target(s)...
+]]
 			TestPattern(pattern2, RunJam{ 'foo' })
 
 			osprocess.sleep(1.0)

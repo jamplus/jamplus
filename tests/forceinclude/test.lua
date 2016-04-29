@@ -333,6 +333,8 @@ void LibA()
 
 	local pattern3 = [[
 *** found 18 target(s)...
+*** updating 4 target(s)...
+*** updated 4 target(s)...
 ]]
 	TestPattern(pattern3, RunJam())
 
@@ -361,8 +363,12 @@ void LibA()
 		TestPattern(pattern4, RunJam())
 	end
 
-	TestPattern(pattern3, RunJam())
+	local noopPattern = [[
+*** found 18 target(s)...
+]]
+	TestPattern(noopPattern, RunJam())
 
+	osprocess.sleep(1.0)
     WriteModifiedFileB()
 
 	if Platform == 'win32' then

@@ -61,6 +61,12 @@ if Platform == 'win32' then
 *** found 12 target(s)...
 ]]
 
+	patternB_useChecksums = [[
+*** found 12 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
+]]
+
 	patternC = [[
 *** found 12 target(s)...
 *** updating 2 target(s)...
@@ -111,6 +117,12 @@ else
 
 	patternB = [[
 *** found 12 target(s)...
+]]
+
+	patternB_useChecksums = [[
+*** found 12 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
 ]]
 
 	patternC = [[
@@ -177,7 +189,7 @@ int Add(int a, int b);
 		ospath.touch('lib-a/add.h')
 
 		if useChecksums then
-			TestPattern(patternB, RunJam{})
+			TestPattern(patternB_useChecksums, RunJam{})
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileA()

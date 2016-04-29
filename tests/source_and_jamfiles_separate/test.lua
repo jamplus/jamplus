@@ -156,6 +156,11 @@ function Test()
 			*** found 17 target(s)...
 ]]
 	end
+	local noopPattern2 = [[
+		*** found 22 target(s)...
+		*** updating 5 target(s)...
+		*** updated 5 target(s)...
+]]
 
 	do
 		TestPattern(noopPattern, RunJam{ '-Cjam' })
@@ -169,7 +174,7 @@ function Test()
 		ospath.touch('src/precomp.h')
 
 		if useChecksums then
-			TestPattern(noopPattern, RunJam{ '-Cjam' })
+			TestPattern(noopPattern2, RunJam{ '-Cjam' })
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileA()
@@ -227,7 +232,7 @@ function Test()
 		ospath.touch('src/createprecomp.c')
 
 		if useChecksums then
-			TestPattern(noopPattern, RunJam{ '-Cjam' })
+			TestPattern(noopPattern2, RunJam{ '-Cjam' })
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileB()

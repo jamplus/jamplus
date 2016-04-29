@@ -293,6 +293,13 @@ extern void Print(const char* str);
 ]]
 		TestPattern(pattern2, RunJam())
 	
+		if useChecksums then
+			pattern2 = [[
+*** found 35 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
+]]
+		end
 		osprocess.sleep(1.0)
 		ospath.touch('common/print.h')
 		TestPattern(pattern2, RunJam())

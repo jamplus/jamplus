@@ -392,7 +392,13 @@ void ExportA2()
 		ospath.touch('lib-c/add.h')
 
 		if useChecksums then
-			TestPattern(pass2Pattern, RunJam{})
+			local noopPattern = [[
+*** found 26 target(s)...
+*** updating 4 target(s)...
+*** updated 5 target(s)...
+]]
+
+			TestPattern(noopPattern, RunJam{})
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileA()
@@ -416,7 +422,13 @@ void ExportA2()
 		ospath.touch('lib-c/add.c')
 
 		if useChecksums then
-			TestPattern(pass4Pattern, RunJam{})
+			local noopPattern = [[
+*** found 26 target(s)...
+*** updating 4 target(s)...
+*** updated 5 target(s)...
+]]
+
+			TestPattern(noopPattern, RunJam{})
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileB()
@@ -440,7 +452,13 @@ void ExportA2()
 		ospath.touch('slib-a/slib-a.c')
 
 		if useChecksums then
-			TestPattern(pass6Pattern, RunJam{})
+			local noopPattern = [[
+*** found 26 target(s)...
+*** updating 2 target(s)...
+*** updated 3 target(s)...
+]]
+
+			TestPattern(noopPattern, RunJam{})
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileC()
