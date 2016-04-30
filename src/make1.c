@@ -1116,7 +1116,8 @@ make1d(
 			if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
 				t->time = 0;
 				getcachedmd5sum( t, 1 );
-				file_time( t->boundname, &t->time );
+				t->time = t->contentchecksum->mtime;
+				//file_time( t->boundname, &t->time );
 				checksum_update(t);
 			}
 		}

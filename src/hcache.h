@@ -6,6 +6,17 @@
  * hcache.h - handle #includes in source files
  */
 
+struct checksumdata {
+	const char	*boundname;
+	int			age;	  /* if too old, we'll remove it from cache */
+	time_t      mtime;    /* when md5sum was cached  */
+	MD5SUM      contentmd5sum;
+	MD5SUM      currentcontentmd5sum;
+	char		contentmd5sum_calculated;
+	char		contentmd5sum_changed;
+	struct checksumdata	*next;
+} ;
+
 /*void hcache_init(void);*/
 void hcache_done(void);
 LIST *hcache( TARGET *t, LIST *hdrscan );

@@ -184,7 +184,8 @@ struct _target {
 	time_t		time;		/* update time */
 	time_t		leaf;		/* update time of leaf sources */
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-	MD5SUM		contentmd5sum; 	/* existing md5sum - either direct (for sources) or indirect (for those that have actions) */
+	struct checksumdata *contentchecksum; /* existing md5sum - either direct (for sources) or indirect (for those that have actions) */
+	//MD5SUM		contentmd5sum; 	/* existing md5sum - either direct (for sources) or indirect (for those that have actions) */
 	MD5SUM		buildmd5sum;	/* new indirect md5sum calculated from actions */
 	MD5SUM		rulemd5sum;	/*  */
 	char		rulemd5sumchecked;
