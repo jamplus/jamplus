@@ -1577,7 +1577,11 @@ void make0calcmd5sum( TARGET *t, int source )
 			if( DEBUG_MD5HASH )
 				printf( "\t\tdepends: %s %s\n", c->target->name, md5tostring( c->target->buildmd5sum ) );
 			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
-			MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+			//MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+			if ( c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
+			{
+				MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+			}
 		}
 	}
 	MD5Final( t->buildmd5sum, &context );
