@@ -1439,7 +1439,7 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t )
 		if ( !( c->target->flags & T_FLAG_NOTFILE ) && !( c->target->flags & T_FLAG_INTERNAL ) && !( c->target->flags & T_FLAG_NOUPDATE ) )
 		{
 			getcachedmd5sum( c->target, 0 );
-			//if ( c->target->contentmd5sum_calculated )
+			if ( c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
 			{
 				MD5Update( context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
 				if( DEBUG_MD5HASH )
@@ -1468,10 +1468,10 @@ void make0calcmd5sum( TARGET *t, int source )
 		memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
 		//return;
 	}
-    else
-    {
-    	getcachedmd5sum( t, 0 );
-    }
+	else
+	{
+		getcachedmd5sum( t, 0 );
+	}
 
 	if ( !source )
 	{
@@ -1498,15 +1498,15 @@ void make0calcmd5sum( TARGET *t, int source )
 		printf( "\t\ttarget: %s\n", t->name );
 
     /* if this is a source */
-    if (source)
-    {
+	if (source)
+	{
 		/* start by adding your own content */
-        if (t->contentchecksum)
-        {
-    		MD5Update( &context, t->contentchecksum->contentmd5sum, sizeof( t->contentchecksum->contentmd5sum ) );
-    		if( DEBUG_MD5HASH )
-    			printf( "\t\tcontent: %s\n", md5tostring( t->contentchecksum->contentmd5sum ) );
-        }
+		if (t->contentchecksum  &&  !ismd5empty(t->contentchecksum->contentmd5sum))
+		{
+			MD5Update( &context, t->contentchecksum->contentmd5sum, sizeof( t->contentchecksum->contentmd5sum ) );
+			if( DEBUG_MD5HASH )
+				printf( "\t\tcontent: %s\n", md5tostring( t->contentchecksum->contentmd5sum ) );
+		}
 	}
 
     /* add in the COMMANDLINE */
