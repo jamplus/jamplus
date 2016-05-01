@@ -1463,9 +1463,14 @@ void make0calcmd5sum( TARGET *t, int source )
 	if ( t->buildmd5sum_calculated )
 		return;
 
-	if ( ( t->flags & T_FLAG_NOTFILE ) || ( t->flags & T_FLAG_INTERNAL ) || ( t->flags & T_FLAG_NOUPDATE ) )
+	if ( ( t->flags & T_FLAG_NOUPDATE ) || ( t->flags & T_FLAG_INTERNAL ) )
 	{
 		memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
+		return;
+	}
+	if ( ( t->flags & T_FLAG_NOTFILE ) )
+	{
+		//memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
 		//return;
 	}
 	else

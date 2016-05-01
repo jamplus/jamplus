@@ -1449,7 +1449,7 @@ int checksum_retrieve(TARGET *t, MD5SUM buildmd5sum)
 		t->contentchecksum->age = 0;
 		checksumsdirty = 1;
 
-		printf("JAMDEBUG: %s is already the proper cached target.\n", t->name);
+		//printf("JAMDEBUG: %s is already the proper cached target.\n", t->name);
 		return 1;
 	}
 	else
