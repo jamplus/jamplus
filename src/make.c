@@ -1580,7 +1580,7 @@ void make0calcmd5sum( TARGET *t, int source )
 			//MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
 			if ( c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
 			{
-				MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+				MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
 			}
 		}
 	}
