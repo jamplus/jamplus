@@ -1117,7 +1117,6 @@ make1d(
 				t->time = 0;
 				getcachedmd5sum( t, 1 );
 				t->time = t->contentchecksum->mtime;
-				//file_time( t->boundname, &t->time );
 				checksum_update(t);
 			}
 		}
@@ -1477,9 +1476,9 @@ make1cmds( ACTIONS *a0 )
 				}
 				continue;
 			}
-	    }
-	    else
-	    {
+		}
+		else
+		{
 #if 0
 			if ( strncmp( rule->name, "batched_", 8 ) == 0 )
 			{
@@ -1627,7 +1626,7 @@ make1cmds( ACTIONS *a0 )
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */
 		maxline = rule->maxline;
 /* commented so jamgram.y can compile #else
-	    maxline = rule->flags / RULE_MAXLINE;
+		maxline = rule->flags / RULE_MAXLINE;
 #endif */
 #ifdef OPT_PIECEMEAL_PUNT_EXT
 		maxline = maxline && maxline < CMDBUF ? maxline : CMDBUF;

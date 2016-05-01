@@ -720,7 +720,6 @@ static void checksums_readfile() {
 
 		c->mtime = read_int( &buff );
 		read_md5sum( &buff, c->contentmd5sum );
-		memcpy( &c->currentcontentmd5sum, &c->contentmd5sum, MD5_SUMSIZE );
 		c->contentmd5sum_changed = 0;
 		c->contentmd5sum_calculated = 0;
 
@@ -818,7 +817,6 @@ void checksums_nextpass() {
 	CHECKSUMDATA	*c;
 
 	for( c = checksumdatalist; c; c = c->next ) {
-		memcpy( &c->currentcontentmd5sum, &c->contentmd5sum, sizeof( MD5SUM ) );
 		c->contentmd5sum_changed = 0;
 	}
 }
@@ -993,7 +991,6 @@ int getcachedmd5sum( TARGET *t, int forcetimecheck )
 				c->next = checksumdatalist;
 				checksumdatalist = c;
 				c->mtime = 0;
-				memset( &c->currentcontentmd5sum, 0, MD5_SUMSIZE );
 				memset( &c->contentmd5sum, 0, MD5_SUMSIZE );
 				c->contentmd5sum_changed = 1;
 				c->contentmd5sum_calculated = 0;
@@ -1096,7 +1093,6 @@ void setcachedmd5sum( TARGET *t )
 	}
 
 	memcpy(c->contentmd5sum, t->contentmd5sum, sizeof(MD5SUM));
-	memcpy(c->currentcontentmd5sum, t->contentmd5sum, sizeof(MD5SUM));
 	c->mtime = t->time;
 	c->age = 0;
 	checksumsdirty = 1;
@@ -1453,7 +1449,7 @@ int checksum_retrieve(TARGET *t, MD5SUM buildmd5sum)
 		t->contentchecksum->age = 0;
 		checksumsdirty = 1;
 
-		//printf("JAMDEBUG: %s is already the proper cached target.\n", t->name);
+		printf("JAMDEBUG: %s is already the proper cached target.\n", t->name);
 		return 1;
 	}
 	else

@@ -11,7 +11,6 @@ struct checksumdata {
 	int			age;	  /* if too old, we'll remove it from cache */
 	time_t      mtime;    /* when md5sum was cached  */
 	MD5SUM      contentmd5sum;
-	MD5SUM      currentcontentmd5sum;
 	char		contentmd5sum_calculated;
 	char		contentmd5sum_changed;
 	struct checksumdata	*next;

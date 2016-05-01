@@ -209,10 +209,6 @@ make_fixprogress(
 	t->flags &= ~T_FLAG_VISITED;
 	t->status = 0;
 	t->time = 0;
-#ifdef OPT_BUILTIN_MD5CACHE_EXT
-	//t->contentmd5sum_calculated = 0;
-	//t->contentmd5sum_changed = 0;
-#endif /* OPT_BUILTIN_MD5CACHE_EXT */
 
 	for ( actions = t->actions; actions; actions = actions->next )
 	{
@@ -1470,10 +1466,12 @@ void make0calcmd5sum( TARGET *t, int source )
 	if ( ( t->flags & T_FLAG_NOTFILE ) || ( t->flags & T_FLAG_INTERNAL ) || ( t->flags & T_FLAG_NOUPDATE ) )
 	{
 		memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
-		return;
+		//return;
 	}
-
-	getcachedmd5sum( t, 0 );
+    else
+    {
+    	getcachedmd5sum( t, 0 );
+    }
 
 	if ( !source )
 	{
@@ -1481,12 +1479,12 @@ void make0calcmd5sum( TARGET *t, int source )
 		return;
 	}
 
-	if ( !t->contentchecksum  ||  ismd5empty( t->contentchecksum->contentmd5sum ) )
-	{
-		memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
-		t->buildmd5sum_calculated = 0;
-		return;
-	}
+	//if ( !t->contentchecksum  ||  ismd5empty( t->contentchecksum->contentmd5sum ) )
+	//{
+		//memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
+		//t->buildmd5sum_calculated = 0;
+		//return;
+	//}
 
 	/* sort all dependents by name, so we can make reliable md5sums */
 	t->depends = make0sortbyname( t->depends );
@@ -1497,15 +1495,18 @@ void make0calcmd5sum( TARGET *t, int source )
 	MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
 
 	if( DEBUG_MD5HASH )
-		printf( "\t\t%s\n", t->name );
+		printf( "\t\ttarget: %s\n", t->name );
 
     /* if this is a source */
     if (source)
     {
 		/* start by adding your own content */
-		MD5Update( &context, t->contentchecksum->contentmd5sum, sizeof( t->contentchecksum->contentmd5sum ) );
-		if( DEBUG_MD5HASH )
-			printf( "\t\tcontent: %s\n", md5tostring( t->contentchecksum->contentmd5sum ) );
+        if (t->contentchecksum)
+        {
+    		MD5Update( &context, t->contentchecksum->contentmd5sum, sizeof( t->contentchecksum->contentmd5sum ) );
+    		if( DEBUG_MD5HASH )
+    			printf( "\t\tcontent: %s\n", md5tostring( t->contentchecksum->contentmd5sum ) );
+        }
 	}
 
     /* add in the COMMANDLINE */
