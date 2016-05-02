@@ -111,6 +111,12 @@ static int verifyIsRealOutput (char *input, int len);
 static void printResponseFiles(CMD *cmd);
 #endif
 
+#ifdef OPT_USE_CHECKSUMS_EXT
+extern int make0calcmd5sum_epoch;
+void make0calcmd5sum( TARGET *t, int source, int depth );
+void make1buildchecksum( TARGET *t, MD5SUM buildmd5sum );
+#endif
+
 #ifdef OPT_MULTIPASS_EXT
 extern LIST *queuedjamfiles;
 #endif
@@ -1102,25 +1108,24 @@ make1d(
 		LISTITEM* target;
 	    LIST *targets = lol_get( &cmd->args, 0 );
 
-		for (target = list_first(targets); target; target = list_next(target))
-		{
-			TARGET *t = bindtarget(list_value(target));
-			if (!(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
-				filecache_update(t);
-			}
-		}
-
-#ifdef OPT_USE_CHECKSUMS_EXT
 		for (target = list_first(cmd->targetsunbound); target; target = list_next(target)) {
+			MD5SUM buildmd5sum;
 			TARGET *t = bindtarget(list_value(target));
-			if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
+			//if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
+			if (!(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
 				t->time = 0;
 				getcachedmd5sum( t, 1 );
 				t->time = t->contentchecksum->mtime;
-				checksum_update(t);
+				++make0calcmd5sum_epoch;
+				make0calcmd5sum( t, 1, 1 );
+				make1buildchecksum( t, buildmd5sum );
+
+#ifdef OPT_USE_CHECKSUMS_EXT
+				checksum_update(t, buildmd5sum);
+#endif /* OPT_USE_CHECKSUMS_EXT */
+				filecache_update(t, buildmd5sum);
 			}
 		}
-#endif /* OPT_USE_CHECKSUMS_EXT */
 	}
 #endif
 
@@ -1149,8 +1154,63 @@ make1d(
 TARGETS *
 make0sortbyname( TARGETS *chain );
 
-extern int make0calcmd5sum_epoch;
-void make0calcmd5sum( TARGET *t, int source );
+void make1buildchecksum( TARGET *t, MD5SUM buildmd5sum )
+{
+	TARGETS *c;
+	MD5_CTX context;
+
+	if( DEBUG_MD5HASH ) {
+		printf( "------------------------------------------------\n" );
+		printf( "------------------------------------------------\n" );
+		printf( "------------------------------------------------\n" );
+	}
+
+	/* sort all dependents by name, so we can make reliable md5sums */
+	t->depends = make0sortbyname( t->depends );
+
+	MD5Init( &context );
+
+	/* add the path of the file to the sum - it is significant because one command can create more than one file */
+	MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
+
+	/* add in the COMMANDLINE */
+	if ( t->flags & T_FLAG_USECOMMANDLINE )
+	{
+		SETTINGS *vars = quicksettingslookup( t, "COMMANDLINE" );
+		if ( vars )
+		{
+			LISTITEM *list;
+			for ( list = list_first(vars->value); list; list = list_next(list) )
+			{
+				MD5Update( &context, (unsigned char*)list_value(list), (unsigned int)strlen( list_value(list) ) );
+				if( DEBUG_MD5HASH )
+					printf( "\t\tCOMMANDLINE: %s\n", list_value(list) );
+			}
+		}
+	}
+
+	/* for each dependencies */
+	for( c = t->depends; c; c = c->next )
+	{
+		/* If this is a "Needs" dependency, don't care about its contents. */
+		if (c->needs)
+		{
+			continue;
+		}
+
+		/* add name of the dependency and its contents */
+		make0calcmd5sum_epoch++;
+		make0calcmd5sum( c->target, 1, 2 );
+		if ( c->target->buildmd5sum_calculated )
+		{
+			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
+			MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+		}
+	}
+
+	MD5Final( buildmd5sum, &context );
+}
+
 #endif
 
 
@@ -1342,7 +1402,7 @@ make1cmds( ACTIONS *a0 )
 				{
 					TARGET *t = bindtarget(list_value(target));
 //					TARGET *s = sources!=NULL ? bindtarget(sources->string) : NULL;
-					TARGETS *c;
+					//TARGETS *c;
 					TARGET *outt;
 					LIST *filecache = 0;
 
@@ -1356,62 +1416,6 @@ make1cmds( ACTIONS *a0 )
 					/* if this target could be cacheable */
 					if ( usechecksums || ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) ) {
 						/* find its final md5sum */
-						MD5_CTX context;
-
-						if( DEBUG_MD5HASH ) {
-							printf( "------------------------------------------------\n" );
-							printf( "------------------------------------------------\n" );
-							printf( "------------------------------------------------\n" );
-						}
-
-						/* sort all dependents by name, so we can make reliable md5sums */
-						t->depends = make0sortbyname( t->depends );
-
-						MD5Init( &context );
-
-						/* add the path of the file to the sum - it is significant because one command can create more than one file */
-						MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
-
-						/* add in the COMMANDLINE */
-						if ( t->flags & T_FLAG_USECOMMANDLINE )
-						{
-							SETTINGS *vars;
-							for ( vars = t->settings; vars; vars = vars->next )
-							{
-								if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
-								{
-									LISTITEM *list;
-									for ( list = list_first(vars->value); list; list = list_next(list) )
-									{
-										MD5Update( &context, (unsigned char*)list_value(list), (unsigned int)strlen( list_value(list) ) );
-										if( DEBUG_MD5HASH )
-											printf( "\t\tCOMMANDLINE: %s\n", list_value(list) );
-									}
-
-									break;
-								}
-							}
-						}
-
-						/* for each dependencies */
-						for( c = t->depends; c; c = c->next )
-						{
-							/* If this is a "Needs" dependency, don't care about its contents. */
-							if (c->needs)
-							{
-								continue;
-							}
-
-							/* add name of the dependency and its contents */
-							make0calcmd5sum_epoch++;
-							make0calcmd5sum( c->target, 1 );
-							if ( c->target->buildmd5sum_calculated )
-							{
-								MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
-								MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
-							}
-						}
-
 						outt = bindtarget( t->name );
 						outt->flags |= T_FLAG_USEFILECACHE;
 						outt->filecache_generate = t->filecache_generate;
@@ -1419,7 +1423,8 @@ make1cmds( ACTIONS *a0 )
 						if ( filecache ) {
 							outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_append( L0, list_value(list_first(filecache)), 1 ) );
 						}
-						MD5Final( outt->buildmd5sum, &context );
+						make1buildchecksum( t, outt->buildmd5sum );
+
 						if (DEBUG_MD5HASH)
 						{
 							printf( "Cacheable: %s buildmd5: %s\n", t->boundname, md5tostring(outt->buildmd5sum) );
@@ -1433,7 +1438,7 @@ make1cmds( ACTIONS *a0 )
 								allcached = filecache_retrieve( t, outt->buildmd5sum );
 								if ( usechecksums ) {
 									getcachedmd5sum(t, 1);
-									checksum_update(t);
+									checksum_update(t, outt->buildmd5sum);
 								}
 							}
 

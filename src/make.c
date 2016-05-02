@@ -118,7 +118,7 @@ static void make0( TARGET *t, TARGET *p, int depth,
 
 static TARGETS *make0sort( TARGETS *c );
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-void make0calcmd5sum( TARGET *t, int source );
+void make0calcmd5sum( TARGET *t, int source, int depth );
 #endif
 #ifdef OPT_GRAPH_DEBUG_EXT
 static void dependGraphOutput( TARGET *t, int depth );
@@ -1415,7 +1415,7 @@ make0sortbyname( TARGETS *chain )
 
 int make0calcmd5sum_epoch = -1000000000;
 
-static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t )
+static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 {
 	TARGETS *c;
 
@@ -1427,11 +1427,11 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t )
 		}
 		c->target->epoch = make0calcmd5sum_epoch;
 
-		if( c->target->binding == T_BIND_UNBOUND && !( c->target->flags & T_FLAG_NOTFILE ) )
+		if( ( c->target->binding == T_BIND_UNBOUND || c->target->time == 0 ) && !( c->target->flags & T_FLAG_NOTFILE ) )
 		{
 			SETTINGS *s = copysettings( c->target->settings );
 			pushsettings( s );
-			c->target->boundname = search( c->target->name, &c->target->time );
+			c->target->boundname = search_uncached( c->target->name, &c->target->time );
 			popsettings( s );
 			freesettings( s );
 			c->target->binding = c->target->time ? T_BIND_EXISTS : T_BIND_MISSING;
@@ -1439,15 +1439,15 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t )
 		if ( !( c->target->flags & T_FLAG_NOTFILE ) && !( c->target->flags & T_FLAG_INTERNAL ) && !( c->target->flags & T_FLAG_NOUPDATE ) )
 		{
 			getcachedmd5sum( c->target, 0 );
-			if ( c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
+			if ( !( c->target->flags & T_FLAG_IGNORECONTENTS )  &&  c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
 			{
 				MD5Update( context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
 				if( DEBUG_MD5HASH )
-					printf( "\t\t%s: %s\n", c->target->name, md5tostring( c->target->contentchecksum->contentmd5sum ) );
+					printf( "\t\t%s%s: md5 %s\n", spaces( depth ), c->target->name, md5tostring( c->target->contentchecksum->contentmd5sum ) );
 			}
 		}
 		if ( c->target->includes )
-			make0recurseincludesmd5sum( context, c->target->includes );
+			make0recurseincludesmd5sum( context, c->target->includes, depth + 1 );
 	}
 }
 
@@ -1455,7 +1455,7 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t )
 /*
  * make0calcmd5sum() - calculate md5sum for a buildable target
  */
-void make0calcmd5sum( TARGET *t, int source )
+void make0calcmd5sum( TARGET *t, int source, int depth )
 {
 	MD5_CTX context;
 	TARGETS *c;
@@ -1500,17 +1500,17 @@ void make0calcmd5sum( TARGET *t, int source )
 	MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
 
 	if( DEBUG_MD5HASH )
-		printf( "\t\ttarget: %s\n", t->name );
+		printf( "\t\t%starget: %s\n", spaces( depth ), t->name );
 
     /* if this is a source */
-	if (source)
+	if (source  &&  !(t->flags & T_FLAG_IGNORECONTENTS))
 	{
 		/* start by adding your own content */
 		if (t->contentchecksum  &&  !ismd5empty(t->contentchecksum->contentmd5sum))
 		{
 			MD5Update( &context, t->contentchecksum->contentmd5sum, sizeof( t->contentchecksum->contentmd5sum ) );
 			if( DEBUG_MD5HASH )
-				printf( "\t\tcontent: %s\n", md5tostring( t->contentchecksum->contentmd5sum ) );
+				printf( "\t\t%scontent: %s\n", spaces( depth ), md5tostring( t->contentchecksum->contentmd5sum ) );
 		}
 	}
 
@@ -1528,7 +1528,7 @@ void make0calcmd5sum( TARGET *t, int source )
 					char const* str = list_value(item);
 					MD5Update( &context, (unsigned char*)str, (unsigned int)strlen(str) );
 					if( DEBUG_MD5HASH )
-						printf( "\t\tCOMMANDLINE: %s\n", str );
+						printf( "\t\t%sCOMMANDLINE: %s\n", spaces( depth ), str );
 				}
 
 				break;
@@ -1552,8 +1552,8 @@ void make0calcmd5sum( TARGET *t, int source )
 		MD5Update( &context, (unsigned char*)includesStr, (unsigned int)strlen( includesStr ) );
 
 		if( DEBUG_MD5HASH )
-			printf( "\t\t#includes:\n" );
-		make0recurseincludesmd5sum( &context, t->includes );
+			printf( "\t\t%s#includes:\n", spaces( depth ) );
+		make0recurseincludesmd5sum( &context, t->includes, depth + 1 );
 	}
 
     /* for each of your dependencies */
@@ -1569,24 +1569,24 @@ void make0calcmd5sum( TARGET *t, int source )
 		{
 			continue;
 		}
-		make0calcmd5sum( c->target, 1 );
+		make0calcmd5sum( c->target, 1, depth + 1 );
 
 		/* add name of the dependency and its contents */
 		if ( c->target->buildmd5sum_calculated )
 		{
 			if( DEBUG_MD5HASH )
-				printf( "\t\tdepends: %s %s\n", c->target->name, md5tostring( c->target->buildmd5sum ) );
+				printf( "\t\t%sdepends: %s %s\n", spaces( depth ), c->target->name, md5tostring( c->target->buildmd5sum ) );
 			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
-			//MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
-			if ( c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
-			{
-				MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
-			}
+			MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+			//if ( !( c->target->flags & T_FLAG_IGNORECONTENTS )  &&  c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
+			//{
+				//MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
+			//}
 		}
 	}
 	MD5Final( t->buildmd5sum, &context );
 	if( DEBUG_MD5HASH ) {
-		printf( "%s (%s)\n", t->name, md5tostring(t->buildmd5sum));
+		printf( "%sbuildmd5sum: %s (%s)\n", spaces( depth ), t->name, md5tostring(t->buildmd5sum));
 	}
 
 	t->buildmd5sum_calculated = 1;
@@ -1691,6 +1691,7 @@ dependGraphOutput( TARGET *t, int depth )
 #ifdef OPT_BUILTIN_NEEDS_EXT
 		if( t->flags & T_FLAG_MIGHTNOTUPDATE ) printf ("MIGHTNOTUPDATE ");
 		if( t->flags & T_FLAG_SCANCONTENTS ) printf ("SCANCONTENTS ");
+		if( t->flags & T_FLAG_IGNORECONTENTS ) printf ("IGNORECONTENTS ");
 #endif
 		printf( "\n" );
 	}

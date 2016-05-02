@@ -249,6 +249,11 @@ load_builtins()
     bindrule( "ScanContents" )->procedure =
     bindrule( "SCANCONTENTS" )->procedure =
 	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_SCANCONTENTS );
+
+    bindrule( "IgnoreContents" )->procedure =
+    bindrule( "IGNORECONTENTS" )->procedure =
+	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_IGNORECONTENTS );
+
 #endif
 
 #ifdef OPT_BUILTIN_NEEDS_EXT

@@ -34,9 +34,6 @@
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 TARGETS *
 make0sortbyname( TARGETS *chain );
-
-extern int make0calcmd5sum_epoch;
-void make0calcmd5sum( TARGET *t, int source, int epoch, int depth );
 #endif
 
 
@@ -1047,8 +1044,8 @@ int getcachedmd5sum( TARGET *t, int forcetimecheck )
 			c->mtime = ftime;
 			c->contentmd5sum_changed = memcmp( &origmd5sum, &c->contentmd5sum, sizeof( MD5SUM ) ) != 0;
 		}
-		if( DEBUG_MD5HASH )
-			printf( "- content md5: %s (%s)\n", t->boundname, md5tostring(c->contentmd5sum));
+		//if( DEBUG_MD5HASH )
+			//printf( "- content md5: %s (%s)\n", t->boundname, md5tostring(c->contentmd5sum));
 
 		c->age = 0;
 		checksumsdirty = 1;
@@ -1059,8 +1056,6 @@ int getcachedmd5sum( TARGET *t, int forcetimecheck )
 #if 0
 			if( DEBUG_MD5HASH )
 				printf( "md5 cache out of date for %s (time %d, md5time %d)\n", t->boundname , (int)t->time, (int)c->mtime );
-	if( DEBUG_MD5HASH )
-		printf( "- content md5: %s (%s)\n", t->boundname, md5tostring(c->contentmd5sum));
 #endif
 }
 
@@ -1333,7 +1328,7 @@ int filecache_retrieve(TARGET *t, MD5SUM buildmd5sum)
 }
 
 
-void filecache_update(TARGET *t)
+void filecache_update(TARGET *t, MD5SUM buildmd5sum)
 {
 	MD5SUM blobmd5sum;
 	int haveblobmd5sum = 0;
@@ -1345,12 +1340,12 @@ void filecache_update(TARGET *t)
 		return;
 
 	/* If the buildmd5sum is empty, then the file doesn't exist. */
-	cacheerror = ismd5empty(t->buildmd5sum);
+	cacheerror = ismd5empty(buildmd5sum);
 	if (cacheerror)
 		return;
 
 	haveblobmd5sum = 0;
-	cachedname = filecache_getfilename(t, t->buildmd5sum, NULL);
+	cachedname = filecache_getfilename(t, buildmd5sum, NULL);
 	if (!cachedname)
 		return;
 
@@ -1461,17 +1456,17 @@ int checksum_retrieve(TARGET *t, MD5SUM buildmd5sum)
 }
 
 
-void checksum_update(TARGET *t)
+void checksum_update(TARGET *t, MD5SUM buildmd5sum)
 {
 	CHECKSUMDATA cachedata, *c = &cachedata;
 	char buildmd5sumstring[33];
 
 	/* If the buildmd5sum is empty, then the file doesn't exist. */
-	if (ismd5empty(t->buildmd5sum))
+	if (ismd5empty(buildmd5sum))
 		return;
 
 	/* if the target is available in the cache */
-	strcpy(buildmd5sumstring, md5tostring(t->buildmd5sum));
+	strcpy(buildmd5sumstring, md5tostring(buildmd5sum));
 	c->boundname = buildmd5sumstring;
 
 	/* Search for the appropriate .link file that matches the target. */

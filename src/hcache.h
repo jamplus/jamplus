@@ -33,10 +33,10 @@ const char *filecache_getfilename(TARGET *t, MD5SUM sum, const char* extension);
 LIST *filecache_fillvalues(TARGET *t);
 void filecache_disable(TARGET *t);
 int filecache_retrieve(TARGET *t, MD5SUM buildmd5sum);
-void filecache_update(TARGET* t);
+void filecache_update(TARGET* t, MD5SUM buildmd5sum);
 
 int checksum_retrieve(TARGET *t, MD5SUM buildmd5sum);
-void checksum_update(TARGET *t);
+void checksum_update(TARGET *t, MD5SUM buildmd5sum);
 
 int hcache_getrulemd5sum( TARGET *t );
 void hcache_finalizerulemd5sum( TARGET *t );
