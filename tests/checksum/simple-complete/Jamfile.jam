@@ -1,4 +1,4 @@
-#LUA_SHARED_LIBRARY.DEBUG = s:/luaplus51-all/build2015.lua53-luaplus/bin.lua53-luaplus.vs2015.win32/lua53_debug.dll ;
+LUA_SHARED_LIBRARY.DEBUG = s:/luaplus51-all/build2015/bin.lua53-luaplus.vs2015.win32/lua53_debug.dll ;
 #JAM_USE_CHECKSUMS = 1 ;
 
 SubDir TOP ;
