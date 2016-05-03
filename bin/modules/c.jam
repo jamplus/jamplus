@@ -338,6 +338,7 @@ rule C._MultiCppCompile SOURCES {
 			_obj = $(_src)$(sufobj[2]) ;
 		}
 		BINDING on $(_obj) = $(_obj:BS) ;
+		ForceContentsOnly $(_obj) ;
 
 		$(makeobj_pass1) ;
 
@@ -797,6 +798,7 @@ rule C._LibraryFromObjects OBJECTS {
 	;
 	Depends $(_l) : $(needLibs) ;
 
+	ForceContentsOnly $(_l) ;
 	UseCommandLine $(_l) : $(libFlags) $(_s) ;
 
 	UseFileCache $(_l) : code ;
@@ -928,6 +930,8 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 	LINKFLAGS on $(_linkTargets) = $(linkFlags) ;
 
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
+
+	ForceContentsOnly $(_linkTargets) ;
 
 	UseFileCache $(_linkTargets) : code ;
 	$(linkRule) $(_linkTargets) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) : $(_extraChecksumTargets) ;
