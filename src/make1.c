@@ -381,37 +381,12 @@ make1b( TARGET *t )
 			}
 			/* If it didn't have the MightNotUpdate flag but did update, mark it. */
 			else if ( c->target->fate > T_FATE_STABLE  &&  !c->needs ) {
-#ifdef OPT_USE_CHECKSUMS_EXT
-				if ( usechecksums ) {
-					if ( c->target->actions ) {
-						//childscancontents = 1;
-						if ( !( c->target->flags & ( T_FLAG_NOTFILE | T_FLAG_NOUPDATE ) ) ) {
-							if ( getcachedmd5sum( c->target, 0 ) ) {
-								childupdated = 1;
-							}
-						}
-					} else {
-						if ( c->target->includes ) {
-							if ( c->target->includes->fate > T_FATE_STABLE ) {
-								childupdated = 1;
-							}
-							if ( c->target->fate == T_FATE_UPDATE ) {
-								childupdated = 1;
-							}
-						} else {
-							childupdated = 1;
-						}
-					}
-				} else
-#endif /* OPT_USE_CHECKSUMS_EXT */
-				{
-					if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
-						childscancontents = 1;
-						if ( getcachedmd5sum( c->target, 0 ) )
-							childupdated = 1;
-					} else {
+				if ( c->target->flags & T_FLAG_SCANCONTENTS ) {
+					childscancontents = 1;
+					if ( getcachedmd5sum( c->target, 0 ) )
 						childupdated = 1;
-					}
+				} else {
+					childupdated = 1;
 				}
 			}
 		}
@@ -480,33 +455,17 @@ make1b( TARGET *t )
 		} else if ( t->fate == T_FATE_STABLE )
 			t->fate = T_FATE_UPDATE;
 	}
-
-//	if ( childupdated  &&  t->fate == T_FATE_STABLE )
-//		t->fate = T_FATE_UPDATE;
-//	if ( ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
-#ifdef OPT_USE_CHECKSUMS_EXT
-	if (usechecksums) {
-		//if ( !( t->flags & T_FLAG_NOTFILE )  &&  t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
-		//if ( ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
-		if ( t->binding != T_BIND_MISSING  &&  t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
-			if ( md5matchescommandline( t ) )
+	if ( !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))  && t->binding != T_BIND_MISSING  &&  ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )  &&  t->status != EXEC_CMD_NEXTPASS ) {
+		if ( t->flags & T_FLAG_SCANCONTENTS ) {
+			if ( md5matchescommandline( t ) ) {
 				t->fate = T_FATE_STABLE;
-	} else {
-#endif /* OPT_USE_CHECKSUMS_EXT */
-		if ( !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))  && t->binding != T_BIND_MISSING  &&  ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )  &&  t->status != EXEC_CMD_NEXTPASS ) {
-			if ( t->flags & T_FLAG_SCANCONTENTS ) {
-				if ( md5matchescommandline( t ) ) {
-					t->fate = T_FATE_STABLE;
-				}
-			} else {
-				if ( md5matchescommandline( t ) ) {
-					t->fate = T_FATE_STABLE;
-				}
+			}
+		} else {
+			if ( md5matchescommandline( t ) ) {
+				t->fate = T_FATE_STABLE;
 			}
 		}
-#ifdef OPT_USE_CHECKSUMS_EXT
 	}
-#endif /* OPT_USE_CHECKSUMS_EXT */
 	if ( t->flags & ( T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS )  &&  t->actions ) {
 #ifdef OPT_ACTIONS_WAIT_FIX
 		/* See http://maillist.perforce.com/pipermail/jamming/2003-December/002252.html */
