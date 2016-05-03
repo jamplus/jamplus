@@ -61,6 +61,8 @@ Modifying Binding</h1>
 <ul>
 <li><a href="builtin_rules.html#rule_Always">Always</a></li>
 <li><a href="builtin_rules.html#rule_ForceCare">ForceCare</a></li>
+<li><a href="builtin_rules.html#rule_ForceContents">ForceContents</a></li>
+<li><a href="builtin_rules.html#rule_IgnoreContents">IgnoreContents</a></li>
 <li><a href="builtin_rules.html#rule_Leaves">Leaves</a></li>
 <li><a href="builtin_rules.html#rule_MightNotUpdate">MightNotUpdate</a></li>
 <li><a href="builtin_rules.html#rule_NoCare">NoCare</a></li>
@@ -83,6 +85,20 @@ rule ForceCare targets ;</h1>
 <p>Causes <b>Jam</b> to care again about <em>targets</em> that neither can be found nor have updating actions to build them. Standard <b>Jam</b> behavior applies here, a warning will be issues and other targets depending on the missing targets will be skipped.</p>
 <p>ForceCare is needed to override a NoCare flag applied to a target. Note that once ForceCare has been applied to a given target, that target can never be a NoCare target again.</p>
 <hr/>
+ <h1><a class="anchor" id="rule_ForceContents"></a>
+rule ForceContents targets ;</h1>
+<p><a name="rule_%46orce%43ontents"></a></p>
+<dl class="section note"><dt>Note</dt><dd>In order to use <code>ForceContents</code>, <code>JAM_CHECKSUMS</code> must be set to 1.</dd></dl>
+<p>Normally, a target's build checksum accumulates a dependency's build checksum also. This may be undesirable in some situations. Use <code>ForceContents</code> to use the target's content checksum instead of the build checksum.</p>
+<div class="fragment"><div class="line">ForceContents mytarget.exe ;</div>
+</div><!-- fragment --><hr/>
+ <h1><a class="anchor" id="rule_IgnoreContents"></a>
+rule IgnoreContents targets ;</h1>
+<p><a name="rule_%49gnore%43ontents"></a></p>
+<dl class="section note"><dt>Note</dt><dd>In order to use <code>IgnoreContents</code>, <code>JAM_CHECKSUMS</code> must be set to 1.</dd></dl>
+<p>Instead of considering the contents of <code>targets</code> for inclusion into the build checksum, the contents of the <code>targets</code> are ignored.</p>
+<div class="fragment"><div class="line">IgnoreContents mytarget.exe ;</div>
+</div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_Leaves"></a>
 rule Leaves targets ;</h1>
 <p><a name="rule_%4ceaves"></a></p>
