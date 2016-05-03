@@ -1662,40 +1662,40 @@ dependGraphOutput( TARGET *t, int depth )
 	switch( t->fate )
 	{
 		case T_FATE_STABLE:
-			printf( "  %s       : Stable\n", spaces(depth) );
+			printf( "  %s   Fate: Stable\n", spaces(depth) );
 			break;
 		case T_FATE_NEWER:
-			printf( "  %s       : Newer\n", spaces(depth) );
+			printf( "  %s   Fate: Newer\n", spaces(depth) );
 			break;
 		case T_FATE_ISTMP:
-			printf( "  %s       : Up to date temp file\n", spaces(depth) );
+			printf( "  %s   Fate: Up to date temp file\n", spaces(depth) );
 			break;
 		case T_FATE_TOUCHED:
-			printf( "  %s       : Been touched, updating it\n", spaces(depth) );
+			printf( "  %s   Fate: Been touched, updating it\n", spaces(depth) );
 			break;
 		case T_FATE_MISSING:
-			printf( "  %s       : Missing, creating it\n", spaces(depth) );
+			printf( "  %s   Fate: Missing, creating it\n", spaces(depth) );
 			break;
 		case T_FATE_OUTDATED:
-			printf( "  %s       : Outdated, updating it\n", spaces(depth) );
+			printf( "  %s   Fate: Outdated, updating it\n", spaces(depth) );
 			break;
 		case T_FATE_UPDATE:
-			printf( "  %s       : Updating it\n", spaces(depth) );
+			printf( "  %s   Fate: Updating it\n", spaces(depth) );
 			break;
 		case T_FATE_CANTFIND:
-			printf( "  %s       : Can't find it\n", spaces(depth) );
+			printf( "  %s   Fate: Can't find it\n", spaces(depth) );
 			break;
 		case T_FATE_CANTMAKE:
-			printf( "  %s       : Can't make it\n", spaces(depth) );
+			printf( "  %s   Fate: Can't make it\n", spaces(depth) );
 			break;
 	}
 
-	printf( "  %s  Times: ", spaces(depth) );
+	printf( "  %s   Time: ", spaces(depth) );
 	dependGraphOutputTimes( t->time );
 
 	if( t->flags & ~T_FLAG_VISITED )
 	{
-		printf( "  %s       : ", spaces(depth) );
+		printf( "  %s  Flags: ", spaces(depth) );
 		if( t->flags & T_FLAG_TEMP ) printf ("TEMPORARY ");
 		if( t->flags & T_FLAG_NOCARE ) printf ("NOCARE ");
 		if( t->flags & T_FLAG_FORCECARE ) printf ("FORCECARE ");
@@ -1707,14 +1707,16 @@ dependGraphOutput( TARGET *t, int depth )
 #ifdef OPT_BUILTIN_NEEDS_EXT
 		if( t->flags & T_FLAG_MIGHTNOTUPDATE ) printf ("MIGHTNOTUPDATE ");
 		if( t->flags & T_FLAG_SCANCONTENTS ) printf ("SCANCONTENTS ");
+		if( t->flags & T_FLAG_IGNORECONTENTS ) printf ("IGNORECONTENTS ");
+		if( t->flags & T_FLAG_FORCECONTENTSONLY ) printf ("FORCECONTENTSONLY ");
 #endif
 		printf( "\n" );
 	}
 
 	for( c = t->depends; c; c = c->next )
 	{
-		printf( "  %s       : Depends on %s (%s) ", spaces(depth),
-			c->target->name, target_fate[ c->target->fate ] );
+		printf( "  %s       : %s %s%s (%s) ", spaces(depth),
+           c->needs ? "Needs" : "Depends on", (c->target->flags & T_FLAG_INTERNAL) ? "(internal) " : "", c->target->name, target_fate[ c->target->fate ] );
 		dependGraphOutputTimes( c->target->time );
 	}
 
