@@ -60,6 +60,8 @@ The rules \ref rule_Always "Always", \ref rule_ForceCare "ForceCare", \ref rule_
 \secreflist
 \refitem rule_Always Always
 \refitem rule_ForceCare ForceCare
+\refitem rule_ForceContents ForceContents
+\refitem rule_IgnoreContents IgnoreContents
 \refitem rule_Leaves Leaves
 \refitem rule_MightNotUpdate MightNotUpdate
 \refitem rule_NoCare NoCare
@@ -92,6 +94,38 @@ ForceCare is needed to override a NoCare flag applied to a target.  Note that on
 
 
 
+
+
+
+
+
+<hr>
+\section rule_ForceContents rule ForceContents targets ;
+\addindex rule_ForceContents
+
+\note In order to use \c ForceContents, \c JAM_CHECKSUMS must be set to 1.
+
+Normally, a target's build checksum accumulates a dependency's build checksum also. This may be undesirable in some situations. Use \c ForceContents to use the target's content checksum instead of the build checksum.
+
+\code
+    ForceContents mytarget.exe ;
+\endcode
+
+
+
+
+
+<hr>
+\section rule_IgnoreContents rule IgnoreContents targets ;
+\addindex rule_IgnoreContents
+
+\note In order to use \c IgnoreContents, \c JAM_CHECKSUMS must be set to 1.
+
+Instead of considering the contents of \c targets for inclusion into the build checksum, the contents of the \c targets are ignored.
+
+\code
+    IgnoreContents mytarget.exe ;
+\endcode
 
 
 
