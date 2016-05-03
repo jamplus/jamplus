@@ -83,7 +83,7 @@ rule C.clang._MultiCppCompile_SetupFlags {
         }
 
         if $(_pch[3]) {
-            Depends $(_obj) : $(_pchFilename) ;
+            #Depends $(_obj) : $(_pchFilename) ;
         }
     }
 
