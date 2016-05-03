@@ -63,6 +63,7 @@ rule C.clang._MultiCppCompile_SetupFlags {
             }
 
             Depends $(_pchFilename) : $(_pchName) ;
+            IgnoreContents $(_pchFilename) ;
             SEARCH on $(_pchName) = $(_hdrs) ;
 
             # source needs to be scanned for header dependencies
