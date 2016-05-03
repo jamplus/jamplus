@@ -111,7 +111,7 @@ static int verifyIsRealOutput (char *input, int len);
 static void printResponseFiles(CMD *cmd);
 #endif
 
-#ifdef OPT_USE_CHECKSUMS_EXT
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
 extern int make0calcmd5sum_epoch;
 void make0calcmd5sum( TARGET *t, int source, int depth );
 void make1buildchecksum( TARGET *t, MD5SUM buildmd5sum );
@@ -1204,7 +1204,17 @@ void make1buildchecksum( TARGET *t, MD5SUM buildmd5sum )
 		if ( c->target->buildmd5sum_calculated )
 		{
 			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
-			MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+			if ( c->target->flags & T_FLAG_FORCECONTENTSONLY )
+			{
+				if ( !( c->target->flags & T_FLAG_IGNORECONTENTS )  &&  c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
+				{
+					MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
+				}
+			}
+			else
+			{
+				MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+			}
 		}
 	}
 
@@ -1305,7 +1315,11 @@ make1cmds( ACTIONS *a0 )
 #endif
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-		if (usechecksums  ||  t->filecache_generate  ||  t->filecache_use)
+		if (
+#ifdef OPT_USE_CHECKSUMS_EXT
+				usechecksums  ||
+#endif /* OPT_USE_CHECKSUMS_EXT */
+				t->filecache_generate  ||  t->filecache_use)
 		{
 			LIST* targets = make1list_unbound( L0, a0->action->targets, 0 );
 			LIST* sources = make1list_unbound( L0, a0->action->sources, rule->flags );
@@ -1414,7 +1428,11 @@ make1cmds( ACTIONS *a0 )
 					}
 
 					/* if this target could be cacheable */
-					if ( usechecksums || ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) ) {
+					if (
+#ifdef OPT_USE_CHECKSUMS_EXT
+							usechecksums ||
+#endif /* OPT_USE_CHECKSUMS_EXT */
+							( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) ) {
 						/* find its final md5sum */
 						outt = bindtarget( t->name );
 						outt->flags |= T_FLAG_USEFILECACHE;
@@ -1431,21 +1449,29 @@ make1cmds( ACTIONS *a0 )
 						}
 
 						/* if using cache is allowed */
-						if ( ( usechecksums  ||  t->filecache_use )  &&  allcached )
+						if ( (
+#ifdef OPT_USE_CHECKSUMS_EXT
+								usechecksums  ||
+#endif /* OPT_USE_CHECKSUMS_EXT */
+								t->filecache_use )  &&  allcached )
 						{
 							if ( t->filecache_use )
 							{
 								allcached = filecache_retrieve( t, outt->buildmd5sum );
+#ifdef OPT_USE_CHECKSUMS_EXT
 								if ( usechecksums ) {
 									getcachedmd5sum(t, 1);
 									checksum_update(t, outt->buildmd5sum);
 								}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 							}
 
+#ifdef OPT_USE_CHECKSUMS_EXT
 							else if ( usechecksums )
 							{
 								allcached = checksum_retrieve( t, outt->buildmd5sum );
 							}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 						}
 						else
 						{

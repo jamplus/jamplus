@@ -1588,13 +1588,16 @@ void make0calcmd5sum( TARGET *t, int source, int depth )
 			if( DEBUG_MD5HASH )
 				printf( "\t\t%sdepends: %s %s\n", spaces( depth ), c->target->name, md5tostring( c->target->buildmd5sum ) );
 			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
-			MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
-			//if ( !( c->target->flags & T_FLAG_IGNORECONTENTS )  &&  c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
-			//{
-				//MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
-				//if( DEBUG_MD5HASH )
-					//printf( "\t\t  %s%s: md5 %s\n", spaces( depth ), c->target->name, md5tostring( c->target->contentchecksum->contentmd5sum ) );
-			//}
+			if ( !( c->target->flags & T_FLAG_FORCECONTENTSONLY ) )
+			{
+				MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+			}
+			else if ( !( c->target->flags & T_FLAG_IGNORECONTENTS )  &&  c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
+			{
+				MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
+				if( DEBUG_MD5HASH )
+					printf( "\t\t  %s%s: md5 %s\n", spaces( depth ), c->target->name, md5tostring( c->target->contentchecksum->contentmd5sum ) );
+			}
 		}
 	}
 	MD5Final( t->buildmd5sum, &context );
@@ -1705,6 +1708,7 @@ dependGraphOutput( TARGET *t, int depth )
 		if( t->flags & T_FLAG_MIGHTNOTUPDATE ) printf ("MIGHTNOTUPDATE ");
 		if( t->flags & T_FLAG_SCANCONTENTS ) printf ("SCANCONTENTS ");
 		if( t->flags & T_FLAG_IGNORECONTENTS ) printf ("IGNORECONTENTS ");
+		if( t->flags & T_FLAG_FORCECONTENTSONLY ) printf ("FORCECONTENTSONLY ");
 #endif
 		printf( "\n" );
 	}

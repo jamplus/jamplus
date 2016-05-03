@@ -198,7 +198,7 @@ function Test()
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.o 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/main.o 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-				*** updated 4 target(s)...
+				*** updated 5 target(s)...
 ]]
 			else
 				pattern = [[
@@ -232,6 +232,12 @@ function Test()
 		ospath.touch('src/createprecomp.c')
 
 		if useChecksums then
+			local noopPattern2 = [[
+*** found 17 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
+]]
+			osprocess.sleep(1.0)
 			TestPattern(noopPattern2, RunJam{ '-Cjam' })
 
 			osprocess.sleep(1.0)
@@ -253,7 +259,7 @@ function Test()
 				*** found 17 target(s)...
 				*** updating 2 target(s)...
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-				*** updated 1 target(s)...
+				*** updated 2 target(s)...
 ]]
 			else
 				pattern = [[

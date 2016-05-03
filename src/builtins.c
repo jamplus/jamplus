@@ -254,6 +254,10 @@ load_builtins()
     bindrule( "IGNORECONTENTS" )->procedure =
 	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_IGNORECONTENTS );
 
+    bindrule( "ForceContentsOnly" )->procedure =
+    bindrule( "FORCECONTENTSONLY" )->procedure =
+	parse_make( builtin_flags, P0, P0, P0, C0, C0, T_FLAG_FORCECONTENTSONLY );
+
 #endif
 
 #ifdef OPT_BUILTIN_NEEDS_EXT

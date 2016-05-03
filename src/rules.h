@@ -170,7 +170,8 @@ struct _target {
 # define 	T_FLAG_MIGHTNOTUPDATE    0x4000	/* MightNotUpdate applied */
 #endif
 # define 	T_FLAG_FORCECARE 	0x8000	/* ForceCare applied */
-# define	T_FLAG_IGNORECONTENTS	    0x10000 /* use md5sum instead of timestamp for this target */
+# define	T_FLAG_IGNORECONTENTS	    0x10000 /* ignore the checksum generated for this target */
+# define	T_FLAG_FORCECONTENTSONLY    0x20000 /* */
 
 	char		binding;	/* how target relates to real file */
 

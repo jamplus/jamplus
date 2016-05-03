@@ -211,7 +211,7 @@ function TestChecksum()
 @ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
-*** updated 3 target(s)...
+*** updated 4 target(s)...
 ]]
         end
         TestPattern(pattern, RunJam{})

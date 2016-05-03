@@ -279,6 +279,14 @@ file.c
 
 		osprocess.sleep(1.0)
 		ospath.touch('file.c')
+		if useChecksums then
+			pattern2 = [[
+*** found 11 target(s)...
+*** updating 2 target(s)...
+*** updated 2 target(s)...
+*** finished in 0.01 sec
+]]
+		end
 		TestPattern(pattern2, RunJam())
 
 		osprocess.sleep(1.0)
