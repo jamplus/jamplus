@@ -5,8 +5,7 @@
 -- 
 -- Written by Leonardo Godinho da Cunha
 -------------------------------------------------------------------------------
-local copas = require("copas")
-local socket = require("socket")
+local copas = require "copas"
 
 local cosocket = {}
 
