@@ -4,8 +4,7 @@ local cgilua = require "cgilua"
 local table = require "table"
 local string = require "string"
 local os = require "os"
-local pairs, type, tostring, xpcall = pairs, type, tostring, xpcall
-local unpack = table.unpack or unpack
+local pairs, type, unpack, tostring, xpcall = pairs, type, unpack, tostring, xpcall
 
 local xavante = require "xavante"
 local httpd = require "xavante.httpd"

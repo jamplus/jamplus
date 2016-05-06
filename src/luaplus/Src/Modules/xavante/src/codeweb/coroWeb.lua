@@ -7,9 +7,7 @@
 
 local session = require "xavante.session"
 
-local unpack = table.unpack or unpack
-
-local coroWeb = {}
+module (arg and arg[1])
 
 -- original coroutine functions
 local o_resume, o_yield = coroutine.resume, coroutine.yield
@@ -20,7 +18,6 @@ local function _ortoroutines (err)
 	local _tag = {}
 	return
 		function (co, ...)
-			local arg = {...}
 			local r,sts
 			repeat
 				r = { o_resume (co, unpack (arg)) }
@@ -37,7 +34,7 @@ local function _ortoroutines (err)
 			return unpack (r)
 		end,
 		function (...)
-			return o_yield (_tag, ...)
+			return o_yield (_tag, unpack (arg))
 		end
 end
 
@@ -46,7 +43,7 @@ local function _error (res, err)
 end
 
 
-coroWeb.resume, coroWeb.yield = _ortoroutines ()
+resume, yield = _ortoroutines ()
 
 --
 -- creates a xavante handler
@@ -54,12 +51,12 @@ coroWeb.resume, coroWeb.yield = _ortoroutines ()
 --		name (string) : session name to use
 --		h (function) :	thread to handle
 --
-function coroWeb.handler (name, h)
+function handler (name, h)
 	return function (req, res)
 		local sess = session.open (req, res, name)
 		sess.coHandler = sess.coHandler or coroutine.create (h)
 		
-		coroWeb.resume (sess.coHandler, req, res)
+		resume (sess.coHandler, req, res)
 		
 		if coroutine.status (sess.coHandler) == "dead" then
 			session.close (req, res, name)
@@ -74,11 +71,11 @@ end
 -- params:
 --		in_req (table) :	'req' parameter
 --		sh_t (table) :		namesubhandlers
-function coroWeb.event (in_req, sh_t, get_all)
+function event (in_req, sh_t, get_all)
 	local req, res
 	local subH, ret
 	repeat
-		req, res = coroWeb.yield ()
+		req, res = yield ()
 		subH = sh_t [req.relpath]
 		if subH and type (subH) == "function" then
 			ret = subH (req, res)
@@ -89,7 +86,7 @@ function coroWeb.event (in_req, sh_t, get_all)
 			
 		elseif ret == "refresh" then
 			xavante.httpd.redirect (res, in_req.parsed_url.path)
-			req, res = coroWeb.yield ()
+			req, res = yield ()
 		end
 	until not subH or get_all or ret == "refresh"
 	return req, res

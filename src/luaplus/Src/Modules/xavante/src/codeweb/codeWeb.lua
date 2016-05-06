@@ -8,8 +8,6 @@
 local prep = require "cgilua.prep"
 local httpd = require "xavante.httpd"
 
-local loadstring = loadstring or load
-
 local _M = {}
 
 -- Adds a module as a website;

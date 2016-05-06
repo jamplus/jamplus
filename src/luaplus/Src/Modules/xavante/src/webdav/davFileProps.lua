@@ -14,7 +14,7 @@ local function mkdir_p (path)
 	local walk = ""
 	for p in string.gfind (path, "[^/]+") do
 		walk = walk.."/"..p
-		local attr = lfs.attributes (walk)
+		attr = lfs.attributes (walk)
 		if not attr then
 			lfs.mkdir (walk)
 		else
