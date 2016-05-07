@@ -491,6 +491,8 @@ rule C.macosx._SharedLibraryFromObjects_LinkFlags {
 		installName = $(outputName:BSR=$(installName)) ;
 		linkFlags += -dynamiclib -fPIC -install_name $(installName) ;
 	}
+
+	linkFlags += "-framework $(FRAMEWORKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))" ;
 }
 
 
