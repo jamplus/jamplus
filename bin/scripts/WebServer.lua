@@ -49,7 +49,12 @@ if not ospath.exists(caKeyFilename)
             if not ospath.exists(opensslExecutable) then
                 opensslExecutable = 'c:/OpenSSL-Win64/bin/openssl.exe'
                 if not ospath.exists(opensslExecutable) then
-                    opensslExecutable = nil
+                    opensslExecutable = 'c:/openssl-1.0.2f-vs2015/bin/opensslMT.exe'
+                    if not ospath.exists(opensslExecutable) then
+                        opensslExecutable = nil
+                    else
+                        osprocess.setenv('OPENSSL_CONF', ospath.join(ospath.remove_filename(opensslExecutable), '..', 'ssl', 'openssl.cnf'))
+                    end
                 end
             end
         end
