@@ -949,6 +949,7 @@ rule C.ios._MultiCppCompile_SetupFlags {
 		local noPeriodVersion = [ Subst $(minimumsdkversion) : %. : "" ] ;
 		extraflags += -miphoneos-version-min=$(minimumsdkversion).0 ;
 		extraflags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=$(noPeriodVersion)000 ;
+		extraflags += -I\"$(IOSBUILDENV_PATH)/Toolchain/include\" ;   #"
 		extraflags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;    #"
 	} else {
 		extraflags += "-isysroot $(isysroot:C)" ;
