@@ -1482,7 +1482,8 @@ void make0calcmd5sum( TARGET *t, int source, int depth )
 
 	if ( ( t->flags & T_FLAG_NOUPDATE ) || ( t->flags & T_FLAG_INTERNAL ) )
 	{
-		memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
+		//memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
+		//t->buildmd5sum_calculated = 1;
 		return;
 	}
 	if ( ( t->flags & T_FLAG_NOTFILE ) )
@@ -1490,16 +1491,14 @@ void make0calcmd5sum( TARGET *t, int source, int depth )
 		//memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
 		//return;
 	}
-	else
-	{
-		getcachedmd5sum( t, 0 );
-	}
-
 	if ( !source )
 	{
-		memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
+		//memset( &t->buildmd5sum, 0, sizeof( t->buildmd5sum ) );
+		//t->buildmd5sum_calculated = 1;
 		return;
 	}
+
+	getcachedmd5sum( t, 0 );
 
 	//if ( !t->contentchecksum  ||  ismd5empty( t->contentchecksum->contentmd5sum ) )
 	//{
