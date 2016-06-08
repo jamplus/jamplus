@@ -667,9 +667,9 @@ const char *checksums_filename() {
 
 
 static void checksums_readfile() {
-	CHECKSUMDATA *last = 0;
+	CHECKSUMDATA *last;
 	FILE *f;
-	int bad_cache = 1, ch;
+	int bad_cache, ch;
 	const char	*version;
 	BUFFER buff;
 	long buffsize;
@@ -703,6 +703,9 @@ static void checksums_readfile() {
 	if ( !version  ||  strcmp( version, CHECKSUM_FILE_VERSION ) || ch != '\n' ) {
 		goto bail;
 	}
+
+	last = 0;
+	bad_cache = 1;
 
 	for (;;) {
 		CHECKSUMDATA	checksumdata, *c = &checksumdata;
