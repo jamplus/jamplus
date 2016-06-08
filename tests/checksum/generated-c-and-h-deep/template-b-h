@@ -1,3 +1,7 @@
+#if AWESOME
+#include <awesome.h>
+#endif // AWESOME
+
 #include "notgenerated-c.h"
 
-#define VALUEB 8
+#define VALUEB 14
