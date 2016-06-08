@@ -1020,18 +1020,16 @@ int getcachedmd5sum( TARGET *t, int forcetimecheck )
 		{
 			MD5SUM origmd5sum;
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-			LIST *md5callback;
+			SETTINGS *md5callback;
 #endif
 
 			memcpy( &origmd5sum, &c->contentmd5sum, sizeof( MD5SUM ) );
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-			pushsettings( t->settings );
-			md5callback = var_get( "MD5CALLBACK" );
-			popsettings( t->settings );
+			md5callback = quicksettingslookup( t, "MD5CALLBACK" );
 
-			if ( list_first(md5callback) )
+			if ( md5callback && md5callback->value )
 			{
-				luahelper_md5callback(t->boundname, c->contentmd5sum, list_value(list_first(md5callback)));
+				luahelper_md5callback(t->boundname, c->contentmd5sum, list_value(list_first(md5callback->value)));
 			}
 			else
 			{
