@@ -855,8 +855,7 @@ LIST *
 # ifdef DOWNSHIFT_PATHS
 	p = path;
 
-	do *p++ = (char)tolower( *target );
-	while( *target++ );
+	do *p++ = (char)tolower( *target ); while( *target++ );
 
 	target = path;
 # endif
