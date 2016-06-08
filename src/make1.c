@@ -113,6 +113,7 @@ static void printResponseFiles(CMD *cmd);
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 extern int make0calcmd5sum_epoch;
+extern int make0calcmd5sum_timestamp_epoch;
 void make0calcmd5sum( TARGET *t, int source, int depth );
 void make1buildchecksum( TARGET *t, MD5SUM buildmd5sum );
 #endif
@@ -1117,6 +1118,7 @@ make1d(
 				getcachedmd5sum( t, 1 );
 				t->time = t->contentchecksum->mtime;
 				++make0calcmd5sum_epoch;
+				++make0calcmd5sum_timestamp_epoch;
 				make0calcmd5sum( t, 1, 1 );
 				make1buildchecksum( t, buildmd5sum );
 

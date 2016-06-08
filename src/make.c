@@ -753,6 +753,11 @@ make0(
 		t->depth = depth;
 	}
 #endif
+#ifdef OPT_USE_CHECKSUMS_EXT
+	if ( t->fate == T_FATE_INIT ) {
+		t->timestamp_epoch = -1000000001;
+	}
+#endif /* OPT_USE_CHECKSUMS_EXT */
 #ifdef OPT_MULTIPASS_EXT
 	if ( t->fate == T_FATE_INIT )
 		t->fate = T_FATE_MAKING;
@@ -1414,6 +1419,7 @@ make0sortbyname( TARGETS *chain )
 }
 
 int make0calcmd5sum_epoch = -1000000000;
+int make0calcmd5sum_timestamp_epoch = -1000000000;
 
 static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 {
@@ -1427,13 +1433,13 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 		}
 		c->target->epoch = make0calcmd5sum_epoch;
 
-		if( ( c->target->binding == T_BIND_UNBOUND || c->target->time == 0 ) && !( c->target->flags & T_FLAG_NOTFILE ) )
+		if( ( c->target->binding == T_BIND_UNBOUND || c->target->time == 0 ) && !( c->target->flags & T_FLAG_NOTFILE )
+				&& c->target->timestamp_epoch != make0calcmd5sum_timestamp_epoch )
 		{
-			SETTINGS *s = copysettings( c->target->settings );
-			pushsettings( s );
+			c->target->timestamp_epoch = make0calcmd5sum_timestamp_epoch;
+			pushsettings( c->target->settings );
 			c->target->boundname = search_uncached( c->target->name, &c->target->time );
-			popsettings( s );
-			freesettings( s );
+			popsettings( c->target->settings );
 			c->target->binding = c->target->time ? T_BIND_EXISTS : T_BIND_MISSING;
 		}
 		if ( !( c->target->flags & T_FLAG_NOTFILE ) && !( c->target->flags & T_FLAG_INTERNAL ) && !( c->target->flags & T_FLAG_NOUPDATE ) )

@@ -194,6 +194,7 @@ struct _target {
 	char		buildmd5sum_calculated;
 	char		filecache_use;
 	char		filecache_generate;
+	int		timestamp_epoch;
 #endif	
 #ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
 	int			epoch;
