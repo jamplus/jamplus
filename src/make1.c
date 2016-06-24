@@ -1114,6 +1114,7 @@ make1d(
 			TARGET *t = bindtarget(list_value(target));
 			//if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
 			if (!(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
+				timestamp_updatetime( t->boundname );
 				t->time = 0;
 				getcachedmd5sum( t, 1 );
 				t->time = t->contentchecksum->mtime;

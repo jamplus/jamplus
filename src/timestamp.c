@@ -445,6 +445,18 @@ time_enter(
 }
 
 /*
+ *
+ */
+void
+timestamp_updatetime(
+	const char	*target )
+{
+	time_t time;
+	int found = file_time( target, &time );
+	time_enter( bindhash, target, found != -1, time, 0 );
+}
+
+/*
  * donestamps() - free timestamp tables
  */
 

@@ -9,4 +9,5 @@
  */
 
 void timestamp( const char *target, time_t *time, int force );
+void timestamp_updatetime( const char *target );
 void donestamps();

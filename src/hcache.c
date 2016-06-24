@@ -31,6 +31,8 @@
 #include "md5.h"
 #endif /* OPT_BUILTIN_MD5CACHE_EXT */
 
+#include "timestamp.h"
+
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 TARGETS *
 make0sortbyname( TARGETS *chain );
@@ -1003,11 +1005,14 @@ int getcachedmd5sum( TARGET *t, int forcetimecheck )
 	}
 
 	if ( !c->contentmd5sum_calculated  ||  forcetimecheck  ||  t->time != c->mtime  ||  c->mtime == 0 ) {
-		c->contentmd5sum_calculated = 1;
-
 		/* This file may have generated or updated in another fashion.  Grab its timestamp. */
 		time_t ftime;
-		if ( file_time( c->boundname, &ftime ) == -1 ) {
+
+		c->contentmd5sum_calculated = 1;
+
+//		if ( file_time( c->boundname, &ftime ) == -1 ) {
+		timestamp( c->boundname, &ftime, 0 );
+		if ( ftime == 0 ) {
 			/* This file is not present anymore. */
 			c->age = 0; /* The entry has been used, its young again */
 			c->mtime = 0;
