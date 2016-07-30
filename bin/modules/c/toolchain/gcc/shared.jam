@@ -3,7 +3,7 @@ rule C.Toolchain.gcc.Shared { }
 if ! $(TARGETINFO_LOCATE) {
 
 rule C.gcc.FDefines { return -D$(<) ; }
-rule C.gcc.FIncludes { return -I$(<) ; }
+rule C.gcc.FIncludes { return -I"\"$(<)\"" ; }
 rule C.gcc.FLibraryPaths { return -L$(<) ; }
 
 
