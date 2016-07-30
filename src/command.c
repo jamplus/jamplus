@@ -329,6 +329,11 @@ cmd_string(
 		    ((char*)ine)[0] = save;
 
 		    file = fopen(buffer_ptr( &subbuff ), "wb");
+			if (!file)
+			{
+				printf( "jam: Error writing file %s. Is MakeLocate set?\n", buffer_ptr( &subbuff ) );
+				exit( EXITBAD );
+			}
 		    buffer_free( &subbuff );
 
 		    ine++;
