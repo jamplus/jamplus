@@ -386,6 +386,7 @@ if $(LUA_BIN)
 				modules/struct.debug.dll
 				modules/uuid.debug.dll
 				modules/ziparchive.debug.dll
+				modules/zlib.debug.dll
 			;
 		}
 		else
@@ -409,6 +410,7 @@ if $(LUA_BIN)
 				modules/struct.dll
 				modules/uuid.dll
 				modules/ziparchive.dll
+				modules/zlib.dll
 			;
 		}
 	}
@@ -467,6 +469,7 @@ if $(LUA_BIN)
 				lib/lua/5.3/struct.debug.$(MODULE_EXT)
 				lib/lua/5.3/uuid.debug.$(MODULE_EXT)
 				lib/lua/5.3/ziparchive.debug.$(MODULE_EXT)
+				lib/lua/5.3/zlib.debug.$(MODULE_EXT)
 			;
 		}
 		else
@@ -489,6 +492,7 @@ if $(LUA_BIN)
 				lib/lua/5.3/struct.$(MODULE_EXT)
 				lib/lua/5.3/uuid.$(MODULE_EXT)
 				lib/lua/5.3/ziparchive.$(MODULE_EXT)
+				lib/lua/5.3/zlib.$(MODULE_EXT)
 			;
 		}
 	}
