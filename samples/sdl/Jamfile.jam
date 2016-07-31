@@ -1,0 +1,79 @@
+SubDir TOP ;
+
+SubIncludeRelative sdl2 : ../sdl2 ;
+
+local SRCS =
+        sdltest.c
+;
+
+if $(PLATFORM) in * win32 win64 {
+    BuildSDL2 ;
+
+    C.ActiveTarget sdltest ;
+    C.Inherits : sdl2 sdl2_image ;
+    C.Inherits : sdl2main ;
+    C.Application : $(SRCS) ;
+
+} else if $(PLATFORM) in ios iossimulator {
+    BuildSDL2 ;
+
+    C.ActiveTarget sdltest ;
+    ios.BundleInfo : displayname : sdltest ;
+    ios.BundleInfo : bundleversion : 1.0 ;
+    ios.BundleInfo : uistatusbarhidden : true ;
+
+    C.Inherits : sdl2 ;
+    C.Application : sdltest.c ;
+
+    ios.ProvisionFile : test.mobileprovision ;
+    ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
+    ios.Bundle ;
+
+    ios.Archive : $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))/../package ;
+    ios.WebServer ;
+
+} else if $(PLATFORM) in android {
+    android.SDK 19 ;
+
+    local toolchainsUsed ;
+    #BUILD_MULTIPLE_ARCHITECTURES = 1 ;
+    if $(BUILD_MULTIPLE_ARCHITECTURES) {
+        toolchainsUsed = [ BuildSDL2 $(C.ACTIVE_TOOLCHAIN_SPEC)@C.ARCHITECTURE=armv7-a $(C.ACTIVE_TOOLCHAIN_SPEC)@C.ARCHITECTURE=x86 ] ;
+    } else {
+        toolchainsUsed = [ BuildSDL2 ] ;
+    }
+
+    SubDir TOP ;
+
+    local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
+    local toolchain ;
+    for toolchain in $(toolchainsUsed) {
+        C.Toolchain $(toolchain) ;
+        C.ActiveTarget sdltest ;
+        C.Inherits : sdl2 ; #sdl2_image ;
+        C.Inherits : sdl2main ;
+        C.OutputName : libmain ;
+        C.OutputPostfix : ;
+        C.Library : sdltest.c : shared ;
+    }
+    C.Toolchain $(saveActiveToolchainSpec) ;
+
+    SubDir TOP android ;
+
+    ActiveTarget sdltest ;
+
+    local JAVA_SRCS =
+        org/libsdl/app/SDLActivity.java
+        org/jamplus/sdltest/sdltestActivity.java
+    ;
+
+    android.SourcePaths : src $(TOP)/sdl2/android-project/src ;
+    android.Application : $(JAVA_SRCS) ;
+
+    android.NativeLibraries : sdltest sdl2 ;
+    android.Sign : my-release-key.keystore blahblah testgles ;
+    #android.PackageOutputPath : package ;
+    android.Package : $(toolchainsUsed) ;
+}
+
+

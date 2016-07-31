@@ -1,0 +1,59 @@
+{
+
+local SRCS =
+        IMG.c
+        IMG_bmp.c
+        IMG_gif.c
+        IMG_jpg.c
+        IMG_lbm.c
+        IMG_pcx.c
+        IMG_png.c
+        IMG_pnm.c
+        IMG_tga.c
+        IMG_tif.c
+        IMG_webp.c
+        IMG_xcf.c
+        IMG_xpm.c
+        IMG_xv.c
+        IMG_xxx.c
+;
+
+if $(C.PLATFORM) in ios iossimulator {
+    SRCS +=
+            IMG_ImageIO.m
+            IMG_UIImage.m
+    ;
+}
+
+C.ActiveTarget sdl2_image ;
+
+C.Defines :
+        #LOAD_BMP
+        #LOAD_GIF
+        LOAD_JPG
+        #LOAD_JPG_DYNAMIC="libjpeg-9.dll"
+        #LOAD_LBM
+        #LOAD_PCX
+        LOAD_PNG
+        #LOAD_PNG_DYNAMIC="libpng16-16.dll"
+        #LOAD_PNM
+        #LOAD_TGA
+        #LOAD_TIF
+        #LOAD_TIF_DYNAMIC="libtiff-5.dll"
+        LOAD_WEBP
+        #LOAD_WEBP_DYNAMIC="libwebp-4.dll"
+        #LOAD_XPM
+        #LOAD_XV
+        #PNG_USE_DLL
+        #ZLIB_DLL
+;
+
+C.IncludeDirectories : . : public ;
+C.IncludeDirectories : ../libpng ../jpeg ;
+C.IncludeDirectories : external/libwebp-0.3.0/src ;
+C.Inherits : sdl2 ;
+C.Library : $(SRCS) ;
+
+}
+
+
