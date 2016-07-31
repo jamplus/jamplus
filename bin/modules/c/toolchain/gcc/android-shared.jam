@@ -1,0 +1,1474 @@
+# The majority of the Android toolchain in android-shared.jam was provided
+# by Steven Craft via a forum posting at http://jamplus.org/boards/1/topics/403.
+#
+# It has been updated from the original posting to work against the JamPlus
+# toolchain support. Some functionality has been renamed. Currently, .aidl support
+# is likely broken. Other functionality has been added.
+
+rule C.Toolchain.gcc.android-shared {
+}
+
+
+if $(NT) {
+
+actions C.android.gcc.Link {
+    PATH=$(C.LINK:D);%PATH%
+    $(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) @^^^($(>:J=$(NEWLINE))) $(NEEDLIBS:TC) $(LINKLIBS:TC)
+}
+
+} else {
+
+actions C.android.gcc.Link {
+    "$(C.LINK)" -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:TC) $(LINKFLAGS)
+}
+
+} # if $(NT)
+
+
+rule android.SDK SDK_VERSION : ARCHITECTURE {
+    ARCHITECTURE ?= $(C.ARCHITECTURE:E=armv7-a) ;
+    C.ARCHITECTURE ?= $(ARCHITECTURE) ;
+    SDK_VERSION ?= 19 ;
+
+    if $(OS) in MACOSX {
+        local ndkRoot = $(NDKROOT:J=" ") ;
+        ndkRoot ?= $(NDKROOT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+        if ! $(ndkRoot) {
+            local PATHS =
+                $(HOME)/
+            ;
+
+            local PATH_SUFFIXES =
+                android-ndk
+                android-ndk-r12b
+            ;
+
+            local ndk-build = [ Glob $(PATHS)$(PATH_SUFFIXES) : ndk-build ] ;
+            if $(ndk-build) {
+                ndkRoot = [ Match (.+)/ : $(ndk-build[1]) ] ;
+            } else {
+                ndkRoot = _ ;
+            }
+            NDKROOT on $(C.COMPILER_SUITE_SYMBOL) = $(ndkRoot) ;
+        }
+
+        if $(ndkRoot) = _ {
+            Exit Android NDK could not found, and NDKROOT is not set. ;
+        }
+
+        NDKROOT = $(ndkRoot) ;
+    } else if $(OS) = NT {
+        local ndkRoot = $(NDKROOT:J=" ") ;
+        ndkRoot ?= $(NDKROOT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+        if ! $(ndkRoot) {
+            local PATHS =
+                $(ProgramFiles(x86):J=$(SPACE))/Android/
+                c:/
+            ;
+
+            local PATH_SUFFIXES =
+                android-ndk
+                android-ndk-r12b
+                android-ndk-r10e
+            ;
+
+            local ndk-build = [ Glob $(PATHS)$(PATH_SUFFIXES) : ndk-build.cmd ndk-build ] ;
+            if $(ndk-build) {
+                ndkRoot = [ Match (.+)/ : $(ndk-build[1]) ] ;
+            } else {
+                ndkRoot = _ ;
+            }
+            NDKROOT on $(C.COMPILER_SUITE_SYMBOL) = $(ndkRoot) ;
+        }
+
+        if $(ndkRoot) = _ {
+            Exit Android NDK could not found, and NDKROOT is not set. ;
+        }
+
+        NDKROOT = $(ndkRoot) ;
+    }
+
+    local developerRoot = $(NDKROOT)/platforms ;
+
+    local NDK_DIRECTORY_PREFIX ;
+    local NDK_COMPILER_PREFIX ;
+    local cflags ;
+    local linkflags ;
+    local sysroot ;
+    switch $(C.ARCHITECTURE) {
+        case arm :
+            NDK_COMPILER_PREFIX = arm-linux-androideabi- ;
+            cflags += -march=armv5te -mtune=xscale -msoft-float ;
+            cflags += -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -mthumb ;
+            linkflags += -no-canonical-prefixes ;
+            linkflags += -mthumb ;
+        case armv7-a :
+            NDK_COMPILER_PREFIX = arm-linux-androideabi- ;
+            cflags += -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=softfp ;
+            cflags += -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -marm ;
+            linkflags += -no-canonical-prefixes ;
+            linkflags += -march=armv7-a -Wl,--fix-cortex-a8 ;
+            linkflags += -mthumb ;
+            sysroot = $(developerRoot)/android-$(SDK_VERSION)/arch-arm ;
+        case x86 :
+            NDK_DIRECTORY_PREFIX = x86- ;
+            NDK_COMPILER_PREFIX = i686-linux-android- ;
+            # Fill in cflags
+            # Fill in linkflags
+        case mips :
+            NDK_COMPILER_PREFIX = mipsel-linux-android- ;
+            # Fill in cflags
+            # Fill in linkflags
+        case arm64 :
+            NDK_COMPILER_PREFIX = aarch64-linux-android- ;
+            # Fill in cflags
+            # Fill in linkflags
+        case x86-64 :
+            NDK_COMPILER_PREFIX = x86_64- ;
+            # Fill in cflags
+            # Fill in linkflags
+        case mips64 :
+            NDK_COMPILER_PREFIX = mips64el-linux-android- ;
+            # Fill in cflags
+            # Fill in linkflags
+        case * :
+            Exit *** Error \: Unknown architecture for NDK\: $(C.ARCHITECTURE) ;
+    }
+    ARCHITECTURE_CFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(cflags) ;
+    ARCHITECTURE_LINKFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(linkflags) ;
+
+    local NDK_COMPILER_VERSION ;
+    switch $(C.COMPILER) {
+        case gcc :      NDK_COMPILER_VERSION = $(C.COMPILER_VERSION:E=4.9) ;
+        case clang :    NDK_COMPILER_VERSION ?= @(clang-$(C.COMPILER_VERSION:E=3.6)) ;
+        case * :
+            Exit *** Error \: Unknown compiler for NDK\: $(C.COMPILER) ;
+    }
+    NDK_COMPILER_VERSION on $(C.COMPILER_SUITE_SYMBOL) = $(NDK_COMPILER_VERSION) ;
+
+    switch $(OS) {
+        case NT :       NDK_HOST    = "windows-x86_64" ;
+        case CYGWIN :   NDK_HOST    = "windows" ;
+        case MACOSX :   NDK_HOST    = "darwin-x86_64" ;
+        case LINUX :    NDK_HOST    = "darwin-x86_64" ;
+        case * :
+            Exit *** Error \: Unable to detect host platform for NDK based on '$(OS)' ;
+    }
+
+    NDK_TOOLCHAIN_ROOT = $(NDKROOT)/toolchains/$(NDK_DIRECTORY_PREFIX:E=$(NDK_COMPILER_PREFIX))$(NDK_COMPILER_VERSION)/prebuilt/$(NDK_HOST) ;
+    #Echo NDK_TOOLCHAIN_ROOT - $(NDK_TOOLCHAIN_ROOT) ;
+
+    sysroot ?= $(developerRoot)/android-$(SDK_VERSION)/arch-$(ARCHITECTURE) ;
+
+    C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
+    C.CC on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)gcc ;
+    C.C++ on $(C.COMPILER_SUITE_SYMBOL)         = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)g++ ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL)        = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)g++ ;
+    C.RANLIB on $(C.COMPILER_SUITE_SYMBOL)      = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ranlib ;
+    C.STRIP on $(C.COMPILER_SUITE_SYMBOL)       = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)strip ;
+
+    # Set up the SDK side of things.
+    if $(OS) in MACOSX {
+        JAVA.JAVA = java ;
+        JAVA.JAVAC = javac ;
+        JAVA.JAR = jar ;
+        JAVA.JARSIGNER = jarsigner ;
+    } else if $(OS) = NT {
+        # Java home
+        local javaHome = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE JavaSoft "Java Development Kit" 1.8 "JavaHome" ] ;
+        javaHome ?= $(ProgramFiles(x86):J=" ")/Java/jdk1.7.0_55 ;
+
+        JAVA.HOME on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome) ;
+        JAVA.JAVA on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome)/bin/java.exe ;
+        JAVA.JAVAC on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome)/bin/javac.exe ;
+        JAVA.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome)/bin/jar.exe ;
+        JAVA.JARSIGNER on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome)/bin/jarsigner.exe ;
+    }
+
+    local sdkRoot = $(ANDROID_SDK_ROOT) ;
+    if $(OS) = NT {
+        sdkRoot ?= $(ProgramFiles(x86):J=" ")/Android/android-sdk ;
+    } else if $(OS) = MACOSX {
+        sdkRoot ?= $(HOME)/android-sdk-macosx ;
+    }
+    sdkRoot = $(sdkRoot:J=" ") ;
+    ANDROID.SDK_ROOT on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot) ;
+
+    local sdkPlatform = $(ANDROID_SDK_PLATFORM) ;
+    sdkPlatform ?= android-$(SDK_VERSION) ;
+    ANDROID.SDK_PLATFORM on $(C.COMPILER_SUITE_SYMBOL) = $(sdkPlatform) ;
+
+    ANDROID.ADB on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/platform-tools/adb ;
+
+    local buildToolsDir = [ Glob $(sdkRoot)/build-tools : $(SDK_VERSION).* ] ;
+    if $(buildToolsDir[1]) {
+        ANDROID.ZIPALIGN on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/zipalign ;
+        ANDROID.AAPT on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/aapt ;
+        ANDROID_AIDL on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/aidl ;
+        ANDROID.DX on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/dx ;
+    }
+
+    ANDROID.ANDROID.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/platforms/$(sdkPlatform)/android.jar ;
+    ANDROID.SDKLIB.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/sdklib.jar ;
+    ANDROID.MANIFEST-MERGER.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/manifest-merger.jar ;
+    ANDROID.FRAMEWORK.AIDL on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/platforms/$(sdkPlatform)/framework.aidl ;
+
+    C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(ARCHITECTURE) ;
+    SYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sysroot) ;
+}
+
+
+rule C.android._MultiCppCompile_SetupFlags {
+    local extraflags ;
+
+    local sysroot = $(SYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+    extraflags += "--sysroot $(sysroot:C)" ;
+    extraflags += $(ARCHITECTURE_CFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+
+    _flags = $(_flags[1-4]) $(extraflags) $(_flags[5-]) ;
+
+    C.gcc._MultiCppCompile_SetupFlags ;
+}
+
+
+rule C.android._ApplicationFromObjects_LinkFlags {
+    linkRule = C.android.gcc.Link ;
+
+    local sysroot = $(SYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+    linkFlags += "--sysroot $(sysroot:C)" ;
+    linkFlags += $(ARCHITECTURE_LINKFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+}
+
+
+rule C.android._SharedLibraryFromObjects_LinkFlags {
+    linkRule = C.android.gcc.Link ;
+
+    linkFlags += -Wl,-soname,$(_t[1]:TCBS) ;
+    linkFlags += -shared ;
+
+    local sysroot = $(SYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+    linkFlags += "--sysroot $(sysroot:C)" ;
+    linkFlags += $(ARCHITECTURE_LINKFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+    linkFlags += -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now ;
+
+    #_flags = $(_flags[1-4]) $(extraflags) $(_flags[5-]) ;
+}
+
+
+#######################################################################################
+
+C.android.IGNORE_ASSETS_LIST = "\"!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~:!*.class:!*.java:!*.apk:!*.jar:!*.bat\"" ;
+
+# Java -> Class
+actions response android._JavaC {
+    $(JAVA.JAVAC:TC) -source 1.7 -target 1.7 $(JFLAGS) @@($(2:TC)) -d $(OUTPUT_FOLDER)
+}
+
+
+# Resources -> Java
+actions android._ResourceCompiler {
+    $(ANDROID.AAPT:TC) package --ignore-assets $(C.android.IGNORE_ASSETS_LIST) $(EXTRA_PACKAGES) -m --non-constant-id --auto-add-overlay --output-text-symbols $(RESOURCE_TEXT_SYMBOLS_DIR:TC) -M $(MANIFEST:TC) -J $(RESOURCE_TEXT_SYMBOLS_DIR:TC) $(RESOURCES) $(ASSETS) -I $(ANDROID.ANDROID.JAR:TC)
+}
+
+
+# Manifest Merger
+actions android._ManifestMerger {
+    $(JAVA.JAVA:TC) -classpath "$(ANDROID.SDKLIB.JAR:T);$(ANDROID.MANIFEST-MERGER.JAR)" com.android.manifmerger.Main merge --out $(1:C) --main $(2[1]:C) --libs $(2[2-]:C)
+}
+
+
+# Aidl -> Java
+actions android._CompileAidl {
+    $(ANDROID.AIDL:TC) "-p$(ANDROID.FRAMEWORK.AIDL)" $(2:TC) $(1:TC)
+}
+
+
+# Class/Jar -> Dex
+actions android._DXBundle {
+    $(ANDROID.DX:TC) --dex --output=$(1:TC) --positions=lines $(2:TC)
+}
+
+
+# Dex/Resources -> Apk
+actions android._APKPackage {
+    $(ANDROID.AAPT:TC) package --ignore-assets $(C.android.IGNORE_ASSETS_LIST) --auto-add-overlay -f -M $(MANIFEST:TC) $(RESOURCES) $(ASSETS) $(UNCOMPRESSED_ASSET_EXTENSIONS) -I $(ANDROID.ANDROID.JAR:TC) $(NEEDJARS_COMMAND_LINE) -F $(1:TC) $(INPUT_DIRECTORY)
+}
+
+
+# Apk -> Signed APK
+actions android._SignApk {
+    $(JAVA.JARSIGNER:TC) -keystore $(KEYSTORE_PATH:TC) -storepass $(KEYSTORE_PASSWORD) -signedjar $(1:TC) $(2:TC) $(KEYSTORE_KEY)
+}
+
+
+# Signed APK -> Signed Zip Aligned APK.
+actions android._ZipAlign {
+    $(ANDROID.ZIPALIGN:TC) -f 4 $(2) $(1)
+}
+
+
+# Install the signed APK to the device
+actions screenoutput android._Install {
+    $(ANDROID.ADB:TC) install -r $(2:TC)
+}
+
+
+# Uninstall the package from the device
+actions screenoutput android._Uninstall {
+    $(ANDROID.ADB:TC) uninstall $(PACKAGE)
+}
+
+
+# Class -> Jar
+if $(OS) = NT {
+    actions android._Jar {
+        cd /d $(OUTPUT_FOLDER:TC)
+        $(JAVA.JAR:TC) cf $(1:TC) -C $(OUTPUT_FOLDER:TC) @($(RELATIVE_CLASSES:R=$(OUTPUT_FOLDER:T)):W=$(OUTPUT_FOLDER:T)/)
+    }
+} else {
+    actions android._Jar {
+        cd $(OUTPUT_FOLDER:TC)
+        $(JAVA.JAR:TC) cf $(1:TC) -C $(OUTPUT_FOLDER:TC) @($(RELATIVE_CLASSES:R=$(OUTPUT_FOLDER:T)):W=$(OUTPUT_FOLDER:T)/)
+    }
+}
+
+
+#######################################################################################
+
+if ! $(TARGETINFO_LOCATE) {
+
+# Recursive glob (through all directories) looking for the given patterns.
+rule android._GlobRecursive DIRECTORIES : PATTERNS {
+    local _dirPattern  = */ ;
+    local _filePattern = $(PATTERNS)[^/] ;
+
+    local _dirs  = [ Glob $(DIRECTORIES) : $(_dirPattern) ] ;
+
+    local _files = [ Glob $(DIRECTORIES) : $(_filePattern) ] ;
+
+    if $(_dirs) {
+        _files += [ android._GlobRecursive $(_dirs) : $(PATTERNS) ] ;
+    }
+
+    return $(_files) ;
+}
+
+# Internal function called by C.android.StripCommonPath.
+rule android._StripCommonPathInternal VAR : COMMON {
+    local _v = [ Split $($(VAR)) : / ] ;
+    local _c = [ Split $($(COMMON)) : / ] ;
+
+    if $(_v[1]) && $(_v[1]) = $(_c[1]) {
+        $(VAR) = $(_v[2-]:J=/) ;
+        $(COMMON) = $(_c[2-]:J=/) ;
+
+        android._StripCommonPathInternal $(VAR) : $(COMMON) ;
+    }
+
+    return $($(VAR)) ;
+}
+
+# Strips the common path away from var, e.g. if var is c:\test\fish and common in c:\test then the 
+# returned result will be fish.
+rule android._StripCommonPath VAR : COMMON {
+    local _var = $(VAR) ;
+    local _common = $(COMMON) ;
+
+    return [ android._StripCommonPathInternal _var : _common ] ;
+}
+
+
+# Reads the package XML entry from the AndroidManifest.xml.
+rule android._ReadPackageFromAndroidManifest FILENAME {
+    return [ LuaString "
+            local xmlize = require 'xmlize'
+
+            local file = io.open([[$(FILENAME)]], 'rb')
+            if file then
+                local buffer = file:read('*a')
+                file:close()
+
+                local xml = xmlize.luaize(buffer)
+                if xml  and  xml.manifest  and  xml.manifest[1]  and  xml.manifest[1]['@'] then
+                    return xml.manifest[1]['@'].package
+                end
+            end
+    " ] ;
+}
+
+
+# Replaces dot separated package with forward slash separated path.
+rule android._PackageToDirectory DIRECTORY {
+    return [ Subst $(DIRECTORY) : %. : / ] ;
+}
+
+
+# Header scanner rule for Java, takes incoming package names, e.g. com.pawprintgames.pigame.pigameonline and fixes
+# up dependencies to actual files, e.g. <!somedir!>com/pawprintgames/pigame/pigameonline.java
+rule android._JavaHdrRule SOURCE : HEADERS {
+    # Get all JARs (not prebuilt) that this target relies on.
+    local needJars = $(JAVA.NEEDJARS:Z=$(HDRGRIST)) ;
+
+    # Get source path for this module.
+    local sourcePaths = $(JAVA.SOURCEPATHS:Z=$(HDRGRIST)) ;
+
+    # Add on source path for all JARs (not prebuilt) that this target rlies on.
+    local _needJar ;
+    for _needJar in $(needJars:GB) {
+        sourcePaths += $(JAVA.SOURCEPATHS:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST))) ;
+    }
+
+    # Go through each package.
+    local _fixed ;
+    local header ;
+    for header in $(HEADERS) {
+        # If this is a wildcard packge i.e. import com.mycompany.mygame.*
+        if $(header:S) = .* {
+            # Convert the com.mycompany.mygame bit into com/mycompany/mygame
+            local _f = [ android._PackageToDirectory $(header:S=) ] ;
+
+            # Go through each source path available to this target.
+            local _sourcePath ;
+            for _sourcePath in $(sourcePaths) {
+                # Glob for all Java files in given source path.
+                local _listing = [ Glob $(_sourcePath)/$(_f) : *.java ] ;
+
+                # If we found one or more files.
+                if $(_listing) {
+                    # Set up an includes dependency between source and all found files and then continue to next header.
+                    # Echo Dependency $(SOURCE) -> $(_listing) ;
+                    Echo TODO!!!!!!!! ;
+                    Includes $(SOURCE) : $(_listing) ;
+                    continue ;
+                }
+            }
+        } else {
+            # Not a wild card, just add the fixed up package name to our list that we batch process below.
+            _fixed += [ android._PackageToDirectory $(header) ] ;
+        }
+    }
+
+    # Add .java to each of our fixed up entries (e.g. com/mycompany/mygame/mygameonline becomes com/mycompany/mygame/mygameonline.java).
+    _fixed = @($(_fixed).java:G=$(HDRGRIST:E)) ;
+
+    # Set search path to all source paths available to this module.
+    SEARCH on $(_fixed) += $(sourcePaths) ;
+
+    # Set up an includes dependency between source and fixed up headers.
+    Includes $(SOURCE) : $(_fixed) ;
+
+    # Indicate we do not care if the fixed up header does not exist (could be a system header).
+    NoCare $(_fixed) ;
+}
+
+
+#######################################################################################
+
+LuaString "
+local ziparchive = require 'ziparchive'
+local ospath = require 'ospath'
+local filefind = require 'filefind'
+
+function MirrorExtractZip(zipFilename, outputDirectory)
+    local outputDirectoryEntries = {}
+    for entry in filefind.glob(ospath.join(outputDirectory, '**+')) do
+        outputDirectoryEntries[entry.filename] = entry.write_time
+    end
+
+    --print(zipFilename)
+    local archive = ziparchive.open(zipFilename, 'r')
+    for entry in archive:files() do
+        local entryFilename = entry.filename
+        if entry.filename:sub(-1) ~= '/' then
+            local fullOutputFilename = ospath.join(outputDirectory, entry.filename)
+            if outputDirectoryEntries[fullOutputFilename] ~= entry.timestamp then
+                --print('Extracting ' .. entry.filename)
+                ospath.mkdir(fullOutputFilename)
+                archive:fileextract(entry.filename, fullOutputFilename)
+                ospath.touch(fullOutputFilename, entry.timestamp)
+            end
+            outputDirectoryEntries[fullOutputFilename] = nil
+            local components = {}
+            for component in fullOutputFilename:gmatch('[^/]+') do
+                components[#components + 1] = component
+                outputDirectoryEntries[table.concat(components, '/') .. '/'] = nil
+            end
+        end
+    end
+    archive:close()
+
+    for filename in pairs(outputDirectoryEntries) do
+        --print('Removing ' .. filename)
+        ospath.remove(filename)
+    end
+end
+
+
+function UnpackAar(aarFilename, outputDirectory)
+    MirrorExtractZip(aarFilename, outputDirectory)
+end
+
+" ;
+
+
+#######################################################################################
+
+# Create library from given sources.
+rule android.Library TARGET : SOURCES : OPTIONS {
+    TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+    # Shove this in a special output directory. That way, we can collect any of the
+    # generated files from javac, since javac doesn't tell us what it is going to
+    # output.
+    local outputClassesDirectory = $(LOCATE_TARGET)/classes ;
+
+    # JARs that we depend on.
+    local needJars = $(JAVA.NEEDJARS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+    # Collect all of the available jar directories.
+    local _jarDirectories =
+        $(JAVA.JARDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+        $(JAVA.JARDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+    local _needJar ;
+    for _needJar in $(needJars:GB) {
+        _jarDirectories += $(JAVA.JARDIRECTORIES:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST))) ;
+    }
+
+    # Prebuilt JAR files.
+    local linkLibs = $(JAVA.PREBUILTJARS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    for _needJar in $(needJars:GB) {
+        linkLibs += $(JAVA.PREBUILTJARS:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST))) ;
+    }
+    SEARCH on $(linkLibs) += $(_jarDirectories) ;
+
+    # Prebuilt AAR files.
+    local LOCATE_AAR_ROOT = $(LOCATE_TARGET)/aar ;
+    local prebuiltAars = $(JAVA.PREBUILTAARS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    SEARCH on $(prebuiltAars) += $(SUBDIR)/libs ;
+
+    local unpackedAars ;
+
+    local prebuiltAar ;
+    for prebuiltAar in $(prebuiltAars) {
+        local outputLocation = $(LOCATE_AAR_ROOT)/__$(prebuiltAar:BS)__ ;
+        local outputAar = $(prebuiltAar:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|aar|temp) ;
+        unpackedAars += $(outputAar) ;
+        LOCATE on $(outputAar) = $(outputLocation) ;
+        PREBUILTAAR on $(outputAar) = $(prebuiltAar) ;
+        LuaString "UnpackAar([[$(prebuiltAar:T)]], [[$(outputLocation)]])" ;
+    }
+    JAVA.UNPACKEDAARS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(unpackedAars) ;
+
+    # Lib path
+    JAVA.LIBPATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SUBDIR) ;
+
+    # Source path
+    local sourcePaths = $(JAVA.SOURCEPATHS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    sourcePaths ?= $(SUBDIR) ;
+    JAVA.SOURCEPATHS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(sourcePaths) ;
+
+    # Manifest.
+    local manifest = $(ANDROID.MANIFEST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    manifest ?= @(AndroidManifest.xml:R=$(SUBDIR:E="")) ;
+    ANDROID.MANIFEST on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(manifest) ;
+
+    # Package
+    local package = $(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    if ! $(package) {
+        package = [ android._ReadPackageFromAndroidManifest $(manifest) ] ;
+        ANDROID.PACKAGE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(package) ;
+    }
+
+
+    # Verify the assets directory is actually there.
+    local assets = $(ANDROID.ASSETS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    assets ?= @(assets:R=$(SUBDIR:E="")) ;
+    assets = [ Glob $(assets:TP) : $(assets:BS)/ ] ;
+    ANDROID.ASSETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(assets) ;
+
+    # Resources
+    local resources = $(ANDROID.RESOURCES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    resources ?= @(res:R=$(SUBDIR:E="")) ;
+    resources = [ Glob $(resources:TP) : $(resources:BS)/ ] ;
+    ANDROID.RESOURCES on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(resources) ;
+
+    # Resource java file (generated).
+    local _packageRFile = [ android._PackageToDirectory $(package) ] ;
+    local resourceJavaFile = $(_packageRFile) ;
+
+    _packageRFile = @($(_packageRFile)/R.class:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+    MakeLocate $(_packageRFile) : $(outputClassesDirectory) ;
+
+    resourceJavaFile = @($(resourceJavaFile)/R.java:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+    local resourceTextFile = [ C.GristFiles $(TARGET) : R.txt ] ;
+    local resourceOutputFiles = $(resourceJavaFile) $(resourceTextFile) ;
+
+    # Can only have one Java resources class per APK, so generate resources from all libraries (and application) using the --extra-packages
+    # switch, which means it'll generate a R.Java for each library.
+    local _needJarResourceDirs = $(resources) ;
+    if $(needJars) {
+        local _needJarPackages ;
+        local _needJar ;
+        for _needJar in $(needJars:GB) {
+            _needJarPackages += $(ANDROID.PACKAGE:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST))) ;
+        }
+
+        local extraResourceFilenames = [ android._PackageToDirectory $(_needJarPackages) ] ;
+        extraResourceFilenames = @($(extraResourceFilenames)/R.java:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+        MakeLocate $(extraResourceFilenames) : $(LOCATE_TARGET) ;
+        resourceOutputFiles += $(extraResourceFilenames) ;
+
+        local _colon = \: ;
+        _needJarPackages = $(_needJarPackages:J=$(_colon)) ;
+        EXTRA_PACKAGES on $(resourceOutputFiles) = --extra-packages $(_needJarPackages) ;
+
+        # Resource directories for needed JARs.
+        for _needJar in $(needJars:GB) {
+            _needJarResourceDirs += $(JAVA.RESOURCES:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST))) ;
+        }
+    }
+
+    local aar ;
+    for aar in $(unpackedAars) {
+        local resLocation = $(LOCATE:Z=$(aar))/res ;
+        resLocation = [ Glob $(resLocation:TP) : $(resLocation:BS)/ ] ;
+        if $(resLocation) {
+            _needJarResourceDirs += $(resLocation) ;
+        }
+    }
+
+    if $(resources) {
+        MakeLocate $(resourceOutputFiles) : $(LOCATE_TARGET) ;
+
+        # Resource text symbols (generated) go into this directory.
+        local _commonStripped = ;
+        if $(SEARCH_SOURCE) = $(sourcePaths) {
+            _commonStripped = "" ;
+        } else {
+            _commonStripped = [ android._StripCommonPath $(sourcePaths) : $(SEARCH_SOURCE) ] ;
+        }
+        RESOURCE_TEXT_SYMBOLS_DIR on $(resourceOutputFiles) = $(LOCATE_TARGET) ;
+
+        # The generated Java file is dependent on all the resource files found in the provided resource directories.
+        local _resourceFiles = [ android._GlobRecursive $(resources) : *.* ] ;
+        Depends $(resourceOutputFiles) : $(_resourceFiles) ;
+
+        # Store the resources directory onto the target so it can be accessed by the action.
+        local _dashS = "-S " ;
+        RESOURCES on $(resourceOutputFiles) = $(_dashS)$(_needJarResourceDirs:TC/) ;
+        local _dashA = "-A " ;
+        ASSETS on $(resourceOutputFiles) = $(_dashA)$(assets:TC/) ;
+
+        # All the resource files we found from our glob are part of the command line.
+        UseCommandLine $(resourceOutputFiles) : $(_resourceFiles) $(C.android.IGNORE_ASSETS_LIST) ;
+
+        # Assign dependencies on the AndroidManifest.xml
+        MANIFEST on $(resourceOutputFiles) = $(manifest) ;
+        Depends $(resourceOutputFiles) : $(manifest) ;
+
+        # Call the resource compiler action.
+        SOURCES += $(resourceJavaFile) ;
+        android._ResourceCompiler $(resourceOutputFiles) : $(resources) : $(C.COMPILER_SUITE_SYMBOL) ;
+    }
+
+    # List of AIDL compiled files.
+    local _aidlCompiledFiles = ;
+
+    # AIDL compiler.
+    local _source ;
+    for _source in $(SOURCES:I=.aidl) {
+        Echo TODO .aidl ;
+        _source = [ C.GristFiles $(TARGET) : $(_source) ] ;
+
+        # Locate source file, allowing for nested paths.
+        MakeLocate $(_source) : $(_source:DR=$(SEARCH_SOURCE)/$(_commonStripped)) ;
+        BINDING on $(_source) = $(_source:BS) ;
+
+        # Compiled Java file.
+        local _compiled = $(_source:S=.java) ;
+
+        # Locate compiled files in build directory, allowing for nested paths.
+        MakeLocate $(_compiled) : $(_compiled:DR=$(LOCATE_TARGET)) ;
+        BINDING on $(_compiled) = $(_compiled:BS) ;
+
+        _aidlCompiledFiles += $(_compiled) ;
+
+        # Action.
+        android._CompileAidl $(_compiled) : $(_source) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+        # Dependency.
+        Depends $(_compiled) : $(_source) ;
+    }
+
+    local _javaFiles = $(SOURCES:I=.java) ;
+
+    local _sources = [ C.GristFiles $(TARGET) : $(_javaFiles) ] ;
+    if $(_sources[1]) {
+        #SEARCH on $(_sources) = $(SEARCH_SOURCE)/$(_commonStripped) ;
+        SEARCH on $(_sources) = $(sourcePaths) ;
+
+        # Class files.
+        local _classes = [ C.GristFiles $(TARGET) : $(_javaFiles:S=.class) ] ;
+        local _class ;
+        for _class in $(_classes) {
+            MakeLocate $(_class) : $(_class:DR=$(outputClassesDirectory)) ;
+            BINDING on $(_class) = $(_class:BS) ;
+        }
+
+        # If we are building the application JAR...
+        if application in $(OPTIONS) {
+            # If we have library JARs that we have built...
+            if $(isthisneeded) && $(needJars) {
+                # Put R.class files for each of our libraries inside, too.
+                local _needJar ;
+                for _needJar in $(needJars:GB) {
+                    # Get package name for library.
+                    local _needJarPackage = $(ANDROID.PACKAGE:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST))) ;
+
+                    # Convert package name into a relative directory.
+                    local _needJarPackageDirectory = [ android._PackageToDirectory $(_needJarPackage) ] ;
+
+                    # Add library R.Java to sources.
+                    local _r = [ C.GristFiles $(TARGET) : $(_needJarPackageDirectory)/R.java ] ;
+                    MakeLocate $(_r) : $(_r:DR=$(LOCATE_TARGET)) ;
+                    BINDING on $(_r) = $(_r:BS) ;
+                    _sources += $(_r) ;
+
+                    # Add library R.class to classes.
+                    local _c = [ C.GristFiles $(TARGET) : $(_needJarPackageDirectory)/R.class ] ;
+                    MakeLocate $(_c) : $(_c:DR=$(outputClassesDirectory)) ;
+                    BINDING on $(_c) = $(_c:BS) ;
+                    _classes += $(_c) ;
+                }
+            }
+        }
+
+        # The classes depend on the source Java files, the processed resource/AIDL files and any JAR files from other libraries we are compiling.
+        Depends $(_classes) : $(_sources) $(resourceOutputFiles) $(_aidlCompiledFiles) ;
+
+        # Flags.
+        local nativeListDelimiter ;
+        if $(OS) in MACOSX {
+            nativeListDelimiter = \: ;
+        } else {
+            nativeListDelimiter = \; ;
+        }
+
+        local _classPath = $(SEARCH_SOURCE) $(linkLibs:TC/) $(outputClassesDirectory) ;
+        _classPath =
+                $(needJars:TC/)
+                $(linkLibs:TC/)
+                $(ANDROID.ANDROID.JAR:C/:Z=$(C.COMPILER_SUITE_SYMBOL))
+        ;
+        JFLAGS on $(_classes) += -classpath $(_classPath:J=$(nativeListDelimiter)) ;
+
+        local _sourcePaths =
+                $(sourcePaths:TC/)
+                $(LOCATE_TARGET)
+        ;
+        JFLAGS on $(_classes) += -sourcepath $(_sourcePaths:J=$(nativeListDelimiter)) ;
+
+        # Determine all of the built .jar files.
+        local builtJars ;
+        local _jar ;
+        for _jar in $(needJars) {
+            if $(BUILT:Z=$(_jar)) {
+                builtJars += $(_jar) ;
+            }
+        }
+
+        Depends $(_classes) : $(linkLibs) $(builtJars) ;
+
+        if $(CONFIG) in debug release {
+            JFLAGS on $(_classes) += -g ;
+        } else {
+            JFLAGS on $(_classes) += -g:none ;
+        }
+
+        # Set up the 'header' scanning rule.
+        HDRRULE on $(_sources) = android._JavaHdrRule ;
+
+        # Start of line, possible white space, 'import', possible white space, ANYTHING, possible whitespace, ';'
+        HDRSCAN on $(_sources) = "^[     ]*import[     ]*(.*)[     ]*;" ;
+        HDRGRIST on $(_sources) = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST) ;
+
+        # Output of the compiler goes into the target directory, the compiler will create the output directory tree that
+        # matches the output filenames we have set up in our dependency tree.
+        OUTPUT_FOLDER on $(_classes) = $(outputClassesDirectory) ;
+
+        # Action.
+        android._JavaC $(_classes) : $(_sources) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+        # JAR file.
+        local _jar = [ C.GristFiles $(TARGET) : $(TARGET).jar ] ;
+        MakeLocate $(_jar) : $(LOCATE_TARGET) ;
+        Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_jar) ;
+
+        # Need access to root output folder as JAR tool will package up based on a this directory.
+        OUTPUT_FOLDER on $(_jar) = $(outputClassesDirectory) ;
+
+        # Need the relative class paths in order to archive.
+        local relativeClasses ;
+        local relativeClassWildcard ;
+        for relativeClassWildcard in $(SOURCES:D)/*.class {  # */
+            if ! $(relativeClassWildcard) in $(relativeClasses) {
+                relativeClasses += $(relativeClassWildcard) ;
+            }
+        }
+        RELATIVE_CLASSES on $(_jar) = $(relativeClasses) ;
+        if application in $(OPTIONS) {
+            # JAR file depends on classes (including R.class for libraries) and packaged R.class file.
+            Depends $(_jar) : $(_classes) $(_packageRFile) ;
+
+            # Also need to package up R.class for each of our libraries...
+            if $(needJars) {
+                local _needJar ;
+                for _needJar in $(needJars:GB) {
+                    # Get package name for library.
+                    local _needJarPackage = $(PACKAGE:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST))) ;
+
+                    # Convert package name into a relative directory.
+                    local _needJarPackageDirectory = [ android._PackageToDirectory $(_needJarPackage) ] ;
+
+                    RELATIVE_CLASSES on $(_jar) += $(_needJarPackageDirectory)/R*.class ;
+                }
+            }
+        } else {
+            # JAR file depends on classes.
+            Depends $(_jar) : $(_classes) ;
+        }
+
+        # Action to make JAR file.
+        android._Jar $(_jar) : $(_sources) : $(C.COMPILER_SUITE_SYMBOL) ;
+        Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_jar) ;
+
+        BUILT on $(_jar) = 1 ;
+    }
+
+    # Find all .class files for clean rule.
+    local _classFiles = [ android._GlobRecursive $(outputClassesDirectory) : * ] ;
+    _classFiles = $(_classFiles:I=.class) ;
+
+    # Hook up the project specific clean for this TARGET.
+    Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+    NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+    Always clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+    Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_jar) $(_classes) $(resourceOutputFiles) $(_classFiles) $(_packageRFile) $(resourceOutputFiles) $(_aidlCompiledFiles) ;
+}
+
+
+# Create application from given sources.
+rule android.Application TARGET : SOURCES : OPTIONS {
+    TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+    # Build library out of the sources.
+    android.Library $(TARGET) : $(SOURCES) : $(OPTIONS) application ;
+}
+
+
+# Create the APK for an Android application.
+rule android.Package TARGET : TOOLCHAINS : OPTIONS {
+    # Activate the requested target.
+    TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+    # Get a list of all of the architectures to be supported.
+    #
+    # This is way slower than it could be, because it requires activating the toolchain to
+    # read out the needed information. There needs to be a way to access data directly from
+    # the toolchain.
+    #
+    # For now, though, this is sufficient.
+    TOOLCHAINS ?= $(C.ACTIVE_TOOLCHAIN) ;
+
+    local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
+    local architectures ;
+    local toolchain ;
+    for toolchain in $(TOOLCHAINS) {
+        C.Toolchain $(toolchain) ;
+        if ! $(C.ARCHITECTURE) in $(architectures) {
+            architectures += $(C.ARCHITECTURE) ;
+        }
+    }
+    C.Toolchain $(saveActiveToolchainSpec) ;
+    C.ActiveTarget $(TARGET) ;
+
+    # JARs that we depend on.
+    local needJars = $(JAVA.NEEDJARS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+    local _applicationJar = [ C.GristFiles $(TARGET) : $(TARGET).jar ] ;
+    MakeLocate $(_applicationJar) : $(LOCATE_TARGET) ;
+
+    # Jar directories.
+    local _jarDirectories =
+        $(JAVA.JARDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+        $(JAVA.JARDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+    local linkLibs = $(JAVA.PREBUILTJARS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    SEARCH on $(linkLibs) += $(_jarDirectories) ;
+
+    # Manifest
+    local manifest = $(ANDROID.MANIFEST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+    # Assets.
+    local assets = $(ANDROID.ASSETS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+    # Uncompressed Asset Extensions
+    local uncompressedAssetExtensions = $(ANDROID.UNCOMPRESSED_ASSET_EXTENSIONS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+    # Resources
+    local resources = $(ANDROID.RESOURCES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+    # Get list of resource/asset directories from libraries we have built.
+    local _needJarResourceDirs = $(resources) ;
+    local classesJars ;
+    local libAndroidManifests ;
+    if $(needJars) {
+        local _needJar ;
+
+        #local _needJarPackages ;
+        #for _needJar in $(needJars:GB) {
+            #_needJarPackages += $(ANDROID.PACKAGE:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST))) ;
+        #}
+        #local _colon = \: ;
+        #_needJarPackages = $(_needJarPackages:J=$(_colon)) ;
+        #EXTRA_PACKAGES on $(_apk) = --extra-packages $(_needJarPackages) ;
+
+        for _needJar in $(needJars:GB) {
+            _needJarResourceDirs += $(ANDROID.RESOURCES:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST))) ;
+        }
+        for _needJar in $(needJars:GB) {
+            local binPath = $(JAVA.LIBPATH:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST)))/bin ;
+            if [ Glob $(binPath:T) : classes.jar ] {
+                local classes.jar = @(classes.jar:G=$(_needJar:G=)) ;
+                SEARCH on $(classes.jar) = $(binPath) ;
+                classesJars += $(classes.jar) ;
+            }
+
+            local libPath = $(JAVA.LIBPATH:Z=$(_needJar:G=$(C.ACTIVE_TOOLCHAIN_GRIST))) ;
+            if [ Glob $(libPath) : AndroidManifest.xml ] {
+                local AndroidManifest.xml = @(AndroidManifest.xml:G=$(_needJar:G=)) ;
+                SEARCH on $(AndroidManifest.xml) = $(libPath) ;
+                libAndroidManifests += $(AndroidManifest.xml) ;
+            }
+        }
+    }
+
+    local aar ;
+    for aar in $(JAVA.UNPACKEDAARS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+        local prebuiltAar = $(JAVA.PREBUILTAAR:Z=$(aar)) ;
+        local aarPath = $(LOCATE:Z=$(aar)) ;
+        local resPath = $(aarPath)/res ;
+        resPath = [ Glob $(resPath:TP) : $(resPath:BS)/ ] ;
+        if $(resPath) {
+            _needJarResourceDirs += $(resPath) ;
+        }
+
+        if [ Glob $(aarPath) : classes.jar ] {
+            local classes.jar = @(classes.jar:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|aar|$(prebuiltAar:G=)) ;
+            SEARCH on $(classes.jar) = $(aarPath) ;
+            classesJars += $(classes.jar) ;
+        }
+
+        if [ Glob $(aarPath) : AndroidManifest.xml ] {
+            local AndroidManifest.xml = @(AndroidManifest.xml:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|aar|$(prebuiltAar:G=)) ;
+            SEARCH on $(AndroidManifest.xml) = $(aarPath) ;
+            libAndroidManifests += $(AndroidManifest.xml) ;
+        }
+    }
+
+    if $(C.CONFIG) in debug {
+        local AndroidManifest-debuggable.xml = @(AndroidManifest-debuggable.xml:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+        SEARCH on $(AndroidManifest-debuggable.xml) = $(JAM_MODULES_PATH)/c/toolchain/gcc ;
+        libAndroidManifests += $(AndroidManifest-debuggable.xml) ;
+    }
+
+    # Merge the final AndroidManifest.xml.
+    local targetAndroidManifest = @(AndroidManifest.xml:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|final) ;
+    MakeLocate $(targetAndroidManifest) : $(LOCATE_TARGET)/_temp_ ;
+    UseCommandLine $(targetAndroidManifest) : $(libAndroidManifests) ;
+    Depends $(targetAndroidManifest) : $(manifest) $(libAndroidManifests) ;
+    if $(libAndroidManifests) {
+        android._ManifestMerger $(targetAndroidManifest) : $(manifest) $(libAndroidManifests) : $(C.COMPILER_SUITE_SYMBOL) ;
+    } else {
+        CopyFile $(C.ACTIVE_TOOLCHAIN_TARGET) : $(targetAndroidManifest) : $(manifest) ;
+    }
+
+    # Determine all of the built .jar files.
+    local builtJars ;
+    local _jar ;
+    for _jar in $(needJars) {
+        if $(BUILT:Z=$(_jar)) {
+            builtJars += $(_jar) ;
+        }
+    }
+
+    # Build DEX file from all JARs (prebuilt and ones we have built).
+    local _dex = [ C.GristFiles $(TARGET) : classes.dex ] ;
+    MakeLocate $(_dex) : $(LOCATE_TARGET) ;
+
+    # Target dependent on DEX file.
+    Depends $(TARGET) : $(_dex) ;
+
+    # DEX file dependent on all JAR files.
+    Depends $(_dex) : $(builtJars) $(linkLibs) $(_applicationJar) $(classesJars) ;
+
+    # Action to bundle DEX file.
+    android._DXBundle $(_dex) : $(builtJars) $(linkLibs) $(_applicationJar) $(classesJars) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+    # Build APK file from the DEX, manifest and resources.
+    local _apk = [ C.GristFiles $(TARGET) : $(TARGET).unsigned.apk ] ;
+    MakeLocate $(_apk) : $(LOCATE_TARGET) ;
+
+    MANIFEST on $(_apk) = $(targetAndroidManifest) ;
+    INPUT_DIRECTORY on $(_apk) = $(LOCATE_TARGET) ;
+
+    # Store the resources directory onto the target so it can be accessed by the action.
+    local _dashS = "-S " ;
+    RESOURCES on $(_apk) = $(_dashS)$(_needJarResourceDirs:TC/) ;
+    local _dashA = "-A " ;
+    ASSETS on $(_apk) = $(_dashA)$(assets:TC/) ;
+    local _dash0 = "-0 " ;
+    UNCOMPRESSED_ASSET_EXTENSIONS on $(_apk) = $(_dash0)$(uncompressedAssetExtensions) ;
+
+    # Glob in the assets directory for dependencies.
+    local assetFiles ;
+    if $(assets) {
+        assetFiles = [ ListSort [ android._GlobRecursive $(assets:T) : *.* ] : 0 ] ;
+        Depends $(_apk) : $(assetFiles) ;
+    }
+
+    # Native lib.
+    local nativeLibs =
+        $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+        $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+    local toolchain ;
+    for toolchain in $(TOOLCHAINS) {
+        local linkTargets = [ C.GetLinkTargets $(nativeLibs) : $(toolchain) ] ;
+
+        local linkTarget ;
+        for linkTarget in $(linkTargets) {
+            if $(linkTarget:S) != .so {
+                continue ;
+            }
+
+            # Get final filenames.
+            local _strippedSo = $(linkTarget) ;
+            #on $(nativeLibs) _strippedSo = $(STRIPPED_SO) ;
+
+            # Copy stripped so into output directory.
+            local _outputSo = $(_strippedSo:G=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+            local _binding = $(_strippedSo:TBS) ;
+            switch $(C.ARCHITECTURE:Z=$(linkTarget)) {
+                case arm :
+                    _outputSo = $(_outputSo)|arm ;
+                    BINDING on $(_outputSo) = $(_binding) ;
+                    MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/armeabi ;
+                case armv7-a :
+                    _outputSo = $(_outputSo)|armv7-a ;
+                    BINDING on $(_outputSo) = $(_binding) ;
+                    MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+                case x86 :
+                    _outputSo = $(_outputSo)|x86 ;
+                    BINDING on $(_outputSo) = $(_binding) ;
+                    MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/x86 ;
+            }
+
+            # Output file depends on input stripped SO file.
+            Depends $(_outputSo) : $(_strippedSo) ;
+
+            CopyFile $(TARGET) : $(_outputSo) : $(_strippedSo) ;
+
+            Depends $(_apk) : $(_outputSo) ;
+        }
+    }
+
+    # Native prebuilt libraries.
+    local nativePrebuiltLibs = $(ANDROID.NATIVEPREBUILTLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+    local nativePrebuiltLibraryDirectories =
+        $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+        $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+    local nativePrebuiltLib ;
+    for nativePrebuiltLib in $(nativePrebuiltLibs) {
+        # Get final filenames.
+        local nativeLibraryFullName = lib$(nativePrebuiltLib).so ;
+
+        # Copy it into output directory.
+        local architecture ;
+        for architecture in $(architectures) {
+            local target = $(nativeLibraryFullName:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(architecture)) ;
+            local source = $(nativeLibraryFullName:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(architecture)|source) ;
+
+            switch $(architecture) {
+                case arm :
+                    SEARCH on $(source) +=
+                        $(nativePrebuiltLibraryDirectories)/armeabi
+                        $(nativePrebuiltLibraryDirectories)/armeabi-v7a
+                    ;
+                    MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi ;
+                case armv7-a :
+                    SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/armeabi-v7a ;
+                    MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+                case x86 :
+                    SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/x86 ;
+                    MakeLocate $(target) : $(LOCATE_TARGET)/lib/x86 ;
+            }
+
+            CopyFile $(_apk) : $(target) : $(source) ;
+            Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(target) ;
+        }
+    }
+
+    # Dependencies.
+    Depends $(_apk) : $(_dex) $(targetAndroidManifest) ;
+
+    # If debug build, copy GDB.
+    if $(CONFIG) = debug {
+        local _sourceGdb ;
+        local _dstGdb ;
+        switch $(C.ARCHITECTURE) {
+            case arm :
+                _sourceGdb = gdbserver|arm ;
+                BINDING on $(_sourceGdb) = gdbserver ;
+                SEARCH on $(_sourceGdb) = $(NDKROOT)/prebuilt/android-arm/gdbserver ;
+
+                _dstGdb = [ C.GristFiles $(TARGET) : gdbserver|arm ] ;
+                BINDING on $(_dstGdb) = gdbserver ;
+                MakeLocate $(_dstGdb) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+            case armv7-a :
+                _sourceGdb = gdbserver|arm ;
+                BINDING on $(_sourceGdb) = gdbserver ;
+                SEARCH on $(_sourceGdb) = $(NDKROOT)/prebuilt/android-arm/gdbserver ;
+
+                _dstGdb = [ C.GristFiles $(TARGET) : gdbserver|arm ] ;
+                BINDING on $(_dstGdb) = gdbserver ;
+                MakeLocate $(_dstGdb) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+            case x86 :
+                _sourceGdb = gdbserver|x86 ;
+                BINDING on $(_sourceGdb) = gdbserver ;
+                SEARCH on $(_sourceGdb) = $(NDKROOT)/prebuilt/android-x86/gdbserver ;
+
+                _dstGdb = [ C.GristFiles $(TARGET) : gdbserver|x86 ] ;
+                BINDING on $(_dstGdb) = gdbserver ;
+                MakeLocate $(_dstGdb) : $(LOCATE_TARGET)/lib/x86 ;
+        }
+
+        CopyFile $(_apk) : $(_dstGdb) : $(_sourceGdb) ;
+        Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_dstGdb) ;
+    }
+
+    # Command line.
+    UseCommandLine $(_apk) : $(C.android.IGNORE_ASSETS_LIST) $(uncompressedAssetExtensions) $(assetFiles) ;
+
+    # Action.
+    android._APKPackage $(_apk) : $(_dex) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+    # Signed APK.
+    local _signedApk = [ C.GristFiles $(TARGET) : $(TARGET).unaligned.apk ] ;
+    MakeLocate $(_signedApk) : $(LOCATE_TARGET) ;
+
+    Depends $(_signedApk) : $(_apk) ;
+
+    local _keyStorePath =
+        $(ANDROID.KEYSTORE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+        $(ANDROID.KEYSTORE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+    local _keyStorePassword =
+        $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+        $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+    local _keyStoreKey =
+        $(ANDROID.KEYSTORE_KEY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+        $(ANDROID.KEYSTORE_KEY:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+    if ! $(_keyStorePath) || ! $(_keyStorePassword) || ! $(_keyStoreKey) {
+        Exit *** error \: Must call android.Sign and specify keystore path, password and key ;
+    }
+
+    KEYSTORE_PATH on $(_signedApk) = $(_keyStorePath) ;
+    KEYSTORE_PASSWORD on $(_signedApk) = $(_keyStorePassword) ;
+    KEYSTORE_KEY on $(_signedApk) = $(_keyStoreKey) ;
+
+    android._SignApk $(_signedApk) : $(_apk) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+    # Aligned.
+    local _alignedApk = [ C.GristFiles $(TARGET) : $(TARGET).apk ] ;
+    local packageOutputPath = $(ANDROID.PACKAGE_OUTPUT_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    MakeLocate $(_alignedApk) : $(packageOutputPath:E=$(LOCATE_TARGET)) ;
+
+    Depends $(_alignedApk) : $(_signedApk) ;
+
+    android._ZipAlign $(_alignedApk) : $(_signedApk) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+    # Make target depend on our aligned (signed) APK.
+    Depends all : $(TARGET) : $(_alignedApk) ;
+
+    # To help deploy the APK generate a little launcher batch.
+#    local _deploy = [ C.GristFiles $(TARGET) : deploy.bat ] ;
+#    MakeLocate $(_deploy) : $(LOCATE_TARGET) ;
+#    local package = $(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+#    local adb = $(ANDROID.ADB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+#    local _deployContents = "pushd %~dp0 & $(adb:TC) uninstall $(package) & $(adb:TC) install $(_alignedApk:TC) & popd" ;
+#    CONTENTS on $(_deploy) = $(_deployContents) ;
+#    WriteFile $(_deploy) ;
+#    UseCommandLine $(_deploy) : $(_deployContents) ;
+#    Depends $(TARGET) : $(_deploy) ;
+
+    # Set up an install target.
+    Depends install:$(TARGET) : $(_alignedApk) ;
+    Always install:$(TARGET) ;
+    NotFile install:$(TARGET) ;
+    android._Install install:$(TARGET) : $(_alignedApk) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+    # Set up an auto-install if requested.
+    if install in $(OPTIONS) {
+        Depends autoinstall:$(TARGET) : $(_alignedApk) ;
+        NotFile autoinstall:$(TARGET) ;
+        android._Install autoinstall:$(TARGET) : $(_alignedApk) : $(C.COMPILER_SUITE_SYMBOL) ;
+        Depends $(TARGET) : autoinstall:$(TARGET) ;
+    }
+
+    # Set up an uninstall target.
+    Always uninstall:$(TARGET) ;
+    NotFile uninstall:$(TARGET) ;
+    PACKAGE on uninstall:$(TARGET) = $(package) ;
+    android._Uninstall uninstall:$(TARGET) : : $(C.COMPILER_SUITE_SYMBOL) ;
+
+    # Depend on the link targets.
+    Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(linkTargets) ;
+
+    # Hook up the project specific clean for this TARGET.
+    Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+    NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+    Always clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+    Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_deploy) $(_alignedApk) $(_signedApk) $(_apk) $(_dex) $(_aidlCompiledFiles) ;
+}
+
+} # if ! $(TARGETINFO_LOCATE)
+
+
+#######################################################################################
+# These rules mainly store values per config/platform that can then be accessed later.
+#######################################################################################
+
+# Specify paths to search when locating prebuilt JARs.
+rule android.JarDirectories TARGET : DIRECTORIES {
+    C.ActiveTarget $(TARGET) ;
+    JAVA.JARDIRECTORIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DIRECTORIES:R=$(SUBDIR:E="")) ;
+}
+
+
+# Specify prebuilt JARs to build against.
+rule android.PrebuiltJars TARGET : LIBRARIES {
+    TARGET = [ C.ActiveTarget $(TARGET) ] ;
+    local grist = $(TARGET):prebuiltlib ;
+    local gristedLibraries = $(LIBRARIES:G=$(grist)) ;
+    SEARCH on $(gristedLibraries) += $(SUBDIR) ;
+    SEARCH_EXTENSIONS on $(gristedLibraries) = .jar ;
+    JAVA.PREBUILTJARS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristedLibraries) ;
+}
+
+
+# Specify prebuilt AARs to build against.
+rule android.PrebuiltAars TARGET : LIBRARIES {
+    TARGET = [ C.ActiveTarget $(TARGET) ] ;
+    local grist = $(TARGET):prebuiltaar ;
+    local gristedLibraries = $(LIBRARIES:G=$(grist)) ;
+    JAVA.PREBUILTAARS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristedLibraries).aar ;
+}
+
+
+# Specify relative source path for target (if inside the current directory there is a
+# 'src' directory which has the com/module/submodule structure inside, then 'src' would
+# be the source path.
+rule android.SourcePaths TARGET : DIRECTORIES {
+    C.ActiveTarget $(TARGET) ;
+    JAVA.SOURCEPATHS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DIRECTORIES:R=$(SUBDIR:E="")) ;
+}
+
+
+# Specify the package name for the target, e.g. com.module.submodule
+#
+# By default, this is read from the AndroidManifest.xml, so only call this if an
+# override is needed.
+rule android.PackageName TARGET : PACKAGE {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.PACKAGE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(PACKAGE) ;
+}
+
+
+# Specify the manifest file for the target.
+rule android.Manifest TARGET : MANIFEST {
+    TARGET = [ C.ActiveTarget $(TARGET) ] ;
+    ANDROID.MANIFEST on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(MANIFEST:R=$(SUBDIR:E="")) ;
+}
+
+
+# Specify the resource directory for the target.
+rule android.Resources TARGET : DIRECTORIES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.RESOURCES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DIRECTORIES:R=$(SUBDIR:E="")) ;
+}
+
+
+# Specify the asset directories for the target.
+rule android.Assets TARGET : DIRECTORY {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.ASSETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(DIRECTORY[1]:R=$(SUBDIR:E="")) ;
+}
+
+
+# Specify extensions to leave uncompressed when building the .apk.
+rule android.UncompressedAssetExtensions TARGET : UNCOMPRESSED_ASSET_EXTENSIONS {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.UNCOMPRESSED_ASSET_EXTENSIONS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(UNCOMPRESSED_ASSET_EXTENSIONS) ;
+}
+
+
+# Specify the native libraries used by this target. The native library targets should be
+# a target being built by the native part of the Android NDK Jam integration.
+rule android.NativeLibraries TARGET : NATIVE_LIBRARIES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.NATIVELIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(NATIVE_LIBRARIES) ;
+}
+
+
+# Specify the prebuilt native shared libraries used by this target.
+rule android.NativePrebuiltLibraries TARGET : NATIVE_PREBUILT_LIBRARIES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.NATIVEPREBUILTLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(NATIVE_PREBUILT_LIBRARIES) ;
+}
+
+
+# Specify paths to search when locating prebuilt native libraries.
+rule android.NativePrebuiltLibraryDirectories TARGET : DIRECTORIES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DIRECTORIES:R=$(SUBDIR:E="")) ;
+}
+
+
+# Specify code signing details (key store path, password and key).
+rule android.Sign TARGET : KEYSTORE_PATH_PASSWORD_KEY {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.KEYSTORE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(KEYSTORE_PATH_PASSWORD_KEY[1]) ;
+    SEARCH on $(KEYSTORE_PATH_PASSWORD_KEY[1]) = $(SUBDIR) ;
+
+    ANDROID.KEYSTORE_PASSWORD on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(KEYSTORE_PATH_PASSWORD_KEY[2]) ;
+    ANDROID.KEYSTORE_KEY on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(KEYSTORE_PATH_PASSWORD_KEY[3]) ;
+}
+
+
+# Specify JARs used by this module (not prebuilt ones though).
+rule android.LinkJars TARGET : LIBRARIES {
+    C.ActiveTarget $(TARGET) ;
+
+    local suflib = .jar ;
+    local gristLibraries ;
+    local lib ;
+    for lib in $(LIBRARIES) {
+        local grist = $(C.ACTIVE_TOOLCHAIN_GRIST):$(lib) ;
+        lib = $(lib:G=$(grist))$(suflib) ;
+        gristLibraries += $(lib) ;
+    }
+    JAVA.NEEDJARS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristLibraries) ;
+}
+
+
+# Assign an output path for the .apk.
+rule android.PackageOutputPath TARGET : OUTPUT_PATH {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.PACKAGE_OUTPUT_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(OUTPUT_PATH[1]:R=$(SUBDIR:E="")) ;
+}
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+
+if $(TARGETINFO_LOCATE) {
+
+rule android.Application TARGET : SOURCES : OPTIONS {
+    TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+    # Build library out of the sources.
+    android.Library $(TARGET) : $(SOURCES) : $(OPTIONS) application ;
+}
+
+
+# Create the APK for an Android application.
+rule android.Package TARGET : TOOLCHAINS : OPTIONS {
+    # Activate the requested target.
+    TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+    C.ActiveTarget $(TARGET) ;
+
+    TOOLCHAINS ?= $(C.ACTIVE_TOOLCHAIN) ;
+
+    # Native lib.
+    local nativeLibs =
+        $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+        $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+    local toolchain ;
+    for toolchain in $(TOOLCHAINS) {
+        local linkTargets = [ C.GetLinkTargets $(nativeLibs) : $(toolchain) ] ;
+
+        local linkTarget ;
+        for linkTarget in $(linkTargets) {
+            if $(linkTarget:S) != .so {
+                continue ;
+            }
+
+            # Copy stripped so into output directory.
+            switch $(C.ARCHITECTURE:Z=$(linkTarget)) {
+                case arm :
+                    Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/armeabi]]$(NEWLINE)" ;
+                case armv7-a :
+                    Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/armeabi-v7a]]$(NEWLINE)" ;
+                case x86 :
+                    Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/x86]]$(NEWLINE)" ;
+            }
+        }
+    }
+
+    # Aligned.
+    local _alignedApk = [ C.GristFiles $(TARGET) : $(TARGET).apk ] ;
+    MakeLocate $(_alignedApk) : $(LOCATE_TARGET) ;
+
+    Contents += "Projects[ [[$(TARGET)]] ].PackagePath[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(_alignedApk:T)]]$(NEWLINE)" ;
+}
+
+
+
+rule android.Library TARGET : SOURCES : OPTIONS {
+    TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+    Workspace $(TARGET) : $(TARGET) : all ;
+
+    local sufexe = $(SUFEXE:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+    local _t = [ C._retrieveOutputName : $(sufexe) ] ;
+    _t = $(_t:G=$(C.ACTIVE_TARGET)) ;
+
+    local outputPath = [ C._retrieveOutputPath ] ;
+
+    C._ApplicationTargetInfo ;
+
+    # Source path
+    local sourcePaths = $(JAVA.SOURCEPATHS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    sourcePaths ?= $(SUBDIR) ;
+
+    # Set search path to all source paths available to this module.
+    SOURCES = [ C.GristFiles : $(SOURCES) ] ;
+    SEARCH on $(SOURCES) += $(sourcePaths) ;
+
+    DumpProjectInfo $(TARGET) : $(SOURCES) : app $(OPTIONS) ;
+    Depends all : $(TARGET) ;
+}
+
+
+} # if ! $(TARGETINFO_LOCATE)
+
+VSPLATFORMMAP.android = ARM ;
+VSNATIVEPLATFORM.android = true ;
+

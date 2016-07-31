@@ -1,0 +1,7 @@
+rule C.Toolchain.android.* {
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+
+    return [ C.Toolchain.gcc.android.Detect ] ;
+}
+
+

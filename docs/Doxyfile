@@ -35,6 +35,7 @@ INPUT             = \
 		language_variables.dox \
 		lua_support.dox \
 		modules.dox \
+		module_android.dox \
 		module_c.dox \
 		module_c_directx.dox \
 		module_c_dotnet.dox \

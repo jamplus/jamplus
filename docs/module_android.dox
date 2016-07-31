@@ -1,0 +1,542 @@
+/*! \page module_android Android Rules
+
+The Android module contains special build rules to create an Android application from start to finish.
+
+The first step when using the <tt>android</tt> module is to set the SDK version. Doing so will detect the appropriate NDK and SDK compilers and set up some architecture-specific items.
+
+\code
+    # This goes in the Jamfile.
+    android.SDK 19 ;
+\endcode
+
+Next, some combination of the following rule calls (and any others described below) are needed to build a full Android .apk for installation and distribution.
+
+\code
+    local JAVA_SRCS =
+        org/libsdl/app/SDLActivity.java
+        org/jamplus/sdltest/sdltestActivity.java
+    ;
+    android.SourcePaths : src sdl2/android-project/src ;
+    android.Application : $(JAVA_SRCS) ;
+
+    android.Assets : assets ;
+    android.UncompressedAssetExtensions : dat ;
+    android.NativeLibraries : sdl2main sdl2 ;
+    android.Sign : $(SUBDIR)/my-keystore.keystore mypassword mykey ;
+    android.Package ;
+\endcode
+
+An Android build is initiated with a <tt>C.TOOLCHAIN</tt> of <tt>android/CONFIG</tt>:
+
+\code
+>jam C.TOOLCHAIN=android/release
+\endcode
+
+\c android.Package creates some additional useful targets:
+
+* <tt>install:TARGET</tt> - Put this on the Jam command-line to install the .apk to the USB-connected Android device.
+* <tt>uninstall:TARGET</tt> Put this on the Jam command-line to uninstall the .apk.
+
+\section module_android_ruleslist List of Rules
+
+\secreflist
+\refitem rule_android_Application android.Application
+\refitem rule_android_Assets android.Assets
+\refitem rule_android_JarDirectories android.JarDirectories
+\refitem rule_android_Library android.Library
+\refitem rule_android_LinkJars android.LinkJars
+\refitem rule_android_Manifest android.Manifest
+\refitem rule_android_NativeLibraries android.NativeLibraries
+\refitem rule_android_NativePrebuiltLibraries android.NativePrebuiltLibraries
+\refitem rule_android_NativePrebuiltLibraryDirectories android.NativePrebuiltLibraryDirectories
+\refitem rule_android_Package android.Package
+\refitem rule_android_PackageName android.PackageName
+\refitem rule_android_PackageOutputPath android.PackageOutputPath
+\refitem rule_android_PrebuiltAars android.PrebuiltAars
+\refitem rule_android_PrebuiltJars android.PrebuiltJars
+\refitem rule_android_Resources android.Resources
+\refitem rule_android_SDK android.SDK
+\refitem rule_android_Sign android.Sign
+\refitem rule_android_SourcePaths android.SourcePaths
+\refitem rule_android_UncompressedAssetExtensions android.UncompressedAssetExtensions
+\endsecreflist
+
+\section module_android_rules Rules
+
+<hr>
+\section rule_android_Application rule android.Application TARGET : SOURCES
+\addindex rule_android_Application
+
+Compiles \c SOURCES and links them into \c TARGET.
+
+\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of <tt>.java</tt> to link into the application.  Object and compiled Windows resource files may also be passed with this list.
+
+\code
+    android.Application sdltest :
+        org/libsdl/app/SDLActivity.java
+        org/jamplus/sdltest/sdltestActivity.java
+    ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_Assets rule android.Assets TARGET : DIRECTORY
+\addindex rule_android_Assets
+
+An Android application may contain user assets. The \c android.Assets rule allows specification of the directory to be recursed and stored within the Android .apk application package.
+
+Call \c android.Assets before calling \c android.Package.
+
+\param TARGET The target to attach the assets directory to.
+\param DIRECTORY The base directory to use for the assets. There can only be one directory specified.
+
+\code
+    # Store all files and directories found by recursing c:/mygame/all_of_the_assets
+    # within the Android package.
+    android.Assets : c:/mygame/all_of_the_assets ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_android_JarDirectories rule android.JarDirectories TARGET : DIRECTORIES
+\addindex rule_android_JarDirectories
+
+Specify paths to search when locating prebuilt JARs during the \c android.Library and \c android.Package rule calls.
+
+\param TARGET The target to apply the JAR search \c DIRECTORIES to. \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the directories are applied to every target needing them.
+\param DIRECTORIES The list of directories to use when searching for JAR files. If relative directories are specified, they are rooted against the current \ref rule_SubDir.
+
+\code
+    # Search for extra prebuilt JARs within the $(SUBDIR)/libs directory.
+    android.JarDirectories : libs ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_Library rule android.Library TARGET : SOURCES : OPTIONS
+\addindex rule_android_Library
+
+\c android.Library takes a list of Java \c SOURCES and builds a Java library out of them. It takes into account the following:
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>Any directories given for .jar searching via \ref rule_android_JarDirectories.
+  <li>Any prebuilt .jar files listed via \ref rule_android_PrebuiltJars.
+  <li>Any prebuilt .aar files listed via \ref rule_android_PrebuiltAars. Any \c AndroidManifest.xml files within the .aar files are merged into a final \c AndroidManifest.xml for \ref rule_android_Package.
+  <li>The search paths for .java files specified with \ref rule_android_SourcePaths.
+  <li>An \c AndroidManifest.xml for the target whose target name is given with \ref rule_android_Manifest.
+  <li>A package name given with \ref rule_android_Package or automatically derived from the target's \c AndroidManifest.xml.
+  <li>An assets directory given via \ref rule_android_Assets.
+  <li>A resources directory given by \ref rule_android_Resources.
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+Dependencies are automatically derived, where possible, by looking at the contents of the <tt>.java</tt> files.
+
+The resulting file is a .jar file.
+
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param SOURCES The list of <tt>.java</tt> and <tt>.aidl</tt> files to build into a <tt>.jar</tt>.
+\param OPTIONS Unused (except that \ref rule_android_Application just calls \c android.Library with \c OPTIONS of \c application).
+
+\code
+    android.Library MyGame :
+        the.java
+        list.java
+        of.java
+        files.java
+    ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_LinkJars rule android.LinkJars TARGET : LIBRARIES
+\addindex rule_android_LinkJars
+
+Makes \c TARGET depend on Jam-generated <tt>.jar</tt> \c LIBRARIES and uses them during linking.
+
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param LIBRARIES The list of libraries to apply.  These libraries are those generated from the \ref rule_android_Library rule.  They do not include prebuilt libraries.  To link prebuilt libraries, use the \ref rule_android_PrebuiltJars rule.
+
+\code
+    android.LinkJars MyGame : MyLibrary ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_android_Manifest rule android.Manifest TARGET : MANIFEST
+\addindex rule_android_Manifest
+
+Assigns \c MANIFEST to be the "AndroidManifest.xml" file for this \c TARGET.
+
+This rule is unneeded if \c MANIFEST is just an <tt>AndroidManifest.xml</tt> file found within <tt>\$(SUBDIR)</tt>.
+
+\param TARGET The target to assign the \c MANIFEST to.
+\param MANIFEST The target name of the <tt>AndroidManifest.xml</tt>.
+
+\code
+    # Use an AndroidManifest.xml within $(SUBDIR).
+    android.Manifest MyGame : AndroidManifest.xml ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_NativeLibraries rule android.NativeLibraries TARGET : NATIVE_LIBRARIES
+\addindex rule_android_NativeLibraries
+
+Makes \c TARGET depend on Jam-generated \c NATIVE_LIBRARIES. These are packaged during the \ref rule_android_Package process.
+
+\param TARGET The target to package the \c NATIVE_LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param NATIVE_LIBRARIES The list of libraries to apply.  These are shared libraries are those generated from the \ref rule_C_Library rule.  They do not include prebuilt libraries.  To package native prebuilt libraries, use the \ref rule_android_NativePrebuiltLibraries rule.
+
+\code
+    C.Library MyNativeLibrary : blah.cpp : shared ;
+    android.NativeLibraries MyGame : MyNativeLibrary ;
+    android.Package ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_android_NativePrebuiltLibraries rule android.NativePrebuiltLibraries TARGET : NATIVE_PREBUILT_LIBRARIES
+\addindex rule_android_NativePrebuiltLibraries
+
+Makes \c TARGET depend on preexisting shared \c NATIVE_PREBUILT_LIBRARIES. These are packaged during the \ref rule_android_Package process.
+
+\param TARGET The target to package the \c NATIVE_PREBUILT_LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param NATIVE_PREBUILT_LIBRARIES The list of native prebuilt shared libraries to apply.  These libraries are shared libraries existing somewhere in the filesystem and are specified without an extension and without the leading 'lib' prefix.  For shared libraries generated from the \ref rule_C_Library rule, use the \ref rule_android_NativeLibraries rule.
+
+\code
+    # Packages libmain.so into the MyGame.apk.
+    android.NativePrebuiltLibraries MyGame : main ;
+    android.Package ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_NativePrebuiltLibraryDirectories rule android.NativePrebuiltLibraryDirectories TARGET : DIRECTORIES
+\addindex rule_android_NativePrebuiltLibraryDirectories
+
+For the given \c TARGET, search \c DIRECTORIES for any libraries requested via \ref rule_android_NativeLibraries. This rule must be called before \ref rule_android_Package.
+
+Native libraries are searched for the following order:
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>Whatever \c SEARCH directories the user added.
+  <li>The directories given through \c DIRECTORIES with an architecture appended. Current architectures are \c arm, \c armeabi-v7a, and \c x86.
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\param TARGET The target to assign the native prebuilt library search \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param DIRECTORIES The list of directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>\$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
+
+\code
+    # Search for libmain.so in the current directory and in c:/some/directory/[architecture].
+    android.NativePrebuiltLibraryDirectories MyGame : c:/some/directory ;
+    android.NativePrebuiltLibraries MyGame : main ;
+    android.Package ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_Package rule android.Package TARGET [ : TOOLCHAINS [ : OPTIONS ] ]
+\addindex rule_android_Package
+
+In order to output a final .apk to be installed on an Android device, the \c android.Package rule must be called. If \c TOOLCHAINS is specified, those requested toolchain components are packaged into the .apk. The passed in \c OPTIONS include additional build instructions such as automatic installation on a USB-connected Android device.
+
+\c android.Package should be the last rule called in a sequence of rule calls describing the build of an Android application.
+
+\param TARGET The target to build.
+\param TOOLCHAINS (optional) The list of toolchains used to build multiple architectures for the package. The default toolchain is used if none are specified.
+\param OPTIONS The list of options applied when building the package.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c install - Installs the .apk on the USB-connected Android device.
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    # Build a package for the current target using the active toolchain.
+    android.Package ;
+
+    # Build a package for the target MyGame using the active toolchain.
+    android.Package MyGame ;
+
+    # Build a package for the target MyGame using the active toolchain and install it to the USB-connected Android device.
+    android.Package MyGame : : install ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_android_PackageName TARGET : PACKAGE_NAME
+\addindex rule_android_PackageName
+
+Specify the package name for \c TARGET, generally in the form of <tt>com.module.submodule</tt>.
+
+By default, this is read from the AndroidManifest.xml, so only call this if an override is needed.
+
+\param TARGET The target to assign the link \c FLAGS to. \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param PACKAGE_NAME The package name to use.
+
+\code
+    android.PackageName MyGame : com.mycompany.mygame ;
+    android.Package
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_PackageOutputPath rule android.PackageOutputPath TARGET : PACKAGE_OUTPUT_PATH
+\addindex rule_android_PackageOutputPath
+
+Assigns the location to output the final .apk to. This rule must be called prior to \c android.Package.
+
+\param TARGET The target to build.
+\param PACKAGE_OUTPUT_PATH The directory to output the final .apk to. If a relative path is provided, that path is rooted against <tt>\$(SUBDIR)</tt>.
+
+\code
+    android.PackageOutputPath MyGame : package ;
+    android.Package ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_android_PrebuiltAars rule android.PrebuiltAars TARGET : LIBRARIES
+\addindex rule_android_PrebuiltAars
+
+List out <tt>.aar</tt> files that \c android.Library or \c android.Application need to link against. Makes \c TARGET depend on these preexisting <tt>.aar</tt> files.
+
+By default, <tt>.aar</tt> files are searched for in <tt>\$(SUBDIR)/libs</tt>.
+
+\param TARGET The target to link the \c LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param LIBRARIES The list of preexisting <tt>.aar</tt> files to use as part of the build, specified without the <tt>.aar</tt> extension.
+
+\code
+    android.PrebuiltAars :
+            appcompat-v7-23.1.1
+            internalexternalpaths
+            play-services-base-8.3.0
+            play-services-basement-8.3.0
+            play-services-drive-8.3.0
+            play-services-games-8.3.0
+            play-services-nearby-8.3.0
+            play-services-plus-8.3.0
+            support-v4-23.1.1
+            unityads-release
+    ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_android_PrebuiltJars rule android.PrebuiltJars TARGET : LIBRARIES
+\addindex rule_android_PrebuiltJars
+
+List out the <tt>.jar</tt> files that \c android.Library or \c android.Application need to link against. Makes \c TARGET depend on these preexisting <tt>.jar</tt> files.
+
+The \c LIBRARIES specified are, by default, searched for in <tt>\$(SUBDIR)</tt>.
+
+\param TARGET The target to link the \c LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param LIBRARIES The list of preexisting <tt>.jar</tt> files to use as part of the build, specified without the <tt>.jar</tt> extension.
+
+\code
+    android.PrebuiltJars :
+            AndroidStore
+            AndroidStoreAmazon
+            in-app-purchasing-2.0.61
+            SoomlaAndroidCore
+            square-otto-1.3.2
+            unity-classes
+            UnityAndroidStore
+            UnitySoomlaAndroidCore
+    ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_android_Resources rule android.Resources TARGET : DIRECTORIES
+\addindex rule_android_Resources
+
+Sets \c DIRECTORIES as the locations to search for Android resources at when \c TARGET is built.
+
+\param TARGET The target to which the resource search \c DIRECTORIES should be applied.  If not specified, \c TARGET defaults to the active target set via \ref rule_ActiveProject "ActiveProject".
+\param DIRECTORIES The list of directories to search for resources. Relative directories are rooted against <tt>\$(SUBDIR)</tt>.
+
+\code
+    android.Resources :
+            ../unity-android-resources/res
+            res
+    ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_SDK rule android.SDK SDK_VERSION : ARCHITECTURE
+\addindex rule_android_SDK
+
+Sets the Android \c SDK_VERSION and \c ARCHITECTURE for the toolchain. Call this before any other <tt>android.*</tt> rules.
+
+\c android.SDK attempts detection number of Android-specific tools and SDKs:
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>If the variable \c NDKROOT is not specified, the location of the Android NDK is searched for in an OS-dependent fashion.
+    <ul>
+        <li>On Windows, <tt>c:/Program Files (x86)/Android</tt> and then <tt>c:/</tt> is searched for a directory named <tt>android-ndk</tt> and a couple versioned derivatives.
+    </ul>
+  <li>Afterward, <tt>C.ARCHITECTURE</tt> is evaluated, and various compilation and linker flags are setup for use with the NDK.
+  <li>Next, <tt>C.COMPILER</tt> is evaluated, and an NDK compiler toolchain is selected based on whether <tt>C.COMPILER</tt> is set to \c gcc or \c clang.
+  <li>The Android SDK is detected next. If \c ANDROID_SDK_ROOT is set to a path, that path is assumed to be the root of the Android SDK toolchain. Otherwise, an OS-dependent default is chosen:
+    <ul>
+        <li>On Windows, <tt>c:/Program Files (x86)/Android/android-sdk</tt> is assumed to contain a properly installed Android SDK.
+    </ul>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\param SDK_VERSION Defaults to \c 19.
+\param ARCHITECTURE Defaults to <tt>armv7-a</tt>.
+
+\code
+    android.SDK 19 : armv7-a ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_Sign rule android.Sign TARGET : KEYSTORE_PATH_PASSWORD_KEY
+\addindex rule_android_Sign
+
+Sets up the keystore information for the Android package. \c android.Sign must be called before \c android.Package.
+
+\param TARGET The target to sign.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param KEYSTORE_PATH_PASSWORD_KEY This parameter contains 3 entries, the path to the keystore, the password of the keystore, and the key to use when accessing the keystore.
+
+\code
+    android.Sign : $(SUBDIR)/my-keystore.keystore mypassword mykey ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_SourcePaths rule android.SourcePaths TARGET : DIRECTORIES
+\addindex android_SourcePaths
+
+Specify the source path for the Java files being built by \c TARGET. \c android.SourcePaths must be called before \c android.Application or \c android.Library.
+
+\param TARGET The target to assign the Java search path \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param DIRECTORIES The list of directories to scan to find <tt>.java</tt> files. A given directory may either be absolute or relative. If relative, it is assumed to be based off of <tt>\$(SUBDIR)</tt>.
+
+\code
+    # Find com/mycompany/mylibrary/file.java at $(SUBDIR)/org/com/mycompany/mylibrary/file.java.
+    android.SourcePaths MyGame : org ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_UncompressedAssetExtensions rule android.UncompressedAssetExtensions TARGET : UNCOMPRESSED_ASSET_EXTENSIONS
+\addindex android_UncompressedAssetExtensions
+
+Specify extensions to leave uncompressed when building the .apk. This must be called before \c android.Package.
+
+\param TARGET The target to leave the uncompressed file entries within.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param UNCOMPRESSED_ASSET_EXTENSIONS The list of extensions to leave uncompressed. Do not include a period in front of the extension.
+
+\code
+    # Leave .zip and .dat files uncompressed.
+    android.UncompressedAssetExtensions MyGame : zip dat ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+*/
+

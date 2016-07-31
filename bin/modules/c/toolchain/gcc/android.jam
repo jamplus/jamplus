@@ -1,0 +1,15 @@
+rule C.Toolchain.gcc.android.Detect {
+    local ret = [ C.Toolchain.gcc.Setup $(NDK_TOOKCHAIN_ROOT)/bin : .o "" .so ] ;
+
+    C.Toolchain.$(C.COMPILER_SUITE).android-shared ;
+
+    C._ApplicationFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.android._ApplicationFromObjects_LinkFlags ;
+    C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.android._MultiCppCompile_SetupFlags ;
+    C._SharedLibraryFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.android._SharedLibraryFromObjects_LinkFlags ;
+
+    android.SDK ;
+
+    C.Toolchain.$(C.COMPILER_SUITE).android-$(C.CONFIG) ;
+
+    return $(ret) ;
+}

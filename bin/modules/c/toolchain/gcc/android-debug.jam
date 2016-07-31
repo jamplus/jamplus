@@ -1,0 +1,6 @@
+rule C.Toolchain.gcc.android-debug {
+    C.Flags * : CC C++ M MM : -g2 -gdwarf-2 -O0 ;
+
+    C.Toolchain.Helper.DebugSettings ;
+}
+
