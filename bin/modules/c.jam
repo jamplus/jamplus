@@ -1213,6 +1213,9 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 
 	C._ApplicationTargetInfo ;
 
+	LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
+	C.ARCHITECTURE on $(linkTargets) = $(C.ARCHITECTURE) ;
+
 	DumpProjectInfo $(TARGET) : $(SOURCES) : app $(OPTIONS) ;
 	Depends all : $(TARGET) ;
 }
@@ -1220,7 +1223,26 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 
 rule C.Library TARGET : SOURCES : OPTIONS {
 	TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
 	if shared in $(OPTIONS) {
+		local suffixName = SUFSHAREDLIB ;
+		if module in $(OPTIONS) {
+			suffixName = SUFMODULE ;
+		}
+
+		local suffix = $($(suffixName):Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+		local _t = @($(TARGET)$(suffix):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+		local _tBINDING = [ C._retrieveOutputName : $(suffix) ] ;
+		BINDING on $(_t) = $(_tBINDING) ;
+		_tBINDING = $(_tBINDING:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+
+		local outputPath = [ C._retrieveOutputPath ] ;
+
+		local _linkTargets = $(_t) ;
+		MakeLocate $(_linkTargets) : $(outputPath) ;
+		LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
+		C.ARCHITECTURE on $(_linkTargets) = $(C.ARCHITECTURE) ;
+
 		DumpProjectInfo $(TARGET) : $(SOURCES) : $(OPTIONS) ;
 	} else {
 		DumpProjectInfo $(TARGET) : $(SOURCES) : lib $(OPTIONS) ;
