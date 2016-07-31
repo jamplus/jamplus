@@ -63,6 +63,11 @@ rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC {
 	return $(LINKTARGETS:Z=$(toolChainTarget)) ;
 }
 
+rule C.GetArchitecture TOOLCHAIN_SPEC {
+	TOOLCHAIN_SPEC ?= $(C.ACTIVE_TOOLCHAIN_GRIST) ;
+	return $(C.ARCHITECTURE:Z=$(TOOLCHAIN_SPEC)) ;
+}
+
 rule C.Clean TARGET : FILES {
 	C.ActiveTarget $(TARGET) ;
 	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(FILES) ;
@@ -579,6 +584,7 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 		local objects = [ C._MultiCppCompile $(SOURCES) ] ;
 		LINKED_OBJECTS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(objects) ;
 		linkTargets = [ C._ApplicationFromObjects $(objects) : $(OPTIONS) ] ;
+		C.ARCHITECTURE on $(linkTargets) = $(C.ARCHITECTURE) ;
 	}
 	return $(linkTargets) ;
 }
@@ -709,6 +715,7 @@ rule C.Library TARGET : SOURCES : OPTIONS {
 			linkTargets = [ C._LibraryFromObjects $(objects) ] ;
 		}
 	}
+	C.ARCHITECTURE on $(linkTargets) = $(C.ARCHITECTURE) ;
 	return $(linkTargets) ;
 }
 
