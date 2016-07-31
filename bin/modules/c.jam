@@ -580,7 +580,6 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 		LINKED_OBJECTS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(objects) ;
 		linkTargets = [ C._ApplicationFromObjects $(objects) : $(OPTIONS) ] ;
 	}
-	C.ActiveTarget * ;
 	return $(linkTargets) ;
 }
 
@@ -710,7 +709,6 @@ rule C.Library TARGET : SOURCES : OPTIONS {
 			linkTargets = [ C._LibraryFromObjects $(objects) ] ;
 		}
 	}
-	C.ActiveTarget * ;
 	return $(linkTargets) ;
 }
 
@@ -1209,7 +1207,6 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 	C._ApplicationTargetInfo ;
 
 	DumpProjectInfo $(TARGET) : $(SOURCES) : app $(OPTIONS) ;
-	C.ActiveTarget * ;
 	Depends all : $(TARGET) ;
 }
 
