@@ -104,7 +104,7 @@ rule ExternalProject TARGET : PROJECT_PATH : OPTIONS {
 
 
 rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
-	SOURCES = [ ExpandFileList $(SOURCES) ] ;
+	SOURCES = [ ExpandFileList $(SOURCES:T) ] ;
 
 	# Write initial Project information.
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;

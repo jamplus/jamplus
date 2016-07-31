@@ -41,9 +41,9 @@ local function RealVSPlatform(platform)
 	return "Win32"
 end
 
-local function RealVSConfig(platform, config)
+local function RealVSConfig(platform, config, forceNativePlatform)
 	local realConfig = GetMapConfigToVSConfig(config)
-	if VSNativePlatforms  and  VSNativePlatforms[platform] then
+	if forceNativePlatform  or  (VSNativePlatforms  and  VSNativePlatforms[platform]) then
 		return realConfig
 	end
 
@@ -77,8 +77,9 @@ local function FindCommonPathDepth(sourceGroup)
 	end
 end
 
-function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
-	local filename = ospath.join(outputPath, self.ProjectName .. '.vcxproj')
+function VisualStudio201xProjectMetaTable:WriteHelper(outputPath, commandLines, androidApplication)
+    local fileTitle = self.ProjectName .. (androidApplication  and  '-android'  or '')
+	local filename = ospath.join(outputPath, fileTitle .. '.vcxproj')
 	local userContents = {}
 
 	local project = Projects[self.ProjectName]
@@ -123,10 +124,10 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 		return
 	end
 
-	local info = ProjectExportInfo[self.ProjectName]
+	local info = ProjectExportInfo[self.ProjectName .. (androidApplication  and  '-android'  or  '')]
 	if not info then
 		info = { Name = self.ProjectName, Filename = filename, Uuid = '{' .. uuid.new():upper() .. '}' }
-		ProjectExportInfo[self.ProjectName] = info
+		ProjectExportInfo[self.ProjectName .. (androidApplication  and  '-android'  or  '')] = info
 	else
 		info.Filename = filename
 	end
@@ -149,12 +150,21 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
   <ItemGroup Label="ProjectConfigurations">
 ]])
 
+    local projectPlatforms = Config.Platforms
+    if androidApplication then
+        projectPlatforms = { 'ARM', 'ARM64', 'x86' }
+    end
 	local workspaceConfigs = GetWorkspaceConfigList(self.Workspace)
-	for platformName in ivalues(Config.Platforms) do
+	for platformName in ivalues(projectPlatforms) do
 		for configName in ivalues(workspaceConfigs) do
 			local configInfo = {}
-			configInfo.VSPlatform = RealVSPlatform(platformName)
-			configInfo.VSConfig = workspaceConfigs == Config.Configurations  and  RealVSConfig(platformName, configName)  or  configName
+			if androidApplication then
+				configInfo.VSPlatform = platformName
+				configInfo.VSConfig = workspaceConfigs == Config.Configurations  and  RealVSConfig(platformName, configName, true)  or  configName
+			else
+				configInfo.VSPlatform = RealVSPlatform(platformName)
+				configInfo.VSConfig = workspaceConfigs == Config.Configurations  and  RealVSConfig(platformName, configName)  or  configName
+			end
 			table.insert(self.Contents, expand([==[
     <ProjectConfiguration Include="$(VSConfig)|$(VSPlatform)">
       <Configuration>$(VSConfig)</Configuration>
@@ -178,7 +188,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 		elseif self.Options.vs2013 then
 			extraInfo.TargetFrameworkVersion = "v4.5"
 		elseif self.Options.vs2015 then
-			extraInfo.TargetFrameworkVersion = "v4.5"
+			extraInfo.TargetFrameworkVersion = "v4.5.2"
 		end
 		table.insert(self.Contents, expand([[
   <PropertyGroup Label="Globals">
@@ -186,6 +196,16 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
     <TargetFrameworkVersion>$(TargetFrameworkVersion)</TargetFrameworkVersion>
     <Keyword>MakeFileProj</Keyword>
     <ProjectName>$(Name)</ProjectName>
+]], extraInfo, info))
+
+        if androidApplication then
+            table.insert(self.Contents, expand([[
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>2.0</ApplicationTypeRevision>
+]], extraInfo, info))
+        end
+
+		table.insert(self.Contents, expand([[
   </PropertyGroup>
 ]], extraInfo, info))
 	end
@@ -195,7 +215,8 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 ]])
 
 	-- Write Configurations.
-	for platformName in ivalues(Config.Platforms) do
+	for platformName in ivalues(projectPlatforms) do
+		local toolchainPlatform = platformName
 		for workspaceConfigName in ivalues(workspaceConfigs) do
 			local jamCommandLine = ospath.escape(ospath.make_backslash(jamScript)) .. ' ' ..
 					ospath.escape('-C' .. destinationRootPath) ..
@@ -206,6 +227,9 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 			if customWorkspaceConfig then
 				jamCommandLine = jamCommandLine .. ' ' .. table.concat(customWorkspaceConfig.CommandLineOptions, ' ')
 				configName = customWorkspaceConfig.ActualConfigName
+			elseif androidApplication then
+				platformName = 'android'
+				jamCommandLine = jamCommandLine .. ' C.TOOLCHAIN=' .. platformName .. '/' .. configName .. '@C.ARCHITECTURE=' .. toolchainPlatform
 			else
 				jamCommandLine = jamCommandLine .. ' C.TOOLCHAIN=' .. platformName .. '/' .. configName
 			end
@@ -216,14 +240,20 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 				PLATFORM = platformName,
 				Config = configName,
 				WorkspaceConfigName = workspaceConfigName,
-				VSPlatform = RealVSPlatform(platformName),
-				VSConfig = workspaceConfigs == Config.Configurations  and  RealVSConfig(platformName, configName)  or  workspaceConfigName,
 				Defines = '',
 				Includes = '',
 				Output = '',
 				OutputPath = '',
 				ForceIncludes = '',
 			}
+
+			if androidApplication then
+				configInfo.VSPlatform = toolchainPlatform
+				configInfo.VSConfig = workspaceConfigs == Config.Configurations  and  RealVSConfig(platformName, configName, true)  or  workspaceConfigName
+			else
+				configInfo.VSPlatform = RealVSPlatform(platformName)
+				configInfo.VSConfig = workspaceConfigs == Config.Configurations  and  RealVSConfig(platformName, configName)  or  workspaceConfigName
+			end
 
 			if project and project.Name and project.Name ~= '!BuildWorkspace' and project.Name ~= '!UpdateWorkspace' then
 				if project.Defines and project.Defines[platformName] and project.Defines[platformName][configName] then
@@ -276,12 +306,28 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 ]==], configInfo, info, _G)
 			end
 
-			userContents[#userContents + 1] = expand([==[
+            if androidApplication then
+                if project.PackagePath  and  project.PackagePath[platformName]  and  project.PackagePath[platformName][configName]
+                        and  project.AdditionalSymbolSearchPaths  and  project.AdditionalSymbolSearchPaths[platformName]  and  project.AdditionalSymbolSearchPaths[platformName][configName] then
+                    configInfo.PackagePath = project.PackagePath[platformName][configName]
+                    configInfo.AdditionalSymbolSearchPaths = project.AdditionalSymbolSearchPaths[platformName][configName]
+                    userContents[#userContents + 1] = expand([==[
+  <PropertyGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'">
+    <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>AndroidDebugger</DebuggerFlavor>
+    <PackagePath>$(PackagePath)</PackagePath>
+    <AdditionalSymbolSearchPaths>$(AdditionalSymbolSearchPaths)</AdditionalSymbolSearchPaths>
+  </PropertyGroup>
+]==], configInfo, info, _G)
+                end
+            else
+                userContents[#userContents + 1] = expand([==[
   <PropertyGroup Condition="'$$(Configuration)|$$(Platform)'=='$(VSConfig)|$(VSPlatform)'">
     <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 ]==], configInfo, info, _G)
+            end
 
 			if self.Options.vs2012 then
 				self.Contents[#self.Contents + 1] = [[
@@ -292,9 +338,15 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
     <PlatformToolset>v120</PlatformToolset>
 ]]
 			elseif self.Options.vs2015 then
-				self.Contents[#self.Contents + 1] = [[
+				if androidApplication then
+					self.Contents[#self.Contents + 1] = [[
+    <PlatformToolset>Clang_3_8</PlatformToolset>
+]]
+				else
+					self.Contents[#self.Contents + 1] = [[
     <PlatformToolset>v140</PlatformToolset>
 ]]
+				end
 			end
 			self.Contents[#self.Contents + 1] = [[
   </PropertyGroup>
@@ -352,7 +404,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	WriteFileIfModified(filename, self.Contents)
 
 	if userContents[1] then
-		local userFilename = ospath.join(outputPath, self.ProjectName .. '.vcxproj.user')
+		local userFilename = ospath.join(outputPath, fileTitle .. '.vcxproj.user')
 		userContents = [[
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -368,7 +420,7 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 	-- Write the .vcxproj.filters file.
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
-	local filename = ospath.join(outputPath, self.ProjectName .. '.vcxproj.filters')
+	local filename = ospath.join(outputPath, fileTitle .. '.vcxproj.filters')
 	self.Contents = {}
 
 	-- Write header.
@@ -418,6 +470,22 @@ function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
 
 	WriteFileIfModified(filename, self.Contents)
 end
+
+
+function VisualStudio201xProjectMetaTable:Write(outputPath, commandLines)
+    for platformName in ivalues(Config.Platforms) do
+        if platformName == 'android' then
+            local project = Projects[self.ProjectName]
+            if project.Options  and  project.Options.app then
+                self:WriteHelper(outputPath, commandLines, true)
+                self.Contents = {}
+            end
+            break
+        end
+    end
+    self:WriteHelper(outputPath, commandLines)
+end
+
 
 function VisualStudio201xProject(projectName, options, workspace, project)
 	return setmetatable(
@@ -572,6 +640,22 @@ EndProject
 ]], info))
 			end
 		end
+
+		-- As a hack, test also for Android projects.
+		local info = ProjectExportInfo[projectName .. '-android']
+		if info then
+			local extension = ospath.get_extension(info.Filename)
+			info.ProjectType = solutionProjectTypes[extension]
+			if not info.ProjectType then
+				print('Error: Unknown project type for external project [' .. info.Filename .. '].')
+			else
+				table.insert(self.Contents, expand([[
+Project("$(ProjectType)") = "$(Name)", "$(Filename:gsub('/', '\\'))", "$(Uuid)"
+EndProject
+]], info))
+			end
+		end
+
 	end
 
 	-- Write the folders we use.
@@ -694,6 +778,7 @@ Global
 
 	for projectName in ivalues(workspace.Projects) do
 		WriteSolutionConfigInfo(projectName)
+		WriteSolutionConfigInfo(projectName .. '-android')
 	end
 
 	table.insert(self.Contents, [[
