@@ -1786,12 +1786,20 @@ if ! $(C.ACTIVE_TOOLCHAIN_GRIST) {
 	} else if $(c.toolchain) {
 		C.Toolchain $(c.toolchain) ;
 	} else {
+		CONFIG ?= $(C.CONFIG) ;
+		PLATFORM ?= $(C.PLATFORM) ;
+		COMPILER ?= $(C.COMPILER) ;
+
 		CONFIG ?= $(VALID_CONFIGS[1]) ;
 
 		if $(PLATFORM) = "" { PLATFORM = ; }
 		PLATFORM ?= $(VALID_PLATFORMS[1]) ;
 
-		C.Toolchain $(PLATFORM)/$(CONFIG) ;
+		C.CONFIG ?= $(CONFIG) ;
+		C.PLATFORM ?= $(PLATFORM) ;
+		C.COMPILER ?= $(COMPILER) ;
+
+		C.Toolchain $(C.PLATFORM)/$(C.CONFIG) ;
 	}
 }
 
