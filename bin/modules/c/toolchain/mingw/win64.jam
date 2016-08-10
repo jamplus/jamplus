@@ -1,0 +1,17 @@
+rule C.Toolchain.mingw.win64.Detect {
+    if ! $(MINGW_ROOT) {
+        local potentialPaths = [ Glob "c:/Program Files/mingw-w64" : * : 1 ] ;
+        if ! $(potentialPaths) {
+            return ;
+        }
+        local foundPath = [ Glob $(potentialPaths)mingw64/bin : gcc.exe ] ;
+        if ! $(foundPath) {
+            return ;
+        }
+        return [ C.Toolchain.mingw.Setup [ Match (.+)/bin : $(foundPath[1]) ] ] ;
+    } else {
+        return [ C.Toolchain.mingw.Setup $(MINGW_ROOT) ] ;
+    }
+}
+
+
