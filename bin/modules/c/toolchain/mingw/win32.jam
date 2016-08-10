@@ -1,12 +1,20 @@
 rule C.Toolchain.mingw.win32.Detect {
-    local foundPath = [ Glob
-        c:/mingw/bin
-        d:/mingw/bin
-        : gcc.exe ] ;
-    if ! $(foundPath) {
-        return ;
+    if ! $(MINGW_ROOT) {
+        local potentialPaths = [ Glob "c:/Program Files/mingw-w64" : * : 1 ] ;
+        local foundPath ;
+        if $(potentialPaths) {
+            foundPath = [ Glob $(potentialPaths)mingw64/bin : gcc.exe ] ;
+        }
+        if ! $(foundPath) {
+            foundPath = [ Glob c:/mingw/bin : gcc.exe ] ;
+        }
+        if ! $(foundPath) {
+            return ;
+        }
+        return [ C.Toolchain.mingw.Setup [ Match (.+)/bin : $(foundPath[1]) ] ] ;
+    } else {
+        return [ C.Toolchain.mingw.Setup $(MINGW_ROOT) ] ;
     }
-    return [ C.Toolchain.mingw.Setup [ Match (.+)/bin : $(foundPath[1]) ] ] ;
 }
 
 
