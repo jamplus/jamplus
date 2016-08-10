@@ -22,7 +22,7 @@
 
 Applies settings to the specified \c TARGET, allowing it to build a wxWidgets-enabled project.
 
-\param TARGET The target to assign the wxWidgets settings to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to assign the wxWidgets settings to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param COMPONENTS The wxWidgets components to link in.  Example: base core adv aui html.
 \param OPTIONS (optional) The following options are available:
 

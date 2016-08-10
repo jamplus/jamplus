@@ -69,7 +69,7 @@ An Android build is initiated with a <tt>C.TOOLCHAIN</tt> of <tt>android/CONFIG<
 
 Compiles \c SOURCES and links them into \c TARGET.
 
-\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of <tt>.java</tt> to link into the application.  Object and compiled Windows resource files may also be passed with this list.
 
 \code
@@ -113,7 +113,7 @@ Call \c android.Assets before calling \c android.Package.
 
 Specify paths to search when locating prebuilt JARs during the \c android.Library and \c android.Package rule calls.
 
-\param TARGET The target to apply the JAR search \c DIRECTORIES to. \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the directories are applied to every target needing them.
+\param TARGET The target to apply the JAR search \c DIRECTORIES to. \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the directories are applied to every target needing them.
 \param DIRECTORIES The list of directories to use when searching for JAR files. If relative directories are specified, they are rooted against the current \ref rule_SubDir.
 
 \code
@@ -150,7 +150,7 @@ Dependencies are automatically derived, where possible, by looking at the conten
 
 The resulting file is a .jar file.
 
-\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of <tt>.java</tt> and <tt>.aidl</tt> files to build into a <tt>.jar</tt>.
 \param OPTIONS Unused (except that \ref rule_android_Application just calls \c android.Library with \c OPTIONS of \c application).
 
@@ -175,7 +175,7 @@ The resulting file is a .jar file.
 
 Makes \c TARGET depend on Jam-generated <tt>.jar</tt> \c LIBRARIES and uses them during linking.
 
-\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param LIBRARIES The list of libraries to apply.  These libraries are those generated from the \ref rule_android_Library rule.  They do not include prebuilt libraries.  To link prebuilt libraries, use the \ref rule_android_PrebuiltJars rule.
 
 \code
@@ -215,7 +215,7 @@ This rule is unneeded if \c MANIFEST is just an <tt>AndroidManifest.xml</tt> fil
 
 Makes \c TARGET depend on Jam-generated \c NATIVE_LIBRARIES. These are packaged during the \ref rule_android_Package process.
 
-\param TARGET The target to package the \c NATIVE_LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to package the \c NATIVE_LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param NATIVE_LIBRARIES The list of libraries to apply.  These are shared libraries are those generated from the \ref rule_C_Library rule.  They do not include prebuilt libraries.  To package native prebuilt libraries, use the \ref rule_android_NativePrebuiltLibraries rule.
 
 \code
@@ -235,7 +235,7 @@ Makes \c TARGET depend on Jam-generated \c NATIVE_LIBRARIES. These are packaged 
 
 Makes \c TARGET depend on preexisting shared \c NATIVE_PREBUILT_LIBRARIES. These are packaged during the \ref rule_android_Package process.
 
-\param TARGET The target to package the \c NATIVE_PREBUILT_LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to package the \c NATIVE_PREBUILT_LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param NATIVE_PREBUILT_LIBRARIES The list of native prebuilt shared libraries to apply.  These libraries are shared libraries existing somewhere in the filesystem and are specified without an extension and without the leading 'lib' prefix.  For shared libraries generated from the \ref rule_C_Library rule, use the \ref rule_android_NativeLibraries rule.
 
 \code
@@ -265,7 +265,7 @@ Native libraries are searched for the following order:
 </ul>
 \htmlonly </blockquote> \endhtmlonly
 
-\param TARGET The target to assign the native prebuilt library search \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param TARGET The target to assign the native prebuilt library search \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param DIRECTORIES The list of directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>\$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
 
 \code
@@ -323,7 +323,7 @@ Specify the package name for \c TARGET, generally in the form of <tt>com.module.
 
 By default, this is read from the AndroidManifest.xml, so only call this if an override is needed.
 
-\param TARGET The target to assign the link \c FLAGS to. \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to assign the link \c FLAGS to. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param PACKAGE_NAME The package name to use.
 
 \code
@@ -364,7 +364,7 @@ List out <tt>.aar</tt> files that \c android.Library or \c android.Application n
 
 By default, <tt>.aar</tt> files are searched for in <tt>\$(SUBDIR)/libs</tt>.
 
-\param TARGET The target to link the \c LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to link the \c LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param LIBRARIES The list of preexisting <tt>.aar</tt> files to use as part of the build, specified without the <tt>.aar</tt> extension.
 
 \code
@@ -397,7 +397,7 @@ List out the <tt>.jar</tt> files that \c android.Library or \c android.Applicati
 
 The \c LIBRARIES specified are, by default, searched for in <tt>\$(SUBDIR)</tt>.
 
-\param TARGET The target to link the \c LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to link the \c LIBRARIES into.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param LIBRARIES The list of preexisting <tt>.jar</tt> files to use as part of the build, specified without the <tt>.jar</tt> extension.
 
 \code
@@ -426,7 +426,7 @@ The \c LIBRARIES specified are, by default, searched for in <tt>\$(SUBDIR)</tt>.
 
 Sets \c DIRECTORIES as the locations to search for Android resources at when \c TARGET is built.
 
-\param TARGET The target to which the resource search \c DIRECTORIES should be applied.  If not specified, \c TARGET defaults to the active target set via \ref rule_ActiveProject "ActiveProject".
+\param TARGET The target to which the resource search \c DIRECTORIES should be applied.  If not specified, \c TARGET defaults to the active target set via \ref rule_ActiveTarget "ActiveTarget".
 \param DIRECTORIES The list of directories to search for resources. Relative directories are rooted against <tt>\$(SUBDIR)</tt>.
 
 \code
@@ -484,7 +484,7 @@ Sets the Android \c SDK_VERSION and \c ARCHITECTURE for the toolchain. Call this
 
 Sets up the keystore information for the Android package. \c android.Sign must be called before \c android.Package.
 
-\param TARGET The target to sign.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to sign.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param KEYSTORE_PATH_PASSWORD_KEY This parameter contains 3 entries, the path to the keystore, the password of the keystore, and the key to use when accessing the keystore.
 
 \code
@@ -503,7 +503,7 @@ Sets up the keystore information for the Android package. \c android.Sign must b
 
 Specify the source path for the Java files being built by \c TARGET. \c android.SourcePaths must be called before \c android.Application or \c android.Library.
 
-\param TARGET The target to assign the Java search path \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to assign the Java search path \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param DIRECTORIES The list of directories to scan to find <tt>.java</tt> files. A given directory may either be absolute or relative. If relative, it is assumed to be based off of <tt>\$(SUBDIR)</tt>.
 
 \code
@@ -523,7 +523,7 @@ Specify the source path for the Java files being built by \c TARGET. \c android.
 
 Specify extensions to leave uncompressed when building the .apk. This must be called before \c android.Package.
 
-\param TARGET The target to leave the uncompressed file entries within.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to leave the uncompressed file entries within.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param UNCOMPRESSED_ASSET_EXTENSIONS The list of extensions to leave uncompressed. Do not include a period in front of the extension.
 
 \code

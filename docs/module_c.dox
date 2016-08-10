@@ -1,54 +1,89 @@
 /*! \page module_c C/C++ Rules
 
-\code
-    # Automatically made available, so this isn't needed.
-    IncludeModule c ;
-\endcode
-
-The C module provides rules to build C and C++ applications, shared libraries, and static libraries.
+The C module provides rules to build C, C++, Objective C, and Objective C++ applications, shared libraries, and static libraries.
 
 When first loaded, it attempts to detect the compiler on the machine.  On Windows, it can successfully detect and run Visual Studio 2010, Visual Studio 2008, Visual Studio 2005, Visual Studio 2003, and Visual C++ 6.  MinGW can also be specified.  On other OSes, it attempts to detect GCC.
 
 \section module_c_ruleslist List of Rules
 
 \secreflist
+
 \refitem rule_C_AddBuildExtensions C.AddBuildExtensions
+\refitem rule_C_ActiveTarget C.ActiveTarget
+\refitem rule_C_AddFlags C.AddFlags
 \refitem rule_C_Application C.Application
 \refitem rule_C_BatchCompileGroupSize C.BatchCompileGroupSize
 \refitem rule_C_CFlags C.CFlags
+\refitem rule_C_Clean C.Clean
+\refitem rule_C_ConfigureFile C.ConfigureFile
 \refitem rule_C_CppExceptions C.C++Exceptions
 \refitem rule_C_CppFlags C.C++Flags
 \refitem rule_C_CompileOptions C.CompileOptions
-\refitem rule_C_RuntimeType C.RuntimeType
 \refitem rule_C_DefFile C.DefFile
 \refitem rule_C_Defines C.Defines
 \refitem rule_C_ExcludeFromBuild C.ExcludeFromBuild
 \refitem rule_C_Flags C.Flags
+\refitem rule_C_ForceFileType C.ForceFileType
 \refitem rule_C_ForceInclude C.ForceInclude
+\refitem rule_C_ForcePublic C.ForcePublic
+\refitem rule_C_GetArchitecture C.GetArchitecture
 \refitem rule_C_GetLinkTargets C.GetLinkTargets
+\refitem rule_C_GristTarget C.GristTarget
+\refitem rule_C_GristFiles C.GristFiles
 \refitem rule_C_IncludeDirectories C.IncludeDirectories
+\refitem rule_C_IncludeInBuild C.IncludeInBuild
 \refitem rule_C_Inherits C.Inherits
+\refitem rule_C_InstallNamePath C.InstallNamePath
+\refitem rule_C_LibFlags C.LibFlags
 \refitem rule_C_Library C.Library
 \refitem rule_C_LinkDirectories C.LinkDirectories
 \refitem rule_C_LinkFlags C.LinkFlags
-\refitem rule_C_LinkFrameworks C.LinkFrameworks
 \refitem rule_C_LinkLibraries C.LinkLibraries
 \refitem rule_C_LinkPrebuiltLibraries C.LinkPrebuiltLibraries
 \refitem rule_C_Lump C.Lump
 \refitem rule_C_NoPrecompiledHeader C.NoPrecompiledHeader
+\refitem rule_C_ObjectAddFlags C.ObjectAddFlags
 \refitem rule_C_ObjectCFlags C.ObjectCFlags
 \refitem rule_C_ObjectCppFlags C.ObjectC++Flags
 \refitem rule_C_ObjectDefines C.ObjectDefines
 \refitem rule_C_ObjectForceInclude C.ObjectForceInclude
+\refitem rule_C_ObjectIncludeDirectories C.ObjectIncludeDirectories
+\refitem rule_C_OverrideToolchainSpec C.OverrideToolchainSpec
 \refitem rule_C_OutputName C.OutputName
 \refitem rule_C_OutputPath C.OutputPath
 \refitem rule_C_OutputPostfix C.OutputPostfix
 \refitem rule_C_OutputPostfixClear C.OutputPostfixClear
+\refitem rule_C_ObjectRemoveFlags C.ObjectRemoveFlags
 \refitem rule_C_OutputSuffix C.OutputSuffix
 \refitem rule_C_PrecompiledHeader C.PrecompiledHeader
+\refitem rule_C_RemoveFlags C.RemoveFlags
+\refitem rule_C_RuntimeType C.RuntimeType
+\refitem rule_C_Toolchain C.Toolchain
+\refitem rule_LocateSource TARGET : LocateSource
+\refitem rule_LocateTarget TARGET : LocateTarget
 \endsecreflist
 
 \section module_c_rules Rules
+
+<hr>
+\section rule_C_ActiveTarget rule C.ActiveTarget TARGET
+\addindex rule_C_ActiveTarget
+
+Changes the active target to \c TARGET. All rules taking an optional \c TARGET parameter will default to the active target if empty.
+
+\param TARGET The target to become active.
+
+\return Returns the newly activated target.
+
+\code
+    C.ActiveTarget MyApplication ;
+\endcode
+
+
+
+
+
+
 
 <hr>
 \section rule_C_AddBuildExtensions rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO_LINK
@@ -56,21 +91,28 @@ When first loaded, it attempts to detect the compiler on the machine.  On Window
 
 Makes a new C/C++ source extensions available to the compiler.  This rule requires some additional setup, described below.
 
+TODO: Finish me.
+
 \c TYPE identifies a category of files and is a short identifier, usually all caps.  It is used to access compiler flags variables during a file's compilation.  If \c TYPE were specified as <tt>CC</tt>, then the compiler flags in the variables called <tt>preCCFLAGS</tt>, <tt>CCFLAGS</tt>, <tt>SUBDIRCCFLAGS</tt>, and <tt>PCHCCFLAGS</tt> would be used.
 
-\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
-\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> (and possibly others) to link into the application.  Object and compiled Windows resource files may also be passed with this list.
-\param OPTIONS The following options are available.  All options are optional.
 
-\htmlonly <blockquote> \endhtmlonly
-<ul>
-  <li>\c windows - Forces a GUI application.  On Windows, the application must have a \c WinMain function.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:WINDOWS</tt>.</li>
-  <li>\c console (default) - Builds a console application.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.
-</ul>
-\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+
+
+<hr>
+\section rule_C_AddFlags rule C.AddFlags TARGET : FLAGS
+\addindex rule_C_AddFlags
+
+For the given project \c TARGET, add the compilation \c FLAGS for the current toolchain.
+
+\param TARGET The target to add the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of flags to add.
 
 \code
-    C.Application helloworld : helloworld.cpp ;
+    C.AddFlags : -g ;
 \endcode
 
 
@@ -85,10 +127,9 @@ Makes a new C/C++ source extensions available to the compiler.  This rule requir
 
 Compiles \c SOURCES and links them into \c TARGET.  Platform specific <tt>.o</tt> files or, on Visual C++ compilers, <tt>.res</tt> files are passed straight through to the linker.  Any file excluded from the build via \ref rule_C_ExcludeFromBuild is ignored.
 
-\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
-\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> (and possibly others) to link into the application.  Object and compiled Windows resource files may also be passed with this list.
+\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> (and possibly others) files to link into the application.  Object and compiled Windows resource files may also be passed with this list.
 \param OPTIONS The following options are available.  All options are optional.
-\return Returns the list of link targets, sometimes more than one, that will be built by the Jam.
 
 \htmlonly <blockquote> \endhtmlonly
 <ul>
@@ -96,6 +137,8 @@ Compiles \c SOURCES and links them into \c TARGET.  Platform specific <tt>.o</tt
   <li>\c console (default) - Builds a console application.  For Visual C++, the executable is linked with <tt>/SUBSYSTEM:CONSOLE</tt>.
 </ul>
 \htmlonly </blockquote> \endhtmlonly
+
+\return Returns the list of link targets, sometimes more than one, that will be built by the Jam.
 
 \code
     C.Application helloworld : helloworld.cpp ;
@@ -113,7 +156,7 @@ Compiles \c SOURCES and links them into \c TARGET.  Platform specific <tt>.o</tt
 
 For the given project \c TARGET, only allow \c SIZE files to be batch compiled in a given compiler execution.
 
-\param TARGET The target to assign the \c SIZE information to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to assign the \c SIZE information to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SIZE (optional) The maximum number of files to allow to compile on a given compiler execution.  If not specified, there is no limit to the number of batch compiled files.
 
 \code
@@ -133,7 +176,7 @@ For the given project \c TARGET, only allow \c SIZE files to be batch compiled i
 
 For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.
 
-\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param FLAGS The list of flags to apply.
 
 \code
@@ -157,23 +200,41 @@ For the given project \c TARGET, assign the \c FLAGS to the appropriate configur
 
 
 <hr>
+\section rule_C_Clean rule C.Clean TARGET : FILES
+\addindex rule_C_Clean
+
+Add \c FILES to the \c clean target for \c TARGET.
+
+\param TARGET The target to add \c FILES to for cleaning.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param FILES The files to clean.
+
+\code
+    C.Clean : $(generatedheader) ;
+\endcode
+
+
+
+
+
+
+
+
+
+<hr>
 \section rule_C_CppExceptions rule C.C++Exceptions TARGET : TYPE
 \addindex rule_C_C++Exceptions
 
-For the given project \c TARGET, turn on/off C++ exception support within the specified configuration and platform.
+For the given project \c TARGET, turn on/off C++ exception support within the current toolchain.
 
-\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param TYPE \c true to turn on exceptions, \c false (default) to turn off exceptions.
 
 \code
-    # Turn on exceptions in the target mycppapp for the current $(CONFIG).
+    # Turn on exceptions in the target mycppapp.
     C.C++Exceptions mycppapp : true ;
 
-    # Turn on exceptions in the target mycppapp for all configs.
-    C.C++Exceptions mycppapp : true : * ;
-
     # Turn off exceptions in the target mycppapp for all configs.
-    C.C++Exceptions mycppapp : false : * ;
+    C.C++Exceptions mycppapp : false ;
 \endcode
 
 
@@ -186,23 +247,14 @@ For the given project \c TARGET, turn on/off C++ exception support within the sp
 \section rule_C_CppFlags rule C.C++Flags TARGET : FLAGS
 \addindex rule_C_CppFlags
 
-For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.
+For the given project \c TARGET, assign the C++ \c FLAGS for the current toolchain.
 
-\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param FLAGS The list of flags to apply.
 
 \code
-    # Assign /clr:oldsyntax to all C++ files in managedapp across all
-    # configurations and platforms.
+    # Assign /clr:oldsyntax to all C++ files in managedapp.
     C.C++Flags managedapp : /clr:oldsyntax ;
-
-    # Assign /clr:oldsyntax to all C++ files in managedapp for the debug
-    # configuration and all platforms.
-    C.C++Flags managedapp : /clr:oldsyntax : debug ;
-
-    # Assign /clr:oldsyntax to all C++ files in managedapp for the debug
-    # configuration and win32 platform.
-    C.C++Flags managedapp : /clr:oldsyntax : debug : win32 ;
 \endcode
 
 
@@ -235,23 +287,18 @@ Sets options that affect how the compiler builds.
 
 
 <hr>
-\section rule_C_RuntimeType rule C.RuntimeType TARGET : TYPE [ : THE_PLATFORM ]
-\addindex rule_C_RuntimeType
+\section rule_C_ConfigureFile rule C.ConfigureFile TARGET : DESTINATION : SOURCE : OPTIONS
+\addindex rule_C_ConfigureFile
 
-For the given project \c TARGET, alter the build to use either a statically linked C runtime or a dynamically linked C runtime.
+For the given \c TARGET, run the file specified through \c SOURCE through a CMake-like configure mechanism and output the file to \c DESTINATION.
 
-\note At this time, the C runtime type only affects Visual C++ applications.
-
-\param TARGET The target to assign the new C runtime to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the C runtime is changed globally.
-\param TYPE May be set to either \c static or \c dynamic.  Use \c static to select a statically linked C runtime.  Use \c dynamic to dynamically link against the C runtime.
-\param THE_PLATFORM (optional) If not specified, the default is the current platform.
+\param TARGET The target to do the processing within.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param DESTINATION The destination filename to output the configured file to. The default output directory is <tt>\$(LOCATE_SOURCE)</tt>.
+\param SOURCE The source filename to configure. The default search directory is <tt>\$(SEARCH_SOURCE)</tt>.
+\param OPTIONS Either \c addinclude to add the \c DESTINATION <tt>\$(LOCATE)</tt> directory to the private include paths or \c addpublicinclude to add it to the public include paths for inheritance.
 
 \code
-    # Use the statically linked C runtime for all targets.
-    C.RuntimeType * : static ;
-
-    # Use the dynamically linked C runtime for the helloworld target.
-    C.RuntimeType helloworld : dynamic ;
+    C.ConfigureFile test : config.h : config.h.in : addinclude ;
 \endcode
 
 
@@ -264,15 +311,15 @@ For the given project \c TARGET, alter the build to use either a statically link
 \section rule_C_DefFile rule C.DefFile TARGET : SOURCES
 \addindex rule_C_DefFile
 
-When linking the given \c TARGET, link the .def file(s) specified in \c SOURCES.
+When linking the given \c TARGET, link the <tt>.def</tt> file(s) specified in \c SOURCES.
 
 \note At this time, the def file only affects Visual C++ applications.
 
-\param TARGET The target to link the def file to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to link the def file to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES One or more \c .def files.  \c .def files are searched for in <tt>$(SEARCH_SOURCE)</tt>.
 
 \code
-    # Link the WorkspaceWhiz target against WorkspaceWhiz.def.
+    # Build WorkspaceWhiz.def as part of the WorkspaceWhiz target.
     C.DefFile WorkspaceWhiz : WorkspaceWhiz.def ;
 \endcode
 
@@ -286,9 +333,9 @@ When linking the given \c TARGET, link the .def file(s) specified in \c SOURCES.
 \section rule_C_Defines rule C.Defines TARGET : DEFINES
 \addindex rule_C_Defines
 
-For the given project \c TARGET, assign the \c DEFINES to the appropriate configuration and platform.
+Assign the \c DEFINES to the given project \c TARGET.
 
-\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param DEFINES The list of defines to apply.
 
 \code
@@ -297,7 +344,9 @@ For the given project \c TARGET, assign the \c DEFINES to the appropriate config
     C.Defines someproject : ABC DEF=5 ;
 
     # For the win32 platform, add a WIN32 define globally.
-    C.Defines * : WIN32 : : win32 ;
+    if $(C.PLATFORM) = win32 {
+        C.Defines * : WIN32 ;
+    }
 
     # Quote a #define, keeping the quotes for compilation:
     C.Defines luacom : LUA5 "LUACOM_DLL=\\\"luacom.dll\\\"" ;
@@ -315,7 +364,7 @@ For the given project \c TARGET, assign the \c DEFINES to the appropriate config
 
 For the given project \c TARGET, exclude the \c SOURCES from the build.  If using <b>JamToWorkspace</b> for project generation, sources must be excluded and not simply removed from the list.  Otherwise, they don't all show in the generated projects.
 
-\param TARGET The target to exclude the \c SOURCES from.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to exclude the \c SOURCES from.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of defines to exclude.
 
 \code
@@ -335,15 +384,37 @@ For the given project \c TARGET, exclude the \c SOURCES from the build.  If usin
 \section rule_C_Flags rule C.Flags TYPE : TARGET : FLAGS
 \addindex rule_C_Flags
 
-For the given project \c TARGET, assign the \c FLAGS to the appropriate configuration and platform.  \c TYPE can be any known source compilation type, such as \c CC for C-style files, \c C++ for C++-style files, and on certain compilers, \c M for Objective C files, or \c MM for Objective C++ files.
+Assign the compilation \c FLAGS to the project \c TARGET.  \c TYPE can be any known source compilation type, such as \c CC for C-style files, \c C++ for C++-style files, and on certain compilers, \c M for Objective C files, or \c MM for Objective C++ files.
 
-\param TYPE A source compilation type added through \ref "rule_C_AddBuildExtensions" "C.AddBuildExtensions".
-\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param TYPE A source compilation type added through \ref rule_C_AddBuildExtensions "C.AddBuildExtensions". If more than one is specified, the flags are applied to all types.
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param FLAGS The list of flags to apply.
 
 \code
-    C.Flags CC  : * : -g -O0 -arch i386 : debug : macosx32 ;
-    C.Flags C++ : * : -g -O0 -arch i386 : debug : macosx32 ;
+    if $(C.PLATFORM) = macosx32  &&  $(C.CONFIG) = debug {
+        C.Flags CC  : * : -g -O0 -arch i386 ;
+        C.Flags C++ : * : -g -O0 -arch i386 ;
+    }
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ForceFileType rule C.ForceFileType TARGET : SOURCES : FILE_TYPE
+\addindex rule_C_ForceFileType
+
+Force the \c FILE_TYPE of the provided \c SOURCES attached to \c TARGET.
+
+\param TARGET The target to use when forcing the file type of \c SOURCES.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SOURCES The list of files to affect the compilation type of.
+\param FILE_TYPE A known extension, such as <tt>.c</tt>, <tt>.cpp</tt>, <tt>.m</tt>, or <tt>.mm</tt>, to force the \c SOURCES to be interpreted as.
+
+\code
+    C.ForceFileType : Application.cpp : .mm ;
 \endcode
 
 
@@ -356,14 +427,51 @@ For the given project \c TARGET, assign the \c FLAGS to the appropriate configur
 \section rule_C_ForceInclude rule C.ForceInclude TARGET : INCLUDES
 \addindex rule_C_ForceInclude
 
-For the given project \c TARGET, assign the \c INCLUDES to the appropriate configuration and platform, causing that project's compilation to force the inclusion of the header before anything else.
+For the given project \c TARGET, assign the \c INCLUDES for the current toolchain causing that project's compilation to force the inclusion of the header before anything else.
 
-\param TARGET The target to assign the \c INCLUDES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param TARGET The target to assign the \c INCLUDES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param INCLUDES The list of header files to force include.
 
 \code
     # Automatically #include myheader.h for all source files listed in myproject.
     C.ForceInclude myproject : myheader.h ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ForcePublic rule C.ForcePublic TARGET
+\addindex rule_C_ForcePublic
+
+Force the \ref rule_C_Inherits public inheritance pattern for \c TARGET. This will treat \c TARGET as if one of the flag setting functions, such as \ref rule_C_Defines or \ref rule_C_IncludeDirectories, had been called with \c public \c OPTIONS.
+
+\param TARGET The target to force to public.
+
+\code
+    C.ForcePublic MyLibrary ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_GetArchitecture rule C.GetArchitecture TOOLCHAIN_SPEC
+\addindex rule_C_GetArchitecture
+
+Retrieves the <tt>C.ARCHITECTURE</tt> assigned to the specified toolchain.
+
+\param TOOLCHAIN_SPEC A toolchain spec. Defaults to the current toolchain.
+\return Returns the toolchain's architecture.
+
+\code
+    Echo Architecture - [ C.GetArchitecture ] ;
 \endcode
 
 
@@ -381,21 +489,21 @@ The \ref rule_C_Application and \ref rule_C_Library rules return the target name
 When it is not possible to save off the result when calling the \c C.Application or \c C.Library rules, the \c C.GetLinkTargets rule can retrieve the properly gristed target later.
 
 \param TARGET The target to retrieve the link targets from.
-\param TOOLCHAIN_SPEC A tool specification such as "win32 debug" (without the quotes) or "$(PLATFORM) $(CONFIG) spu" (without the quotes).
+\param TOOLCHAIN_SPEC A tool specification such as <tt>win32/debug</tt> or <tt>\$(PLATFORM)/\$(CONFIG)/spu</tt>.
 \return Returns the list of link targets, sometimes more than one, that will be built by the Jam.  The target list may be passed to another rule like \ref rule_C_LinkLibraries.
 
 \code
-	C.Toolchain ps3 debug spu ;
+	C.Toolchain ps3/debug/spu ;
 	local sputhing_library = [ C.Library sputhing : sputhing.c ] ;
 
-	C.Toolchain ps3 debug ppu ;
+	C.Toolchain ps3/debug/ppu ;
 
-	local also_sputhing_library = [ C.GetLinkTargets sputhing : ps3 debug spu ] ;
+	local also_sputhing_library = [ C.GetLinkTargets sputhing : ps3/debug/spu ] ;
 
-	# <fakeps3!release!spu:sputhing>sputhing.lib
+	# <ps3!release!spu:sputhing>sputhing.lib
 	Echo sputhing_library - $(sputhing_library) ;
 
-	# <fakeps3!release!spu:sputhing>sputhing.lib
+	# <ps3!release!spu:sputhing>sputhing.lib
 	Echo also_sputhing_library - $(also_sputhing_library) ;
 
 	C.LinkLibraries pputhing : $(sputhing_library) ;
@@ -409,12 +517,54 @@ When it is not possible to save off the result when calling the \c C.Application
 
 
 <hr>
+\section rule_C_GristFiles rule C.GristFiles TARGET : FILES
+\addindex rule_C_GristFiles
+
+Grists the passed in \c FILES against \c TARGET and returns them to the user in the form: <tt>\<win32/debug:TARGET\>FILES</tt>
+
+\param TARGET The target to grist. May be <tt>*</tt>.
+\param FILES The list of files to apply the target grist tot.
+\return Returns the gristed \c FILES.
+
+\code
+    # <platform/config:Application>filea.cpp <platform/config:Application>fileb.cpp
+    Echo Gristed files - [ C.GristFiles Application : filea.cpp fileb.cpp ] ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_C_GristTarget rule C.GristTarget TARGET
+\addindex rule_C_GristTarget
+
+Grists the passed in \c TARGET and returns it to the user in the form: <tt>\<win32/debug\>TARGET</tt>
+
+\param TARGET The target to grist. May be <tt>*</tt>.
+\return Returns the gristed \c TARGET.
+
+\code
+    # <platform/config>Application
+    Echo Gristed target - [ C.GristTarget Application ] ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_C_IncludeDirectories rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]
 \addindex rule_C_IncludeDirectories
 
-For the given project \c TARGET, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
+Add the \c INCLUDEPATHS to the given project \c TARGET.
 
-\param TARGET The target to assign the \c INCLUDEPATHS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param TARGET The target to assign the \c INCLUDEPATHS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param INCLUDEPATHS The list of include paths to apply.
 \param OPTIONS If \c public is specified, the paths specified by \c INCLUDEPATHS are made available to a project using \c C.Inherits.
 
@@ -427,6 +577,31 @@ For the given project \c TARGET, assign the \c INCLUDEPATHS to the appropriate c
 
     # Add $(Code)/Shared to myproject and make it available to C.Inherits users.
     C.IncludeDirectories myproject : $(Code)/Shared : public ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_IncludeInBuild rule C.IncludeInBuild TARGET : SOURCES
+\addindex rule_C_IncludeInBuild
+
+For the given project \c TARGET, re-include the \c SOURCES into the build.
+
+\param TARGET The target to include the \c SOURCES from.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SOURCES The list of source files to force include
+
+\code
+    if $(PLATFORM) != xbox
+    {
+        C.ExcludeFromBuild myproject : $(XBOX_SRCS) ;
+
+        # Probably will result in compilation errors on non-xbox platforms.
+        C.IncludeInBuild myproject : $(XBOX_SRCS) ;
+    }
 \endcode
 
 
@@ -465,14 +640,52 @@ If one of the targets specified in \c INHERITS_TARGETS has no public entries, th
 
 
 <hr>
+\section rule_C_InstallNamePath rule C.InstallNamePath TARGET : INSTALL_NAME_PATH
+\addindex rule_C_InstallNamePath
+
+On platforms with Unix-like shared libraries, <tt>C.InstallNamePath</tt> allows adjustment of the directory in which the shared library is allowed to run from.
+
+\param TARGET The target to modify the install name path on.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param INSTALL_NAME_PATH A valid path for shared libraries, such as <tt>\@rpath</tt>.
+
+\code
+    C.InstallNamePath : @rpath ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_LibFlags rule C.LibFlags TARGET : FLAGS
+\addindex rule_C_LibFlags
+
+For the given project \c TARGET, assign the lib \c FLAGS to the current toolchain to be used when archiving object files into library files.
+
+\param TARGET The target to assign the link \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of lib flags to apply.
+
+\code
+    C.LibFlags * : /LTCG ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_C_Library rule C.Library TARGET : SOURCES [ : OPTIONS ]
 \addindex rule_C_Library
 
 Compiles \c SOURCES and archives them into a library called \c TARGET.  Filenames with an <tt>.obj</tt> or <tt>.res</tt> are passed straight through to the linker.  Any file excluded from the build via \ref rule_C_ExcludeFromBuild is ignored.
 
-\param TARGET The targets to archive \c SOURCES into.  The target name is given without extension; a platform specific extension will be generated.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The targets to archive \c SOURCES into.  The target name is given without extension; a platform specific extension will be generated.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of <tt>.cpp</tt>, <tt>.cxx</tt>, and <tt>.c</tt> to link into the application.  Object and compiled Windows resource files may also be passed with this list.
-\param OPTIONS (optional) The following options are available.
+\param OPTIONS (optional) The following options are available:
 
 \htmlonly <blockquote> \endhtmlonly
 <ul>
@@ -515,18 +728,18 @@ If \c shared is specified for \c OPTIONS, the following additional options are a
 \section rule_C_LinkDirectories rule C.LinkDirectories TARGET : DIRECTORIES
 \addindex rule_C_LinkDirectories
 
-For the given project \c TARGET, assign the link \c DIRECTORIES to the appropriate configuration and platform.
+Assign the linker search \c DIRECTORIES for the given project \c TARGET.
 
-\param TARGET The target to assign the link \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
-\param DIRECTORIES The list of link directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
+\param TARGET The target to assign the link \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param DIRECTORIES The list of link directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>\$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
 
 \code
     # Add c:/some/directory to myproject for all configurations and
     # all platforms.
     C.LinkDirectories myproject : c:/some/directory ;
 
-    # For the win32 platform, add the MFC link directory.
-    C.LinkDirectories myproject : "$(MSVCNT)/atlmfc/lib" : : win32 ;
+    # Add the MFC link directory.
+    C.LinkDirectories myproject : "$(MSVCNT)/atlmfc/lib" ;
 
     # Relative path:
     C.LinkDirectories myproject : ../lib ;
@@ -542,36 +755,18 @@ For the given project \c TARGET, assign the link \c DIRECTORIES to the appropria
 \section rule_C_LinkFlags rule C.LinkFlags TARGET : FLAGS
 \addindex rule_C_LinkFlags
 
-For the given project \c TARGET, assign the link \c FLAGS to the appropriate configuration and platform.
+Assign extra link \c FLAGS to the given project \c TARGET.
 
-\param TARGET The target to assign the link \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param TARGET The target to assign the link \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param FLAGS The list of link flags to apply.
 
 \code
-    C.LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.debug.dll : debug ;
-    C.LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.dll : release ;
+    if $(C.CONFIG) = debug {
+        C.LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.debug.dll : debug ;
+    } else if $(C.CONFIG) = release {
+        C.LinkFlags ManagedLuaPlus : /DELAYLOAD:LuaPlus_1100.dll : release ;
+    }
     C.LinkFlags ManagedLuaPlus : /KEYFILE:\"$(SEARCH_SOURCE)/ManagedLuaPlus.snk\" ;
-\endcode
-
-
-
-
-
-
-
-<hr>
-\section rule_C_LinkFrameworks rule C.LinkFrameworks TARGET : FRAMEWORKS
-\addindex rule_C_LinkFrameworks
-
-\note This rule is only valid on Mac OS X.
-
-Links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are set, so changes to the framework will not be relinked.
-
-\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
-\param FRAMEWORKS The list of frameworks to link.  The frameworks are specified without an extension.
-
-\code
-    C.LinkFrameworks MyApp : CoreFoundation ;
 \endcode
 
 
@@ -586,7 +781,7 @@ Links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are set, s
 
 Makes \c TARGET depend on Jam generated \c LIBRARIES and includes them during linking.
 
-\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param LIBRARIES The list of libraries to apply.  These libraries are those generated from the \ref rule_C_Library rule.  They do not include prebuilt libraries.  To link prebuilt libraries, use the \ref rule_C_LinkPrebuiltLibraries rule.
 \param OPTIONS If \c public is specified, the libraries specified by \c LIBRARIES are made available to a project using \c C.Inherits.
 
@@ -607,7 +802,7 @@ Makes \c TARGET depend on Jam generated \c LIBRARIES and includes them during li
 
 Makes \c TARGET depend on \c LIBRARIES and includes them during linking.
 
-\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param LIBRARIES The list of libraries to apply.  These libraries are prebuilt libraries, such as kernel32.lib, and are specified without an extension.  For those libraries generated from the \ref rule_C_Library rule, use the \ref rule_C_LinkLibraries rule.
 \param OPTIONS If \c public is specified, the libraries specified by \c LIBRARIES are made available to a project using \c C.Inherits.
 
@@ -630,7 +825,7 @@ Makes \c TARGET depend on \c LIBRARIES and includes them during linking.
 
 Generates a small file containing an <tt>\#include</tt> amalgamation of files passed into the rule.
 
-The name of the generated lump file is <tt>\$(LOCATE_SOURCE)/!\$(LUMP_NAME)!.\$(LUMP_NAME:S)</tt>.  If \c LUMP_NAME does not have an extension, then the extension from $(PCH_FILENAMES[1]:S) is used.  If that doesn't exist, then the default is <tt>.cpp</tt>.
+The name of the generated lump file is <tt>\$(LOCATE_SOURCE)/!\$(LUMP_NAME)!.\$(LUMP_NAME:S)</tt>.  If \c LUMP_NAME does not have an extension, then the extension from \$(PCH_FILENAMES[1]:S) is used.  If that doesn't exist, then the default is <tt>.cpp</tt>.
 
 The lump file has the following contents:
 
@@ -641,8 +836,8 @@ The lump file has the following contents:
 
 Lumping may be turned off globally by setting the global variable <tt>LUMP</tt> to be <tt>0</tt>.
 
-\param PARENT The parent target to which the lump file belongs.  \c PARENT is optional if \ref rule_ActiveProject has been specified.
-\param SOURCES_VARIABLE_NAME The variable name listing the source files to be added to the lump.  This is not an expanded version through <tt>$(SRCS)</tt> but rather, it is the actual name of the variable, <tt>SRCS</tt>.  On return from the \c Lump rule, \c SOURCES_VARIABLE_NAME will be populated with the gristed name of the lump file.  It will not contain the original file list anymore.  It may include the precompiled header source filename \$(PCH_FILENAMES[1]) if \$(PCH_FILENAMES[3]) is set.
+\param PARENT The parent target to which the lump file belongs.  \c PARENT is optional if \ref rule_ActiveTarget has been specified.
+\param SOURCES_VARIABLE_NAME The variable name listing the source files to be added to the lump.  This is not an expanded version through <tt>\$(SRCS)</tt> but rather, it is the actual name of the variable, <tt>SRCS</tt>.  On return from the \c Lump rule, \c SOURCES_VARIABLE_NAME will be populated with the gristed name of the lump file.  It will not contain the original file list anymore.  It may include the precompiled header source filename \$(PCH_FILENAMES[1]) if \$(PCH_FILENAMES[3]) is set.
 \param PCH_FILENAMES (optional) \c PCH_FILENAMES[1] is the filename of the precompiled header source file (generally, the .cpp).  \c PCH_FILENAMES[2] is the filename of the precompiled header's header file.  If \c PCH_FILENAMES[2] is not specified, then <tt>\$(PCH_FILENAMES[1]:S=.h)</tt> is used.  Finally, if \c PCH_FILENAMES[3] is set to <tt>1</tt>, the precompiled header's source file (set through \c PCH_FILENAMES[1]) is added to the \c SOURCES_VARIABLE_NAME list.
 \param EXTRA_INCLUDE_PATHS If additional include paths are needed for this lump file, specify them here.
 
@@ -671,7 +866,7 @@ Lumping may be turned off globally by setting the global variable <tt>LUMP</tt> 
 
 Creates a precompiled header and uses it on the specified \c FILES.
 
-\param TARGET The target to which the precompiled header belongs.  This is needed to properly grist the precompiled header filenames.  If not specified, \c TARGET defaults to the active target set via \ref rule_ActiveProject "ActiveProject".
+\param TARGET The target to which the precompiled header belongs.  This is needed to properly grist the precompiled header filenames.  If not specified, \c TARGET defaults to the active target set via \ref rule_ActiveTarget "ActiveTarget".
 \param FILES The list of files to turn off precompiled header support for.
 
 \code
@@ -698,12 +893,32 @@ Creates a precompiled header and uses it on the specified \c FILES.
 
 
 <hr>
+\section rule_C_ObjectAddFlags rule C.ObjectAddFlags TARGET : SOURCES : FLAGS
+\addindex rule_C_ObjectAddFlags
+
+For the given \c SOURCES, add the compilation \c FLAGS.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SOURCES The list of sources to add the \c FLAGS to.
+\param FLAGS The list of flags to add.
+
+\code
+    C.ObjectAddFlags : myfile.cpp yourfile.cpp : -g ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_C_ObjectCFlags rule C.ObjectCFlags TARGET : SOURCES : FLAGS
 \addindex rule_C_ObjectCFlags
 
-For the given \c SOURCES matching <tt>*.c</tt>, assign the \c FLAGS to the appropriate configuration and platform.
+For the given \c SOURCES matching <tt>*.c</tt>, assign the passed in \c FLAGS.
 
-\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of sources to assign the \c FLAGS to.
 \param FLAGS The list of flags to apply.
 
@@ -723,9 +938,9 @@ For the given \c SOURCES matching <tt>*.c</tt>, assign the \c FLAGS to the appro
 \section rule_C_ObjectCppFlags rule C.ObjectC++Flags TARGET : SOURCES : FLAGS
 \addindex rule_C_ObjectCppFlags
 
-For the given \c SOURCES matching *.cpp or *.cxx, assign the \c FLAGS to the appropriate configuration and platform.
+For the given \c SOURCES matching *.cpp or *.cxx, assign the passed in \c FLAGS.
 
-\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of sources to assign the \c FLAGS to.
 \param FLAGS The list of flags to apply.
 
@@ -745,9 +960,9 @@ For the given \c SOURCES matching *.cpp or *.cxx, assign the \c FLAGS to the app
 \section rule_C_ObjectDefines rule C.ObjectDefines TARGET : SOURCES : DEFINES
 \addindex rule_C_ObjectDefines
 
-For the given \c SOURCES, assign the \c DEFINES to the appropriate configuration and platform.
+For the given \c SOURCES, assign the passed in \c DEFINES.
 
-\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of sources to assign the \c DEFINES to.
 \param DEFINES The list of defines to apply.
 
@@ -767,9 +982,9 @@ For the given \c SOURCES, assign the \c DEFINES to the appropriate configuration
 \section rule_C_ObjectForceInclude rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES
 \addindex rule_C_ObjectForceInclude
 
-For the given \c SOURCES, assign the \c INCLUDES to the appropriate configuration and platform, causing that project's compilation to force the inclusion of the header before anything else.
+For the given \c SOURCES, assign the \c INCLUDES to the \c TARGET, causing that project's compilation to force the inclusion of the header before anything else.
 
-\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of sources to assign the force include flag to.
 \param INCLUDES The list of header files to force include.
 
@@ -788,9 +1003,9 @@ For the given \c SOURCES, assign the \c INCLUDES to the appropriate configuratio
 \section rule_C_ObjectIncludeDirectories rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS
 \addindex rule_C_ObjectIncludeDirectories
 
-For the given \c SOURCES, assign the \c INCLUDEPATHS to the appropriate configuration and platform.
+For the given \c SOURCES, assign the \c INCLUDEPATHS as part of the \c TARGET compilation of the \c SOURCES.
 
-\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of sources to assign the include paths to.
 \param INCLUDEPATHS The list of include paths to apply.
 
@@ -807,12 +1022,32 @@ For the given \c SOURCES, assign the \c INCLUDEPATHS to the appropriate configur
 
 
 <hr>
+\section rule_C_ObjectRemoveFlags rule C.ObjectRemoveFlags TARGET : SOURCES : FLAGS
+\addindex rule_C_ObjectRemoveFlags
+
+For the given \c SOURCES, remove the compilation \c FLAGS.
+
+\param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SOURCES The list of sources to remove the \c FLAGS from.
+\param FLAGS The list of flags to remove.
+
+\code
+    C.ObjectRemoveFlags : myfile.cpp yourfile.cpp : -g ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_C_OutputName rule C.OutputName TARGET : NAME
 \addindex rule_C_OutputName
 
 By default, the name of a generated executable or library is determined by the name of the \c TARGET.  \c OutputName is used to override the name of the executable or library.
 
-\param TARGET The target to affect the output name change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to affect the output name change on.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param NAME The new name of the output target.
 
 \code
@@ -833,7 +1068,7 @@ By default, the name of a generated executable or library is determined by the n
 
 By default, the output location of a generated executable or library is at \c LOCATE_TARGET.  \c OutputPath is used to override the output location of the executable or library.
 
-\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param OUTPUTPATH The new output location of the generated target.
 
 \code
@@ -855,11 +1090,11 @@ By default, the output location of a generated executable or library is at \c LO
 \section rule_C_OutputPostfix rule C.OutputPostfix TARGET : POSTFIX
 \addindex rule_C_OutputPostfix
 
-The output postfix is appended to the end of the generated target name.  By default, the output postfix is .\$(CONFIG).  This means the resultant filename is \$(OUTPUTNAME).\$(CONFIG).\$(EXT).
+The output postfix is appended to the end of the generated target name.  By default, the output postfix is empty.  This means the resultant filename is \$(OUTPUTNAME).\$(EXT).
 
 If there is no assigned output postfix for \c TARGET, then the global target \c * is checked for a postfix.
 
-\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param POSTFIX The new output postfix of the generated target.
 
 \code
@@ -874,8 +1109,9 @@ If there is no assigned output postfix for \c TARGET, then the global target \c 
     #   * For release: LuaPlus_1100.dll
     C.OutputName LuaPlusShared : LuaPlus_1100 ;
     C.OutputPath LuaPlusShared : "c:/Program Files/LuaPlus" ;
-    C.OutputPostfix LuaPlusShared : .debug : debug ;
-    C.OutputPostfix LuaPlusShared : : release ;
+    if $(C.CONFIG) = debug {
+        C.OutputPostfix LuaPlusShared : .debug ;
+    }
 \endcode
 
 
@@ -890,11 +1126,13 @@ If there is no assigned output postfix for \c TARGET, then the global target \c 
 
 Clear the output postfix.
 
-\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to affect the output path change on.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 
 \code
-    C.OutputPostfix LuaPlusShared : .debug : debug ;
-	C.OutputPostfixClear LuaPlusShared : debug ;
+    if $(C.CONFIG) = debug {
+        C.OutputPostfix LuaPlusShared : .debug ;
+        C.OutputPostfixClear LuaPlusShared ;
+    }
 \endcode
 
 
@@ -909,13 +1147,47 @@ Clear the output postfix.
 
 The output suffix is the file extension of the generated target.  By default, the output suffix is appropriate for an executable or library.
 
-\param TARGET The target to affect the output suffix change on.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to affect the output suffix change on.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SUFFIX The new output suffix of the generated target.
 
 \code
     # The final name will be SomePlugin.appplugin.
     C.OutputSuffix SomePlugin : .appplugin ;
 \endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_OverrideToolchainSpec rule C.OverrideToolchainSpec TOOLCHAIN_SPEC_OPTIONS : OPTIONS
+\addindex rule_C_OverrideToolchainSpec
+
+Advanced functionality used when setting up overlay toolchains.
+
+\param TOOLCHAIN_SPEC_OPTIONS TBD
+\param OPTIONS TBD
+
+\code
+    # From samples/newplatforms/jam/c/toolchain/win32dx.jam:
+    rule C.Toolchain.win32dx.* {
+        # This feels like a complete hack, but the internals of the win32 toolchain
+        # use $(C.PLATFORM) to make decisions about what to include next.
+        #
+        # Since we're using a custom platform that JamPlus does not understand by
+        # default, we work around that by telling JamPlus we are using win32 as a
+        # platform.  After the toolchain is loaded, we force the platform back to
+        # the intended one.
+        C.OverrideToolchainSpec C.PLATFORM=win32 ;
+        C.Toolchain.win32.* ;
+        C.OverrideToolchainSpec C.PLATFORM=win32 : remove ;
+
+        C.Defines * : PLATFORM_WIN32DX ;
+    }
+\endcode
+
 
 
 
@@ -946,6 +1218,109 @@ Under GCC-based compilers, the precompiled header name is automatic based on the
     # The precompiled header stdafx.h is applied to SRCS.  stdafx.cpp is used
     # to create the precompiled header.
     C.PrecompiledHeader SimpleMFC : stdafx.cpp stdafx.h : $(SRCS) ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_RemoveFlags rule C.RemoveFlags TARGET : FLAGS
+\addindex rule_C_RemoveFlags
+
+For the given project \c TARGET, remove the compilation \c FLAGS from the current toolchain.
+
+\param TARGET The target to remove the \c FLAGS from.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param FLAGS The list of flags to remove.
+
+\code
+    C.RemoveFlags : -g ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_RuntimeType rule C.RuntimeType TARGET : TYPE [ : THE_PLATFORM ]
+\addindex rule_C_RuntimeType
+
+For the given project \c TARGET, alter the build to use either a statically linked C runtime or a dynamically linked C runtime.
+
+\note At this time, the C runtime type only affects Visual C++ applications.
+
+\param TARGET The target to assign the new C runtime to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the C runtime is changed globally.
+\param TYPE May be set to either \c static or \c dynamic.  Use \c static to select a statically linked C runtime.  Use \c dynamic to dynamically link against the C runtime.
+\param THE_PLATFORM (optional) If not specified, the default is the current platform.
+
+\code
+    # Use the statically linked C runtime for all targets.
+    C.RuntimeType * : static ;
+
+    # Use the dynamically linked C runtime for the helloworld target.
+    C.RuntimeType helloworld : dynamic ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_Toolchain rule C.Toolchain TOOLCHAIN_SPEC
+\addindex rule_C_Toolchain
+
+Activate the toolchain specified by \c TOOLCHAIN_SPEC.
+
+\param TOOLCHAIN_SPEC The toolchain to activate.
+
+\code
+    C.Toolchain win32/debug ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_LocateSource rule LocateSource TARGET : DIRECTORY
+\addindex rule_LocateSource
+
+Helper function to set \c LOCATE_SOURCE on \c TARGET to \c DIRECTORY and to override the current global \c LOCATE_SOURCE provided from \ref rule_SubDir.
+
+\param TARGET The target to do the processing within.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param DIRECTORY The directory to use as the override.
+
+\code
+    LocateSource test : some/directory ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_LocateTarget rule LocateTarget TARGET : DIRECTORY
+\addindex rule_LocateTarget
+
+Helper function to set \c LOCATE_TARGET on \c TARGET to \c DIRECTORY and to override the current global \c LOCATE_TARGET provided from \ref rule_SubDir.
+
+\param TARGET The target to do the processing within.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param DIRECTORY The directory to use as the override.
+
+\code
+    LocateTarget test : some/directory ;
 \endcode
 
 

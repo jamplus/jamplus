@@ -4,7 +4,7 @@
     IncludeModule c/win32resource ;
 \endcode
 
-\section module_c_ruleslist List of Rules
+\section module_c_win32resource_ruleslist List of Rules
 
 \secreflist
 \refitem rule_C_RcDefines C.RcDefines
@@ -21,7 +21,7 @@
 
 For the given project \c TARGET, assign the \c DEFINES for the resource file compilation.
 
-\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param RESOURCE_NAME (optional) When present, the \c DEFINES are applied to the specified \c .rc file.
 \param DEFINES The list of defines to apply.
 
@@ -50,7 +50,7 @@ For the given project \c TARGET, assign the \c DEFINES for the resource file com
 
 For the given project \c TARGET, assign the \c FLAGS for the resource file compilation.
 
-\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param RESOURCE_NAME (optional) When present, the \c FLAGS are applied to the specified \c .rc file.
 \param FLAGS The list of flags to apply.
 
@@ -78,7 +78,7 @@ For the given project \c TARGET, assign the \c FLAGS for the resource file compi
 
 For the given project \c TARGET, assign the include directories specified in \c HDRS to the resource file compilation.
 
-\param TARGET The target to assign the \c HDRS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the include directories are made available globally.
+\param TARGET The target to assign the \c HDRS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the include directories are made available globally.
 \param RESOURCE_NAME (optional) When present, the \c HDRS are applied to the specified \c .rc file.
 \param HDRS The list of include directories to apply.
 

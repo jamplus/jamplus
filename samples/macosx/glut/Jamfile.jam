@@ -1,6 +1,6 @@
 SubDir TOP ;
 
-ActiveProject glut ;
+ActiveTarget glut ;
 
 C.macosx.LinkFrameworks glut : GLUT OpenGL ;
 

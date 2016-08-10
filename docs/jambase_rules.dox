@@ -1,23 +1,18 @@
 /*! \page jambase_rules Jambase Rules
 
-\section cmd_intro Introduction
+\section jambase_intro Introduction
 
-In the <tt>Jambase.jam</tt> that ships with JamPlus, the default build configuration is Release.
-
-The <tt>Jambase.jam</tt> rules attempt to detect the compiler on the machine.  It can successfully detect and run Visual C++ 6, Visual Studio 2003, Visual Studio 2005, Visual Studio 2008, Visual Studio 2010, Visual Studio 2012, Xcode 4, GCC, and Clang.
+The following is a list of rules available in <tt>bin/Jambase.jam</tt>.
 
 If [square] brackets are used the argument is optional.
 
-Here is an alphabetically sorted list of all commands with references to their
-documentation:
 \secreflist
-\refitem rule_ActiveProject ActiveProject
+\refitem rule_ActiveTarget ActiveTarget
 \refitem rule_AutoSourceGroup AutoSourceGroup
 \refitem rule_Clean Clean
 \refitem rule_CleanTree CleanTree
 \refitem rule_ExternalProject ExternalProject
 \refitem rule_FGristDirectories FGristDirectories
-\refitem rule_GroupByVar GroupByVar
 \refitem rule_IncludeModule IncludeModule
 \refitem rule_MakeLocate MakeLocate
 \refitem rule_MkDir MkDir
@@ -35,15 +30,13 @@ documentation:
 \refitem rule_WriteFile WriteFile
 \endsecreflist
 
-The following is a list of rules available in <tt>bin/Jambase.jam</tt>.
-
 <hr>
-\section rule_ActiveProject rule ActiveProject PROJECT
-\addindex rule_ActiveProject
+\section rule_ActiveTarget rule ActiveTarget TARGET
+\addindex rule_ActiveTarget
 
-Set the default project target to use when the target isn't specified.  This works with a good number of the Jambase commands.
+Set the default target to use when the target isn't specified.  Calls \ref rule_C_ActiveTarget under the hood.
 
-\param PROJECT The default target name to use for upcoming rules.
+\param TARGET The default target name to use for upcoming rules.
 
 
 
@@ -156,55 +149,6 @@ Given a list of \c DIRECTORIES, a gristed version of each is returned.  Currentl
 
 
 <hr>
-\section rule_GroupByVar rule GroupByVar TARGETS_VARIABLE : VARIABLE_NAME [ : MAX_PER_GROUP ]
-\addindex rule_GroupByVar
-
-Returns a list of targets with identical settings as specified by \c VARIABLE_NAME using the first target specified in \c TARGETS_VARIABLE.
-
-Example: The C/C++ compilation puts a variety of compilation flags in a variable declared per target called \c MFLAGS.  For compilers that support batching of files using the same build flags, GroupByVar returns each set of matching files one after another to send to the compiler.
-
-\param TARGETS_VARIABLE The variable containing the targets to return matching groups from.  The first target in the variable is used as the target to match against.  \c TARGETS_VARIABLE is updated with the remaining list of targets after the current found group has been identified.
-\param VARIABLE_NAME The settings variable used to obtain matches from.
-\param MAX_PER_GROUP The maximum number of files to return in the group.  If not specified, there is no upper limit.
-\return Returns a list of 1 or more \c TARGETS matching the string list in \c VARIABLE_NAME.
-
-\code
-    # Prints:
-    #
-    # Together - targeta targetc targete targetf
-    # Together - targetb
-    # Together - targetd
-    # (2 max) - targeta targetc
-    # (2 max) - targetb
-    # (2 max) - targetd
-    # (2 max) - targete targetf
-    files = targeta targetb targetc targetd targete targetf ;
-    FLAGS on targeta = a b c ;
-    FLAGS on targetb = a b c d ;
-    FLAGS on targetc = a b c ;
-    FLAGS on targetd = a b c e ;
-    FLAGS on targete = a b c ;
-    FLAGS on targetf = a b c ;
-
-    while $(files) {
-        local together = [ GroupByVar files : FLAGS ] ;
-        Echo Together - $(together) ;
-    }
-
-
-    files = targeta targetb targetc targetd targete targetf ;
-    while $(files) {
-        local together = [ GroupByVar files : FLAGS : 2 ] ;
-        Echo (2 max) - $(together) ;
-    }
-\endcode
-
-
-
-
-
-
-<hr>
 \section rule_IncludeModule rule IncludeModule MODULE_NAME
 \addindex rule_IncludeModule
 
@@ -213,6 +157,7 @@ Loads a Jam module.  It searches in the following manner:
 <ul>
   <li>The current <tt>\$(SUBDIR)</tt></li>
   <li>The current working directory <tt>\$(CWD)</tt></li>
+  <li>The current working directory <tt>\$(CWD)/jam/</tt></li>
   <li><tt>\$(JAM_MODULES_USER_PATH)</tt></li>
   <li><tt>\$(JAM_MODULES_PATH)</tt> which includes the <tt>bin/modules/</tt> directory</li>
 </ul>

@@ -1,0 +1,735 @@
+/*! \page module_ios iOS Rules
+
+The iOS module contains special build rules to create a C/C++/Objective C/Objective C++ iOS application from start to finish.
+
+The \c ios module will automatically detect the appropriate compilers and set up some architecture-specific items.
+
+\code
+    # This goes in the Jamfile.
+    ios.SDK 8.0 ;
+\endcode
+
+Next, some combination of the following rule calls (and any others described below) are needed to build a full iOS .ipa for installation and distribution.
+
+\code
+    C.ActiveTarget sdltest ;
+    ios.BundleInfo : displayname : sdltest ;
+    ios.BundleInfo : bundleversion : 1.0 ;
+    ios.BundleInfo : uistatusbarhidden : true ;
+
+    C.Inherits : sdl2 ;
+    C.Application : sdltest.c ;
+
+    ios.ProvisionFile : test.mobileprovision ;
+    ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
+    ios.Bundle ;
+
+    local bundlePath = [ ios.GetBundlePath ] ;
+    ios.Archive : $(bundlePath)/../package ;
+    ios.WebServer ;
+\endcode
+
+An iOS build is initiated with a <tt>C.TOOLCHAIN</tt> of <tt>ios/CONFIG</tt>. This will build the application bundle, but it will not build the <tt>.ipa</tt>.
+
+\code
+>jam C.TOOLCHAIN=ios/release
+\endcode
+
+To bundle up an <tt>.ipa</tt>, build the <tt>archive:TARGET</tt> target.
+
+\code
+>jam C.TOOLCHAIN=ios/release archive:TARGET
+\endcode
+
+\section module_ios_ruleslist List of Rules
+
+\secreflist
+\refitem rule_C_ios_FrameworkDirectories C.ios.FrameworkDirectories
+\refitem rule_C_ios_LinkFrameworks C.ios.LinkFrameworks
+\refitem rule_C_ios_MinimumOSVersion C.ios.MinimumOSVersion
+\refitem rule_C_ios_WeakLinkFrameworks C.ios.WeakLinkFrameworks
+\refitem rule_ios_Archive ios.Archive
+\refitem rule_ios_AssetCatalog ios.AssetCatalog
+\refitem rule_ios_Bundle ios.Bundle
+\refitem rule_ios_BundleInfoArrayBegin ios.BundleInfoArrayBegin
+\refitem rule_ios_BundleInfoArrayBoolean ios.BundleInfoArrayBoolean
+\refitem rule_ios_BundleInfoArrayDictBegin ios.BundleInfoArrayDictBegin
+\refitem rule_ios_BundleInfoArrayDictEnd ios.BundleInfoArrayDictEnd
+\refitem rule_ios_BundleInfoArrayEnd ios.BundleInfoArrayEnd
+\refitem rule_ios_BundleInfoArrayInteger ios.BundleInfoArrayInteger
+\refitem rule_ios_BundleInfoArrayString ios.BundleInfoArrayString
+\refitem rule_ios_BundleInfoBoolean ios.BundleInfoBoolean
+\refitem rule_ios_BundleInfoInteger ios.BundleInfoInteger
+\refitem rule_ios_BundleInfoString ios.BundleInfoString
+\refitem rule_ios_BundleInfo ios.BundleInfo
+\refitem rule_ios_BundlePath ios.BundlePath
+\refitem rule_ios_CodeSign ios.CodeSign
+\refitem rule_ios_GetBundlePath ios.GetBundlePath
+\refitem rule_ios_GetBundleTarget ios.GetBundleTarget
+\refitem rule_ios_InfoPListFile ios.InfoPListFile
+\refitem rule_C_ios_Lipo C.ios.Lipo
+\refitem rule_ios_MergeInfoPList ios.MergeInfoPList
+\refitem rule_ios_ProvisionFile ios.ProvisionFile
+\refitem rule_ios_Provision ios.Provision
+\refitem rule_ios_SDK ios.SDK
+\refitem rule_ios_WebServer ios.WebServer
+\endsecreflist
+
+\section module_ios_rules Rules
+
+<hr>
+\section rule_C_ios_FrameworkDirectories rule C.ios.FrameworkDirectories TARGET : DIRECTORIES
+\addindex rule_C_ios_FrameworkDirectories
+
+For the given project \c TARGET, assign the framework search \c DIRECTORIES to the current toolchain.
+
+\param TARGET The target to assign the link \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the framework search directories are made available globally.
+\param DIRECTORIES The list of framework search directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
+
+\code
+    C.ios.FrameworkDirectories MyGame : $(SUBDIR)/ExtraFrameworks ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ios_LinkFrameworks rule C.ios.LinkFrameworks TARGET : FRAMEWORKS
+\addindex rule_C_ios_LinkFrameworks
+
+Links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are set, so changes to the framework will not be relinked.
+
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param FRAMEWORKS The list of frameworks to link.  The frameworks are specified without an extension.
+
+\code
+    C.ios.LinkFrameworks MyGame : CoreFoundation ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ios_MinimumOSVersion rule C.ios.MinimumOSVersion TARGET : SDK_VERSION_MIN
+\addindex rule_C_ios_MinimumOSVersion
+
+Sets the minimum iOS version for the \c TARGET.
+
+\param TARGET The target to assign a minimum OS version to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SDK_VERSION_MIN The minimum OS version allowable in the format <tt>major.minor</tt>.
+
+\code
+    C.ios.MinimumOSVersion MyGame : 9.0 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ios_WeakLinkFrameworks rule C.ios.WeakLinkFrameworks TARGET : FRAMEWORKS
+\addindex rule_C_ios_WeakLinkFrameworks
+
+Weak links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are set, so changes to the framework will not be relinked.
+
+\param TARGET The target to link \c LIBRARIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param FRAMEWORKS The list of frameworks to link.  The frameworks are specified without an extension.
+
+\code
+    C.ios.WeakLinkFrameworks MyGame : CoreMotion iAd AVFoundation ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_Archive rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK
+\addindex rule_ios_Archive
+
+In order to output a final <tt>.ipa</tt> to be installed on an iOS device, \c ios.Archive must be called for the \c TARGET.
+
+\param TARGET The target to convert to an <tt>.ipa</tt>. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param OUTPUT_PATH The final resting place of the <tt>.ipa</tt>.
+\param ITUNES_ARTWORK The path to a <tt>.jpg</tt> to be used as the icon within iTunes.
+
+\code
+    ios.Archive : c:/ios-packages ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_AssetCatalog rule ios.AssetCatalog TARGET : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH
+\addindex rule_ios_AssetCatalog
+
+Takes a provided asset catalog and builds it into its individual components.
+
+\param TARGET The target to build the asset catalog for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param TARGET_GRIST A grist to preface the derived asset catalog entries against.
+\param DESTINATION_PATH The output directory for the generated assets.
+\param SOURCE_PATH The source filename to process.
+
+\code
+    C.ios.AssetCatalog [ ios.GetBundleTarget ] : assets : [ ios.GetBundlePath ] : Unity-iPhone/Images.xcassets/AppIcon.appiconset ;
+    C.ios.AssetCatalog [ ios.GetBundleTarget ] : assets : [ ios.GetBundlePath ] : Unity-iPhone/Images.xcassets/LaunchImage.launchimage ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_Bundle rule ios.Bundle TARGET [ : TOOLCHAINS ]
+\addindex rule_ios_Bundle
+
+In order to output an application bundle, the \c ios.Bundle rule must be called. If \c TOOLCHAINS is specified, those requested toolchain link targets are run through \c C.ios.Lipo, and all necessary components are bundled together.
+
+\c ios.Bundle should be the last rule called in a sequence of rule calls describing the build of an iOS application.
+
+\param TARGET The target to build. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param TOOLCHAINS (optional) The list of toolchains used to build multiple architectures for the bundle. The default toolchain is used if none are specified.
+
+\code
+    # Build a bundle for the current target using the active toolchain.
+    ios.Bundle ;
+
+    # Build a bundle for the target MyGame using the active toolchain.
+    ios.Bundle MyGame ;
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoArrayBegin rule ios.BundleInfoArrayBegin TARGET : KEY
+\addindex rule_ios_BundleInfoArrayBegin
+
+For the given bundle \c TARGET, begin an array entry within the <tt>Info.plist</tt>. Call \ref rule_ios_BundleInfoArrayEnd to complete the array entry.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param KEY The key name of the array entry within the <tt>Info.plist</tt>.
+
+\code
+    ios.BundleInfoArrayBegin : UISupportedInterfaceOrientations ;
+        ios.BundleInfoArrayString : UIInterfaceOrientationPortrait ;
+        ios.BundleInfoArrayString : UIInterfaceOrientationPortraitUpsideDown ;
+        ios.BundleInfoArrayString : UIInterfaceOrientationLandscapeRight ;
+        ios.BundleInfoArrayString : UIInterfaceOrientationLandscapeLeft ;
+    ios.BundleInfoArrayEnd ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoArrayBoolean rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE
+\addindex rule_ios_BundleInfoArrayBoolean
+
+For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of booleans to the bundle's <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param VALUE The boolean array value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+
+\code
+    ios.BundleInfoArrayBoolean : MyBooleanArray : false true true false ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoArrayDictBegin rule ios.BundleInfoArrayDictBegin TARGET
+\addindex rule_ios_BundleInfoArrayDictBegin
+
+For the given bundle \c TARGET, begin a array dict entry within the <tt>Info.plist</tt>. Call \ref rule_ios_BundleInfoArrayDictEnd to complete the dict entry.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+
+\code
+    ios.BundleInfoArrayDictBegin ;
+        ios.BundleInfoString : UILaunchImageMinimumOSVersion : 7.0 ;
+        ios.BundleInfoString : UILaunchImageName : LaunchImage-700 ;
+        ios.BundleInfoString : UILaunchImageOrientation : Portrait ;
+        ios.BundleInfoString : UILaunchImageSize : "{320, 480}" ;
+    ios.BundleInfoArrayDictEnd ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoArrayDictEnd rule C.ios.BundleInfoArrayDictEnd TARGET
+\addindex rule_ios_BundleInfoArrayDictEnd
+
+For the given bundle \c TARGET, end the current array entry begun with \ref rule_ios_BundleInfoArrayDictBegin within the <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+
+\code
+    ios.BundleInfoArrayDictBegin ;
+        ios.BundleInfoString : UILaunchImageMinimumOSVersion : 7.0 ;
+        ios.BundleInfoString : UILaunchImageName : LaunchImage-700 ;
+        ios.BundleInfoString : UILaunchImageOrientation : Portrait ;
+        ios.BundleInfoString : UILaunchImageSize : "{320, 480}" ;
+    ios.BundleInfoArrayDictEnd ;
+\endcode
+
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoArrayEnd rule ios.BundleInfoArrayEnd TARGET
+\addindex rule_ios_BundleInfoArrayEnd
+
+For the given bundle \c TARGET, end the current array entry begun with \ref rule_ios_BundleInfoArrayBegin within the <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+
+\code
+    ios.BundleInfoArrayBegin : UISupportedInterfaceOrientations ;
+        ios.BundleInfoArrayString : UIInterfaceOrientationPortrait ;
+        ios.BundleInfoArrayString : UIInterfaceOrientationPortraitUpsideDown ;
+        ios.BundleInfoArrayString : UIInterfaceOrientationLandscapeRight ;
+        ios.BundleInfoArrayString : UIInterfaceOrientationLandscapeLeft ;
+    ios.BundleInfoArrayEnd ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoArrayInteger rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE
+\addindex rule_ios_BundleInfoArrayInteger
+
+For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of integers to the bundle's <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param VALUE The integer array value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+
+\code
+    ios.BundleInfoArrayInteger : MyIntegerArray : 0 1 2 3 4 5 ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoArrayString rule ios.BundleInfoArrayString TARGET : KEY : VALUE
+\addindex rule_ios_BundleInfoArrayString
+
+For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of strings to the bundle's <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param VALUE The string array value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+
+\code
+    ios.BundleInfoArrayString : UIRequiredDeviceCapabilities : armv7 armv8 ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoBoolean rule ios.BundleInfoBoolean TARGET : KEY : VALUE
+\addindex rule_ios_BundleInfoBoolean
+
+For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as a boolean type to the bundle's <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param VALUE The value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+
+\code
+    ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoInteger rule ios.BundleInfoInteger TARGET : KEY : VALUE
+\addindex rule_ios_BundleInfoInteger
+
+For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an integer type to the bundle's <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param VALUE The value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+
+\code
+    ios.BundleInfoInteger : Unity_LoadingActivityIndicatorStyle : -1 ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoString rule ios.BundleInfoString TARGET : KEY : VALUE
+\addindex rule_ios_BundleInfoString
+
+For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as string type to the bundle's <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param VALUE The value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+
+\code
+    ios.BundleInfoString : CFBundleName : simple ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfo rule ios.BundleInfo TARGET : KEY : VALUE
+\addindex rule_ios_BundleInfo
+
+For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of strings to the bundle's <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param VALUE The value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c info - Runs: <tt>ios.BundleInfoString : CFBundleGetInfoString : $(VALUE) ;</tt>
+  <li>\c iconfile - Runs: <tt>ios.BundleInfoString : CFBundleIconFile : $(VALUE) ;</tt>
+  <li>\c iconfiles - Runs: <tt>ios.BundleInfoArrayString : CFBundleIconFiles : $(VALUE) ;</tt>
+  <li>\c longversion - Runs: <tt>ios.BundleInfoString : CFBundleLongVersionString : $(VALUE) ;</tt>
+  <li>\c bundlename - Runs: <tt>ios.BundleInfoString : CFBundleName : $(VALUE) ;</tt>
+  <li>\c displayname - Runs: <tt>ios.BundleInfoString : CFBundleDisplayName : $(VALUE) ;</tt>
+  <li>\c executable - Runs: <tt>ios.BundleInfoString : CFBundleExecutable : $(VALUE) ;</tt>
+  <li>\c identifier - Runs: <tt>ios.BundleInfoString : CFBundleIdentifier : $(VALUE) ;</tt>
+  <li>\c shortversion - Runs: <tt>ios.BundleInfoString : CFShortVersionString : $(VALUE) ;</tt>
+  <li>\c bundleversion - Runs: <tt>ios.BundleInfoString : CFBundleVersion : $(VALUE) ;</tt>
+  <li>\c copyright - Runs: <tt>ios.BundleInfoString : NSHumanReadableCopyright : $(VALUE) ;</tt>
+  <li>\c mainnibfile - Runs: <tt>ios.BundleInfoString : NSMainNibFile : $(VALUE) ;</tt>
+  <li>\c supportedplatforms - Runs: <tt>ios.BundleInfoArrayString : CFBundleSupportedPlatforms : $(VALUE) ;</tt>
+  <li>\c minimumosversion - Runs: <tt>ios.BundleInfoString : MinimumOSVersion : $(VALUE) ;</tt>
+  <li>\c uidevicefamily - \c VALUE may be \c ipad or \c iphone. Runs: <tt>ios.BundleInfoArrayInteger : UIDeviceFamily : $(VALUE) ;</tt>
+  <li>\c uiprerenderedicon - Runs: <tt>ios.BundleInfoBoolean : UIPrerenderedIcon : $(VALUE) ;</tt>
+  <li>\c uistatusbarhidden - Runs: <tt>ios.BundleInfoBoolean : UIStatusBarHidden : $(VALUE) ;</tt>
+  <li>\c uiviewcontrollerbasedstatusbarappearance - Runs: <tt>ios.BundleInfoBoolean : UIViewControllerBasedStatusBarAppearance : $(VALUE) ;</tt>
+  <li>\c uiinterfaceorientation - \c VALUE may be \c portrait, \c portraitupsidedown, \c landscapeleft, \c landscaperight. Runs: <tt>ios.BundleInfoString : UIInterfaceOrientation : $(VALUE) ;</tt>
+  <li>\c uisupportedinterfaceorientations - \c VALUE may be \c portrait, \c portraitupsidedown, \c landscapeleft, \c landscaperight. Runs: <tt>ios.BundleInfoString : UISupportedInterfaceOrientations : $(VALUE) ;</tt>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
+\code
+    ios.BundleInfo : displayname : simple ;
+    ios.BundleInfo : bundlename : simple ;
+    ios.BundleInfo : bundleversion : 1.0 ;
+    ios.BundleInfo : uistatusbarhidden : true ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundlePath rule ios.BundlePath TARGET : BUNDLE_PATH
+\addindex rule_ios_BundlePath
+
+For the given bundle \c TARGET, set the output location for the bundle via \c BUNDLE_PATH.
+
+\param TARGET The target to set the bundle path against. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param BUNDLE_PATH The output path for the bundle. If the path is absolute, it is used as is. If it is relative, the path will be rooted against <tt>\$(SUBDIR)</tt>.
+
+\code
+    # Output the bundle to $(SUBDIR)/package.
+    ios.BundlePath : package ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_CodeSign rule ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN
+\addindex rule_ios_CodeSign
+
+For \c TARGET, use the provided \c SIGNING_IDENTITY and \c CERTIFICATE_CHAIN to sign the application bundle.
+
+\param TARGET The target to code sign. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SIGNING_IDENTITY The name on the certificate.
+\param CERTIFICATE_CHAIN This is only used with the iOS Build Environment for Windows. Generally, it is best to just use: <tt>"ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:"</tt>
+
+\code
+    # This works on Mac and Windows.
+    ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_GetBundlePath rule ios.GetBundlePath TARGET
+\addindex rule_ios_GetBundlePath
+
+For the given bundle \c TARGET, return the output location for the bundle.
+
+\param TARGET The target to retrieve the bundle path for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\return Returns the path the bundle will be output to.
+
+\code
+    Echo Bundle path - [ ios.GetBundlePath ] ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_GetBundleTarget rule ios.GetBundleTarget TARGET
+\addindex rule_ios_GetBundleTarget
+
+For the given bundle \c TARGET, return the actual dependency graph target name of the bundle.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\return Returns the dependency graph target name representing the bundle's build.
+
+\code
+    Echo Bundle target - [ ios.GetBundleTarget ] ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_InfoPListFile rule ios.InfoPListFile TARGET : SOURCE
+\addindex rule_ios_InfoPListFile
+
+For the given bundle \c TARGET, use the <tt>Info.plist</tt> file found at \c SOURCE. Run it through the \ref rule_C_ConfigureFile rule to expand any variables. Use the result in the \c TARGET bundle.
+
+\param TARGET The bundle target to configure the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SOURCE The source <tt>Info.plist</tt> file.
+
+\code
+    local PRODUCT_NAME = "MyProductName" ;
+    ios.InfoPListFile : DefaultInfo.plist ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ios_Lipo rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH
+\addindex rule_C_ios_Lipo
+
+For the given \c TARGET, take the \c LINK_TARGETS, run lipo, and output the end result at \c OUTPUT_PATH.
+
+This rule does not need to be called if using \ref rule_ios_Bundle.
+
+\param TARGET The target to perform the Lipo operation on. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param LINK_TARGETS A list of link targets returned from \ref rule_C_Application, \ref rule_C_Library, or \ref rule_C_GetLinkTargets.
+\param OUTPUT_PATH The output location for the Lipo'ed target.
+
+\code
+    local linkTargets ;
+    local toolchain ;
+    for toolchain in $(TOOLCHAINS) {
+        linkTargets += [ C.GetLinkTargets $(TARGET) : $(toolchain) ] ;
+    }
+    C.ios.Lipo $(TARGET) : $(linkTargets) : $(bundlePath) ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_MergeInfoPList rule ios.MergeInfoPList TARGET : SOURCE
+\addindex rule_ios_MergeInfoPList
+
+For the given bundle \c TARGET, merge the <tt>Info.plist</tt>-style file found at \c SOURCE into the main <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SOURCE The source file to merge into the current generated <tt>Info.plist</tt>.
+
+\code
+    # Merge in DefaultInfo.plist the disk first and then assign some overrides.
+    ios.MergeInfoPList : DefaultInfo.plist ;
+    ios.BundleInfo : displayname : simple ;
+    ios.BundleInfo : bundlename : simple ;
+    ios.BundleInfo : bundleversion : 1.0 ;
+    ios.BundleInfo : uistatusbarhidden : true ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_ProvisionFile rule ios.ProvisionFile TARGET : FILENAME
+\addindex rule_ios_ProvisionFile
+
+For \c TARGET, uses the specified <tt>.mobileprovision</tt> file at \c FILENAME as the bundle's <tt>embedded.mobileprovision</tt>.
+
+\param TARGET The target to use the <tt>.mobileprovision</tt> file for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param FILENAME The filename of the <tt>.mobileprovision</tt> file. If the filename is a relative path, it becomes rooted against <tt>\$(SUBDIR)</tt>.
+
+\code
+    ios.ProvisionFile : test.mobileprovision ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_Provision rule ios.Provision TARGET : PROFILE_ID
+\addindex rule_ios_Provision
+
+For \c TARGET, uses the specified \c PROFILE_ID to look up a matching <tt>.mobileprovision</tt> file from <tt>\$(HOME)/Library/MobileDevice/Provisioning Profiles</tt> on the Mac. This rule does not work on Windows.
+
+In general, store your application's <tt>.mobileprovision</tt> file with the application and use \ref rule_ios_ProvisionFile instead.
+
+\param TARGET The target to assign the found <tt>.mobileprovision</tt> file. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param PROFILE_ID The profile name.
+
+\code
+    # No example at this time.
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_SDK rule ios.SDK SDK_VERSION
+\addindex rule_ios_SDK
+
+Sets the iOS \c SDK_VERSION for the toolchain. Call this before any other <tt>ios.*</tt> rules.
+
+\param SDK_VERSION Defaults to \c 9.3.
+
+\code
+    ios.SDK 9.3 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_WebServer rule ios.WebServer TARGET
+\addindex rule_ios_WebServer
+
+After \c ios.Archive, launch a secure webserver for \c TARGET to install the <tt>.ipa</tt> onto the device.
+
+\param TARGET The target to launch a webserver for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+
+\code
+    ios.WebServer ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+*/
+

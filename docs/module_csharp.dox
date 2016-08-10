@@ -37,7 +37,7 @@ The CSharp module currently has no automatic detection of C# compilers available
 
 For the given C# project \c TARGET, assign the \c DEFINES to the configuration \c THE_CONFIG.
 
-\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param DEFINES The list of defines to apply.
 \param THE_CONFIG (optional) If not specified, the default is all configurations.
 
@@ -63,7 +63,7 @@ For the given C# project \c TARGET, assign the \c DEFINES to the configuration \
 
 For the given C# project \c TARGET, assign the \c FLAGS to the configuration \c THE_CONFIG.
 
-\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
 \param FLAGS The list of flags to apply.
 \param THE_CONFIG (optional) If not specified, the default is all configurations.
 
@@ -103,7 +103,7 @@ Compiles C# \c SOURCES and links them into \c TARGET.  This is just a passthroug
 
 Compiles C# \c SOURCES and links them into \c TARGET.
 
-\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to link \c SOURCES into.  The target name is given without extension.  A platform specific extension will be generated, often reflecting a configuration type.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of <tt>.cs</tt> files to link into the application.
 \param OPTIONS (optional) The following options are available:
 
@@ -148,7 +148,7 @@ Compiles C# \c SOURCES and links them into the library \c TARGET.  This is just 
 
 Makes \c TARGET depend on \c ASSEMBLIES and includes them during linking.
 
-\param TARGET The target to link \c ASSEMBLIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to link \c ASSEMBLIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param ASSEMBLIES The list of assemblies to apply.  These libraries are prebuilt assemblies, such as System.Core.dll.  For those assemblies generated from the \ref rule_CSharp_Assembly "CSharpAssembly" rule, use the "LinkAssemblies" rule.
 \param THE_CONFIG (optional) If not specified, the default is all configurations.
 
@@ -179,7 +179,7 @@ Makes \c TARGET depend on \c ASSEMBLIES and includes them during linking.
 
 For the given project \c TARGET, make the reference search paths \c PATHS available to configuration \c THE_CONFIG.
 
-\param TARGET The target to assign the reference paths to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param TARGET The target to assign the reference paths to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param PATHS The list of reference search paths to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
 \param THE_CONFIG (optional) If not specified, the default is all configurations.
 

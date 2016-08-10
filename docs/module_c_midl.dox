@@ -20,7 +20,7 @@
 
 Compile the \c SOURCE .idl file into the appropriate source files.  Usage of this rule is not as clean as it ought to be.
 
-\param PARENT The parent target to set the .idl build as a dependency of.  \c PARENT is optional if \ref rule_ActiveProject has been specified.
+\param PARENT The parent target to set the .idl build as a dependency of.  \c PARENT is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCE An .idl file.
 \return Returns the list of generated sources.
 

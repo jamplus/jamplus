@@ -99,7 +99,7 @@ Alternatively, an Xcode project for debugging Jam is maintained.  Open <tt>src/j
 
 
 
-\section building_macosx Building for Linux
+\section building_linux Building for Linux
 
 In order to build JamPlus for Linux 32-bit, run:
 

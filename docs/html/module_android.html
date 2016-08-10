@@ -54,7 +54,7 @@ rule android.Application TARGET : SOURCES</h1>
 <p>Compiles <code>SOURCES</code> and links them into <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to link <code>SOURCES</code> into. The target name is given without extension. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to link <code>SOURCES</code> into. The target name is given without extension. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">SOURCES</td><td>The list of <code>.java</code> to link into the application. Object and compiled Windows resource files may also be passed with this list.</td></tr>
   </table>
   </dd>
@@ -79,7 +79,7 @@ rule android.JarDirectories TARGET : DIRECTORIES</h1>
 <p>Specify paths to search when locating prebuilt JARs during the <code>android.Library</code> and <code>android.Package</code> rule calls.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to apply the JAR search <code>DIRECTORIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the directories are applied to every target needing them. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to apply the JAR search <code>DIRECTORIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. If <code>TARGET</code> is <code>*</code>, the directories are applied to every target needing them. </td></tr>
     <tr><td class="paramname">DIRECTORIES</td><td>The list of directories to use when searching for JAR files. If relative directories are specified, they are rooted against the current <a class="el" href="jambase_rules.html#rule_SubDir">rule SubDir TOP d1...dn : SUBNAME</a>.</td></tr>
   </table>
   </dd>
@@ -112,7 +112,7 @@ A resources directory given by <a class="el" href="module_android.html#rule_andr
 <p>The resulting file is a .jar file.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to assign the <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to assign the <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">SOURCES</td><td>The list of <code>.java</code> and <code>.aidl</code> files to build into a <code>.jar</code>. </td></tr>
     <tr><td class="paramname">OPTIONS</td><td>Unused (except that <a class="el" href="module_android.html#rule_android_Application">rule android.Application TARGET : SOURCES</a> just calls <code>android.Library</code> with <code>OPTIONS</code> of <code>application</code>).</td></tr>
   </table>
@@ -125,7 +125,7 @@ rule android.LinkJars TARGET : LIBRARIES</h1>
 <p>Makes <code>TARGET</code> depend on Jam-generated <code>.jar</code> <code>LIBRARIES</code> and uses them during linking.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to link <code>LIBRARIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to link <code>LIBRARIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">LIBRARIES</td><td>The list of libraries to apply. These libraries are those generated from the <a class="el" href="module_android.html#rule_android_Library">rule android.Library TARGET : SOURCES : OPTIONS</a> rule. They do not include prebuilt libraries. To link prebuilt libraries, use the <a class="el" href="module_android.html#rule_android_PrebuiltJars">rule android.PrebuiltJars TARGET : LIBRARIES</a> rule.</td></tr>
   </table>
   </dd>
@@ -150,7 +150,7 @@ rule android.NativeLibraries TARGET : NATIVE_LIBRARIES</h1>
 <p>Makes <code>TARGET</code> depend on Jam-generated <code>NATIVE_LIBRARIES</code>. These are packaged during the <a class="el" href="module_android.html#rule_android_Package">rule android.Package TARGET [ : TOOLCHAINS [ : OPTIONS ] ]</a> process.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to package the <code>NATIVE_LIBRARIES</code> into. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to package the <code>NATIVE_LIBRARIES</code> into. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">NATIVE_LIBRARIES</td><td>The list of libraries to apply. These are shared libraries are those generated from the <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rule. They do not include prebuilt libraries. To package native prebuilt libraries, use the <a class="el" href="module_android.html#rule_android_NativePrebuiltLibraries">rule android.NativePrebuiltLibraries TARGET : NATIVE_PREBUILT_LIBRARIES</a> rule.</td></tr>
   </table>
   </dd>
@@ -162,7 +162,7 @@ rule android.NativePrebuiltLibraries TARGET : NATIVE_PREBUILT_LIBRARIES</h1>
 <p>Makes <code>TARGET</code> depend on preexisting shared <code>NATIVE_PREBUILT_LIBRARIES</code>. These are packaged during the <a class="el" href="module_android.html#rule_android_Package">rule android.Package TARGET [ : TOOLCHAINS [ : OPTIONS ] ]</a> process.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to package the <code>NATIVE_PREBUILT_LIBRARIES</code> into. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to package the <code>NATIVE_PREBUILT_LIBRARIES</code> into. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">NATIVE_PREBUILT_LIBRARIES</td><td>The list of native prebuilt shared libraries to apply. These libraries are shared libraries existing somewhere in the filesystem and are specified without an extension and without the leading 'lib' prefix. For shared libraries generated from the <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rule, use the <a class="el" href="module_android.html#rule_android_NativeLibraries">rule android.NativeLibraries TARGET : NATIVE_LIBRARIES</a> rule.</td></tr>
   </table>
   </dd>
@@ -182,7 +182,7 @@ The directories given through <code>DIRECTORIES</code> with an architecture appe
 <p> </blockquote> </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to assign the native prebuilt library search <code>DIRECTORIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to assign the native prebuilt library search <code>DIRECTORIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
     <tr><td class="paramname">DIRECTORIES</td><td>The list of directories to apply. Absolute paths are used directly. Relative paths are local to <code>$(SUBDIR)</code>. That is, they are relative to the subdirectory specified via <a class="el" href="jambase_rules.html#rule_SubDir">SubDir</a>.</td></tr>
   </table>
   </dd>
@@ -214,7 +214,7 @@ TARGET : PACKAGE_NAME</h1>
 <p>By default, this is read from the AndroidManifest.xml, so only call this if an override is needed.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to assign the link <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to assign the link <code>FLAGS</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">PACKAGE_NAME</td><td>The package name to use.</td></tr>
   </table>
   </dd>
@@ -239,7 +239,7 @@ rule android.PrebuiltAars TARGET : LIBRARIES</h1>
 <p>By default, <code>.aar</code> files are searched for in <code>$(SUBDIR)/libs</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to link the <code>LIBRARIES</code> into. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to link the <code>LIBRARIES</code> into. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">LIBRARIES</td><td>The list of preexisting <code>.aar</code> files to use as part of the build, specified without the <code>.aar</code> extension.</td></tr>
   </table>
   </dd>
@@ -252,7 +252,7 @@ rule android.PrebuiltJars TARGET : LIBRARIES</h1>
 <p>The <code>LIBRARIES</code> specified are, by default, searched for in <code>$(SUBDIR)</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to link the <code>LIBRARIES</code> into. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to link the <code>LIBRARIES</code> into. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">LIBRARIES</td><td>The list of preexisting <code>.jar</code> files to use as part of the build, specified without the <code>.jar</code> extension.</td></tr>
   </table>
   </dd>
@@ -264,7 +264,7 @@ rule android.Resources TARGET : DIRECTORIES</h1>
 <p>Sets <code>DIRECTORIES</code> as the locations to search for Android resources at when <code>TARGET</code> is built.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to which the resource search <code>DIRECTORIES</code> should be applied. If not specified, <code>TARGET</code> defaults to the active target set via <a class="el" href="jambase_rules.html#rule_ActiveProject">ActiveProject</a>. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to which the resource search <code>DIRECTORIES</code> should be applied. If not specified, <code>TARGET</code> defaults to the active target set via <a class="el" href="jambase_rules.html#rule_ActiveTarget">ActiveTarget</a>. </td></tr>
     <tr><td class="paramname">DIRECTORIES</td><td>The list of directories to search for resources. Relative directories are rooted against <code>$(SUBDIR)</code>.</td></tr>
   </table>
   </dd>
@@ -308,7 +308,7 @@ rule android.Sign TARGET : KEYSTORE_PATH_PASSWORD_KEY</h1>
 <p>Sets up the keystore information for the Android package. <code>android.Sign</code> must be called before <code>android.Package</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to sign. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to sign. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">KEYSTORE_PATH_PASSWORD_KEY</td><td>This parameter contains 3 entries, the path to the keystore, the password of the keystore, and the key to use when accessing the keystore.</td></tr>
   </table>
   </dd>
@@ -320,7 +320,7 @@ rule android.SourcePaths TARGET : DIRECTORIES</h1>
 <p>Specify the source path for the Java files being built by <code>TARGET</code>. <code>android.SourcePaths</code> must be called before <code>android.Application</code> or <code>android.Library</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to assign the Java search path <code>DIRECTORIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to assign the Java search path <code>DIRECTORIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">DIRECTORIES</td><td>The list of directories to scan to find <code>.java</code> files. A given directory may either be absolute or relative. If relative, it is assumed to be based off of <code>$(SUBDIR)</code>.</td></tr>
   </table>
   </dd>
@@ -332,7 +332,7 @@ rule android.UncompressedAssetExtensions TARGET : UNCOMPRESSED_ASSET_EXTENSIONS<
 <p>Specify extensions to leave uncompressed when building the .apk. This must be called before <code>android.Package</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to leave the uncompressed file entries within. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveProject">rule ActiveProject PROJECT</a> has been specified. </td></tr>
+    <tr><td class="paramname">TARGET</td><td>The target to leave the uncompressed file entries within. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">UNCOMPRESSED_ASSET_EXTENSIONS</td><td>The list of extensions to leave uncompressed. Do not include a period in front of the extension.</td></tr>
   </table>
   </dd>

@@ -4,7 +4,7 @@
 
 JamPlus comes with a number of helper modules, extending the default Jambase with additional capabilities.  These modules are <tt>.jam</tt> files that exist in the <tt>bin/modules/</tt> directory.
 
-Modules are loaded using the rule \ref rule_IncludeModule "IncludeModule".  For now, the module providing C/C++ support is automatically loaded.
+Modules are usually automatically loaded on first access. If a module needs to be loaded explicitly, use the rule \ref rule_IncludeModule "IncludeModule".
 
 \section modules_list List of Jam Modules
 
@@ -30,9 +30,10 @@ The following represents the list of provided Jam modules:
 
 - \subpage module_csharp "CSharp" - Various rules to build C# applications and assemblies.
 
-\subsection modules_android_support_list Android Support Modules
+\subsection modules_platform_support_list Platform Support Modules
 
 - \subpage module_android "Android" - Necessary rules to build for an Android target.
+- \subpage module_ios "iOS" - Necessary rules to build for an iOS target.
 
 */
 

@@ -24,7 +24,7 @@
 
 For the given project \c TARGET, assign the reference \c DIRECTORIES to the appropriate configuration and platform.
 
-\param TARGET The target to assign the reference \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
+\param TARGET The target to assign the reference \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param DIRECTORIES The list of reference directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
 \param THE_CONFIG (optional) If not specified, the default is all configurations.
 \param THE_PLATFORM (optional) If not specified, the default is all platforms.
@@ -50,7 +50,7 @@ For the given project \c TARGET, assign the reference \c DIRECTORIES to the appr
 
 After the executable has been built for \c TARGET, sign the assembly with the strong name \c SNK_NAME.  This rule must be run AFTER \ref rule_C_Application "C.Application" or \ref rule_C_Library "C.Library" has been run.
 
-\param TARGET The target representing the executable to assign the strong name to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target representing the executable to assign the strong name to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SNK_NAME The name of the keyfile.
 
 \code
@@ -70,7 +70,7 @@ After the executable has been built for \c TARGET, sign the assembly with the st
 
 Applies .NET Framework settings to the specified C++/CLI \c TARGET.
 
-\param TARGET The target to assign the settings to.  \c TARGET is optional if \ref rule_ActiveProject has been specified.
+\param TARGET The target to assign the settings to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param OPTIONS (optional) The following options are available:
 
 \htmlonly <blockquote> \endhtmlonly

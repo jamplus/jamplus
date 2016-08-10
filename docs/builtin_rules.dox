@@ -24,6 +24,13 @@ Builds a direct dependency: makes each of <i>targets1</i> depend on each of <i>t
 
 As a simplification when specifying multi-level dependencies, <i>targets2</i> depend on the optional <i>targets3</i>, and so on.</td>
 
+
+
+
+
+
+
+
 <hr>
 \section rule_Includes rule Includes <i>targets1</i> : <i>targets2</i> [ : <i>target3</i> ... <i>targets9</i> ] ;
 \addindex rule_Includes
@@ -38,6 +45,13 @@ Builds a sibling dependency: makes any target that depends on any of <i>targets1
 "foo.o" depends on "foo.c" and "foo.h" in this example.
 
 As a simplification when specifying multi-level dependencies, <i>targets2</i> depend on the optional <i>targets3</i>, and so on.
+
+
+
+
+
+
+
 
 <hr>
 \section rule_Needs rule Needs <i>targets1</i> : <i>targets2</i> [ : <i>target3</i> ... <i>targets9</i> ] ;
@@ -69,7 +83,6 @@ The rules \ref rule_Always "Always", \ref rule_ForceCare "ForceCare", \ref rule_
 \refitem rule_NoUpdate NoUpdate
 \refitem rule_ScanContents ScanContents
 \refitem rule_Temporary Temporary
-\refitem rule_UseCommandLine UseCommandLine
 \endsecreflist
 
 <hr>
@@ -228,37 +241,6 @@ Marks <i>targets</i> as temporary, allowing them to be removed after other targe
 
 
 
-<hr>
-\section rule_UseCommandLine rule UseCommandLine TARGETS : COMMANDLINE;
-\addindex rule_UseCommandLine
-
-The "command line" of a target, not necessarily the command line sent to a target's action, is compared against the previous build's command line for the same target.  If it differs, regardless of timestamps being equal, the target is rebuilt.
-
-\param TARGETS One or more targets to set the \c COMMANDLINE string to.
-\param COMMANDLINE A unique string to be compared against the last build.  When different, the target is rebuilt.
-
-<i>Example 1:</i> During the last build, the \#defines for <tt>somefile.cpp</tt> were -DMYDEFINE -DSOMEDEFINE.  The user then alters the defines for <tt>somefile.cpp</tt> to be -DMYDEFINE -DYOURDEFINE.  <tt>somefile.cpp</tt> file will be rebuilt, even if the timestamp hasn't changed.
-
-\code
-UseCommandLine somefile.cpp : -DMYDEFINE -DYOURDEFINE ;
-\endcode
-
-<i>Example 2:</i> The file format for <b>.model</b> files changes. It is desirable to cause the .model files to be rebuilt on the next build. This can be done by altering the 'command line' to be <tt>version2</tt>.
-
-\code
-UseCommandLine $(TARGETS) : version2 ;
-\endcode
-
-
-
-
-
-
-
-
-
-
-
 <br>
 \htmlonly <center> \endhtmlonly
 \section language_built_in_rules_utility_rules Utility Rules
@@ -267,6 +249,7 @@ UseCommandLine $(TARGETS) : version2 ;
 The remaining rules are utility rules.
 
 \secreflist
+\refitem rule_ConfigureFileHelper ConfigureFileHelper
 \refitem rule_DependsList DependsList
 \refitem rule_Echo Echo
 \refitem rule_Exit Exit
@@ -282,15 +265,56 @@ The remaining rules are utility rules.
 \refitem rule_RuleExists RuleExists
 \refitem rule_QueueJamfile QueueJamfile
 \refitem rule_QuickSettingsLookup QuickSettingsLookup
+\refitem rule_Search Search
 \refitem rule_Shell Shell
 \refitem rule_Split Split
 \refitem rule_Subst Subst
 \refitem rule_SubstLiteralize SubstLiteralize
+\refitem rule_UseCommandLine UseCommandLine
 \refitem rule_UseDepCache UseDepCache
 \refitem rule_UseFileCache UseFileCache
 \refitem rule_UseMD5Callback UseMD5Callback
 \refitem rule_W32_GETREG W32_GETREG
 \endsecreflist
+
+<hr>
+\section rule_ConfigureFileHelper rule ConfigureFileHelper TARGET : SOURCE [ : OPTIONS ] ;
+\addindex rule_ConfigureFileHelper
+
+Copies \c SOURCE to \c TARGET, potentially modifying its contents during the transfer.
+
+While processing the text lines of \c SOURCE, text found in the form \${VAR} are replaced with the current value of the variable within Jam. If the variable doesn't exist, \${VAR} is replaced with an empty string.
+
+\c ConfigureFileHelper is based on input formats for CMake's configure_file function. As such, input lines containing:
+
+\code
+#cmakedefine VAR ...
+\endcode
+
+will be replaced with the following if \c VAR is defined:
+
+\code
+#define VAR ...
+\endcode
+
+or if \c VAR is not defined, a line of this format will be output:
+
+\code
+/* #undef VAR */
+\endcode
+
+\param TARGET The destination target for the expansion copy.
+\param SOURCE The source file target to expansion copy from.
+\param OPTIONS (optional) May be \c noexpand, in which case no variable expansion is performed when copying from \c SOURCE to \c TARGET.
+
+\code
+    local boundName = [ Search TheTarget.lib ] ;
+\endcode
+
+
+
+
+
 
 <hr>
 \section rule_DependsList rule DependsList PARENT_TARGETS ;
@@ -633,6 +657,24 @@ Determines whether \c RULE_NAME exists.
 
 
 <hr>
+\section rule_Search rule Search TARGET ;
+\addindex rule_Search
+
+Determines whether \c TARGET exists, and, if so, returns the bound filename using all \c LOCATE and \c SEARCH and other facilities available.
+
+\param TARGET The target to search for.
+\return Returns nothing if the target is not found or the bound name if it is found.
+
+\code
+    local boundName = [ Search TheTarget.lib ] ;
+\endcode
+
+
+
+
+
+
+<hr>
 \section rule_Shell rule Shell COMMANDS ;
 \addindex rule_Shell
 
@@ -918,6 +960,37 @@ Returns an escaped version of \c LITERAL_PATTERN that is suitable to be passed t
 Echo [ SubstLiteralize "Hello [world].  How (are) you?" ] ;
 # Hello %[world%].  How %(are%) you%?
 \endcode
+
+
+
+
+
+
+<hr>
+\section rule_UseCommandLine rule UseCommandLine TARGETS : COMMANDLINE;
+\addindex rule_UseCommandLine
+
+The "command line" of a target, not necessarily the command line sent to a target's action, is compared against the previous build's command line for the same target.  If it differs, regardless of timestamps being equal, the target is rebuilt.
+
+\param TARGETS One or more targets to set the \c COMMANDLINE string to.
+\param COMMANDLINE A unique string to be compared against the last build.  When different, the target is rebuilt.
+
+<i>Example 1:</i> During the last build, the \#defines for <tt>somefile.cpp</tt> were -DMYDEFINE -DSOMEDEFINE.  The user then alters the defines for <tt>somefile.cpp</tt> to be -DMYDEFINE -DYOURDEFINE.  <tt>somefile.cpp</tt> file will be rebuilt, even if the timestamp hasn't changed.
+
+\code
+UseCommandLine somefile.cpp : -DMYDEFINE -DYOURDEFINE ;
+\endcode
+
+<i>Example 2:</i> The file format for <b>.model</b> files changes. It is desirable to cause the .model files to be rebuilt on the next build. This can be done by altering the 'command line' to be <tt>version2</tt>.
+
+\code
+UseCommandLine $(TARGETS) : version2 ;
+\endcode
+
+
+
+
+
 
 
 
