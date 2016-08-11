@@ -20,15 +20,15 @@ toolchainsUsed += [ BuildSimple $(saveActiveToolchainSpec)@C.ARCHITECTURE=armv7 
 C.Toolchain $(saveActiveToolchainSpec) ;
 
 C.ActiveTarget simple ;
-C.ios.BundleInfo : displayname : simple ;
-C.ios.BundleInfo : bundleversion : 1.0 ;
-C.ios.BundleInfo : uistatusbarhidden : true ;
+ios.BundleInfo : displayname : simple ;
+ios.BundleInfo : bundleversion : 1.0 ;
+ios.BundleInfo : uistatusbarhidden : true ;
 
-C.ios.ProvisionFile : test.mobileprovision ;
+ios.ProvisionFile : test.mobileprovision ;
 
-C.ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
-C.ios.Bundle simple : $(toolchainsUsed) ;
+ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
+ios.Bundle simple : $(toolchainsUsed) ;
 
-C.ios.Archive simple : $(ALL_LOCATE_TARGET)/package ;
-C.ios.WebServer simple ;
+ios.Archive simple : $(ALL_LOCATE_TARGET)/package ;
+ios.WebServer simple ;
 

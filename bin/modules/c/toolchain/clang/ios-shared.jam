@@ -37,7 +37,7 @@ actions C.ios.clang.Link {
 
 if ! $(NT) {
 
-rule C.ios.SDK SDK_VERSION {
+rule ios.SDK SDK_VERSION {
 	local SDK_PLATFORM ;
 	SDK_PLATFORM ?= $(C.PLATFORM) ;
 
@@ -153,7 +153,7 @@ rule C.ios.SDK SDK_VERSION {
 					architecture = armv7 ;
 					minimumVersion = 6.0 ;
 
-				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
+				case * :		Exit "* ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			flags += -fvisibility=hidden ;
 
@@ -246,7 +246,7 @@ rule C.ios.SDK SDK_VERSION {
 					sdkroot = iphoneos ;
 					minimumVersion = 6.0 ;
 
-				case * :		Exit "* C.ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
+				case * :		Exit "* ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
 			architecture = i386 ;
 	}
@@ -273,7 +273,7 @@ rule C.ios.SDK SDK_VERSION {
 
 } else {
 
-rule C.ios.SDK SDK_VERSION {
+rule ios.SDK SDK_VERSION {
 	local SDK_PLATFORM ;
 	SDK_PLATFORM ?= $(C.PLATFORM) ;
 
@@ -354,25 +354,25 @@ end
 " ;
 
 
-rule C.ios.BundleInfoBoolean TARGET : KEY : VALUE {
+rule ios.BundleInfoBoolean TARGET : KEY : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')[1] == 'true'" ;
 }
 
 
-rule C.ios.BundleInfoInteger TARGET : KEY : VALUE {
+rule ios.BundleInfoInteger TARGET : KEY : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = tonumber(jam_getvar('VALUE')[1])" ;
 }
 
 
-rule C.ios.BundleInfoString TARGET : KEY : VALUE {
+rule ios.BundleInfoString TARGET : KEY : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')[1]" ;
 }
 
 
-rule C.ios.BundleInfoArrayBegin TARGET : KEY {
+rule ios.BundleInfoArrayBegin TARGET : KEY {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "
 		local currentLevel = GetInfoPlistCurrentLevel()
@@ -385,13 +385,13 @@ rule C.ios.BundleInfoArrayBegin TARGET : KEY {
 }
 
 
-rule C.ios.BundleInfoArrayEnd TARGET {
+rule ios.BundleInfoArrayEnd TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "PopInfoPlistLevel()" ;
 }
 
 
-rule C.ios.BundleInfoArrayDictBegin TARGET : KEY {
+rule ios.BundleInfoArrayDictBegin TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "
 		local currentLevel = GetInfoPlistCurrentLevel()
@@ -404,13 +404,13 @@ rule C.ios.BundleInfoArrayDictBegin TARGET : KEY {
 }
 
 
-rule C.ios.BundleInfoArrayDictEnd TARGET {
+rule ios.BundleInfoArrayDictEnd TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "PopInfoPlistLevel()" ;
 }
 
 
-rule C.ios.BundleInfoArrayBoolean TARGET : KEY : VALUE {
+rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	if $(VALUE) {
 		LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')" ;
@@ -427,7 +427,7 @@ rule C.ios.BundleInfoArrayBoolean TARGET : KEY : VALUE {
 }
 
 
-rule C.ios.BundleInfoArrayInteger TARGET : KEY : VALUE {
+rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	if $(VALUE) {
 		LuaString "
@@ -449,7 +449,7 @@ rule C.ios.BundleInfoArrayInteger TARGET : KEY : VALUE {
 }
 
 
-rule C.ios.BundleInfoArrayString TARGET : KEY : VALUE {
+rule ios.BundleInfoArrayString TARGET : KEY : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	if $(VALUE) {
 		LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')" ;
@@ -465,16 +465,16 @@ rule C.ios.BundleInfoArrayString TARGET : KEY : VALUE {
 }
 
 
-rule C.ios.BundleInfo TARGET : TYPE : VALUE {
+rule ios.BundleInfo TARGET : TYPE : VALUE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
 		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
 
-		C.ios.BundleInfoString : CFBundleDevelopmentRegion : en ;
-		C.ios.BundleInfoString : CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
-		C.ios.BundleInfoString : CFBundleInfoDictionaryVersion : 6.0 ;
-		C.ios.BundleInfoString : CFBundlePackageType : APPL ;
-		C.ios.BundleInfoString : CFBundleSignature : ???? ;
+		ios.BundleInfoString : CFBundleDevelopmentRegion : en ;
+		ios.BundleInfoString : CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
+		ios.BundleInfoString : CFBundleInfoDictionaryVersion : 6.0 ;
+		ios.BundleInfoString : CFBundlePackageType : APPL ;
+		ios.BundleInfoString : CFBundleSignature : ???? ;
 
 		switch $(C.PLATFORM) {
 			case ios :
@@ -484,12 +484,12 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 				local minimumsdkversion = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 				minimumsdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-				C.ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
-				C.ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 ;
-				C.ios.BundleInfoString : DTPlatformName : iphoneos ;
-				C.ios.BundleInfoString : DTSDKName : iphoneos$(sdkversion) ;
-				C.ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneOS ;
-				C.ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) ;
+				ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
+				ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 ;
+				ios.BundleInfoString : DTPlatformName : iphoneos ;
+				ios.BundleInfoString : DTSDKName : iphoneos$(sdkversion) ;
+				ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneOS ;
+				ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) ;
 				if $(TARGETINFO_LOCATE) {
 					Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
 
@@ -503,12 +503,12 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 				local minimumsdkversion = $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 				minimumsdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-				C.ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
-				C.ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 ;
-				C.ios.BundleInfoString : DTPlatformName : iphonesimulator ;
-				C.ios.BundleInfoString : DTSDKName : iphonesimulator$(sdkversion) ;
-				C.ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneSimulator ;
-				C.ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) ;
+				ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
+				ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 ;
+				ios.BundleInfoString : DTPlatformName : iphonesimulator ;
+				ios.BundleInfoString : DTSDKName : iphonesimulator$(sdkversion) ;
+				ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneSimulator ;
+				ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) ;
 				if $(TARGETINFO_LOCATE) {
 					Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
 
@@ -518,28 +518,28 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 	}
 
 	switch $(TYPE:L) {
-		case info :					C.ios.BundleInfoString : CFBundleGetInfoString : $(VALUE) ;
-		case iconfile :				C.ios.BundleInfoString : CFBundleIconFile : $(VALUE) ;
-		case iconfiles :			C.ios.BundleInfoArrayString : CFBundleIconFiles : $(VALUE) ;
-		case longversion :			C.ios.BundleInfoString : CFBundleLongVersionString : $(VALUE) ;
+		case info :					ios.BundleInfoString : CFBundleGetInfoString : $(VALUE) ;
+		case iconfile :				ios.BundleInfoString : CFBundleIconFile : $(VALUE) ;
+		case iconfiles :			ios.BundleInfoArrayString : CFBundleIconFiles : $(VALUE) ;
+		case longversion :			ios.BundleInfoString : CFBundleLongVersionString : $(VALUE) ;
 		case bundlename :
-			C.ios.BundleInfoString : CFBundleName : $(VALUE) ;
+			ios.BundleInfoString : CFBundleName : $(VALUE) ;
 			CFBundleName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case displayname :
-			C.ios.BundleInfoString : CFBundleDisplayName : $(VALUE) ;
+			ios.BundleInfoString : CFBundleDisplayName : $(VALUE) ;
 			CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-		case executable :			C.ios.BundleInfoString : CFBundleExecutable : $(VALUE) ;
+		case executable :			ios.BundleInfoString : CFBundleExecutable : $(VALUE) ;
 		case identifier :
-			C.ios.BundleInfoString : CFBundleIdentifier : $(VALUE) ;
+			ios.BundleInfoString : CFBundleIdentifier : $(VALUE) ;
 			CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-		case shortversion :			C.ios.BundleInfoString : CFShortVersionString : $(VALUE) ;
+		case shortversion :			ios.BundleInfoString : CFShortVersionString : $(VALUE) ;
 		case bundleversion :
-			C.ios.BundleInfoString : CFBundleVersion : $(VALUE) ;
+			ios.BundleInfoString : CFBundleVersion : $(VALUE) ;
 			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-		case copyright :			C.ios.BundleInfoString : NSHumanReadableCopyright : $(VALUE) ;
-		case mainnibfile :			C.ios.BundleInfoString : NSMainNibFile : $(VALUE) ;
-		case supportedplatforms :   C.ios.BundleInfoArrayString : CFBundleSupportedPlatforms : $(VALUE) ;
-		case minimumosversion :		C.ios.BundleInfoString : MinimumOSVersion : $(VALUE) ;
+		case copyright :			ios.BundleInfoString : NSHumanReadableCopyright : $(VALUE) ;
+		case mainnibfile :			ios.BundleInfoString : NSMainNibFile : $(VALUE) ;
+		case supportedplatforms :   ios.BundleInfoArrayString : CFBundleSupportedPlatforms : $(VALUE) ;
+		case minimumosversion :		ios.BundleInfoString : MinimumOSVersion : $(VALUE) ;
 		case uidevicefamily :
 			local actualValues ;
 			local value ;
@@ -556,27 +556,27 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 					actualValues += $(value) ;
 				}
 			}
-			C.ios.BundleInfoArrayInteger : UIDeviceFamily : $(actualValues) ;
+			ios.BundleInfoArrayInteger : UIDeviceFamily : $(actualValues) ;
 			if $(TARGETINFO_LOCATE) {
 				Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
 
 " ;
 			}
-		case uiprerenderedicon :	C.ios.BundleInfoBoolean : UIPrerenderedIcon : $(VALUE) ;
-		case uistatusbarhidden :	C.ios.BundleInfoBoolean : UIStatusBarHidden : $(VALUE) ;
-		case uiviewcontrollerbasedstatusbarappearance : C.ios.BundleInfoBoolean : UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
+		case uiprerenderedicon :	ios.BundleInfoBoolean : UIPrerenderedIcon : $(VALUE) ;
+		case uistatusbarhidden :	ios.BundleInfoBoolean : UIStatusBarHidden : $(VALUE) ;
+		case uiviewcontrollerbasedstatusbarappearance : ios.BundleInfoBoolean : UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
 		case uiinterfaceorientation :
 			if $(VALUE) = portrait {
-				C.ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationPortrait ;
+				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationPortrait ;
 			}
 			if $(VALUE) = portraitupsidedown {
-				C.ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationPortraitUpsideDown ;
+				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationPortraitUpsideDown ;
 			}
 			if $(VALUE) = landscapeleft {
-				C.ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationLandscapeLeft ;
+				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationLandscapeLeft ;
 			}
 			if $(VALUE) = landscaperight {
-				C.ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationLandscapeRight ;
+				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationLandscapeRight ;
 			}
 		case uisupportedinterfaceorientations :
 			local values = ;
@@ -592,12 +592,12 @@ rule C.ios.BundleInfo TARGET : TYPE : VALUE {
 			if landscaperight in $(VALUE) {
 				values += UIInterfaceOrientationLandscapeRight ;
 			}
-			C.ios.BundleInfoArrayString : UISupportedInterfaceOrientations : $(values) ;
+			ios.BundleInfoArrayString : UISupportedInterfaceOrientations : $(values) ;
 	}
 }
 
 
-rule C.ios.MergeInfoPList TARGET : SOURCE {
+rule ios.MergeInfoPList TARGET : SOURCE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 
 	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):source ;
@@ -618,7 +618,7 @@ rule C.ios.MergeInfoPList TARGET : SOURCE {
 }
 
 
-rule C.ios.InfoPListFile TARGET : SOURCE {
+rule ios.InfoPListFile TARGET : SOURCE {
 	#TARGET = [ ActiveTarget $(TARGET) ] ;
 
 	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):intermediate ;
@@ -640,18 +640,18 @@ actions C.ios._GenerateDSYMFile {
 }
 
 
-rule C.ios.BundlePath TARGET : BUNDLE_PATH {
+rule ios.BundlePath TARGET : BUNDLE_PATH {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	C.ios._SetDefaultBundlePath ;
-	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(BUNDLE_PATH) ;
+	ios._SetDefaultBundlePath ;
+	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(BUNDLE_PATH:R=$(SUBDIR)) ;
 }
 
 
-rule C.ios.GetBundlePath TARGET : BUNDLE_PATH {
+rule ios.GetBundlePath TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	if ! $(bundlePath) {
-		C.ios._SetDefaultBundlePath ;
+		ios._SetDefaultBundlePath ;
 		return $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	} else {
 		return $(bundlePath) ;
@@ -659,11 +659,11 @@ rule C.ios.GetBundlePath TARGET : BUNDLE_PATH {
 }
 
 
-rule C.ios.GetBundleTarget TARGET {
+rule ios.GetBundleTarget TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	if ! $(bundleTarget) {
-		C.ios._SetDefaultBundlePath ;
+		ios._SetDefaultBundlePath ;
 		return $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	} else {
 		return $(bundleTarget) ;
@@ -673,7 +673,7 @@ rule C.ios.GetBundleTarget TARGET {
 
 rule C.ios.GenerateDSYMFile TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	local bundlePath = [ C.ios.GetBundlePath $(TARGET) ] ;
+	local bundlePath = [ ios.GetBundlePath $(TARGET) ] ;
 	local dsymBundlePath = $(bundlePath).dSYM ;
 	local _t = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	local _t.dsym = $(_t).DSYM ;
@@ -698,7 +698,7 @@ C.__COLON = ":" ;
 # 5. Set "get-task-allow" as per get-task-allow settings in provisioning profile (these must match).
 # 6. Set 'keychain-access-groups:" as per keychain-access-groups settings in provisioning profile (these must match).
 # 7. Set 'application-identifier' as per application-identifier setting in provisioning profile (these must match).
-actions C.ios.ProcessEntitlements
+actions ios.ProcessEntitlements
 {
 	cp $(2[1]) $(1)
 	cat "$(PROVISION)" | grep "<key>aps-environment</key>" > /dev/null && cat "$(PROVISION)" | grep "<string>development</string>" > /dev/null && /usr/libexec/PlistBuddy -c "Add :aps-environment string development" $(1)
@@ -743,11 +743,11 @@ rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH {
 
 if ! $(TARGETINFO_LOCATE) {
 
-rule C.ios.Bundle TARGET : TOOLCHAINS {
+rule ios.Bundle TARGET : TOOLCHAINS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 
-	local bundlePath = [ C.ios.GetBundlePath ] ;
-	local bundleTarget = [ C.ios.GetBundleTarget ] ;
+	local bundlePath = [ ios.GetBundlePath ] ;
+	local bundleTarget = [ ios.GetBundleTarget ] ;
 	local cleanBundleTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(bundleTarget) ;
 	NotFile $(bundleTarget) ;
@@ -810,7 +810,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 			Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
 			local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			PROVISION on $(destEntitlementsPlist) = $(provisionFileTarget:TC/) ;
-			C.ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+			ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 		}
 
 		{
@@ -854,7 +854,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 			Clean $(cleanBundleTarget) : $(codeResources) $(resourceRulesPlist) ;
 
 			CERTIFICATE_CHAIN on $(codeResources) $(linkTarget) = $(CERTIFICATE_CHAIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-			C.ios._CodeSign $(codeResources) $(linkTarget) : $(dependsList) $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
+			ios._CodeSign $(codeResources) $(linkTarget) : $(dependsList) $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
 		} else {
 			local codeResourcesSymbolicLink = [ C.GristFiles : CodeResourcesLink ] ;
 			BINDING on $(codeResourcesSymbolicLink) = CodeResources ;
@@ -866,7 +866,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 
 			local dsym_name = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			DSYM_NAME on $(codeResources) $(linkTarget) = $(dsym_name) ;
-			C.ios._CodeSign $(codeResources) $(linkTarget) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
+			ios._CodeSign $(codeResources) $(linkTarget) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
 
 			UseCommandLine $(codeResources) : $(dependsList) ;
 			Depends $(bundleTarget) : $(codeResources) : $(dependsList) $(dsym_name) ;
@@ -878,7 +878,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 
 } else { # TARGETINFO_LOCATE
 
-rule C.ios.Bundle TARGET : TOOLCHAINS {
+rule ios.Bundle TARGET : TOOLCHAINS {
 	TARGET = [ C.ActiveTarget $(TARGET) ] ;
 	local project = "Projects['$(TARGET)']" ;
 	Contents += "if not $(project).Options then $(project).Options = {} end$(NEWLINE)" ;
@@ -888,7 +888,7 @@ rule C.ios.Bundle TARGET : TOOLCHAINS {
 } # TARGETINFO_LOCATE
 
 
-rule C.ios._SetDefaultBundlePath {
+rule ios._SetDefaultBundlePath {
 	if $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 		return ;
 	}
@@ -907,10 +907,10 @@ rule C.ios._SetDefaultBundlePath {
 
 
 rule C.ios._ApplicationFromObjects_PostBuild {
-	C.ios._SetDefaultBundlePath ;
+	ios._SetDefaultBundlePath ;
 
 	if bundle in $(OPTIONS) {
-		C.ios.Bundle ;
+		ios.Bundle ;
 	}
 }
 
@@ -1076,7 +1076,7 @@ rule C.ios.XIB {
 rule C.ios.SetTaskAllow {
 }
 
-rule C.ios.CodeSign TARGET : SIGNING_IDENTITY {
+rule ios.CodeSign TARGET : SIGNING_IDENTITY {
 	Contents += "Projects[ [[C.*]] ].IOS_SIGNING_IDENTITY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(SIGNING_IDENTITY)]]
 
 " ;
@@ -1094,7 +1094,7 @@ rule C.ios._ApplicationTargetInfo {
 		local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
 		Depends all : $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		C.ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+		ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 
 		Contents += "Projects[ [[$(TARGET)]] ].XCODE_ENTITLEMENTS[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(destEntitlementsPlist:T)]]
 
@@ -1107,7 +1107,7 @@ rule C.ios._ApplicationTargetInfo {
 rule C.ios.XIB PARENT : SOURCES  {
 	PARENT = [ C.ActiveTarget $(PARENT) ] ;
 	
-	local bundlePath = [ C.ios.GetBundlePath ] ;
+	local bundlePath = [ ios.GetBundlePath ] ;
 	if ! $(bundlePath)
 	{
 		Echo *** XIB $(PARENT) \: $(SOURCES) ;
@@ -1143,23 +1143,25 @@ actions ios.CompileXIB
 }
 
 
-actions C.ios._ImageResize {
+actions ios._ImageResize {
 	$(IMCONVERT:C) $(2:C) -quiet -resize $(IMAGE_SIZE) $(1:C)
 }
 
 
 if $(NT) {
-    actions C.ios._ImageCopy {
+    actions ios._ImageCopy {
         copy $(2:C\\) $(1:C\\)
     }
 } else {
-    actions C.ios._ImageCopy {
+    actions ios._ImageCopy {
         cp $(2:C) $(1:C)
     }
 }
 
 
-rule C.ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH {
+rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH {
+    SOURCE_PATH = $(SOURCE_PATH:R=$(SUBDIR)) ;
+
     local assetName = $(SOURCE_PATH:B) ;
     local assetType = $(SOURCE_PATH:S) ;
 
@@ -1196,7 +1198,7 @@ rule C.ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH {
 
                 local width, height = entry.size:match('(%d+)x(%d+)')
                 jam_setvar(outputTarget, 'IMAGE_SIZE', (width * scale) .. 'x' .. (height * scale))
-                jam_evaluaterule('C.ios._ImageResize', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
+                jam_evaluaterule('ios._ImageResize', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
             end
 
         elseif assetType == '.launchimage' then
@@ -1265,14 +1267,14 @@ rule C.ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH {
                 jam_evaluaterule('Clean', outputTarget)
 
                 jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
-                jam_evaluaterule('C.ios._ImageCopy', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
+                jam_evaluaterule('ios._ImageCopy', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
             until true end
         end
 " ;
 }
 
 
-rule C.ios.ProvisionFile TARGET : FILENAME {
+rule ios.ProvisionFile TARGET : FILENAME {
 	TARGET = [ C.ActiveTarget $(TARGET) ] ;
 
 	local _provisionDir = $(FILENAME:D) ;
@@ -1293,13 +1295,13 @@ rule C.ios.ProvisionFile TARGET : FILENAME {
 		return identifier
 	" ] ;
 	if $(bundleIdentifier) != * {
-		C.ios.BundleInfoString $(TARGET) : CFBundleIdentifier : $(bundleIdentifier) ;
+		ios.BundleInfoString $(TARGET) : CFBundleIdentifier : $(bundleIdentifier) ;
 		CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleIdentifier) ;
 	}
 }
 
 
-rule C.ios.Provision TARGET : PROFILE_ID {
+rule ios.Provision TARGET : PROFILE_ID {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local _matchingProvision ;
 
@@ -1340,15 +1342,15 @@ rule C.ios.Provision TARGET : PROFILE_ID {
 	}
 
 	# Get bundle path.
-	local _bundlePath = [ C.ios.GetBundlePath ] ;
-	local _bundleTarget = [ C.ios.GetBundleTarget ] ;
+	local _bundlePath = [ ios.GetBundlePath ] ;
+	local _bundleTarget = [ ios.GetBundleTarget ] ;
 
 	if ! $(_bundlePath) {
-		Echo *** C.ios.Provision $(TARGET) \: $(PROFILE_ID) ;
+		Echo *** ios.Provision $(TARGET) \: $(PROFILE_ID) ;
 		Exit *** Bundle path not setup for target $(TARGET) ;
 	}
 	if ! $(_bundleTarget) {
-		Echo *** C.ios.Provision $(TARGET) \: $(PROFILE_ID) ;
+		Echo *** ios.Provision $(TARGET) \: $(PROFILE_ID) ;
 		Exit *** Bundle target not setup for target $(TARGET) ;
 	}
 
@@ -1368,7 +1370,7 @@ rule C.ios.Provision TARGET : PROFILE_ID {
 
 if $(NT) {
 
-actions C.ios._CodeSign
+actions ios._CodeSign
 {
     "$(IOSBUILDENV_PATH)/Toolchain/ldid" -n -k"$(IOSBUILDENV_PATH)/Keychain" -S$(CERTIFICATE_CHAIN) -E"" $(1[2]:CT)
     copy /B $(1[2]:CT\\)+,, $(1[2]:CT\\) > nul
@@ -1377,7 +1379,7 @@ actions C.ios._CodeSign
 
 } else {
 
-actions C.ios._CodeSign
+actions ios._CodeSign
 {
 	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
 	/usr/bin/codesign --force --no-strict --sign "$(SIGNING_IDENTITY)" --entitlements $(ENTITLEMENTS:CT) --timestamp=none $(BUNDLE_PATH)
@@ -1388,7 +1390,7 @@ actions C.ios._CodeSign
 }
 
 
-rule C.ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
+rule ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
 	ActiveTarget $(TARGET) ;
 
 	if $(C.PLATFORM) in ios {
@@ -1406,12 +1408,12 @@ rule C.ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
 }
 
 
-rule C.ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK {
+rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK {
 	# Set up the archive support.
 	if $(C.PLATFORM) in ios {
 		TARGET = [ ActiveTarget $(TARGET) ] ;
 
-		local bundlePath = [ C.ios.GetBundlePath ] ;
+		local bundlePath = [ ios.GetBundlePath ] ;
 		local linkTarget = $(LINK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
 		local archiveTarget = archive:$(TARGET) ;
@@ -1429,17 +1431,17 @@ rule C.ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK {
 		BUNDLE_PATH on $(ipaTarget) = $(bundlePath) ;
 		SIGNING_IDENTITY on $(ipaTarget) = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		ITUNES_ARTWORK on $(ipaTarget) = $(ITUNES_ARTWORK) ;
-		C.ios._Archive $(ipaTarget) : $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
+		ios._Archive $(ipaTarget) : $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
 	}
 }
 
 
-rule C.ios.WebServer TARGET {
+rule ios.WebServer TARGET {
 	# Set up the archive support.
 	if $(C.PLATFORM) in ios {
 		TARGET = [ ActiveTarget $(TARGET) ] ;
 
-		local bundlePath = [ C.ios.GetBundlePath ] ;
+		local bundlePath = [ ios.GetBundlePath ] ;
 		local ipaTarget = @($(bundlePath:D=:S=).ipa:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		local OUTPUT_PATH = $(LOCATE:Z=$(ipaTarget)) ;
 
@@ -1552,20 +1554,20 @@ Make sure you're visiting this page on your device, not your computer.</p>
 			WriteFile $(index.html) ;
 			UseCommandLine $(index.html) : $(contents) ;
 
-			C.ios._WebServer $(archiveTarget) ;
+			ios._WebServer $(archiveTarget) ;
 		}
 	}
 }
 
 
-actions screenoutput C.ios._WebServer {
+actions screenoutput ios._WebServer {
 	$(JAM_EXECUTABLE_PATH:C) --webserver $(OUTPUT_PATH)
 }
 
 if $(NT) {
 
 
-actions lua C.ios._Archive
+actions lua ios._Archive
 {
 	local ospath = require 'ospath'
 	local filefind = require 'filefind'
@@ -1591,7 +1593,7 @@ actions lua C.ios._Archive
 
 } else {
 
-actions C.ios._Archive
+actions ios._Archive
 {
 	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
 	/usr/bin/xcrun -sdk iphoneos PackageApplication -v "$(BUNDLE_PATH)" -o "$(1)" --sign "$(SIGNING_IDENTITY)" --embed "$(BUNDLE_PATH)/embedded.mobileprovision"

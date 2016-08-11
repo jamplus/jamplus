@@ -22,11 +22,11 @@ local SRCS =
 
 C.ios.LinkFrameworks : Foundation UIKit OpenGLES QuartzCore ;
 
-C.ios.BundleInfo : displayname : opengles ;
-C.ios.BundleInfo : identifier : com.yourcompany.testapp ;
-C.ios.BundleInfo : bundlename : opengles ;
-C.ios.BundleInfo : bundleversion : 1.0 ;
-C.ios.BundleInfo : mainnibfile : MainWindow ;
+ios.BundleInfo : displayname : opengles ;
+ios.BundleInfo : identifier : com.yourcompany.testapp ;
+ios.BundleInfo : bundlename : opengles ;
+ios.BundleInfo : bundleversion : 1.0 ;
+ios.BundleInfo : mainnibfile : MainWindow ;
 
 C.Application : $(SRCS) : bundle ;
 
