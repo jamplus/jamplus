@@ -25,7 +25,7 @@ Missing rules</h1>
 <p>If the script wants to execute the rule <code>Assets.Build.Something</code>, the following happens:</p>
 <ol type="1">
 <li><code>modules/assets.jam</code> is loaded. A test is performed for the rule <code>Assets.Build.Something</code>. If it is found, it is executed.</li>
-<li><code>modules/assets/build.jam</code> is loaded. A test is performed for the existence of the rule .Build.Something.</li>
+<li><code>modules/assets/build.jam</code> is loaded. A test is performed for the existence of the rule <code>Assets.Build.Something</code>.</li>
 <li><code>modules/assets/build/something.jam</code> is loaded. A test is performed for the existence of the rule <code>Assets.Build.Something</code>.</li>
 <li>Assuming the search made it this far, the rule <code>Assets.Build.Something</code> does not exist. Now, Jam begins looking for a more generic rule called <code>Assets.Build.Something.*</code>.</li>
 <li>If that is not found, <code>Assets.Build.*</code> is searched for.</li>

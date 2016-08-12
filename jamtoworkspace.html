@@ -16,7 +16,6 @@
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="jamtoworkspace_overview"></a>
 Overview</h1>
-<p>This documentation is out of date.</p>
 <p>JamPlus has a built-in workspace generator that reads a project's Jamfiles and exports an IDE workspace. The workspace may then be loaded in the appropriate IDE and represents a read-only view of the contents of the Jamfiles. Updates to the Jamfiles do not appear automatically in the IDE workspace, although correct Jam builds will continue to function. JamPlus provides a facility to manually regenerate the workspace when Jamfiles change.</p>
 <p>JamPlus generates a completely out-of-source build structure. This means that all intermediate files, output files, IDE project files, and other miscellaneous Jam related files exist in a directory external to the source code itself. Since the entire build tree is generated, merely removing the out-of-source build directory will destroy all evidence of the build.</p>
 <p>Out of source build trees also contain special instructions to make the build run faster. Among other things, the dependency cache is set up. The dependency cache is used to track 'include' dependencies, but it is also used to store MD5 command lines and MD5 contents information.</p>
@@ -31,7 +30,9 @@ jam --workspace
     [ -gen=<em>GENERATOR</em> ]
     [ -compiler=<em>COMPILER</em> ]
     [ -config=<em>CONFIG</em> ]
-    [ -jamflags=<em>KEY=VALUE</em> ]
+    [ -jambaseflags=<em>KEY=VALUE</em> ]
+    [ -jamfileflags=<em>KEY=VALUE</em> ]
+    [ -jamexepath=<em>JAMEXEPATH</em> ]
     [ -jambase=<em>JAMBASEFULLPATH</em> ]
     <em>source-jamfile</em>
     [ <em>path-to-destination</em> ]
@@ -54,6 +55,12 @@ jam --workspace
 <li>
 <code>vs2010</code> - Generates Visual Studio 2010 solutions and projects. </li>
 <li>
+<code>vs2012</code> - Generates Visual Studio 2012 solutions and projects. </li>
+<li>
+<code>vs2013</code> - Generates Visual Studio 2013 solutions and projects. </li>
+<li>
+<code>vs2015</code> - Generates Visual Studio 2015 solutions and projects. </li>
+<li>
 <code>xcode</code> - Generates Xcode workspaces and projects. </li>
 </ul>
 <p class="endtd"></p>
@@ -61,6 +68,12 @@ jam --workspace
 <tr>
 <td valign="top" width="20%"><code> -compiler=<em>COMPILER</em> </code> </td><td><p class="starttd">Sets the default compiler used to build with. If not specified, the compiler will be set according to the Jambase auto detection capabilities, with Visual Studio taking precedence.</p>
 <p><em>COMPILER</em> may be one of the following: </p><ul>
+<li>
+<code>vs2015</code> - Visual Studio 2015. </li>
+<li>
+<code>vs2013</code> - Visual Studio 2013. </li>
+<li>
+<code>vs2012</code> - Visual Studio 2012. </li>
 <li>
 <code>vs2010</code> - Visual Studio 2010. </li>
 <li>
@@ -83,12 +96,16 @@ jam --workspace
 <p class="endtd"></p>
 </td></tr>
 <tr>
-<td valign="top" width="20%"><code> -jamflags=<em>KEY=VALUE</em> </code> </td><td><p class="starttd">Provides additional configuration options when generating the out of source build's redirection Jambase.jam. <em>KEY</em> is the name of a variable known to Jam, such as <code>CSC_COMPILER</code>. <em>VALUE</em> is the value to set that Jam variable to.</p>
+<td valign="top" width="20%"><code> -jambaseflags=<em>KEY=VALUE</em> </code> </td><td><p class="starttd">Provides additional configuration options when generating the out of source build's redirection Jambase.jam. <em>KEY</em> is the name of a variable known to Jam, such as <code>CSC_COMPILER</code>. <em>VALUE</em> is the value to set that Jam variable to.</p>
 <p><em>Examples:</em></p>
 <ul>
 <li>
 <code>CSC_COMPILER=mono</code> (or <code>vs2005</code> or <code>vs2008</code>) </li>
 </ul>
+<p class="endtd"></p>
+</td></tr>
+<tr>
+<td valign="top" width="20%"><code> -jamfileflags=<em>KEY=VALUE</em> </code> </td><td><p class="starttd">Provides additional configuration options when generating the out of source build's redirection Jamfile.jam.</p>
 <p class="endtd"></p>
 </td></tr>
 <tr>
@@ -129,6 +146,7 @@ jam --workspace -jambase=c:/myapp/build/jam/NewJambase.jam ...
 <div class="fragment"><div class="line">jam --workspace -gen=vs2008 Jamfile.jam build</div></div><!-- fragment --><p>From here on out, all Jam executions should be run from within the generated build/ directory.</p>
 <h1><a class="anchor" id="jamtoworkspace_generatedfiles"></a>
 Generated Files</h1>
+<p>TODO: This part of the documentation is out of date.</p>
 <ul>
 <li><code>build/</code><ul>
 <li><code>_workspace.ide_/</code><ul>
