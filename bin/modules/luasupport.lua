@@ -20,7 +20,7 @@ setmetatable(jam, {
                     jam_setvar(targetkey, key, value)
                 end,
             })
-            rawset(jamtargets, targetkey, target)
+            rawset(jamtarget, targetkey, target)
             return target
         end
     end,
@@ -36,8 +36,8 @@ setmetatable(jamvar, {
     end,
 })
 
-jamtargets = {}
-setmetatable(jamtargets, {
+jamtarget = {}
+setmetatable(jamtarget, {
     __index = function(t, targetkey)
         local target = {}
         setmetatable(target, {
@@ -48,7 +48,7 @@ setmetatable(jamtargets, {
                 jam_setvar(targetkey, key, value)
             end,
         })
-        rawset(jamtargets, targetkey, target)
+        rawset(jamtarget, targetkey, target)
         return target
     end,
 })
