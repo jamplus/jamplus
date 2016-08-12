@@ -15,7 +15,7 @@
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="building_bootstrapping"></a>
-Quick bootstrapping of Jam</h1>
+Quick bootstrapping of JamPlus</h1>
 <p>The directions in the sections below describe the build process in better detail, but if you just need a working copy of JamPlus with its dependencies, run the following:</p>
 <div class="fragment"><div class="line"><span class="preprocessor"># If you are on Linux and want a 32-bit build:</span></div><div class="line">./bootstrap-linux32.sh</div><div class="line"></div><div class="line"><span class="preprocessor"># If you are on Linux and want a 64-bit build:</span></div><div class="line">./bootstrap-linux64.sh</div><div class="line"></div><div class="line"><span class="preprocessor"># If you are on Mac OS X and want a 32-bit build:</span></div><div class="line">./bootstrap-macosx32.sh</div><div class="line"></div><div class="line"><span class="preprocessor"># If you are on Mac OS X and want a 64-bit build:</span></div><div class="line">./bootstrap-macosx64.sh</div><div class="line"></div><div class="line"><span class="preprocessor"># If you are on Windows and want a 32-bit build:</span></div><div class="line">bootstrap-win32.bat</div><div class="line"></div><div class="line"><span class="preprocessor"># If you are on Windows and want a 64-bit build:</span></div><div class="line"><span class="preprocessor">bootstrap-win64.bat</span></div></div><!-- fragment --><p>The instructions below are unnecessary if the bootstrap scripts are used.</p>
 <h1><a class="anchor" id="building_overview"></a>
@@ -30,7 +30,7 @@ Building for Visual C++</h1>
 <div class="fragment"><div class="line">cd src</div><div class="line">jmake-win32</div></div><!-- fragment --><p>To build JamPlus for Win64 using the Visual C++ compiler, run the following:</p>
 <div class="fragment"><div class="line">cd src</div><div class="line">jmake-win64</div></div><!-- fragment --><p><code>jmake-win32</code> or <code>jmake-win64</code> selects the most recent Visual Studio version available and uses that compiler to build the Jam executable. When finished, the Jam executable will have been built as <code>bin/win32/jam.exe</code> or <code>bin/win64/jam.exe</code>.</p>
 <p>To clean the Visual C++ build, run:</p>
-<div class="fragment"><div class="line">cd src</div><div class="line">clean-win32</div><div class="line">clean-win64</div></div><!-- fragment --><p>Visual Studio 2010, 2012, and 2013 solutions are maintained for easy debugging of Jam. Open <code>src/jam.VS201?.sln</code> to build within the appropriate IDE. Note: The Release build of the Jam executable built via the IDE is nowhere near as fast as the command-line generated Link Time Code Generated version.</p>
+<div class="fragment"><div class="line">cd src</div><div class="line">clean-win32</div><div class="line">clean-win64</div></div><!-- fragment --><p>Visual Studio 2010, 2012, 2013, and 2015 solutions are maintained for easy debugging of Jam. Open <code>src/jam.VS201?.sln</code> to build within the appropriate IDE. Note: The Release build of the Jam executable built via the IDE is nowhere near as fast as the command-line generated Link Time Code Generated version.</p>
 <h1><a class="anchor" id="building_macosx"></a>
 Building for Mac OS X</h1>
 <p>In order to build JamPlus for Mac OS X 32-bit, run:</p>

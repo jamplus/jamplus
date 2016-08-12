@@ -15,12 +15,12 @@
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><h2>Introduction</h2>
-<p>JamPlus is a powerful code and data build system built on the code base of the original Perforce version of Jam, a software build tool similar to <b>make</b>.</p>
+<p>JamPlus is a fast and powerful code and data build system built on the code base of the original Perforce version of Jam, a software build tool similar to <b>make</b>. It is regularly used to parallelize the builds of massive code or data sets.</p>
 <p>JamPlus adds new features to Jam and integrates a number of patches from the Jamming mailing list and the Perforce Public Depot.</p>
 <p>A sampling of the features in the JamPlus distribution follows:</p>
 <ul>
 <li><b>Muliplatform:</b> Binaries are provided for Windows, Linux, and Mac OS X.</li>
-<li><b>Compiler support:</b> Out of box compiler support for Visual C++ 6/200x/201x, GCC, Clang, and MinGW.</li>
+<li><b>Compiler support:</b> Out of box compiler support for Visual C++ 201x/200x/6, GCC, Clang, and MinGW.</li>
 <li><b>Platform targets:</b> Platform modules are provided for building for Windows, Xbox 360, Linux, Mac OS X, iOS, and Android targets.</li>
 <li><b>Workspace/Project Generator:</b> Output project files for the Visual Studio IDE, Xcode, and CodeBlocks.</li>
 <li><b>Multiple Passes:</b> Run multiple internal passes, collecting unknown dependencies, and execute them in a future pass.</li>
@@ -45,6 +45,7 @@
 <li><a class="el" href="jambase_rules.html">Jambase Rules</a> shows the list of rules available in the default <code>Jambase.jam</code>.</li>
 <li><a class="el" href="modules.html">JamPlus Modules</a> lists the various Jam modules that ship with JamPlus.</li>
 <li><a class="el" href="multiple_passes.html">Multiple Passes</a> shows how you can add multiple passes to your JamPlus build.</li>
+<li><a class="el" href="module_c_multiple_toolchain_support.html">C Module Multiple Toolchain Support</a> describes how JamPlus can execute builds across varied toolchains in the same execution.</li>
 <li><a class="el" href="lua_support.html">Lua Support</a> shows how Lua can communicate with JamPlus.</li>
 <li><a class="el" href="file_cache.html">File Cache</a> goes in-depth about the JamPlus (network) file caching feature.</li>
 <li><a class="el" href="warnings_and_errors.html">Warnings and Errors</a> shows a list of the possible warnings and errors that can be reported by Jam.</li>
