@@ -2,6 +2,27 @@
 
 \section jambase_intro Introduction
 
+By default, <tt>Jambase.jam</tt> is the first Jam file loaded by Jam.
+
+\section jambase_missing_rules Missing rules
+
+The default <tt>Jambase.jam</tt> provides implementation of the missing rule function \c FindMissingRule. That means that Jam makes a good attempt at automatically finding rules that have not been specifically loaded by a script via \c IncludeModule or \c include or similar mechanism.  \c FindMissingRule splits the rule name into its components (separated by periods) and then searches the disk for a file of the component name.  Each component file found is loaded and tested for the rule name.
+
+For example, if the script asks for <tt>C.Application</tt>, Jam loads <tt>modules/c.jam</tt> and looks for a <tt>C.Application</tt> rule.  It will find the <tt>C.Application</tt> rule and execute it.
+
+As another example, if the script calls \c CopyFile, Jam will look in <tt>modules/copyfile.jam</tt> for the \c CopyFile rule.
+
+If the script wants to execute the rule <tt>Assets.Build.Something</tt>, the following happens:
+
+  -# <tt>modules/assets.jam</tt> is loaded.  A test is performed for the rule <tt>Assets.Build.Something</tt>.  If it is found, it is executed.
+  -# <tt>modules/assets/build.jam</tt> is loaded.  A test is performed for the existence of the rule @Assets.Build.Something</tt>.
+  -# <tt>modules/assets/build/something.jam</tt> is loaded.  A test is performed for the existence of the rule <tt>Assets.Build.Something</tt>.
+  -# Assuming the search made it this far, the rule <tt>Assets.Build.Something</tt> does not exist.  Now, Jam begins looking for a more generic rule called <tt>Assets.Build.Something.*</tt>.
+  -# If that is not found, <tt>Assets.Build.*</tt> is searched for.
+  -# If that is not found, <tt>Assets.*</tt> is searched for.
+  -# If any are found, <tt>\$(__MISSING_RULE_COMPONENTS)</tt> is filled in with the string list <tt>Assets Build Something</tt>.  <tt>\$(__MISSING_RULE_SCAN_LIST)</tt> is filled in with the rules that were searched for and can be used for error reporting.
+
+
 The following is a list of rules available in <tt>bin/Jambase.jam</tt>.
 
 If [square] brackets are used the argument is optional.

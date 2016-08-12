@@ -40,6 +40,7 @@ INPUT             = \
 		module_c_dotnet.dox \
 		module_c_mfc.dox \
 		module_c_midl.dox \
+		module_c_multiple_toolchains.dox \
 		module_c_win32resource.dox \
 		module_c_wxwidgets.dox \
 		module_copydirectory.dox \

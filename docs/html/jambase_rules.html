@@ -16,6 +16,22 @@
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="jambase_intro"></a>
 Introduction</h1>
+<p>By default, <code>Jambase.jam</code> is the first Jam file loaded by Jam.</p>
+<h1><a class="anchor" id="jambase_missing_rules"></a>
+Missing rules</h1>
+<p>The default <code>Jambase.jam</code> provides implementation of the missing rule function <code>FindMissingRule</code>. That means that Jam makes a good attempt at automatically finding rules that have not been specifically loaded by a script via <code>IncludeModule</code> or <code>include</code> or similar mechanism. <code>FindMissingRule</code> splits the rule name into its components (separated by periods) and then searches the disk for a file of the component name. Each component file found is loaded and tested for the rule name.</p>
+<p>For example, if the script asks for <code>C.Application</code>, Jam loads <code>modules/c.jam</code> and looks for a <code>C.Application</code> rule. It will find the <code>C.Application</code> rule and execute it.</p>
+<p>As another example, if the script calls <code>CopyFile</code>, Jam will look in <code>modules/copyfile.jam</code> for the <code>CopyFile</code> rule.</p>
+<p>If the script wants to execute the rule <code>Assets.Build.Something</code>, the following happens:</p>
+<ol type="1">
+<li><code>modules/assets.jam</code> is loaded. A test is performed for the rule <code>Assets.Build.Something</code>. If it is found, it is executed.</li>
+<li><code>modules/assets/build.jam</code> is loaded. A test is performed for the existence of the rule .Build.Something.</li>
+<li><code>modules/assets/build/something.jam</code> is loaded. A test is performed for the existence of the rule <code>Assets.Build.Something</code>.</li>
+<li>Assuming the search made it this far, the rule <code>Assets.Build.Something</code> does not exist. Now, Jam begins looking for a more generic rule called <code>Assets.Build.Something.*</code>.</li>
+<li>If that is not found, <code>Assets.Build.*</code> is searched for.</li>
+<li>If that is not found, <code>Assets.*</code> is searched for.</li>
+<li>If any are found, <code>$(__MISSING_RULE_COMPONENTS)</code> is filled in with the string list <code>Assets Build Something</code>. <code>$(__MISSING_RULE_SCAN_LIST)</code> is filled in with the rules that were searched for and can be used for error reporting.</li>
+</ol>
 <p>The following is a list of rules available in <code>bin/Jambase.jam</code>.</p>
 <p>If [square] brackets are used the argument is optional.</p>
 <div class="multicol">

@@ -1,6 +1,6 @@
 /*! \page building Bootstrapping/Building
 
-\section building_bootstrapping Quick bootstrapping of Jam
+\section building_bootstrapping Quick bootstrapping of JamPlus
 
 The directions in the sections below describe the build process in better detail, but if you just need a working copy of JamPlus with its dependencies, run the following:
 
@@ -67,7 +67,7 @@ To clean the Visual C++ build, run:
     clean-win64
 \endcode
 
-Visual Studio 2010, 2012, and 2013 solutions are maintained for easy debugging of Jam.  Open <tt>src/jam.VS201?.sln</tt> to build within the appropriate IDE.  Note: The Release build of the Jam executable built via the IDE is nowhere near as fast as the command-line generated Link Time Code Generated version.
+Visual Studio 2010, 2012, 2013, and 2015 solutions are maintained for easy debugging of Jam.  Open <tt>src/jam.VS201?.sln</tt> to build within the appropriate IDE.  Note: The Release build of the Jam executable built via the IDE is nowhere near as fast as the command-line generated Link Time Code Generated version.
 
 
 

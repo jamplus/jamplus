@@ -1,0 +1,146 @@
+/*! \page module_c_multiple_toolchain_support C Module Multiple Toolchain Support
+
+\section module_c_multiple_toolchain_support_overview Overview
+
+Accessing the C module for the first time will auto-launch a reasonable default toolchain. On Windows, for example, the default toolchain is <tt>win64/release</tt>. You can override the default toolchain by passing the <tt>C.TOOLCHAIN=platform/config</tt> command-line option to Jam.  For instance, to build win64 debug for the C toolchain, you would specify <tt>C.TOOLCHAIN=win64/debug</tt> on the Jam command-line.
+
+\code
+    jam C.TOOLCHAIN=win64/debug
+\endcode
+
+Additionally, as a backward compatibility feature, passing <tt>PLATFORM=abc</tt> and <tt>CONFIG=defg</tt> will result in a toolchain called <tt>abc/defg</tt>.
+
+\code
+    jam PLATFORM=abc CONFIG=defg
+
+    # This is the same as:
+    #
+    #     jam C.TOOLCHAIN=abc/defg
+\endcode
+
+\ref rule_C_Toolchain allows the current toolchain to be changed.  The format of <tt>TOOLCHAIN_SPEC</tt> (<tt>win32/release</tt>) is slash-separated and the format is determined by the underlying Jamfiles that are executed.  Additionally, at the end of the <tt>TOOLCHAIN_SPEC</tt>, you can add <tt>key=value</tt> options by preceding the option with an <tt>\@</tt> sign.  See <tt>samples/toolchains-helloworld/Jamfile.jam</tt> for usages.
+
+\code
+    C.Toolchain win32/release ;
+    C.Toolchain win32/release@C.COMPILER=mingw
+    C.Toolchain win32@C.COMPILER=gcc@C.CONFIG=debug
+\endcode
+
+
+
+
+
+\section module_c_multiple_toolchain_support_usage Usage
+
+Saving and restoring the current toolchain is performed by storing off <tt>\$(C.ACTIVE_TOOLCHAIN_SPEC)</tt>.
+
+\code
+    # Save the active toolchain.
+    local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
+
+    # Change to another toolchain.
+    C.Toolchain whatever/toolchain ;
+
+    # Do some work with the toolchain here.
+    ...
+
+    # All done. Restore the previous one.
+    C.Toolchain $(saveActiveToolchainSpec) ;
+\endcode
+
+
+
+\section module_c_multiple_toolchain_support_example Example
+
+For the following <tt>Jamfile.jam</tt>, a single invocation of Jam will build helloworld for:
+
+  -# The default toolchain
+  -# win32/release for the default compiler
+  -# win32/release for Visual C++ 2010
+  -# win32/release for Visual C++ 2012
+  -# win32/release for Visual C++ 2013
+  -# win32/release for MinGW
+  -# win32/debug for Visual C++ 2013
+
+\code
+    # Build helloworld with the default toolchain or passed-in command-line toolchain.
+    C.Application helloworld : main.c ;
+
+    # Build helloworld for C.PLATFORM=win32 and C.CONFIG=release for the default compiler.
+    C.Toolchain win32@C.CONFIG=release ;
+    C.Application helloworld : main.c ;
+
+    # Build helloworld for C.PLATFORM=win32 and C.CONFIG=release for VS2010.
+    C.Toolchain win32/release@C.COMPILER=vs2010 ;
+    C.Application helloworld : main.c ;
+
+    # Build helloworld for C.PLATFORM=win32 and C.CONFIG=release for VS2012.
+    C.Toolchain win32/release@C.COMPILER=vs2012 ;
+    C.Application helloworld : main.c ;
+
+    # Build helloworld for C.PLATFORM=win32 and C.CONFIG=release for VS2013.
+    C.Toolchain win32/release@C.COMPILER=vs2013 ;
+    C.Application helloworld : main.c ;
+
+    # Build helloworld for C.PLATFORM=win32 and C.CONFIG=release for MinGW.
+    C.Toolchain win32/release@C.COMPILER=mingw ;
+    C.Application helloworld : main.c ;
+
+    # Build helloworld for C.PLATFORM=win32 and C.CONFIG=debug for VS2013.
+    C.Toolchain win32/debug@C.COMPILER=vs2013 ;
+    C.Application helloworld : main.c ;
+
+    # Build helloworld for C.PLATFORM=win32 and C.CONFIG=debug for VS2013. This will be a no-op.
+    C.Toolchain win32@C.COMPILER=vs2013@C.CONFIG=debug ;
+    C.Application helloworld : main.c ;
+\endcode
+
+
+
+\section module_c_multiple_toolchain_support_technical_details Technical Details
+
+The order of toolchain file loads is as follows when <tt>C.Toolchain win32/release</tt> is called:
+
+  -# The <tt>C.Toolchain</tt> rule is requested. The rule is found missing, so Jam loads <tt>bin/modules/c.jam</tt> to find it.
+  -# Jam then attempts to execute an unloaded rule called <tt>C.Toolchain.win32.release</tt>.  The <tt>FindMissingRule</tt> support kicks in and ends up executing <tt>rule C.Toolchain.win32.*</tt> from <tt>bin/modules/c/toolchain/win32.jam</tt>.
+  -# Toolchain spec keys are added for <tt>C.PLATFORM/PLATFORM</tt> and <tt>C.CONFIG/CONFIG</tt>.  For the toolchain <tt>win32/release</tt>, the following assignments are made: <tt>C.PLATFORM=win32</tt>, <tt>PLATFORM=win32</tt>, <tt>C.CONFIG=release</tt>, <tt>CONFIG=release</tt>
+  -# Within <tt>C.Toolchain.win32.*</tt>, auto detection of the compiler is performed.  First, the latest Visual Studio version is detected.  Failing that, TDM/GCC is detected then MinGW.  Assuming Visual Studio detection, <tt>C.Toolchain.vc.win32.Detect</tt> from <tt>bin/modules/c/toolchain/vc/win32.jam</tt> is called.
+  -# Next, <tt>C.Toolchain.vc.win32-release</tt> from <tt>bin/modules/c/toolchain/vc/win32-release.jam</tt> is called to set up some optimization flags and \#defines.
+
+<tt>samples/fakeps3/jam/c/toolchain/fakeps3.jam</tt> shows an example of handling multiple configurations and architectures within a single file.
+
+\code
+    jam C.TOOLCHAIN=fakeps3/debug/ppu
+\endcode
+
+<tt>C.ToolchainSpecKeys</tt> is used to break down the basic form of <tt>C.TOOLCHAIN=whatever/whatever</tt>. It parses the <tt>/</tt> separators to assign the same value to multiple keys.  For instance, <tt>C.ToolchainSpecKeys C.PLATFORM/PLATFORM</tt> assigns the value to both <tt>C.PLATFORM</tt> and <tt>PLATFORM</tt>.
+
+\code
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
+\endcode
+
+Settings are now added to <tt>\$(C.COMPILER_SUITE_SYMBOL)</tt> with the rule names that should be called.  More than one rule name can be attached per setting; the listed rules will executed in order.  The names of the settings are as follows:
+
+  - <tt>C.ApplicationFromObjects_CleanIntermediates</tt>
+  - <tt>C.ApplicationFromObjects_LinkFlags</tt>
+  - <tt>C.ApplicationFromObjects_PostBuild</tt>
+  - <tt>C.ApplicationFromObjects_Setup</tt>
+  - <tt>C.C++Exceptions</tt>
+  - <tt>C.LibraryFromObjects_LibFlags</tt>
+  - <tt>C.LinkPrebuiltLibraries</tt>
+  - <tt>C.MultiCppCompile_PreCompile</tt>
+  - <tt>C.MultiCppCompile_PchDeps</tt>
+  - <tt>C.MultiCppCompile_PostCompile</tt>
+  - <tt>C.MultiCppCompile_SetupFlags</tt>
+  - <tt>C.RuntimeTypeHelper</tt>
+  - <tt>C.SharedLibraryFromObjects_CleanIntermediates</tt>
+  - <tt>C.SharedLibraryFromObjects_ExportLib</tt>
+  - <tt>C.SharedLibraryFromObjects_LinkFlags</tt>
+  - <tt>C.SharedLibraryFromObjects_PostBuild</tt>
+  - <tt>C.SharedLibraryFromObjects_RegServer</tt>
+  - <tt>C.SharedLibraryFromObjects_UnRegServer</tt>.
+
+
+<hr>
+*/
+
