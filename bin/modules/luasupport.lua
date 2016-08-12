@@ -1,13 +1,4 @@
 jam = {}
-jam.globals = {}
-setmetatable(jam.globals, {
-    __index = function(t, key)
-        return jam_getvar(key)
-    end,
-    __newindex = function(t, key, value)
-        jam_setvar(key, value)
-    end,
-})
 
 setmetatable(jam, {
     __index = function(t, key)
