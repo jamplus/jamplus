@@ -61,8 +61,8 @@ Support for more than one toolchain used during the same Jam execution is provid
 \refitem rule_C_RemoveFlags C.RemoveFlags
 \refitem rule_C_RuntimeType C.RuntimeType
 \refitem rule_C_Toolchain C.Toolchain
-\refitem rule_LocateSource TARGET : LocateSource
-\refitem rule_LocateTarget TARGET : LocateTarget
+\refitem rule_LocateSource LocateSource
+\refitem rule_LocateTarget LocateTarget
 \endsecreflist
 
 \section module_c_rules Rules

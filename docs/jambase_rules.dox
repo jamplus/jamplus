@@ -15,7 +15,7 @@ As another example, if the script calls \c CopyFile, Jam will look in <tt>module
 If the script wants to execute the rule <tt>Assets.Build.Something</tt>, the following happens:
 
   -# <tt>modules/assets.jam</tt> is loaded.  A test is performed for the rule <tt>Assets.Build.Something</tt>.  If it is found, it is executed.
-  -# <tt>modules/assets/build.jam</tt> is loaded.  A test is performed for the existence of the rule @Assets.Build.Something</tt>.
+  -# <tt>modules/assets/build.jam</tt> is loaded.  A test is performed for the existence of the rule <tt>Assets.Build.Something</tt>.
   -# <tt>modules/assets/build/something.jam</tt> is loaded.  A test is performed for the existence of the rule <tt>Assets.Build.Something</tt>.
   -# Assuming the search made it this far, the rule <tt>Assets.Build.Something</tt> does not exist.  Now, Jam begins looking for a more generic rule called <tt>Assets.Build.Something.*</tt>.
   -# If that is not found, <tt>Assets.Build.*</tt> is searched for.
