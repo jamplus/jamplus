@@ -175,7 +175,6 @@ function ProcessCommandLine()
 		getopt.Option {{"gui"}, "Pop up a GUI to set options"},
 		getopt.Option {{"platform"}, "Set the default platform used to build with", "Req", 'PLATFORM'},
 		getopt.Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
-		getopt.Option {{"postfix"}, "Extra text for the IDE project name"},
 		getopt.Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
 		getopt.Option {{"jambaseflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJambaseFlags },
 		getopt.Option {{"jamfileflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMFILE_FLAGS', ProcessJamfileFlags },
