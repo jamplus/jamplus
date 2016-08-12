@@ -35,6 +35,7 @@ In the same directory as <tt>main.c</tt>, we need to create <tt>Jamfile.jam</tt>
 #
 # Please note that Jam tokens are whitespace separated.  Even the semicolon
 # delineating the end of statements has whitespace before it.
+SubDir TOP ;
 
 C.Application helloworld : main.c ;
 \endcode
