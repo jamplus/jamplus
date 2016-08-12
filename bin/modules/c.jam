@@ -41,10 +41,10 @@ rule C.ActiveTarget TARGET {
 	# C.ACTIVE_TOOLCHAIN_* = <win32/debug>C.*
 	C.ACTIVE_TOOLCHAIN_* = @(C.*:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
 
-	if ! $(ALL_SUBDIR_TOKENS) {
-		SubDir TOP ;
-	}
-
+#	if ! $(ALL_SUBDIR_TOKENS) {
+#		SubDir TOP ;
+#	}
+#
 #	if $(TARGET) != C.* {
 	if $(ALL_SUBDIR_TOKENS)  &&  $(TARGET) != C.* {
 		SubDir : $(C.ACTIVE_TOOLCHAIN_SPEC_PATH) $(TARGET) ;
