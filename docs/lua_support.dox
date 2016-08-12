@@ -4,8 +4,6 @@
 
 JamPlus has built in Lua support, provided through a minimal distribution of LuaPlus (http://luaplus.org/).  Lua scripts may be run during the \ref operation_parsing and during the \ref operation_updating.
 
-Any LuaBinaries capable module can run in the LuaPlus environment. Just drop the binary in the <tt>bin/PLATFORM/LuaPlus/modules/</tt> directory or alter the <tt>package.path</tt> or <tt>package.cpath</tt>
-
 The scripts located in <tt>bin/scripts/</tt> are written in Lua, although they are executed external to the Jam executable.
 
 
@@ -70,9 +68,88 @@ actions lua RunLuaScript
 
 
 <hr>
-\section lua_support_jam Accessing Jam from Lua
+\section lua_support_module_jam Accessing Jam from Lua
+
+Within a Lua script, it is possible to access Jam variables and execute Jam rules. A special Jam module and accompanying Lua script, both found in <tt>bin/modules/luasupport.*</tt> provide some extra ease of use over the direct calling conventions seen in the next section.
+
+To make this support available within your Jam scripts, execute the following:
+
+\code
+    LuaSupport ;
+\endcode
+
+From this point on, several new Jam-related namespaces become available in Lua accessed by \c jam, \c jamtarget, and \c jamvar. By indexing members of those namespaces from Lua, that functionality of Jam feels more seamlessly integrated. However, in the section below, a more rich API lets you access most Jam functionality.
+
+To read or write from any variables currently within scope in Jam, use the Lua-provided \c jamvar table.
+
+\code
+    # Jam:
+    GameAssets = assets ;
+    GameSoundAssets = $(GameAssets)/sound ;
+
+    MyVariable = Hello ;
+    MyListOfStrings = Hello how are you? ;
+
+    -- Lua equivalent:
+    jamvar.GameAssets = "assets"
+    jamvar.GameSoundAssets = jamvar.GameAssets[1] .. '/sound'
+
+    jamvar.MyVariable = "Hello"
+    jamvar.MyListOfStrings = { 'Hello', 'how', 'are', 'you?' }
+\endcode
+
+The only data type in Jam is a list of strings, so even \c GameAssets containing a single path is still a list of strings containing only one element. Within Lua, <tt>jamvar.GameAssets</tt> is a table containing an array of strings with the only element being <tt>\$(SUBDIR)/assets</tt>. Therefore, to access the actual contents of a Jam-provided string list requires indexing into the returned table.
+
+It is also possible to access a Jam target directly.
+
+\code
+    # Jam:
+    SEARCH on <GameAssets|source>StringTable.lua = $(COOKED_PATH) ;
+
+    local search ;
+    on <GameAssets|source>StringTable.lua search = $(SEARCH) ;
+
+    #    or:
+    local search = $(SEARCH:Z=<GameAssets|source>StringTable.lua) ;
+
+    -- Lua:
+    jamtarget['<GameAssets|source>StringTable.lua'].SEARCH = COOKED_PATH
+    local search = jamtarget['<GameAssets|source>StringTable.lua'].SEARCH
+\endcode
+
+Evaluating a rule is done with ease within the \c jam namespace:
+
+\code
+    # Jam:
+    local inputTarget = <GameAssets|source>StringTable.lua ;
+    local inputTarget2 = <GameAssets|source>StringTable.merge.lua ;
+    local outputTarget = <GameAssets>StringTable.lua ;
+    Depends assets : $(outputTarget) : $(inputTarget) $(inputTarget2) ;
+
+    -- Lua:
+    local inputTarget = '<GameAssets|source>StringTable.lua'
+    local inputTarget2 = '<GameAssets|source>StringTable.merge.lua'
+    local outputTarget = '<GameAssets>StringTable.lua'
+    jam.Depends('assets', outputTarget, { inputTarget, inputTarget2 })
+\endcode
+
+Note that single element data types in Lua are automatically converted to a list of strings for Jam. That means that the second parameter to <tt>jam.Depends</tt> is converted to <tt>{ outputTarget }</tt>.
+
+The \c jam namespace provides the most useful access to Jam functionality. It does not cover the full range of Jam features. For a more extensive API to access Jam from Lua, see the next section.
+
+
+
+
+
+<hr>
+\section lua_support_jam Lua to Jam API
 
 Within a Lua script, it is possible to access Jam variables and execute Jam rules.
+
+
+
+
+
 
 \subsection lua_jam_action function jam_action(ACTION_NAME, ACTION_TEXT [, FLAGS])
 \addindex lua_jam_action
