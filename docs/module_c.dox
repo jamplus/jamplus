@@ -299,6 +299,8 @@ For the given \c TARGET, run the file specified through \c SOURCE through a CMak
 \param SOURCE The source filename to configure. The default search directory is <tt>\$(SEARCH_SOURCE)</tt>.
 \param OPTIONS Either \c addinclude to add the \c DESTINATION <tt>\$(LOCATE)</tt> directory to the private include paths or \c addpublicinclude to add it to the public include paths for inheritance.
 
+\remark An example is found at <tt>tests/configurefile/</tt>.
+
 \code
     C.ConfigureFile test : config.h : config.h.in : addinclude ;
 \endcode
@@ -450,6 +452,8 @@ For the given project \c TARGET, assign the \c INCLUDES for the current toolchai
 \addindex rule_C_ForcePublic
 
 Force the \ref rule_C_Inherits public inheritance pattern for \c TARGET. This will treat \c TARGET as if one of the flag setting functions, such as \ref rule_C_Defines or \ref rule_C_IncludeDirectories, had been called with \c public \c OPTIONS.
+
+<tt>C.ForcePublic</tt> is usually used in situations where \ref rule_C_Inherits is called with \c TARGET to inherit from, but \c TARGET has no public defines or include directories or other flags. <tt>C.Inherits</tt> will abort as a precautionary measure assuming that Jam has not yet defined \c TARGET yet.
 
 \param TARGET The target to force to public.
 

@@ -216,10 +216,11 @@ rule C.ConfigureFile TARGET : DESTINATION : SOURCE : OPTIONS</h1>
     <tr><td class="paramname">TARGET</td><td>The target to do the processing within. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">DESTINATION</td><td>The destination filename to output the configured file to. The default output directory is <code>$(LOCATE_SOURCE)</code>. </td></tr>
     <tr><td class="paramname">SOURCE</td><td>The source filename to configure. The default search directory is <code>$(SEARCH_SOURCE)</code>. </td></tr>
-    <tr><td class="paramname">OPTIONS</td><td>Either <code>addinclude</code> to add the <code>DESTINATION</code> <code>$(LOCATE)</code> directory to the private include paths or <code>addpublicinclude</code> to add it to the public include paths for inheritance.</td></tr>
+    <tr><td class="paramname">OPTIONS</td><td>Either <code>addinclude</code> to add the <code>DESTINATION</code> <code>$(LOCATE)</code> directory to the private include paths or <code>addpublicinclude</code> to add it to the public include paths for inheritance. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section remark"><dt>Remarks</dt><dd>An example is found at <code>tests/configurefile/</code>.</dd></dl>
 <div class="fragment"><div class="line">C.ConfigureFile test : config.h : config.h.in : addinclude ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_DefFile"></a>
 rule C.DefFile TARGET : SOURCES</h1>
@@ -300,6 +301,7 @@ rule C.ForceInclude TARGET : INCLUDES</h1>
 rule C.ForcePublic TARGET</h1>
 <p><a name="arule_:43_:46orce:50ublic"></a></p>
 <p>Force the <a class="el" href="module_c.html#rule_C_Inherits">rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]</a> public inheritance pattern for <code>TARGET</code>. This will treat <code>TARGET</code> as if one of the flag setting functions, such as <a class="el" href="module_c.html#rule_C_Defines">rule C.Defines TARGET : DEFINES</a> or <a class="el" href="module_c.html#rule_C_IncludeDirectories">rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]</a>, had been called with <code>public</code> <code>OPTIONS</code>.</p>
+<p><code>C.ForcePublic</code> is usually used in situations where <a class="el" href="module_c.html#rule_C_Inherits">rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]</a> is called with <code>TARGET</code> to inherit from, but <code>TARGET</code> has no public defines or include directories or other flags. <code>C.Inherits</code> will abort as a precautionary measure assuming that Jam has not yet defined <code>TARGET</code> yet.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to force to public.</td></tr>
