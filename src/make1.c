@@ -456,16 +456,19 @@ make1b( TARGET *t )
 		} else if ( t->fate == T_FATE_STABLE )
 			t->fate = T_FATE_UPDATE;
 	}
-	if ( !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))  && t->binding != T_BIND_MISSING  &&  ( t->fate == T_FATE_UPDATE  ||  t->fate == T_FATE_OUTDATED )  &&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )  &&  t->status != EXEC_CMD_NEXTPASS ) {
-		if ( t->flags & T_FLAG_SCANCONTENTS ) {
-			if ( md5matchescommandline( t ) ) {
-				t->fate = T_FATE_STABLE;
-			}
-		} else {
+	if ( 0  &&  usechecksums ) {
+		if ( !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))
+				&&  t->binding != T_BIND_MISSING  &&  ( t->fate == T_FATE_UPDATE  /* ||  t->fate == T_FATE_OUTDATED */ )
+				&&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )
+				&&  t->status != EXEC_CMD_NEXTPASS ) {
 			if ( md5matchescommandline( t ) ) {
 				t->fate = T_FATE_STABLE;
 			}
 		}
+	} else {
+		if ( t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
+			if ( md5matchescommandline( t ) )
+				t->fate = T_FATE_STABLE;
 	}
 	if ( t->flags & ( T_FLAG_MIGHTNOTUPDATE | T_FLAG_SCANCONTENTS )  &&  t->actions ) {
 #ifdef OPT_ACTIONS_WAIT_FIX
