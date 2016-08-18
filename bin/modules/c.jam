@@ -680,6 +680,8 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 
 	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
 
+	ForceContentsOnly $(_linkTargets) ;
+
 	UseFileCache $(_linkTargets) : code ;
 	$(linkRule) $(_linkTargets) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) : $(_extraChecksumTargets) ;
 
