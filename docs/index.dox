@@ -37,6 +37,7 @@ A sampling of the features in the JamPlus distribution follows:
 - \subpage module_c_multiple_toolchain_support describes how JamPlus can execute builds across varied toolchains in the same execution.
 - \subpage lua_support shows how Lua can communicate with JamPlus.
 - \subpage file_cache goes in-depth about the JamPlus (network) file caching feature.
+- \subpage checksum_builds discusses special considerations for enabling and using JamPlus' checksum-over-timestamp support.
 - \subpage warnings_and_errors shows a list of the possible warnings and errors that can be reported by Jam.
 - \subpage bugs
 - \subpage improvements

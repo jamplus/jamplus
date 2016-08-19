@@ -24,6 +24,7 @@ INPUT             = \
 		building.dox \
 		builtin_rules.dox \
 		builtin_variables.dox \
+		checksum_builds.dox \
 		changelog.dox \
 		dependency_cache.dox \
 		file_cache.dox \
