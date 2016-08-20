@@ -93,6 +93,8 @@ $(Z) -&gt; <br />
 <tr>
 <td><code> :W[=<em>remove_path</em>] </code> </td><td>Populate the list with directory contents matching the string. If specified, <em>remove_path</em> is removed from the beginning of each found file.  </td></tr>
 <tr>
+<td><code> :Z[=<em>target</em>] </code> </td><td>Provides an alternate and usually faster form of <code>on target variable = $(VAR)</code>. Instead, use <code>variable = $(VAR:Z=<em>target)</em></code> for the same result.  </td></tr>
+<tr>
 <td><code> :T </code> </td><td>Expand the bound name of the target. Just as when expanding within an action, the BINDING is applied first. If LOCATE is set, it is used for the path. If not, SEARCH is used to look up the file.  </td></tr>
 <tr>
 <td><code> :C </code> </td><td>EsCapes the string as if it were a file path. On Windows, if the path has spaces, it is quoted. On other platforms, spaces, parentheses, and a few other special characters are escaped with a backslash.  </td></tr>

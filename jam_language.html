@@ -107,7 +107,9 @@ Statements</h2>
 <tr>
 <td><code>actions response</code> </td><td><p class="starttd">Enables automatically generated response files. Response files store text surrounded by <code>@(text...)</code> into a temporary response file. The <code>@(text)</code> in the action is replaced with the full path to the temporary response file.</p>
 <div class="fragment"><div class="line">actions response C++</div><div class="line">{</div><div class="line">    $(C++) @@($(2))</div><div class="line">}</div></div><!-- fragment --><p>It is valid to nest the generation of response files. In the example below, the file list is written to a temporary response file and the filename is inserted in the place of <code>@($(2))</code>. In a secondary response file, the <code>-filelist</code> parameter and the first response filename are added. This response filename is then passed to the C++ compiler.</p>
-<div class="fragment"><div class="line">actions response C++</div><div class="line">{</div><div class="line">    $(C++) @@(-filelist @($(2)))</div><div class="line">}</div></div><!-- fragment -->   </td></tr>
+<div class="fragment"><div class="line">actions response C++</div><div class="line">{</div><div class="line">    $(C++) @@(-filelist @($(2)))</div><div class="line">}</div></div><!-- fragment --><p>Note that <code>$@(...)</code> and <code>\$(...)</code> are synonomous.</p>
+<p>Additionally, the <code>response</code> modifier may be removed if the <code>^^^(...)</code> syntax is used:</p>
+<div class="fragment"><div class="line">actions C++</div><div class="line">{</div><div class="line">    $(C++) @^^^(-filelist @($(2)))</div><div class="line">}</div></div><!-- fragment -->   </td></tr>
 <tr>
 <td><code>actions screenoutput</code> </td><td>Normally, actions collect all output before displaying it to the user in order to avoid interleaving the output from different processes. 'screenoutput' may be used to display the output as it happens. It will be more difficult to follow multiprocess output, but during some long running actions, the user may need faster visual response.  </td></tr>
 <tr>
