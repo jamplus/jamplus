@@ -278,6 +278,7 @@ The remaining rules are utility rules.
 \refitem rule_UseDepCache UseDepCache
 \refitem rule_UseFileCache UseFileCache
 \refitem rule_UseMD5Callback UseMD5Callback
+\refitem rule_Wildcard Wildcard
 \refitem rule_W32_GETREG W32_GETREG
 \endsecreflist
 
@@ -1079,6 +1080,30 @@ Returns a registry entry, given a list of \c KEYS.
     local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio 9.0 InstallDir ;
     MSVCNT = [ W32_GETREG $(key) ] ;
 \endcode
+
+
+
+
+
+
+<hr>
+\section rule_Wildcard rule Wildcard WILDCARDS ;
+\addindex rule_Wildcard
+
+\c Wildcard takes a list of files or including glob-capable wildcards and expands them.  The result of the expansion is returned to the user.
+
+If \c SEARCH_SOURCE is defined (generally through the \c SubDir rule), then it is removed from the beginning of each expansion.
+
+\param WILDCARDS A list of files or \ref rule_Glob "Glob"-capable wildcards.
+\return Returns the wildcard expanded file list.
+
+\code
+	Echo [ Wildcard myfile.cpp **.cpp **.h ] ;
+	# myfile.cpp
+	# All *.cpp files recursively
+	# All *.h files recursively
+\endcode
+
 
 
 

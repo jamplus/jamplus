@@ -172,6 +172,7 @@ Utility Rules</h1>
 <li><a href="builtin_rules.html#rule_UseDepCache">UseDepCache</a></li>
 <li><a href="builtin_rules.html#rule_UseFileCache">UseFileCache</a></li>
 <li><a href="builtin_rules.html#rule_UseMD5Callback">UseMD5Callback</a></li>
+<li><a href="builtin_rules.html#rule_Wildcard">Wildcard</a></li>
 <li><a href="builtin_rules.html#rule_W32_GETREG">W32_GETREG</a></li>
 </ul>
 </div>
@@ -590,6 +591,19 @@ rule W32_GETREG KEYS ;</h1>
 </ul>
 <dl class="section return"><dt>Returns</dt><dd>Returns the found registry entry. If no registry entry was found, an empty list is returned.</dd></dl>
 <div class="fragment"><div class="line">local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft VisualStudio 9.0 InstallDir ;</div><div class="line">MSVCNT = [ W32_GETREG $(key) ] ;</div></div><!-- fragment --><hr/>
+ <h1><a class="anchor" id="rule_Wildcard"></a>
+rule Wildcard WILDCARDS ;</h1>
+<p><a name="arule_:57ildcard"></a></p>
+<p><code>Wildcard</code> takes a list of files or including glob-capable wildcards and expands them. The result of the expansion is returned to the user.</p>
+<p>If <code>SEARCH_SOURCE</code> is defined (generally through the <code>SubDir</code> rule), then it is removed from the beginning of each expansion.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">WILDCARDS</td><td>A list of files or <a class="el" href="builtin_rules.html#rule_Glob">Glob</a>-capable wildcards. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the wildcard expanded file list.</dd></dl>
+<div class="fragment"><div class="line">Echo [ Wildcard myfile.cpp **.cpp **.h ] ;</div><div class="line"><span class="preprocessor"># myfile.cpp</span></div><div class="line"><span class="preprocessor"># All *.cpp files recursively</span></div><div class="line"><span class="preprocessor"># All *.h files recursively</span></div></div><!-- fragment --><hr/>
  </div></div><!-- contents -->
 </body>
 </html>

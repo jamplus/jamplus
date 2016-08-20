@@ -68,6 +68,53 @@ actions lua RunLuaScript
 
 
 <hr>
+\section lua_support_line_filters Lua Line Filters
+
+The <tt>LineFilters</tt> table contains a mapping of an action name to a line-by-line parsing function. For every line of output received by the action, the appropriate <tt>LineFilters</tt> table actionname->function is run. The function can do with the output what it wants and return the result.
+
+For example, in the <tt>LineFilters.Compiler</tt> function and action below, a GCC-style error message is changed into a Visual C++ compatible error message.
+
+\htmlonly <blockquote> \endhtmlonly
+\code
+    USE_LUA_LINE_FILTERS = 1 ;
+
+    LuaString "
+        LineFilters.UpperCaseRule = function(input)
+            return '-> ' .. input:upper()
+        end
+        LineFilters.LowerCaseRule = function(input)
+            return '-> ' .. input:lower()
+        end
+        LineFilters.Compiler = function(input)
+            return input:gsub('(.-):(%d+):(.+)', '%1(%2) %3')
+        end
+    " ;
+
+    actions UpperCaseRule {
+        echo This text will be uppercase.
+        echo This text will also be uppercase in the output.
+    }
+
+    actions LowerCaseRule {
+        echo THIS TEXT will be LOWERCASE.
+    }
+
+    actions Compiler {
+        echo c:\the\directory\filename.cpp:1000:This is an error message.
+    }
+
+    Always all ;
+    UpperCaseRule all ;
+    LowerCaseRule all ;
+    Compiler all ;
+\endcode
+\htmlonly </blockquote> \endhtmlonly
+
+
+
+
+
+<hr>
 \section lua_support_module_jam Accessing Jam from Lua
 
 Within a Lua script, it is possible to access Jam variables and execute Jam rules. A special Jam module and accompanying Lua script, both found in <tt>bin/modules/luasupport.*</tt> provide some extra ease of use over the direct calling conventions seen in the next section.

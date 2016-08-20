@@ -248,6 +248,17 @@ actions response C++
     $(C++) @@(-filelist @($(2)))
 }
 \endcode
+
+Note that <tt>\$@(...)</tt> and <tt>@\$(...)</tt> are synonomous.
+
+Additionally, the <tt>response</tt> modifier may be removed if the <tt>^^^(...)</tt> syntax is used:
+
+\code
+actions C++
+{
+    $(C++) @^^^(-filelist @($(2)))
+}
+\endcode
     </td>
   </tr>
   <tr>

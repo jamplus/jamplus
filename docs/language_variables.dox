@@ -156,6 +156,10 @@ A variable element's string value can be parsed into grist and filename-related 
 	<td>Populate the list with directory contents matching the string.  If specified, <i>remove_path</i> is removed from the beginning of each found file.</td>
   </tr>
   <tr>
+    <td><code> :Z[=<i>target</i>] </code></td>
+	<td>Provides an alternate and usually faster form of <tt>on target variable = \$(VAR)</tt>. Instead, use <tt>variable = \$(VAR:Z=<i>target)</i></tt> for the same result.</td>
+  </tr>
+  <tr>
     <td><code> :T </code></td>
 	<td>Expand the bound name of the target.  Just as when expanding within an action, the BINDING is applied first.  If LOCATE is set, it is used for the path.  If not, SEARCH is used to look up the file.</td>
   </tr>

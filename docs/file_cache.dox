@@ -2,9 +2,9 @@
 
 \section file_cache_intro Introduction
 
-JamPlus provides an MD5sum based file caching system, provided by Alen Ladavac.  Using all relevant dependency information specified during the \ref operation_parsing to guarantee absolute uniqueness within the file cache, the JamPlus file caching system is able to dramatically speed builds by retrieving the precached target contents from a (usually) shared file cache, most often located on a network share.  This can be used as a poor man's distributed build system, as one machine can populate the file cache while the other machines do a minimum of work and just merely retrieve the prebuilt targets.
+JamPlus provides an MD5sum based file caching system, provided by Alen Ladavac.  Using all relevant dependency information specified during the \ref operation_parsing to guarantee absolute uniqueness within the file cache, the JamPlus file caching system is able to dramatically speed builds by retrieving precached target contents from a (usually) shared file cache, most often located on a network share.  This can be used as a poor man's distributed build system, as one machine can populate the file cache while the other machines do a minimum of work and just merely retrieve the prebuilt targets.
 
-The most important thing to note is JamPlus will do a deep dependency scan to calculate the proper file cache entry.  If you find yourself safely using incremental builds in Jam, then the file cache feature is for you.  If, on the other hand, you haven't specified your dependencies properly in Jam and are often doing full rebuilds "just in case", steer clear of using the file cache.  It will just cause you pain.
+The most important thing to note is JamPlus will do a deep dependency scan to calculate the proper file cache entry.  If you find yourself safely using incremental builds in Jam, then the file cache feature could be for you.  If, on the other hand, you haven't specified your dependencies properly in Jam and are often doing full rebuilds "just in case", steer clear of using the file cache.  It will just cause you pain.
 
 \note The file cache will only be available if the dependency cache is turned on.
 
