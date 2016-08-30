@@ -1,5 +1,9 @@
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 
+#if !defined(_MSC_VER)
+#include <inttypes.h>
+#endif /* _MSC_VER */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
