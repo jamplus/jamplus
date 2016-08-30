@@ -456,7 +456,7 @@ make1b( TARGET *t )
 		} else if ( t->fate == T_FATE_STABLE )
 			t->fate = T_FATE_UPDATE;
 	}
-	if ( 0  &&  usechecksums ) {
+	if ( 0  /* COMMENTED OUT FOR NOW &&  usechecksums */ ) {
 		if ( !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))
 				&&  t->binding != T_BIND_MISSING  &&  ( t->fate == T_FATE_UPDATE  /* ||  t->fate == T_FATE_OUTDATED */ )
 				&&  ( !childupdated  &&  ( t->depends != NULL  ||  t->includes != NULL ) )
