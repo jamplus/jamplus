@@ -29,7 +29,7 @@ end
 
 function RunJam(commandLine)
 	if not commandLine then commandLine = {} end
-	table.insert(commandLine, 1, JAM_EXECUTABLE)
+	table.insert(commandLine, 1, ospath.escape(JAM_EXECUTABLE))
 	table.insert(commandLine, 2, '-j1')
 
 	if Compiler then
@@ -513,10 +513,10 @@ else
 end
 table.sort(dirs)
 
-if Platform == 'macosx' then
-	JAM_EXECUTABLE = ospath.join(scriptPath, '..', 'bin', PlatformDir, 'jam')
-else
-	JAM_EXECUTABLE = "jam"
+JAM_EXECUTABLE = ospath.join(scriptPath, '..', 'bin', PlatformDir, 'jam')
+
+if Platform == 'win32' then
+    JAM_EXECUTABLE = ospath.make_backslash(JAM_EXECUTABLE)
 end
 
 function ErrorHandler(inMessage)
