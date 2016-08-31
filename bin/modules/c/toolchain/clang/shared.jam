@@ -57,7 +57,11 @@ rule C.clang._MultiCppCompile_SetupFlags {
 
             newsrcs += $(_pchName) ;
 
+            PCHFLAGS on $(_pchFilename) += $($($(pchBUILD_EXT).PCHFLAGS)) ;
             MFLAGS on $(_pchName) = $($(pchBUILD_EXT).RULE) $($(pchBUILD_EXT).SUFOBJ) $($(pchBUILD_EXT).ADD_TO_LINK) $(_flags[5-]) $($($(BUILD_EXT).PCHFLAGS)) -o \"$(_pchFilename:T)\" ;
+            if $(C_LIBRARY_SHARED_MODULE) {
+                MFLAGS on $(_pchName) += -fPIC ;
+            }
             if $(objectForceIncludes[1]) {
                 MFLAGS on $(_pchName) += "-include $(objectForceIncludes:G=)" ;
             }
