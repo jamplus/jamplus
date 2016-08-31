@@ -1,0 +1,1 @@
+../bin/linux64/lua/lua runtests.lua --platform linux64 $*
