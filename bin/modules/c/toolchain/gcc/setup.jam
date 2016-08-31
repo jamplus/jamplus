@@ -44,7 +44,7 @@ rule C.Toolchain.gcc.Setup COMPILER_BIN_PATH : SUFFIXES {
     C.Flags * : M   : -x objective-c ;
     C.Flags * : MM  : -x objective-c++ ;
 
-    C.AR on $(C.COMPILER_SUITE_SYMBOL) = @(ar:R=$(COMPILER_BIN_PATH)) ru ;
+    C.AR on $(C.COMPILER_SUITE_SYMBOL) = @(ar:R=$(COMPILER_BIN_PATH)) rU ;
     C.CC on $(C.COMPILER_SUITE_SYMBOL) = @(gcc:R=$(COMPILER_BIN_PATH)) ;
     C.C++ on $(C.COMPILER_SUITE_SYMBOL) = @(g++:R=$(COMPILER_BIN_PATH)) ;
     C.LINK on $(C.COMPILER_SUITE_SYMBOL) = @(g++:R=$(COMPILER_BIN_PATH)) ;
