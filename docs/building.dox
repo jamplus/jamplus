@@ -1,5 +1,11 @@
 /*! \page building Bootstrapping/Building
 
+\section building_prerequisites Prerequisites
+
+Linux requires certain packages installed to complete the entire bootstrap process. These packages are not related to JamPlus itself but instead to the LuaPlus subset residing with it. Therefore, they are optional, but their existence enables a more complete environment for JamPlus features. The packages are: <tt>libreadline-dev</tt>, <tt>uuid-dev</tt>, and <tt>libssl-dev</tt>.
+
+
+
 \section building_bootstrapping Quick bootstrapping of JamPlus
 
 The directions in the sections below describe the build process in better detail, but if you just need a working copy of JamPlus with its dependencies, run the following:
@@ -24,11 +30,35 @@ The directions in the sections below describe the build process in better detail
     bootstrap-win64.bat
 \endcode
 
-The instructions below are unnecessary if the bootstrap scripts are used.
+It may also be useful to run the JamPlus test suite after the bootstrap is finished. Note that the test suite may fail depending on platform and compiler version and so on, even though JamPlus itself will work fine.
+
+\code
+    cd tests
+
+    # If you are on Linux and want to test the 32-bit build:
+    ./runtests-linux32
+
+    # If you are on Linux and want to test the 64-bit build:
+    ./runtests-linux64
+
+    # If you are on Mac OS X and want to test the 32-bit build:
+    ./runtests-macosx32
+
+    # If you are on Mac OS X and want to test the 64-bit build:
+    ./runtests-macosx64
+
+    # If you are on Windows and want to test the 32-bit build:
+    runtests-win32.bat
+
+    # If you are on Windows and want to test the 64-bit build:
+    runtests-win64.bat
+\endcode
 
 
 
 \section building_overview Advanced Overview
+
+The instructions below are unnecessary if the bootstrap scripts are used.
 
 JamPlus comes with some simple makefiles to bootstrap the initial build of the JamPlus executable.  A good portion of the makefile contents in <tt>Makefile.Common</tt> are shared between the Visual C++ NMake-based build and the GCC-based make build.
 
