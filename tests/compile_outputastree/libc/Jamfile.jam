@@ -24,7 +24,7 @@ local SOURCE_DIRECTORIES =
     src/$(SCAN_PLATFORM)/Saving
 ;
 
-local SOURCE_FILES = [ Glob $(SUBDIR)/$(SOURCE_DIRECTORIES) : $(SOURCE_EXTENSIONS) ] ;
+local SOURCE_FILES = [ ListSort [ Glob $(SUBDIR)/$(SOURCE_DIRECTORIES) : $(SOURCE_EXTENSIONS) ] ] ;
 SOURCE_FILES = [ Match $(SUBDIR)/(.*) : $(SOURCE_FILES) ] ;
 
 C.Library libc : $(SOURCE_FILES) ;

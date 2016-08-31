@@ -84,9 +84,9 @@ function Test()
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):common>print.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):common>common.a 
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
+!NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libA>libA.a 
-@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 9 target(s)...
 ]]
 
@@ -151,7 +151,7 @@ function Test()
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libA>libA.a 
-@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 4 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
@@ -282,9 +282,9 @@ void LibA()
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):common>print.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):common>common.a 
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
+!NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libA>libA.a 
-@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 9 target(s)...
 ]]
 
@@ -352,6 +352,16 @@ void LibA()
 !NEXT!*** updated 4 target(s)...
 ]]
 		TestPattern(pattern4, RunJam())
+	elseif Platform == 'linux' then
+		local pattern4 = [[
+*** found 18 target(s)...
+*** updating 4 target(s)...
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
+*** updated 4 target(s)...
+]]
+		TestPattern(pattern4, RunJam())
 	else
 		local pattern4 = [[
 *** found 18 target(s)...
@@ -387,7 +397,7 @@ void LibA()
 *** updating 3 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libA>libA.a 
-@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 3 target(s)...
 ]]
 		TestPattern(pattern5, RunJam())

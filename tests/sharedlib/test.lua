@@ -203,7 +203,7 @@ else
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-c>add.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.a 
-@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.o 
 @ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
 @ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app
@@ -242,7 +242,7 @@ else
 		*** updating 7 target(s)...
 		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-c>add.o 
 		@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.a 
-		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app
 		*** updated 7 target(s)...
@@ -253,7 +253,7 @@ else
 		*** updating 7 target(s)...
 		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-c>add.o 
 		@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.a 
-		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
 		*** updated 7 target(s)...
 ]]

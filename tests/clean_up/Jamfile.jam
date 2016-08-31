@@ -21,7 +21,7 @@ if $(NT) {
 	}
 } else {
 	actions WriteExtraFiles {
-		mkdir "subdira/subdirb/subdirc/subdird"
+		mkdir -p "subdira/subdirb/subdirc/subdird"
 		echo abc > subdira/extrafile.txt
 		echo abc > subdir1/junk.txt
 		echo abc > subdira/junk.txt

@@ -79,6 +79,16 @@ function Test()
 @ $(C_LINK) <$(TOOLCHAIN_GRIST):platform>platform
 *** updated 5 target(s)...
 ]]
+			elseif Platform == 'linux' then
+				pattern = [[
+*** found 11 target(s)...
+*** updating 5 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>platform.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>linux.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):platform>filerelease.o 
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):platform>platform
+*** updated 5 target(s)...
+]]
 			else
 				pattern = [[
 *** found 11 target(s)...

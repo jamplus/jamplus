@@ -9,7 +9,7 @@ ProjectSubDir libb ;
 SOURCE_EXTENSIONS ?= *.cpp *.c ;
 
 SRCS =
-		[ Glob $(SUBDIR) : $(SOURCE_EXTENSIONS) : 0 ]
+		[ ListSort [ Glob $(SUBDIR) : $(SOURCE_EXTENSIONS) : 0 ] ]
 		onelevel/oneleveldeeper.cpp
 		../outerb/outer.cpp
 ;

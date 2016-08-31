@@ -10,7 +10,7 @@ extern void MacOSX();
 extern void Linux();
 #endif
 
-main()
+int main()
 {
 #ifdef USING_WIN32
 	printf("Using win32\n");
@@ -23,4 +23,5 @@ main()
 	Linux();
 #endif
 	Func();
+	return 0;
 }

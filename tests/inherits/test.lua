@@ -152,9 +152,9 @@ else
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):nested-lib-b>sub.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):nested-lib-c>mul.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):nested-lib-c>nested-lib-c.a 
-@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):nested-lib-b>nested-lib-b.a 
-@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-a>lib-a.a 
-@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app 
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):nested-lib-b>nested-lib-b.a 
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-a>lib-a.a 
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app 
 *** updated 12 target(s)...
 ]]
 
@@ -170,12 +170,22 @@ else
 *** updated 2 target(s)...
 ]]
 
-	patternC_checksums = [[
+	if Platform == 'linux' then
+		patternC_checksums = [[
+*** found 22 target(s)...
+*** updating 2 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app 
+*** updated 2 target(s)...
+]]
+	else
+		patternC_checksums = [[
 *** found 22 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o
 *** updated 2 target(s)...
 ]]
+	end
 
 	patternD = [[
 *** found 22 target(s)...

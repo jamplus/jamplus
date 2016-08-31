@@ -182,8 +182,8 @@ function Test()
 !NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libb>libb.lib
 !NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/Loading/Loading.obj
 !NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/Saving1.obj
-!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memorya.obj
 !NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/integral/integral1.obj
+!NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memorya.obj
 !NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/win32/Loading/Loading.obj
 !NEXT!@ C.vc.C++ <$(TOOLCHAIN_GRIST):libc>src/win32/Saving/Saving1.obj
 !NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libc>libc.lib
@@ -321,24 +321,24 @@ function Test()
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):liba>treea/treeb/deepfile.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):liba>../outer/outer.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):liba>liba.a 
-*** updated 8 target(s)...
+!NEXT!*** updated 8 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>filea.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>fileb.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>filec.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>onelevel/oneleveldeeper.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libb>../outerb/outer.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libb>libb.a 
-*** updated 10 target(s)...
+!NEXT!*** updated 10 target(s)...
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Loading/Loading.o 
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/Saving1.o 
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/Saving3.o 
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/Saving/SavingB.o 
-!NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memorya.o 
-!NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memoryb.o 
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/integral/integral1.o 
 !NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/integral/integral2.o 
-@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libc>libc.a 
-*** updated 14 target(s)...
+!NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memorya.o 
+!NEXT!@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libc>src/memory/memoryb.o 
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libc>libc.a 
+!NEXT!*** updated 14 target(s)...
 ]]
 
 			TestPattern(pattern, RunJam{ 'liba', 'libb', 'libc' })
