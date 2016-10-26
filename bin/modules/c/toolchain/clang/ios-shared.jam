@@ -4,6 +4,7 @@ rule C.Toolchain.clang.ios-shared {
 
 rule C.ios.FrameworkDirectories TARGET : FRAMEWORKDIRS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
+	FRAMEWORKDIRS = $(FRAMEWORKDIRS:R=$(SUBDIR:E="")) ;
 	C.Flags $(TARGET) : CC C++ M MM : -F\"$(FRAMEWORKDIRS)\" ;
 	C.LinkFlags $(TARGET) : -F\"$(FRAMEWORKDIRS)\" ;
 }
