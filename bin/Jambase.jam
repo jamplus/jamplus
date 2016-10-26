@@ -294,6 +294,7 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 	local _tokens = $(SUBDIR_PATH[2-]) ;
 
 	ALL_SUBDIR_TOKENS = $(SUBDIR_PATH) ;
+	__SUBDIR_TARGET_DIRECTORY = $(TARGET_DIRECTORY) ;
 
 	#
 	# First time through sets up relative root and includes Jamrules.
@@ -498,6 +499,8 @@ rule FSubDirPath
 	return $(_r:R=$($(<[1])-ROOT)) ;
 }
 
+local __SubIncludeStackIndex = 0 ;
+
 rule SubInclude TOKENS : FILENAME
 {
 	# SubInclude TOP d1 ... ;
@@ -530,17 +533,25 @@ rule SubInclude TOKENS : FILENAME
 	}
 	$(include_marker) = true ;
 
-	local saveTokens = $(ALL_SUBDIR_TOKENS) ;
-	local saveCurrentJamfile = $(CURRENT_JAMFILE) ;
+	__SubIncludeSaveTokens_$(__SubIncludeStackIndex) = $(ALL_SUBDIR_TOKENS) ;
+	__SubIncludeSaveTargetDirectory_$(__SubIncludeStackIndex) = $(__SUBDIR_TARGET_DIRECTORY) ;
+	__SubIncludeSaveCurrentJamfile_$(__SubIncludeStackIndex) = $(CURRENT_JAMFILE) ;
+	__SubIncludeStackIndex = [ Math $(__SubIncludeStackIndex) + 1 ] ;
+
 	SubDir $(TOKENS) ;
 
 	CURRENT_JAMFILE = $(jamfile:R=$(SUBDIR)) ;
 	include $(CURRENT_JAMFILE) ;
 
-	if $(saveTokens)
+	__SubIncludeStackIndex = [ Math $(__SubIncludeStackIndex) - 1 ] ;
+
+	if $(__SubIncludeSaveTokens_$(__SubIncludeStackIndex))
 	{
-		SubDir $(saveTokens) ;
-		CURRENT_JAMFILE = $(saveCurrentJamfile) ;
+		SubDir $(__SubIncludeSaveTokens_$(__SubIncludeStackIndex)) : $(__SubIncludeSaveTargetDirectory_$(__SubIncludeStackIndex)) ;
+		__SubIncludeSaveTokens_$(__SubIncludeStackIndex) = ;
+
+		CURRENT_JAMFILE = $(__SubIncludeSaveCurrentJamfile_$(__SubIncludeStackIndex)) ;
+		__SubIncludeSaveCurrentJamfile_$(__SubIncludeStackIndex) = ;
 	}
 }
 
