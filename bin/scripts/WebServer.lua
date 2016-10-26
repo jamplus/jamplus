@@ -1,7 +1,16 @@
 local osprocess = require 'osprocess'
 local ospath = require 'ospath'
 
-local baseDirectory = ...
+local arg = {...}
+local argIndex = 1
+
+local ssl
+if arg[argIndex] == '-ssl' then
+    ssl = true
+    argIndex = argIndex + 1
+end
+
+local baseDirectory = arg[argIndex]
 
 print('-------------------------------------------------------------')
 
@@ -24,17 +33,18 @@ else
     outputPath = ospath.join(os.getenv('HOME'), '.jamplus', 'webserver')
 end
 
-local caKeyFilename = ospath.join(outputPath, 'jamplusCA.key')
-local caCerFilename = ospath.join(outputPath, 'jamplusCA.cer')
-local serverKeyFilename = ospath.join(outputPath, 'jamplusServer.key')
-local serverCsrFilename = ospath.join(outputPath, 'jamplusServer.csr')
-local serverCerFilename = ospath.join(outputPath, 'jamplusServer.cer')
+local hostname = GetLocalIPAddress()
+local caKeyFilename = ospath.join(outputPath, 'jamplusCA-' .. hostname .. '.key')
+local caCerFilename = ospath.join(outputPath, 'jamplusCA-' .. hostname .. '.cer')
+local serverKeyFilename = ospath.join(outputPath, 'jamplusServer-' .. hostname .. '.key')
+local serverCsrFilename = ospath.join(outputPath, 'jamplusServer-' .. hostname .. '.csr')
+local serverCerFilename = ospath.join(outputPath, 'jamplusServer-' .. hostname .. '.cer')
 
-if not ospath.exists(caKeyFilename)
+if ssl  and  (not ospath.exists(caKeyFilename)
         or  not ospath.exists(caCerFilename)
         or  not ospath.exists(serverKeyFilename)
         or  not ospath.exists(serverCsrFilename)
-        or  not ospath.exists(serverCerFilename) then
+        or  not ospath.exists(serverCerFilename)) then
 
     if OS == 'NT' then
         for entry in os.getenv('PATH'):gmatch('[^;]*') do
@@ -75,8 +85,7 @@ if not ospath.exists(caKeyFilename)
 
     opensslExecutable = ospath.escape(opensslExecutable)
 
-    local hostname = GetLocalIPAddress()
-    local cn = 'JamPlus'
+    local cn = 'JamPlus-' .. hostname
 
     ospath.mkdir(caKeyFilename)
 
@@ -104,8 +113,10 @@ if not ospath.exists(caKeyFilename)
 	os.remove('serial')
 end
 
-print('Certificates are stored at: ' .. outputPath)
-print()
+if ssl then
+    print('Certificates are stored at: ' .. outputPath)
+    print()
+end
 
 
 -----------------------------------------------------------------------------------------------
@@ -113,15 +124,19 @@ local xavante = require "xavante"
 local filehandler = require "xavante.filehandler"
 local redirecthandler = require 'xavante.redirecthandler'
 
-local params = {
-	mode = "server",
-	protocol = "sslv23",
-	verify = {"none"},
-	options = {"all", "no_sslv2"},
-	key = serverKeyFilename,
-	certificate = serverCerFilename,
-}
- 
+local params
+
+if ssl then
+    params = {
+        mode = "server",
+        protocol = "sslv23",
+        verify = {"none"},
+        options = {"all", "no_sslv2"},
+        key = serverKeyFilename,
+        certificate = serverCerFilename,
+    }
+end
+
 local rules = {
 	{
 		match = "^[^%./]*/$",
@@ -130,7 +145,13 @@ local rules = {
 	}, 
 
 	{
-		match = "jamplusCA.cer",
+		match = "jamplusCA%.cer$",
+		with = redirecthandler,
+		params = {"jamplusCA-" .. hostname .. '.cer'}
+	},
+
+	{
+		match = "jamplusCA%-" .. hostname .. ".cer",
 		with = filehandler,
 		params = {baseDir = outputPath}
 	},
@@ -142,7 +163,7 @@ local rules = {
 	},
 }
 
-xavante.start_message(function(ports) print(string.format('Local web server running at: https://%s:%d/\n\nPress Enter to exit.', GetLocalIPAddress(), ports[1])) end)
+xavante.start_message(function(ports) print(string.format('Local web server running at: %s://%s:%d/\n\nPress Enter to exit.', ssl  and  'https'  or  'http', hostname, ports[1])) end)
 xavante.HTTP{ server = { host = '*', port = 9999, ssl = params }, defaultHost = { rules = rules, } }
 
 local lanes = require 'lanes'.configure()

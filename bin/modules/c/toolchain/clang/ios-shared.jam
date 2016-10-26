@@ -1562,7 +1562,7 @@ Make sure you're visiting this page on your device, not your computer.</p>
 
 
 actions screenoutput ios._WebServer {
-	$(JAM_EXECUTABLE_PATH:C) --webserver $(OUTPUT_PATH)
+	$(JAM_EXECUTABLE_PATH:C) --webserver -ssl $(OUTPUT_PATH)
 }
 
 if $(NT) {

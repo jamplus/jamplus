@@ -1193,6 +1193,8 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
 
     # Aligned.
     local _alignedApk = [ C.GristFiles $(TARGET) : $(TARGET).apk ] ;
+    APK_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_alignedApk) ;
+
     local packageOutputPath = $(ANDROID.PACKAGE_OUTPUT_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
     MakeLocate $(_alignedApk) : $(packageOutputPath:E=$(LOCATE_TARGET)) ;
 
@@ -1242,6 +1244,87 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
     NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
     Always clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
     Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_deploy) $(_alignedApk) $(_signedApk) $(_apk) $(_dex) $(_aidlCompiledFiles) ;
+}
+
+
+rule android.WebServer TARGET {
+    if $(C.PLATFORM) in android {
+        TARGET = [ ActiveTarget $(TARGET) ] ;
+
+        local apkTarget = $(APK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+        local packagePath = $(apkTarget:TD) ;
+        local OUTPUT_PATH = $(LOCATE:Z=$(apkTarget)) ;
+
+        local archiveTarget = archive:$(TARGET) ;
+        OUTPUT_PATH on $(archiveTarget) = $(OUTPUT_PATH) ;
+        Echo $(archiveTarget) ;
+
+        local IP ;
+        if ! $(URL) {
+            IP = [ LuaString "
+                local socket = require 'socket'.udp()
+                socket:setpeername('10.10.10.10', '9999')
+                return socket:getsockname()
+                " ] ;
+            IP = $(IP[1]) ;
+            URL = http://$(IP):9999 ;
+        }
+        if $(URL) {
+            # Stolen from BetaBuilder:
+
+            local index.html = @(index.html:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):archive) ;
+            MakeLocate $(index.html) : $(OUTPUT_PATH) ;
+            Depends $(archiveTarget) : $(index.html) ;
+            Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(index.html) ;
+            local contents ;
+
+            local APK_FILENAME = $(apkTarget:BS) ;
+
+            on $(C.ACTIVE_TOOLCHAIN_TARGET) contents = "
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> <html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>$(TARGET)</title>
+<style type="text/css">
+body {background:#fff;margin:0;padding:0;font-family:arial,helvetica,sans-serif;text-align:center;padding:10px;color:#333;font-size:16px;}
+#container {width:300px;margin:0 auto;}
+h1 {margin:0;padding:0;font-size:14px;}
+p {font-size:13px;}
+.link {background:#ecf5ff;border-top:1px solid #fff;border:1px solid #dfebf8;margin-top:.5em;padding:.3em;}
+.link a {text-decoration:none;font-size:15px;display:block;color:#069;}
+
+</style>
+</head>
+<body>
+
+<div id="container">
+
+<h1>Android Users:</h1>
+
+<div class="link"><a href="$(URL)/$(APK_FILENAME)">Tap Here to Install<br />$(TARGET)<br />On Your Device</a></div>
+
+<p><strong>Link didn't work?</strong><br />
+Make sure you're visiting this page on your device, not your computer.</p>
+
+</div>
+
+</body>
+</html>
+" ;
+            CONTENTS on $(index.html) = $(contents) ;
+            Always $(index.html) ;
+            WriteFile $(index.html) ;
+            UseCommandLine $(index.html) : $(contents) ;
+
+            android._WebServer $(archiveTarget) ;
+        }
+    }
+}
+
+
+actions screenoutput android._WebServer {
+	$(JAM_EXECUTABLE_PATH:C) --webserver $(OUTPUT_PATH)
 }
 
 } # if ! $(TARGETINFO_LOCATE)
