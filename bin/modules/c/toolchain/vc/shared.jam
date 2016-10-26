@@ -112,7 +112,7 @@ actions updated response C.vc.C++ {
 
 actions together response C.vc.Archive {
     PATH=$(MSVCNT_BIN_PATH:J=;);%PATH%
-    $(C.AR:C) /nologo $(LIBFLAGS) @@($(>:\\C)) /out:$(<:C)
+    $(C.AR:C) /nologo $(LIBFLAGS) @@($(>:\\CJ=$(NEWLINE))) /out:$(<:C)
 }
 
 
