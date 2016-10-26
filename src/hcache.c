@@ -1444,9 +1444,12 @@ int checksum_retrieve(TARGET *t, MD5SUM buildmd5sum)
 #else
 		utime(t->boundname, NULL);
 #endif
-		file_time(t->boundname, &time);
+		timestamp_updatetime(t->boundname);
+		timestamp(t->boundname, &time, 0);
+		//file_time(t->boundname, &time);
 		t->contentchecksum->mtime = time;
 		t->contentchecksum->age = 0;
+		t->time = time;
 		checksumsdirty = 1;
 
 		//printf("JAMDEBUG: %s is already the proper cached target.\n", t->name);
