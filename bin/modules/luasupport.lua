@@ -41,7 +41,7 @@ setmetatable(jamtarget, {
     __index = function(t, targetkey)
         local target = {}
         setmetatable(target, {
-            __index = function(t, targetkey)
+            __index = function(t, key)
                 return jam_getvar(targetkey, key)
             end,
             __newindex = function(t, key, value)
