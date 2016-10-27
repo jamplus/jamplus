@@ -38,6 +38,8 @@ List of Rules</h1>
 <li><a href="module_ios.html#rule_ios_BundleInfoArrayInteger">ios.BundleInfoArrayInteger</a></li>
 <li><a href="module_ios.html#rule_ios_BundleInfoArrayString">ios.BundleInfoArrayString</a></li>
 <li><a href="module_ios.html#rule_ios_BundleInfoBoolean">ios.BundleInfoBoolean</a></li>
+<li><a href="module_ios.html#rule_ios_BundleInfoDictBegin">ios.BundleInfoDictBegin</a></li>
+<li><a href="module_ios.html#rule_ios_BundleInfoDictEnd">ios.BundleInfoDictEnd</a></li>
 <li><a href="module_ios.html#rule_ios_BundleInfoInteger">ios.BundleInfoInteger</a></li>
 <li><a href="module_ios.html#rule_ios_BundleInfoString">ios.BundleInfoString</a></li>
 <li><a href="module_ios.html#rule_ios_BundleInfo">ios.BundleInfo</a></li>
@@ -242,6 +244,29 @@ rule ios.BundleInfoBoolean TARGET : KEY : VALUE</h1>
   </dd>
 </dl>
 <div class="fragment"><div class="line">ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;</div></div><!-- fragment --><hr/>
+ <h1><a class="anchor" id="rule_ios_BundleInfoDictBegin"></a>
+rule ios.BundleInfoDictBegin TARGET : KEY</h1>
+<p><a name="arule_ios_:42undle:49nfo:44ict:42egin"></a></p>
+<p>For the given bundle <code>TARGET</code>, begin a dict entry within the <code>Info.plist</code>. Call <a class="el" href="module_ios.html#rule_ios_BundleInfoDictEnd">rule ios.BundleInfoDictEnd TARGET</a> to complete the dict entry.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TARGET</td><td>The bundle target to affect the <code>Info.plist</code> for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
+    <tr><td class="paramname">KEY</td><td>The key name of the dict entry within the <code>Info.plist</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><div class="line">ios.BundleInfoDictBegin : NSAppTransportSecurity ;</div><div class="line">    ios.BundleInfoBoolean : NSAllowsArbitraryLoads : true ;</div><div class="line">ios.BundleInfoDictEnd ;</div></div><!-- fragment --><hr/>
+ <h1><a class="anchor" id="rule_ios_BundleInfoDictEnd"></a>
+rule ios.BundleInfoDictEnd TARGET</h1>
+<p><a name="arule_ios_:42undle:49nfo:44ict:45nd"></a></p>
+<p>For the given bundle <code>TARGET</code>, end the current dict entry begun with <a class="el" href="module_ios.html#rule_ios_BundleInfoDictBegin">rule ios.BundleInfoDictBegin TARGET : KEY</a> within the <code>Info.plist</code>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TARGET</td><td>The bundle target to affect the <code>Info.plist</code> for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><div class="line">ios.BundleInfoDictBegin : NSAppTransportSecurity ;</div><div class="line">    ios.BundleInfoBoolean : NSAllowsArbitraryLoads : true ;</div><div class="line">ios.BundleInfoDictEnd ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_ios_BundleInfoInteger"></a>
 rule ios.BundleInfoInteger TARGET : KEY : VALUE</h1>
 <p><a name="arule_ios_:42undle:49nfo:49nteger"></a></p>
