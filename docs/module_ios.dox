@@ -59,6 +59,8 @@ To bundle up an <tt>.ipa</tt>, build the <tt>archive:TARGET</tt> target.
 \refitem rule_ios_BundleInfoArrayInteger ios.BundleInfoArrayInteger
 \refitem rule_ios_BundleInfoArrayString ios.BundleInfoArrayString
 \refitem rule_ios_BundleInfoBoolean ios.BundleInfoBoolean
+\refitem rule_ios_BundleInfoDictBegin ios.BundleInfoDictBegin
+\refitem rule_ios_BundleInfoDictEnd ios.BundleInfoDictEnd
 \refitem rule_ios_BundleInfoInteger ios.BundleInfoInteger
 \refitem rule_ios_BundleInfoString ios.BundleInfoString
 \refitem rule_ios_BundleInfo ios.BundleInfo
@@ -394,6 +396,48 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as a boolean type to t
 
 \code
     ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoDictBegin rule ios.BundleInfoDictBegin TARGET : KEY
+\addindex rule_ios_BundleInfoDictBegin
+
+For the given bundle \c TARGET, begin a dict entry within the <tt>Info.plist</tt>. Call \ref rule_ios_BundleInfoDictEnd to complete the dict entry.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param KEY The key name of the dict entry within the <tt>Info.plist</tt>.
+
+\code
+    ios.BundleInfoDictBegin : NSAppTransportSecurity ;
+        ios.BundleInfoBoolean : NSAllowsArbitraryLoads : true ;
+    ios.BundleInfoDictEnd ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_BundleInfoDictEnd rule ios.BundleInfoDictEnd TARGET
+\addindex rule_ios_BundleInfoDictEnd
+
+For the given bundle \c TARGET, end the current dict entry begun with \ref rule_ios_BundleInfoDictBegin within the <tt>Info.plist</tt>.
+
+\param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+
+\code
+    ios.BundleInfoDictBegin : NSAppTransportSecurity ;
+        ios.BundleInfoBoolean : NSAllowsArbitraryLoads : true ;
+    ios.BundleInfoDictEnd ;
 \endcode
 
 

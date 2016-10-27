@@ -386,6 +386,25 @@ rule ios.BundleInfoString TARGET : KEY : VALUE {
 }
 
 
+rule ios.BundleInfoDictBegin TARGET : KEY {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	LuaString "
+		local currentLevel = GetInfoPlistCurrentLevel()
+		local newLevel = plist.newdict()
+		currentLevel[jam_getvar('KEY')[1]] = newLevel
+		rawset(newLevel, '__previous', currentLevel)
+		local plistName = jam_getvar('C.ACTIVE_TOOLCHAIN_TARGET_GRIST')[1] .. ':Info.plist'
+		_G[plistName] = newLevel
+" ;
+}
+
+
+rule ios.BundleInfoDictEnd TARGET {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	LuaString "PopInfoPlistLevel()" ;
+}
+
+
 rule ios.BundleInfoArrayBegin TARGET : KEY {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "
