@@ -115,6 +115,7 @@ rule C.clang._SharedLibraryFromObjects_ExportLib {
     MakeLocate $(_tlib) : $(outputPath) ;
     Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_tlib) : $(_actiontlib) $(_t) ;
     NotFile $(_tlib) ;		# Turn this off for export libraries.
+    __BUILT_LIBRARY on $(_tlib) = true ;
     ForceContentsOnly $(_tlib) ;
 
 #			LinkFlags $(TARGET) : -Wl,--out-implib,$(_tlib:T) ;
