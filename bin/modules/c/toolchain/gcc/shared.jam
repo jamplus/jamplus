@@ -107,7 +107,7 @@ rule C.gcc._MultiCppCompile_SetupFlags {
 rule C.gcc._SharedLibraryFromObjects_ExportLib {
     local _actiontlib = @($(TARGET)$(suflib):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)!inner) ;
     BINDING on $(_actiontlib) = [ C._retrieveOutputName : $(_t:S) ] ;
-    ForceContentsOnly $(_actionlib) ;
+    ForceContentsOnly $(_actiontlib) ;
     MakeLocate $(_actiontlib) : $(outputPath) ;
     _linkTargets += $(_actiontlib) ;
 
