@@ -177,7 +177,7 @@ In order to output a final <tt>.ipa</tt> to be installed on an iOS device, \c io
 
 
 <hr>
-\section rule_ios_AssetCatalog rule ios.AssetCatalog TARGET : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH
+\section rule_ios_AssetCatalog rule ios.AssetCatalog TARGET : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE_NAME
 \addindex rule_ios_AssetCatalog
 
 Takes a provided asset catalog and builds it into its individual components.
@@ -185,11 +185,12 @@ Takes a provided asset catalog and builds it into its individual components.
 \param TARGET The target to build the asset catalog for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param TARGET_GRIST A grist to preface the derived asset catalog entries against.
 \param DESTINATION_PATH The output directory for the generated assets.
-\param SOURCE_PATH The source filename to process.
+\param ASSET_CATALOG_PATH The path to the <tt>.xcassets</tt> directory containing the asset catalog components.
+\param APP_ICON_NAME (optional) The name of the <tt>.appiconset</tt> to process. Generally, the name is \c AppIcon.
+\param LAUNCH_IMAGE_NAME (optional) The name of the <tt>.launchimage</tt> to process. Generally, the name is \c LaunchImage.
 
 \code
-    C.ios.AssetCatalog [ ios.GetBundleTarget ] : assets : [ ios.GetBundlePath ] : Unity-iPhone/Images.xcassets/AppIcon.appiconset ;
-    C.ios.AssetCatalog [ ios.GetBundleTarget ] : assets : [ ios.GetBundlePath ] : Unity-iPhone/Images.xcassets/LaunchImage.launchimage ;
+    ios.AssetCatalog [ ios.GetBundleTarget ] : assets : [ ios.GetBundlePath ] : Unity-iPhone/Images.xcassets : AppIcon : LaunchImage ;
 \endcode
 
 

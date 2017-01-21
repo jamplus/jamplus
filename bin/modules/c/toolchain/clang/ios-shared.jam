@@ -1204,42 +1204,52 @@ actions ios.CompileXIB
 }
 
 
-actions ios._ImageResize {
-	$(IMCONVERT:C) $(2:C) -quiet -resize $(IMAGE_SIZE) $(1:C)
-}
-
 
 if $(NT) {
     actions ios._ImageCopy {
         copy $(2:C\\) $(1:C\\)
     }
+
+    actions ios._ImageResize {
+        $(IMCONVERT:C) $(2:C) -quiet -resize $(IMAGE_SIZE) $(1:C)
+    }
 } else {
-    actions ios._ImageCopy {
-        cp $(2:C) $(1:C)
+    actions ios._CompileAssetCatalog {
+        $(ACTOOL:C) --output-format human-readable-text --output-partial-info-plist $(OUTPUT_PARTIAL_INFO_PLIST) --notices --warnings $(APP_ICON) $(LAUNCH_IMAGE) --compress-pngs --enable-on-demand-resources YES --sticker-pack-identifier-prefix .sticker-pack. --target-device iphone --target-device ipad --minimum-deployment-target 6.0 --platform iphoneos --product-type com.apple.product-type.application --compile $(1[1]:D) $(SOURCE_PATH)
     }
 }
 
 
-rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH {
-    SOURCE_PATH = $(SOURCE_PATH:R=$(SUBDIR)) ;
+rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE_NAME {
+    ASSET_CATALOG_PATH = $(ASSET_CATALOG_PATH:R=$(SUBDIR)) ;
 
-    local assetName = $(SOURCE_PATH:B) ;
-    local assetType = $(SOURCE_PATH:S) ;
+    local cleanTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
     LuaString "
         local ospath = require 'ospath'
-        local contentsJsonFilename = ospath.join(jam_getvar('SOURCE_PATH')[1], 'Contents.json')
-        local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+
         local parent = jam_getvar('PARENT')[1]
         local targetGrist = jam_getvar('TARGET_GRIST')[1]
-        local assetName = jam_getvar('assetName')[1]
-        local assetType = jam_getvar('assetType')[1]
-        local sourcePath = jam_getvar('SOURCE_PATH')[1]
+        local assetCatalogPath = jam_getvar('ASSET_CATALOG_PATH')[1]
         local destinationPath = jam_getvar('DESTINATION_PATH')[1]
+        local cleanTarget = jam_getvar('cleanTarget')[1]
 
-        if assetType == '.appiconset' then
-            for _, entry in ipairs(contents.images) do
-                local filename = assetName .. entry.size
+        local destinationTargets = {}
+        local sourceTargets = {}
+
+        local appIcon = jam_getvar('APP_ICON_NAME')[1]
+        local launchImage = jam_getvar('LAUNCH_IMAGE_NAME')[1]
+        local NT = jam_getvar('NT')[1]
+
+        if appIcon ~= '' then
+            local sourcePath = ospath.join(assetCatalogPath, appIcon .. '.appiconset')
+            local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
+            local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+
+            for _, entry in ipairs(contents.images) do repeat
+                if not entry.filename then break end
+
+                local filename = appIcon .. entry.size
                 local scale = 1
                 if entry.scale  and  entry.scale ~= '1x' then
                     filename = filename .. '@' .. entry.scale
@@ -1255,17 +1265,27 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH {
                 jam_setvar(inputTarget, 'SEARCH', sourcePath)
                 jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
                 jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
-                jam_evaluaterule('Clean', outputTarget)
+                jam_evaluaterule('Clean', cleanTarget, outputTarget)
 
-                local width, height = entry.size:match('(%d+)x(%d+)')
-                jam_setvar(outputTarget, 'IMAGE_SIZE', (width * scale) .. 'x' .. (height * scale))
-                jam_evaluaterule('ios._ImageResize', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
-            end
+                if NT then
+                    local width, height = entry.size:match('(%d+)x(%d+)')
+                    jam_setvar(outputTarget, 'IMAGE_SIZE', (width * scale) .. 'x' .. (height * scale))
+                    jam_evaluaterule('ios._ImageResize', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
+                else
+                    destinationTargets[#destinationTargets + 1] = outputTarget
+                    sourceTargets[#sourceTargets + 1] = inputTarget
+                end
+            until true end
+        end
 
-        elseif assetType == '.launchimage' then
+        if launchImage ~= '' then
+            local sourcePath = ospath.join(assetCatalogPath, launchImage .. '.launchimage')
+            local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
+            local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+
             local activeFilenames = {}
             local function MakeLaunchImageFilename(entry, build)
-                local filename = assetName
+                local filename = launchImage
                 local minimumSystemVersion = entry['minimum-system-version']
                 if minimumSystemVersion == '7.0' then
                     filename = filename .. '-700'
@@ -1325,11 +1345,30 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH {
                 jam_setvar(inputTarget, 'SEARCH', sourcePath)
                 jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
                 jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
-                jam_evaluaterule('Clean', outputTarget)
+                jam_evaluaterule('Clean', cleanTarget, outputTarget)
 
-                jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
-                jam_evaluaterule('ios._ImageCopy', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
+                if NT then
+                    jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
+                    jam_evaluaterule('ios._ImageCopy', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
+                else
+                    destinationTargets[#destinationTargets + 1] = outputTarget
+                    sourceTargets[#sourceTargets + 1] = inputTarget
+                end
             until true end
+        end
+
+        if not NT then
+            for _, target in ipairs(destinationTargets) do
+                if appIcon ~= '' then
+                    jam_setvar(target, 'APP_ICON',  '--app-icon ' .. appIcon)
+                end
+                if launchImage ~= '' then
+                    jam_setvar(target, 'LAUNCH_IMAGE',  '--launch-image ' .. launchImage)
+                end
+                jam_setvar(target, 'SOURCE_PATH',  assetCatalogPath)
+                jam_setvar(target, 'OUTPUT_PARTIAL_INFO_PLIST', jam_getvar('LOCATE_TARGET')[1] .. '/assetcatalog_generated_info.plist')
+            end
+            jam_evaluaterule('ios._CompileAssetCatalog', destinationTargets, sourceTargets, jam_getvar('C.COMPILER_SUITE_SYMBOL')[1])
         end
 " ;
 }
