@@ -121,7 +121,7 @@ rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK</h1>
 </dl>
 <div class="fragment"><div class="line">ios.Archive : c:/ios-packages ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_ios_AssetCatalog"></a>
-rule ios.AssetCatalog TARGET : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH</h1>
+rule ios.AssetCatalog TARGET : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE_NAME</h1>
 <p><a name="arule_ios_Asset:43atalog"></a></p>
 <p>Takes a provided asset catalog and builds it into its individual components.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -129,11 +129,13 @@ rule ios.AssetCatalog TARGET : TARGET_GRIST : DESTINATION_PATH : SOURCE_PATH</h1
     <tr><td class="paramname">TARGET</td><td>The target to build the asset catalog for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">TARGET_GRIST</td><td>A grist to preface the derived asset catalog entries against. </td></tr>
     <tr><td class="paramname">DESTINATION_PATH</td><td>The output directory for the generated assets. </td></tr>
-    <tr><td class="paramname">SOURCE_PATH</td><td>The source filename to process.</td></tr>
+    <tr><td class="paramname">ASSET_CATALOG_PATH</td><td>The path to the <code>.xcassets</code> directory containing the asset catalog components. </td></tr>
+    <tr><td class="paramname">APP_ICON_NAME</td><td>(optional) The name of the <code>.appiconset</code> to process. Generally, the name is <code>AppIcon</code>. </td></tr>
+    <tr><td class="paramname">LAUNCH_IMAGE_NAME</td><td>(optional) The name of the <code>.launchimage</code> to process. Generally, the name is <code>LaunchImage</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<div class="fragment"><div class="line">C.ios.AssetCatalog [ ios.GetBundleTarget ] : assets : [ ios.GetBundlePath ] : Unity-iPhone/Images.xcassets/AppIcon.appiconset ;</div><div class="line">C.ios.AssetCatalog [ ios.GetBundleTarget ] : assets : [ ios.GetBundlePath ] : Unity-iPhone/Images.xcassets/LaunchImage.launchimage ;</div></div><!-- fragment --><hr/>
+<div class="fragment"><div class="line">ios.AssetCatalog [ ios.GetBundleTarget ] : assets : [ ios.GetBundlePath ] : Unity-iPhone/Images.xcassets : AppIcon : LaunchImage ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_ios_Bundle"></a>
 rule ios.Bundle TARGET [ : TOOLCHAINS ]</h1>
 <p><a name="arule_ios_:42undle"></a></p>
