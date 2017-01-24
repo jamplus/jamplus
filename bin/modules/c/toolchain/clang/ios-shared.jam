@@ -1241,6 +1241,9 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_P
         local launchImage = jam_getvar('LAUNCH_IMAGE_NAME')[1]
         local NT = jam_getvar('NT')[1]
 
+        local appIcons = {}
+        local launchImages = {}
+
         if appIcon ~= '' then
             local sourcePath = ospath.join(assetCatalogPath, appIcon .. '.appiconset')
             local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
@@ -1275,6 +1278,9 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_P
                     destinationTargets[#destinationTargets + 1] = outputTarget
                     sourceTargets[#sourceTargets + 1] = inputTarget
                 end
+
+                local at = '@'
+                appIcons[#appIcons + 1] = jam_expand(at .. '(' .. outputTarget .. ':BS)')[1]
             until true end
         end
 
@@ -1355,6 +1361,14 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_P
                     destinationTargets[#destinationTargets + 1] = outputTarget
                     sourceTargets[#sourceTargets + 1] = inputTarget
                 end
+
+                local expansionString = '@'
+                launchImages[#launchImages + 1] = {
+                    osVersion = entry['minimum-system-version'],
+                    fileTitle = jam_expand(expansionString .. '(' .. outputTarget .. ':B)')[1],
+                    orientation = entry.orientation,
+--                    imageSize = '{' .. entry.size .. '}',
+                }
             until true end
         end
 
@@ -1370,6 +1384,26 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_P
                 jam_setvar(target, 'OUTPUT_PARTIAL_INFO_PLIST', jam_getvar('LOCATE_TARGET')[1] .. '/assetcatalog_generated_info.plist')
             end
             jam_evaluaterule('ios._CompileAssetCatalog', destinationTargets, sourceTargets, jam_getvar('C.COMPILER_SUITE_SYMBOL')[1])
+        end
+
+        if appIcons[1] then
+            local dict = GetInfoPlistCurrentLevel()
+            dict.CFBundleIconFiles = appIcons
+        end
+
+        if false  and  launchImages[1] then
+            jam_evaluaterule('ios.BundleInfoArrayBegin', 'UILaunchImages')
+
+            for _, launchImageInfo in ipairs(launchImages) do
+                jam_evaluaterule('ios.BundleInfoArrayDictBegin')
+                    jam_evaluaterule('ios.BundleInfoString', 'UILaunchImageMinimumOSVersion', launchImageInfo.osVersion)
+                    jam_evaluaterule('ios.BundleInfoString', 'UILaunchImageName', launchImageInfo.fileTitle)
+                    jam_evaluaterule('ios.BundleInfoString', 'UILaunchImageOrientation', launchImageInfo.orientation)
+                    jam_evaluaterule('ios.BundleInfoString', 'UILaunchImageSize', launchImageInfo.imageSize)
+                jam_evaluaterule('ios.BundleInfoArrayDictEnd')
+            end
+
+            jam_evaluaterule('ios.BundleInfoArrayEnd')
         end
 " ;
 }
