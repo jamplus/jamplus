@@ -1336,6 +1336,7 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_P
             end
 
             for _, entry in ipairs(contents.images) do repeat
+                if not entry.filename then break end
                 local filename = MakeLaunchImageFilename(entry)
                 if not filename then break end
                 filename = filename .. '.png'
