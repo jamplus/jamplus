@@ -1130,7 +1130,7 @@ rule C.ios._SharedLibraryFromObjects_LinkFlags {
 
 if $(TARGETINFO_LOCATE) {
 
-rule C.ios.XIB {
+rule ios.XIB {
 
 }
 
@@ -1165,7 +1165,7 @@ rule C.ios._ApplicationTargetInfo {
 
 } else {
 
-rule C.ios.XIB PARENT : SOURCES  {
+rule ios.XIB PARENT : SOURCES  {
 	PARENT = [ C.ActiveTarget $(PARENT) ] ;
 	
 	local bundlePath = [ ios.GetBundlePath ] ;
