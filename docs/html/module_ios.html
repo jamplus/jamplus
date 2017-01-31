@@ -25,7 +25,6 @@ List of Rules</h1>
 <ul>
 <li><a href="module_ios.html#rule_C_ios_FrameworkDirectories">C.ios.FrameworkDirectories</a></li>
 <li><a href="module_ios.html#rule_C_ios_LinkFrameworks">C.ios.LinkFrameworks</a></li>
-<li><a href="module_ios.html#rule_C_ios_MinimumOSVersion">C.ios.MinimumOSVersion</a></li>
 <li><a href="module_ios.html#rule_C_ios_WeakLinkFrameworks">C.ios.WeakLinkFrameworks</a></li>
 <li><a href="module_ios.html#rule_ios_Archive">ios.Archive</a></li>
 <li><a href="module_ios.html#rule_ios_AssetCatalog">ios.AssetCatalog</a></li>
@@ -50,6 +49,7 @@ List of Rules</h1>
 <li><a href="module_ios.html#rule_ios_InfoPListFile">ios.InfoPListFile</a></li>
 <li><a href="module_ios.html#rule_C_ios_Lipo">C.ios.Lipo</a></li>
 <li><a href="module_ios.html#rule_ios_MergeInfoPList">ios.MergeInfoPList</a></li>
+<li><a href="module_ios.html#rule_ios_MinimumOSVersion">ios.MinimumOSVersion</a></li>
 <li><a href="module_ios.html#rule_ios_ProvisionFile">ios.ProvisionFile</a></li>
 <li><a href="module_ios.html#rule_ios_Provision">ios.Provision</a></li>
 <li><a href="module_ios.html#rule_ios_SDK">ios.SDK</a></li>
@@ -83,18 +83,6 @@ rule C.ios.LinkFrameworks TARGET : FRAMEWORKS</h1>
   </dd>
 </dl>
 <div class="fragment"><div class="line">C.ios.LinkFrameworks MyGame : CoreFoundation ;</div></div><!-- fragment --><hr/>
- <h1><a class="anchor" id="rule_C_ios_MinimumOSVersion"></a>
-rule C.ios.MinimumOSVersion TARGET : SDK_VERSION_MIN</h1>
-<p><a name="arule_:43_ios_:4dinimum:4f:53:56ersion"></a></p>
-<p>Sets the minimum iOS version for the <code>TARGET</code>.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">TARGET</td><td>The target to assign a minimum OS version to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
-    <tr><td class="paramname">SDK_VERSION_MIN</td><td>The minimum OS version allowable in the format <code>major.minor</code>.</td></tr>
-  </table>
-  </dd>
-</dl>
-<div class="fragment"><div class="line">C.ios.MinimumOSVersion MyGame : 9.0 ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_ios_WeakLinkFrameworks"></a>
 rule C.ios.WeakLinkFrameworks TARGET : FRAMEWORKS</h1>
 <p><a name="arule_:43_ios_:57eak:4cink:46rameworks"></a></p>
@@ -438,6 +426,18 @@ rule ios.MergeInfoPList TARGET : SOURCE</h1>
   </dd>
 </dl>
 <div class="fragment"><div class="line"><span class="preprocessor"># Merge in DefaultInfo.plist the disk first and then assign some overrides.</span></div><div class="line">ios.MergeInfoPList : DefaultInfo.plist ;</div><div class="line">ios.BundleInfo : displayname : simple ;</div><div class="line">ios.BundleInfo : bundlename : simple ;</div><div class="line">ios.BundleInfo : bundleversion : 1.0 ;</div><div class="line">ios.BundleInfo : uistatusbarhidden : true ;</div></div><!-- fragment --><hr/>
+ <h1><a class="anchor" id="rule_ios_MinimumOSVersion"></a>
+rule ios.MinimumOSVersion TARGET : SDK_VERSION_MIN</h1>
+<p><a name="arule_ios_:4dinimum:4f:53:56ersion"></a></p>
+<p>Sets the minimum iOS version for the <code>TARGET</code>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TARGET</td><td>The target to assign a minimum OS version to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
+    <tr><td class="paramname">SDK_VERSION_MIN</td><td>The minimum OS version allowable in the format <code>major.minor</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><div class="line">ios.MinimumOSVersion MyGame : 7.0 ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_ios_ProvisionFile"></a>
 rule ios.ProvisionFile TARGET : FILENAME</h1>
 <p><a name="arule_ios_:50rovision:46ile"></a></p>
