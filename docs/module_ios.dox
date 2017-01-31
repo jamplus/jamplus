@@ -46,7 +46,6 @@ To bundle up an <tt>.ipa</tt>, build the <tt>archive:TARGET</tt> target.
 \secreflist
 \refitem rule_C_ios_FrameworkDirectories C.ios.FrameworkDirectories
 \refitem rule_C_ios_LinkFrameworks C.ios.LinkFrameworks
-\refitem rule_C_ios_MinimumOSVersion C.ios.MinimumOSVersion
 \refitem rule_C_ios_WeakLinkFrameworks C.ios.WeakLinkFrameworks
 \refitem rule_ios_Archive ios.Archive
 \refitem rule_ios_AssetCatalog ios.AssetCatalog
@@ -71,6 +70,7 @@ To bundle up an <tt>.ipa</tt>, build the <tt>archive:TARGET</tt> target.
 \refitem rule_ios_InfoPListFile ios.InfoPListFile
 \refitem rule_C_ios_Lipo C.ios.Lipo
 \refitem rule_ios_MergeInfoPList ios.MergeInfoPList
+\refitem rule_ios_MinimumOSVersion ios.MinimumOSVersion
 \refitem rule_ios_ProvisionFile ios.ProvisionFile
 \refitem rule_ios_Provision ios.Provision
 \refitem rule_ios_SDK ios.SDK
@@ -109,25 +109,6 @@ Links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are set, s
 
 \code
     C.ios.LinkFrameworks MyGame : CoreFoundation ;
-\endcode
-
-
-
-
-
-
-
-<hr>
-\section rule_C_ios_MinimumOSVersion rule C.ios.MinimumOSVersion TARGET : SDK_VERSION_MIN
-\addindex rule_C_ios_MinimumOSVersion
-
-Sets the minimum iOS version for the \c TARGET.
-
-\param TARGET The target to assign a minimum OS version to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
-\param SDK_VERSION_MIN The minimum OS version allowable in the format <tt>major.minor</tt>.
-
-\code
-    C.ios.MinimumOSVersion MyGame : 9.0 ;
 \endcode
 
 
@@ -689,6 +670,25 @@ For the given bundle \c TARGET, merge the <tt>Info.plist</tt>-style file found a
     ios.BundleInfo : uistatusbarhidden : true ;
 \endcode
 
+
+
+
+
+
+
+
+<hr>
+\section rule_ios_MinimumOSVersion rule ios.MinimumOSVersion TARGET : SDK_VERSION_MIN
+\addindex rule_ios_MinimumOSVersion
+
+Sets the minimum iOS version for the \c TARGET.
+
+\param TARGET The target to assign a minimum OS version to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SDK_VERSION_MIN The minimum OS version allowable in the format <tt>major.minor</tt>.
+
+\code
+    ios.MinimumOSVersion MyGame : 7.0 ;
+\endcode
 
 
 

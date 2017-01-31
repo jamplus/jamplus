@@ -336,7 +336,7 @@ rule ios.SDK SDK_VERSION {
 } # if ! $(NT)
 
 
-rule C.ios.MinimumOSVersion TARGET : SDK_VERSION_MIN {
+rule ios.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 
 	local SDK_PLATFORM ;
