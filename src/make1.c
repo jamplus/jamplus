@@ -1117,19 +1117,28 @@ make1d(
 			TARGET *t = bindtarget(list_value(target));
 			//if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
 			if (!(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
+				int generatechecksum = 0;
 				timestamp_updatetime( t->boundname );
-				t->time = 0;
-				getcachedmd5sum( t, 1 );
-				t->time = t->contentchecksum->mtime;
-				++make0calcmd5sum_epoch;
-				++make0calcmd5sum_timestamp_epoch;
-				make0calcmd5sum( t, 1, 1 );
-				make1buildchecksum( t, buildmd5sum );
+#if defined(OPT_BUILTIN_MD5CACHE_EXT)
+				generatechecksum |= t->filecache_generate;
+#endif
+#if defined(OPT_USE_CHECKSUMS_EXT)
+				generatechecksum |= usechecksums;
+#endif
+				if (generatechecksum) {
+					t->time = 0;
+					getcachedmd5sum( t, 1 );
+					t->time = t->contentchecksum->mtime;
+					++make0calcmd5sum_epoch;
+					++make0calcmd5sum_timestamp_epoch;
+					make0calcmd5sum( t, 1, 1 );
+					make1buildchecksum( t, buildmd5sum );
 
 #ifdef OPT_USE_CHECKSUMS_EXT
-				checksum_update(t, buildmd5sum);
+					checksum_update(t, buildmd5sum);
 #endif /* OPT_USE_CHECKSUMS_EXT */
-				filecache_update(t, buildmd5sum);
+					filecache_update(t, buildmd5sum);
+				}
 			}
 		}
 	}
