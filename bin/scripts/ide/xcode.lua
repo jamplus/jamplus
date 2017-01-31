@@ -605,6 +605,28 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 				end
 			end
 
+			-- Write PRODUCT_BUNDLE_IDENTIFIER.
+			local productBundleIdentifier
+			if subProject.PRODUCT_BUNDLE_IDENTIFIER  and  subProject.PRODUCT_BUNDLE_IDENTIFIER[platformName]  and  subProject.PRODUCT_BUNDLE_IDENTIFIER[platformName][configName] then
+				productBundleIdentifier = subProject.PRODUCT_BUNDLE_IDENTIFIER[platformName][configName]
+			elseif Projects['C.*']  and  Projects['C.*'].PRODUCT_BUNDLE_IDENTIFIER  and  Projects['C.*'].PRODUCT_BUNDLE_IDENTIFIER[platformName]  and  Projects['C.*'].PRODUCT_BUNDLE_IDENTIFIER[platformName][configName] then
+				productBundleIdentifier = Projects['C.*'].PRODUCT_BUNDLE_IDENTIFIER[platformName][configName]			
+			end
+			if productBundleIdentifier then
+				table.insert(self.Contents, "\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = \"" .. productBundleIdentifier .. "\";\n")
+			end
+
+			-- Write PROVISIONING_PROFILE_SPECIFIER.
+			local provisioningProfileSpecifier
+			if subProject.PROVISIONING_PROFILE_SPECIFIER  and  subProject.PROVISIONING_PROFILE_SPECIFIER[platformName]  and  subProject.PROVISIONING_PROFILE_SPECIFIER[platformName][configName] then
+				provisioningProfileSpecifier = subProject.PROVISIONING_PROFILE_SPECIFIER[platformName][configName]
+			elseif Projects['C.*']  and  Projects['C.*'].PROVISIONING_PROFILE_SPECIFIER  and  Projects['C.*'].PROVISIONING_PROFILE_SPECIFIER[platformName]  and  Projects['C.*'].PROVISIONING_PROFILE_SPECIFIER[platformName][configName] then
+				provisioningProfileSpecifier = Projects['C.*'].PROVISIONING_PROFILE_SPECIFIER[platformName][configName]			
+			end
+			if provisioningProfileSpecifier then
+				table.insert(self.Contents, "\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = \"" .. provisioningProfileSpecifier .. "\";\n")
+			end
+
 			-- Write CODE_SIGN_ENTITLEMENTS.
 			local codeSignEntitlements
 			if subProject.XCODE_ENTITLEMENTS  and  subProject.XCODE_ENTITLEMENTS[platformName]  and  subProject.XCODE_ENTITLEMENTS[platformName][configName] then

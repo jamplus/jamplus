@@ -1128,6 +1128,45 @@ rule C.ios._SharedLibraryFromObjects_LinkFlags {
 }
 
 
+rule ios.ProvisionFile TARGET : FILENAME {
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+	local _provisionDir = $(FILENAME:D) ;
+	if $(_provisionDir) = "" {
+	    _provisionDir = $(SUBDIR) ;
+	}
+
+	local _provisionFileTarget = $(FILENAME:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+	SEARCH on $(_provisionFileTarget) = $(_provisionDir) ;
+	PROVISION_FILE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_provisionFileTarget) ;
+
+	_provisionFileTarget = $(_provisionFileTarget:T) ;
+
+	local bundleIdentifier ;
+	local provisioningProfileSpecifier ;
+	LuaString "
+		local pl = require 'plist'.read(jam_getvar('_provisionFileTarget')[1])
+		local prefix = pl.ApplicationIdentifierPrefix
+		local identifier = pl.Entitlements[\"application-identifier\"]
+		identifier = identifier:sub(#prefix[1] + 2)
+		jam_setvar('bundleIdentifier', identifier)
+		local name = pl.Name
+		jam_setvar('provisioningProfileSpecifier', name)
+	" ;
+	if $(bundleIdentifier) != * {
+		ios.BundleInfoString $(TARGET) : CFBundleIdentifier : $(bundleIdentifier) ;
+		CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleIdentifier) ;
+
+		if $(TARGETINFO_LOCATE) {
+			Contents += "Projects[ [[$(TARGET)]] ].PRODUCT_BUNDLE_IDENTIFIER[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(bundleIdentifier)]]
+" ;
+			Contents += "Projects[ [[$(TARGET)]] ].PROVISIONING_PROFILE_SPECIFIER[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(provisioningProfileSpecifier)]]
+" ;
+		}
+	}
+}
+
+
 if $(TARGETINFO_LOCATE) {
 
 rule ios.XIB {
@@ -1406,33 +1445,6 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_P
             jam_evaluaterule('ios.BundleInfoArrayEnd')
         end
 " ;
-}
-
-
-rule ios.ProvisionFile TARGET : FILENAME {
-	TARGET = [ C.ActiveTarget $(TARGET) ] ;
-
-	local _provisionDir = $(FILENAME:D) ;
-	if $(_provisionDir) = "" {
-	    _provisionDir = $(SUBDIR) ;
-	}
-
-	local _provisionFileTarget = $(FILENAME:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-	SEARCH on $(_provisionFileTarget) = $(_provisionDir) ;
-	PROVISION_FILE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_provisionFileTarget) ;
-
-	_provisionFileTarget = $(_provisionFileTarget:T) ;
-	local bundleIdentifier = [ LuaString "
-		local pl = require 'plist'.read(jam_getvar('_provisionFileTarget')[1])
-		local prefix = pl.ApplicationIdentifierPrefix
-		local identifier = pl.Entitlements[\"application-identifier\"]
-		identifier = identifier:sub(#prefix[1] + 2)
-		return identifier
-	" ] ;
-	if $(bundleIdentifier) != * {
-		ios.BundleInfoString $(TARGET) : CFBundleIdentifier : $(bundleIdentifier) ;
-		CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleIdentifier) ;
-	}
 }
 
 
