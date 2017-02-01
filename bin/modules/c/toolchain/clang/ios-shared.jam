@@ -793,6 +793,7 @@ rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH {
 	BINDING on $(_t) = $(BINDING:Z=$(LINK_TARGETS[0])) ;
 	Depends $(TARGET) : $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_t) : $(LINK_TARGETS) ;
 	MakeLocate $(_t) : $(OUTPUT_PATH) ;
+	UseCommandLine $(_t) : $(LINK_TARGETS) ;
 	Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_t) ;
 	C.ios._Lipo $(_t) : $(LINK_TARGETS) : $(C.COMPILER_SUITE_SYMBOL) ;
 	LIPO_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_t) ;
