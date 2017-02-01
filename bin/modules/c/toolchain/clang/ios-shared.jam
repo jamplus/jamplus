@@ -291,11 +291,11 @@ rule ios.SDK SDK_VERSION {
 			architecture = i386 ;
 	}
 
-	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.AR:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
-	C.CC on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.CC:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
-	C.C++ on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.C++:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
-	C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.LINK:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
-	C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = ;
+#	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.AR:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
+#	C.CC on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.CC:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
+#	C.C++ on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.C++:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
+#	C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.LINK:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
+#	C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = ;
 
 	C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(C.ARCHITECTURE:E=$(architecture)) ;
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;
@@ -695,7 +695,7 @@ rule ios.InfoPListFile TARGET : SOURCE {
 
 
 actions C.ios._GenerateDSYMFile {
-	@($(COMPILER_BIN_PATH)/dsymutil:C) $(2:C) -o $(OUTPUT_PATH:C)
+	$(C.DSYMUTIL:C) $(2:C) -o $(OUTPUT_PATH:C)
 }
 
 
@@ -1038,12 +1038,12 @@ rule C.ios._MultiCppCompile_SetupFlags {
 
 	_flags = $(_flags[1-4]) $(extraflags) $(_flags[5-]) ;
 
-	C.clang._MultiCppCompile_SetupFlags ;
+	C.$(C.COMPILER_SUITE)._MultiCppCompile_SetupFlags ;
 }
 
 
 rule C.ios._ApplicationFromObjects_LinkFlags {
-	linkRule = C.ios.clang.Link ;
+	linkRule = C.ios.$(C.COMPILER_SUITE).Link ;
 
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
@@ -1084,7 +1084,7 @@ rule C.ios._ApplicationFromObjects_LinkFlags {
 
 
 rule C.ios._LibraryFromObjects_LibFlags {
-	archiveRule = C.ios.clang.Archive ;
+	archiveRule = C.ios.$(C.COMPILER_SUITE).Archive ;
 
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
@@ -1095,7 +1095,7 @@ rule C.ios._LibraryFromObjects_LibFlags {
 
 
 rule C.ios._SharedLibraryFromObjects_LinkFlags {
-	linkRule = C.ios.clang.Link ;
+	linkRule = C.ios.$(C.COMPILER_SUITE).Link ;
 
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
@@ -1534,7 +1534,7 @@ actions ios._CodeSign
 
 actions ios._CodeSign
 {
-	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH)/codesign_allocate
+	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH_SECONDARY)/codesign_allocate
 	/usr/bin/codesign --force --no-strict --sign "$(SIGNING_IDENTITY)" --entitlements $(ENTITLEMENTS:CT) --timestamp=none $(BUNDLE_PATH)
 	touch $(1[1]:C)
 	touch $(DSYM_NAME:CT)

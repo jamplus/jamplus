@@ -1,0 +1,15 @@
+rule C.Toolchain.gcc.ios-shared {
+}
+
+
+actions updated together piecemeal C.ios.gcc.Archive {
+	$(C.AR:C) $(LIBFLAGS) $(<:C) $(>:C)
+}
+
+
+actions C.ios.gcc.Link {
+	$(C.LINK:C) -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:TC) $(LINKFLAGS)
+}
+
+
+C.Toolchain.clang.ios-shared ;

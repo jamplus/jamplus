@@ -1,0 +1,8 @@
+rule C.Toolchain.gcc.ios-releaseltcg {
+	C.Flags * : CC	: -g -O3 ;
+	C.Flags * : C++	: -g -O3 ;
+	C.Flags * : M	: -g -O3 ;
+	C.Flags * : MM	: -g -O3 ;
+
+	C.Toolchain.Helper.ReleaseSettings ;
+}
