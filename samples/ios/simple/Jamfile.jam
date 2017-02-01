@@ -13,7 +13,8 @@ C.ios.LinkFrameworks : Foundation UIKit ;
 ios.BundleInfo : displayname : simple ;
 ios.BundleInfo : bundleversion : 1.0 ;
 ios.BundleInfo : uistatusbarhidden : true ;
-ios.BundleInfo : identifier : com.jamplus.simple ;
+# The CFBundleIdentifier is automatically read from ios.ProvisionFile.
+#ios.BundleInfo : identifier : com.jamplus.simple ;
 
 ios.ProvisionFile : test.mobileprovision ;
 ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
