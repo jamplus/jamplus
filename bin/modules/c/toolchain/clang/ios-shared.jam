@@ -900,6 +900,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 		local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
 		local dependsList = [ DependsList $(bundleTarget) ] ;
+		dependsList = [ ListSort $(dependsList) ] ;
 
 		local codeResources = @(CodeResources:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 		MakeLocate $(codeResources) : $(bundlePath)/_CodeSignature ;
@@ -925,11 +926,12 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 
 			local dsym_name = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			DSYM_NAME on $(codeResources) $(linkTarget) = $(dsym_name) ;
-			ios._CodeSign $(codeResources) $(linkTarget) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
 
-			UseCommandLine $(codeResources) : $(dependsList) ;
+			UseCommandLine $(codeResources) : $(dependsList) $(dsym_name) ;
 			Depends $(bundleTarget) : $(codeResources) : $(dependsList) $(dsym_name) ;
 			Clean $(cleanBundleTarget) : $(codeResources) $(codeResourcesSymbolicLink) ;
+
+			ios._CodeSign $(codeResources) : $(dependsList) $(dsym_name) : $(C.COMPILER_SUITE_SYMBOL) ;
 		}
 	}
 
