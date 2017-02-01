@@ -1,2 +1,2 @@
-jam --workspace -gen=xcode -config=CreateJamXcodeWorkspace.config Jamfile.jam ../../../build/ipad/simple
+jam --workspace -gen=xcode -config=CreateJamXcodeWorkspace.config Jamfile.jam ../../../build/ios/simple
 
