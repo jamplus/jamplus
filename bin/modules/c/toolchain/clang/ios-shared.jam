@@ -942,7 +942,9 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 
 rule ios.Bundle TARGET : TOOLCHAINS {
 	TARGET = [ C.ActiveTarget $(TARGET) ] ;
-	local project = "Projects['$(TARGET)']" ;
+	local project = "Projects[ [[$(TARGET)]] ]" ;
+	local bundlePath = [ ios.GetBundlePath ] ;
+	Contents += "$(project).BUNDLE_PATH[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(bundlePath)]]$(NEWLINE)" ;
 	Contents += "if not $(project).Options then $(project).Options = {} end$(NEWLINE)" ;
 	Contents += "$(project).Options['bundle'] = true$(NEWLINE)" ;
 }

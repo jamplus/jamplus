@@ -574,7 +574,9 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 
 			table.insert(self.Contents, "\t\t\t\tPLATFORM = " .. platformName .. ";\n")
 			table.insert(self.Contents, "\t\t\t\tCONFIG = " .. configName .. ";\n")
-			if configInfo.OutputPath ~= '' then
+			if subProject.BUNDLE_PATH  and subProject.BUNDLE_PATH[platformName]  and  subProject.BUNDLE_PATH[platformName][configName]  then
+				table.insert(self.Contents, "\t\t\t\tCONFIGURATION_BUILD_DIR = \"" .. ospath.remove_slash(ospath.remove_filename(subProject.BUNDLE_PATH[platformName][configName])) .. "\";\n")
+			elseif configInfo.OutputPath ~= '' then
 				table.insert(self.Contents, "\t\t\t\tCONFIGURATION_BUILD_DIR = \"" .. ospath.remove_slash(configInfo.OutputPath) .. "\";\n")
 			end
 
