@@ -24,6 +24,7 @@ Running <b>jam --workspace --help</b> will list the help.
 <pre>
 jam --workspace
     [ -gen=<i>GENERATOR</i> ]
+    [ -platform=<i>PLATFORM</i> ]
     [ -compiler=<i>COMPILER</i> ]
     [ -config=<i>CONFIG</i> ]
     [ -jambaseflags=<i>KEY=VALUE</i> ]
@@ -72,6 +73,10 @@ jam --workspace
         <li> \c clang - Clang.
         <li> \c gcc - GCC.
       </ul>
+
+  <tr>
+    <td valign=top width=20%><code> -platform=<i>PLATFORM</i> </code>
+    <td> A list of platforms to generate the workspace for. List each additional platform with another <tt>-platform</tt> option. Corresponds to <tt>Config.Platforms</tt>.
 
   <tr>
     <td valign=top width=20%><code> -config=<i>CONFIG</i> </code>
