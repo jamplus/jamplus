@@ -176,8 +176,8 @@ function ProcessCommandLine()
 		getopt.Option {{"gen"}, "Set a project generator", "Req", 'GENERATOR'},
 		getopt.Option {{"gui"}, "Pop up a GUI to set options"},
 		getopt.Option {{"platform"}, "Set the default platform used to build with", "Req", 'PLATFORM'},
-		getopt.Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
 		getopt.Option {{"config"}, "Filename of additional configuration file", "Req", 'CONFIG'},
+		getopt.Option {{"compiler"}, "Set the default compiler used to build with", "Req", 'COMPILER'},
 		getopt.Option {{"jambaseflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMBASE_FLAGS', ProcessJambaseFlags },
 		getopt.Option {{"jamfileflags"}, "Extra flags to make available for each invocation of Jam.  Specify in KEY=VALUE form.", "Req", 'JAMFILE_FLAGS', ProcessJamfileFlags },
 		getopt.Option {{"jamexepath"}, "The full path to the Jam executable when the default location won't suffice.", "Req", 'JAMEXEPATH' },
@@ -186,7 +186,7 @@ function ProcessCommandLine()
 
 	function Usage()
 		print (table.concat (errors, "\n") .. "\n" ..
-				getopt.usageInfo ("Usage: jam --workspace [options] <source-jamfile> <path-to-destination>",
+				getopt.usageInfo ("Usage: jam --workspace [options] [[<source-jamfile>] <path-to-destination>]",
 				options))
 
 		local sortedExporters = {}
