@@ -19,7 +19,7 @@ Generation of a new IDE workspace is performed by running the command line:
     jam --workspace [options] <source-jamfile> <path-to-destination>
 </pre>
 
-Running <b>jam --workspace</b> without any command line options will list the help.
+Running <b>jam --workspace --help</b> will list the help.
 
 <pre>
 jam --workspace

@@ -172,6 +172,7 @@ function ProcessCommandLine()
 	end
 
 	local options = getopt.makeOptions{
+		getopt.Option {{"help"}, "Show this help listing"},
 		getopt.Option {{"gen"}, "Set a project generator", "Req", 'GENERATOR'},
 		getopt.Option {{"gui"}, "Pop up a GUI to set options"},
 		getopt.Option {{"platform"}, "Set the default platform used to build with", "Req", 'PLATFORM'},
@@ -245,7 +246,7 @@ function ProcessCommandLine()
 	opts.jamexepath = opts.jamexepath and opts.jamexepath[#opts.jamexepath]
 	opts.jambase = opts.jambase and opts.jambase[#opts.jambase]
 
-	if #errors > 0  or  (#nonOpts ~= 1  and  #nonOpts ~= 2) then
+	if #errors > 0  or  opts.help  or  (#nonOpts ~= 1  and  #nonOpts ~= 2) then
 		Usage()
 	end
 end
