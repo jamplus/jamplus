@@ -23,6 +23,25 @@ The generated Jamfile will need some basic clean up, and until the clean up has 
 
 
 
+\section generate Generate
+
+In the current directory, <tt>jam --generate</tt> writes a simple <tt>Jamfile.jam</tt> (if it does not already exist) with build instructions for the C/C++ source files residing in the directory.
+
+It is run like so:
+
+\code
+jam --generate
+\endcode
+
+The generated Jamfile may need some clean up.
+
+
+
+
+
+
+
+
 \section vcprojtojamfile VCProjToJamfile
 
 \b VCProjToJamfile is capable of reading a .vcproj file from Visual Studio 2003, 2005, or 2008, and writing a Jamfile bearing the folder structure and file contents of the .vcproj.
