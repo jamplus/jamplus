@@ -216,7 +216,7 @@ function ProcessCommandLine()
 
 	nonOpts, opts, errors = getopt.getOpt (arg, options)
 
-	opts.gen = opts.gen or { 'none' }
+	opts.gen = opts.gen or { DefaultExporter }
 	local ides = {}
 	local usedIdes = {}
 	for _, str in ipairs(opts.gen) do
@@ -245,6 +245,12 @@ function ProcessCommandLine()
 	end
 	opts.jamexepath = opts.jamexepath and opts.jamexepath[#opts.jamexepath]
 	opts.jambase = opts.jambase and opts.jambase[#opts.jambase]
+
+	if nonOpts[1] == nil then
+		nonOpts = { 'Jamfile.jam', '.build' }
+	elseif nonOpts[2] == nil then
+		nonOpts[#nonOpts + 1] = '.build'
+	end
 
 	if #errors > 0  or  opts.help  or  (#nonOpts ~= 1  and  #nonOpts ~= 2) then
 		Usage()
@@ -382,6 +388,14 @@ require 'ide/vs2013'
 require 'ide/vs2015'
 require 'ide/codeblocks'
 require 'ide/xcode'
+
+if uname == 'windows' then
+	DefaultExporter = 'vs2015'
+elseif uname == 'darwin' then
+	DefaultExporter = 'xcode'
+else
+	DefaultExporter = 'none'
+end
 
 Exporters =
 {
