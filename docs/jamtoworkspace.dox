@@ -25,8 +25,8 @@ Running <b>jam --workspace --help</b> will list the help.
 jam --workspace
     [ -gen=<i>GENERATOR</i> ]
     [ -platform=<i>PLATFORM</i> ]
-    [ -compiler=<i>COMPILER</i> ]
     [ -config=<i>CONFIG</i> ]
+    [ -compiler=<i>COMPILER</i> ]
     [ -jambaseflags=<i>KEY=VALUE</i> ]
     [ -jamfileflags=<i>KEY=VALUE</i> ]
     [ -jamexepath=<i>JAMEXEPATH</i> ]
@@ -80,7 +80,7 @@ jam --workspace
 
   <tr>
     <td valign=top width=20%><code> -config=<i>CONFIG</i> </code>
-	<td> Provides various configuration options to Jam's workspace generator.  <i>CONFIG</i> is the name of the configuration file.
+    <td> Provides various configuration options to Jam's workspace generator.  <i>CONFIG</i> is the name of the configuration file.
 
   <tr>
     <td valign=top width=20%><code> -jambaseflags=<i>KEY=VALUE</i> </code>
