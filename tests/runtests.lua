@@ -289,6 +289,8 @@ function TestDirectories(expectedDirs)
 		end
 		newExpectedDirs[#newExpectedDirs + 1] = dirName
 	end
+	expectedDirsMap['.build/'] = '?'
+	newExpectedDirs[#newExpectedDirs + 1] = '?.build/'
 
 	local foundDirsMap = {}
 	for entry in filefind.glob('**/') do
