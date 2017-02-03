@@ -8,6 +8,19 @@ Accessing the C module for the first time will auto-launch a reasonable default 
     jam C.TOOLCHAIN=win64/debug
 \endcode
 
+Replacing one of the <tt>C.TOOLCHAIN</tt> entries with a <tt>-</tt> (dash) will insert a reasonable default.
+
+\code
+    rem On Windows, use win64/debug.
+    jam C.TOOLCHAIN=-/debug
+
+    rem On Windows, use win32/release.
+    jam C.TOOLCHAIN=win32/-
+
+    rem On Windows, use win64/release, the same as running jam without a C.TOOLCHAIN option.
+    jam C.TOOLCHAIN=-/-
+\endcode
+
 Additionally, as a backward compatibility feature, passing <tt>PLATFORM=abc</tt> and <tt>CONFIG=defg</tt> will result in a toolchain called <tt>abc/defg</tt>.
 
 \code

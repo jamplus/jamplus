@@ -1783,25 +1783,43 @@ if ! $(C.ACTIVE_TOOLCHAIN_GRIST) {
 			VALID_PLATFORMS ?= linux64 linux32 ;
 	}
 
+	CONFIG ?= $(C.CONFIG) ;
+	PLATFORM ?= $(C.PLATFORM) ;
+	COMPILER ?= $(C.COMPILER) ;
+
+	CONFIG ?= $(VALID_CONFIGS[1]) ;
+
+	if $(PLATFORM) = "" { PLATFORM = ; }
+	PLATFORM ?= $(VALID_PLATFORMS[1]) ;
+
+	C.CONFIG ?= $(CONFIG) ;
+	C.PLATFORM ?= $(PLATFORM) ;
+	C.COMPILER ?= $(COMPILER) ;
+
+	C.TOOLCHAIN ?= $(c.toolchain) ;
 	if $(C.TOOLCHAIN) {
-		C.Toolchain $(C.TOOLCHAIN) ;
-	} else if $(c.toolchain) {
-		C.Toolchain $(c.toolchain) ;
+		local TOOLCHAIN_SPEC = $(C.TOOLCHAIN) ;
+		local TOOLCHAIN_SPEC_VALUES = [ Split $(TOOLCHAIN_SPEC) : "@" ] ;
+		local TOOLCHAIN_SPEC_OPTIONS = $(TOOLCHAIN_SPEC_VALUES[2-]) ;
+		TOOLCHAIN_SPEC_VALUES = $(TOOLCHAIN_SPEC_VALUES[1]) ;
+		TOOLCHAIN_SPEC_VALUES = [ Split $(TOOLCHAIN_SPEC_VALUES) : / ] ;
+		local newToolchainSpecValues ;
+		if $(TOOLCHAIN_SPEC_VALUES[1]) = "-" {
+			newToolchainSpecValues += $(C.PLATFORM) ;
+		} else {
+			newToolchainSpecValues += $(TOOLCHAIN_SPEC_VALUES[1]) ;
+		}
+		if $(TOOLCHAIN_SPEC_VALUES[2]) = "-" {
+			newToolchainSpecValues += $(C.CONFIG) ;
+		} else {
+			newToolchainSpecValues += $(TOOLCHAIN_SPEC_VALUES[2]) ;
+		}
+		newToolchainSpecValues += $(TOOLCHAIN_SPEC_VALUES[3-]) ;
+		C.TOOLCHAIN = $(newToolchainSpecValues:J=/) $(TOOLCHAIN_SPEC_OPTIONS) ;
+		C.TOOLCHAIN = $(C.TOOLCHAIN:J=@) ;
 	} else {
-		CONFIG ?= $(C.CONFIG) ;
-		PLATFORM ?= $(C.PLATFORM) ;
-		COMPILER ?= $(C.COMPILER) ;
-
-		CONFIG ?= $(VALID_CONFIGS[1]) ;
-
-		if $(PLATFORM) = "" { PLATFORM = ; }
-		PLATFORM ?= $(VALID_PLATFORMS[1]) ;
-
-		C.CONFIG ?= $(CONFIG) ;
-		C.PLATFORM ?= $(PLATFORM) ;
-		C.COMPILER ?= $(COMPILER) ;
-
-		C.Toolchain $(C.PLATFORM)/$(C.CONFIG) ;
+		C.TOOLCHAIN = $(C.PLATFORM)/$(C.CONFIG) ;
 	}
+	C.Toolchain $(C.TOOLCHAIN) ;
 }
 
