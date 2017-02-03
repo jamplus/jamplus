@@ -6,6 +6,7 @@ function Test()
         'Jamfile.jam',
     }
     TestFiles(cleanFiles)
+    TestDirectories({})
 
 	local run1pattern =
 	{

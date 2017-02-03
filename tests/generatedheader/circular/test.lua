@@ -24,15 +24,19 @@ function Test()
 		-- First build
 		local pattern = [[
 *** found 12 target(s)...
-*** updating 4 target(s)...
+*** updating 5 target(s)...
 Writing generated.h
 @ SleepThenTouch <$(TOOLCHAIN_GRIST):foo>generated.h
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.obj
 !NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):foo>foo.lib
-!NEXT!*** updated 4 target(s)...
+!NEXT!*** updated 5 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam{'foo'})
+
+		local pass1Directories = {
+			'$(TOOLCHAIN_PATH)/foo/',
+		}
 
 		local pass1Files =
 		{
@@ -41,18 +45,17 @@ Writing generated.h
 			'README',
 			'circularA.h',
 			'circularB.h',
-			'foo.lib',
 			'generated.h',
 			'sourceA.c',
-			'sourceA.obj',
 			'sourceB.c',
 			'sourceB.h',
-			'sourceB.obj',
-			'vc.pdb',
+			'$(TOOLCHAIN_PATH)/foo/foo.lib',
+			'$(TOOLCHAIN_PATH)/foo/sourceA.obj',
+			'$(TOOLCHAIN_PATH)/foo/sourceB.obj',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
 *** found 11 target(s)...
@@ -87,16 +90,20 @@ Writing generated.h
 		-- First build
 		local pattern = [[
 *** found 11 target(s)...
-*** updating 4 target(s)...
+*** updating 5 target(s)...
 Writing generated.h
 @ SleepThenTouch <$(TOOLCHAIN_GRIST):foo>generated.h 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceA.o 
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):foo>sourceB.o 
 @ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):foo>foo.a 
-!NEXT!*** updated 4 target(s)...
+!NEXT!*** updated 5 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam{ 'foo' })
+
+		local pass1Directories = {
+			'$(TOOLCHAIN_PATH)/foo/',
+		}
 
 		local pass1Files =
 		{
@@ -105,17 +112,17 @@ Writing generated.h
 			'README',
 			'circularA.h',
 			'circularB.h',
-			'foo.a',
 			'generated.h',
 			'sourceA.c',
-			'sourceA.o',
 			'sourceB.c',
 			'sourceB.h',
-			'sourceB.o',
+			'$(TOOLCHAIN_PATH)/foo/foo.a',
+			'$(TOOLCHAIN_PATH)/foo/sourceA.o',
+			'$(TOOLCHAIN_PATH)/foo/sourceB.o',
 		}
 
 		TestFiles(pass1Files)
-		TestDirectories(originalDirs)
+		TestDirectories(pass1Directories)
 
 		local pattern2 = [[
 *** found 11 target(s)...
