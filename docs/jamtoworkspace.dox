@@ -69,6 +69,7 @@ jam --workspace
         <li> \c vs2003 - Visual Studio 2003.
         <li> \c vc6 - Visual C++ 6.
         <li> \c mingw - MinGW.
+        <li> \c clang - Clang.
         <li> \c gcc - GCC.
       </ul>
 

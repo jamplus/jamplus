@@ -34,7 +34,8 @@ Compilers =
 	{ 'vs2003', 'Visual Studio 2003' },
 	{ 'vc6',	'Visual C++ 6' },
 	{ 'mingw',	'MinGW' },
-	{ 'gcc',	'gcc' },
+	{ 'clang',	'Clang' },
+	{ 'gcc',	'GCC' },
 }
 
 Config = {}
