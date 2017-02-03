@@ -546,7 +546,22 @@ rule ios.BundleInfo TARGET : TYPE : VALUE {
 				ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
 				ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 ;
 				ios.BundleInfoString : DTPlatformName : iphoneos ;
+				ios.BundleInfoString : DTPlatformVersion : $(sdkversion) ;
 				ios.BundleInfoString : DTSDKName : iphoneos$(sdkversion) ;
+				if ! $(NT) {
+					local xcodeVersions = [ Match "Xcode ([^$(NEWLINE)]*).*Build version ([^$(NEWLINE)]*)" : [ Shell "xcodebuild -version" ] ] ;
+					xcodeVersions = [ Subst $(xcodeVersions[1]) : "%." : "" ] $(xcodeVersions[2]) ;
+					xcodeVersions = 0$(xcodeVersions[1]) $(xcodeVersions[2]) ;
+					ios.BundleInfoString : DTXcode : $(xcodeVersions[1]) ;
+					ios.BundleInfoString : DTXcodeBuild : $(xcodeVersions[2]) ;
+
+					local sdkVersion = [ Match "([^$(NEWLINE)]*)" : [ Shell "xcrun --sdk iphoneos$(sdkversion) --show-sdk-build-version" ] ] ;
+					ios.BundleInfoString : DTSDKBuild : $(sdkVersion) ;
+					ios.BundleInfoString : DTPlatformBuild : $(sdkVersion) ;
+
+					local osVersion = [ Match "([^$(NEWLINE)]*)" : [ Shell "sw_vers -buildVersion" ] ] ;
+					ios.BundleInfoString : BuildMachineOSBuild : $(osVersion) ;
+				}
 				ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneOS ;
 				ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) ;
 				if $(TARGETINFO_LOCATE) {
@@ -591,7 +606,7 @@ rule ios.BundleInfo TARGET : TYPE : VALUE {
 		case identifier :
 			ios.BundleInfoString : CFBundleIdentifier : $(VALUE) ;
 			CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-		case shortversion :			ios.BundleInfoString : CFShortVersionString : $(VALUE) ;
+		case shortversion :			ios.BundleInfoString : CFBundleShortVersionString : $(VALUE) ;
 		case bundleversion :
 			ios.BundleInfoString : CFBundleVersion : $(VALUE) ;
 			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
