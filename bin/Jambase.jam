@@ -451,7 +451,7 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 
 	if ! $(DEPCACHE.$(DEPCACHE))  &&  ! $(JAM_NO_DEP_CACHE) {
 		DEPCACHE.$(DEPCACHE) = $(ALL_LOCATE_TARGET:E=.)/.depcache ;
-		Clean clean : $(DEPCACHE.$(DEPCACHE)) ;
+		Clean clean $(JAM_AUTOMATIC_BUILD_CLEAN_TARGET) : $(DEPCACHE.$(DEPCACHE)) ;
 	}
 
 	SEARCH_SOURCE = $(SUBDIR) ;
@@ -871,10 +871,24 @@ if [ Search $(JAMFILE) ] {
 } else if [ Search $(JAMFILE.LUA) ] {
 	LuaFile $(JAMFILE.LUA) ;
 } else {
-	local files = [ Glob . : *.c *.cpp *.m *.mm : 0 ] ;
+	TARGET ?= $(JAM_COMMAND_LINE_TARGETS[1]) ;
+	if $(TARGET) = all
+	{
+		TARGET = ;
+	}
+	local splitTarget = [ Split $(TARGET) : ":" ] ;
+	if $(splitTarget[1]) = clean
+	{
+		JAM_AUTOMATIC_BUILD_CLEAN_TARGET = $(TARGET) ;
+		TARGET = $(splitTarget[2]) ;
+	}
+	WILDCARDS ?= $(JAM_COMMAND_LINE_TARGETS[2-]) ;
+	WILDCARDS ?= *@=*.c@=*.cpp@=*.m@=*.mm ;
+	local files = $(WILDCARDS:W) ;
 	if ($(files[1])) {
-		local target = $(APPNAME:E=$(files[1]:B)) ;
+		local target = $(TARGET:E=$(files[1]:B)) ;
 		C.OutputPath $(target) : $(CWD) ;
 		C.Application $(target) : $(files) ;
+		JAM_COMMAND_LINE_TARGETS = $(JAM_COMMAND_LINE_TARGETS[1]:E=$(target)) ;
 	}
 }
