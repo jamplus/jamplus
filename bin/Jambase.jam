@@ -841,8 +841,11 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 	C.COMPILER ?= $(COMPILER) ;
 }
 
+JAMFILE.LUA ?= Jamfile.lua ;
 if [ Search $(JAMFILE) ] {
 	include $(JAMFILE) ;
+} else if [ Search $(JAMFILE.LUA) ] {
+	LuaFile $(JAMFILE.LUA) ;
 } else {
 	local files = [ Glob . : *.c *.cpp *.m *.mm : 0 ] ;
 	if ($(files[1])) {
