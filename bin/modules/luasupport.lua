@@ -2,8 +2,7 @@ jam = {}
 
 setmetatable(jam, {
     __index = function(t, key)
-        --print('Generating ' .. key)
-        if jam_evaluaterule('RuleExists', key)[1] == 'true' then
+        if jam_evaluaterule('RuleExists', key, '1')[1] == 'true' then
             local f = function(...)
                 return jam_evaluaterule(key, ...)
             end
