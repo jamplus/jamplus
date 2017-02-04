@@ -999,6 +999,7 @@ void ls_lua_init()
         }
     }
 
+    if (ruleexists("LuaSupport"))
     {
         LOL lol;
         LIST *result;
