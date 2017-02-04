@@ -541,7 +541,31 @@ rule SubInclude TOKENS : FILENAME
 	SubDir $(TOKENS) ;
 
 	CURRENT_JAMFILE = $(jamfile:R=$(SUBDIR)) ;
-	include $(CURRENT_JAMFILE) ;
+	if [ Search $(CURRENT_JAMFILE) ]
+	{
+		include $(CURRENT_JAMFILE) ;
+	}
+	else
+	{
+		local jamfile.lua ;
+		if $(FILENAME)
+		{
+			jamfile.lua = $(FILENAME:S=.lua) ;
+		}
+		else
+		{
+			jamfile.lua = $(JAMFILE.LUA) ;
+		}
+		jamfile.lua = $(jamfile.lua:R=$(SUBDIR)) ;
+		if [ Search $(jamfile.lua) ]
+		{
+			LuaFile $(jamfile.lua) ;
+		}
+		else
+		{
+			Exit * Unable to find $(CURRENT_JAMFILE). ;
+		}
+	}
 
 	__SubIncludeStackIndex = [ Math $(__SubIncludeStackIndex) - 1 ] ;
 
