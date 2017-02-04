@@ -11,6 +11,8 @@ When the Jam executable is run, it reads a file called <tt>Jamfile.jam</tt> in t
 <hr>
 \section quick_start_00 Tutorial 0: Use Jam to Build Simple Applications
 
+\subsection quick_start_00_simple_helloworld Building helloworld
+
 For this tutorial, we are going to make a basic \b helloworld application.
 
 First, we need to create a <tt>helloworld.c</tt> file.  It will do nothing more than print <b>Hello, world!</b> to the user.
@@ -29,22 +31,43 @@ int main()
 Straight out of the box, you can run <tt>jam</tt> within the directory of <tt>helloworld.c</tt>, and Jam will build a <tt>helloworld</tt> executable using all of the <tt>*.c</tt>, <tt>*.cpp</tt>, <tt>*.m</tt>, and <tt>*.mm</tt> files in the directory.
 
 \code
-# Build the executable.
+# helloworld.exe (or the equivalent) is generated. It might not be named helloworld.exe, because
+# the first source file title in the directory is used as the executable name.
 jam
+
+# Remove the executable and all intermediate files.
+jam clean
 
 # helloworld.exe (or the equivalent) is generated. It might not be named helloworld.exe, because
 # the first source file title in the directory is used as the executable name. To override this,
-# use APPNAME=helloworld on the command-line:
-jam APPNAME=helloworld
+# add helloworld to the command-line:
+jam helloworld
 
-# Remove helloworld.exe (or the equivalent) and all intermediate files.
-jam clean
+# Remove the helloworld executable and all intermediate files.
+jam clean:helloworld
 \endcode
 
-While this is a convenient Jam feature, generally a more complex build is needed. We'll make one of those next.
+While this is a convenient Jam feature, generally a more complex build is needed. We'll make one of those in \ref quick_start_01.
 
 
 
+
+\subsection quick_start_00_lua Building Lua 5.3
+
+For this tutorial, we are going to quickly build Lua 5.3 using Jam.
+
+First, download Lua from http://lua.org/. Expand it into a directory, and change to that directory.
+
+\code
+cd src
+
+# Build the Lua executable by globbing all *.c file but removing luac.c from the list.
+# We don't want two main() functions.
+jam lua *.c@-luac.c
+
+# Clean the Lua executable and intermediates.
+jam clean:lua *.c@-luac.c
+\endcode
 
 
 
@@ -163,6 +186,50 @@ At this point, build as you normally would.  Change between the Debug and Releas
 
 
 
+<hr>
+\section quick_start_02 Building Lua 5.3 with a Jamfile
+
+For this tutorial, we'll create a Jamfile to build Lua 5.3 using Jam.
+
+First, download Lua from http://lua.org/. Expand it into a directory, and change to that directory's <tt>src/</tt> folder.
+
+\code
+cd src
+\endcode
+
+Now, create a <tt>Jamfile.jam</tt> with the following contents:
+
+\code
+# Annoyingly, "lua" must be quoted, because it is a keyword in Jam.
+# Also annoyingly, luac.c must be removed from the list with a recursive wildcard.
+# This will be fixed in the future.
+C.Application "lua" : *.c@-**/luac.c ;
+
+C.Application luac : *.c@-**/lua.c ;
+\endcode
+
+From the command-line, build Lua with:
+
+\code
+jam lua
+\endcode
+
+Clean Lua with:
+
+\code
+# Clean everything.
+jam clean
+
+# OR clean just the Lua target.
+jam clean:lua
+\endcode
+
+
+
+
+
+
+<hr>
 <hr>
 \section quick_start_02 Tutorial 2: Hello World! (statically linked)
 
