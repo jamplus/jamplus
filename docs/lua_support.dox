@@ -2,14 +2,15 @@
 
 \section lua_support_overview Overview
 
-JamPlus has built in Lua support, provided through a minimal distribution of LuaPlus (http://luaplus.org/).  Lua scripts may be run during the \ref operation_parsing and during the \ref operation_updating.
+JamPlus has built-in Lua support, provided through a minimal distribution of LuaPlus (http://luaplus.org/) using Lua 5.3.  Lua scripts may be run during the \ref operation_parsing and during the \ref operation_updating.
 
-The scripts located in <tt>bin/scripts/</tt> are written in Lua, although they are executed external to the Jam executable.
-
+JamPlus also utilizes Lua scripts located in <tt>bin/scripts/</tt>, but these are executed external to the Jam executable and not as part of the build process.
 
 
 <hr>
 \section lua_support_rules Using Lua during the Parsing Phase
+
+If a <tt>Jamfile.lua</tt> file is present instead of a <tt>Jamfile.jam</tt>, Lua execution of <tt>Jamfile.lua</tt> happens automatically.
 
 There are two rules for execution of Lua script available for use during the rule parsing phase of JamPlus.  They are \ref rule_LuaString and \ref rule_LuaFile.
 
@@ -20,7 +21,7 @@ There are two rules for execution of Lua script available for use during the rul
 
 Executes \c LUA_SCRIPT, returning any results back to the caller.
 
-\param LUA_SCRIPT Syntactically correct Lua script embedded in a string.  Only the first string list item is executed.
+\param LUA_SCRIPT Syntactically correct Lua script embedded in a string.  Only the first string list item is executed. Please note that double quotes should be escaped.
 \return If the Lua script doesn't return any values, the return value is an empty list.  If the Lua script does return values, the return values are transformed to a Jam string list.  Nested tables are collapsed.
 
 \htmlonly </blockquote> \endhtmlonly
@@ -50,7 +51,7 @@ Executes \c LUA_FILENAME, returning any results back to the caller.
 <hr>
 \section lua_support_actions Using Lua in Actions
 
-Using the new <tt>lua</tt> modifier for an action, Lua script can be run in a thread within the Jam process.
+Using the <tt>lua</tt> modifier for an action, Lua script can be run in a thread within the Jam process.
 
 \htmlonly <blockquote> \endhtmlonly
 \code
@@ -117,15 +118,9 @@ For example, in the <tt>LineFilters.Compiler</tt> function and action below, a G
 <hr>
 \section lua_support_module_jam Accessing Jam from Lua
 
-Within a Lua script, it is possible to access Jam variables and execute Jam rules. A special Jam module and accompanying Lua script, both found in <tt>bin/modules/luasupport.*</tt> provide some extra ease of use over the direct calling conventions seen in the next section.
+Within a Lua script, it is possible to access Jam variables and execute Jam rules.
 
-To make this support available within your Jam scripts, execute the following:
-
-\code
-    LuaSupport ;
-\endcode
-
-From this point on, several new Jam-related namespaces become available in Lua accessed by \c jam, \c jamtarget, and \c jamvar. By indexing members of those namespaces from Lua, that functionality of Jam feels more seamlessly integrated. However, in the section below, a more rich API lets you access most Jam functionality.
+Upon first encountering a <tt>Jamfile.lua</tt> or using \ref rule_LuaFile or \ref rule_LuaString, several Jam-related namespaces become available in Lua accessible via the namespaces \c jam, \c jamtarget, and \c jamvar. Also, described in the section below, a more rich API lets you access most Jam functionality.
 
 To read or write from any variables currently within scope in Jam, use the Lua-provided \c jamvar table.
 
