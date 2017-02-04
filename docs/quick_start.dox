@@ -211,7 +211,17 @@ C.Application luac : *.c@-**/lua.c ;
 From the command-line, build Lua with:
 
 \code
+# Build both lua and luac.
+jam
+
+# Build both lua and luac.
+jam all
+
+# Build just lua.
 jam lua
+
+# Build just luac.
+jam luac
 \endcode
 
 Clean Lua with:
@@ -220,8 +230,11 @@ Clean Lua with:
 # Clean everything.
 jam clean
 
-# OR clean just the Lua target.
+# OR clean just the lua target.
 jam clean:lua
+
+# OR clean just the luac target.
+jam clean:luac
 \endcode
 
 
