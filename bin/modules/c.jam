@@ -1769,33 +1769,6 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 ########################################################################
 
 if ! $(C.ACTIVE_TOOLCHAIN_GRIST) {
-	VALID_CONFIGS ?= release releaseltcg debug ;
-
-	switch $(OS)
-	{
-		case NT :
-			VALID_PLATFORMS ?= win64 win32 ;
-
-		case MACOSX :
-			VALID_PLATFORMS ?= macosx64 macosx32 ;
-
-		case LINUX :
-			VALID_PLATFORMS ?= linux64 linux32 ;
-	}
-
-	CONFIG ?= $(C.CONFIG) ;
-	PLATFORM ?= $(C.PLATFORM) ;
-	COMPILER ?= $(C.COMPILER) ;
-
-	CONFIG ?= $(VALID_CONFIGS[1]) ;
-
-	if $(PLATFORM) = "" { PLATFORM = ; }
-	PLATFORM ?= $(VALID_PLATFORMS[1]) ;
-
-	C.CONFIG ?= $(CONFIG) ;
-	C.PLATFORM ?= $(PLATFORM) ;
-	C.COMPILER ?= $(COMPILER) ;
-
 	C.TOOLCHAIN ?= $(c.toolchain) ;
 	if $(C.TOOLCHAIN) {
 		local TOOLCHAIN_SPEC = $(C.TOOLCHAIN) ;
