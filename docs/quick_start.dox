@@ -9,16 +9,14 @@ When the Jam executable is run, it reads a file called <tt>Jamfile.jam</tt> in t
 
 
 <hr>
-\section quick_start_01 Tutorial 1: Hello World!
-
-\subsection quick_start_01_setup Initial Setup
+\section quick_start_00 Tutorial 0: Use Jam to Build Simple Applications
 
 For this tutorial, we are going to make a basic \b helloworld application.
 
-First, we need to create a <tt>main.c</tt> file.  It will do nothing more than print <b>Hello, world!</b> to the user.
+First, we need to create a <tt>helloworld.c</tt> file.  It will do nothing more than print <b>Hello, world!</b> to the user.
 
 \code
-/* main.c */
+/* helloworld.c */
 #include <stdio.h>
 
 int main()
@@ -28,17 +26,62 @@ int main()
 }
 \endcode
 
-In the same directory as <tt>main.c</tt>, we need to create <tt>Jamfile.jam</tt> with the description of how to build the basic \b helloworld application.
+Straight out of the box, you can run <tt>jam</tt> within the directory of <tt>helloworld.c</tt>, and Jam will build a <tt>helloworld</tt> executable using all of the <tt>*.c</tt>, <tt>*.cpp</tt>, <tt>*.m</tt>, and <tt>*.mm</tt> files in the directory.
+
+\code
+# Build the executable.
+jam
+
+# helloworld.exe (or the equivalent) is generated. It might not be named helloworld.exe, because
+# the first source file title in the directory is used as the executable name. To override this,
+# use APPNAME=helloworld on the command-line:
+jam APPNAME=helloworld
+
+# Remove helloworld.exe (or the equivalent) and all intermediate files.
+jam clean
+\endcode
+
+While this is a convenient Jam feature, generally a more complex build is needed. We'll make one of those next.
+
+
+
+
+
+
+
+
+
+<hr>
+\section quick_start_01 Tutorial 1: Hello World!
+
+\subsection quick_start_01_setup Initial Setup
+
+For this tutorial, we are going to make a basic \b helloworld application.
+
+First, we need to create a <tt>helloworld.c</tt> file.  It will do nothing more than print <b>Hello, world!</b> to the user.
+
+\code
+/* helloworld.c */
+#include <stdio.h>
+
+int main()
+{
+    printf("Hello, world!\n");
+    return 0;
+}
+\endcode
+
+In the same directory as <tt>helloworld.c</tt>, we also need to create <tt>Jamfile.jam</tt> with the description of how to build the basic \b helloworld application.
 
 \code
 # This file is Jamfile.jam.
 #
 # Please note that Jam tokens are whitespace separated.  Even the semicolon
 # delineating the end of statements has whitespace before it.
-SubDir TOP ;
-
-C.Application helloworld : main.c ;
+C.Application helloworld : helloworld.c ;
 \endcode
+
+
 
 \subsection quick_start_01_compiling Compiling the Tutorial
 
@@ -95,23 +138,23 @@ jam C.TOOLCHAIN=-/debug clean
 
 One of the exciting features of JamPlus is its ability to build IDE workspaces for Visual Studio or Xcode or others.  It does so with a set of scripts that are present in the JamPlus <tt>bin/</tt> directory.  These scripts create an out-of-source build tree optimized for best performance within JamPlus.  By being out-of-source, the source tree remains pristine, and all compiler intermediates are stored in a separate location.
 
-For the \b helloworld application, let's build a Visual Studio 2015 solution.
+For the \b helloworld application, let's build a Visual Studio 2015 solution on Windows or an Xcode workspace on macOS.
+
+\code
+jam --workspace
+\endcode
+
+It may be preferable to output to a different directory than <tt>.build/</tt>.
 
 \code
 jam --workspace --gen=vs2015 Jamfile.jam build
 \endcode
 
-On Mac OS X, you can build an Xcode workspace:
-
-\code
-jam --workspace --gen=xcode Jamfile.jam build
-\endcode
-
-After running <tt>jam --workspace</tt>, the new out-of-source work area will have been created.  Inside the generated <tt>01-helloworld/build/_workspaces_/IDE/</tt> directory, you'll find a <tt>helloworld.sln</tt>.  Open this file in Visual Studio to proceed.
+After running <tt>jam --workspace</tt>, the new out-of-source work area will have been created.  Inside the generated <tt>build/_workspaces_/IDE/</tt> directory, you'll find a <tt>helloworld.sln</tt>.  Open this file in Visual Studio to proceed.
 
 When Visual Studio has loaded the <tt>helloworld.sln</tt>, you'll find it contains the \b helloworld project within the Solution Explorer.  If the \b helloworld project is not already the active project, right click on it and choose <b>Set as StartUp Project</b>.
 
-On Mac OS X, you'll find the appropriate .xcodeproj as <tt>01-helloworld/build/_workspaces_/xcode/helloworld.xcworkspace</tt>.  Open this project file in Xcode, and choose the appropriate scheme (such as <tt>helloworld-release</tt>).
+On Mac OS X, you'll find the appropriate .xcodeproj as <tt>build/_workspaces_/xcode/helloworld.xcworkspace</tt>.  Open this project file in Xcode, and choose the appropriate scheme (such as <tt>helloworld-release</tt>).
 
 At this point, build as you normally would.  Change between the Debug and Release configurations if you'd like.  In fact, you can even debug as if the project were manually created!
 

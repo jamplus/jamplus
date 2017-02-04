@@ -841,4 +841,13 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 	C.COMPILER ?= $(COMPILER) ;
 }
 
-include $(JAMFILE) ;
+if [ Search $(JAMFILE) ] {
+	include $(JAMFILE) ;
+} else {
+	local files = [ Glob . : *.c *.cpp *.m *.mm : 0 ] ;
+	if ($(files[1])) {
+		local target = $(APPNAME:E=$(files[1]:B)) ;
+		C.OutputPath $(target) : $(CWD) ;
+		C.Application $(target) : $(files) ;
+	}
+}
