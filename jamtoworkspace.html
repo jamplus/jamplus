@@ -23,23 +23,24 @@ Overview</h1>
 Usage</h1>
 <p>Generation of a new IDE workspace is performed by running the command line:</p>
 <pre>
-    jam --workspace [options] &lt;source-jamfile&gt; &lt;path-to-destination&gt;
-</pre><p>Running <b>jam &ndash;workspace</b> without any command line options will list the help.</p>
+    jam --workspace [options] [[&lt;source-jamfile&gt;] &lt;path-to-destination&gt;]
+</pre><p>Running <b>jam &ndash;workspace &ndash;help</b> will list the help.</p>
 <pre>
 jam --workspace
     [ -gen=<em>GENERATOR</em> ]
-    [ -compiler=<em>COMPILER</em> ]
+    [ -platform=<em>PLATFORM</em> ]
     [ -config=<em>CONFIG</em> ]
+    [ -compiler=<em>COMPILER</em> ]
     [ -jambaseflags=<em>KEY=VALUE</em> ]
     [ -jamfileflags=<em>KEY=VALUE</em> ]
     [ -jamexepath=<em>JAMEXEPATH</em> ]
     [ -jambase=<em>JAMBASEFULLPATH</em> ]
-    <em>source-jamfile</em>
+    [ <em>source-jamfile</em> ]
     [ <em>path-to-destination</em> ]
 </pre><p><b>jam &ndash;workspace</b> may be invoked with the following options:</p>
 <table  width="85%" align="center" border="1" cellpadding="2">
 <tr>
-<td valign="top" width="20%"><code> -gen=<em>GENERATOR</em> </code> </td><td><p class="starttd">Sets an IDE workspace and project generator. <em>GENERATOR</em> may be one of the following: </p><ul>
+<td valign="top" width="20%"><code> -gen=<em>GENERATOR</em> </code> </td><td><p class="starttd">(optional) Sets an IDE workspace and project generator. <em>GENERATOR</em> may be one of the following: </p><ul>
 <li>
 <code>codeblocks</code> - Generates CodeBlocks workspaces and projects. </li>
 <li>
@@ -59,9 +60,9 @@ jam --workspace
 <li>
 <code>vs2013</code> - Generates Visual Studio 2013 solutions and projects. </li>
 <li>
-<code>vs2015</code> - Generates Visual Studio 2015 solutions and projects. </li>
+<code>vs2015</code> - (default on Windows) Generates Visual Studio 2015 solutions and projects. </li>
 <li>
-<code>xcode</code> - Generates Xcode workspaces and projects. </li>
+<code>xcode</code> - (default on macOS) Generates Xcode workspaces and projects. </li>
 </ul>
 <p class="endtd"></p>
 </td></tr>
@@ -87,8 +88,14 @@ jam --workspace
 <li>
 <code>mingw</code> - MinGW. </li>
 <li>
+<code>clang</code> - Clang. </li>
+<li>
 <code>gcc</code> - GCC. </li>
 </ul>
+<p class="endtd"></p>
+</td></tr>
+<tr>
+<td valign="top" width="20%"><code> -platform=<em>PLATFORM</em> </code> </td><td><p class="starttd">A list of platforms to generate the workspace for. List each additional platform with another <code>-platform</code> option. Corresponds to <code>Config.Platforms</code>.</p>
 <p class="endtd"></p>
 </td></tr>
 <tr>
@@ -115,13 +122,12 @@ jam --workspace -jambase=c:/myapp/build/jam/NewJambase.jam ...
 </pre><p class="endtd"></p>
 </td></tr>
 <tr>
-<td valign="top" width="20%"><code> source-jamfile </code> </td><td><p class="starttd">The path to the Jamfile to start building the workspace from. If only the directory is specified, then Jam attempts to load a file named <code>Jamfile.jam</code> from the given directory. If <em>source-jamfile</em> is a directory with filename, such as <code>../Game/Pong.jam</code>, then the specified Jamfile is loaded.</p>
+<td valign="top" width="20%"><code> source-jamfile </code> </td><td><p class="starttd">(optional) The path to the Jamfile to start building the workspace from. If this option isn't provided or only the directory is specified, then Jam attempts to load a file named <code>Jamfile.jam</code> from the given directory. If <em>source-jamfile</em> is a directory with filename, such as <code>../Game/Pong.jam</code>, then the specified Jamfile is loaded.</p>
 <p class="endtd"></p>
 </td></tr>
 <tr>
-<td valign="top" width="20%"><code> path-to-destination </code> </td><td>(optional) If <em>path-to-destination</em> is specified, then the build tree will be generated into <em>path-to-destination</em>. If <em>path-to-destination</em> is not specified, the build tree is generated into the current working directory. </td></tr>
+<td valign="top" width="20%"><code> path-to-destination </code> </td><td>(optional) If <em>path-to-destination</em> is specified, then the build tree will be generated into <em>path-to-destination</em>. If <em>path-to-destination</em> is not specified, the build tree is generated off of the current working directory in a directory called <code>.build/</code>. </td></tr>
 </table>
-<p>Minimally, Jam requires the <code>-gen</code> parameter and <code>source-jamfile</code>.</p>
 <p>Assuming a source tree of:</p>
 <ul>
 <li><code>helloworld/</code><ul>
