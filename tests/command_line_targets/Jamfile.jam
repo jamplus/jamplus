@@ -1,11 +1,10 @@
 SubDir TOP ;
 
+local target ;
 for target in $(JAM_COMMAND_LINE_TARGETS) {
 	target = [ Split $(target) : \: ] ;
 	ACTIVE_TARGETS.$(target[1]) += $(target[2]:E=1) ;
 }
-
-local all_clean = all clean ;
 
 if $(ACTIVE_TARGETS.all)  ||  $(ACTIVE_TARGETS.appA)  ||  appA in $(ACTIVE_TARGETS.clean)  ||  1 in $(ACTIVE_TARGETS.clean) {
 	Echo Building appA... ;
