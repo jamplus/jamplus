@@ -1340,7 +1340,7 @@ builtin_expandfilelist(
     for (file = list_first(files) ; file; file = list_next(file) ) {
 		int wildcard = 0;
 		const char* ptr = list_value(file);
-		while ( *ptr ) {
+		while ( *ptr  &&  *ptr != '@' ) {
 			if ( *ptr == '*'  ||  *ptr == '?' ) {
 				wildcard = 1;
 				break;
