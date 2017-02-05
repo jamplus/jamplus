@@ -27,6 +27,7 @@ INPUT             = \
 		checksum_builds.dox \
 		changelog.dox \
 		dependency_cache.dox \
+		examples.dox \
 		file_cache.dox \
 		improvements.dox \
 		jam_language.dox \

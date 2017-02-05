@@ -1,0 +1,202 @@
+/*! \page examples Examples
+
+\section examples_overview Overview
+
+Detailed on this page are various examples with descriptions on how JamPlus can be made to work for your environment.
+
+
+
+<hr>
+\section examples_building_lua Building Lua 5.3
+
+In this example, we are going to quickly build Lua 5.3 using Jam.
+
+First, download Lua from http://lua.org/. Expand it into a directory, and change to the expanded Lua directory's <tt>src/<tt> folder.
+
+\code
+[lua] cd src
+[lua/src]
+\endcode
+
+
+\subsection examples_building_lua_quick Building without a Jamfile
+
+\code
+# Build the Lua executable by globbing all *.c file but removing luac.c from the list.
+# Both lua.c and luac.c provide main() functions, and we only want one.
+[lua/src] jam lua *.c@-luac.c
+
+# Clean the Lua executable and intermediates. As there is no Jamfile.jam in the directory,
+# the same wildcard file hint used in the build above must be provided to the clean target.
+[lua/src] jam clean:lua *.c@-luac.c
+\endcode
+
+
+
+
+
+
+<hr>
+\subsection examples_building_lua_jamfile_static Building a statically-linked Lua 5.3 with a Jamfile
+
+In this example, we'll create a Jamfile to build Lua 5.3 using Jam.
+
+Now, create a <tt>Jamfile.jam</tt> with the following contents:
+
+\code
+# Annoyingly, because "lua" is a keyword in Jam, "lua" must be quoted as the target name for C.Application.
+# Also annoyingly, luac.c must be removed from the list with a recursive wildcard.
+# This will be fixed in the future.
+
+# Provide the build instructions for the lua target.
+C.Application "lua" : *.c@-**/luac.c ;
+
+# Provide the build instructions for the luac target.
+C.Application luac : *.c@-**/lua.c ;
+\endcode
+
+From the command-line, build Lua with:
+
+\code
+# Build both lua and luac.
+[lua/src] jam
+
+# Build both lua and luac.
+[lua/src] jam all
+
+# Build just lua.
+[lua/src] jam lua
+
+# Build just luac.
+[lua/src] jam luac
+\endcode
+
+After the build is complete, a <tt>lua.exe</tt> (and, possibly, <tt>luac.exe</tt>) will exist in the <tt>lua/src</tt> directory. Additionally, build intermediates can be found in the <tt>lua/src/.build/</tt> directory.
+
+Clean Lua with:
+
+\code
+# Clean everything.
+[~/lua/src] jam clean
+
+# OR clean just the lua target.
+[~/lua/src] jam clean:lua
+
+# OR clean just the luac target.
+[~/lua/src] jam clean:luac
+\endcode
+
+
+
+
+
+<hr>
+\subsection examples_building_lua_jamfile_static Building a dynamically-linked Lua 5.3 with a Jamfile
+
+In this example, we'll create a Jamfile to build Lua 5.3 using Jam.
+
+Now, create a <tt>Jamfile.jam</tt> with the following contents:
+
+\code
+# List out the source files individually for this example.
+# A wildcard such as this could have been used:
+#    *@-**/lua.c@-**/luac.c
+local LUA53_SRCS =
+        lapi.c
+        lapi.h
+        lauxlib.c
+        lauxlib.h
+        lbaselib.c
+        lbitlib.c
+        lcode.c
+        lcode.h
+        lcorolib.c
+        lctype.c
+        lctype.h
+        ldblib.c
+        ldebug.c
+        ldebug.h
+        ldo.c
+        ldo.h
+        ldump.c
+        lfunc.c
+        lfunc.h
+        lgc.c
+        lgc.h
+        linit.c
+        liolib.c
+        llex.c
+        llex.h
+        llimits.h
+        lmathlib.c
+        lmem.c
+        lmem.h
+        loadlib.c
+        lobject.c
+        lobject.h
+        lopcodes.c
+        lopcodes.h
+        loslib.c
+        lparser.c
+        lparser.h
+        lstate.c
+        lstate.h
+        lstring.c
+        lstring.h
+        lstrlib.c
+        ltable.c
+        ltable.h
+        ltablib.c
+        ltm.c
+        ltm.h
+        lua.h
+        lua.hpp
+        luaconf.h
+        lualib.h
+        lundump.c
+        lundump.h
+        lutf8lib.c
+        lvm.c
+        lvm.h
+        lzio.c
+        lzio.h
+;
+
+# Tell Lua's code to export the appropriate functions to the DLL.
+C.Defines : LUA_BUILD_AS_DLL ;
+
+# Write lua53.dll into the current directory.
+C.OutputPath lua53 : . ;
+C.Library lua53 : $(LUA53_SRCS) : shared ;
+
+# Build lua.exe into the current directory.
+C.OutputPath "lua" : . ;
+
+# Link against the target lua53.
+C.LinkLibraries "lua" : lua53 ;
+C.Application "lua" : lua.c ;
+\endcode
+
+From the command-line, build Lua with:
+
+\code
+[lua/src] jam
+\endcode
+
+After the build is complete, a <tt>lua.exe</tt> and <tt>lua53.dll</tt> (or your platform equivalent) will reside in the <tt>lua/src</tt> directory. Build intermediates can be found in the <tt>lua/src/.build/</tt> directory.
+
+Clean Lua with:
+
+\code
+# Clean everything.
+[~/lua/src] jam clean
+\endcode
+
+
+
+
+
+
+
+
+*/

@@ -52,28 +52,6 @@ While this is a convenient Jam feature, generally a more complex build is needed
 
 
 
-\subsection quick_start_00_lua Building Lua 5.3
-
-For this tutorial, we are going to quickly build Lua 5.3 using Jam.
-
-First, download Lua from http://lua.org/. Expand it into a directory, and change to that directory.
-
-\code
-cd src
-
-# Build the Lua executable by globbing all *.c file but removing luac.c from the list.
-# We don't want two main() functions.
-jam lua *.c@-luac.c
-
-# Clean the Lua executable and intermediates.
-jam clean:lua *.c@-luac.c
-\endcode
-
-
-
-
-
-
 <hr>
 \section quick_start_01 Tutorial 1: Hello World!
 
@@ -185,67 +163,5 @@ At this point, build as you normally would.  Change between the Debug and Releas
 
 
 
-
-<hr>
-\section quick_start_02 Building Lua 5.3 with a Jamfile
-
-For this tutorial, we'll create a Jamfile to build Lua 5.3 using Jam.
-
-First, download Lua from http://lua.org/. Expand it into a directory, and change to that directory's <tt>src/</tt> folder.
-
-\code
-cd src
-\endcode
-
-Now, create a <tt>Jamfile.jam</tt> with the following contents:
-
-\code
-# Annoyingly, "lua" must be quoted, because it is a keyword in Jam.
-# Also annoyingly, luac.c must be removed from the list with a recursive wildcard.
-# This will be fixed in the future.
-C.Application "lua" : *.c@-**/luac.c ;
-
-C.Application luac : *.c@-**/lua.c ;
-\endcode
-
-From the command-line, build Lua with:
-
-\code
-# Build both lua and luac.
-jam
-
-# Build both lua and luac.
-jam all
-
-# Build just lua.
-jam lua
-
-# Build just luac.
-jam luac
-\endcode
-
-Clean Lua with:
-
-\code
-# Clean everything.
-jam clean
-
-# OR clean just the lua target.
-jam clean:lua
-
-# OR clean just the luac target.
-jam clean:luac
-\endcode
-
-
-
-
-
-
-<hr>
-<hr>
-\section quick_start_02 Tutorial 2: Hello World! (statically linked)
-
-This tutorial is nearly identical to Tutorial 1, except we are going to statically link the C runtime.
 
 */

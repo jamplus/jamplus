@@ -23,6 +23,7 @@ A sampling of the features in the JamPlus distribution follows:
 <h2>Contents</h2>
 
 - \subpage quick_start gets you up and running quickly.
+- \subpage examples shows various simple JamPlus build techniques.
 - \subpage building shows how to build JamPlus.
 - \subpage jamtoworkspace tells how to use JamToWorkspace to create Visual Studio and other IDE workspaces.
 - \subpage usage shows the command-line features of JamPlus.
