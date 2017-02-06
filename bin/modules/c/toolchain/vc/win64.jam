@@ -9,6 +9,8 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
     local MSSDK_BINDIR ;
     local MSSDK_STDHDRS ;
     local MSSDK_LINKDIRECTORIES ;
+    local RC ;
+    local rc_nologo ;
     switch $(COMPILER) {
         case vs2015 :
             local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot81 ;
@@ -29,6 +31,8 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
                 $(MSSDK)/lib/10.0.10150.0/ucrt/x64
                 $(MSSDK81)/lib/winv6.3/um/x64
             ;
+            RC = $(MSSDK81)/bin/x64/rc ;
+            rc_nologo = /nologo ;
 
         case vs2013 :
             local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot81 ;
@@ -78,7 +82,8 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
     C.C++ on $(C.COMPILER_SUITE_SYMBOL)         = $(MSVCBIN)cl ;
     C.LINK on $(C.COMPILER_SUITE_SYMBOL)        = $(MSVCBIN)link ;
     C.MT on $(C.COMPILER_SUITE_SYMBOL)          = $(MSSDK_BINDIR)/mt ;
-    C.RC on $(C.COMPILER_SUITE_SYMBOL)          = $(MSSDK_BINDIR)/RC ;
+    C.RC on $(C.COMPILER_SUITE_SYMBOL)          ?= $(RC) ;
+    C.RC_NOLOGO on $(C.COMPILER_SUITE_SYMBOL)   ?= $(rc_nologo) ;
     C.STDHDRS on $(C.COMPILER_SUITE_SYMBOL)     = $(MSSDK_STDHDRS) ;
     C.STDLINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
 
