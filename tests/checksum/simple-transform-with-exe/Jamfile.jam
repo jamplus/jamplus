@@ -1,0 +1,30 @@
+JAM_CHECKSUMS = 1 ;
+
+SubDir TOP ;
+
+rule ConvertImage SOURCE
+{
+    local target = $(SOURCE:S=.image) ;
+    MakeLocate $(target) : $(LOCATE_TARGET) ;
+    Clean clean : $(target) ;
+
+    #Depends all : $(target) : $(SOURCE) : $(CONVERTER_EXE) ;
+    Depends all : $(target) : $(SOURCE) ;
+    Depends $(target) : $(CONVERTER_EXE) ;
+    #Depends $(SOURCE) : $(CONVERTER_EXE) ;
+    #Needs $(target) : $(CONVERTER_EXE) ;
+    #Needs $(SOURCE) : $(CONVERTER_EXE) ;
+    UseCommandLine $(target) : v11 ;
+    _ConvertImage $(target) : $(SOURCE) ;
+}
+
+actions _ConvertImage
+{
+    $(CONVERTER_EXE:T) $(2:C) $(1:C)
+}
+
+CONVERTER_EXE = [ C.Application Converter : main.cpp ] ;
+#IgnoreContents $(CONVERTER_EXE) ;
+#ForceContentsOnly $(CONVERTER_EXE) ;
+ConvertImage file1.tga ;
+ConvertImage file2.tga ;
