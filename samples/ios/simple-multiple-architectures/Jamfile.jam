@@ -14,10 +14,10 @@ rule BuildSimple TOOLCHAIN {
     return $(TOOLCHAIN) ;
 }
 
-local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
-local toolchainsUsed = [ BuildSimple $(C.ACTIVE_TOOLCHAIN_SPEC)@C.ARCHITECTURE=armv7s ] ;
-toolchainsUsed += [ BuildSimple $(saveActiveToolchainSpec)@C.ARCHITECTURE=armv7 ] ;
-C.Toolchain $(saveActiveToolchainSpec) ;
+local saveActiveToolchain = [ C.GetActiveToolchain ] ;
+local toolchainsUsed = [ BuildSimple $(saveActiveToolchain)@C.ARCHITECTURE=arm64 ] ;
+toolchainsUsed += [ BuildSimple $(saveActiveToolchain)@C.ARCHITECTURE=armv7 ] ;
+C.Toolchain $(saveActiveToolchain) ;
 
 C.ActiveTarget simple ;
 ios.BundleInfo : displayname : simple ;
