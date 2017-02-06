@@ -1681,7 +1681,7 @@ rule C.OverrideToolchainSpec TOOLCHAIN_SPEC_OPTIONS : OPTIONS {
 }
 
 
-rule C.Toolchain TOOLCHAIN_SPEC {
+rule _C.ToolchainHelper TOOLCHAIN_SPEC {
 	# Null out any existing toolchain spec options.
 	local keyValue ;
 	for keyValue in $(TOOLCHAIN_SPEC_OPTIONS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
@@ -1765,6 +1765,14 @@ rule C.Toolchain TOOLCHAIN_SPEC {
 	return $(C.ACTIVE_TOOLCHAIN_SPEC) ;
 }
 
+rule C.Toolchain TOOLCHAIN_SPEC {
+	if ! $(TOOLCHAIN_SPEC) {
+		Exit * C.Toolchain called with an empty invalid TOOLCHAIN_SPEC. ;
+	}
+	return [ _C.ToolchainHelper $(TOOLCHAIN_SPEC) ] ;
+}
+
+
 ########################################################################
 ########################################################################
 
@@ -1793,6 +1801,6 @@ if ! $(C.ACTIVE_TOOLCHAIN_GRIST) {
 	} else {
 		C.TOOLCHAIN = $(C.PLATFORM)/$(C.CONFIG) ;
 	}
-	C.Toolchain $(C.TOOLCHAIN) ;
+	_C.ToolchainHelper $(C.TOOLCHAIN) ;
 }
 
