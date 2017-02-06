@@ -790,6 +790,7 @@ function WriteJambase(exporter)
 	end
 
 	jambaseText[#jambaseText + 1] = "JAM_MODULES_USER_PATH += \"" .. sourceRootPath .. "\" ;\n"
+	jambaseText[#jambaseText + 1] = "JAM_MODULES_USER_PATH += \"" .. sourceRootPath .. "jam\" ;\n"
 
 	jambaseText[#jambaseText + 1] = expand([[
 
