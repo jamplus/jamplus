@@ -163,7 +163,7 @@ local LUA53_SRCS =
 ;
 
 # Tell Lua's code to export the appropriate functions to the DLL.
-C.Defines : LUA_BUILD_AS_DLL ;
+C.Defines lua53 : LUA_BUILD_AS_DLL ;
 
 # Write lua53.dll into the current directory.
 C.OutputPath lua53 : . ;
