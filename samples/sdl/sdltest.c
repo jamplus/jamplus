@@ -1,5 +1,14 @@
 #include <SDL.h>
+#ifdef __APPLE__
+#include "TargetConditionals.h"
+#if TARGET_IPHONE_SIMULATOR  ||  TARGET_OS_IPHONE
 #include <SDL_opengles2.h>
+#elif TARGET_OS_MAC
+#include <SDL_opengl.h>
+#endif
+#else
+#include <SDL_opengles2.h>
+#endif
 
 int main(int argc, char** argv)
 {

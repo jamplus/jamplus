@@ -1,13 +1,13 @@
 BuildSDL2_SaveSubDir = $(ALL_SUBDIR_TOKENS) ;
 
 rule BuildSDL2 TOOLCHAINS {
-    local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
+    local saveActiveToolchain = [ C.GetActiveToolchain ] ;
 
     local toolchains ;
     local toolchain ;
     local saveSubDir = $(ALL_SUBDIR_TOKENS) ;
 
-    for toolchain in $(TOOLCHAINS:E=$(C.ACTIVE_TOOLCHAIN_SPEC)) {
+    for toolchain in $(TOOLCHAINS:E=$(saveActiveToolchain)) {
         toolchains += [ C.Toolchain $(toolchain) ] ;
 
         SubDir $(BuildSDL2_SaveSubDir) ;
@@ -142,6 +142,7 @@ rule BuildSDL2 TOOLCHAINS {
                     src/audio/coreaudio/*.h
             ;
 
+            SDL_JOYSTICK = 1 ;
             if $(SDL_JOYSTICK) = 1 {
                 SRCS +=
                         src/joystick/darwin/*.c
@@ -199,6 +200,7 @@ rule BuildSDL2 TOOLCHAINS {
 
             C.Defines : SDL_POWER_MACOSX ;
             #C.Flags : M MM : -fobjc-arc : public ;
+            C.IncludeDirectories : src/render : public ;
             C.macosx.LinkFrameworks : AudioToolbox AudioUnit Carbon Cocoa CoreAudio CoreFoundation CoreGraphics CoreVideo ForceFeedback Foundation IOKit OpenGL : public ;
         }
 
@@ -478,7 +480,7 @@ rule BuildSDL2 TOOLCHAINS {
         C.Library : $(SRCS) ;
     }
 
-    C.Toolchain $(saveActiveToolchainSpec) ;
+    C.Toolchain $(saveActiveToolchain) ;
     SubDir $(saveSubDir) ;
 
     return $(toolchains) ;

@@ -10,8 +10,16 @@ if $(PLATFORM) in * win32 win64 {
     BuildSDL2 ;
 
     C.ActiveTarget sdltest ;
-    C.Inherits : sdl2 sdl2_image ;
+    C.Inherits : sdl2 ; # sdl2_image ;
     C.Inherits : sdl2main ;
+    C.Application : $(SRCS) ;
+
+} else if $(PLATFORM) in macosx32 macosx64 {
+    BuildSDL2 ;
+
+    C.ActiveTarget sdltest ;
+    C.Inherits : sdl2 ; # sdl2_image ;
+    #C.Inherits : sdl2main ;
     C.Application : $(SRCS) ;
 
 } else if $(PLATFORM) in ios iossimulator {
@@ -45,7 +53,7 @@ if $(PLATFORM) in * win32 win64 {
 
     SubDir TOP ;
 
-    local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
+    local saveActiveToolchainSpec = [ C.GetActiveToolchain ] ;
     local toolchain ;
     for toolchain in $(toolchainsUsed) {
         C.Toolchain $(toolchain) ;
