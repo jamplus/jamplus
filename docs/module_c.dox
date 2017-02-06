@@ -28,6 +28,7 @@ Support for more than one toolchain used during the same Jam execution is provid
 \refitem rule_C_ForceFileType C.ForceFileType
 \refitem rule_C_ForceInclude C.ForceInclude
 \refitem rule_C_ForcePublic C.ForcePublic
+\refitem rule_C_GetActiveToolchain C.GetActiveToolchain
 \refitem rule_C_GetArchitecture C.GetArchitecture
 \refitem rule_C_GetLinkTargets C.GetLinkTargets
 \refitem rule_C_GristTarget C.GristTarget
@@ -523,13 +524,32 @@ When it is not possible to save off the result when calling the \c C.Application
 
 
 <hr>
+\section rule_C_GetActiveToolchain rule C.GetActiveToolchain
+\addindex rule_C_GetActiveToolchain
+
+\return Returns the active toolchain.
+
+\code
+    local saveActiveToolchain = [ C.GetActiveToolchain ] ;
+    local toolchainsUsed = [ BuildSimple $(saveActiveToolchain)@C.ARCHITECTURE=arm64 ] ;
+    toolchainsUsed += [ BuildSimple $(saveActiveToolchain)@C.ARCHITECTURE=armv7 ] ;
+    C.Toolchain $(saveActiveToolchain) ;
+\endcode
+
+
+
+
+
+
+
+<hr>
 \section rule_C_GristFiles rule C.GristFiles TARGET : FILES
 \addindex rule_C_GristFiles
 
 Grists the passed in \c FILES against \c TARGET and returns them to the user in the form: <tt>\<win32/debug:TARGET\>FILES</tt>
 
 \param TARGET The target to grist. May be <tt>*</tt>.
-\param FILES The list of files to apply the target grist tot.
+\param FILES The list of files to apply the target grist to.
 \return Returns the gristed \c FILES.
 
 \code
