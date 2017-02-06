@@ -1,4 +1,5 @@
 rule C.Toolchain.win32dx-debug.* {
-    C.ToolchainSpecKeys C.PLATFORM C.CONFIG ;
+    C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
     C.Toolchain.win32dx.* ;
+    C.Defines * : CONFIG_DEBUG ;
 }
