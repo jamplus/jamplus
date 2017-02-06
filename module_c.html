@@ -39,6 +39,7 @@ List of Rules</h1>
 <li><a href="module_c.html#rule_C_ForceFileType">C.ForceFileType</a></li>
 <li><a href="module_c.html#rule_C_ForceInclude">C.ForceInclude</a></li>
 <li><a href="module_c.html#rule_C_ForcePublic">C.ForcePublic</a></li>
+<li><a href="module_c.html#rule_C_GetActiveToolchain">C.GetActiveToolchain</a></li>
 <li><a href="module_c.html#rule_C_GetArchitecture">C.GetArchitecture</a></li>
 <li><a href="module_c.html#rule_C_GetLinkTargets">C.GetLinkTargets</a></li>
 <li><a href="module_c.html#rule_C_GristTarget">C.GristTarget</a></li>
@@ -335,6 +336,11 @@ rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC</h1>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the list of link targets, sometimes more than one, that will be built by the Jam. The target list may be passed to another rule like <a class="el" href="module_c.html#rule_C_LinkLibraries">rule C.LinkLibraries TARGET : LIBRARIES [ : OPTIONS ]</a>.</dd></dl>
 <div class="fragment"><div class="line">C.Toolchain ps3/debug/spu ;</div><div class="line">local sputhing_library = [ C.Library sputhing : sputhing.c ] ;</div><div class="line"></div><div class="line">C.Toolchain ps3/debug/ppu ;</div><div class="line"></div><div class="line">local also_sputhing_library = [ C.GetLinkTargets sputhing : ps3/debug/spu ] ;</div><div class="line"></div><div class="line"><span class="preprocessor"># &lt;ps3!release!spu:sputhing&gt;sputhing.lib</span></div><div class="line">Echo sputhing_library - $(sputhing_library) ;</div><div class="line"></div><div class="line"><span class="preprocessor"># &lt;ps3!release!spu:sputhing&gt;sputhing.lib</span></div><div class="line">Echo also_sputhing_library - $(also_sputhing_library) ;</div><div class="line"></div><div class="line">C.LinkLibraries pputhing : $(sputhing_library) ;</div><div class="line">C.Application pputhing : pputhing.c ;</div></div><!-- fragment --><hr/>
+ <h1><a class="anchor" id="rule_C_GetActiveToolchain"></a>
+rule C.GetActiveToolchain</h1>
+<p><a name="arule_:43_:47etActive:54oolchain"></a></p>
+<dl class="section return"><dt>Returns</dt><dd>Returns the active toolchain.</dd></dl>
+<div class="fragment"><div class="line">local saveActiveToolchain = [ C.GetActiveToolchain ] ;</div><div class="line">local toolchainsUsed = [ BuildSimple $(saveActiveToolchain)@C.ARCHITECTURE=arm64 ] ;</div><div class="line">toolchainsUsed += [ BuildSimple $(saveActiveToolchain)@C.ARCHITECTURE=armv7 ] ;</div><div class="line">C.Toolchain $(saveActiveToolchain) ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_GristFiles"></a>
 rule C.GristFiles TARGET : FILES</h1>
 <p><a name="arule_:43_:47rist:46iles"></a></p>
@@ -342,7 +348,7 @@ rule C.GristFiles TARGET : FILES</h1>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to grist. May be <code>*</code>. </td></tr>
-    <tr><td class="paramname">FILES</td><td>The list of files to apply the target grist tot. </td></tr>
+    <tr><td class="paramname">FILES</td><td>The list of files to apply the target grist to. </td></tr>
   </table>
   </dd>
 </dl>
