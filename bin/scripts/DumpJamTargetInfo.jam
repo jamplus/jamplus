@@ -1,4 +1,7 @@
-C ;
+if ! [ RuleExists C.Toolchain ]
+{
+	C ;
+}
 
 JAM_MODULES_PATH += $(JAMFILE_ROOT) ;
 
