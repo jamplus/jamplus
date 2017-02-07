@@ -1,7 +1,7 @@
 JamPlus
 =======
 
-JamPlus is a very fast and powerful code and data build system built on the code base of the original Perforce version of Jam written by Christopher Seiwald. JamPlus is regularly used to parallelize the builds of massive code and data sets.
+JamPlus is a very fast and powerful code and data build system built on the code base of the original Perforce version of Jam written by Christopher Seiwald. JamPlus is regularly used to efficiently parallelize the builds of massive code and data sets.
 
 A sampling of the features in the JamPlus distribution follows:
 
