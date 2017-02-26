@@ -756,6 +756,27 @@ Sets the iOS \c SDK_VERSION for the toolchain. Call this before any other <tt>io
 
 
 <hr>
+\section rule_ios_Storyboards rule ios.Storyboards TARGET : LANGUAGE_DIRECTORY : STORYBOARD_FILES
+\addindex rule_ios_AssetCatalog
+
+Compiles a directory of storyboards.
+
+\param TARGET The target to build the storyboards for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param LANGUAGE_DIRECTORY The path to the (generally) <tt>Base.lproj</tt> directory containing the <tt>.storyboard</tt> files.
+\param STORYBOARD_FILES (optional) The names of the launch image storyboard and the main storyboard, generally <tt>LaunchImage</tt> and <tt>Main</tt>. Automatically adds them to the <tt>Info.plist</tt>.
+
+\code
+    ios.Storyboards : $(SUBDIR)/Base.lproj : LaunchImage Main ;
+\endcode
+
+
+
+
+
+
+
+
+<hr>
 \section rule_ios_WebServer rule ios.WebServer TARGET
 \addindex rule_ios_WebServer
 

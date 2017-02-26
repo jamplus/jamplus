@@ -1263,6 +1263,92 @@ actions ios.CompileXIB
 }
 
 
+rule ios.Storyboard TARGET : SOURCES {
+    TARGET = [ ActiveTarget $(TARGET) ] ;
+
+    local bundleTarget = [ ios.GetBundleTarget ] ;
+    if ! $(bundleTarget)
+    {
+        Echo *** ios.Storyboard $(TARGET) \: $(SOURCES) ;
+        Exit *** Bundle target not setup for target $(TARGET) ;
+    }
+
+    local bundlePath = [ ios.GetBundlePath ] ;
+    if ! $(bundlePath)
+    {
+        Echo *** ios.Storyboard $(TARGET) \: $(SOURCES) ;
+        Exit *** Bundle path not setup for target $(TARGET) ;
+    }
+
+    SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+    SEARCH on $(SOURCES) += $(SEARCH_SOURCE) ;
+
+    local LANGUAGE_SUBDIRECTORY = $(SOURCES[1]:TD) ;
+    LANGUAGE_SUBDIRECTORY = $(LANGUAGE_SUBDIRECTORY:BS) ;
+
+    local intermediateDirectory = $(LOCATE_TARGET)/$(LANGUAGE_SUBDIRECTORY) ;
+
+    local finalTargets ;
+    local storyboardsToLink ;
+    local source ;
+    for source in $(SOURCES) {
+        local compileTarget = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(source:BS)) ;
+        Depends $(bundleTarget) : $(compileTarget) : $(source) ;
+        local compileIntermediateDirectory = $(intermediateDirectory)/$(source:BS)c ;
+        LOCATE on $(compileTarget) = $(compileIntermediateDirectory) ;
+        CleanTree $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(compileIntermediateDirectory) ;
+        storyboardsToLink += $(compileTarget) ;
+
+        local finalTargetOutputDirectory = $(bundlePath)/$(LANGUAGE_SUBDIRECTORY)/$(source:BS)c ;
+        local finalTarget = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|final|$(source:BS)) ;
+        Depends $(bundleTarget) : $(finalTarget) : $(compileTarget) ;
+        MakeLocate $(finalTarget) : $(finalTargetOutputDirectory) ;
+        CleanTree $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(finalTargetOutputDirectory) ;
+        finalTargets += $(finalTarget) ;
+
+        local partialInfo.plist = $(LOCATE_TARGET)/$(source:B)-SBPartialInfo.plist ;
+        Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(partialInfo.plist) ;
+
+        TARGET on $(compileTarget) = $(TARGET) ;
+        OUTPUT_PARTIAL_INFO_PLIST on $(compileTarget) = $(partialInfo.plist) ;
+        OUTPUT_DIRECTORY on $(compileTarget) = $(intermediateDirectory) ;
+        ios._CompileStoryboard $(compileTarget) : $(source) : $(C.COMPILER_SUITE_SYMBOL) ;
+    }
+
+    TARGET on $(finalTargets) = $(TARGET) ;
+    BUNDLE_DIRECTORY on $(finalTargets) = $(bundlePath) ;
+    ios._LinkStoryboards $(finalTargets) : $(storyboardsToLink) ;
+}
+
+
+actions ios._CompileStoryboard
+{
+	PATH=$(MACOSX_SDK_DEVELOPER_ROOT)/usr/bin:$PATH
+	/Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --module $(TARGET) --output-partial-info-plist $(OUTPUT_PARTIAL_INFO_PLIST) --auto-activate-custom-fonts --target-device iphone --target-device ipad --minimum-deployment-target 10.2 --output-format human-readable-text --compilation-directory $(OUTPUT_DIRECTORY) $(2:C)
+}
+
+
+actions ios._LinkStoryboards
+{
+	PATH=$(MACOSX_SDK_DEVELOPER_ROOT)/usr/bin:$PATH
+	/Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --module $(TARGET) --target-device iphone --target-device ipad --minimum-deployment-target 10.2 --output-format human-readable-text --link $(BUNDLE_DIRECTORY) $(2:CD)
+}
+
+
+rule ios.Storyboards TARGET : LANGUAGE_DIRECTORY : STORYBOARD_FILES {
+    LANGUAGE_DIRECTORY = $(LANGUAGE_DIRECTORY:R=$(SUBDIR)) ;
+    local storyboards = [ Glob $(LANGUAGE_DIRECTORY) : *.storyboard ] ;
+    storyboards = $(storyboards:BSG=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+    SEARCH on $(storyboards) = $(LANGUAGE_DIRECTORY) ;
+    ios.Storyboard $(TARGET) : $(storyboards) ;
+
+    ios.BundleInfoString : UILaunchStoryboardName : $(STORYBOARD_FILES[1]) ;
+    ios.BundleInfoString : UIMainStoryboardFile : $(STORYBOARD_FILES[2]) ;
+}
+
+
+
+
 
 if $(NT) {
     actions ios._ImageCopy {
