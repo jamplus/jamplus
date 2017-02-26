@@ -1,0 +1,38 @@
+C.ActiveTarget storyboard ;
+
+local SRCS =
+        AppDelegate.m
+        AppDelegate.h
+        GameViewController.m
+        GameViewController.h
+        main.m
+;
+
+C.ios.LinkFrameworks : Foundation GLKit OpenGLES UIKit ;
+
+C.Application : $(SRCS) ;
+
+C.ActiveTarget storyboard ;
+
+on $(C.ACTIVE_TOOLCHAIN_TARGET) {
+    CopyFile $(BUNDLE_TARGET) : $(BUNDLE_PATH)/Shader.fsh : $(SUBDIR)/Shaders/Shader.fsh ;
+    CopyFile $(BUNDLE_TARGET) : $(BUNDLE_PATH)/Shader.vsh : $(SUBDIR)/Shaders/Shader.vsh ;
+}
+
+ios.BundleInfo : displayname : storyboard ;
+ios.BundleInfo : bundleversion : 1.0 ;
+ios.BundleInfo : uistatusbarhidden : true ;
+
+ios.AssetCatalog storyboard : Assets.xcassets : AppIcon ;
+ios.Storyboards storyboard : Base.lproj : LaunchScreen Main ;
+
+ios.ProvisionFile : test.mobileprovision ;
+
+CODESIGN_IDENTITY ?= "iPhone Developer" ;
+ios.CodeSign : $(CODESIGN_IDENTITY) : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
+
+ios.Bundle ;
+
+ios.Archive storyboard : $(ALL_LOCATE_TARGET)/package ;
+ios.WebServer storyboard ;
+
