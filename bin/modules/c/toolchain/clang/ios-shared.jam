@@ -1279,16 +1279,24 @@ if $(NT) {
 }
 
 
-rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE_NAME {
+rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE_NAME : DESTINATION_PATH {
     ASSET_CATALOG_PATH = $(ASSET_CATALOG_PATH:R=$(SUBDIR)) ;
 
+    local target = [ ios.GetBundleTarget ] ;
     local cleanTarget = $(CLEAN_BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    local bundlePath = [ ios.GetBundlePath ] ;
+    if ! $(DESTINATION_PATH) {
+        DESTINATION_PATH = $(bundlePath) ;
+    }
+    ASSET_CATALOG_PATH = $(ASSET_CATALOG_PATH:R=$(SUBDIR)) ;
 
+    local COLON = ":" ;
     LuaString "
         local ospath = require 'ospath'
 
-        local parent = jam_getvar('PARENT')[1]
-        local targetGrist = jam_getvar('TARGET_GRIST')[1]
+        local parent = jam_getvar('target')[1]
+        local targetGrist = jam_getvar('C.ACTIVE_TOOLCHAIN_TARGET_GRIST')[1]
+        targetGrist = targetGrist .. '|assetcatalog'
         local assetCatalogPath = jam_getvar('ASSET_CATALOG_PATH')[1]
         local destinationPath = jam_getvar('DESTINATION_PATH')[1]
         local cleanTarget = jam_getvar('cleanTarget')[1]
@@ -1296,14 +1304,23 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_P
         local destinationTargets = {}
         local sourceTargets = {}
 
-        local appIcon = jam_getvar('APP_ICON_NAME')[1]
-        local launchImage = jam_getvar('LAUNCH_IMAGE_NAME')[1]
+        local appIcon = jam_getvar('APP_ICON_NAME')
+        if appIcon then
+            appIcon =  appIcon[1]
+        end
+        local launchImage = jam_getvar('LAUNCH_IMAGE_NAME')
+        if launchImage then
+            launchImage = launchImage[1]
+        end
         local NT = jam_getvar('NT')[1]
 
         local appIcons = {}
         local launchImages = {}
 
-        if appIcon ~= '' then
+        local at = '@'
+        local dollar = '$'
+
+        if appIcon  and  appIcon ~= '' then
             local sourcePath = ospath.join(assetCatalogPath, appIcon .. '.appiconset')
             local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
             local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
@@ -1338,12 +1355,12 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_P
                     sourceTargets[#sourceTargets + 1] = inputTarget
                 end
 
-                local at = '@'
-                appIcons[#appIcons + 1] = jam_expand(at .. '(' .. outputTarget .. ':BS)')[1]
+                local textToExpand = at .. '(' .. outputTarget:gsub(':', dollar .. '(COLON)') .. ':BS)'
+                appIcons[#appIcons + 1] = jam_expand(textToExpand)[1]
             until true end
         end
 
-        if launchImage ~= '' then
+        if launchImage  and  launchImage ~= '' then
             local sourcePath = ospath.join(assetCatalogPath, launchImage .. '.launchimage')
             local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
             local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
@@ -1421,10 +1438,10 @@ rule ios.AssetCatalog PARENT : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_P
                     sourceTargets[#sourceTargets + 1] = inputTarget
                 end
 
-                local expansionString = '@'
+                local textToExpand = at .. '(' .. outputTarget:gsub(':', dollar .. '(COLON)') .. ':B)'
                 launchImages[#launchImages + 1] = {
                     osVersion = entry['minimum-system-version'],
-                    fileTitle = jam_expand(expansionString .. '(' .. outputTarget .. ':B)')[1],
+                    fileTitle = jam_expand(textToExpand)[1],
                     orientation = entry.orientation,
 --                    imageSize = '{' .. entry.size .. '}',
                 }
