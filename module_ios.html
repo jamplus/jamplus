@@ -109,21 +109,20 @@ rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK</h1>
 </dl>
 <div class="fragment"><div class="line">ios.Archive : c:/ios-packages ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_ios_AssetCatalog"></a>
-rule ios.AssetCatalog TARGET : TARGET_GRIST : DESTINATION_PATH : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE_NAME</h1>
+rule ios.AssetCatalog TARGET : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE_NAME : DESTINATION_PATH</h1>
 <p><a name="arule_ios_Asset:43atalog"></a></p>
 <p>Takes a provided asset catalog and builds it into its individual components.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to build the asset catalog for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
-    <tr><td class="paramname">TARGET_GRIST</td><td>A grist to preface the derived asset catalog entries against. </td></tr>
-    <tr><td class="paramname">DESTINATION_PATH</td><td>The output directory for the generated assets. </td></tr>
     <tr><td class="paramname">ASSET_CATALOG_PATH</td><td>The path to the <code>.xcassets</code> directory containing the asset catalog components. </td></tr>
     <tr><td class="paramname">APP_ICON_NAME</td><td>(optional) The name of the <code>.appiconset</code> to process. Generally, the name is <code>AppIcon</code>. </td></tr>
-    <tr><td class="paramname">LAUNCH_IMAGE_NAME</td><td>(optional) The name of the <code>.launchimage</code> to process. Generally, the name is <code>LaunchImage</code>.</td></tr>
+    <tr><td class="paramname">LAUNCH_IMAGE_NAME</td><td>(optional) The name of the <code>.launchimage</code> to process. Generally, the name is <code>LaunchImage</code>. </td></tr>
+    <tr><td class="paramname">DESTINATION_PATH</td><td>(optional) The output directory for the generated assets. Defaults to the bundle path.</td></tr>
   </table>
   </dd>
 </dl>
-<div class="fragment"><div class="line">ios.AssetCatalog [ ios.GetBundleTarget ] : assets : [ ios.GetBundlePath ] : Unity-iPhone/Images.xcassets : AppIcon : LaunchImage ;</div></div><!-- fragment --><hr/>
+<div class="fragment"><div class="line">ios.AssetCatalog : Unity-iPhone/Images.xcassets : AppIcon : LaunchImage ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_ios_Bundle"></a>
 rule ios.Bundle TARGET [ : TOOLCHAINS ]</h1>
 <p><a name="arule_ios_:42undle"></a></p>
@@ -474,6 +473,19 @@ rule ios.SDK SDK_VERSION</h1>
   </dd>
 </dl>
 <div class="fragment"><div class="line">ios.SDK 9.3 ;</div></div><!-- fragment --><hr/>
+ <h1><a class="anchor" id="rule_ios_Storyboards"></a>
+rule ios.Storyboards TARGET : LANGUAGE_DIRECTORY : STORYBOARD_FILES</h1>
+<p><a name="arule_ios_Asset:43atalog"></a></p>
+<p>Compiles a directory of storyboards.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">TARGET</td><td>The target to build the storyboards for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
+    <tr><td class="paramname">LANGUAGE_DIRECTORY</td><td>The path to the (generally) <code>Base.lproj</code> directory containing the <code>.storyboard</code> files. </td></tr>
+    <tr><td class="paramname">STORYBOARD_FILES</td><td>(optional) The names of the launch image storyboard and the main storyboard, generally <code>LaunchImage</code> and <code>Main</code>. Automatically adds them to the <code>Info.plist</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><div class="line">ios.Storyboards : $(SUBDIR)/Base.lproj : LaunchImage Main ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_ios_WebServer"></a>
 rule ios.WebServer TARGET</h1>
 <p><a name="arule_ios_:57eb:53erver"></a></p>
