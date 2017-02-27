@@ -23,7 +23,7 @@ ios.BundleInfo : displayname : storyboard ;
 ios.BundleInfo : bundleversion : 1.0 ;
 ios.BundleInfo : uistatusbarhidden : true ;
 
-ios.AssetCatalog storyboard : Assets.xcassets : AppIcon ;
+ios.AssetCatalog storyboard : Assets.xcassets ;
 ios.Storyboards storyboard : Base.lproj : LaunchScreen Main ;
 
 ios.ProvisionFile : test.mobileprovision ;

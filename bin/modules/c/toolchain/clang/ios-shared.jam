@@ -1381,8 +1381,9 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
     ASSET_CATALOG_PATH = $(ASSET_CATALOG_PATH:R=$(SUBDIR)) ;
 
     local COLON = ":" ;
-    LuaString "
+    local code = "
         local ospath = require 'ospath'
+        local filefind = require 'filefind'
 
         local parent = jam_getvar('target')[1]
         local targetGrist = jam_getvar('C.ACTIVE_TOOLCHAIN_TARGET_GRIST')[1]
@@ -1394,14 +1395,8 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
         local destinationTargets = {}
         local sourceTargets = {}
 
-        local appIcon = jam_getvar('APP_ICON_NAME')
-        if appIcon then
-            appIcon =  appIcon[1]
-        end
-        local launchImage = jam_getvar('LAUNCH_IMAGE_NAME')
-        if launchImage then
-            launchImage = launchImage[1]
-        end
+        local appIcon = ''
+        local launchImage = ''
         local NT = jam_getvar('NT')[1]
 
         local appIcons = {}
@@ -1409,134 +1404,203 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
 
         local at = '@'
         local dollar = '$'
+" ;
 
-        if appIcon  and  appIcon ~= '' then
-            local sourcePath = ospath.join(assetCatalogPath, appIcon .. '.appiconset')
-            local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
-            local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+    code += "
+        for directoryEntry in filefind.match(ospath.join(assetCatalogPath, '*.*')) do repeat
+            if not directoryEntry.is_directory then break end
 
-            for _, entry in ipairs(contents.images) do repeat
-                if not entry.filename then break end
+            local extension = ospath.get_extension(directoryEntry.filename)
+            if extension == '.appiconset' then
+                appIcon = ospath.remove_extension(ospath.get_filename(directoryEntry.filename))
+                local sourcePath = ospath.join(assetCatalogPath, directoryEntry.filename)
+                local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
+                local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
 
-                local filename = appIcon .. entry.size
-                local scale = 1
-                if entry.scale  and  entry.scale ~= '1x' then
-                    filename = filename .. '@' .. entry.scale
-                    scale = tonumber(entry.scale:match('(%d+)x'))
+                for _, entry in ipairs(contents.images) do repeat
+                    if not entry.filename then break end
+
+                    local filename = appIcon .. entry.size
+                    local scale = 1
+                    if entry.scale  and  entry.scale ~= '1x' then
+                        filename = filename .. '@' .. entry.scale
+                        scale = tonumber(entry.scale:match('(%d+)x'))
+                    end
+                    if entry.idiom  and  entry.idiom ~= 'iphone' then
+                        filename = filename .. '~' .. entry.idiom
+                    end
+                    filename = filename .. '.png'
+
+                    local inputTarget = '<' .. targetGrist .. ':source>' .. entry.filename
+                    local outputTarget = '<' .. targetGrist .. '>' .. filename
+                    jam_setvar(inputTarget, 'SEARCH', sourcePath)
+                    jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
+                    jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
+                    jam_evaluaterule('Clean', cleanTarget, outputTarget)
+
+                    if NT then
+                        local width, height = entry.size:match('(%d+)x(%d+)')
+                        jam_setvar(outputTarget, 'IMAGE_SIZE', (width * scale) .. 'x' .. (height * scale))
+                        jam_evaluaterule('ios._ImageResize', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
+                    else
+                        destinationTargets[#destinationTargets + 1] = outputTarget
+                        sourceTargets[#sourceTargets + 1] = inputTarget
+                    end
+
+                    local textToExpand = at .. '(' .. outputTarget:gsub(':', dollar .. '(COLON)') .. ':BS)'
+                    appIcons[#appIcons + 1] = jam_expand(textToExpand)[1]
+                until true end
+" ;
+
+    code += "
+            elseif extension == '.imageset' then
+                local imageset = ospath.remove_extension(ospath.get_filename(directoryEntry.filename))
+                local sourcePath = ospath.join(assetCatalogPath, directoryEntry.filename)
+                local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
+                local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+
+                local activeFilenames = {}
+                local function MakeFilename(entry, build)
+                    local filename = imageset
+
+                    if entry.scale  and  entry.scale ~= '1x' then
+                        filename = filename .. '@' .. entry.scale
+                    end
+
+--                    if entry.idiom  and  entry.idiom ~= 'iphone' then
+--                        filename = filename .. '~' .. entry.idiom
+--                    end
+
+                    if build then
+                        activeFilenames[filename] = true
+                    end
+
+                    return filename
                 end
-                if entry.idiom  and  entry.idiom ~= 'iphone' then
-                    filename = filename .. '~' .. entry.idiom
-                end
-                filename = filename .. '.png'
 
-                local inputTarget = '<' .. targetGrist .. ':source>' .. entry.filename
-                local outputTarget = '<' .. targetGrist .. '>' .. filename
-                jam_setvar(inputTarget, 'SEARCH', sourcePath)
-                jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
-                jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
-                jam_evaluaterule('Clean', cleanTarget, outputTarget)
-
-                if NT then
-                    local width, height = entry.size:match('(%d+)x(%d+)')
-                    jam_setvar(outputTarget, 'IMAGE_SIZE', (width * scale) .. 'x' .. (height * scale))
-                    jam_evaluaterule('ios._ImageResize', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
-                else
-                    destinationTargets[#destinationTargets + 1] = outputTarget
-                    sourceTargets[#sourceTargets + 1] = inputTarget
+                for _, entry in ipairs(contents.images) do
+                    MakeFilename(entry, true)
                 end
 
-                local textToExpand = at .. '(' .. outputTarget:gsub(':', dollar .. '(COLON)') .. ':BS)'
-                appIcons[#appIcons + 1] = jam_expand(textToExpand)[1]
-            until true end
-        end
+                for _, entry in ipairs(contents.images) do repeat
+                    if not entry.filename then break end
+                    local filename = MakeFilename(entry)
+                    if not filename then break end
+                    filename = filename .. '.png'
 
-        if launchImage  and  launchImage ~= '' then
-            local sourcePath = ospath.join(assetCatalogPath, launchImage .. '.launchimage')
-            local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
-            local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+                    local inputTarget = '<' .. targetGrist .. ':source>' .. entry.filename
+                    local outputTarget = '<' .. targetGrist .. '>' .. filename
+                    jam_setvar(inputTarget, 'SEARCH', sourcePath)
+                    jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
+                    jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
+                    jam_evaluaterule('Clean', cleanTarget, outputTarget)
 
-            local activeFilenames = {}
-            local function MakeLaunchImageFilename(entry, build)
-                local filename = launchImage
-                local minimumSystemVersion = entry['minimum-system-version']
-                if minimumSystemVersion == '7.0' then
-                    filename = filename .. '-700'
-                elseif minimumSystemVersion == '8.0' then
-                    filename = filename .. '-800'
-                end
+                    if NT then
+                        jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
+                        jam_evaluaterule('ios._ImageCopy', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
+                    else
+                        destinationTargets[#destinationTargets + 1] = outputTarget
+                        sourceTargets[#sourceTargets + 1] = inputTarget
+                    end
 
-                if entry.orientation == 'portrait' then
-                    if not build then
-                        entry.orientation = 'landscape'
-                        local alternateFilename = MakeLaunchImageFilename(entry)
-                        if activeFilenames[alternateFilename] then
+--                    local textToExpand = at .. '(' .. outputTarget:gsub(':', dollar .. '(COLON)') .. ':B)'
+--                    launchImages[#launchImages + 1] = {
+--                        osVersion = entry['minimum-system-version'],
+--                        fileTitle = jam_expand(textToExpand)[1],
+--                        orientation = entry.orientation,
+--    --                    imageSize = '{' .. entry.size .. '}',
+--                    }
+                until true end
+
+            elseif extension == '.launchimage' then
+                launchImage = ospath.remove_extension(ospath.get_filename(directoryEntry.filename))
+                local sourcePath = ospath.join(assetCatalogPath, directoryEntry.filename)
+                local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
+                local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+
+                local activeFilenames = {}
+                local function MakeLaunchImageFilename(entry, build)
+                    local filename = launchImage
+                    local minimumSystemVersion = entry['minimum-system-version']
+                    if minimumSystemVersion == '7.0' then
+                        filename = filename .. '-700'
+                    elseif minimumSystemVersion == '8.0' then
+                        filename = filename .. '-800'
+                    end
+
+                    if entry.orientation == 'portrait' then
+                        if not build then
+                            entry.orientation = 'landscape'
+                            local alternateFilename = MakeLaunchImageFilename(entry)
+                            if activeFilenames[alternateFilename] then
+                                filename = filename .. '-Portrait'
+                            end
+                            entry.orientation = 'portrait'
+                        else
                             filename = filename .. '-Portrait'
                         end
-                        entry.orientation = 'portrait'
-                    else
-                        filename = filename .. '-Portrait'
+                    elseif entry.orientation == 'landscape' then
+                        filename = filename .. '-Landscape'
                     end
-                elseif entry.orientation == 'landscape' then
-                    filename = filename .. '-Landscape'
-                end
 
-                if entry.subtype then
-                    if entry.subtype == 'retina4' then
-                        filename = filename .. '-568h'
-                    else
-                        filename = filename .. '-' .. entry.subtype
+                    if entry.subtype then
+                        if entry.subtype == 'retina4' then
+                            filename = filename .. '-568h'
+                        else
+                            filename = filename .. '-' .. entry.subtype
+                        end
                     end
+
+                    if entry.scale  and  entry.scale ~= '1x' then
+                        filename = filename .. '@' .. entry.scale
+                    end
+
+                    if entry.idiom  and  entry.idiom ~= 'iphone' then
+                        filename = filename .. '~' .. entry.idiom
+                    end
+
+                    if build then
+                        activeFilenames[filename] = true
+                    end
+
+                    return filename
                 end
 
-                if entry.scale  and  entry.scale ~= '1x' then
-                    filename = filename .. '@' .. entry.scale
+                for _, entry in ipairs(contents.images) do
+                    MakeLaunchImageFilename(entry, true)
                 end
 
-                if entry.idiom  and  entry.idiom ~= 'iphone' then
-                    filename = filename .. '~' .. entry.idiom
-                end
+                for _, entry in ipairs(contents.images) do repeat
+                    if not entry.filename then break end
+                    local filename = MakeLaunchImageFilename(entry)
+                    if not filename then break end
+                    filename = filename .. '.png'
 
-                if build then
-                    activeFilenames[filename] = true
-                end
+                    local inputTarget = '<' .. targetGrist .. ':source>' .. entry.filename
+                    local outputTarget = '<' .. targetGrist .. '>' .. filename
+                    jam_setvar(inputTarget, 'SEARCH', sourcePath)
+                    jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
+                    jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
+                    jam_evaluaterule('Clean', cleanTarget, outputTarget)
 
-                return filename
+                    if NT then
+                        jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
+                        jam_evaluaterule('ios._ImageCopy', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
+                    else
+                        destinationTargets[#destinationTargets + 1] = outputTarget
+                        sourceTargets[#sourceTargets + 1] = inputTarget
+                    end
+
+                    local textToExpand = at .. '(' .. outputTarget:gsub(':', dollar .. '(COLON)') .. ':B)'
+                    launchImages[#launchImages + 1] = {
+                        osVersion = entry['minimum-system-version'],
+                        fileTitle = jam_expand(textToExpand)[1],
+                        orientation = entry.orientation,
+    --                    imageSize = '{' .. entry.size .. '}',
+                    }
+                until true end
             end
-
-            for _, entry in ipairs(contents.images) do
-                MakeLaunchImageFilename(entry, true)
-            end
-
-            for _, entry in ipairs(contents.images) do repeat
-                if not entry.filename then break end
-                local filename = MakeLaunchImageFilename(entry)
-                if not filename then break end
-                filename = filename .. '.png'
-
-                local inputTarget = '<' .. targetGrist .. ':source>' .. entry.filename
-                local outputTarget = '<' .. targetGrist .. '>' .. filename
-                jam_setvar(inputTarget, 'SEARCH', sourcePath)
-                jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
-                jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
-                jam_evaluaterule('Clean', cleanTarget, outputTarget)
-
-                if NT then
-                    jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
-                    jam_evaluaterule('ios._ImageCopy', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
-                else
-                    destinationTargets[#destinationTargets + 1] = outputTarget
-                    sourceTargets[#sourceTargets + 1] = inputTarget
-                end
-
-                local textToExpand = at .. '(' .. outputTarget:gsub(':', dollar .. '(COLON)') .. ':B)'
-                launchImages[#launchImages + 1] = {
-                    osVersion = entry['minimum-system-version'],
-                    fileTitle = jam_expand(textToExpand)[1],
-                    orientation = entry.orientation,
---                    imageSize = '{' .. entry.size .. '}',
-                }
-            until true end
-        end
+        until true end
 
         if not NT then
             local generatedInfoPlist = jam_getvar('LOCATE_TARGET')[1] .. '/assetcatalog_generated_info.plist'
@@ -1575,6 +1639,8 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
             jam_evaluaterule('ios.BundleInfoArrayEnd')
         end
 " ;
+
+    LuaString $(code:J) ;
 }
 
 
