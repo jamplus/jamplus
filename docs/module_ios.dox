@@ -756,7 +756,7 @@ Sets the iOS \c SDK_VERSION for the toolchain. Call this before any other <tt>io
 
 
 <hr>
-\section rule_ios_Storyboards rule ios.Storyboards TARGET : LANGUAGE_DIRECTORY : STORYBOARD_FILES
+\section rule_ios_Storyboards rule ios.Storyboards TARGET : LANGUAGE_DIRECTORY [ : STORYBOARD_FILES ]
 \addindex rule_ios_AssetCatalog
 
 Compiles a directory of storyboards.
