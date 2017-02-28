@@ -1299,7 +1299,12 @@ rule ios.Storyboard TARGET : SOURCES {
         CleanTree $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(compileIntermediateDirectory) ;
         storyboardsToLink += $(compileTarget) ;
 
-        local finalTargetOutputDirectory = $(bundlePath)/$(LANGUAGE_SUBDIRECTORY)/$(source:BS)c ;
+        local finalTargetOutputDirectory ;
+        if $(LANGUAGE_SUBDIRECTORY:S) = .lproj {
+            finalTargetOutputDirectory = $(bundlePath)/$(LANGUAGE_SUBDIRECTORY)/$(source:BS)c ;
+        } else {
+            finalTargetOutputDirectory = $(bundlePath)/$(source:BS)c ;
+        }
         local finalTarget = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|final|$(source:BS)) ;
         Depends $(bundleTarget) : $(finalTarget) : $(compileTarget) ;
         MakeLocate $(finalTarget) : $(finalTargetOutputDirectory) ;
