@@ -25,6 +25,7 @@ jamPath = ospath.simplify(ospath.make_absolute(scriptPath .. '../'))
 
 Compilers =
 {
+	{ 'vs2017', 'Visual Studio 2017' },
 	{ 'vs2015', 'Visual Studio 2015' },
 	{ 'vs2013', 'Visual Studio 2013' },
 	{ 'vs2012', 'Visual Studio 2012' },
@@ -386,6 +387,7 @@ require 'ide/vs2010'
 require 'ide/vs2012'
 require 'ide/vs2013'
 require 'ide/vs2015'
+require 'ide/vs2017'
 require 'ide/codeblocks'
 require 'ide/xcode'
 
@@ -509,6 +511,19 @@ Exporters =
 		Options =
 		{
 			vs2015 = true,
+		}
+	},
+
+	vs2017 =
+	{
+		Initialize = VisualStudio201xInitialize,
+		ProjectExporter = VisualStudio201xProject,
+		WorkspaceExporter = VisualStudio201xSolution,
+		Shutdown = VisualStudio201xShutdown,
+		Description = 'Generate Visual Studio 2017 solutions and projects.',
+		Options =
+		{
+			vs2017 = true,
 		}
 	},
 

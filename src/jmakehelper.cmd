@@ -16,6 +16,20 @@ REM Setup 64-bit aware registry location
 
 IF NOT "%ProgramFiles(x86)%"=="" SET WOW6432NODE=WOW6432NODE\
 
+REM Test for Visual Studio 2017
+
+if %VERBOSE% == 1 echo.Checking Visual Studio 2017
+
+set COMNTOOLS=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\
+if exist "%COMNTOOLS%vcvars32.bat" (
+  set VS=2017
+  set COMNTOOLS="%COMNTOOLS%vcvars32.bat"
+  goto :foundenv
+)
+set COMNTOOLS=
+
+if %VERBOSE% == 1 echo   ...done
+
 REM Test for Visual Studio 2015
 
 if %VERBOSE% == 1 echo.Checking Visual Studio 2015
@@ -137,6 +151,6 @@ if %COMNTOOLS% == "" (
 if %VERBOSE% == 1 echo.Found Visual Studio %VS%
 if %VERBOSE% == 1 echo.
 
-if "%VCINSTALLDIR%" == "" call %COMNTOOLS%
+call %COMNTOOLS%
 
 :end
