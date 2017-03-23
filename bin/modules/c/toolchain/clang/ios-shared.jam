@@ -1076,7 +1076,7 @@ rule C.ios._ApplicationFromObjects_LinkFlags {
 
 	if $(IOSBUILDENV_PATH) {
 		linkFlags += "-arch $(architecture)" ;
-		linkFlags += "-syslibroot $(isysroot:C)" ;
+		linkFlags += "-syslibroot $(isysroot:C\\)" ;
 		linkFlags += -demangle -dead_strip ;
 		linkFlags += -ios_version_min $(minimumsdkversion) ;
 		linkFlags += -lobjc -lSystem -lc++ -lstdc++ ;
