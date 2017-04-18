@@ -555,7 +555,7 @@ rule android.Library TARGET : SOURCES : OPTIONS {
         local outputAar = $(prebuiltAar:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|aar|temp) ;
         unpackedAars += $(outputAar) ;
         LOCATE on $(outputAar) = $(outputLocation) ;
-        PREBUILTAAR on $(outputAar) = $(prebuiltAar) ;
+        JAVA.PREBUILTAAR on $(outputAar) = $(prebuiltAar) ;
         LuaString "UnpackAar([[$(prebuiltAar:T)]], [[$(outputLocation)]])" ;
     }
     JAVA.UNPACKEDAARS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(unpackedAars) ;
