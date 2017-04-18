@@ -557,6 +557,13 @@ rule android.Library TARGET : SOURCES : OPTIONS {
         LOCATE on $(outputAar) = $(outputLocation) ;
         JAVA.PREBUILTAAR on $(outputAar) = $(prebuiltAar) ;
         LuaString "UnpackAar([[$(prebuiltAar:T)]], [[$(outputLocation)]])" ;
+
+        if [ Glob $(outputLocation) : classes.jar ] {
+            local classes.jar = @(classes.jar:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|aar|$(prebuiltAar:G=)) ;
+            SEARCH on $(classes.jar) = $(outputLocation) ;
+            linkLibs += $(classes.jar) ;
+        }
+
     }
     JAVA.UNPACKEDAARS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(unpackedAars) ;
 
