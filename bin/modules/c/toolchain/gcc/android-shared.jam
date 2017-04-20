@@ -204,7 +204,7 @@ rule android.SDK SDK_VERSION : ARCHITECTURE {
     if $(buildToolsDir[1]) {
         ANDROID.ZIPALIGN on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/zipalign ;
         ANDROID.AAPT on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/aapt ;
-        ANDROID_AIDL on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/aidl ;
+        ANDROID.AIDL on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/aidl ;
         ANDROID.DX on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/dx ;
     }
 
@@ -685,12 +685,8 @@ rule android.Library TARGET : SOURCES : OPTIONS {
     # AIDL compiler.
     local _source ;
     for _source in $(SOURCES:I=.aidl) {
-        Echo TODO .aidl ;
         _source = [ C.GristFiles $(TARGET) : $(_source) ] ;
-
-        # Locate source file, allowing for nested paths.
-        MakeLocate $(_source) : $(_source:DR=$(SEARCH_SOURCE)/$(_commonStripped)) ;
-        BINDING on $(_source) = $(_source:BS) ;
+        SEARCH on $(_source) = $(sourcePaths) ;
 
         # Compiled Java file.
         local _compiled = $(_source:S=.java) ;
