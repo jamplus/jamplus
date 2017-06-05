@@ -1,0 +1,4 @@
+/.build/
+/code/
+/package/
+*.apk

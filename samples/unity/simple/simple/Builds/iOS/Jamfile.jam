@@ -1,0 +1,119 @@
+JAM_CHECKSUMS = 1 ;
+
+SubDir TOP ;
+SubDir TOP code ;
+
+APP_NAME = simple ;
+
+C.ActiveTarget $(APP_NAME) ;
+
+rule _C.ios.UnityApplicationHelper TOOLCHAIN : TARGET : ADDITIONAL_SOURCES : OPTIONS {
+    TOOLCHAIN = [ C.Toolchain $(TOOLCHAIN) ] ;
+
+    C.OutputPostfix $(TARGET) : ;
+
+    local SRCS =
+            [ ExpandFileList Classes/** ]        #*/
+            [ ExpandFileList Libraries/** ]        #*/
+    ;
+
+    C.Defines $(TARGET) : INIT_SCRIPTING_BACKEND=1 ;
+    C.Flags $(TARGET) : C C++ M MM PCH : -U__clang_major__ -D__clang_major__=6 ;
+#    C.Flags $(TARGET) : C C++ M MM PCH : -fms-extensions -w ;
+    C.Flags $(TARGET) : C++ MM PCH : -std=c++11 ;
+    C.Flags $(TARGET) : C++ MM PCH : -fobjc-arc ;
+    C.ios.MinimumOSVersion $(TARGET) : 6.0 ;
+    ios.SDK $(TARGET) : 7.0 ;
+    C.IncludeDirectories $(TARGET) :
+            Classes
+            Classes/Native
+            Classes/UI
+            Classes/Unity
+            Libraries
+            Libraries/libil2cpp/include
+    ;
+    C.PrecompiledHeader $(TARGET) : Classes/Prefix.cpp Classes/Prefix.pch : $(SRCS) ;
+
+    C.LinkDirectories $(TARGET) : Libraries ;
+
+    C.ios.WeakLinkFrameworks $(TARGET) :
+            AVFoundation
+            CoreMotion
+            iAd
+    ;
+    C.ios.LinkFrameworks $(TARGET) :
+            AudioToolbox
+            CoreGraphics
+            CoreLocation
+            CoreMedia
+            CoreText
+            CoreVideo
+            Foundation
+            MediaPlayer
+            OpenGLES
+            QuartzCore
+            UIKit
+    ;
+    C.LinkFlags $(TARGET) : -dead_strip ;
+
+#    C.LinkPrebuiltLibraries $(TARGET) : iconv.2 ;
+    C.LinkPrebuiltLibraries $(TARGET) : iPhone-lib ;
+    C.LinkPrebuiltLibraries $(TARGET) : c++ ;
+
+    C.LinkFlags $(TARGET) : -ObjC ;
+
+    C.Application $(TARGET) : $(SRCS) $(ADDITIONAL_SOURCES) ;
+
+    return $(TOOLCHAIN) ;
+}
+
+
+rule ios.UnityApplication TARGET : ADDITIONAL_SOURCES : OPTIONS {
+    local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
+    local toolchainsUsed ;
+#    toolchainsUsed += [ _C.ios.UnityApplicationHelper $(saveActiveToolchainSpec)@C.ARCHITECTURE=arm64 : $(TARGET) : $(ADDITIONAL_SOURCES) ] ;
+    toolchainsUsed += [ _C.ios.UnityApplicationHelper $(saveActiveToolchainSpec)@C.ARCHITECTURE=armv7 : $(TARGET) : $(ADDITIONAL_SOURCES) : $(OPTIONS) ] ;
+    C.Toolchain $(saveActiveToolchainSpec) ;
+    return $(toolchainsUsed) ;
+}
+
+
+local toolchainsUsed = [ ios.UnityApplication $(APP_NAME) ] ;
+
+C.ActiveTarget $(APP_NAME) ;
+
+IMAGE_TARGET = $(APP_NAME) ;
+
+if $(C.PLATFORM) in ios iossimulator macosx32 macosx64 {
+    IMAGE_PATH = [ ios.GetBundlePath ] ;
+    IMAGE_TARGET = [ ios.GetBundleTarget ] ;
+}
+
+IMAGE_RESOURCES_PATH = $(IMAGE_PATH) ;
+
+CopyFiles $(IMAGE_TARGET) : $(IMAGE_PATH) :
+        $(SUBDIR)/LaunchScreen-iPad.png
+        $(SUBDIR)/LaunchScreen-iPhoneLandscape.png
+        $(SUBDIR)/LaunchScreen-iPhonePortrait.png
+        $(TOP)/LaunchScreen-iPhone.nib
+        $(TOP)/LaunchScreen-iPad.nib
+;
+
+CopyDirectory $(IMAGE_TARGET) : $(IMAGE_RESOURCES_PATH)/Data : @($(SUBDIR)/Data:R=) : * : 1 ;
+
+ios.AssetCatalog $(IMAGE_TARGET) : assets : $(IMAGE_RESOURCES_PATH) : Unity-iPhone/Images.xcassets/AppIcon.appiconset ;
+ios.AssetCatalog $(IMAGE_TARGET) : assets : $(IMAGE_RESOURCES_PATH) : Unity-iPhone/Images.xcassets/LaunchImage.launchimage ;
+
+ios.MergeInfoPList : Info.plist ;
+ios.BundleInfo : displayname : simple ;
+ios.BundleInfo : bundlename : simple ;
+ios.BundleInfo : bundleversion : 1.0 ;
+
+ios.ProvisionFile : simple.mobileprovision ;
+ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
+
+ios.Bundle : $(toolchainsUsed) ;
+
+ios.Archive : $(ALL_LOCATE_TARGET)/package ;
+ios.WebServer ;
+
