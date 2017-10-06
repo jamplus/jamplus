@@ -1737,7 +1737,7 @@ if $(NT) {
 
 actions ios._CodeSign
 {
-    "$(IOSBUILDENV_PATH)/Toolchain/ldid" -n -k"$(IOSBUILDENV_PATH)/Keychain" -S$(CERTIFICATE_CHAIN) -E"" $(1[2]:CT)
+    "$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S$(CERTIFICATE_CHAIN) -E"" $(1[2]:CT)
     copy /B $(1[2]:CT\\)+,, $(1[2]:CT\\) > nul
     copy /B $(1[1]:C\\)+,, $(1[1]:CT\\) > nul
 }
