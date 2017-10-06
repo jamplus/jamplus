@@ -1043,7 +1043,7 @@ rule C.ios._MultiCppCompile_SetupFlags {
 			extraflags += --sysroot $(isysroot:C) ;
 		}
 		local noPeriodVersion = [ Subst $(minimumsdkversion) : %. : "" ] ;
-		extraflags += -integrated-as -fdiagnostics-format=msvc -fconstant-cfstrings -fmodules -fvisibility=hidden ;
+		extraflags += -integrated-as -fdiagnostics-format=msvc -fconstant-cfstrings -fvisibility=hidden ;
 		extraflags += -miphoneos-version-min=$(minimumsdkversion).0 ;
 		extraflags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=$(noPeriodVersion)000 ;
 		extraflags += -I\"$(IOSBUILDENV_PATH)/Toolchain/include\" ;   #"
