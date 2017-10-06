@@ -53,7 +53,7 @@ rule ios.SDK SDK_VERSION {
 	switch $(SDK_PLATFORM) {
 		case ios :
 			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 10.2 ;
+			SDK_VERSION ?= 11.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
@@ -158,22 +158,29 @@ rule ios.SDK SDK_VERSION {
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.0.sdk ;
 					sdkroot = iphoneos ;
-					architecture = armv7 ;
-					minimumVersion = 6.0 ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
 
 				case 10.1 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.1.sdk ;
 					sdkroot = iphoneos ;
-					architecture = armv7 ;
-					minimumVersion = 6.0 ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
 
 				case 10.2 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.2.sdk ;
 					sdkroot = iphoneos ;
-					architecture = armv7 ;
-					minimumVersion = 6.0 ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
+
+				case 11.0 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk ;
+					sdkroot = iphoneos ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
 
 				case * :		Exit "* ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -181,7 +188,7 @@ rule ios.SDK SDK_VERSION {
 
 		case iossimulator :
 			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 10.1 ;
+			SDK_VERSION ?= 11.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
@@ -278,13 +285,19 @@ rule ios.SDK SDK_VERSION {
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator10.1.sdk ;
 					sdkroot = iphoneos ;
-					minimumVersion = 6.0 ;
+					minimumVersion = 8.0 ;
 
 				case 10.2 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator10.2.sdk ;
 					sdkroot = iphoneos ;
-					minimumVersion = 6.0 ;
+					minimumVersion = 8.0 ;
+
+				case 11.0 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk ;
+					sdkroot = iphoneos ;
+					minimumVersion = 8.0 ;
 
 				case * :		Exit "* ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
@@ -327,7 +340,7 @@ rule ios.SDK SDK_VERSION {
 	C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.LINK:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
 	C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = ;
 
-	C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(C.ARCHITECTURE:E=armv7) ;
+	C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(C.ARCHITECTURE:E=arm64) ;
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sysroot) ;
 	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
