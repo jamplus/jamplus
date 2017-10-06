@@ -607,6 +607,17 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 				end
 			end
 
+			-- Write DEVELOPMENT_TEAM.
+			local teamIdentifier
+			if subProject.TEAM_IDENTIFIER  and  subProject.TEAM_IDENTIFIER[platformName]  and  subProject.TEAM_IDENTIFIER[platformName][configName] then
+				teamIdentifier = subProject.TEAM_IDENTIFIER[platformName][configName]
+			elseif Projects['C.*']  and  Projects['C.*'].TEAM_IDENTIFIER  and  Projects['C.*'].TEAM_IDENTIFIER[platformName]  and  Projects['C.*'].TEAM_IDENTIFIER[platformName][configName] then
+				teamIdentifier = Projects['C.*'].TEAM_IDENTIFIER[platformName][configName]
+			end
+			if teamIdentifier then
+				table.insert(self.Contents, "\t\t\t\tDEVELOPMENT_TEAM = \"" .. teamIdentifier .. "\";\n")
+			end
+
 			-- Write PRODUCT_BUNDLE_IDENTIFIER.
 			local productBundleIdentifier
 			if subProject.PRODUCT_BUNDLE_IDENTIFIER  and  subProject.PRODUCT_BUNDLE_IDENTIFIER[platformName]  and  subProject.PRODUCT_BUNDLE_IDENTIFIER[platformName][configName] then

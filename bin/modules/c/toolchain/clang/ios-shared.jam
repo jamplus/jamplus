@@ -1180,6 +1180,7 @@ rule ios.ProvisionFile TARGET : FILENAME {
 	_provisionFileTarget = $(_provisionFileTarget:T) ;
 
 	local bundleIdentifier ;
+	local teamIdentifier ;
 	local provisioningProfileSpecifier ;
 	LuaString "
 		local pl = require 'plist'.read(jam_getvar('_provisionFileTarget')[1])
@@ -1187,6 +1188,10 @@ rule ios.ProvisionFile TARGET : FILENAME {
 		local identifier = pl.Entitlements[\"application-identifier\"]
 		identifier = identifier:sub(#prefix[1] + 2)
 		jam_setvar('bundleIdentifier', identifier)
+
+		local identifier = pl.Entitlements[\"com.apple.developer.team-identifier\"]
+		jam_setvar('teamIdentifier', identifier)
+
 		local name = pl.Name
 		jam_setvar('provisioningProfileSpecifier', name)
 	" ;
@@ -1198,6 +1203,12 @@ rule ios.ProvisionFile TARGET : FILENAME {
 			Contents += "Projects[ [[$(TARGET)]] ].PRODUCT_BUNDLE_IDENTIFIER[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(bundleIdentifier)]]
 " ;
 			Contents += "Projects[ [[$(TARGET)]] ].PROVISIONING_PROFILE_SPECIFIER[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(provisioningProfileSpecifier)]]
+" ;
+		}
+	}
+	if $(teamIdentifier) {
+		if $(TARGETINFO_LOCATE) {
+			Contents += "Projects[ [[$(TARGET)]] ].TEAM_IDENTIFIER[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(teamIdentifier)]]
 " ;
 		}
 	}
