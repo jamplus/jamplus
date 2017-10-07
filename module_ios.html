@@ -17,7 +17,7 @@
 <div class="textblock"><p>The iOS module contains special build rules to create a C/C++/Objective C/Objective C++ iOS application from start to finish.</p>
 <p>The <code>ios</code> module will automatically detect the appropriate compilers and set up some architecture-specific items.</p>
 <div class="fragment"><div class="line"><span class="preprocessor"># This goes in the Jamfile.</span></div><div class="line"><span class="preprocessor">ios.SDK 8.0 ;</span></div></div><!-- fragment --><p>Next, some combination of the following rule calls (and any others described below) are needed to build a full iOS .ipa for installation and distribution.</p>
-<div class="fragment"><div class="line">C.ActiveTarget sdltest ;</div><div class="line">ios.BundleInfo : displayname : sdltest ;</div><div class="line">ios.BundleInfo : bundleversion : 1.0 ;</div><div class="line">ios.BundleInfo : uistatusbarhidden : true ;</div><div class="line"></div><div class="line">C.Inherits : sdl2 ;</div><div class="line">C.Application : sdltest.c ;</div><div class="line"></div><div class="line">ios.ProvisionFile : test.mobileprovision ;</div><div class="line">ios.CodeSign : <span class="stringliteral">&quot;iPhone Developer&quot;</span> : <span class="stringliteral">&quot;ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:&quot;</span> ;</div><div class="line">ios.Bundle ;</div><div class="line"></div><div class="line">local bundlePath = [ ios.GetBundlePath ] ;</div><div class="line">ios.Archive : $(bundlePath)/../package ;</div><div class="line">ios.WebServer ;</div></div><!-- fragment --><p>An iOS build is initiated with a <code>C.TOOLCHAIN</code> of <code>ios/CONFIG</code>. This will build the application bundle, but it will not build the <code>.ipa</code>.</p>
+<div class="fragment"><div class="line">C.ActiveTarget sdltest ;</div><div class="line">ios.BundleInfo : displayname : sdltest ;</div><div class="line">ios.BundleInfo : bundleversion : 1.0 ;</div><div class="line">ios.BundleInfo : uistatusbarhidden : true ;</div><div class="line"></div><div class="line">C.Inherits : sdl2 ;</div><div class="line">C.Application : sdltest.c ;</div><div class="line"></div><div class="line">ios.ProvisionFile : test.mobileprovision ;</div><div class="line">ios.CodeSign : <span class="stringliteral">&quot;iPhone Developer&quot;</span> : <span class="stringliteral">&quot;ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:&quot;</span> ;</div><div class="line">ios.Bundle ;</div><div class="line"></div><div class="line">local bundlePath = [ ios.GetBundlePath ] ;</div><div class="line">ios.Archive : $(bundlePath)/../package : : webserver ;</div></div><!-- fragment --><p>An iOS build is initiated with a <code>C.TOOLCHAIN</code> of <code>ios/CONFIG</code>. This will build the application bundle, but it will not build the <code>.ipa</code>.</p>
 <div class="fragment"><div class="line">&gt;jam C.TOOLCHAIN=ios/release</div></div><!-- fragment --><p>To bundle up an <code>.ipa</code>, build the <code>archive:TARGET</code> target.</p>
 <div class="fragment"><div class="line">&gt;jam C.TOOLCHAIN=ios/release archive:TARGET</div></div><!-- fragment --><h1><a class="anchor" id="module_ios_ruleslist"></a>
 List of Rules</h1>
@@ -96,17 +96,25 @@ rule C.ios.WeakLinkFrameworks TARGET : FRAMEWORKS</h1>
 </dl>
 <div class="fragment"><div class="line">C.ios.WeakLinkFrameworks MyGame : CoreMotion iAd AVFoundation ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_ios_Archive"></a>
-rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK</h1>
+rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK : OPTIONS</h1>
 <p><a name="arule_ios_Archive"></a></p>
 <p>In order to output a final <code>.ipa</code> to be installed on an iOS device, <code>ios.Archive</code> must be called for the <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to convert to an <code>.ipa</code>. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">OUTPUT_PATH</td><td>The final resting place of the <code>.ipa</code>. </td></tr>
-    <tr><td class="paramname">ITUNES_ARTWORK</td><td>The path to a <code>.jpg</code> to be used as the icon within iTunes.</td></tr>
+    <tr><td class="paramname">ITUNES_ARTWORK</td><td>The path to a <code>.jpg</code> to be used as the icon within iTunes. </td></tr>
+    <tr><td class="paramname">OPTIONS</td><td>The list of options applied when building the <code>.ipa</code>.</td></tr>
   </table>
   </dd>
 </dl>
+<p> <blockquote>  </p><ul>
+<li>
+<code>install</code> - Installs the .ipa on the USB-connected iOS device. Requires <code>libimobiledevice</code> installed installed within the <code>jamplus/bin/libimobiledevice</code> directory. </li>
+<li>
+<code>run</code> - Installs and runs the application on the USB-connected iOS device. Requires <code>libimobiledevice</code> installed within the <code>jamplus/bin/libimobiledevice</code> directory. </li>
+</ul>
+<p> </blockquote> </p>
 <div class="fragment"><div class="line">ios.Archive : c:/ios-packages ;</div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_ios_AssetCatalog"></a>
 rule ios.AssetCatalog TARGET : ASSET_CATALOG_PATH ;</h1>
