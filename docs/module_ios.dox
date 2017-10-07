@@ -25,8 +25,7 @@ Next, some combination of the following rule calls (and any others described bel
     ios.Bundle ;
 
     local bundlePath = [ ios.GetBundlePath ] ;
-    ios.Archive : $(bundlePath)/../package ;
-    ios.WebServer ;
+    ios.Archive : $(bundlePath)/../package : : webserver ;
 \endcode
 
 An iOS build is initiated with a <tt>C.TOOLCHAIN</tt> of <tt>ios/CONFIG</tt>. This will build the application bundle, but it will not build the <tt>.ipa</tt>.
@@ -137,7 +136,7 @@ Weak links \c TARGET against the \c FRAMEWORKS specified.  No dependencies are s
 
 
 <hr>
-\section rule_ios_Archive rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK
+\section rule_ios_Archive rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK : OPTIONS
 \addindex rule_ios_Archive
 
 In order to output a final <tt>.ipa</tt> to be installed on an iOS device, \c ios.Archive must be called for the \c TARGET.
@@ -145,6 +144,14 @@ In order to output a final <tt>.ipa</tt> to be installed on an iOS device, \c io
 \param TARGET The target to convert to an <tt>.ipa</tt>. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param OUTPUT_PATH The final resting place of the <tt>.ipa</tt>.
 \param ITUNES_ARTWORK The path to a <tt>.jpg</tt> to be used as the icon within iTunes.
+\param OPTIONS The list of options applied when building the <tt>.ipa</tt>.
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c install - Installs the .ipa on the USB-connected iOS device. Requires <tt>libimobiledevice</tt> installed installed within the <tt>jamplus/bin/libimobiledevice</tt> directory.
+  <li>\c run - Installs and runs the application on the USB-connected iOS device. Requires <tt>libimobiledevice</tt> installed within the <tt>jamplus/bin/libimobiledevice</tt> directory.
+</ul>
+\htmlonly </blockquote> \endhtmlonly
 
 \code
     ios.Archive : c:/ios-packages ;
