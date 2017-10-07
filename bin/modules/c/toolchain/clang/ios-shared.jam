@@ -939,12 +939,9 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 		MakeLocate $(codeResources) : $(bundlePath)/_CodeSignature ;
 
 		if $(IOSBUILDENV_PATH) {
-			local resourceRulesPlist = @(ResourceRules.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-			MakeLocate $(resourceRulesPlist) : $(bundlePath) ;
-
-			UseCommandLine $(codeResources) $(resourceRulesPlist) : $(dependsList) ;
-			Depends $(bundleTarget) : $(codeResources) $(resourceRulesPlist) : $(dependsList) $(linkTarget) ;
-			Clean $(cleanBundleTarget) : $(codeResources) $(resourceRulesPlist) ;
+			UseCommandLine $(codeResources) : $(dependsList) ;
+			Depends $(bundleTarget) : $(codeResources) : $(dependsList) $(linkTarget) ;
+			Clean $(cleanBundleTarget) : $(codeResources) ;
 
 			CERTIFICATE_CHAIN on $(codeResources) $(linkTarget) = $(CERTIFICATE_CHAIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			ios._CodeSign $(codeResources) $(linkTarget) : $(dependsList) $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
