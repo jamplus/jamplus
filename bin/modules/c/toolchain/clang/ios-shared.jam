@@ -1813,42 +1813,44 @@ rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK : OPTIONS {
 		ITUNES_ARTWORK on $(ipaTarget) = $(ITUNES_ARTWORK) ;
 		ios._Archive $(ipaTarget) : $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
 
-		# Set up an install target.
-		Depends install:$(TARGET) : $(ipaTarget) ;
-		Always install:$(TARGET) ;
-		NotFile install:$(TARGET) ;
-		IPA_TARGET on install:$(TARGET) = $(ipaTarget) ;
-		ios._Install install:$(TARGET) : $(ipaTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
+		if $(NT) {
+			# Set up an install target.
+			Depends install:$(TARGET) : $(ipaTarget) ;
+			Always install:$(TARGET) ;
+			NotFile install:$(TARGET) ;
+			IPA_TARGET on install:$(TARGET) = $(ipaTarget) ;
+			ios._Install install:$(TARGET) : $(ipaTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
 
-		# Set up an auto-install if requested.
-		if install in $(OPTIONS) {
-			Depends autoinstall:$(TARGET) : $(ipaTarget) ;
-			NotFile autoinstall:$(TARGET) ;
-			IPA_TARGET on autoinstall:$(TARGET) = $(ipaTarget) ;
-			ios._Install autoinstall:$(TARGET) : $(ipaTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
-			Depends $(TARGET) : autoinstall:$(TARGET) ;
-		}
+			# Set up an auto-install if requested.
+			if install in $(OPTIONS) {
+				Depends autoinstall:$(TARGET) : $(ipaTarget) ;
+				NotFile autoinstall:$(TARGET) ;
+				IPA_TARGET on autoinstall:$(TARGET) = $(ipaTarget) ;
+				ios._Install autoinstall:$(TARGET) : $(ipaTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
+				Depends $(TARGET) : autoinstall:$(TARGET) ;
+			}
 
-		# Set up an uninstall target.
-		Always uninstall:$(TARGET) ;
-		NotFile uninstall:$(TARGET) ;
-		APPID on uninstall:$(TARGET) = $(CFBundleIdentifier:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		ios._Uninstall uninstall:$(TARGET) : : $(C.COMPILER_SUITE_SYMBOL) ;
+			# Set up an uninstall target.
+			Always uninstall:$(TARGET) ;
+			NotFile uninstall:$(TARGET) ;
+			APPID on uninstall:$(TARGET) = $(CFBundleIdentifier:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			ios._Uninstall uninstall:$(TARGET) : : $(C.COMPILER_SUITE_SYMBOL) ;
 
-		# Set up a run target.
-		Depends run:$(TARGET) : install:$(TARGET) ;
-		Always run:$(TARGET) ;
-		NotFile run:$(TARGET) ;
-		APPID on run:$(TARGET) = $(CFBundleIdentifier:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		ios._Run run:$(TARGET) : : $(C.COMPILER_SUITE_SYMBOL) ;
+			# Set up a run target.
+			Depends run:$(TARGET) : install:$(TARGET) ;
+			Always run:$(TARGET) ;
+			NotFile run:$(TARGET) ;
+			APPID on run:$(TARGET) = $(CFBundleIdentifier:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			ios._Run run:$(TARGET) : : $(C.COMPILER_SUITE_SYMBOL) ;
 
-		# Set up an auto-run if requested.
-		if run in $(OPTIONS) {
-			Depends autorun:$(TARGET) : install:$(TARGET) ;
-			NotFile autorun:$(TARGET) ;
-			APPID on autorun:$(TARGET) = $(CFBundleIdentifier:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-			ios._Run autorun:$(TARGET) : : $(C.COMPILER_SUITE_SYMBOL) ;
-			Depends $(TARGET) : autorun:$(TARGET) ;
+			# Set up an auto-run if requested.
+			if run in $(OPTIONS) {
+				Depends autorun:$(TARGET) : install:$(TARGET) ;
+				NotFile autorun:$(TARGET) ;
+				APPID on autorun:$(TARGET) = $(CFBundleIdentifier:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				ios._Run autorun:$(TARGET) : : $(C.COMPILER_SUITE_SYMBOL) ;
+				Depends $(TARGET) : autorun:$(TARGET) ;
+			}
 		}
 
 		# Set up the webserver.
