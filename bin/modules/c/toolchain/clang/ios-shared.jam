@@ -2002,7 +2002,8 @@ actions screenoutput ios._WebServer {
 	$(JAM_EXECUTABLE_PATH:C) --webserver -ssl $(OUTPUT_PATH)
 }
 
-if $(NT) {
+#if $(NT) {
+if 1 {
 
 
 actions lua ios._Archive
