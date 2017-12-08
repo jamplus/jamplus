@@ -23,15 +23,15 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
             MSSDK_STDHDRS =
                 $(MSVCNT)/include
                 $(MSVCNT)/../../../Auxiliary/VS/include
-                $(MSSDK)/Include/10.0.14393.0/ucrt
-                $(MSSDK)/Include/10.0.14393.0/um
-                $(MSSDK)/Include/10.0.14393.0/shared
-                $(MSSDK)/Include/10.0.14393.0/winrt
+                $(MSSDK)/Include/10.0.16299.0/ucrt
+                $(MSSDK)/Include/10.0.16299.0/um
+                $(MSSDK)/Include/10.0.16299.0/shared
+                $(MSSDK)/Include/10.0.16299.0/winrt
             ;
             MSSDK_LINKDIRECTORIES =
                 $(MSVCNT)/lib/x64
-                $(MSSDK)/lib/10.0.14393.0/ucrt/x64
-                $(MSSDK)/lib/10.0.14393.0/um/x64
+                $(MSSDK)/lib/10.0.16299.0/ucrt/x64
+                $(MSSDK)/lib/10.0.16299.0/um/x64
             ;
             MSVCBIN = "$(MSVCNT)/bin/HostX64/x64/" ;
             RC = $(MSSDK)/bin/x64/rc ;
