@@ -52,20 +52,21 @@ rule ios.SDK SDK_VERSION {
 
 	switch $(SDK_PLATFORM) {
 		case ios :
-			developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
-			SDK_VERSION ?= 11.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
+					developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS4.3.sdk ;
 					architecture = armv6 ;
 					sdkroot = iphoneos4.3 ;
 
 				case 5.0 :
+					developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
 					isysroot = $(developerRoot)/SDKs/iPhoneOS5.0.sdk ;
 					architecture = armv6 ;
 					sdkroot = iphoneos5.0 ;
 
 				case 5.1 :
+					developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
 					isysroot = @(../../SDKs/iPhoneOS5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
 					architecture = armv6 ;
 					sdkroot = iphoneos5.1 ;
@@ -188,25 +189,43 @@ rule ios.SDK SDK_VERSION {
 					sdkroot = iphoneos ;
 					architecture = arm64 ;
 					minimumVersion = 8.0 ;
-
-				case * :		Exit "* ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
+
+			if ! $(developerRoot) {
+				developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+				isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk ;
+				sdkroot = iphoneos ;
+				architecture = arm64 ;
+				minimumVersion = 8.0 ;
+				local buffer = [ Shell "plutil -convert xml1 -o - $(developerRoot)/Platforms/iPhoneOS.platform/Version.plist" ] ;
+				LuaString "
+					if not plist then
+						plist = require 'plist'
+					end
+					local ospath = require 'ospath'
+					local versionPlist = plist.readbuffer(jam_getvar('buffer')[1])
+					jam_setvar('SDK_VERSION', versionPlist['CFBundleVersion'])
+				" ;
+
+			}
+
 			flags += -fvisibility=hidden ;
 
 		case iossimulator :
-			developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
-			SDK_VERSION ?= 11.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
+					developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator4.3.sdk ;
 					#flags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=30200 ;
 					sdkroot = iphoneos4.3 ;
 
 				case 5.0 :
+					developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
 					isysroot = $(developerRoot)/SDKs/iPhoneSimulator5.0.sdk ;
 					sdkroot = iphoneos5.0 ;
 
 				case 5.1 :
+					developerRoot = /Developer/Platforms/iPhoneSimulator.platform/Developer ;
 					isysroot = @(../../../../Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator5.1.sdk:R=$(COMPILER_BIN_PATH)) ;
 					sdkroot = iphoneos5.1 ;
 
@@ -305,9 +324,24 @@ rule ios.SDK SDK_VERSION {
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk ;
 					sdkroot = iphoneos ;
 					minimumVersion = 8.0 ;
-
-				case * :		Exit "* ios.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 			}
+
+			if ! $(developerRoot) {
+				developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+				isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk ;
+				sdkroot = iphoneos ;
+				minimumVersion = 8.0 ;
+				local buffer = [ Shell "plutil -convert xml1 -o - $(developerRoot)/Platforms/iPhoneSimulator.platform/Info.plist" ] ;
+				LuaString "
+					if not plist then
+						plist = require 'plist'
+					end
+					local ospath = require 'ospath'
+					local versionPlist = plist.readbuffer(jam_getvar('buffer')[1])
+					jam_setvar('SDK_VERSION', versionPlist['CFBundleVersion'])
+				" ;
+			}
+
 			architecture = i386 ;
 	}
 
