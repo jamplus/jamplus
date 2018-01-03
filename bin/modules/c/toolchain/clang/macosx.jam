@@ -13,10 +13,12 @@ rule C.Toolchain.clang.macosx.Detect {
 	local COMPILER_BIN_PATH = [ Match (.+)/ : $(clang[1]) ] ;
 	C.Toolchain.clang.Setup $(COMPILER_BIN_PATH) ;
 
+	COMPILER_BIN_PATH_SECONDARY on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH) ;
 	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/libtool ;
 	if $(IOSBUILDENV_PATH) {
 		C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/ld ;
 	}
+	C.DSYMUTIL on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/dsymutil ;
 	C.LIPO on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/lipo ;
 	SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = "" ;
 	SUFMODULE on $(C.COMPILER_SUITE_SYMBOL) = .dylib ;
@@ -31,7 +33,7 @@ rule C.Toolchain.clang.macosx.Detect {
 	C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._MultiCppCompile_SetupFlags ;
 	C._SharedLibraryFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.macosx._SharedLibraryFromObjects_LinkFlags ;
 
-	C.macosx.SDK $(SDK_VERSION) ;
+	macosx.SDK $(SDK_VERSION) ;
 
 	C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) ;
 
