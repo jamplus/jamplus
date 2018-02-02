@@ -16,8 +16,6 @@ rule C.OpenSSL TARGET : OPTIONS {
 			local PATH_SUFFIXES =
 				# https://www.npcglib.org/~stathis/blog/precompiled-openssl/
 				openssl-1.1.0f-$(C.COMPILER)
-				openssl-1.0.2f-$(C.COMPILER)
-				openssl-1.0.1r-$(C.COMPILER)
 			;
 
 			local ssl.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include$(bits)/openssl : ssl.h ] ;
@@ -44,10 +42,10 @@ rule C.OpenSSL TARGET : OPTIONS {
 
 		if link in $(OPTIONS) {
 			C.LinkDirectories $(TARGET) : $(opensslRoot)/lib$(bits) ;
-			C.LinkPrebuiltLibraries $(TARGET) : libeay32MT ssleay32MT ;
+			C.LinkPrebuiltLibraries $(TARGET) : libcryptoMT libsslMT ;
 
 			C.LinkPrebuiltLibraries $(TARGET) : advapi32 gdi32 user32 ;
-
+			C.LinkPrebuiltLibraries $(TARGET) : Crypt32 ;
 			C.LinkPrebuiltLibraries $(TARGET) : ws2_32 ;
 		}
 
