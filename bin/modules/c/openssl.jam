@@ -14,7 +14,8 @@ rule C.OpenSSL TARGET : OPTIONS {
 			;
 
 			local PATH_SUFFIXES =
-				# http://www.npcglib.org/~stathis/blog/precompiled-openssl/
+				# https://www.npcglib.org/~stathis/blog/precompiled-openssl/
+				openssl-1.1.0f-$(C.COMPILER)
 				openssl-1.0.2f-$(C.COMPILER)
 				openssl-1.0.1r-$(C.COMPILER)
 			;
