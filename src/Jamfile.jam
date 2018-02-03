@@ -354,6 +354,8 @@ if $(LUA_BIN)
 				lua/xmlize.lua
 				lua/socket/http.lua
 				lua/socket/url.lua
+				lua/ssl/https.lua
+				lua/ssl/options.lua
 				lua/lxp/lom.lua
 				lua/xavante/encoding.lua
 				lua/xavante/filehandler.lua
