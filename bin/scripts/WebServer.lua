@@ -47,25 +47,26 @@ if ssl  and  (not ospath.exists(caKeyFilename)
         or  not ospath.exists(serverCerFilename)) then
 
     if OS == 'NT' then
-        for entry in os.getenv('PATH'):gmatch('[^;]*') do
-            opensslExecutable = ospath.join(entry, 'openssl.exe')
-            if ospath.exists(opensslExecutable) then
-                break
+        opensslExecutable = 'c:/OpenSSL-Win32/bin/openssl.exe'
+        if not ospath.exists(opensslExecutable) then
+            opensslExecutable = 'c:/OpenSSL-Win64/bin/openssl.exe'
+            if not ospath.exists(opensslExecutable) then
+                opensslExecutable = 'c:/openssl-1.1.0f-vs2017/bin/openssl.exe'
+                if not ospath.exists(opensslExecutable) then
+                    opensslExecutable = nil
+                else
+                    osprocess.setenv('OPENSSL_CONF', ospath.join(ospath.remove_filename(opensslExecutable), '..', 'ssl', 'openssl.cnf'))
+                end
             end
-            opensslExecutable = nil
         end
         if not opensslExecutable then
-            opensslExecutable = 'c:/OpenSSL-Win32/bin/openssl.exe'
-            if not ospath.exists(opensslExecutable) then
-                opensslExecutable = 'c:/OpenSSL-Win64/bin/openssl.exe'
-                if not ospath.exists(opensslExecutable) then
-                    opensslExecutable = 'c:/openssl-1.0.2f-vs2015/bin/opensslMT.exe'
-                    if not ospath.exists(opensslExecutable) then
-                        opensslExecutable = nil
-                    else
-                        osprocess.setenv('OPENSSL_CONF', ospath.join(ospath.remove_filename(opensslExecutable), '..', 'ssl', 'openssl.cnf'))
-                    end
+            for entry in os.getenv('PATH'):gmatch('[^;]*') do
+                opensslExecutable = ospath.join(entry, 'openssl.exe')
+                if ospath.exists(opensslExecutable) then
+                    print(opensslExecutable)
+                    break
                 end
+                opensslExecutable = nil
             end
         end
     else
