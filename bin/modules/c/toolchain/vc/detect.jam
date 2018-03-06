@@ -10,7 +10,7 @@ rule FindVisualStudioHelper VERSION : COMPILER {
             }
             if $(MSVCNT) {
                 MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
-                MSVCNT = @(..\\..\\VC\\Tools\\MSVC\\14.12.25827:R=$(MSVCNT)) ;
+                MSVCNT = @(..\\..\\VC\\Tools\\MSVC\\14.13.26128:R=$(MSVCNT)) ;
                 COMPILER = vs2017 ;
             }
 
