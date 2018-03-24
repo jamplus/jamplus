@@ -154,3 +154,5 @@ if %VERBOSE% == 1 echo.
 call %COMNTOOLS%
 
 :end
+cd /D %~dp0
+
