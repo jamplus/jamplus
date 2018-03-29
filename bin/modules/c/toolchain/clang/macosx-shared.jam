@@ -141,7 +141,7 @@ rule macosx.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 }
 
 
-LuaString "
+local InfoPlistHelper = "
 function GetInfoPlistCurrentLevel()
 	if not plist then
 		plist = require 'plist'
@@ -179,24 +179,32 @@ end
 
 
 rule macosx.BundleInfoBoolean TARGET : KEY : VALUE {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')[1] == 'true'" ;
 }
 
 
 rule macosx.BundleInfoInteger TARGET : KEY : VALUE {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = tonumber(jam_getvar('VALUE')[1])" ;
 }
 
 
 rule macosx.BundleInfoString TARGET : KEY : VALUE {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')[1]" ;
 }
 
 
 rule macosx.BundleInfoDictBegin TARGET : KEY {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "
 		local currentLevel = GetInfoPlistCurrentLevel()
@@ -210,12 +218,16 @@ rule macosx.BundleInfoDictBegin TARGET : KEY {
 
 
 rule macosx.BundleInfoDictEnd TARGET {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "PopInfoPlistLevel()" ;
 }
 
 
 rule macosx.BundleInfoArrayBegin TARGET : KEY {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "
 		local currentLevel = GetInfoPlistCurrentLevel()
@@ -229,12 +241,16 @@ rule macosx.BundleInfoArrayBegin TARGET : KEY {
 
 
 rule macosx.BundleInfoArrayEnd TARGET {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "PopInfoPlistLevel()" ;
 }
 
 
 rule macosx.BundleInfoArrayDictBegin TARGET {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "
 		local currentLevel = GetInfoPlistCurrentLevel()
@@ -248,12 +264,16 @@ rule macosx.BundleInfoArrayDictBegin TARGET {
 
 
 rule macosx.BundleInfoArrayDictEnd TARGET {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "PopInfoPlistLevel()" ;
 }
 
 
 rule macosx.BundleInfoArrayBoolean TARGET : KEY : VALUE {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	if $(VALUE) {
 		LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')" ;
@@ -271,6 +291,8 @@ rule macosx.BundleInfoArrayBoolean TARGET : KEY : VALUE {
 
 
 rule macosx.BundleInfoArrayInteger TARGET : KEY : VALUE {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	if $(VALUE) {
 		LuaString "
@@ -293,6 +315,8 @@ rule macosx.BundleInfoArrayInteger TARGET : KEY : VALUE {
 
 
 rule macosx.BundleInfoArrayString TARGET : KEY : VALUE {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	if $(VALUE) {
 		LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')" ;
@@ -383,6 +407,8 @@ rule macosx.BundleInfo TARGET : TYPE : VALUE {
 
 
 rule macosx.MergeInfoPList TARGET : SOURCE {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 
 	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):source ;
@@ -561,6 +587,8 @@ rule macosx.Bundle TARGET : TOOLCHAINS {
 		if $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 			CopyFile $(bundleTarget) : $(infoplist) : $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		} else {
+			if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 			local infoplistcontents = [ LuaString "
 				local currentLevel = GetInfoPlistCurrentLevel()
 				return plist.dump(currentLevel)
