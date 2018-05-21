@@ -26,22 +26,24 @@ local xml = xmlize.luaize(vcxproj)
 local function RecurseItemGroup(files, itemGroupRoot)
 	for _, entry in ipairs(itemGroupRoot) do
 		entry = entry['#']
-		for _, orderTable in ipairs(entry['*']) do
-			local key = orderTable[1]
-			if key ~= 'Filter' then
-				local value = entry[key][orderTable[2]]
-				local attr = value['@']
-				local filename = ospath.make_slash(attr.Include)
+		if entry['*'] then
+			for _, orderTable in ipairs(entry['*']) do
+				local key = orderTable[1]
+				if key ~= 'Filter' then
+					local value = entry[key][orderTable[2]]
+					local attr = value['@']
+					local filename = ospath.make_slash(attr.Include)
 
-				local filter = value['#'].Filter
-				if filter then
-					local relativePath = filter[1]['#']
-					if type(relativePath) ~= 'string' then
-						relativePath = ''
+					local filter = value['#'].Filter
+					if filter then
+						local relativePath = filter[1]['#']
+						if type(relativePath) ~= 'string' then
+							relativePath = ''
+						end
+						foldertree.InsertName(files, relativePath, filename)
+					else
+						foldertree.InsertName(files, '', filename)
 					end
-					foldertree.InsertName(files, relativePath, filename)
-				else
-					foldertree.InsertName(files, '', filename)
 				end
 			end
 		end
