@@ -3,7 +3,7 @@ rule C.Toolchain.gcc.linux32.Detect {
     if ! $(foundPath) {
         return ;
     }
-    foundPath = [ Match (.+)/ : $(foundPath gcc[1]) ] ;
+    foundPath = [ Match (.+)/ : $(foundPath[1]) ] ;
 
     return [ C.Toolchain.gcc.Setup $(foundPath) ] ;
 }
