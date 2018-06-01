@@ -132,7 +132,7 @@ rule C.clang._SharedLibraryFromObjects_LinkFlags {
 
 if $(CLANG_USES_AR) {
 
-    actions updated together piecemeal C.gcc.Archive {
+    actions updated together piecemeal C.clang.Archive {
         "$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
     }
 
@@ -142,7 +142,7 @@ if $(CLANG_USES_AR) {
     #
 
     if $(NOARUPDATE) {
-        actions C.gcc.Archive {
+        actions C.clang.Archive {
             "$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
         }
     }
