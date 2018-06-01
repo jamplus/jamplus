@@ -76,7 +76,7 @@ rule LuaApplication TARGET : OPTIONS
 	C.LinkLibraries : $(LUA_VERSION) ;
 	if $(OS) in LINUX FREEBSD
 	{
-		if $(OS) = LINUX {
+		if $(OS) = LINUX
 		{
 			C.LinkFlags : -Wl,-E -lreadline ;
 		}
