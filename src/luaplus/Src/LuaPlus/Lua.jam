@@ -74,7 +74,7 @@ rule LuaApplication TARGET : OPTIONS
 	}
 	C.IncludeDirectories : $(LUAPLUS_INCLUDE_DIRECTORIES) ;
 	C.LinkLibraries : $(LUA_VERSION) ;
-	if $(OS) = LINUX
+	if $(OS) in LINUX FREEBSD
 	{
 		C.LinkFlags : -Wl,-E -lreadline ;
 		C.LinkFlags : -Wl,--rpath=\\$ORIGIN -z origin ;
