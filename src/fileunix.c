@@ -109,6 +109,7 @@ struct ar_hdr		/* archive file member header - printable ascii */
 
 #ifdef __FreeBSD__
 #include <sys/sysctl.h>
+#include <libgen.h>
 #endif
 
 #include <errno.h>
@@ -953,8 +954,10 @@ void getprocesspath(char* buffer, size_t bufferLen)
 	CFRelease(normalizedString);
 	CFRelease(bundleUrl);
 #elif defined(__FreeBSD__)
+	char* dirNameBuffer;
 	sysctl_get_pathname(buffer, bufferLen);
-	dirname(buffer);
+	dirNameBuffer = dirname(buffer);
+	memmove(buffer, dirNameBuffer, strlen(dirNameBuffer) + 1);
 	strcat(buffer, "/");
 #else
 	int count = readlink("/proc/self/exe", buffer, bufferLen);
