@@ -421,6 +421,7 @@ if $(LUA_BIN)
 		local MODULE_EXT ;
 		switch $(OS)
 		{
+			case FREEBSD : MODULE_EXT = so ;
 			case MACOSX : MODULE_EXT = dylib ;
 			case LINUX : MODULE_EXT = so ;
 		}
