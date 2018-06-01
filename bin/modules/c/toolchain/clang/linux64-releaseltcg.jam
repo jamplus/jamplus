@@ -1,0 +1,9 @@
+rule C.Toolchain.clang.linux64-releaseltcg {
+    C.Flags * : CC	: -g -O3 -fomit-frame-pointer -m64 ;
+    C.Flags * : C++	: -g -O3 -fomit-frame-pointer -m64 ;
+    C.Flags * : M	: -g -O3 -fomit-frame-pointer -m64 ;
+    C.Flags * : MM	: -g -O3 -fomit-frame-pointer -m64 ;
+    C.LinkFlags * : -m64 ;
+
+    C.Toolchain.Helper.ReleaseSettings ;
+}

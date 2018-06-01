@@ -1,0 +1,10 @@
+rule C.Toolchain.clang.linux32.Detect {
+    local foundPath = [ Glob $(PATH) : clang ] ;
+    if ! $(foundPath) {
+        return ;
+    }
+    foundPath = [ Match (.+)/ : $(foundPath[1]) ] ;
+
+    return [ C.Toolchain.clang.Setup $(foundPath) ] ;
+}
+

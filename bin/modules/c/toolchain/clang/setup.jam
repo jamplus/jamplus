@@ -44,7 +44,12 @@ rule C.Toolchain.clang.Setup COMPILER_BIN_PATH : SUFFIXES {
     C.Flags * : M   : -x objective-c -Wno-unused-parameter ;
     C.Flags * : MM  : -x objective-c++ -Wno-unused-parameter ;
 
-    C.AR on $(C.COMPILER_SUITE_SYMBOL) = @(libtool:R=$(COMPILER_BIN_PATH)) ;
+    if $(OS) in FREEBSD {
+        CLANG_USES_AR = 1 ;
+        C.AR on $(C.COMPILER_SUITE_SYMBOL) = @(ar:R=$(COMPILER_BIN_PATH)) rU ;
+    } else {
+        C.AR on $(C.COMPILER_SUITE_SYMBOL) = @(libtool:R=$(COMPILER_BIN_PATH)) ;
+    }
     C.CC on $(C.COMPILER_SUITE_SYMBOL) = @(clang:R=$(COMPILER_BIN_PATH)) ;
     C.C++ on $(C.COMPILER_SUITE_SYMBOL) = @(clang++:R=$(COMPILER_BIN_PATH)) ;
     C.LINK on $(C.COMPILER_SUITE_SYMBOL) = @(clang++:R=$(COMPILER_BIN_PATH)) ;

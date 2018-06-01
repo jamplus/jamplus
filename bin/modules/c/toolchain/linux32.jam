@@ -7,7 +7,9 @@ rule C.Toolchain.linux32.* {
         }
     } else {
         if ! [ C.Toolchain.gcc.$(C.PLATFORM).Detect ] {
-            return ;
+            if ! [ C.Toolchain.clang.$(C.PLATFORM).Detect ] {
+                return ;
+            }
         }
     }
     if [ RuleExists C.Toolchain.$(C.COMPILER_SUITE).$(C.PLATFORM)-$(C.CONFIG) : 1 ] {
