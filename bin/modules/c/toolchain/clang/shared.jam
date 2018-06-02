@@ -130,31 +130,20 @@ rule C.clang._SharedLibraryFromObjects_LinkFlags {
 }
 
 
-if $(CLANG_USES_AR) {
-
-    actions updated together piecemeal C.clang.Archive {
-        "$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
-    }
-
-
-    #
-    # NOARUPDATE - can't update an archive
-    #
-
-    if $(NOARUPDATE) {
-        actions C.clang.Archive {
-            "$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
-        }
-    }
-
-} else {
-
-    actions C.clang.Archive {
-        $(C.AR:C) $(LIBFLAGS) $(<:C) @^^^($(>:CJ=$(NEWLINE)))
-    }
-
+actions updated together piecemeal C.clang.Archive {
+    "$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
 }
 
+
+#
+# NOARUPDATE - can't update an archive
+#
+
+if $(NOARUPDATE) {
+    actions C.clang.Archive {
+        "$(C.AR)" $(LIBFLAGS) $(<:C) $(>:C)
+    }
+}
 
 
 actions C.clang.Link {
