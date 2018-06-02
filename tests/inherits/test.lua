@@ -171,12 +171,22 @@ else
 ]]
 
 	if Platform == 'linux' then
-		patternC_checksums = [[
+		if Compiler == 'clang' then
+			patternC_checksums = [[
 *** found 22 target(s)...
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o
 *** updated 2 target(s)...
 ]]
+		else
+			patternC_checksums = [[
+*** found 22 target(s)...
+*** updating 2 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app
+*** updated 2 target(s)...
+]]
+		end
 	else
 		patternC_checksums = [[
 *** found 22 target(s)...

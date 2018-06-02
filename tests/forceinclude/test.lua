@@ -353,14 +353,26 @@ void LibA()
 ]]
 		TestPattern(pattern4, RunJam())
 	elseif Platform == 'linux' then
-		local pattern4 = [[
+		if Compiler == 'clang' then
+			local pattern4 = [[
 *** found 18 target(s)...
 *** updating 4 target(s)...
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
-@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o
 *** updated 4 target(s)...
 ]]
-		TestPattern(pattern4, RunJam())
+			TestPattern(pattern4, RunJam())
+		else
+			local pattern4 = [[
+*** found 18 target(s)...
+*** updating 4 target(s)...
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o
+@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
+*** updated 4 target(s)...
+]]
+			TestPattern(pattern4, RunJam())
+		end
 	else
 		local pattern4 = [[
 *** found 18 target(s)...

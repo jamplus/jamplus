@@ -276,13 +276,24 @@ extern void Print(const char* str);
 		WriteModifiedFile()
 
 		if Platform == 'linux' then
-			local pattern3 = [[
+			if Compiler == 'clang' then
+				local pattern3 = [[
 *** found 11 target(s)...
 *** updating 2 target(s)...
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o
 *** updated 2 target(s)...
 ]]
-			TestPattern(pattern3, RunJam())
+				TestPattern(pattern3, RunJam())
+			else
+				local pattern3 = [[
+*** found 11 target(s)...
+*** updating 2 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o
+@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
+*** updated 2 target(s)...
+]]
+				TestPattern(pattern3, RunJam())
+			end
 		else
 			local pattern3 = [[
 *** found 11 target(s)...
