@@ -439,6 +439,28 @@ function TestFiles(expectedFiles)
 end
 
 
+local dirs
+
+local arg = { ... }
+if arg[1] == '--platform' then
+    PlatformDir = arg[2]
+    if PlatformDir == 'win64' then
+        Platform = 'win32'
+    elseif PlatformDir == 'macosx32'  or  PlatformDir == 'macosx64' then
+        Platform = 'macosx'
+    elseif PlatformDir == 'linux32'  or  PlatformDir == 'linux64' then
+        Platform = 'linux'
+    end
+    table.remove(arg, 1)
+    table.remove(arg, 1)
+end
+
+if arg[1] == '--compiler' then
+	Compiler = arg[2]
+	table.remove(arg, 1)
+	table.remove(arg, 1)
+end
+
 -- Detect OS
 if os.getenv("OS") == "Windows_NT" then
 	Platform = 'win32'
@@ -468,10 +490,17 @@ else
 	elseif uname == 'linux' then
 		Platform = 'linux'
 		PlatformDir = 'linux32'
-		COMPILER = 'gcc'
-		C_CC = 'C.gcc.CC'
-		C_ARCHIVE = 'C.gcc.Archive'
-		C_LINK = 'C.gcc.Link'
+		if Compiler == 'clang' then
+			COMPILER = 'clang'
+			C_CC = 'C.clang.CC'
+			C_ARCHIVE = 'C.clang.Archive'
+			C_LINK = 'C.clang.Link'
+		else
+			COMPILER = 'gcc'
+			C_CC = 'C.gcc.CC'
+			C_ARCHIVE = 'C.gcc.Archive'
+			C_LINK = 'C.gcc.Link'
+		end
 	elseif uname == 'freebsd' then
 		Platform = 'linux'
 		PlatformDir = 'linux32'
@@ -484,28 +513,6 @@ else
 	SUFEXE = ''
 end
 
-
-local dirs
-
-local arg = { ... }
-if arg[1] == '--platform' then
-    PlatformDir = arg[2]
-    if PlatformDir == 'win64' then
-        Platform = 'win32'
-    elseif PlatformDir == 'macosx32'  or  PlatformDir == 'macosx64' then
-        Platform = 'macosx'
-    elseif PlatformDir == 'linux32'  or  PlatformDir == 'linux64' then
-        Platform = 'linux'
-    end
-    table.remove(arg, 1)
-    table.remove(arg, 1)
-end
-
-if arg[1] == '--compiler' then
-	Compiler = arg[2]
-	table.remove(arg, 1)
-	table.remove(arg, 1)
-end
 
 if arg[1] then
 	dirs = {}
