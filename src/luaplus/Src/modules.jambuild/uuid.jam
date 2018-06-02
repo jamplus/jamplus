@@ -24,7 +24,7 @@ if ! $(foundUuid) {
 	} else if $(OS) = FREEBSD {
 		C.IncludeDirectories uuid : /usr/local/include ;
 		C.LinkDirectories uuid : /usr/local/lib ;
-		C.LinkPrebuiltLibraries uuid : readline ;
+		C.LinkPrebuiltLibraries uuid : uuid ;
 	}
 
 	Lua.CModule uuid : : $(SRCS) ;
