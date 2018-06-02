@@ -5,7 +5,7 @@
 # Your platform. See PLATS for possible values.
 PLAT = none
 
-CC = gcc
+CC = cc
 CFLAGS =
 EXENAME = ./jam0
 LINKLIBS =
