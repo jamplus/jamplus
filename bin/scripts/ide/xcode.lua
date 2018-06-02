@@ -662,12 +662,14 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 			local archs
 			if subProject.XCODE_ARCHITECTURE  and  subProject.XCODE_ARCHITECTURE[platformName]  and  subProject.XCODE_ARCHITECTURE[platformName][configName] then
 				archs = table.concat(subProject.XCODE_ARCHITECTURE[platformName][configName], ' ')
-			elseif Projects['C.*'].XCODE_ARCHITECTURE  and  Projects['C.*'].XCODE_ARCHITECTURE[platformName]  and  Projects['C.*'].XCODE_ARCHITECTURE[platformName][configName] then
+			elseif Projects['C.*']  and  Projects['C.*'].XCODE_ARCHITECTURE  and  Projects['C.*'].XCODE_ARCHITECTURE[platformName]  and  Projects['C.*'].XCODE_ARCHITECTURE[platformName][configName] then
 				archs = table.concat(Projects['C.*'].XCODE_ARCHITECTURE[platformName][configName], ' ')
 			elseif platformName == 'macosx32'  or  platformName == 'macosx64' then
 				archs = "$(ARCHS_STANDARD_32_64_BIT)"
 			elseif platformName == 'ios'  or  platformName == 'iossimulator' then
 				archs = "$(ARCHS_UNIVERSAL_IPHONE_OS)"
+			else
+				archs = "$(ARCHS_STANDARD_32_64_BIT)"
 			end
 			self.Contents[#self.Contents + 1] = "\t\t\t\tARCHS = \"" .. archs .. "\";\n"
 
