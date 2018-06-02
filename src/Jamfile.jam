@@ -323,11 +323,16 @@ C.Library libjam :
 		    newstr.c option.c parse.c regexp.c rules.c scan.c
 		    search.c timestamp.c variable.c ;
 
+local filesRoot = $(OS:L) ;
+if $(UNIX)
+{
+	filesRoot = linux ;
+}
 
 local file ;
-for file in [ Glob $(OS:L) : *.* : 0 ]
+for file in [ Glob $(filesRoot) : *.* : 0 ]
 {
-	CopyFile all : $(BIN_PATH)/$(file) : $(OS:L)/$(file) ;
+	CopyFile all : $(BIN_PATH)/$(file) : $(filesRoot)/$(file) ;
 }
 
 if $(LUA_BIN)

@@ -472,6 +472,13 @@ else
 		C_CC = 'C.gcc.CC'
 		C_ARCHIVE = 'C.gcc.Archive'
 		C_LINK = 'C.gcc.Link'
+	elseif uname == 'freebsd' then
+		Platform = 'linux'
+		PlatformDir = 'linux32'
+		COMPILER = 'clang'
+		C_CC = 'C.clang.CC'
+		C_ARCHIVE = 'C.clang.Archive'
+		C_LINK = 'C.clang.Link'
 	end
 
 	SUFEXE = ''

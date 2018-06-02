@@ -134,7 +134,12 @@ else
 ]]
 
 if Platform == 'linux' then
-	patternC_useChecksums = patternC
+	patternC_useChecksums = [[
+*** found 12 target(s)...
+*** updating 2 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):app>main.o 
+*** updated 2 target(s)...
+]]
 else
 	patternC_useChecksums = [[
 *** found 12 target(s)...

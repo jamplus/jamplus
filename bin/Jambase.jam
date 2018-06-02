@@ -839,16 +839,17 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 {
 	VALID_CONFIGS ?= release releaseltcg debug ;
 
-	switch $(OS)
+	if $(NT)
 	{
-		case NT :
-			VALID_PLATFORMS ?= win64 win32 ;
-
-		case MACOSX :
-			VALID_PLATFORMS ?= macosx64 macosx32 ;
-
-		case LINUX :
-			VALID_PLATFORMS ?= linux64 linux32 ;
+		VALID_PLATFORMS ?= win64 win32 ;
+	}
+	else if $(MACOSX)
+	{
+		VALID_PLATFORMS ?= macosx64 macosx32 ;
+	}
+	else if $(UNIX)
+	{
+		VALID_PLATFORMS ?= linux64 linux32 ;
 	}
 
 	CONFIG ?= $(C.CONFIG) ;
