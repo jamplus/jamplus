@@ -32,7 +32,7 @@ actions C.ios.clang.Archive {
 
 
 actions C.ios.clang.Link {
-	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) $(NEEDLIBS:TC) $(LINKLIBS:TC)
+	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) -optlist ^^^($(NEEDLIBS:TCJ=$(NEWLINE))) -optlist ^^^($(LINKLIBS:TCJ=$(NEWLINE)))
 }
 
 
@@ -381,7 +381,7 @@ rule ios.SDK SDK_VERSION {
 
 	local COMPILER_BIN_PATH = $(COMPILER_BIN_PATH:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local sysroot = $(IOSBUILDENV_PATH)/SDK ;
-	SDK_VERSION ?= 6.0 ;
+	SDK_VERSION ?= 11.0 ;
 
 	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.AR:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
 	C.CC on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.CC:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
@@ -392,7 +392,7 @@ rule ios.SDK SDK_VERSION {
 	C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(C.ARCHITECTURE:E=arm64) ;
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sysroot) ;
 	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
-	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
+	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = 6.0 ;
 }
 
 } # if ! $(NT)
@@ -1142,6 +1142,7 @@ rule C.ios._ApplicationFromObjects_LinkFlags {
 		linkFlags += "-syslibroot $(isysroot:C\\)" ;
 		linkFlags += -demangle -dead_strip ;
 		linkFlags += -ios_version_min $(minimumsdkversion) ;
+		linkFlags += -sdk_version $(sdkversion) ;
 		linkFlags += -lobjc -lSystem -lc++ -lstdc++ ;
 		linkFlags += \"$(IOSBUILDENV_PATH)/SDK/libclang_rt.ios.a\" ;
 		linkFlags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;
