@@ -4,6 +4,7 @@
 
 Linux requires certain packages installed to complete the entire bootstrap process. These packages are not related to JamPlus itself but instead to the LuaPlus subset residing with it. Therefore, they are optional, but their existence enables a more complete environment for JamPlus features. The packages are: <tt>libreadline-dev</tt>, <tt>uuid-dev</tt>, and <tt>libssl-dev</tt>.
 
+FreeBSD, after a Git install via <tt>pkg install git</tt>, should have an install of the package <tt>e2fsprogs-libuuid</tt>.
 
 
 \section building_bootstrapping Quick Bootstrapping of JamPlus
@@ -11,10 +12,10 @@ Linux requires certain packages installed to complete the entire bootstrap proce
 The directions in the sections below describe the build process in better detail, but if you just need a working copy of JamPlus with its dependencies, run the following:
 
 \code
-    # If you are on Linux and want a 32-bit build:
+    # If you are on a Unix-y OS and want a 32-bit build:
     ./bootstrap-linux32.sh
 
-    # If you are on Linux and want a 64-bit build:
+    # If you are on Unix-y OS and want a 64-bit build:
     ./bootstrap-linux64.sh
 
     # If you are on Mac OS X and want a 32-bit build:
