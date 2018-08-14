@@ -31,12 +31,11 @@ actions C.ios.clang.Archive {
 }
 
 
-actions C.ios.clang.Link {
-	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) -optlist ^^^($(NEEDLIBS:TCJ=$(NEWLINE))) -optlist ^^^($(LINKLIBS:TCJ=$(NEWLINE)))
-}
-
-
 if ! $(NT) {
+
+actions C.ios.clang.Link {
+    $(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) $(NEEDLIBS:TC) $(LINKLIBS:TC)
+}
 
 rule ios.SDK SDK_VERSION {
 	local SDK_PLATFORM ;
@@ -382,6 +381,10 @@ rule ios.SDK SDK_VERSION {
 
 } else {
 
+actions C.ios.clang.Link {
+	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) -optlist ^^^($(NEEDLIBS:TCJ=$(NEWLINE))) -optlist ^^^($(LINKLIBS:TCJ=$(NEWLINE)))
+}
+ 
 rule ios.SDK SDK_VERSION {
 	local SDK_PLATFORM ;
 	SDK_PLATFORM ?= $(C.PLATFORM) ;
