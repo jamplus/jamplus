@@ -51,7 +51,7 @@ rule ios.SDK SDK_VERSION {
 
 	switch $(SDK_PLATFORM) {
 		case ios :
-			SDK_VERSION ?= 11.4 ;
+			SDK_VERSION ?= 12.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
@@ -203,6 +203,20 @@ rule ios.SDK SDK_VERSION {
 					sdkroot = iphoneos ;
 					architecture = arm64 ;
 					minimumVersion = 8.0 ;
+
+				case 11.4 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.4.sdk ;
+					sdkroot = iphoneos ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
+
+				case 12.0 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.0.sdk ;
+					sdkroot = iphoneos ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
 			}
 
 			if ! $(developerRoot) {
@@ -338,6 +352,12 @@ rule ios.SDK SDK_VERSION {
 					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk ;
 					sdkroot = iphoneos ;
 					minimumVersion = 8.0 ;
+
+				case 12.0 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk ;
+					sdkroot = iphoneos ;
+					minimumVersion = 8.0 ;
 			}
 
 			if ! $(developerRoot) {
@@ -391,7 +411,7 @@ rule ios.SDK SDK_VERSION {
 
 	local COMPILER_BIN_PATH = $(COMPILER_BIN_PATH:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local sysroot = $(IOSBUILDENV_PATH)/SDK ;
-	SDK_VERSION ?= 11.0 ;
+	SDK_VERSION ?= 12.0 ;
 
 	C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.AR:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
 	C.CC on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/$(C.CC:BSZ=$(C.COMPILER_SUITE_SYMBOL)) ;
@@ -415,7 +435,7 @@ rule ios.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 	SDK_PLATFORM ?= $(C.PLATFORM) ;
 
 	if $(IOSBUILDENV_PATH) {
-		SDK_VERSION_MIN = 6.0 ;
+		SDK_VERSION_MIN ?= 6.0 ;
 	}
 
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_VERSION_MIN) ;
@@ -1093,8 +1113,9 @@ rule C.ios._MultiCppCompile_SetupFlags {
 
 	local extraflags ;
 	if $(IOSBUILDENV_PATH) {
+		extraflags = -U__STDC_HOSTED__ -U__clang_major__ -D__clang_major__=99 ;
 		architecture ?= armv7 ;
-		extraflags = -target $(architecture)-apple-ios$(minimumsdkversion) ;
+		extraflags += -target $(architecture)-apple-ios$(minimumsdkversion) ;
 		if $(isysroot) {
 			extraflags += --sysroot $(isysroot:C) ;
 		}
@@ -1102,7 +1123,6 @@ rule C.ios._MultiCppCompile_SetupFlags {
 		extraflags += -integrated-as -fdiagnostics-format=msvc -fconstant-cfstrings -fvisibility=hidden ;
 		extraflags += -miphoneos-version-min=$(minimumsdkversion).0 ;
 		extraflags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=$(noPeriodVersion)000 ;
-		extraflags += -I\"$(IOSBUILDENV_PATH)/Toolchain/include\" ;   #"
 		extraflags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;    #"
 	} else {
 		extraflags += "-isysroot $(isysroot:C)" ;
@@ -1153,7 +1173,7 @@ rule C.ios._ApplicationFromObjects_LinkFlags {
 		linkFlags += -demangle -dead_strip ;
 		linkFlags += -ios_version_min $(minimumsdkversion) ;
 		linkFlags += -sdk_version $(sdkversion) ;
-		linkFlags += -lobjc -lSystem -lc++ -lstdc++ ;
+		linkFlags += -lobjc -lSystem -lc++ ;
 		linkFlags += \"$(IOSBUILDENV_PATH)/SDK/libclang_rt.ios.a\" ;
 		linkFlags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;
 	} else {
