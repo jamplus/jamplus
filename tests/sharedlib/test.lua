@@ -153,8 +153,7 @@ if Platform == 'win32' then
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
 !NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.obj
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.dll
-!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app.exe
-!NEXT!*** updated 5 target(s)...
+!NEXT!*** updated 4 target(s)...
 ]]
 
 pass3Pattern_useChecksums = pass3Pattern
@@ -169,8 +168,7 @@ pass3Pattern_useChecksums = pass3Pattern
 !NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.lib
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.dll
-!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app.exe
-!NEXT!*** updated 5 target(s)...
+!NEXT!*** updated 4 target(s)...
 ]]
 
 	pass5Pattern_useChecksums = pass5Pattern
@@ -184,8 +182,7 @@ pass3Pattern_useChecksums = pass3Pattern
 *** updating 2 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.obj
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
-!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):app>app.exe
-!NEXT!*** updated 3 target(s)...
+!NEXT!*** updated 2 target(s)...
 ]]
 
 	pass7Pattern_useChecksums = pass7Pattern
