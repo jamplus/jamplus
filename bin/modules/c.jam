@@ -803,7 +803,7 @@ rule C._LibraryFromObjects OBJECTS {
 		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
 		$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
 	;
-	Depends $(_l) : $(needLibs) ;
+	Needs $(_l) : $(needLibs) ;
 
 	ForceContentsOnly $(_l) ;
 	UseCommandLine $(_l) : $(libFlags) $(_s) ;
