@@ -237,17 +237,18 @@ rule C.DefFile TARGET : SOURCES</h1>
 </dl>
 <div class="fragment"><div class="line"><span class="preprocessor"># Build WorkspaceWhiz.def as part of the WorkspaceWhiz target.</span></div><div class="line"><span class="preprocessor">C.DefFile WorkspaceWhiz : WorkspaceWhiz.def ;</span></div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_Defines"></a>
-rule C.Defines TARGET : DEFINES</h1>
+rule C.Defines TARGET : DEFINES [ : OPTIONS ]</h1>
 <p><a name="arule_:43_:44efines"></a></p>
 <p>Assign the <code>DEFINES</code> to the given project <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the <code>DEFINES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
-    <tr><td class="paramname">DEFINES</td><td>The list of defines to apply.</td></tr>
+    <tr><td class="paramname">DEFINES</td><td>The list of defines to apply. </td></tr>
+    <tr><td class="paramname">OPTIONS</td><td>If <code>public</code> is specified, the defines specified by <code>DEFINES</code> are made available to a project using <code>C.Inherits</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<div class="fragment"><div class="line"><span class="preprocessor"># Make #defines available for ABC and DEF=5 in someproject for all</span></div><div class="line"><span class="preprocessor"># configurations and all platforms.</span></div><div class="line">C.Defines someproject : ABC DEF=5 ;</div><div class="line"></div><div class="line"><span class="preprocessor"># For the win32 platform, add a WIN32 define globally.</span></div><div class="line"><span class="keywordflow">if</span> $(C.PLATFORM) = win32 {</div><div class="line">    C.Defines * : WIN32 ;</div><div class="line">}</div><div class="line"></div><div class="line"><span class="preprocessor"># Quote a #define, keeping the quotes for compilation:</span></div><div class="line"><span class="preprocessor">C.Defines luacom : LUA5 &quot;LUACOM_DLL=\\\&quot;luacom.dll\\\&quot;&quot; ;</span></div></div><!-- fragment --><hr/>
+<div class="fragment"><div class="line"><span class="preprocessor"># Make #defines available for ABC and DEF=5 in someproject for all</span></div><div class="line"><span class="preprocessor"># configurations and all platforms.</span></div><div class="line">C.Defines someproject : ABC DEF=5 ;</div><div class="line"></div><div class="line"><span class="preprocessor"># For the win32 platform, add a WIN32 define globally.</span></div><div class="line"><span class="keywordflow">if</span> $(C.PLATFORM) = win32 {</div><div class="line">    C.Defines * : WIN32 ;</div><div class="line">}</div><div class="line"></div><div class="line"><span class="preprocessor"># Quote a #define, keeping the quotes for compilation:</span></div><div class="line">C.Defines luacom : LUA5 <span class="stringliteral">&quot;LUACOM_DLL=\\\&quot;luacom.dll\\\&quot;&quot;</span> ;</div><div class="line"></div><div class="line"><span class="preprocessor"># Add GHI to myproject and make it available to C.Inherits users.</span></div><div class="line"><span class="preprocessor">C.Defines someproject : GHI : public ;</span></div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_ExcludeFromBuild"></a>
 rule C.ExcludeFromBuild TARGET : SOURCES</h1>
 <p><a name="arule_:43_:45xclude:46rom:42uild"></a></p>
@@ -301,7 +302,7 @@ rule C.ForceInclude TARGET : INCLUDES</h1>
  <h1><a class="anchor" id="rule_C_ForcePublic"></a>
 rule C.ForcePublic TARGET</h1>
 <p><a name="arule_:43_:46orce:50ublic"></a></p>
-<p>Force the <a class="el" href="module_c.html#rule_C_Inherits">rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]</a> public inheritance pattern for <code>TARGET</code>. This will treat <code>TARGET</code> as if one of the flag setting functions, such as <a class="el" href="module_c.html#rule_C_Defines">rule C.Defines TARGET : DEFINES</a> or <a class="el" href="module_c.html#rule_C_IncludeDirectories">rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]</a>, had been called with <code>public</code> <code>OPTIONS</code>.</p>
+<p>Force the <a class="el" href="module_c.html#rule_C_Inherits">rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]</a> public inheritance pattern for <code>TARGET</code>. This will treat <code>TARGET</code> as if one of the flag setting functions, such as <a class="el" href="module_c.html#rule_C_Defines">rule C.Defines TARGET : DEFINES [ : OPTIONS ]</a> or <a class="el" href="module_c.html#rule_C_IncludeDirectories">rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]</a>, had been called with <code>public</code> <code>OPTIONS</code>.</p>
 <p><code>C.ForcePublic</code> is usually used in situations where <a class="el" href="module_c.html#rule_C_Inherits">rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]</a> is called with <code>TARGET</code> to inherit from, but <code>TARGET</code> has no public defines or include directories or other flags. <code>C.Inherits</code> will abort as a precautionary measure assuming that Jam has not yet defined <code>TARGET</code> yet.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -378,7 +379,7 @@ rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]</h1>
   </table>
   </dd>
 </dl>
-<div class="fragment"><div class="line"><span class="preprocessor"># Add $(Code)/Shared as an include path to myproject.</span></div><div class="line">C.IncludeDirectories myproject : $(Code)/Shared ;</div><div class="line"></div><div class="line"><span class="preprocessor"># For the win32 platform, add the MFC include path.</span></div><div class="line">C.IncludeDirectories myproject : <span class="stringliteral">&quot;$(MSVCNT)/atlmfc/include&quot;</span> i;</div><div class="line"></div><div class="line"><span class="preprocessor"># Add $(Code)/Shared to myproject and make it available to C.Inherits users.</span></div><div class="line"><span class="preprocessor">C.IncludeDirectories myproject : $(Code)/Shared : public ;</span></div></div><!-- fragment --><hr/>
+<div class="fragment"><div class="line"><span class="preprocessor"># Add $(Code)/Shared as an include path to myproject.</span></div><div class="line">C.IncludeDirectories myproject : $(Code)/Shared ;</div><div class="line"></div><div class="line"><span class="preprocessor"># For the win32 platform, add the MFC include path.</span></div><div class="line">C.IncludeDirectories myproject : <span class="stringliteral">&quot;$(MSVCNT)/atlmfc/include&quot;</span> ;</div><div class="line"></div><div class="line"><span class="preprocessor"># Add $(Code)/Shared to myproject and make it available to C.Inherits users.</span></div><div class="line"><span class="preprocessor">C.IncludeDirectories myproject : $(Code)/Shared : public ;</span></div></div><!-- fragment --><hr/>
  <h1><a class="anchor" id="rule_C_IncludeInBuild"></a>
 rule C.IncludeInBuild TARGET : SOURCES</h1>
 <p><a name="arule_:43_:49nclude:49n:42uild"></a></p>
