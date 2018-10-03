@@ -14,6 +14,7 @@ Debug/*
 Release/*
 bin.*/*
 jbin.*/*
+x64/
 /DerivedData/
 jam.xcodeproj/*.mode1v3
 jam.xcodeproj/*.pbxuser
