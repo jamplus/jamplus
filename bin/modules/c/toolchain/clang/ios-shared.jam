@@ -34,7 +34,7 @@ actions C.ios.clang.Archive {
 if ! $(NT) {
 
 actions C.ios.clang.Link {
-    $(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) $(NEEDLIBS:TC) $(LINKLIBS:TC)
+	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) -filelist ^^^($(NEEDLIBS:TCJ=$(NEWLINE))) -filelist ^^^($(LINKLIBS:TCJ=$(NEWLINE)))
 }
 
 rule ios.SDK SDK_VERSION {
@@ -384,7 +384,7 @@ rule ios.SDK SDK_VERSION {
 actions C.ios.clang.Link {
 	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) -optlist ^^^($(NEEDLIBS:TCJ=$(NEWLINE))) -optlist ^^^($(LINKLIBS:TCJ=$(NEWLINE)))
 }
- 
+
 rule ios.SDK SDK_VERSION {
 	local SDK_PLATFORM ;
 	SDK_PLATFORM ?= $(C.PLATFORM) ;
