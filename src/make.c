@@ -1132,10 +1132,10 @@ make0(
 						break;
 					}
 				}
-				if ( targets->parentcommandlineoutofdate )
-				{
-					break;
-				}
+				//if ( targets->parentcommandlineoutofdate )
+				//{
+					//break;
+				//}
 			}
 		}
 
