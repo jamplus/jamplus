@@ -1388,9 +1388,13 @@ rule C._retrieveOutputName TARGET : SUFFIX {
 
 
 
-rule C.Defines TARGET : DEFINES {
+rule C.Defines TARGET : DEFINES : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	DEFINES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DEFINES) ;
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_DEFINES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DEFINES) ;
+	}
 }
 
 
@@ -1466,6 +1470,15 @@ rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
 			Echo "*     Does $(originalInheritsTarget) exist before $(TARGET) in the Jamfile chain?" ;
 			Exit ;
 		}
+
+		local publicDefines = $(PUBLIC_DEFINES:Z=$(inheritsTarget)) ;
+		if $(publicDefines) {
+			DEFINES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicDefines) ;
+			if $(public) {
+				PUBLIC_DEFINES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicDefines) ;
+			}
+		}
+
 		local publicHdrs = $(PUBLIC_HDRS:Z=$(inheritsTarget)) ;
 		if $(publicHdrs) {
 			HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicHdrs) ;

@@ -335,13 +335,14 @@ When linking the given \c TARGET, link the <tt>.def</tt> file(s) specified in \c
 
 
 <hr>
-\section rule_C_Defines rule C.Defines TARGET : DEFINES
+\section rule_C_Defines rule C.Defines TARGET : DEFINES [ : OPTIONS ]
 \addindex rule_C_Defines
 
 Assign the \c DEFINES to the given project \c TARGET.
 
 \param TARGET The target to assign the \c DEFINES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param DEFINES The list of defines to apply.
+\param OPTIONS If \c public is specified, the defines specified by \c DEFINES are made available to a project using \c C.Inherits.
 
 \code
     # Make #defines available for ABC and DEF=5 in someproject for all
@@ -355,6 +356,9 @@ Assign the \c DEFINES to the given project \c TARGET.
 
     # Quote a #define, keeping the quotes for compilation:
     C.Defines luacom : LUA5 "LUACOM_DLL=\\\"luacom.dll\\\"" ;
+
+    # Add GHI to myproject and make it available to C.Inherits users.
+    C.Defines someproject : GHI : public ;
 \endcode
 
 
@@ -599,7 +603,7 @@ Add the \c INCLUDEPATHS to the given project \c TARGET.
     C.IncludeDirectories myproject : $(Code)/Shared ;
 
     # For the win32 platform, add the MFC include path.
-    C.IncludeDirectories myproject : "$(MSVCNT)/atlmfc/include" i;
+    C.IncludeDirectories myproject : "$(MSVCNT)/atlmfc/include" ;
 
     # Add $(Code)/Shared to myproject and make it available to C.Inherits users.
     C.IncludeDirectories myproject : $(Code)/Shared : public ;
