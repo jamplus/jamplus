@@ -59,7 +59,7 @@ rule C.Toolchain.vc.win32.Detect COMPILER {
             ;
             MSSDK_LINKDIRECTORIES =
                 $(MSVCNT)/lib
-                $(MSSDK)/lib/$(MSSDK_VERSION)/ucrt/x64
+                $(MSSDK)/lib/$(MSSDK_VERSION)/ucrt/x86
                 $(MSSDK81)/lib/winv6.3/um/x86
             ;
             RC = $(MSSDK_BINDIR)/rc ;
