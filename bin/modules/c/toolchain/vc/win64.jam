@@ -20,18 +20,21 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
             MSSDK = [ W32_GETREG $(key) ] ;
             MSSDK ?= $(MSVCNT) ;
             MSSDK_BINDIR = "$(MSSDK)/bin/x64" ;
+            local dirs = [ Glob $(MSSDK)/Include : */ ] ;
+            local MSSDK_VERSION = $(dirs[1]:P) ;
+            MSSDK_VERSION = $(MSSDK_VERSION:D=) ;
             MSSDK_STDHDRS =
                 $(MSVCNT)/include
                 $(MSVCNT)/../../../Auxiliary/VS/include
-                $(MSSDK)/Include/10.0.16299.0/ucrt
-                $(MSSDK)/Include/10.0.16299.0/um
-                $(MSSDK)/Include/10.0.16299.0/shared
-                $(MSSDK)/Include/10.0.16299.0/winrt
+                $(MSSDK)/Include/$(MSSDK_VERSION)/ucrt
+                $(MSSDK)/Include/$(MSSDK_VERSION)/um
+                $(MSSDK)/Include/$(MSSDK_VERSION)/shared
+                $(MSSDK)/Include/$(MSSDK_VERSION)/winrt
             ;
             MSSDK_LINKDIRECTORIES =
                 $(MSVCNT)/lib/x64
-                $(MSSDK)/lib/10.0.16299.0/ucrt/x64
-                $(MSSDK)/lib/10.0.16299.0/um/x64
+                $(MSSDK)/lib/$(MSSDK_VERSION)/ucrt/x64
+                $(MSSDK)/lib/$(MSSDK_VERSION)/um/x64
             ;
             MSVCBIN = "$(MSVCNT)/bin/HostX64/x64/" ;
             RC = $(MSSDK)/bin/x64/rc ;
@@ -44,16 +47,19 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
             MSSDK = [ W32_GETREG $(key) ] ;
             MSSDK ?= $(MSVCNT) ;
             MSSDK_BINDIR = "$(MSSDK)/bin/x64" ;
+            local dirs = [ Glob $(MSSDK)/Include : */ ] ;
+            local MSSDK_VERSION = $(dirs[1]:P) ;
+            MSSDK_VERSION = $(MSSDK_VERSION:D=) ;
             MSSDK_STDHDRS =
                 $(MSVCNT)/include
-                $(MSSDK)/Include/10.0.10150.0/ucrt
+                $(MSSDK)/Include/$(MSSDK_VERSION)/ucrt
                 $(MSSDK81)/Include/shared
                 $(MSSDK81)/Include/um
                 $(MSSDK81)/Include/winrt
             ;
             MSSDK_LINKDIRECTORIES =
                 $(MSVCNT)/lib/amd64
-                $(MSSDK)/lib/10.0.10150.0/ucrt/x64
+                $(MSSDK)/lib/$(MSSDK_VERSION)/ucrt/x64
                 $(MSSDK81)/lib/winv6.3/um/x64
             ;
             MSVCBIN = "$(MSVCNT)/bin/amd64/" ;
