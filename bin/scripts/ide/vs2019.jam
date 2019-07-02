@@ -1,0 +1,1 @@
+include $(__JAM_SCRIPTS_PATH)/ide/helper/vs201x.jam ;
