@@ -3,4 +3,19 @@ Echo 10 - 2 \= [ Math 10 - 2 ] ;
 Echo 10 * 2 \= [ Math 10 * 2 ] ;
 Echo 10 / 2 \= [ Math 10 / 2 ] ;
 Echo 10 % 3 \= [ Math 10 % 3 ] ;
+
+Echo "10 > 2" \= [ Math 10 ">" 2 ] ;
+Echo "1 > 2" \= [ Math 1 ">" 2 ] ;
+Echo "10 >= 2" \= [ Math 10 ">=" 2 ] ;
+Echo "1 >= 2" \= [ Math 1 ">=" 2 ] ;
+Echo "10 >= 10" \= [ Math 10 ">=" 10 ] ;
+
+Echo "2 < 10" \= [ Math 2 "<" 10 ] ;
+Echo "1 <= 2" \= [ Math 1 "<=" 2 ] ;
+Echo "2 <= 2" \= [ Math 2 "<=" 2 ] ;
+Echo "3 <= 2" \= [ Math 3 "<=" 2 ] ;
+
+Echo "2 = 2" \= [ Math 2 "=" 2 ] ;
+Echo "2 == 3" \= [ Math 2 "==" 3 ] ;
+
 Exit 10 ^ 2 \= [ Math 10 ^ 2 ] ;

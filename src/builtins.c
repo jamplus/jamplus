@@ -1012,6 +1012,39 @@ builtin_math(
 	case '*':   result = num1 * num2;    break;
 	case '/':   result = num1 / num2;    break;
 	case '%':   result = num1 % num2;    break;
+	case '<':
+		if (op[1] == '\0')
+			result = num1 < num2;
+		else if (op[1] == '=' && op[2] == '\0')
+			result = num1 <= num2;
+		else
+		{
+			printf( "jam: rule Math: Unknown operator [%s].\n", op );
+			exit( EXITBAD );
+		}
+		break;
+	case '>':
+		if (op[1] == '\0')
+			result = num1 > num2;
+		else if (op[1] == '=' && op[2] == '\0')
+			result = num1 >= num2;
+		else
+		{
+			printf( "jam: rule Math: Unknown operator [%s].\n", op );
+			exit( EXITBAD );
+		}
+		break;
+	case '=':
+		if (op[1] == '\0')
+			result = num1 == num2;
+		else if (op[1] == '=' && op[2] == '\0')
+			result = num1 == num2;
+		else
+		{
+			printf( "jam: rule Math: Unknown operator [%s].\n", op );
+			exit( EXITBAD );
+		}
+		break;
 	default:
 	    printf( "jam: rule Math: Unknown operator [%s].\n", op );
 	    exit( EXITBAD );

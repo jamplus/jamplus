@@ -513,7 +513,7 @@ Matches the <b>egrep</b>(1) style regular expressions \c REGEXPS against the str
 Calculates the result of the simple math equation of the form \c LEFT \c OPERATOR \c RIGHT.  Useful only within the <tt>[ ]</tt> construct, to change the result into a list.
 
 \param LEFT An integer for the left side of the equation.
-\param OPERATOR <tt>+</tt> for addition, <tt>-</tt> for subtraction, <tt>*</tt> for multiplication, <tt>/</tt> for division, and <tt>%</tt> for modulus.
+\param OPERATOR <tt>+</tt> for addition, <tt>-</tt> for subtraction, <tt>*</tt> for multiplication, <tt>/</tt> for division, and <tt>%</tt> for modulus. Alternatively, use a less-than symbol, greater-than symbol, or equals symbol to test the \c LEFT and \c RIGHT number relationship.
 \param RIGHT An integer for the right side of the equation.
 \return Returns the result of the equation.
 
