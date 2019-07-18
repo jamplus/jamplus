@@ -27,7 +27,7 @@ rule C.ios.WeakLinkFrameworks TARGET : FRAMEWORKS {
 
 
 actions C.ios.clang.Archive {
-	$(C.AR:C) -static $(LIBFLAGS) -o $(<:C) -filelist ^^^($(>:J=$(NEWLINE)))
+	$(C.AR:C) -static $(LIBFLAGS) -o $(<:C) -filelist ^^^($(>:J=$(NEWLINE))$(NEWLINE))
 }
 
 
@@ -51,7 +51,7 @@ rule ios.SDK SDK_VERSION {
 
 	switch $(SDK_PLATFORM) {
 		case ios :
-			SDK_VERSION ?= 12.0 ;
+			SDK_VERSION ?= 12.1 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
@@ -214,6 +214,13 @@ rule ios.SDK SDK_VERSION {
 				case 12.0 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.0.sdk ;
+					sdkroot = iphoneos ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
+
+				case 12.1 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.1.sdk ;
 					sdkroot = iphoneos ;
 					architecture = arm64 ;
 					minimumVersion = 8.0 ;
