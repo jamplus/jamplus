@@ -212,7 +212,7 @@ rule C.Toolchain.vc.Detect THE_COMPILER : OPTIONS {
 
     # Do we need to attempt to detect the compiler?
     if ! $(THE_COMPILER)  ||  $(THE_COMPILER) = * {
-        for ver in $(VISUAL_STUDIO_FORCE_VERSION) vs2017 vs2015 vs2013 vs2012 vs2010 vs2008 vs2005 vs2003 vs2002 vc6 {
+        for ver in $(VISUAL_STUDIO_FORCE_VERSION) vs2019 vs2017 vs2015 vs2013 vs2012 vs2010 vs2008 vs2005 vs2003 vs2002 vc6 {
             C.COMPILER = [ FindVisualStudio $(ver) ] ;
             if $(C.COMPILER) {
                 break ;
