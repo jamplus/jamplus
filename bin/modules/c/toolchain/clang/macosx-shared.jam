@@ -95,7 +95,11 @@ rule macosx.SDK SDK_VERSION {
 			isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk ;
 			sdkroot = macosx ;
 
-		case * :		Exit "* macosx.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
+		case * :
+			developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+			isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk ;
+			sdkroot = macosx ;
+			#Exit "* macosx.SDK: Unsupported version $(SDK_VERSION) for SDK platform $(SDK_PLATFORM)." ;
 	}
 	developerRoot = $(isysroot) ;
 
@@ -141,7 +145,7 @@ rule macosx.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 }
 
 
-local InfoPlistHelper = "
+InfoPlistHelper = "
 function GetInfoPlistCurrentLevel()
 	if not plist then
 		plist = require 'plist'
@@ -750,7 +754,7 @@ rule C.macosx._SharedLibraryFromObjects_LinkFlags {
 		linkFlags += -dynamiclib -fPIC -install_name $(installName) ;
 	}
 
-	#linkFlags += "-framework $(FRAMEWORKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))" ;
+	linkFlags += "-framework $(FRAMEWORKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))" ;
 }
 
 
