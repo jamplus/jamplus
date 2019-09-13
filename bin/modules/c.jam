@@ -870,7 +870,7 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 
 	local linkDirectories ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) linkDirectories += $(LINKDIRECTORIES) ;
-	on @(C.ACTIVE_TOOLCHAIN_*) linkDirectories += $(LINKDIRECTORIES) ;
+	on $(C.ACTIVE_TOOLCHAIN_*) linkDirectories += $(LINKDIRECTORIES) ;
 
 	local linkFlags ;
 	linkFlags +=
