@@ -5,30 +5,31 @@
 # toolchain support. Some functionality has been renamed. Currently, .aidl support
 # is likely broken. Other functionality has been added.
 
-rule C.Toolchain.gcc.android-shared {
+rule C.Toolchain.clang.android-shared {
 }
 
 
 if $(NT) {
 
-actions C.android.gcc.Link {
-    PATH=$(C.LINK:D);%PATH%
+actions C.android.clang.Link {
+    PATH=$(C.LINK[1]:D);$(EXTRA_LINK_PATH);%PATH%
     $(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) @^^^($(>:J=$(NEWLINE))) $(NEEDLIBS:TC) $(LINKLIBS:TC)
 }
 
 } else {
 
-actions C.android.gcc.Link {
+actions C.android.clang.Link {
     "$(C.LINK)" -o $(<[1]:C) $(>:C) $(NEEDLIBS:TC) $(LINKLIBS:TC) $(LINKFLAGS)
 }
 
 } # if $(NT)
 
 
-rule android.SDK SDK_VERSION : ARCHITECTURE {
+rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
     ARCHITECTURE ?= $(C.ARCHITECTURE:E=armv7-a) ;
     C.ARCHITECTURE ?= $(ARCHITECTURE) ;
-    SDK_VERSION ?= 19 ;
+    SDK_VERSION ?= 26 ;
+    NDK_VERSION ?= 24 ;
 
     if $(OS) in MACOSX {
         local ndkRoot = $(NDKROOT:J=" ") ;
@@ -107,12 +108,14 @@ rule android.SDK SDK_VERSION : ARCHITECTURE {
             linkflags += -mthumb ;
         case armv7-a :
             NDK_COMPILER_PREFIX = arm-linux-androideabi- ;
-            cflags += -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=softfp ;
+			cflags += -target armv7-none-linux-androideabi ;
+            cflags += -march=armv7-a -mfpu=neon -mfloat-abi=softfp ;
             cflags += -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -marm ;
             linkflags += -no-canonical-prefixes ;
+			linkflags += -target armv7-linux-androideabi ;
             linkflags += -march=armv7-a -Wl,--fix-cortex-a8 ;
             linkflags += -mthumb ;
-            sysroot = $(developerRoot)/android-$(SDK_VERSION)/arch-arm ;
+            sysroot = $(developerRoot)/android-$(NDK_VERSION)/arch-arm ;
         case x86 :
             NDK_DIRECTORY_PREFIX = x86- ;
             NDK_COMPILER_PREFIX = i686-linux-android- ;
@@ -142,8 +145,21 @@ rule android.SDK SDK_VERSION : ARCHITECTURE {
 
     local NDK_COMPILER_VERSION ;
     switch $(C.COMPILER) {
-        case gcc :      NDK_COMPILER_VERSION = $(C.COMPILER_VERSION:E=4.9) ;
-        case clang :    NDK_COMPILER_VERSION ?= @(clang-$(C.COMPILER_VERSION:E=3.6)) ;
+        case gcc :
+            NDK_COMPILER_VERSION = $(C.COMPILER_VERSION:E=4.9) ;
+            NDK_TOOLCHAIN_ROOT = $(NDKROOT)/toolchains/$(NDK_DIRECTORY_PREFIX:E=$(NDK_COMPILER_PREFIX))$(NDK_COMPILER_VERSION)/prebuilt/$(NDK_HOST) ;
+        case clang :
+            NDK_COMPILER_VERSION = $(C.COMPILER_VERSION:E=4.9) ;
+            NDK_TOOLCHAIN_ROOT = $(NDKROOT)/toolchains/$(NDK_DIRECTORY_PREFIX:E=$(NDK_COMPILER_PREFIX))$(NDK_COMPILER_VERSION)/prebuilt/$(NDK_HOST) ;
+            local lastDirectory = [ Subst $(NDK_COMPILER_PREFIX) : -$ ] ;
+            EXTRA_LINK_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/bin ;
+            C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
+            C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/lib/gcc/$(lastDirectory)/$(NDK_COMPILER_VERSION).x ;
+            C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/lib/armv7-a ;
+            C.LinkDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a ;
+            NDK_COMPILER_PREFIX = "" ;
+            NDK_COMPILER_VERSION ?= llvm ;
+            NDK_TOOLCHAIN_ROOT = $(NDKROOT)/toolchains/llvm/prebuilt/windows-x86_64 ;
         case * :
             Exit *** Error \: Unknown compiler for NDK\: $(C.COMPILER) ;
     }
@@ -158,16 +174,13 @@ rule android.SDK SDK_VERSION : ARCHITECTURE {
             Exit *** Error \: Unable to detect host platform for NDK based on '$(OS)' ;
     }
 
-    NDK_TOOLCHAIN_ROOT = $(NDKROOT)/toolchains/$(NDK_DIRECTORY_PREFIX:E=$(NDK_COMPILER_PREFIX))$(NDK_COMPILER_VERSION)/prebuilt/$(NDK_HOST) ;
-    #Echo NDK_TOOLCHAIN_ROOT - $(NDK_TOOLCHAIN_ROOT) ;
+    sysroot ?= $(developerRoot)/android-$(NDK_VERSION)/arch-$(ARCHITECTURE) ;
 
-    sysroot ?= $(developerRoot)/android-$(SDK_VERSION)/arch-$(ARCHITECTURE) ;
-
-    C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
-    C.CC on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)gcc ;
-    C.C++ on $(C.COMPILER_SUITE_SYMBOL)         = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)g++ ;
-    C.LINK on $(C.COMPILER_SUITE_SYMBOL)        = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)g++ ;
-    C.RANLIB on $(C.COMPILER_SUITE_SYMBOL)      = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ranlib ;
+    C.AR on $(C.COMPILER_SUITE_SYMBOL)          ?= $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
+    C.CC on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)clang ;
+    C.C++ on $(C.COMPILER_SUITE_SYMBOL)         = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)clang++ ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL)        = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)clang++ ;
+    C.RANLIB on $(C.COMPILER_SUITE_SYMBOL)      = ;
     C.STRIP on $(C.COMPILER_SUITE_SYMBOL)       = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)strip ;
 
     # Set up the SDK side of things.
@@ -217,9 +230,19 @@ rule android.SDK SDK_VERSION : ARCHITECTURE {
     }
 
     ANDROID.ANDROID.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/platforms/$(sdkPlatform)/android.jar ;
-    ANDROID.SDKLIB.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/sdklib.jar ;
-    ANDROID.MANIFEST-MERGER.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/manifest-merger.jar ;
+
     ANDROID.FRAMEWORK.AIDL on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/platforms/$(sdkPlatform)/framework.aidl ;
+
+    local libVersion = -$(SDK_VERSION).0.0-dev ;
+    ANDROID.COMMON.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/common$(libVersion).jar ;
+    ANDROID.SDK-COMMON.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/sdk-common$(libVersion).jar ;
+    ANDROID.SDKLIB.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/sdklib$(libVersion).jar ;
+    ANDROID.MANIFEST-MERGER.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/manifest-merger$(libVersion).jar ;
+    if $(NT) {
+        ANDROID.PATHSEPARATOR on $(C.COMPILER_SUITE_SYMBOL) = ";" ;
+    } else {
+        ANDROID.PATHSEPARATOR on $(C.COMPILER_SUITE_SYMBOL) = ":" ;
+    }
 
     C.ARCHITECTURE on $(C.ACTIVE_TOOLCHAIN_*) = $(ARCHITECTURE) ;
     SYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sysroot) ;
@@ -235,12 +258,12 @@ rule C.android._MultiCppCompile_SetupFlags {
 
     _flags = $(_flags[1-4]) $(extraflags) $(_flags[5-]) ;
 
-    C.gcc._MultiCppCompile_SetupFlags ;
+    C.clang._MultiCppCompile_SetupFlags ;
 }
 
 
 rule C.android._ApplicationFromObjects_LinkFlags {
-    linkRule = C.android.gcc.Link ;
+    linkRule = C.android.clang.Link ;
 
     local sysroot = $(SYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
     linkFlags += "--sysroot $(sysroot:C)" ;
@@ -249,7 +272,7 @@ rule C.android._ApplicationFromObjects_LinkFlags {
 
 
 rule C.android._SharedLibraryFromObjects_LinkFlags {
-    linkRule = C.android.gcc.Link ;
+    linkRule = C.android.clang.Link ;
 
     linkFlags += -Wl,-soname,$(_t[1]:TCBS) ;
     linkFlags += -shared ;
@@ -281,7 +304,7 @@ actions android._ResourceCompiler {
 
 # Manifest Merger
 actions android._ManifestMerger {
-    $(JAVA.JAVA:TC) -classpath "$(ANDROID.SDKLIB.JAR:T);$(ANDROID.MANIFEST-MERGER.JAR)" com.android.manifmerger.Main merge --out $(1:C) --main $(2[1]:C) --libs $(2[2-]:C)
+    $(JAVA.JAVA:TC) -cp "$(ANDROID.COMMON.JAR:T)$(ANDROID.PATHSEPARATOR)$(ANDROID.MANIFEST-MERGER.JAR)$(ANDROID.PATHSEPARATOR)$(ANDROID.SDK-COMMON.JAR:T)$(ANDROID.PATHSEPARATOR)$(ANDROID.SDKLIB.JAR:T)" com.android.manifmerger.Merger --out $(1:C) --main $(2[1]:C) --libs $(2[2-]:CJ=$(ANDROID.PATHSEPARATOR))
 }
 
 
@@ -989,7 +1012,7 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
 
     if $(C.CONFIG) in debug {
         local AndroidManifest-debuggable.xml = @(AndroidManifest-debuggable.xml:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
-        SEARCH on $(AndroidManifest-debuggable.xml) = $(JAM_MODULES_PATH)/c/toolchain/gcc ;
+        SEARCH on $(AndroidManifest-debuggable.xml) = $(JAM_MODULES_PATH)/c/toolchain/clang ;
         libAndroidManifests += $(AndroidManifest-debuggable.xml) ;
     }
 
@@ -1268,7 +1291,6 @@ rule android.WebServer TARGET {
 
         local archiveTarget = archive:$(TARGET) ;
         OUTPUT_PATH on $(archiveTarget) = $(OUTPUT_PATH) ;
-        Echo $(archiveTarget) ;
 
         local IP ;
         if ! $(URL) {

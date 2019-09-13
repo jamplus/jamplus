@@ -1,0 +1,6 @@
+rule C.Toolchain.clang.android-releaseltcg {
+    C.Flags * : CC C++ M MM : -g -O3 ;
+
+    C.Toolchain.Helper.ReleaseSettings ;
+}
+

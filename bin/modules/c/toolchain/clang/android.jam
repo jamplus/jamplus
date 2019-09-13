@@ -1,5 +1,5 @@
-rule C.Toolchain.gcc.android.Detect {
-    local ret = [ C.Toolchain.gcc.Setup $(NDK_TOOLCHAIN_ROOT)/bin : .o "" .so ] ;
+rule C.Toolchain.clang.android.Detect {
+    local ret = [ C.Toolchain.clang.Setup $(NDK_TOOLCHAIN_ROOT)/bin : .o "" .so ] ;
 
     C.Toolchain.$(C.COMPILER_SUITE).android-shared ;
 
