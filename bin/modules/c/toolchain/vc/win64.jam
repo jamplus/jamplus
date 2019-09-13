@@ -20,8 +20,25 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
             MSSDK = [ W32_GETREG $(key) ] ;
             MSSDK ?= $(MSVCNT) ;
             MSSDK_BINDIR = "$(MSSDK)/bin/x64" ;
-            local dirs = [ Glob $(MSSDK)/Include : */ ] ;
-            local MSSDK_VERSION = $(dirs[1]:P) ;
+
+            local MSSDK_VERSION ;
+            if ! $(MSSDK_VERSION) {
+                local dirs = [ Glob $(MSSDK)/Include : */ ] ;
+                local versions = [ Match 10\.0\.(.*)\.0 : $(dirs) ] ;
+                local highestDir ;
+                local dir ;
+                for dir in $(dirs) {
+                    local version = [ Match 10\.0\.(.*)\.0 : $(dir) ] ;
+                    local highestVersion = [ Match 10\.0\.(.*)\.0 : $(highestDir) ] ;
+                    if ! $(highestVersion) {
+                        highestVersion = 0 ;
+                    }
+                    if [ Math $(version) ">" $(highestVersion) ] = 1 {
+                        highestDir = $(dir) ;
+                    }
+                }
+                MSSDK_VERSION = $(highestDir:P) ;
+            }
             MSSDK_VERSION = $(MSSDK_VERSION:D=) ;
             MSSDK_STDHDRS =
                 $(MSVCNT)/include
