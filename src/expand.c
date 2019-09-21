@@ -420,6 +420,7 @@ var_expand(
 
 				/* TODO: Efficiency: Just append to newl above? */
 				newl = list_copy( newl, foundfiles );
+				newl = list_sort( newl, 0 );
 				list_free( foundfiles );
 			}
 			if ( origvalue ) {
