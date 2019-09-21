@@ -51,7 +51,7 @@ rule ios.SDK SDK_VERSION {
 
 	switch $(SDK_PLATFORM) {
 		case ios :
-			SDK_VERSION ?= 12.1 ;
+			SDK_VERSION ?= 13.0 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
@@ -221,6 +221,20 @@ rule ios.SDK SDK_VERSION {
 				case 12.1 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.1.sdk ;
+					sdkroot = iphoneos ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
+
+				case 12.2 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk ;
+					sdkroot = iphoneos ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
+
+				case 13.0 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.0.sdk ;
 					sdkroot = iphoneos ;
 					architecture = arm64 ;
 					minimumVersion = 8.0 ;
