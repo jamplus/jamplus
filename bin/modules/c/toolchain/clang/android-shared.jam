@@ -1231,6 +1231,9 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
     KEYSTORE_PASSWORD on $(_signedApk) = $(_keyStorePassword) ;
     KEYSTORE_KEY on $(_signedApk) = $(_keyStoreKey) ;
 
+    Depends $(_signedApk) : $(_keystorePath) ;
+    UseCommandLine $(_signedApk) : $(_keyStorePassword) $(_keyStoreKey) ;
+
     android._SignApk $(_signedApk) : $(_apk) : $(C.COMPILER_SUITE_SYMBOL) ;
 
     # Aligned.
