@@ -29,7 +29,7 @@ actions C.android.clang.Link {
 rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
     ARCHITECTURE ?= $(C.ARCHITECTURE:E=armv7-a) ;
     C.ARCHITECTURE ?= $(ARCHITECTURE) ;
-    SDK_VERSION ?= 26 ;
+    SDK_VERSION ?= 28 ;
     NDK_VERSION ?= 24 ;
 
     if $(OS) in MACOSX {
@@ -224,7 +224,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
 
     local buildToolsDir = [ Glob $(sdkRoot)/build-tools : $(SDK_VERSION).* ] ;
     if ! $(buildToolsDir) {
-        buildToolsDir = $(sdkRoot)/build-tools/26.0.1 ;
+        buildToolsDir = $(sdkRoot)/build-tools/28.0.3 ;
     }
     if $(buildToolsDir[1]) {
         ANDROID.ZIPALIGN on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/zipalign ;
@@ -240,6 +240,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
     local libVersion = "" ;
     if $(OS) = NT {
         libVersion = -$(SDK_VERSION).0.0-dev ;
+        libVersion = -26.0.0-dev ;
     }
     ANDROID.COMMON.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/common$(libVersion).jar ;
     ANDROID.SDK-COMMON.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/sdk-common$(libVersion).jar ;
