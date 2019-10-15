@@ -130,6 +130,14 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             # Fill in linkflags
         case arm64 :
             NDK_COMPILER_PREFIX = aarch64-linux-android- ;
+            cflags += -target aarch64-none-linux-android ;
+            cflags += -march=armv8-a ;
+            cflags += -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes ;
+            linkflags += -no-canonical-prefixes ;
+            linkflags += -target aarch64-none-linux-android ;
+            linkflags += -march=armv8-a ;
+            linkflags += -mthumb ;
+            sysroot = $(developerRoot)/android-$(NDK_VERSION)/arch-arm64 ;
             # Fill in cflags
             # Fill in linkflags
         case x86-64 :
@@ -157,9 +165,19 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             local lastDirectory = [ Subst $(NDK_COMPILER_PREFIX) : -$ ] ;
             EXTRA_LINK_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/bin ;
             C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
+            C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/gnu-libstdc++/4.9/include ;
             C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/lib/gcc/$(lastDirectory)/$(NDK_COMPILER_VERSION).x ;
-            C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/lib/armv7-a ;
-            C.LinkDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a ;
+            switch $(C.ARCHITECTURE) {
+                case armv7-a :
+                    C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/include ;
+                    C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/lib/armv7-a ;
+                    C.LinkDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a ;
+
+                case arm64 :
+                    C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a/include ;
+                    C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/lib64 ;
+                    C.LinkDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/arm64-v8a ;
+            }
             NDK_COMPILER_PREFIX = "" ;
             NDK_COMPILER_VERSION ?= llvm ;
         case * :
@@ -1110,6 +1128,10 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
                     _outputSo = $(_outputSo)|armv7-a ;
                     BINDING on $(_outputSo) = $(_binding) ;
                     MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+                case arm64 :
+                    _outputSo = $(_outputSo)|arm64-v8a ;
+                    BINDING on $(_outputSo) = $(_binding) ;
+                    MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/arm64-v8a ;
                 case x86 :
                     _outputSo = $(_outputSo)|x86 ;
                     BINDING on $(_outputSo) = $(_binding) ;
@@ -1153,6 +1175,9 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
                 case armv7-a :
                     SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/armeabi-v7a ;
                     MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+                case arm64 :
+                    SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/arm64-v8a ;
+                    MakeLocate $(target) : $(LOCATE_TARGET)/lib/arm64-v8a ;
                 case x86 :
                     SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/x86 ;
                     MakeLocate $(target) : $(LOCATE_TARGET)/lib/x86 ;
@@ -1187,6 +1212,14 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
                 _dstGdb = [ C.GristFiles $(TARGET) : gdbserver|arm ] ;
                 BINDING on $(_dstGdb) = gdbserver ;
                 MakeLocate $(_dstGdb) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+            case arm64 :
+                _sourceGdb = gdbserver|arm ;
+                BINDING on $(_sourceGdb) = gdbserver ;
+                SEARCH on $(_sourceGdb) = $(NDKROOT)/prebuilt/android-arm/gdbserver ;
+
+                _dstGdb = [ C.GristFiles $(TARGET) : gdbserver|arm ] ;
+                BINDING on $(_dstGdb) = gdbserver ;
+                MakeLocate $(_dstGdb) : $(LOCATE_TARGET)/lib/arm64-v8a ;
             case x86 :
                 _sourceGdb = gdbserver|x86 ;
                 BINDING on $(_sourceGdb) = gdbserver ;
@@ -1553,6 +1586,8 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
                     Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/armeabi]]$(NEWLINE)" ;
                 case armv7-a :
                     Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/armeabi-v7a]]$(NEWLINE)" ;
+                case arm64 :
+                    Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/arm64-v8a]]$(NEWLINE)" ;
                 case x86 :
                     Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/x86]]$(NEWLINE)" ;
             }
