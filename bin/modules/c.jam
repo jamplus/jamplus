@@ -1790,6 +1790,30 @@ rule C.GetActiveToolchain {
 	return $(C.ACTIVE_TOOLCHAIN_SPEC) ;
 }
 
+
+rule C.Build TARGETS : TOOLCHAINS {
+    local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
+
+    local toolchains ;
+    local toolchain ;
+
+    for toolchain in $(TOOLCHAINS:E=$(C.ACTIVE_TOOLCHAIN_SPEC)) {
+        toolchains += [ C.Toolchain $(toolchain) ] ;
+
+        local target ;
+        for target in $(TARGETS) {
+            if $(BUILD.$(target).SAVE_SUBDIR_TOKENS) {
+                SubDir $(BUILD.$(target).SAVE_SUBDIR_TOKENS) : $(BUILD.$(target).SAVE_SUBDIR_TARGET_DIRECTORY) ;
+            }
+
+            Build.$(target) ;
+        }
+    }
+
+    C.Toolchain $(saveActiveToolchainSpec) ;
+    return $(toolchains) ;
+}
+
 ########################################################################
 ########################################################################
 

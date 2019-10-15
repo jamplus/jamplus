@@ -540,6 +540,18 @@ rule SubInclude TOKENS : FILENAME
 
 	SubDir $(TOKENS) ;
 
+	local TARGET = $(FILENAME) ;
+	if ! $(TARGET)
+	{
+		local token ;
+		for token in $(TOKENS)
+		{
+			TARGET = $(token) ;
+		}
+	}
+	BUILD.$(TARGET).SAVE_SUBDIR_TOKENS = $(ALL_SUBDIR_TOKENS) ;
+	BUILD.$(TARGET).SAVE_SUBDIR_TARGET_DIRECTORY = $(__SUBDIR_TARGET_DIRECTORY) ;
+
 	CURRENT_JAMFILE = $(jamfile:R=$(SUBDIR)) ;
 	if [ Search $(CURRENT_JAMFILE) ]
 	{
