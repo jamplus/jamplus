@@ -1792,26 +1792,37 @@ rule C.GetActiveToolchain {
 
 
 rule C.Build TARGETS : TOOLCHAINS {
-    local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
+    if $(TOOLCHAINS) {
+        local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
 
-    local toolchains ;
-    local toolchain ;
+        local toolchains ;
+        local toolchain ;
 
-    for toolchain in $(TOOLCHAINS:E=$(C.ACTIVE_TOOLCHAIN_SPEC)) {
-        toolchains += [ C.Toolchain $(toolchain) ] ;
+        for toolchain in $(TOOLCHAINS:E=$(C.ACTIVE_TOOLCHAIN_SPEC)) {
+            toolchains += [ C.Toolchain $(toolchain) ] ;
 
-        local target ;
-        for target in $(TARGETS) {
-            if $(BUILD.$(target).SAVE_SUBDIR_TOKENS) {
-                SubDir $(BUILD.$(target).SAVE_SUBDIR_TOKENS) : $(BUILD.$(target).SAVE_SUBDIR_TARGET_DIRECTORY) ;
+            local target ;
+            for target in $(TARGETS) {
+                if $(BUILD.$(target).SAVE_SUBDIR_TOKENS) {
+                    SubDir $(BUILD.$(target).SAVE_SUBDIR_TOKENS) : $(BUILD.$(target).SAVE_SUBDIR_TARGET_DIRECTORY) ;
+                }
+
+                Build.$(target) ;
             }
-
-            Build.$(target) ;
         }
+
+        C.Toolchain $(saveActiveToolchainSpec) ;
+        return $(toolchains) ;
     }
 
-    C.Toolchain $(saveActiveToolchainSpec) ;
-    return $(toolchains) ;
+    local target ;
+    for target in $(TARGETS) {
+        if $(BUILD.$(target).SAVE_SUBDIR_TOKENS) {
+            SubDir $(BUILD.$(target).SAVE_SUBDIR_TOKENS) : $(BUILD.$(target).SAVE_SUBDIR_TARGET_DIRECTORY) ;
+        }
+
+        Build.$(target) ;
+    }
 }
 
 ########################################################################
