@@ -51,7 +51,7 @@ rule ios.SDK SDK_VERSION {
 
 	switch $(SDK_PLATFORM) {
 		case ios :
-			SDK_VERSION ?= 13.0 ;
+			SDK_VERSION ?= 13.2 ;
 			switch $(SDK_VERSION) {
 				case 4.3 :
 					developerRoot = /Developer/Platforms/iPhoneOS.platform/Developer ;
@@ -232,9 +232,37 @@ rule ios.SDK SDK_VERSION {
 					architecture = arm64 ;
 					minimumVersion = 8.0 ;
 
+				case 12.4 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.4.sdk ;
+					sdkroot = iphoneos ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
+
 				case 13.0 :
 					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.0.sdk ;
+					sdkroot = iphoneos ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
+
+				case 13.1 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.1.sdk ;
+					sdkroot = iphoneos ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
+
+				case 13.2 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk ;
+					sdkroot = iphoneos ;
+					architecture = arm64 ;
+					minimumVersion = 8.0 ;
+
+				case 13.3 :
+					developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+					isysroot = $(developerRoot)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.3.sdk ;
 					sdkroot = iphoneos ;
 					architecture = arm64 ;
 					minimumVersion = 8.0 ;
@@ -1144,6 +1172,7 @@ rule C.ios._MultiCppCompile_SetupFlags {
 		extraflags += -D__IPHONE_OS_VERSION_MIN_REQUIRED=$(noPeriodVersion)000 ;
 		extraflags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;    #"
 	} else {
+		extraflags += -target $(architecture)-apple-ios$(minimumsdkversion) ;
 		extraflags += "-isysroot $(isysroot:C)" ;
 		extraflags += "-arch $(architecture)" ;
 		switch $(C.PLATFORM) {
@@ -1196,6 +1225,7 @@ rule C.ios._ApplicationFromObjects_LinkFlags {
 		linkFlags += \"$(IOSBUILDENV_PATH)/SDK/libclang_rt.ios.a\" ;
 		linkFlags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;
 	} else {
+		linkFlags += "-target $(architecture)-apple-ios$(minimumsdkversion)" ;
 		linkFlags += "-isysroot $(isysroot:C)" ;
 		linkFlags += "-arch $(architecture)" ;
 		switch $(C.PLATFORM) {
