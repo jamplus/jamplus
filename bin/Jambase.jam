@@ -855,7 +855,7 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 	{
 		VALID_PLATFORMS ?= win64 win32 ;
 	}
-	else if $(MACOSX)
+	else if $(OS) = MACOSX
 	{
 		VALID_PLATFORMS ?= macosx64 macosx32 ;
 	}
