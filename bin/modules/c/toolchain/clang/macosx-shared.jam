@@ -48,7 +48,7 @@ rule macosx.SDK SDK_VERSION {
 	local architecture ;
 
 	developerRoot = /Developer/SDKs ;
-	SDK_VERSION ?= 10.13 ;
+	SDK_VERSION ?= 10.15 ;
 	switch $(SDK_VERSION) {
 		case 10.4 :
 			isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
@@ -91,6 +91,16 @@ rule macosx.SDK SDK_VERSION {
 			sdkroot = macosx ;
 
 		case 10.13 :
+			developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+			isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk ;
+			sdkroot = macosx ;
+
+		case 10.14 :
+			developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
+			isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk ;
+			sdkroot = macosx ;
+
+		case 10.15 :
 			developerRoot = [ Match ([^$(NEWLINE)]*) : [ Shell "xcode-select --print-path" ] ] ;
 			isysroot = $(developerRoot)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk ;
 			sdkroot = macosx ;
