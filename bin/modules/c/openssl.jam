@@ -1,8 +1,8 @@
 rule C.OpenSSL TARGET : OPTIONS {
 	if $(NT) {
-		local bits = "" ;
+		local bits = x86 ;
 		if $(PLATFORM) = win64 {
-			bits = 64 ;
+			bits = x64 ;
 		}
 
 		local opensslRoot = $(OPENSSL_ROOT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
@@ -14,13 +14,13 @@ rule C.OpenSSL TARGET : OPTIONS {
 			;
 
 			local PATH_SUFFIXES =
-				# https://www.npcglib.org/~stathis/blog/precompiled-openssl/
-				openssl-1.1.0f-$(C.COMPILER)
+				# https://kb.firedaemon.com/support/solutions/articles/4000121705
+				openssl-1.1
 			;
 
-			local ssl.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/include$(bits)/openssl : ssl.h ] ;
+			local ssl.h = [ Glob $(PATHS)$(PATH_SUFFIXES)/$(bits)/include/openssl : ssl.h ] ;
 			if $(ssl.h) {
-				opensslRoot = [ Match (.+)/include$(bits)/openssl/ : $(ssl.h[1]) ] ;
+				opensslRoot = [ Match (.+)/include/openssl/ : $(ssl.h[1]) ] ;
 			} else {
 				opensslRoot = _ ;
 			}
@@ -38,13 +38,13 @@ rule C.OpenSSL TARGET : OPTIONS {
 		TARGET = [ C.ActiveTarget $(TARGET) ] ;
 		C.Defines $(TARGET) : USE_SSLEAY ;
 
-		C.IncludeDirectories $(TARGET) : $(opensslRoot)/include$(bits) $(opensslRoot)/include$(bits)/openssl ;
+		C.IncludeDirectories $(TARGET) : $(opensslRoot)/include $(opensslRoot)/include/openssl ;
 
 		if link in $(OPTIONS) {
-			C.LinkDirectories $(TARGET) : $(opensslRoot)/lib$(bits) ;
-			C.LinkPrebuiltLibraries $(TARGET) : libcryptoMT libsslMT ;
+			C.LinkDirectories $(TARGET) : $(opensslRoot)/lib ;
+			C.LinkPrebuiltLibraries $(TARGET) : libcrypto libssl ;
 
-			C.LinkPrebuiltLibraries $(TARGET) : advapi32 gdi32 user32 ;
+			C.LinkPrebuiltLibraries $(TARGET) : advapi32 ;
 			C.LinkPrebuiltLibraries $(TARGET) : Crypt32 ;
 			C.LinkPrebuiltLibraries $(TARGET) : ws2_32 ;
 		}
