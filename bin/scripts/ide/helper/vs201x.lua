@@ -669,8 +669,8 @@ MinimumVisualStudioVersion = 10.0.40219.1
 	elseif self.Options.vs2019 then
 		table.insert(self.Contents, [[
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 16
-VisualStudioVersion = 16.0.29029.237
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
 ]])
 	end
