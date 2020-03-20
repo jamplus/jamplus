@@ -1792,6 +1792,8 @@ rule C.GetActiveToolchain {
 
 
 rule C.Build TARGETS : TOOLCHAINS {
+    local saveCurrentJamfile = $(CURRENT_JAMFILE) ;
+
     if $(TOOLCHAINS) {
         local saveActiveToolchainSpec = $(C.ACTIVE_TOOLCHAIN_SPEC) ;
 
@@ -1805,6 +1807,7 @@ rule C.Build TARGETS : TOOLCHAINS {
             for target in $(TARGETS) {
                 if $(BUILD.$(target).SAVE_SUBDIR_TOKENS) {
                     SubDir $(BUILD.$(target).SAVE_SUBDIR_TOKENS) : $(BUILD.$(target).SAVE_SUBDIR_TARGET_DIRECTORY) ;
+                    CURRENT_JAMFILE = $(BUILD.$(target).CURRENT_JAMFILE) ;
                 }
 
                 Build.$(target) ;
@@ -1812,6 +1815,9 @@ rule C.Build TARGETS : TOOLCHAINS {
         }
 
         C.Toolchain $(saveActiveToolchainSpec) ;
+
+        CURRENT_JAMFILE = $(saveCurrentJamfile) ;
+
         return $(toolchains) ;
     }
 
@@ -1819,10 +1825,13 @@ rule C.Build TARGETS : TOOLCHAINS {
     for target in $(TARGETS) {
         if $(BUILD.$(target).SAVE_SUBDIR_TOKENS) {
             SubDir $(BUILD.$(target).SAVE_SUBDIR_TOKENS) : $(BUILD.$(target).SAVE_SUBDIR_TARGET_DIRECTORY) ;
+            CURRENT_JAMFILE = $(BUILD.$(target).CURRENT_JAMFILE) ;
         }
 
         Build.$(target) ;
     }
+
+    CURRENT_JAMFILE = $(saveCurrentJamfile) ;
 }
 
 ########################################################################
