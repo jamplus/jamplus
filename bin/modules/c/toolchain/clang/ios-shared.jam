@@ -1574,7 +1574,7 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
                 appIcon = ospath.remove_extension(ospath.get_filename(directoryEntry.filename))
                 local sourcePath = ospath.join(assetCatalogPath, directoryEntry.filename)
                 local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
-                local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+                local contents = require 'rapidjson'.decode(ospath.read_file(contentsJsonFilename))
 
                 for _, entry in ipairs(contents.images) do repeat
                     if not entry.filename then break end
@@ -1616,7 +1616,7 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
                 local imageset = ospath.remove_extension(ospath.get_filename(directoryEntry.filename))
                 local sourcePath = ospath.join(assetCatalogPath, directoryEntry.filename)
                 local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
-                local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+                local contents = require 'rapidjson'.decode(ospath.read_file(contentsJsonFilename))
 
                 local activeFilenames = {}
                 local function MakeFilename(entry, build)
@@ -1675,7 +1675,7 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
                 launchImage = ospath.remove_extension(ospath.get_filename(directoryEntry.filename))
                 local sourcePath = ospath.join(assetCatalogPath, directoryEntry.filename)
                 local contentsJsonFilename = ospath.join(sourcePath, 'Contents.json')
-                local contents = require 'cjson'.decode(ospath.read_file(contentsJsonFilename))
+                local contents = require 'rapidjson'.decode(ospath.read_file(contentsJsonFilename))
 
                 local activeFilenames = {}
                 local function MakeLaunchImageFilename(entry, build)

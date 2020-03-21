@@ -378,7 +378,6 @@ if $(LUA_BIN)
 				lua.debug.exe
 				lua53_debug.dll
 				lua-tilde.debug.dll
-				modules/cjson.debug.dll
 				modules/ffi.debug.dll
 				modules/filefind.debug.dll
 				modules/lanes/core.debug.dll
@@ -389,6 +388,7 @@ if $(LUA_BIN)
 				modules/ospath.debug.dll
 				modules/osprocess.debug.dll
 				modules/prettydump.debug.dll
+				modules/rapidjson.debug.dll
 				modules/ssl.debug.dll
 				modules/struct.debug.dll
 				modules/uuid.debug.dll
@@ -403,7 +403,6 @@ if $(LUA_BIN)
 				lua53.dll
 				lua-tilde.dll
 				modules/socket/core.dll
-				modules/cjson.dll
 				modules/ffi.dll
 				modules/filefind.dll
 				modules/lanes/core.dll
@@ -413,6 +412,7 @@ if $(LUA_BIN)
 				modules/ospath.dll
 				modules/osprocess.dll
 				modules/prettydump.dll
+				modules/rapidjson.dll
 				modules/ssl.dll
 				modules/struct.dll
 				modules/uuid.dll
@@ -462,7 +462,6 @@ if $(LUA_BIN)
 			LUA_SRCS +=
 				lua.debug
 				liblua53_debug.so
-				lib/lua/5.3/cjson.debug.$(MODULE_EXT)
 				lib/lua/5.3/ffi.debug.$(MODULE_EXT)
 				lib/lua/5.3/filefind.debug.$(MODULE_EXT)
 				lib/lua/5.3/lanes/core.debug.$(MODULE_EXT)
@@ -473,6 +472,7 @@ if $(LUA_BIN)
 				lib/lua/5.3/ospath.debug.$(MODULE_EXT)
 				lib/lua/5.3/osprocess.debug.$(MODULE_EXT)
 				lib/lua/5.3/prettydump.debug.$(MODULE_EXT)
+				lib/lua/5.3/rapidjson.debug.$(MODULE_EXT)
 				lib/lua/5.3/ssl.debug.$(MODULE_EXT)
 				lib/lua/5.3/struct.debug.$(MODULE_EXT)
 				lib/lua/5.3/uuid.debug.$(MODULE_EXT)
@@ -485,7 +485,6 @@ if $(LUA_BIN)
 			LUA_SRCS +=
 				lua
 				liblua53.so
-				lib/lua/5.3/cjson.$(MODULE_EXT)
 				lib/lua/5.3/ffi.$(MODULE_EXT)
 				lib/lua/5.3/filefind.$(MODULE_EXT)
 				lib/lua/5.3/lanes/core.$(MODULE_EXT)
@@ -496,6 +495,7 @@ if $(LUA_BIN)
 				lib/lua/5.3/ospath.$(MODULE_EXT)
 				lib/lua/5.3/osprocess.$(MODULE_EXT)
 				lib/lua/5.3/prettydump.$(MODULE_EXT)
+				lib/lua/5.3/rapidjson.$(MODULE_EXT)
 				lib/lua/5.3/ssl.$(MODULE_EXT)
 				lib/lua/5.3/struct.$(MODULE_EXT)
 				lib/lua/5.3/uuid.$(MODULE_EXT)
