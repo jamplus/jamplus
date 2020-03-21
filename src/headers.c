@@ -109,7 +109,7 @@ typedef struct
 {
     const char *name;
     regexp *re;
-} regexdata;
+} headers_regexdata;
 
 /* OPT_HDRPIPE_EXT -- http://maillist.perforce.com/pipermail/jamming/2002-June/001717.html */
 
@@ -146,12 +146,12 @@ static LIST *headers1helper(
 	}
 
 	if ( !regexhash )
-	    regexhash = hashinit( sizeof(regexdata), "regex" );
+	    regexhash = hashinit( sizeof(headers_regexdata), "regex" );
 
 	pattern = list_first(hdrscan);
 	while( rec < MAXINC && pattern )
 	{
-	    regexdata data, *d = &data;
+	    headers_regexdata data, *d = &data;
 	    data.name = list_value(pattern);
 	    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 	    {
@@ -263,7 +263,7 @@ typedef struct
 {
     const char *name;
     regexp *re;
-} regexdata;
+} headers_regexdata;
 
 #ifndef OPT_HEADER_CACHE_EXT
 static	/* Needs to be global if header caching is on */
@@ -292,12 +292,12 @@ headers1(
 	    return result;
 
 	if ( !regexhash )
-	    regexhash = hashinit( sizeof(regexdata), "regex" );
+	    regexhash = hashinit( sizeof(headers_regexdata), "regex" );
 
 	pattern = list_first(hdrscan);
 	while( rec < MAXINC && pattern )
 	{
-	    regexdata data, *d = &data;
+	    headers_regexdata data, *d = &data;
 	    data.name = list_value(pattern);
 	    if( !hashcheck( regexhash, (HASHDATA **)&d ) )
 	    {

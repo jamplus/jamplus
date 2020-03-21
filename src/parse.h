@@ -11,6 +11,8 @@
  * 11/04/02 (seiwald) - const-ing for string literals
  */
 
+#pragma once
+
 /*
  * parse tree node
  */

@@ -38,6 +38,8 @@
  * 11/05/02 (seiwald) - OSPLAT now set to sparc on solaris.
  */
 
+#pragma once
+
 /*
  * VMS, OPENVMS
  */

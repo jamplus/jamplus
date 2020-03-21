@@ -10,6 +10,8 @@
  * 11/04/02 (seiwald) - const-ing for string literals
  */
 
+#pragma once
+
 /*
  * PATHNAME - a name of a file, broken into <grist>dir/base/suffix(member)
  *

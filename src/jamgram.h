@@ -37,6 +37,7 @@
    simplifying the original so-called "semantic" parser.  */
 
 
+#pragma once
 
 
 /* Tokens.  */

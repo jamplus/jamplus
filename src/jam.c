@@ -899,7 +899,7 @@ track_malloc(size_t mem)
     malloc_bytes += (int)mem;
 #undef malloc
     return malloc(mem);
-#define malloc(x) do_not_call_malloc_after_this(x)
+//#define malloc(x) do_not_call_malloc_after_this(x)
 }
 
 void*
@@ -908,6 +908,6 @@ track_realloc(void *ptr, size_t size)
     realloc_bytes += (int)size;
 #undef realloc
     return realloc(ptr, size);
-#define realloc(a,b) do_not_call_realloc_after_this(a,b)
+//#define realloc(a,b) do_not_call_realloc_after_this(a,b)
 }
 #endif

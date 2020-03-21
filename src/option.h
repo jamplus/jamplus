@@ -13,6 +13,8 @@
  * 11/04/02 (seiwald) - const-ing for string literals
  */
 
+#pragma once
+
 typedef struct option
 {
 	char		flag;	/* filled in by getoption() */

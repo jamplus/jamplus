@@ -609,7 +609,7 @@ pass:
 			++count;
 		}
 
-		sortedfiles = malloc( sizeof( QUEUEDFILEINFO ) * count );
+		sortedfiles = (QUEUEDFILEINFO*)malloc( sizeof( QUEUEDFILEINFO ) * count );
 		i = 0;
 		for( l = list_first( origqueuedjamfiles ); l; l = list_next( l ) ) {
 			char *separator = strchr( list_value(l), '\xff' );

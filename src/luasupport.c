@@ -660,7 +660,7 @@ int LS_jam_parse(ls_lua_State *L)
             }
             ++ptr;
         }
-        lines = malloc(sizeof(char*) * (numberOfLines + 1));
+        lines = (char**)malloc(sizeof(char*) * (numberOfLines + 1));
         numberOfLines = 0;
         startPtr = ptr = src;
         while (1) {
@@ -668,7 +668,7 @@ int LS_jam_parse(ls_lua_State *L)
                 char* line;
                 if (*ptr == '\n')
                     ++ptr;
-                line = malloc(ptr - startPtr + 1);
+                line = (char*)malloc(ptr - startPtr + 1);
                 memcpy(line, startPtr, ptr - startPtr);
                 line[ptr - startPtr] = 0;
                 startPtr = ptr;
@@ -1025,7 +1025,7 @@ int luahelper_taskadd(const char* taskscript, LOL* args)
     ls_lua_getfield(L, -1, "gen");                            /* lanes gen */
     ls_lua_pushstring(L, "*");                                /* lanes gen * */
 
-    newTaskScript = malloc( taskscriptlen + 1 );
+    newTaskScript = (char*)malloc( taskscriptlen + 1 );
     strncpy(newTaskScript, taskscript, taskscriptlen);
     newTaskScript[taskscriptlen] = 0;
     ret = ls_luaL_loadstring(L, newTaskScript);            /* lanes gen * script */
@@ -1230,7 +1230,7 @@ const char* luahelper_linefilter(const char* line, size_t lineSize) {
         return NULL;
     }
 
-    out = malloc(ls_lua_rawlen(L, -1) + 1);
+    out = (char*)malloc(ls_lua_rawlen(L, -1) + 1);
     strcpy(out, ls_lua_tostring(L, -1));
     ls_lua_settop(L, top);
 

@@ -39,6 +39,8 @@
  *	lol_print() - debug print LISTS separated by ":"
  */
 
+#pragma once
+
 /*
  * LIST - list of strings
  */

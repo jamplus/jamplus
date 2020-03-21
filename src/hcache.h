@@ -6,6 +6,8 @@
  * hcache.h - handle #includes in source files
  */
 
+#pragma once
+
 struct checksumdata {
 	const char	*boundname;
 	int			age;	  /* if too old, we'll remove it from cache */

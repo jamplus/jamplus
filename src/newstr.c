@@ -30,7 +30,7 @@
 # include "newstr.h"
 # include "hash.h"
 
-typedef const char *STRING;
+typedef const char *JAM_STRING;
 
 static struct hash *strhash = 0;
 static size_t strtotal = 0;
@@ -50,10 +50,10 @@ static char* str_allocend = NULL;
 const char *
 newstr( const char *string )
 {
-	STRING str, *s = &str;
+	JAM_STRING str, *s = &str;
 
 	if( !strhash )
-	    strhash = hashinit( sizeof( STRING ), "strings" );
+	    strhash = hashinit( sizeof( JAM_STRING ), "strings" );
 
 	*s = string;
 

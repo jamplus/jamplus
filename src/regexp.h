@@ -7,6 +7,8 @@
  * 11/04/02 (seiwald) - const-ing for string literals
  */
 
+#pragma once
+
 #define NSUBEXP  10
 typedef struct regexp {
 	const char *startp[NSUBEXP];

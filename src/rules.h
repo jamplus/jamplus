@@ -36,6 +36,8 @@
  * 01/14/03 (seiwald) - fix includes fix with new internal includes TARGET
  */
 
+#pragma once
+
 typedef struct _rule RULE;
 typedef struct _target TARGET;
 typedef struct _targets TARGETS;

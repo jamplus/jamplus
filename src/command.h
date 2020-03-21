@@ -31,6 +31,8 @@
  *	cmd_next() - walk the CMD chain
  */
 
+#pragma once
+
 #include "buffer.h"
 
 #ifdef OPT_RESPONSE_FILES

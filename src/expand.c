@@ -93,7 +93,7 @@ typedef struct
 {
     const char *name;
     regexp *re;
-} regexdata;
+} expand_regexdata;
 
 # define MAGIC_COLON	'\001'
 # define MAGIC_LEFT	'\002'
@@ -583,7 +583,7 @@ var_expand(
 		    int hasInclude = 0;
 
 		    if ( !regexhash )
-			regexhash = hashinit( sizeof(regexdata), "regex" );
+			regexhash = hashinit( sizeof(expand_regexdata), "regex" );
 
 		    {
 			LISTITEM *inex = list_first(edits.includes_excludes);
@@ -605,7 +605,7 @@ var_expand(
 			while ( inex ) {
 			    char mod = list_value(inex)[0];
 			    regexp *re;
-			    regexdata data, *d = &data;
+			    expand_regexdata data, *d = &data;
 			    inex = list_next( inex );
 			    data.name = list_value(inex);
 			    if( !hashcheck( regexhash, (HASHDATA **)&d ) )

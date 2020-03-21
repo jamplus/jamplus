@@ -832,7 +832,7 @@ void hcache_done()
 	for( file = hcachefilelist; file; file = file->next ) {
 		hcache_writefile( file );
 	}
-#if OPT_BUILTIN_MD5CACHE_EXT
+#ifdef OPT_BUILTIN_MD5CACHE_EXT
 	checksums_writefile();
 #endif /* OPT_BUILTIN_MD5CACHE_EXT */
 	hashdone(hcachehash);
