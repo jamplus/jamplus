@@ -42,6 +42,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
 
             local PATH_SUFFIXES =
                 android-ndk
+                android-ndk-r18b
                 android-ndk-r14b
                 android-ndk-r12b
             ;
@@ -111,6 +112,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             linkflags += -mthumb ;
         case armv7-a :
             NDK_COMPILER_PREFIX = arm-linux-androideabi- ;
+            cflags += -isystem $(NDKROOT)/sysroot/usr/include/arm-linux-androideabi ;
             cflags += -target armv7-none-linux-androideabi ;
             cflags += -march=armv7-a -mfpu=neon -mfloat-abi=softfp ;
             cflags += -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -marm ;
@@ -130,6 +132,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             # Fill in linkflags
         case arm64 :
             NDK_COMPILER_PREFIX = aarch64-linux-android- ;
+            cflags += -isystem $(NDKROOT)/sysroot/usr/include/aarch64-linux-android ;
             cflags += -target aarch64-none-linux-android ;
             cflags += -march=armv8-a ;
             cflags += -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes ;
@@ -151,6 +154,9 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
         case * :
             Exit *** Error \: Unknown architecture for NDK\: $(C.ARCHITECTURE) ;
     }
+
+    cflags += -D__ANDROID_API__=$(NDK_VERSION) ;
+
     ARCHITECTURE_CFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(cflags) ;
     ARCHITECTURE_LINKFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(linkflags) ;
 
@@ -165,16 +171,16 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             local lastDirectory = [ Subst $(NDK_COMPILER_PREFIX) : -$ ] ;
             EXTRA_LINK_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/bin ;
             C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
-            C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/gnu-libstdc++/4.9/include ;
+            C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/include ;
             C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/lib/gcc/$(lastDirectory)/$(NDK_COMPILER_VERSION).x ;
             switch $(C.ARCHITECTURE) {
                 case armv7-a :
-                    C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/include ;
+                    #C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/include ;
                     C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/lib/armv7-a ;
                     C.LinkDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a ;
 
                 case arm64 :
-                    C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a/include ;
+                    #C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a/include ;
                     C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/lib64 ;
                     C.LinkDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/arm64-v8a ;
             }
@@ -280,6 +286,8 @@ rule C.android._MultiCppCompile_SetupFlags {
 
     local sysroot = $(SYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
     extraflags += "--sysroot $(sysroot:C)" ;
+    extraflags += "-isystem @($(NDKROOT)/sysroot/usr/include:C)" ;
+    local developerRoot = $(NDKROOT)/platforms ;
     extraflags += $(ARCHITECTURE_CFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 
     _flags = $(_flags[1-4]) $(extraflags) $(_flags[5-]) ;
