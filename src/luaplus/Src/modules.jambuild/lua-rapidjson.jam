@@ -13,6 +13,10 @@ local SRCS =
         src/values.hpp
 ;
 
+if ! $(MSVCNT) {
+    C.Flags * : C++ MM : -std=c++11 ;
+}
+
 C.IncludeDirectories lua-rapidjson : rapidjson/include ;
 
 Lua.CModule lua-rapidjson : rapidjson : $(SRCS) ;
