@@ -12,6 +12,7 @@ rule C.Toolchain.win64.* {
             }
         }
     } else if ! [ C.Toolchain.vc.$(C.PLATFORM).Detect ]  &&
+                ! [ C.Toolchain.clang.$(C.PLATFORM).Detect ]  &&
                 ! [ C.Toolchain.gcc.$(C.PLATFORM).Detect ]  &&
                 ! [ C.Toolchain.mingw.$(C.PLATFORM).Detect ] {
         return ;
