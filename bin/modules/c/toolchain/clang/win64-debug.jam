@@ -1,0 +1,7 @@
+rule C.Toolchain.clang.win64-debug {
+    C.Flags * : CC C++ M MM : -g -O0 -target x86_64-w64-mingw32 -fms-extensions ;
+    C.LinkFlags * : -target x86_64-w64-mingw32 -fuse-ld=lld ;
+
+    C.Toolchain.Helper.DebugSettings ;
+}
+

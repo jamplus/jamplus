@@ -851,6 +851,7 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 	local _linkTargets = $(_t) ;
 	MakeLocate $(_linkTargets) : $(outputPath) ;
 
+	local linkFlags ;
 	if ! ( noexportlib in $(OPTIONS) ) {
 		local suflib = $(SUFLIB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 		local _tlib = @($(TARGET)$(suflib):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
@@ -872,7 +873,6 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) linkDirectories += $(LINKDIRECTORIES) ;
 	on $(C.ACTIVE_TOOLCHAIN_*) linkDirectories += $(LINKDIRECTORIES) ;
 
-	local linkFlags ;
 	linkFlags +=
 		[ C.$(C.COMPILER_SUITE).FLibraryPaths $(linkDirectories) $(C.STDLINKDIRECTORIES) ]
 		$(LINKFLAGS:Z=$(C.ACTIVE_TOOLCHAIN_*))

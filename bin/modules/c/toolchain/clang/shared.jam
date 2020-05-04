@@ -60,7 +60,7 @@ rule C.clang._MultiCppCompile_SetupFlags {
             PCHFLAGS on $(_pchFilename) += $($($(pchBUILD_EXT).PCHFLAGS)) ;
             MFLAGS on $(_pchName) = $($(pchBUILD_EXT).RULE) $($(pchBUILD_EXT).SUFOBJ) $($(pchBUILD_EXT).ADD_TO_LINK) $(_flags[5-]) $($($(BUILD_EXT).PCHFLAGS)) -o \"$(_pchFilename:T)\" ;
             if $(C_LIBRARY_SHARED_MODULE) {
-                MFLAGS on $(_pchName) += -fPIC ;
+                MFLAGS on $(_pchName) += $(SHAREDLIBDEFAULTFLAG:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
             }
             if $(objectForceIncludes[1]) {
                 MFLAGS on $(_pchName) += "-include $(objectForceIncludes:G=)" ;
@@ -100,7 +100,7 @@ rule C.clang._MultiCppCompile_SetupFlags {
     _flags += "-o \"$(_obj:T)\"" ;
 
     if $(C_LIBRARY_SHARED_MODULE) {
-        _flags += -fPIC ;
+        _flags += $(SHAREDLIBDEFAULTFLAG:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
     }
 }
 
@@ -123,9 +123,9 @@ rule C.clang._SharedLibraryFromObjects_ExportLib {
 
 rule C.clang._SharedLibraryFromObjects_LinkFlags {
     if module in $(OPTIONS) {
-        linkFlags += -shared -fPIC ;
+        linkFlags += -shared $(SHAREDLIBDEFAULTFLAG:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
     } else {
-        on $(TARGET) linkFlags += -shared -fPIC ;
+        on $(TARGET) linkFlags += -shared $(SHAREDLIBDEFAULTFLAG:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
     }
 }
 

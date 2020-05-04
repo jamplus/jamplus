@@ -1,0 +1,7 @@
+rule C.Toolchain.clang.win64-releaseltcg {
+    C.Flags * : CC C++ M MM : -g -O3 -fomit-frame-pointer -target x86_64-w64-mingw32 -fms-extensions ;
+    C.LinkFlags * : -target x86_64-w64-mingw32 -fuse-ld=lld ;
+
+    C.Toolchain.Helper.ReleaseSettings ;
+}
+

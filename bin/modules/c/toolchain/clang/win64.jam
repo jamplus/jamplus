@@ -1,0 +1,41 @@
+rule C.Toolchain.clang.win64.Detect {
+    local foundPath = [ Glob
+        $(ProgramFiles(x86):J=$(SPACE))/LLVM/bin
+        c:/llvm-mingw/bin
+        $(PATH)
+        : clang.exe ] ;
+    if ! $(foundPath) {
+        return ;
+    }
+
+    foundPath = [ Match (.+)/ : $(foundPath[1]) ] ;
+    if ! [ C.Toolchain.clang.Setup $(foundPath) ] {
+        return ;
+    }
+
+    C.AR on $(C.COMPILER_SUITE_SYMBOL) = @(llvm-ar:R=$(foundPath)) ru ;
+
+    C._SharedLibraryFromObjects_ExportLib on $(C.COMPILER_SUITE_SYMBOL) = C.clang.win64._SharedLibraryFromObjects_ExportLib ;
+
+    SHAREDLIBDEFAULTFLAG on $(C.COMPILER_SUITE_SYMBOL) = ;
+
+    return $(C.COMPILER) ;
+}
+
+
+rule C.clang.win64._SharedLibraryFromObjects_ExportLib {
+    local _actiontlib = @($(TARGET)$(suflib):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)!inner) ;
+    BINDING on $(_actiontlib) = [ C._retrieveOutputName : $(suflib) ] ;
+    MightNotUpdate $(_actiontlib) ;
+    MakeLocate $(_actiontlib) : $(outputPath) ;
+    _linkTargets += $(_actiontlib) ;
+
+    BINDING on $(_tlib) = [ C._retrieveOutputName : $(suflib) ] ;
+    Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_tlib) : $(_actiontlib) $(_t) ;
+    MightNotUpdate $(_tlib) ;
+    MakeLocate $(_tlib) : $(outputPath) ;
+
+    linkFlags += -Wl,--out-implib,$(_tlib:T) ;
+
+}
+
