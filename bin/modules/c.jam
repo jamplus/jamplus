@@ -1,4 +1,4 @@
-rule C {
+rule C.Use {
 }
 
 SUBDIRRESET += ASFLAGS HDRS C++FLAGS CCFLAGS ;

@@ -882,7 +882,7 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 	C.TOOLCHAIN ?= $(c.toolchain) ;
 	if $(C.TOOLCHAIN)
 	{
-		C ;
+		C.Use ;
 	}
 }
 
