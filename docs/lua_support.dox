@@ -4,7 +4,7 @@
 
 JamPlus has built-in Lua support, provided through a minimal distribution of LuaPlus (http://luaplus.org/) using Lua 5.3.  Lua scripts may be run during the \ref operation_parsing and during the \ref operation_updating.
 
-JamPlus also utilizes Lua scripts located in <tt>bin/scripts/</tt>, but these are executed external to the Jam executable and not as part of the build process.
+JamPlus also utilizes Lua scripts located in <tt>bin/scripts/</tt>, but these are not executed as part of the build process.
 
 
 <hr>
@@ -173,6 +173,13 @@ Evaluating a rule is done with ease within the \c jam namespace:
     local inputTarget2 = '<GameAssets|source>StringTable.merge.lua'
     local outputTarget = '<GameAssets>StringTable.lua'
     jam.Depends('assets', outputTarget, { inputTarget, inputTarget2 })
+
+    # Jam:
+    C.Application helloworld : *.c *.h ;
+
+    -- Lua:
+    jam.C.Application('helloworld', { '*.c', '*.h' })
+    -- or: jam['C.Application']('helloworld', { '*.c', '*.h' })
 \endcode
 
 Note that single element data types in Lua are automatically converted to a list of strings for Jam. That means that the second parameter to <tt>jam.Depends</tt> is converted to <tt>{ outputTarget }</tt>.
