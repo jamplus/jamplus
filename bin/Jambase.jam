@@ -573,6 +573,7 @@ rule SubInclude TOKENS : FILENAME
 		jamfile.lua = $(jamfile.lua:R=$(SUBDIR)) ;
 		if [ Search $(jamfile.lua) ]
 		{
+			LuaSupport ;
 			LuaFile $(jamfile.lua) ;
 		}
 		else
@@ -890,6 +891,7 @@ JAMFILE.LUA ?= Jamfile.lua ;
 if [ Search $(JAMFILE) ] {
 	include $(JAMFILE) ;
 } else if [ Search $(JAMFILE.LUA) ] {
+	LuaSupport ;
 	LuaFile $(JAMFILE.LUA) ;
 } else {
 	TARGET ?= $(JAM_COMMAND_LINE_TARGETS[1]) ;
