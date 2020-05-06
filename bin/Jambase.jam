@@ -856,15 +856,15 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 
 	if $(NT)
 	{
-		VALID_PLATFORMS ?= win64 ; # win32 ;
+		VALID_PLATFORMS ?= win64 win32 ;
 	}
 	else if $(OS) = MACOSX
 	{
-		VALID_PLATFORMS ?= macosx64 ; # macosx32 ;
+		VALID_PLATFORMS ?= macosx64 macosx32 ;
 	}
 	else if $(UNIX)
 	{
-		VALID_PLATFORMS ?= linux64 ; # linux32 ;
+		VALID_PLATFORMS ?= linux64 linux32 ;
 	}
 
 	CONFIG ?= $(C.CONFIG) ;
