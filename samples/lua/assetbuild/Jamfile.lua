@@ -2,6 +2,7 @@ BINARY_OR_TEXT_COMMAND_LINE = 'text'
 
 ospath = require 'ospath'
 filefind = require 'filefind'
+rapidjson = require 'rapidjson'
 
 --setmetatable(_G, { __index = jam })
 
@@ -31,7 +32,7 @@ function AddToAssetsFileList(entryName, sourcePath)
     local compress = 8
     local ext = ospath.get_extension(entryName)
     if ext == ".png"  or
-        ext == ".ogg" or ext == ".caf" or ext == ".zip" then
+        ext == ".ogg" or ext == ".caf" or ext == ".zip" or ext == ".board" then
         compress = 0
     end
 
@@ -71,21 +72,48 @@ function BuildBoard(name)
     if copiedBoards[name] then return end
     copiedBoards[name] = true
 
+--[[
+    local boardFilename = COOKED_PATH .. '/boards/' .. name
+    local env = {}
+    local chunk = loadfile(boardFilename, 'bt', env)
+    if not chunk then
+        local file = io.open(boardFilename, "rb")
+        if not file then
+            error("Missing file " .. boardFilename)
+        end
+        local jsonstring = file:read('*a')
+        file:close()
+        Board = rapidjson.decode(jsonstring)
+    else
+        chunk()
+        Board = env.Board
+    end
+
+    local uuid = Board.UUID
+    if not uuid then
+        error("Missing UUID in file " .. boardFilename)
+    end
+--]]
+
     local inputTarget = '<assets|source>' .. name
     jamtarget[inputTarget].SEARCH = COOKED_PATH .. '/boards'
+
+    local inputScriptTarget = '<assets|scripts>CompileBoard.lua'
+    jamtarget[inputScriptTarget].SEARCH = COOKED_PATH
 
     local outputTarget = '<assets>' .. name
     jam.UseDepCache(outputTarget, 'platform')
     jam.MakeLocate(outputTarget, TEMP_BOARDS_PATH)
 
-    jam.Depends('assets', outputTarget, inputTarget)
+    jam.Depends('assets', outputTarget, { inputTarget, inputScriptTarget })
     jam.Clean('clean:assets', outputTarget)
     jam.UseFileCache(outputTarget)
 
-    jam.UseCommandLine(outputTarget, BINARY_OR_TEXT_COMMAND_LINE)
-    jam._CompileBoard(outputTarget, inputTarget)
+    jam.UseCommandLine(outputTarget, { 'v3a', BINARY_OR_TEXT_COMMAND_LINE })
+    jam._CompileBoard(outputTarget, { inputTarget, inputScriptTarget })
 
     AddToAssetsFileList('boards/' .. name, outputTarget)
+    --AddToAssetsFileList('boards/' .. name .. '.json', outputTarget .. '.json')
 end
 
 
@@ -115,19 +143,17 @@ end
 
 local collectedBoards = {}
 function BuildJourney()
-    for index = 0, 4 do
-        local progressionTable = _G["Progression" .. index]
-        for _, info in ipairs(progressionTable) do
-            if info.boardFileName then
-                collectedBoards[info.boardFileName:lower()] = true
-                BuildBoard(info.boardFileName)
-            end
-            if info.challenges then
-                for _, challengeInfo in ipairs(info.challenges) do
-                    if challengeInfo.boardFileName then
-                        collectedBoards[challengeInfo.boardFileName:lower()] = true
-                        BuildBoard(challengeInfo.boardFileName)
-                    end
+    local progressionTable = _G["Progression"]
+    for _, info in ipairs(progressionTable) do
+        if info.boardFileName then
+            collectedBoards[info.boardFileName:lower()] = true
+            BuildBoard(info.boardFileName)
+        end
+        if info.challenges then
+            for _, challengeInfo in ipairs(info.challenges) do
+                if challengeInfo.boardFileName then
+                    collectedBoards[challengeInfo.boardFileName:lower()] = true
+                    BuildBoard(challengeInfo.boardFileName)
                 end
             end
         end
@@ -136,13 +162,16 @@ end
 
 
 function BinaryizeLua(fileName, inputPath, outputPath, assetsFileListPath)
-    local inputTarget = '<assets!source>' .. fileName
+    --print('BinaryizeLua', fileName, inputPath, outputPath)
+    local inputTarget = '<assets!source>' .. assetsFileListPath .. fileName
     jamtarget[inputTarget].SEARCH = inputPath
-    local outputTarget = '<assets>' .. fileName
+    jamtarget[inputTarget].BINDING = fileName
+    local outputTarget = '<assets>' .. assetsFileListPath .. fileName
     jam.UseDepCache(outputTarget, 'platform')
     jamtarget[outputTarget].SOURCE_STRING = '@' .. fileName
     jamtarget[outputTarget].STRIP = '0'
     jam.MakeLocate(outputTarget, outputPath)
+    jamtarget[outputTarget].BINDING = fileName
     jam.Clean('clean:assets', outputTarget)
     jam.Depends('assets', outputTarget, inputTarget)
     jam.UseFileCache(outputTarget)
@@ -173,10 +202,50 @@ function ProcessImageDirectory(cookedPath, tempPath, options)
     local ignoreFiles = {}
 
     if Atlases then
+        local sortedAtlases = {}
         for atlasName, atlas in pairs(Atlases) do
+            sortedAtlases[#sortedAtlases + 1] = atlasName
+        end
+        table.sort(sortedAtlases)
+        for _, atlasName in ipairs(sortedAtlases) do
+            local atlas = Atlases[atlasName]
             local inputTargets = {}
+
+            local extraCommandLineString = ""
+            do
+                local extraCommandLineInformation = {}
+                if atlas.forcedDuplicates then
+                    extraCommandLineInformation[#extraCommandLineInformation + 1] = '--forcedDuplicates begin--'
+                    for _, groupList in ipairs(atlas.forcedDuplicates) do
+                        extraCommandLineInformation[#extraCommandLineInformation + 1] = '--forcedDuplicateGroup begin--'
+                        for _, filename in ipairs(groupList) do
+                            extraCommandLineInformation[#extraCommandLineInformation + 1] = filename
+                        end
+                        extraCommandLineInformation[#extraCommandLineInformation + 1] = '--forcedDuplicateGroup end--'
+                    end
+                end
+
+                extraCommandLineString = extraCommandLineString .. table.concat(extraCommandLineInformation, '\n')
+            end
+
+            local imageNames = {}
             for _, imageName in ipairs(atlas) do
-                local filename = imageName:lower() .. '.png'
+                if imageName:find('%*') then
+                    for entry in filefind.match(ospath.join(imagesPath, imageName)) do
+                        if ospath.get_extension(entry.filename) == '.png' then
+                            imageNames[#imageNames + 1] = entry.filename
+                        end
+                    end
+                else
+                    if ospath.get_extension(imageName) == '' then
+                        imageNames[#imageNames + 1] = imageName .. '.png'
+                    end
+                end
+            end
+
+            for _, imageName in ipairs(imageNames) do
+                local filename = imageName:lower()
+                imageName = ospath.remove_extension(imageName)
                 local inputTarget = '<images!source>' .. assetsFileListPath .. filename
                 jamtarget[inputTarget].BINDING = filename
                 jamtarget[inputTarget].SEARCH = imagesPath
@@ -188,6 +257,24 @@ function ProcessImageDirectory(cookedPath, tempPath, options)
             end
             table.sort(inputTargets)
 
+            local sd = atlas.sd
+            if sd then
+                local sdInputTargets = {}
+                sd = ospath.join(imagesPath, sd)
+                for _, imageName in ipairs(imageNames) do
+                    local filename = imageName:lower()
+                    local inputTarget = '<images!source:sd>' .. assetsFileListPath .. filename
+                    jamtarget[inputTarget].BINDING = filename
+                    jamtarget[inputTarget].SEARCH = sd
+                    jam.NoCare(inputTarget)
+                    sdInputTargets[#sdInputTargets + 1] = inputTarget
+                end
+                table.sort(sdInputTargets)
+                for _, inputTarget in ipairs(sdInputTargets) do
+                    inputTargets[#inputTargets + 1] = inputTarget
+                end
+            end
+
             local outputImageTarget = '<images!atlas>' .. assetsFileListPath .. atlasName:lower() .. '.png'
             local outputInfoTarget = '<images!atlas>' .. assetsFileListPath .. atlasName:lower() .. '.lua'
             local outputTargets = { outputImageTarget, outputInfoTarget }
@@ -196,13 +283,16 @@ function ProcessImageDirectory(cookedPath, tempPath, options)
             jamtarget[outputInfoTarget].BINDING = atlasName:lower() .. '.lua'
             jam.Depends('assets', outputTargets, inputTargets)
             jam.UseDepCache(outputTargets, 'platform')
-            jam.UseCommandLine(outputTargets, {
-                "v5",
+            local commandLineInformation = {
+                "v8",
                 "padding=" .. (atlas.padding or 0),
                 "maxSize=" .. (atlas.maxSize or 0),
                 "nosplit=" .. tostring(atlas.nosplit or false),
+                "premultiplyalpha=" .. tostring(atlas.premultiplyAlpha or false),
+                extraCommandLineString,
                 table.unpack(inputTargets)
-            })
+            }
+            jam.UseCommandLine(outputTargets, commandLineInformation)
             jamtarget[outputImageTarget].ATLAS_NAME = atlasName
             jamtarget[outputInfoTarget].ATLAS_NAME = atlasName
             jam._BuildAtlas(outputTargets, inputTargets)
@@ -285,10 +375,13 @@ function ProcessImageDirectory(cookedPath, tempPath, options)
             end
             processedImages[outputTarget] = true
             if imageInfo then
-                local outputAlphaTarget = '<images>' .. assetsFileListPath .. fileTitle .. '_' .. extension
-                jam.UseDepCache(outputAlphaTarget, 'platform')
-                jamtarget[outputAlphaTarget].BINDING = fileTitle .. '_' .. extension
-                jam.MakeLocate(outputAlphaTarget, tempPath)
+                local outputAlphaTarget
+                if not imageInfo.NoAlpha then
+                    outputAlphaTarget = '<images>' .. assetsFileListPath .. fileTitle .. '_' .. extension
+                    jam.UseDepCache(outputAlphaTarget, 'platform')
+                    jamtarget[outputAlphaTarget].BINDING = fileTitle .. '_' .. extension
+                    jam.MakeLocate(outputAlphaTarget, tempPath)
+                end
                 local pngnq = forcepngnq or imageInfo.pngnq or true
 
                 -- If the image is described, we can run gfxmonger on it.
@@ -357,11 +450,16 @@ function ProcessImageDirectory(cookedPath, tempPath, options)
                         jam.MakeLocate(outputInfoTarget, tempPath)
                         jam.Clean('clean:assets', outputInfoTarget)
                         jam.UseFileCache(outputInfoTarget)
-                        jam.Depends('assets', outputInfoTarget, { outputTarget, outputAlphaTarget })
+
+                        local outputTargets = { outputTarget }
+                        if outputAlphaTarget then
+                            outputTargets[#outputTargets + 1] = outputAlphaTarget
+                        end
+                        jam.Depends('assets', outputInfoTarget, outputTargets)
                         if addToFileList then
                             AddToAssetsFileList(assetsFileListPath .. fileTitle .. extension .. '.info', outputInfoTarget)
                         end
-                        jam._AnalyzeImage(outputInfoTarget, { outputTarget, outputAlphaTarget })
+                        jam._AnalyzeImage(outputInfoTarget, outputTargets)
                     else
                         jam._CopyFile(outputTarget, inputTarget)
                     end
@@ -414,19 +512,20 @@ end
 function BuildFonts()
     local fonts =
     {
-        "Arial10BoldItalics",
-        "Font10",
-        "Font14",
-        "Font18",
-        "Font26",
-        "Font120_time",
-        "FontTitle_reduced",
+        --"Arial10BoldItalics",
+        --"Font10",
+        --"Font14",
+        --"Font18",
+        --"Font26",
+        --"Font120_time",
     }
 
     local rawFontsPath = COOKED_PATH .. '/fonts/'
     local tempFontsPath = TEMP_PATH .. "/fonts/"
 
-    ProcessImageDirectory(COOKED_PATH, TEMP_PATH, { assetsFileListPath = "fonts/" })
+    --ProcessImageDirectory(COOKED_PATH, TEMP_PATH, { assetsFileListPath = "fonts/" })
+    --ProcessImageDirectory(COOKED_PATH, TEMP_PATH, { assetsFileListPath = "fonts/images/" })
+    ProcessImageDirectory(COOKED_PATH, TEMP_PATH, { assetsFileListPath = "fonts/glyphimages/" })
 
     for _, fontName in ipairs(fonts) do
         local inputTarget = '<images!source>' .. fontName .. '.txt'
@@ -442,7 +541,10 @@ function BuildFonts()
 
     local ttfFonts =
     {
-        "lemon-regular",
+        --"lemon-regular",
+        --"lemonada-wght",
+        "lemonada-regular",
+        --"lemonada-light",
     }
 
     for _, fontName in ipairs(ttfFonts) do
@@ -468,24 +570,31 @@ function ProcessLevel()
 	ProcessImageDirectoryHelper("images/level/")
 	ProcessImageDirectoryHelper("images/level/balls/")
 	ProcessImageDirectoryHelper("images/level/clouds/")
-	ProcessImageDirectoryHelper("images/level/day/")
-	ProcessImageDirectoryHelper("images/level/hud/")
-	ProcessImageDirectoryHelper("images/level/night/")
+	--ProcessImageDirectoryHelper("images/level/day/")
+	--ProcessImageDirectoryHelper("images/level/day-snow/")
+	--ProcessImageDirectoryHelper("images/level/hud/")
+	ProcessImageDirectoryHelper("images/level/hud/hd/")
+	--ProcessImageDirectoryHelper("images/level/night/")
+	ProcessImageDirectoryHelper("images/level/themes/day_01/")
+	ProcessImageDirectoryHelper("images/level/themes/day_02/")
+	ProcessImageDirectoryHelper("images/level/themes/day_03/")
+	ProcessImageDirectoryHelper("images/level/themes/day_04/")
+	ProcessImageDirectoryHelper("images/level/themes/day_05/")
+	ProcessImageDirectoryHelper("images/level/themes/day_06/")
+	ProcessImageDirectoryHelper("images/level/themes/day_07/")
+	ProcessImageDirectoryHelper("images/level/themes/day_08/")
+	ProcessImageDirectoryHelper("images/level/themes/night_01/")
 	ProcessImageDirectoryHelper("images/level/tiles_32/")
 end
 
 
-function ProcessPlayer()
-	ProcessImageDirectoryHelper("images/level/player/")
-	ProcessImageDirectoryHelper("images/level/player/blink/")
-	ProcessImageDirectoryHelper("images/level/player/doublejump/")
-	ProcessImageDirectoryHelper("images/level/player/idle/")
-	ProcessImageDirectoryHelper("images/level/player/magic/")
-	ProcessImageDirectoryHelper("images/level/player/pointjump/")
-	ProcessImageDirectoryHelper("images/level/player/throwball/")
-	ProcessImageDirectoryHelper("images/level/player/throwspear/")
-	ProcessImageDirectoryHelper("images/level/player/uncoverthrow/")
-	ProcessImageDirectoryHelper("images/level/player/uncoverthrowspear/")
+function ProcessPlayerA()
+	ProcessImageDirectoryHelper("images/level/player_a/")
+end
+
+
+function ProcessPlayerB()
+	ProcessImageDirectoryHelper("images/level/player_b/")
 end
 
 
@@ -503,18 +612,23 @@ function ProcessMenus()
     local cookedMenusPath = cookedPath .. "/images/menus/"
     local tempMenusPath = tempPath .. "/images/menus/"
 
-    ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "images/menus/" })
+    --ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "images/menus/" })
+    ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "images/menus/hd/" })
+
+    ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "images/editor/hd/" })
+
+    ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "images/menus/title/hd/" })
 
     BinaryizeLua("main.lua", cookedPath, tempPath, "")
     --	BinaryizeLua("tutorial_bubbles.lua", rawMenusPath, tempMenusPath, "images/menus/")
     BinaryizeLua("tutorial_window.lua", cookedMenusPath, tempMenusPath, "images/menus/")
     BinaryizeLua("tutorial_pointer.lua", cookedMenusPath, tempMenusPath, "images/menus/")
 
-    ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "images/menus/achievements/" })
+    --ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "map/ui/" })
+    ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "map/ui/hd/" })
 
-    ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "map/ui/" })
-
-    ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "map/opening/" })
+    --ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "map/opening/" })
+    ProcessImageDirectory(cookedPath, tempPath, { assetsFileListPath = "map/opening/hd/" })
 
     for entry in filefind.glob(cookedPath .. '/ui/*.ui.lua') do
         BinaryizeLua(ospath.remove_directory(entry.filename), cookedPath .. '/ui/', tempPath .. '/ui/', 'ui/')
@@ -525,11 +639,11 @@ end
 function ProcessMusic()
     local music =
     {
-        "Game1",
-        "Game2",
+        --"Game1",
+        --"Game2",
         "MapIntro",
-        "MapReward",
-        "Menu",
+        --"MapReward",
+        --"Menu",
     }
 
     local cookedMusicPath = COOKED_PATH .. '/music'
@@ -568,17 +682,24 @@ function ProcessSounds()
         "MistBurn",
         "MouseClick",
         "PathCompleted",
+        "PlayerJump",
+        "Results",
         "ShifterHit",
         "SplitterHit",
         "Star",
         "StartLevel",
+        "StormPowerReceived",
+        "SummonPathstormerFailed",
         "ThrowBurn",
+        "ThrowLightning",
         "TimeAlert",
         "TimeCountdown",
         "TwirlerHit",
         "WinLevel",
         "WinTrophy",
         "WrongGuess",
+        "ClearedOrFlooded",
+        "LongThunderstorm",
     }
 
     local cookedSoundsPath = COOKED_PATH .. '/sounds'
@@ -663,22 +784,68 @@ end
 
 
 function ProcessProgression()
-    local inputTarget = '<GameAssets|source>Progression.lua'
+    -- ProgressionLogic.lua
+    local inputTarget = '<GameAssets|source>ProgressionLogic.lua'
     jamtarget[inputTarget].SEARCH = COOKED_PATH
 
-    local outputTarget = '<GameAssets>Progression.lua'
+    local outputTarget = '<GameAssets>ProgressionLogic.lua'
     jam.UseDepCache(outputTarget, 'platform')
     jam.MakeLocate(outputTarget, TEMP_PATH)
 
     jam.Depends('assets', outputTarget, inputTarget)
     jam.Clean('clean:assets', outputTarget)
 
-    jam.UseCommandLine(outputTarget, BINARY_OR_TEXT_COMMAND_LINE)
+    jam.UseCommandLine(outputTarget, { BINARY_OR_TEXT_COMMAND_LINE, 'v2' })
+    jam._CompileProgressionLogic(outputTarget, inputTarget)
+
+    AddToAssetsFileList('ProgressionLogic.lua', outputTarget)
+
+    -- Progression.lua
+    local inputTarget = '<GameAssets|source>Progression.lua'
+    jamtarget[inputTarget].SEARCH = COOKED_PATH
+
+    dofile(jam_expand('@(' .. inputTarget .. ':T)')[1])
+
+    local allBoards = {}
+    local progressionTable = _G["Progression"]
+    for _, info in ipairs(progressionTable) do
+        if info.boardFileName then
+            allBoards[info.boardFileName:lower()] = true
+        end
+        if info.challenges then
+            for _, challengeInfo in ipairs(info.challenges) do
+                if challengeInfo.boardFileName then
+                    allBoards[challengeInfo.boardFileName:lower()] = true
+                end
+            end
+        end
+    end
+
+    local allBoardsSorted = {}
+    for boardFilename in pairs(allBoards) do
+        allBoardsSorted[#allBoardsSorted + 1] = boardFilename
+    end
+    table.sort(allBoardsSorted)
+
+    local inputTargets = { inputTarget }
+    for _, name in ipairs(allBoardsSorted) do
+        name = name:lower() .. '.board'
+
+        local grist = '<assets|source>' .. name
+        inputTargets[#inputTargets + 1] = grist
+    end
+
+    local outputTarget = '<GameAssets>Progression.lua'
+    jam.UseDepCache(outputTarget, 'platform')
+    jam.MakeLocate(outputTarget, TEMP_PATH)
+
+    jam.Depends('assets', outputTarget, inputTargets)
+    jam.Clean('clean:assets', outputTarget)
+
+    jam.UseCommandLine(outputTarget, { BINARY_OR_TEXT_COMMAND_LINE, 'v3b' })
     jam._CompileProgression(outputTarget, inputTarget)
 
     AddToAssetsFileList('Progression.lua', outputTarget)
-
-    dofile(jam_expand('@(' .. inputTarget .. ':T)')[1])
 
     BuildJourney()
 
@@ -703,7 +870,7 @@ function ProcessProgression()
         jam.Depends('assets', outputTarget, inputTargets)
         jam.Clean('clean:assets', outputTarget)
 
-        jam.UseCommandLine(outputTarget, inputTargets)
+        jam.UseCommandLine(outputTarget, { 'v8c', table.unpack(inputTargets) })
         jam._DumpBoardsInfo(outputTarget, inputTargets)
 
         AddToAssetsFileList('BoardsInfo.lua', outputTarget)
@@ -719,17 +886,59 @@ function ProcessMap()
     local inputTarget = '<GameAssets>levelmap.svg'
     jamtarget[inputTarget].SEARCH = COOKED_PATH .. '/map'
 
+    local inputScriptTarget = '<GameAssets>CompileLevelMap.lua'
+    jamtarget[inputScriptTarget].SEARCH = COOKED_PATH
+
     local outputTarget = '<GameAssets>levelmap.lua'
     jam.UseDepCache(outputTarget, 'platform')
     jam.MakeLocate(outputTarget, TEMP_PATH .. '/map')
 
-    jam.Depends('assets', outputTarget, inputTarget)
+    jam.Depends('assets', outputTarget, { inputTarget, inputScriptTarget })
     jam.Clean('clean:assets', outputTarget)
 
-    jam.UseCommandLine(outputTarget, BINARY_OR_TEXT_COMMAND_LINE)
-    jam._CompileLevelMap(outputTarget, inputTarget)
+    jam.UseCommandLine(outputTarget, { BINARY_OR_TEXT_COMMAND_LINE, "v6" })
+    jam._CompileLevelMap(outputTarget, { inputTarget, inputScriptTarget })
 
     AddToAssetsFileList('map/levelmap.lua', outputTarget)
+
+    ----------------
+    local NEEDS_LEVEL_MAP = false
+    if NEEDS_LEVEL_MAP then
+        local inputGameTarget = '<GameAssets>levelmap-game.svg'
+        jamtarget[inputGameTarget].SEARCH = COOKED_PATH .. '/map'
+
+        local outputGameTarget = '<GameAssets|output>levelmap-game.svg'
+        jam.MakeLocate(outputGameTarget, TEMP_PATH .. '/map')
+        jam.Depends('assets', outputGameTarget, inputGameTarget)
+        jam.Clean('clean:assets', outputGameTarget)
+        jam._CopyFile(outputGameTarget, inputGameTarget)
+
+        AddToAssetsFileList('map/levelmap-game.svg', outputGameTarget)
+    end
+
+    ----------------
+    local inputPathsTarget = '<GameAssets>levelmap-paths.svg'
+    jamtarget[inputPathsTarget].SEARCH = COOKED_PATH .. '/map'
+
+    local outputPathsTarget = '<GameAssets|output>levelmap-paths.svg'
+    jam.MakeLocate(outputPathsTarget, TEMP_PATH .. '/map')
+    jam.Depends('assets', outputPathsTarget, inputPathsTarget)
+    jam.Clean('clean:assets', outputPathsTarget)
+    jam._CopyFile(outputPathsTarget, inputPathsTarget)
+
+    AddToAssetsFileList('map/levelmap-paths.svg', outputPathsTarget)
+
+    ----------------
+    local inputAnimationsTarget = '<GameAssets>animations.svg'
+    jamtarget[inputAnimationsTarget].SEARCH = COOKED_PATH .. '/map'
+
+    local outputAnimationsTarget = '<GameAssets|output>animations.svg'
+    jam.MakeLocate(outputAnimationsTarget, TEMP_PATH .. '/map')
+    jam.Depends('assets', outputAnimationsTarget, inputAnimationsTarget)
+    jam.Clean('clean:assets', outputAnimationsTarget)
+    jam._CopyFile(outputAnimationsTarget, inputAnimationsTarget)
+
+    AddToAssetsFileList('map/animations.svg', outputAnimationsTarget)
 end
 
 
@@ -752,42 +961,12 @@ end
 function ProcessMapArchive()
     local mapPath = 'map/rewards/'
 
-    local tempMapGeneratedPath = TEMP_PATH .. "/map/generated/"
+    ProcessImageDirectoryHelper("map/background/")
+    ProcessImageDirectoryHelper("map/clouds/")
+    --ProcessImageDirectoryHelper("map/rewards/")
+    ProcessImageDirectoryHelper("map/rewards/hd/")
 
-    local wipeLowerLeftTarget = "<images!source>map/wipe_lower_left.png"
-    local wipeLowerRightTarget = "<images!source>map/wipe_lower_right.png"
-    local wipeUpperLeftTarget = "<images!source>map/wipe_upper_left.png"
-    local wipeUpperRightTarget = "<images!source>map/wipe_upper_right.png"
-    jamtarget[wipeLowerLeftTarget].SEARCH = COOKED_PATH
-    jamtarget[wipeLowerRightTarget].SEARCH = COOKED_PATH
-    jamtarget[wipeUpperLeftTarget].SEARCH = COOKED_PATH
-    jamtarget[wipeUpperRightTarget].SEARCH = COOKED_PATH
-
-    local mapWipeTarget = '<images>map/mapwipe.dat'
-    jam.MakeLocate(mapWipeTarget, tempMapGeneratedPath)
-
-    --local inputTargets = { mapColorTarget, mapNoColorTarget, mapSimpleTarget }
-    local inputTargets = { wipeLowerLeftTarget, wipeLowerRightTarget, wipeUpperLeftTarget, wipeUpperRightTarget }
-    local outputTargets = { mapWipeTarget }
-
-    jam.Depends('assets', outputTargets, inputTargets)
-    jam.UseDepCache(outputTargets, 'platform')
-    jam.UseCommandLine(outputTargets, { 'v1' })
-    jam._GenerateWipe(outputTargets, inputTargets)
-    jam.Clean('clean:assets', outputTargets)
-
-    ProcessImageDirectoryHelper("map/rewards/")
-    --ProcessImageDirectoryHelper("map/")
-
-	local mapColorFileName = "map_color"
-	AddToMapFileList('map/' .. mapColorFileName .. '.png', COOKED_PATH .. '/map/' .. mapColorFileName .. '.png')
-	local mapNoColorFileName = "map_no_color"
-	AddToMapFileList('map/' .. mapNoColorFileName .. '.png', COOKED_PATH .. '/map/' .. mapNoColorFileName .. '.png')
-	local mapSimpleFileName = "map_simple"
-	AddToMapFileList('map/' .. mapSimpleFileName .. '.jpg', COOKED_PATH .. '/map/' .. mapSimpleFileName .. '.jpg')
-
-	AddToMapFileList('map/mappoints.lua', COOKED_PATH .. '/map/MapPoints.lua')
-   AddToMapFileList('map/mapwipe.dat', tempMapGeneratedPath .. '/map/mapwipe.dat')
+    ProcessMap()
 end
 
 
@@ -802,7 +981,7 @@ jam_parse[[
 
 
 actions _CompileBoard {
-    $(LUA_EXE:C) $(GameAssets)/CompileBoard.lua $(2:C) $(1:C)
+    $(LUA_EXE:C) $(GameAssets)/CompileBoard.lua $(2[1]:C) $(1:C)
 }
 
 
@@ -816,14 +995,15 @@ actions _CompileProgression {
 }
 
 
+actions _CompileProgressionLogic {
+    $(LUA_EXE:C) $(GameAssets)/CompileProgressionLogic.lua $(2:C) $(1:C)
+}
+
+
 actions _DumpBoardsInfo {
     $(LUA_EXE:C) $(GameAssets)/DumpBoardsInfo.lua ^^^($(2[2-]:J=$(NEWLINE))) $(1:C)
 }
 
-
-actions _GenerateWipe {
-    $(LUA_EXE:C) $(GameAssets)/GenerateWipe.lua "$(1[1]:D)/" $(2[1]:CD)/
-}
 
 
 if $(NT) {
@@ -839,7 +1019,7 @@ if $(NT) {
 if $(NT) {
 	BIN_PATH = $(GameAssets)/../bin/win32 ;
 } else {
-	BIN_PATH = $(GameAssets)/../bin/macosx32 ;
+	BIN_PATH = $(GameAssets)/../bin/macosx64 ;
 }
 
 
@@ -872,7 +1052,7 @@ actions _CompileLua {
 }
 
 actions _CompileLevelMap {
-    $(LUA_EXE:C) $(GameAssets)/CompileLevelMap.lua $(2:C) $(1:C)
+    $(LUA_EXE:C) $(GameAssets)/CompileLevelMap.lua $(2[1]:C) $(1:C)
 }
 
 actions _BuildAtlas {
@@ -886,7 +1066,8 @@ CompileStringTable()
 ProcessProgression()
 BuildFonts()
 ProcessLevel()
-ProcessPlayer()
+ProcessPlayerA()
+ProcessPlayerB()
 ProcessStory()
 ProcessMenus()
 ProcessSounds()
