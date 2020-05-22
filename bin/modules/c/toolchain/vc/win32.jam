@@ -190,14 +190,14 @@ rule C.Toolchain.vc.win32.Detect COMPILER {
     MSSDK_STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_STDHDRS) ;
     MSSDK_LINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
 
-    C.AR on $(C.COMPILER_SUITE_SYMBOL)      ?= $(MSVCBIN)lib ;
-    C.CC on $(C.COMPILER_SUITE_SYMBOL)      ?= $(MSVCBIN)cl ;
-    C.C++ on $(C.COMPILER_SUITE_SYMBOL)     ?= $(MSVCBIN)cl ;
-    C.LINK on $(C.COMPILER_SUITE_SYMBOL)    ?= $(MSVCBIN)link ;
-    C.MT on $(C.COMPILER_SUITE_SYMBOL)      ?= $(MSSDK_BINDIR)/mt ;
-    C.RC on $(C.COMPILER_SUITE_SYMBOL)      ?= $(RC) ;
-    C.RC_NOLOGO on $(C.COMPILER_SUITE_SYMBOL) ?= $(rc_nologo) ;
-    C.STDHDRS on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_STDHDRS) ;
+    C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(MSVCBIN)lib ;
+    C.CC on $(C.COMPILER_SUITE_SYMBOL)          = $(MSVCBIN)cl ;
+    C.C++ on $(C.COMPILER_SUITE_SYMBOL)         = $(MSVCBIN)cl ;
+    C.LINK on $(C.COMPILER_SUITE_SYMBOL)        = $(MSVCBIN)link ;
+    C.MT on $(C.COMPILER_SUITE_SYMBOL)          = $(MSSDK_BINDIR)/mt ;
+    C.RC on $(C.COMPILER_SUITE_SYMBOL)          ?= $(RC) ;
+    C.RC_NOLOGO on $(C.COMPILER_SUITE_SYMBOL)   ?= $(rc_nologo) ;
+    C.STDHDRS on $(C.COMPILER_SUITE_SYMBOL)     = $(MSSDK_STDHDRS) ;
     C.STDLINKDIRECTORIES on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_LINKDIRECTORIES) ;
 
     C._ApplicationFromObjects_CleanIntermediates on $(C.COMPILER_SUITE_SYMBOL) = C.vc._ApplicationFromObjects_CleanIntermediates ;
