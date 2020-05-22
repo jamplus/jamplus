@@ -860,7 +860,7 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 	}
 	else if $(OS) = MACOSX
 	{
-		VALID_PLATFORMS ?= macosx64 macosx32 ;
+		VALID_PLATFORMS ?= macosx64 ; # macosx32 ;
 	}
 	else if $(UNIX)
 	{
