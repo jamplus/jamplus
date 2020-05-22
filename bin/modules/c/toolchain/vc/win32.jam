@@ -50,6 +50,7 @@ rule C.Toolchain.vc.win32.Detect COMPILER {
             ;
             MSSDK_LINKDIRECTORIES =
                 $(MSVCNT)/lib/x86
+                $(MSVCNT)/lib/onecore/x86
                 $(MSSDK)/lib/$(MSSDK_VERSION)/ucrt/x86
                 $(MSSDK)/lib/$(MSSDK_VERSION)/um/x86
             ;
