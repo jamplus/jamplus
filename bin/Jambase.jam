@@ -21,7 +21,7 @@ NEWLINE = "
 " ;
 DOLLAR = $ ;
 
-JAMBASE_VERSION = "JamPlus 3.0 Beta (2017.02.03)" ;
+JAMBASE_VERSION = "JamPlus 3.0 (2020.06.01)" ;
 
 #
 # OS specific variable settings
