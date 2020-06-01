@@ -83,7 +83,14 @@ Depends clean : clean:all ;
 # Rules
 #
 
-JAM_MODULES_PATH ?= @($(JAM_PROCESS_PATH)/../modules:R=) ;
+if $(JAMBASE_ROOT_PATH)
+{
+	JAM_MODULES_PATH ?= @($(JAMBASE_ROOT_PATH)/modules:R=) ;
+}
+else
+{
+	JAM_MODULES_PATH ?= @($(JAM_PROCESS_PATH)/../modules:R=) ;
+}
 
 rule IncludeModule MODULE_NAME : OPTIONS
 {
