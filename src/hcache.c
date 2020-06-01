@@ -213,7 +213,7 @@ skip_spaces( BUFFER *buff )
  * returned value is as returned by newstr(), so it need not be freed.
  */
 const char *
-read_string( BUFFER* buff )
+_hcache_read_string( BUFFER* buff )
 {
 	int ch, i = 0;
 	char filename[ MAXJPATH ];
@@ -243,7 +243,7 @@ read_string( BUFFER* buff )
 /*
  * Read a md5sum.
  */
-void read_md5sum( BUFFER *buff, MD5SUM sum )
+void _hcache_read_md5sum( BUFFER *buff, MD5SUM sum )
 {
 	int ch, i, val;
 	memset(sum, 0, sizeof(*sum));
@@ -272,7 +272,7 @@ void read_md5sum( BUFFER *buff, MD5SUM sum )
 /*
  * Read a md5sum.
  */
-int read_md5sum_string( const char* str, MD5SUM sum)
+int _hcache_read_md5sum_string( const char* str, MD5SUM sum)
 {
 	int ch, i, val;
 	memset(sum, 0, sizeof(*sum));
@@ -402,7 +402,7 @@ hcache_readfile(HCACHEFILE *file)
 	buffer_ptr( &buff )[buffsize] = 0;
 	fclose( f );
 
-	version = read_string( &buff );
+	version = _hcache_read_string( &buff );
 	ch = buffer_getchar( &buff );
 	if (!version || strcmp( version, CACHE_FILE_VERSION ) || ch != '\n' ) {
 		goto bail;
@@ -414,7 +414,7 @@ hcache_readfile(HCACHEFILE *file)
 
 		c = &cachedata;
 
-		c->boundname = read_string( &buff );
+		c->boundname = _hcache_read_string( &buff );
 		if( !c->boundname ) /* Test for eof */
 			break;
 
@@ -422,7 +422,7 @@ hcache_readfile(HCACHEFILE *file)
 		c->age = read_int( &buff ) + 1; /* we're getting older... */
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-		read_md5sum( &buff, c->rulemd5sum );
+		_hcache_read_md5sum( &buff, c->rulemd5sum );
 		memcpy( &c->currentrulemd5sum, &c->rulemd5sum, MD5_SUMSIZE );
 #endif
 
@@ -432,7 +432,7 @@ hcache_readfile(HCACHEFILE *file)
 		/* headers */
 		count = read_int( &buff );
 		for( l = 0, i = 0; i < count; ++i ) {
-			const char *s = read_string( &buff );
+			const char *s = _hcache_read_string( &buff );
 			if( !s )
 				goto bail;
 			l = list_append( l, s, 0 );
@@ -442,7 +442,7 @@ hcache_readfile(HCACHEFILE *file)
 		/* hdrscan */
 		count = read_int( &buff );
 		for( l = 0, i = 0; i < count; ++i ) {
-			const char *s = read_string( &buff );
+			const char *s = _hcache_read_string( &buff );
 			if( !s )
 				goto bail;
 			l = list_append( l, s, 0 );
@@ -700,7 +700,7 @@ static void checksums_readfile() {
 	buffer_ptr( &buff )[buffsize] = 0;
 	fclose( f );
 
-	version = read_string( &buff );
+	version = _hcache_read_string( &buff );
 	ch = buffer_getchar( &buff );
 	if ( !version  ||  strcmp( version, CHECKSUM_FILE_VERSION ) || ch != '\n' ) {
 		goto bail;
@@ -713,7 +713,7 @@ static void checksums_readfile() {
 		CHECKSUMDATA	checksumdata, *c = &checksumdata;
 		int ch;
 
-		c->boundname = read_string( &buff );
+		c->boundname = _hcache_read_string( &buff );
 		if ( !c->boundname ) { /* Test for eof */
 			break;
 		}
@@ -721,7 +721,7 @@ static void checksums_readfile() {
 		c->age = read_int( &buff ) + 1; /* we're getting older... */
 
 		c->mtime = read_int( &buff );
-		read_md5sum( &buff, c->contentmd5sum );
+		_hcache_read_md5sum( &buff, c->contentmd5sum );
 		c->contentmd5sum_changed = 0;
 		c->contentmd5sum_calculated = 0;
 
@@ -1252,7 +1252,7 @@ static int filecache_findlink(const char *cachedname, MD5SUM blobmd5sum)
 	buffer_addstring(&wildbuff, "-*.link", 7);
 	buffer_addchar(&wildbuff, 0);
 
-	if (findfile(buffer_ptr(&wildbuff), &linknamebuff))
+	if (jfindfile(buffer_ptr(&wildbuff), &linknamebuff))
 	{
 		const char* dashPtr = strrchr(buffer_ptr(&linknamebuff), '-');
 		const char* slashPtr = strrchr(buffer_ptr(&linknamebuff), '/');
@@ -1262,7 +1262,7 @@ static int filecache_findlink(const char *cachedname, MD5SUM blobmd5sum)
 			slashPtr = backslashPtr;
 #endif
 		if (dashPtr > slashPtr)
-			haveblobmd5sum = read_md5sum_string(dashPtr + 1, blobmd5sum);
+			haveblobmd5sum = _hcache_read_md5sum_string(dashPtr + 1, blobmd5sum);
 	}
 
 	buffer_free(&linknamebuff);

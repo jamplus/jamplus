@@ -623,7 +623,7 @@ int copyfile(const char *dst, const char *src, MD5SUM* md5sum)
     return 1;
 }
 
-int findfile(const char* wildcard, BUFFER* foundfilebuff)
+int jfindfile(const char* wildcard, BUFFER* foundfilebuff)
 {
     HANDLE handle;
     WIN32_FIND_DATA fd;

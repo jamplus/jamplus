@@ -803,7 +803,7 @@ static int wildmatch( const char* pattern, const char *string, int caseSensitive
 }
 
 
-int findfile(const char* wildcard, BUFFER* foundfilebuff)
+int jfindfile(const char* wildcard, BUFFER* foundfilebuff)
 {
 	DIR* dirp;
 	struct dirent* dp;

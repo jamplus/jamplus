@@ -20,10 +20,10 @@
 # include "newstr.h"
 
 /*
- * BINDING - all known files
+ * JBINDING - all known files
  */
 
-typedef struct _binding BINDING;
+typedef struct _binding JBINDING;
 
 struct _binding {
 	const char	*name;
@@ -70,7 +70,7 @@ timestamp(
 	int      force )
 {
 	PATHNAME f1, f2;
-	BINDING	binding, *b = &binding;
+	JBINDING binding, *b = &binding;
 	char buf[ MAXJPATH ];
 
 # ifdef DOWNSHIFT_PATHS
@@ -84,7 +84,7 @@ timestamp(
 # endif 
 
 	if( !bindhash )
-	    bindhash = hashinit( sizeof( BINDING ), "bindings" );
+	    bindhash = hashinit( sizeof( JBINDING ), "bindings" );
 
 	/* Quick path - is it there? */
 
@@ -113,7 +113,7 @@ timestamp(
 	/* Scan directory if not already done so */
 
 	{
-	    BINDING binding, *b = &binding;
+	    JBINDING binding, *b = &binding;
 
 	    f2 = f1;
 	    f2.f_grist.len = 0;
@@ -158,7 +158,7 @@ timestamp(
 		if( !( b->flags & BIND_SCANNED ) )
 		{
 			/* verify the need to scan it by checking if the parent directory has been read */
-			BINDING	binding2, *b2 = &binding2;
+			JBINDING	binding2, *b2 = &binding2;
 
 			if ( buf[0]  &&  buf[0] != '.'  &&  buf[1] != '.' )
 			{
@@ -224,7 +224,7 @@ timestamp(
 			if( !found  ||  !( b->flags & BIND_SCANNED ) )
 			{
 				/* Verify the need to scan it by checking if the parent directory has been read. */
-				BINDING	binding2, *b2 = &binding2;
+				JBINDING	binding2, *b2 = &binding2;
 
 				/* There is no point in looking for a parent for an empty directory (the current */
 				/* working directory or a ".." directory.  Neither have a parent. */
@@ -368,7 +368,7 @@ timestamp(
 
 	if( f1.f_member.len )
 	{
-	    BINDING binding, *b = &binding;
+	    JBINDING binding, *b = &binding;
 
 	    f2 = f1;
 	    f2.f_grist.len = 0;
@@ -418,7 +418,7 @@ time_enter(
 	time_t		time )
 #endif
 {
-	BINDING	binding, *b = &binding;
+	JBINDING	binding, *b = &binding;
 	struct hash *bindhash = (struct hash *)closure;
 
 # ifdef DOWNSHIFT_PATHS

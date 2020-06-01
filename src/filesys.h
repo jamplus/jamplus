@@ -36,7 +36,7 @@ int file_pclose(FILE *file);
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 int copyfile(const char *dstin, const char *src, MD5SUM* md5sum);
-int findfile(const char* wildcard, BUFFER* foundfilebuff);
+int jfindfile(const char* wildcard, BUFFER* foundfilebuff);
 const char *md5tostring(MD5SUM sum);
 void md5file(const char *filename, MD5SUM sum);
 #endif

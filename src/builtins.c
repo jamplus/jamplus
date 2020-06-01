@@ -654,7 +654,7 @@ builtin_match(
  * builtin_subst() - Lua-like gsub rule, regexp substitution
  */
 
-extern int str_gsub (BUFFER *buff, const char *src, const char *p, const char *repl, int max_s);
+extern int j_str_gsub (BUFFER *buff, const char *src, const char *p, const char *repl, int max_s);
 
 LIST *
 builtin_subst(
@@ -680,7 +680,7 @@ builtin_subst(
 	{
 		BUFFER buff;
 		buffer_init( &buff );
-		str_gsub (&buff, list_value(liststring), patternStr, replStr, n);
+		j_str_gsub (&buff, list_value(liststring), patternStr, replStr, n);
 		result = list_append( result, buffer_ptr( &buff ), 0 );
 		buffer_free( &buff );
 	}

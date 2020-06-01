@@ -8,17 +8,17 @@
 #define uchar(c)        ((unsigned char)(c))
 
 /*
-@@ LUA_MAXCAPTURES is the maximum number of captures that a pattern
+@@ JMAXCAPTURES is the maximum number of captures that a pattern
 @* can do during pattern-matching.
 ** CHANGE it if you need more captures. This limit is arbitrary.
 */
-#define LUA_MAXCAPTURES		32
+#define JMAXCAPTURES		32
 
 /*
-@@ LUA_QL describes how error messages quote program elements.
+@@ J_QL describes how error messages quote program elements.
 ** CHANGE it if you want a different appearance.
 */
-#define LUA_QL(x)	"'" x "'"
+#define J_QL(x)	"'" x "'"
 
 /*
 ** {======================================================
@@ -27,59 +27,59 @@
 */
 
 
-#define CAP_UNFINISHED	(-1)
-#define CAP_POSITION	(-2)
+#define JCAP_UNFINISHED	(-1)
+#define JCAP_POSITION	(-2)
 
-typedef struct MatchState {
+typedef struct JMatchState {
   const char *src_init;  /* init of source string */
   const char *src_end;  /* end (`\0') of source string */
   int level;  /* total number of captures (finished or unfinished) */
   struct {
     const char *init;
     ptrdiff_t len;
-  } capture[LUA_MAXCAPTURES];
+  } capture[JMAXCAPTURES];
   BUFFER* buff;
-} MatchState;
+} JMatchState;
 
 
 #define L_ESC		'%'
 #define SPECIALS	"^$*+?.([%-"
 
 
-static int gsub_error (const char *fmt) {
+static int j_gsub_error (const char *fmt) {
   printf("%s\n", fmt);
   exit(1);
   return 0;
 }
 
-static int check_capture (MatchState *ms, int l) {
+static int j_check_capture (JMatchState *ms, int l) {
   l -= '1';
-  if (l < 0 || l >= ms->level || ms->capture[l].len == CAP_UNFINISHED)
-    return gsub_error("invalid capture index");
+  if (l < 0 || l >= ms->level || ms->capture[l].len == JCAP_UNFINISHED)
+    return j_gsub_error("invalid capture index");
   return l;
 }
 
 
-static int capture_to_close (MatchState *ms) {
+static int j_capture_to_close (JMatchState *ms) {
   int level = ms->level;
   for (level--; level>=0; level--)
-    if (ms->capture[level].len == CAP_UNFINISHED) return level;
-  return gsub_error("invalid pattern capture");
+    if (ms->capture[level].len == JCAP_UNFINISHED) return level;
+  return j_gsub_error("invalid pattern capture");
 }
 
 
-static const char *classend (MatchState *ms, const char *p) {
+static const char *j_classend (JMatchState *ms, const char *p) {
   switch (*p++) {
     case L_ESC: {
       if (*p == '\0')
-        gsub_error("malformed pattern (ends with " LUA_QL("%%") ")");
+        j_gsub_error("malformed pattern (ends with " J_QL("%%") ")");
       return p+1;
     }
     case '[': {
       if (*p == '^') p++;
       do {  /* look for a `]' */
         if (*p == '\0')
-          gsub_error("malformed pattern (missing " LUA_QL("]") ")");
+          j_gsub_error("malformed pattern (missing " J_QL("]") ")");
         if (*(p++) == L_ESC && *p != '\0')
           p++;  /* skip escapes (e.g. `%]') */
       } while (*p != ']');
@@ -92,7 +92,7 @@ static const char *classend (MatchState *ms, const char *p) {
 }
 
 
-static int match_class (int c, int cl) {
+static int j_match_class (int c, int cl) {
   int res;
   switch (tolower(cl)) {
     case 'a' : res = isalpha(c); break;
@@ -111,7 +111,7 @@ static int match_class (int c, int cl) {
 }
 
 
-static int matchbracketclass (int c, const char *p, const char *ec) {
+static int j_matchbracketclass (int c, const char *p, const char *ec) {
   int sig = 1;
   if (*(p+1) == '^') {
     sig = 0;
@@ -120,7 +120,7 @@ static int matchbracketclass (int c, const char *p, const char *ec) {
   while (++p < ec) {
     if (*p == L_ESC) {
       p++;
-      if (match_class(c, uchar(*p)))
+      if (j_match_class(c, uchar(*p)))
         return sig;
     }
     else if ((*(p+1) == '-') && (p+2 < ec)) {
@@ -134,23 +134,23 @@ static int matchbracketclass (int c, const char *p, const char *ec) {
 }
 
 
-static int singlematch (int c, const char *p, const char *ep) {
+static int j_singlematch (int c, const char *p, const char *ep) {
   switch (*p) {
     case '.': return 1;  /* matches any char */
-    case L_ESC: return match_class(c, uchar(*(p+1)));
-    case '[': return matchbracketclass(c, p, ep-1);
+    case L_ESC: return j_match_class(c, uchar(*(p+1)));
+    case '[': return j_matchbracketclass(c, p, ep-1);
     default:  return (uchar(*p) == c);
   }
 }
 
 
-static const char *match (MatchState *ms, const char *s, const char *p);
+static const char *j_match (JMatchState *ms, const char *s, const char *p);
 
 
-static const char *matchbalance (MatchState *ms, const char *s,
+static const char *j_matchbalance (JMatchState *ms, const char *s,
                                    const char *p) {
   if (*p == 0 || *(p+1) == 0)
-    gsub_error("unbalanced pattern");
+    j_gsub_error("unbalanced pattern");
   if (*s != *p) return NULL;
   else {
     int b = *p;
@@ -167,62 +167,62 @@ static const char *matchbalance (MatchState *ms, const char *s,
 }
 
 
-static const char *max_expand (MatchState *ms, const char *s,
+static const char *j_max_expand (JMatchState *ms, const char *s,
                                  const char *p, const char *ep) {
   ptrdiff_t i = 0;  /* counts maximum expand for item */
-  while ((s+i)<ms->src_end && singlematch(uchar(*(s+i)), p, ep))
+  while ((s+i)<ms->src_end && j_singlematch(uchar(*(s+i)), p, ep))
     i++;
-  /* keeps trying to match with the maximum repetitions */
+  /* keeps trying to j_match with the maximum repetitions */
   while (i>=0) {
-    const char *res = match(ms, (s+i), ep+1);
+    const char *res = j_match(ms, (s+i), ep+1);
     if (res) return res;
-    i--;  /* else didn't match; reduce 1 repetition to try again */
+    i--;  /* else didn't j_match; reduce 1 repetition to try again */
   }
   return NULL;
 }
 
 
-static const char *min_expand (MatchState *ms, const char *s,
+static const char *j_min_expand (JMatchState *ms, const char *s,
                                  const char *p, const char *ep) {
   for (;;) {
-    const char *res = match(ms, s, ep+1);
+    const char *res = j_match(ms, s, ep+1);
     if (res != NULL)
       return res;
-    else if (s<ms->src_end && singlematch(uchar(*s), p, ep))
+    else if (s<ms->src_end && j_singlematch(uchar(*s), p, ep))
       s++;  /* try with one more repetition */
     else return NULL;
   }
 }
 
 
-static const char *start_capture (MatchState *ms, const char *s,
+static const char *j_start_capture (JMatchState *ms, const char *s,
                                     const char *p, int what) {
   const char *res;
   int level = ms->level;
-  if (level >= LUA_MAXCAPTURES) gsub_error("too many captures");
+  if (level >= JMAXCAPTURES) j_gsub_error("too many captures");
   ms->capture[level].init = s;
   ms->capture[level].len = what;
   ms->level = level+1;
-  if ((res=match(ms, s, p)) == NULL)  /* match failed? */
+  if ((res=j_match(ms, s, p)) == NULL)  /* j_match failed? */
     ms->level--;  /* undo capture */
   return res;
 }
 
 
-static const char *end_capture (MatchState *ms, const char *s,
+static const char *j_end_capture (JMatchState *ms, const char *s,
                                   const char *p) {
-  int l = capture_to_close(ms);
+  int l = j_capture_to_close(ms);
   const char *res;
   ms->capture[l].len = s - ms->capture[l].init;  /* close capture */
-  if ((res = match(ms, s, p)) == NULL)  /* match failed? */
-    ms->capture[l].len = CAP_UNFINISHED;  /* undo capture */
+  if ((res = j_match(ms, s, p)) == NULL)  /* j_match failed? */
+    ms->capture[l].len = JCAP_UNFINISHED;  /* undo capture */
   return res;
 }
 
 
-static const char *match_capture (MatchState *ms, const char *s, int l) {
+static const char *j_match_capture (JMatchState *ms, const char *s, int l) {
   size_t len;
-  l = check_capture(ms, l);
+  l = j_check_capture(ms, l);
   len = ms->capture[l].len;
   if ((size_t)(ms->src_end-s) >= len &&
       memcmp(ms->capture[l].init, s, len) == 0)
@@ -231,49 +231,49 @@ static const char *match_capture (MatchState *ms, const char *s, int l) {
 }
 
 
-static const char *match (MatchState *ms, const char *s, const char *p) {
+static const char *j_match (JMatchState *ms, const char *s, const char *p) {
   init: /* using goto's to optimize tail recursion */
   switch (*p) {
     case '(': {  /* start capture */
       if (*(p+1) == ')')  /* position capture? */
-        return start_capture(ms, s, p+2, CAP_POSITION);
+        return j_start_capture(ms, s, p+2, JCAP_POSITION);
       else
-        return start_capture(ms, s, p+1, CAP_UNFINISHED);
+        return j_start_capture(ms, s, p+1, JCAP_UNFINISHED);
     }
     case ')': {  /* end capture */
-      return end_capture(ms, s, p+1);
+      return j_end_capture(ms, s, p+1);
     }
     case L_ESC: {
       switch (*(p+1)) {
         case 'b': {  /* balanced string? */
-          s = matchbalance(ms, s, p+2);
+          s = j_matchbalance(ms, s, p+2);
           if (s == NULL) return NULL;
-          p+=4; goto init;  /* else return match(ms, s, p+4); */
+          p+=4; goto init;  /* else return j_match(ms, s, p+4); */
         }
         case 'f': {  /* frontier? */
           const char *ep; char previous;
           p += 2;
           if (*p != '[')
-            gsub_error("missing " LUA_QL("[") " after "
-                               LUA_QL("%%f") " in pattern");
-          ep = classend(ms, p);  /* points to what is next */
+            j_gsub_error("missing " J_QL("[") " after "
+                               J_QL("%%f") " in pattern");
+          ep = j_classend(ms, p);  /* points to what is next */
           previous = (s == ms->src_init) ? '\0' : *(s-1);
-          if (matchbracketclass(uchar(previous), p, ep-1) ||
-             !matchbracketclass(uchar(*s), p, ep-1)) return NULL;
-          p=ep; goto init;  /* else return match(ms, s, ep); */
+          if (j_matchbracketclass(uchar(previous), p, ep-1) ||
+             !j_matchbracketclass(uchar(*s), p, ep-1)) return NULL;
+          p=ep; goto init;  /* else return j_match(ms, s, ep); */
         }
         default: {
           if (isdigit(uchar(*(p+1)))) {  /* capture results (%0-%9)? */
-            s = match_capture(ms, s, uchar(*(p+1)));
+            s = j_match_capture(ms, s, uchar(*(p+1)));
             if (s == NULL) return NULL;
-            p+=2; goto init;  /* else return match(ms, s, p+2) */
+            p+=2; goto init;  /* else return j_match(ms, s, p+2) */
           }
           goto dflt;  /* case default */
         }
       }
     }
     case '\0': {  /* end of pattern */
-      return s;  /* match succeeded */
+      return s;  /* j_match succeeded */
     }
     case '$': {
       if (*(p+1) == '\0')  /* is the `$' the last char in pattern? */
@@ -281,27 +281,27 @@ static const char *match (MatchState *ms, const char *s, const char *p) {
       else goto dflt;
     }
     default: dflt: {  /* it is a pattern item */
-      const char *ep = classend(ms, p);  /* points to what is next */
-      int m = s<ms->src_end && singlematch(uchar(*s), p, ep);
+      const char *ep = j_classend(ms, p);  /* points to what is next */
+      int m = s<ms->src_end && j_singlematch(uchar(*s), p, ep);
       switch (*ep) {
         case '?': {  /* optional */
           const char *res;
-          if (m && ((res=match(ms, s+1, ep+1)) != NULL))
+          if (m && ((res=j_match(ms, s+1, ep+1)) != NULL))
             return res;
-          p=ep+1; goto init;  /* else return match(ms, s, ep+1); */
+          p=ep+1; goto init;  /* else return j_match(ms, s, ep+1); */
         }
         case '*': {  /* 0 or more repetitions */
-          return max_expand(ms, s, p, ep);
+          return j_max_expand(ms, s, p, ep);
         }
         case '+': {  /* 1 or more repetitions */
-          return (m ? max_expand(ms, s+1, p, ep) : NULL);
+          return (m ? j_max_expand(ms, s+1, p, ep) : NULL);
         }
         case '-': {  /* 0 or more repetitions (minimum) */
-          return min_expand(ms, s, p, ep);
+          return j_min_expand(ms, s, p, ep);
         }
         default: {
           if (!m) return NULL;
-          s++; p=ep; goto init;  /* else return match(ms, s+1, ep); */
+          s++; p=ep; goto init;  /* else return j_match(ms, s+1, ep); */
         }
       }
     }
@@ -310,7 +310,7 @@ static const char *match (MatchState *ms, const char *s, const char *p) {
 
 
 
-static const char *lmemfind (const char *s1, size_t l1,
+static const char *j_lmemfind (const char *s1, size_t l1,
                                const char *s2, size_t l2) {
   if (l2 == 0) return s1;  /* empty strings are everywhere */
   else if (l2 > l1) return NULL;  /* avoids a negative `l1' */
@@ -332,18 +332,18 @@ static const char *lmemfind (const char *s1, size_t l1,
 }
 
 
-static void push_onecapture (MatchState *ms, int i, const char *s,
+static void j_push_onecapture (JMatchState *ms, int i, const char *s,
                                                     const char *e) {
   if (i >= ms->level) {
 	if (i == 0) { /* ms->level == 0, too */
-      buffer_addstring(ms->buff, s, e - s);  /* add whole match */
+      buffer_addstring(ms->buff, s, e - s);  /* add whole j_match */
 	} else
-      gsub_error("invalid capture index");
+      j_gsub_error("invalid capture index");
   }
   else {
     ptrdiff_t l = ms->capture[i].len;
-    if (l == CAP_UNFINISHED) gsub_error("unfinished capture");
-	if (l == CAP_POSITION) {
+    if (l == JCAP_UNFINISHED) j_gsub_error("unfinished capture");
+	if (l == JCAP_POSITION) {
       // lua_pushinteger(ms->L, ms->capture[i].init - ms->src_init + 1);
 	  assert(0);
 	} else
@@ -352,17 +352,17 @@ static void push_onecapture (MatchState *ms, int i, const char *s,
 }
 
 
-static int push_captures (MatchState *ms, const char *s, const char *e) {
+static int j_push_captures (JMatchState *ms, const char *s, const char *e) {
   int i;
   int nlevels = (ms->level == 0 && s) ? 1 : ms->level;
 //  luaL_checkstack(ms->L, nlevels, "too many captures");
   for (i = 0; i < nlevels; i++)
-    push_onecapture(ms, i, s, e);
+    j_push_onecapture(ms, i, s, e);
   return nlevels;  /* number of strings pushed */
 }
 
 
-static void add_s (MatchState *ms, const char *s, const char *e, const char *news, size_t l) {
+static void j_add_s (JMatchState *ms, const char *s, const char *e, const char *news, size_t l) {
   size_t i;
   for (i = 0; i < l; i++) {
 	if (news[i] != L_ESC) {
@@ -374,7 +374,7 @@ static void add_s (MatchState *ms, const char *s, const char *e, const char *new
 	  } else if (news[i] == '0') {
         buffer_addstring(ms->buff, s, e - s);
 	  } else {
-        push_onecapture(ms, news[i] - '1', s, e);
+        j_push_onecapture(ms, news[i] - '1', s, e);
 //        luaL_addvalue(b);  /* add capture to accumulated result */
       }
     }
@@ -382,10 +382,10 @@ static void add_s (MatchState *ms, const char *s, const char *e, const char *new
 }
 
 
-int str_gsub (BUFFER *buff, const char *src, const char *p, const char *repl, int max_s) {
+int j_str_gsub (BUFFER *buff, const char *src, const char *p, const char *repl, int max_s) {
   int anchor;
   int n = 0;
-  MatchState ms;
+  JMatchState ms;
   size_t srcl = strlen(src);
   if (max_s == -1)
 	max_s = (int)(srcl + 1);
@@ -397,12 +397,12 @@ int str_gsub (BUFFER *buff, const char *src, const char *p, const char *repl, in
   while (n < max_s) {
     const char *e;
     ms.level = 0;
-    e = match(&ms, src, p);
+    e = j_match(&ms, src, p);
     if (e) {
       n++;
-      add_s(&ms, src, e, repl, strlen(repl));
+      j_add_s(&ms, src, e, repl, strlen(repl));
     }
-    if (e && e>src) /* non empty match? */
+    if (e && e>src) /* non empty j_match? */
       src = e;  /* skip it */
 	else if (src < ms.src_end) {
       buffer_addchar(ms.buff, *src++);
