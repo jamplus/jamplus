@@ -26,6 +26,7 @@
 # include "jamgram.h"
 # include "jambase.h"
 # include "newstr.h"
+# include "variable.h"
 
 struct keyword {
 	const char *word;
@@ -115,6 +116,8 @@ yyfparse( const char *s )
 	i->line = 0;
 	i->next = incp;
 	incp = i;
+
+	var_set( "JAM_CURRENT_SCRIPT", list_append(L0, i->fname, 0), VAR_SET );
 
 	/* If the filename is "+", it means use the internal jambase. */
 
