@@ -107,6 +107,10 @@ struct ar_hdr		/* archive file member header - printable ascii */
 # include "md5.h"
 #endif
 
+#ifdef __linux__
+#include <libgen.h>
+#endif
+
 #ifdef __FreeBSD__
 #include <sys/sysctl.h>
 #include <libgen.h>
