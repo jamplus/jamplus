@@ -42,11 +42,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <assert.h>
 
-#include "threading.h"
+#include "keeper.h"
 #include "compat.h"
 #include "tools.h"
-#include "keeper.h"
+#include "universe.h"
+#include "uniquekey.h"
 
 //###################################################################################
 // Keeper implementation
@@ -63,6 +65,8 @@ typedef struct
 	lua_Integer limit;
 } keeper_fifo;
 
+static int const CONTENTS_TABLE = 1;
+
 // replaces the fifo ud by its uservalue on the stack
 static keeper_fifo* prepare_fifo_access( lua_State* L, int idx_)
 {
@@ -72,7 +76,7 @@ static keeper_fifo* prepare_fifo_access( lua_State* L, int idx_)
 		idx_ = lua_absindex( L, idx_);
 		STACK_GROW( L, 1);
 		// we can replace the fifo userdata in the stack without fear of it being GCed, there are other references around
-		lua_getuservalue( L, idx_);
+		lua_getiuservalue( L, idx_, CONTENTS_TABLE);
 		lua_replace( L, idx_);
 	}
 	return fifo;
@@ -84,12 +88,13 @@ static void fifo_new( lua_State* L)
 {
 	keeper_fifo* fifo;
 	STACK_GROW( L, 2);
-	fifo = (keeper_fifo*) lua_newuserdata( L, sizeof( keeper_fifo));
+	// a fifo full userdata has one uservalue, the table that holds the actual fifo contents
+	fifo = (keeper_fifo*)lua_newuserdatauv( L, sizeof( keeper_fifo), 1);
 	fifo->first = 1;
 	fifo->count = 0;
 	fifo->limit = -1;
 	lua_newtable( L);
-	lua_setuservalue( L, -2);
+	lua_setiuservalue( L, -2, CONTENTS_TABLE);
 }
 
 // in: expect fifo ... on top of the stack
@@ -103,7 +108,7 @@ static void fifo_push( lua_State* L, keeper_fifo* fifo_, lua_Integer count_)
 	for( i = count_; i >= 1; -- i)
 	{
 		// store in the fifo the value at the top of the stack at the specified index, popping it from the stack
-		lua_rawseti( L, idx, start + i);
+		lua_rawseti( L, idx, (int)(start + i));
 	}
 	fifo_->count += count_;
 }
@@ -115,11 +120,11 @@ static void fifo_push( lua_State* L, keeper_fifo* fifo_, lua_Integer count_)
 // function assumes that there is enough data in the fifo to satisfy the request
 static void fifo_peek( lua_State* L, keeper_fifo* fifo_, lua_Integer count_)
 {
-	int i;
+	lua_Integer i;
 	STACK_GROW( L, count_);
 	for( i = 0; i < count_; ++ i)
 	{
-		lua_rawgeti( L, 1, fifo_->first + i);
+		lua_rawgeti( L, 1, (int)( fifo_->first + i));
 	}
 }
 
@@ -134,7 +139,7 @@ static void fifo_pop( lua_State* L, keeper_fifo* fifo_, lua_Integer count_)
 	// skip first item, we will push it last
 	for( i = 1; i < count_; ++ i)
 	{
-		lua_Integer const at = fifo_->first + i;
+		int const at = (int)( fifo_->first + i);
 		// push item on the stack
 		lua_rawgeti( L, fifo_idx, at);         // ... fifo val
 		// remove item from the fifo
@@ -143,7 +148,7 @@ static void fifo_pop( lua_State* L, keeper_fifo* fifo_, lua_Integer count_)
 	}
 	// now process first item
 	{
-		lua_Integer const at = fifo_->first;
+		int const at = (int)( fifo_->first);
 		lua_rawgeti( L, fifo_idx, at);         // ... fifo vals val
 		lua_pushnil( L);                       // ... fifo vals val nil
 		lua_rawseti( L, fifo_idx, at);         // ... fifo vals val
@@ -159,14 +164,14 @@ static void fifo_pop( lua_State* L, keeper_fifo* fifo_, lua_Integer count_)
 
 // in: linda_ud expected at *absolute* stack slot idx
 // out: fifos[ud]
-static void* const fifos_key = (void*) prepare_fifo_access;
+// crc64/we of string "FIFOS_KEY" generated at http://www.nitrxgen.net/hashgen/
+static DECLARE_CONST_UNIQUE_KEY( FIFOS_KEY, 0xdce50bbc351cd465);
 static void push_table( lua_State* L, int idx_)
 {
 	STACK_GROW( L, 4);
-	STACK_CHECK( L);
+	STACK_CHECK( L, 0);
 	idx_ = lua_absindex( L, idx_);
-	lua_pushlightuserdata( L, fifos_key);        // ud fifos_key
-	lua_rawget( L, LUA_REGISTRYINDEX);           // ud fifos
+	REGISTRY_GET( L, FIFOS_KEY);                 // ud fifos
 	lua_pushvalue( L, idx_);                     // ud fifos ud
 	lua_rawget( L, -2);                          // ud fifos fifos[ud]
 	STACK_MID( L, 2);
@@ -183,15 +188,14 @@ static void push_table( lua_State* L, int idx_)
 	STACK_END( L, 1);
 }
 
-int keeper_push_linda_storage( struct s_Universe* U, lua_State* L, void* ptr_, unsigned long magic_)
+int keeper_push_linda_storage( Universe* U, lua_State* L, void* ptr_, ptrdiff_t magic_)
 {
-	struct s_Keeper* const K = keeper_acquire( U->keepers, magic_);
+	Keeper* const K = which_keeper( U->keepers, magic_);
 	lua_State* const KL = K ? K->L : NULL;
 	if( KL == NULL) return 0;
 	STACK_GROW( KL, 4);
-	STACK_CHECK( KL);
-	lua_pushlightuserdata( KL, fifos_key);                      // fifos_key
-	lua_rawget( KL, LUA_REGISTRYINDEX);                         // fifos
+	STACK_CHECK( KL, 0);
+	REGISTRY_GET( KL, FIFOS_KEY);                               // fifos
 	lua_pushlightuserdata( KL, ptr_);                           // fifos ud
 	lua_rawget( KL, -2);                                        // fifos storage
 	lua_remove( KL, -2);                                        // storage
@@ -204,7 +208,7 @@ int keeper_push_linda_storage( struct s_Universe* U, lua_State* L, void* ptr_, u
 	// move data from keeper to destination state                  KEEPER                       MAIN
 	lua_pushnil( KL);                                           // storage nil
 	STACK_GROW( L, 5);
-	STACK_CHECK( L);
+	STACK_CHECK( L, 0);
 	lua_newtable( L);                                                                        // out
 	while( lua_next( KL, -2))                                   // storage key fifo
 	{
@@ -230,7 +234,6 @@ int keeper_push_linda_storage( struct s_Universe* U, lua_State* L, void* ptr_, u
 	STACK_END( L, 1);
 	lua_pop( KL, 1);                                            //
 	STACK_END( KL, 0);
-	keeper_release( K);
 	return 1;
 }
 
@@ -238,12 +241,13 @@ int keeper_push_linda_storage( struct s_Universe* U, lua_State* L, void* ptr_, u
 int keepercall_clear( lua_State* L)
 {
 	STACK_GROW( L, 3);
-	lua_pushlightuserdata( L, fifos_key);        // ud fifos_key
-	lua_rawget( L, LUA_REGISTRYINDEX);           // ud fifos
+	STACK_CHECK( L, 0);
+	REGISTRY_GET( L, FIFOS_KEY);                 // ud fifos
 	lua_pushvalue( L, 1);                        // ud fifos ud
 	lua_pushnil( L);                             // ud fifos ud nil
 	lua_rawset( L, -3);                          // ud fifos
 	lua_pop( L, 1);                              // ud
+	STACK_END( L, 0);
 	return 0;
 }
 
@@ -421,7 +425,7 @@ int keepercall_set( lua_State* L)
 				should_wake_writers = (fifo->limit > 0) && (fifo->count >= fifo->limit);
 				lua_remove( L, -2);                         // fifos fifo
 				lua_newtable( L);                           // fifos fifo {}
-				lua_setuservalue( L, -2);                   // fifos fifo
+				lua_setiuservalue( L, -2, CONTENTS_TABLE);  // fifos fifo
 				fifo->first = 1;
 				fifo->count = 0;
 			}
@@ -449,7 +453,7 @@ int keepercall_set( lua_State* L)
 			should_wake_writers = (fifo->limit > 0) && (fifo->count >= fifo->limit) && (count < fifo->limit);
 			// empty the fifo for the specified key: replace uservalue with a virgin table, reset counters, but leave limit unchanged!
 			lua_newtable( L);                             // fifos key [val [, ...]] fifo {}
-			lua_setuservalue( L, -2);                     // fifos key [val [, ...]] fifo
+			lua_setiuservalue( L, -2, CONTENTS_TABLE);    // fifos key [val [, ...]] fifo
 			fifo->first = 1;
 			fifo->count = 0;
 		}
@@ -575,7 +579,7 @@ int keepercall_count( lua_State* L)
 */
 
 // called as __gc for the keepers array userdata
-void close_keepers( struct s_Universe* U, lua_State* L)
+void close_keepers( Universe* U, lua_State* L)
 {
 	if( U->keepers != NULL)
 	{
@@ -608,7 +612,7 @@ void close_keepers( struct s_Universe* U, lua_State* L)
 		{
 			void* allocUD;
 			lua_Alloc allocF = lua_getallocf( L, &allocUD);
-			allocF( allocUD, U->keepers, sizeof( struct s_Keepers) + (nbKeepers - 1) * sizeof(struct s_Keeper), 0);
+			allocF( allocUD, U->keepers, sizeof( Keepers) + (nbKeepers - 1) * sizeof( Keeper), 0);
 			U->keepers = NULL;
 		}
 	}
@@ -625,23 +629,26 @@ void close_keepers( struct s_Universe* U, lua_State* L)
  *       function never fails.
  * settings table is at position 1 on the stack
  */
-void init_keepers( struct s_Universe* U, lua_State* L)
+void init_keepers( Universe* U, lua_State* L)
 {
 	int i;
 	int nb_keepers;
 	void* allocUD;
 	lua_Alloc allocF = lua_getallocf( L, &allocUD);
 
-	STACK_CHECK( L);                                       // L                            K
+	STACK_CHECK( L, 0);                                    // L                            K
 	lua_getfield( L, 1, "nb_keepers");                     // nb_keepers
 	nb_keepers = (int) lua_tointeger( L, -1);
 	lua_pop( L, 1);                                        //
-	assert( nb_keepers >= 1);
-
-	// struct s_Keepers contains an array of 1 s_Keeper, adjust for the actual number of keeper states
+	if( nb_keepers < 1)
 	{
-		size_t const bytes = sizeof( struct s_Keepers) + (nb_keepers - 1) * sizeof(struct s_Keeper);
-		U->keepers = (struct s_Keepers*) allocF( allocUD, NULL, 0, bytes);
+		(void) luaL_error( L, "Bad number of keepers (%d)", nb_keepers);
+	}
+
+	// Keepers contains an array of 1 s_Keeper, adjust for the actual number of keeper states
+	{
+		size_t const bytes = sizeof( Keepers) + (nb_keepers - 1) * sizeof( Keeper);
+		U->keepers = (Keepers*) allocF( allocUD, NULL, 0, bytes);
 		if( U->keepers == NULL)
 		{
 			(void) luaL_error( L, "init_keepers() failed while creating keeper array; out of memory");
@@ -652,7 +659,8 @@ void init_keepers( struct s_Universe* U, lua_State* L)
 	}
 	for( i = 0; i < nb_keepers; ++ i)                      // keepersUD
 	{
-		lua_State* K = PROPAGATE_ALLOCF_ALLOC();
+		// note that we will leak K if we raise an error later
+		lua_State* K = create_state( U, L);
 		if( K == NULL)
 		{
 			(void) luaL_error( L, "init_keepers() failed while creating keeper states; out of memory");
@@ -664,12 +672,11 @@ void init_keepers( struct s_Universe* U, lua_State* L)
 		// from there, GC can collect a linda, which would acquire the keeper again, and deadlock the thread.
 		// therefore, we need a recursive mutex.
 		MUTEX_RECURSIVE_INIT( &U->keepers->keeper_array[i].keeper_cs);
-		STACK_CHECK( K);
+
+		STACK_CHECK( K, 0);
 
 		// copy the universe pointer in the keeper itself
-		lua_pushlightuserdata( K, UNIVERSE_REGKEY);
-		lua_pushlightuserdata( K, U);
-		lua_rawset( K, LUA_REGISTRYINDEX);
+		universe_store( K, U);
 		STACK_MID( K, 0);
 
 		// make sure 'package' is initialized in keeper states, so that we have require()
@@ -677,7 +684,7 @@ void init_keepers( struct s_Universe* U, lua_State* L)
 		luaL_requiref( K, "package", luaopen_package, 1);                                 // package
 		lua_pop( K, 1);                                                                   //
 		STACK_MID( K, 0);
-		serialize_require( U, K);
+		serialize_require( DEBUGSPEW_PARAM_COMMA( U) K);
 		STACK_MID( K, 0);
 
 		// copy package.path and package.cpath from the source state
@@ -702,22 +709,25 @@ void init_keepers( struct s_Universe* U, lua_State* L)
 		call_on_state_create( U, K, L, eLM_ToKeeper);
 
 		// to see VM name in Decoda debugger
-		lua_pushliteral( K, "Keeper #");                                                  // "Keeper #"
-		lua_pushinteger( K, i + 1);                                                       // "Keeper #" n
-		lua_concat( K, 2);                                                                // "Keeper #n"
+		lua_pushfstring( K, "Keeper #%d", i + 1);                                         // "Keeper #n"
 		lua_setglobal( K, "decoda_name");                                                 //
 
 		// create the fifos table in the keeper state
-		lua_pushlightuserdata( K, fifos_key);                                             // fifo_key
-		lua_newtable( K);                                                                 // fifo_key {}
-		lua_rawset( K, LUA_REGISTRYINDEX);                                                //
-
+		REGISTRY_SET( K, FIFOS_KEY, lua_newtable( K));
 		STACK_END( K, 0);
 	}
 	STACK_END( L, 0);
 }
 
-struct s_Keeper* keeper_acquire( struct s_Keepers* keepers_, unsigned long magic_)
+// should be called only when inside a keeper_acquire/keeper_release pair (see linda_protected_call)
+Keeper* which_keeper(Keepers* keepers_, ptrdiff_t magic_)
+{
+	int const nbKeepers = keepers_->nb_keepers;
+	unsigned int i = (unsigned int)((magic_ >> KEEPER_MAGIC_SHIFT) % nbKeepers);
+	return &keepers_->keeper_array[i];
+}
+
+Keeper* keeper_acquire( Keepers* keepers_, ptrdiff_t magic_)
 {
 	int const nbKeepers = keepers_->nb_keepers;
 	// can be 0 if this happens during main state shutdown (lanes is being GC'ed -> no keepers)
@@ -735,7 +745,7 @@ struct s_Keeper* keeper_acquire( struct s_Keepers* keepers_, unsigned long magic
 		* have to cast to unsigned long to avoid compilation warnings about loss of data when converting pointer-to-integer
 		*/
 		unsigned int i = (unsigned int)((magic_ >> KEEPER_MAGIC_SHIFT) % nbKeepers);
-		struct s_Keeper* K = &keepers_->keeper_array[i];
+		Keeper* K = &keepers_->keeper_array[i];
 
 		MUTEX_LOCK( &K->keeper_cs);
 		//++ K->count;
@@ -743,13 +753,13 @@ struct s_Keeper* keeper_acquire( struct s_Keepers* keepers_, unsigned long magic
 	}
 }
 
-void keeper_release( struct s_Keeper* K)
+void keeper_release( Keeper* K)
 {
 	//-- K->count;
 	if( K) MUTEX_UNLOCK( &K->keeper_cs);
 }
 
-void keeper_toggle_nil_sentinels( lua_State* L, int val_i_, enum eLookupMode mode_)
+void keeper_toggle_nil_sentinels( lua_State* L, int val_i_, LookupMode const mode_)
 {
 	int i, n = lua_gettop( L);
 	for( i = val_i_; i <= n; ++ i)
@@ -758,13 +768,13 @@ void keeper_toggle_nil_sentinels( lua_State* L, int val_i_, enum eLookupMode mod
 		{
 			if( lua_isnil( L, i))
 			{
-				lua_pushlightuserdata( L, NIL_SENTINEL);
+				push_unique_key( L, NIL_SENTINEL);
 				lua_replace( L, i);
 			}
 		}
 		else
 		{
-			if( lua_touserdata( L, i) == NIL_SENTINEL)
+			if( equal_unique_key( L, i, NIL_SENTINEL))
 			{
 				lua_pushnil( L);
 				lua_replace( L, i);
@@ -782,7 +792,7 @@ void keeper_toggle_nil_sentinels( lua_State* L, int val_i_, enum eLookupMode mod
 *
 * Returns: number of return values (pushed to 'L') or -1 in case of error
 */
-int keeper_call( struct s_Universe* U, lua_State* K, keeper_api_t func_, lua_State* L, void* linda, uint_t starting_index)
+int keeper_call( Universe* U, lua_State* K, keeper_api_t func_, lua_State* L, void* linda, uint_t starting_index)
 {
 	int const args = starting_index ? (lua_gettop( L) - starting_index + 1) : 0;
 	int const Ktos = lua_gettop( K);

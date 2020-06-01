@@ -20,8 +20,8 @@ N=1000
 _TARGET_DIR=src/lanes
 TIME=time
 
-ifeq "$(findstring MINGW32,$(shell uname -s))" "MINGW32"
-  # MinGW MSYS on XP
+ifeq "$(findstring MINGW,$(shell uname -s))" "MINGW"
+  # MinGW MSYS on Windows
   #
   _SO=dll
   _LUAEXT=.exe
@@ -76,6 +76,7 @@ test:
 	$(MAKE) irayo_recursive
 	$(MAKE) irayo_closure
 	$(MAKE) basic
+	$(MAKE) cancel
 	$(MAKE) fifo
 	$(MAKE) keeper
 	$(MAKE) timer
@@ -92,6 +93,9 @@ test:
 	$(MAKE) pingpong
 
 basic: tests/basic.lua $(_TARGET_SO)
+	$(_PREFIX) $(LUA) $<
+
+cancel: tests/cancel.lua $(_TARGET_SO)
 	$(_PREFIX) $(LUA) $<
 
 #

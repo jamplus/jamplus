@@ -7,7 +7,7 @@
 
 MODULE=lanes
 
-SRC=lanes.c compat.c threading.c tools.c deep.c keeper.c
+SRC=lanes.c cancel.c compat.c threading.c tools.c linda.c deep.c keeper.c universe.c
 
 OBJ=$(SRC:.c=.o)
 
@@ -19,12 +19,12 @@ OPT_FLAGS=-O2
     # -O0 -g
 
 _SO=so
-ifeq "$(findstring MINGW32,$(shell uname -s))" "MINGW32"
+ifeq "$(findstring MINGW,$(shell uname -s))" "MINGW"
   _SO=dll
 endif
 
 ifeq "$(LUAROCKS)" ""
-  ifeq "$(findstring MINGW32,$(shell uname -s))" "MINGW32"
+  ifeq "$(findstring MINGW,$(shell uname -s))" "MINGW"
     # MinGW MSYS on Windows
     #
     # - 'lua' and 'luac' expected to be on the path

@@ -1,5 +1,112 @@
 CHANGES:
 
+CHANGE 146: BGe 26-Apr-19
+   * lane:cancel() rework (see doc).
+   * opt.cancelstep is gone, hook is installed by lane:cancel() if requested
+
+CHANGE 145: BGe 28-Nov-18
+   * more code refacto
+   * don't test __lanesignore for POD types (-> slightly faster when trasnfering lots of data)
+
+CHANGE 144: BGe 28-Nov-18
+   * some code refacto
+
+CHANGE 143: BGe 27-Nov-18
+   * Lua 5.4 support
+   * __lanesclone and  lanes.nameof support userdata uservalue(s)
+
+CHANGE 142: BGe 26-Nov-18
+   * Version is available in public header
+
+CHANGE 141: BGe 25-Nov-18
+   * protect_allocator configure option is gone, long live allocator (more embedders-friendly)
+
+CHANGE 140: BGe 22-Nov-18
+   * Raise an error instead of crashing when attempting to transfer a non-deep full userdata
+
+CHANGE 139: BGe 21-Nov-18
+   * more DEBUGSPEW
+
+CHANGE 138: BGe 19-Nov-18
+   * Registry access code utility macros
+   * CONFIG_REGKEY and LOOKUP_REGKEY are now lightuserdata instead of strings
+   * Stack checking debug macros improvements
+
+CHANGE 137: BGe 15-Nov-18
+   * Deep userdata must embed DeepPrelude to save an allocation (also changes Deep protocol)
+
+CHANGE 136: BGe 15-Nov-18
+   * split linda code in a separate file
+   * rockspec for version v3.13.0
+
+CHANGE 135: BGe 11-Nov-18
+   * fix a bunch of compilation warnings
+
+CHANGE 134: BGe 3-Dec-13
+   * new API lanes.set_thread_affinity()
+   * set_debug_threadname implemented with win32 pthread
+
+CHANGE 133: BGe 8-Nov-18
+   * Make sure any linda operation that can raise an error won't ever leave a mutex unreleased
+   * lane:join() now returns nil, "timeout" in case of timeout
+
+CHANGE 132: BGe 7-Nov-18
+   * __lanesclone mechanism should actually work now
+
+CHANGE 131: BGe 7-Nov-18
+   * Fix potential crash at application shutdown when deep userdata were created before Lanes is required
+
+CHANGE 130: BGe 2-Nov-18
+   * always duplicate the config structure in new lanes even when no libraries are initialized by the generator
+     (fixes an internal error trying to call on_state_create in a lane without any libs loaded)
+
+CHANGE 129: BGe 2-Nov-18
+   * Bumped version to 3.13
+   * fix error when autodetecting protect_allocator when running under LuaJIT
+
+CHANGE 128: BGe 31-Oct-18
+   * Better default value autodetection for protect_allocator setting
+
+CHANGE 127: BGe 30-Oct-18
+   * restrict internal light userdata constants to 47 significant bits when building against LuaJIT-x64
+
+CHANGE 126: Bge 29-Oct-18
+   * Add deep user data cloning support
+
+CHANGE 125: BGe 25-Oct-18
+   * Fix Lanes build by reorganizing types around a bit
+
+CHANGE 124: BGe 9-Jul-18
+   * Fix a stack overflow when copying large tables with verbose_errors option enabled
+   * Support for integer formatting in verbose errors
+
+CHANGE 123: BGe 2-Aug-17
+   * added support for user-provided __gc in deep userdata
+   * more complete deep userdata sample
+
+CHANGE 122: BGe 1-Aug-17
+   * fix crash trying to use a deep-aware module while not requiring Lanes
+   * bumped version to 3.12
+
+CHANGE 121: BGe 13-Jun-17
+   * no longer internally assert when an error message is not a string
+
+CHANGE 120: BGe 5-Jun-17
+   * new API function lanes.register( "name", module) to manually register a module table after it was required
+   * Transfering registered module tables will link the equivalent in the destination state instead of cloning it
+   * bumped version to 3.11
+
+CHANGE 119: BGe 10-May-17
+   * Fixed some compilation warnings
+   * Improved LuaJIT support
+
+CHANGE 118: trukanduk 21-Nov-16
+   * bumped version to 3.10.1
+   * objects with a metatable that contains __lanesignore are skipped during data transfers
+
+CHANGE 117: mpeterv 21-Nov-16
+   * Fix an implicit number-to-string conversion
+
 CHANGE 116: BGe, mpeterv 27-Apr-15
    * bumped version to 3.10.0
    * segfault fixed in LG_lane_new

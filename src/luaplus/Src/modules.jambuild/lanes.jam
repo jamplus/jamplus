@@ -1,18 +1,29 @@
 {
 
 local SRCS =
+		src/cancel.c
+		src/cancel.h
 		src/compat.c
 		src/compat.h
 		src/deep.c
 		src/deep.h
 		src/keeper.c
 		src/keeper.h
+		src/lanes.c
+		src/lanes.h
+		src/lanes.lua
+		src/lanes_private.h
+		src/linda.c
+		src/macros_and_utils.h
+		src/platform.h
 		src/threading.c
 		src/threading.h
-		src/lanes.c
-		src/lanes.lua
+		src/threading_osx.h
 		src/tools.c
 		src/tools.h
+		src/uniquekey.h
+		src/universe.c
+		src/universe.h
 ;
 
 CopyFiles lanes : $(LUA_LDIR) : $(SUBDIR)/src/lanes.lua ;

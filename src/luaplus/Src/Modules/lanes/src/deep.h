@@ -6,14 +6,29 @@
  * said modules will have to link against lanes (it is not really possible to separate the 'deep userdata' implementation from the rest of Lanes)
  */
 
-
 #include "lua.h"
+#include "platform.h"
+#include "uniquekey.h"
 
-#if (defined PLATFORM_WIN32) || (defined PLATFORM_POCKETPC)
+// forwards
+struct s_Universe;
+typedef struct s_Universe Universe;
+
+#if !defined LANES_API // when deep is compiled standalone outside Lanes
+#if 0 // (defined PLATFORM_WIN32) || (defined PLATFORM_POCKETPC)
 #define LANES_API __declspec(dllexport)
 #else
 #define LANES_API
 #endif // (defined PLATFORM_WIN32) || (defined PLATFORM_POCKETPC)
+#endif // LANES_API
+
+enum eLookupMode
+{
+	eLM_LaneBody, // send the lane body directly from the source to the destination lane
+	eLM_ToKeeper, // send a function from a lane to a keeper state
+	eLM_FromKeeper // send a function from a keeper state to a lane
+};
+typedef enum eLookupMode LookupMode;
 
 enum eDeepOp
 {
@@ -22,11 +37,30 @@ enum eDeepOp
 	eDO_metatable,
 	eDO_module,
 };
+typedef enum eDeepOp DeepOp;
 
-typedef void* (*luaG_IdFunction)( lua_State* L, enum eDeepOp op_);
+typedef void* (*luaG_IdFunction)( lua_State* L, DeepOp op_);
+
+// ################################################################################################
+
+// crc64/we of string "DEEP_VERSION_1" generated at http://www.nitrxgen.net/hashgen/
+static DECLARE_CONST_UNIQUE_KEY( DEEP_VERSION, 0x4f4eadf0accf6c73);
+
+// should be used as header for full userdata
+struct s_DeepPrelude
+{
+	DECLARE_UNIQUE_KEY( magic); // must be filled by the Deep userdata idfunc that allocates it on eDO_new operation
+	// when stored in a keeper state, the full userdata doesn't have a metatable, so we need direct access to the idfunc
+	luaG_IdFunction idfunc;
+	// data is destroyed when refcount is 0
+	volatile int refcount;
+};
+typedef struct s_DeepPrelude DeepPrelude;
+
+char const* push_deep_proxy( Universe* U, lua_State* L, DeepPrelude* prelude, LookupMode mode_);
+void free_deep_prelude( lua_State* L, DeepPrelude* prelude_);
 
 extern LANES_API int luaG_newdeepuserdata( lua_State* L, luaG_IdFunction idfunc);
 extern LANES_API void* luaG_todeep( lua_State* L, luaG_IdFunction idfunc, int index);
-extern LANES_API void luaG_pushdeepversion( lua_State* L);
 
 #endif // __LANES_DEEP_H__

@@ -1,6 +1,6 @@
 /*
  * THREADING.C                        Copyright (c) 2007-08, Asko Kauppi
- *                                    Copyright (C) 2009-14, Benoit Germain
+ *                                    Copyright (C) 2009-19, Benoit Germain
  *
  * Lua Lanes OS threading specific code.
  *
@@ -34,6 +34,19 @@ THE SOFTWARE.
 
 ===============================================================================
 */
+#if defined(__linux__)
+
+# ifndef _GNU_SOURCE // definition by the makefile can cause a redefinition error
+# define _GNU_SOURCE // must be defined before any include
+# endif // _GNU_SOURCE
+
+# ifdef __ANDROID__
+#  include <android/log.h>
+#  define LOG_TAG "LuaLanes"
+# endif // __ANDROID__
+
+#endif // __linux__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -52,10 +65,20 @@ THE SOFTWARE.
 # include <unistd.h>
 #endif
 
+#if defined(__FreeBSD__)
+#include <sys/_cpuset.h>
+#include <sys/cpuset.h>
+typedef cpuset_t cpu_set_t;
+#endif
+
 /* Linux needs to check, whether it's been run as root
 */
 #ifdef PLATFORM_LINUX
   volatile bool_t sudo;
+#endif
+
+#ifdef PLATFORM_OSX
+# include "threading_osx.h"
 #endif
 
 /* Linux with older glibc (such as Debian) don't have pthread_setname_np, but have prctl
@@ -80,11 +103,11 @@ THE SOFTWARE.
     // loops (maybe retry forever?)
 
 /* 
-* FAIL is for unexpected API return values - essentially programming 
+* LANES_FAIL is for unexpected API return values - essentially programming 
 * error in _this_ code. 
 */
 #if defined( PLATFORM_XBOX) || defined( PLATFORM_WIN32) || defined( PLATFORM_POCKETPC)
-static void FAIL( char const* funcname, int rc)
+static void LANES_FAIL( char const* funcname, int rc)
 {
 #if defined( PLATFORM_XBOX)
 	fprintf( stderr, "%s() failed! (%d)\n", funcname, rc );
@@ -129,7 +152,7 @@ time_d now_secs(void) {
         st.wHour= st.wMinute= st.wSecond= st.wMilliseconds= 0;
 
         if (!SystemTimeToFileTime( &st, &ft ))
-            FAIL( "SystemTimeToFileTime", GetLastError() );
+            LANES_FAIL( "SystemTimeToFileTime", GetLastError() );
 
         uli_epoch.LowPart= ft.dwLowDateTime;
         uli_epoch.HighPart= ft.dwHighDateTime;
@@ -137,7 +160,7 @@ time_d now_secs(void) {
 
     GetSystemTime( &st );	// current system date/time in UTC
     if (!SystemTimeToFileTime( &st, &ft ))
-        FAIL( "SystemTimeToFileTime", GetLastError() );
+        LANES_FAIL( "SystemTimeToFileTime", GetLastError() );
 
     uli.LowPart= ft.dwLowDateTime;
     uli.HighPart= ft.dwHighDateTime;
@@ -255,10 +278,10 @@ static void prepare_timeout( struct timespec *ts, time_d abs_secs ) {
   //
   void MUTEX_INIT( MUTEX_T *ref ) {
      *ref= CreateMutex( NULL /*security attr*/, FALSE /*not locked*/, NULL );
-     if (!ref) FAIL( "CreateMutex", GetLastError() );
+     if (!ref) LANES_FAIL( "CreateMutex", GetLastError() );
   }
   void MUTEX_FREE( MUTEX_T *ref ) {
-     if (!CloseHandle(*ref)) FAIL( "CloseHandle (mutex)", GetLastError() );
+     if (!CloseHandle(*ref)) LANES_FAIL( "CloseHandle (mutex)", GetLastError() );
      *ref= NULL;
   }
 	void MUTEX_LOCK( MUTEX_T *ref )
@@ -267,11 +290,11 @@ static void prepare_timeout( struct timespec *ts, time_d abs_secs ) {
 		// ERROR_WAIT_NO_CHILDREN means a thread was killed (lane terminated because of error raised during a linda transfer for example) while having grabbed this mutex
 		// this is not a big problem as we will grab it just the same, so ignore this particular error
 		if( rc != 0 && rc != ERROR_WAIT_NO_CHILDREN)
-			FAIL( "WaitForSingleObject", (rc == WAIT_FAILED) ? GetLastError() : rc);
+			LANES_FAIL( "WaitForSingleObject", (rc == WAIT_FAILED) ? GetLastError() : rc);
 	}
   void MUTEX_UNLOCK( MUTEX_T *ref ) {
     if (!ReleaseMutex(*ref))
-        FAIL( "ReleaseMutex", GetLastError() );
+        LANES_FAIL( "ReleaseMutex", GetLastError() );
   }
 #endif // CONDITION_VARIABLE aren't available
 
@@ -303,12 +326,12 @@ void THREAD_CREATE( THREAD_T* ref, THREAD_RETURN_T (__stdcall *func)( void*), vo
 
 	if( h == NULL) // _beginthreadex returns 0L on failure instead of -1L (like _beginthread)
 	{
-		FAIL( "CreateThread", GetLastError());
+		LANES_FAIL( "CreateThread", GetLastError());
 	}
 
 	if (!SetThreadPriority( h, gs_prio_remap[prio + 3]))
 	{
-		FAIL( "SetThreadPriority", GetLastError());
+		LANES_FAIL( "SetThreadPriority", GetLastError());
 	}
 
 	*ref = h;
@@ -320,10 +343,17 @@ void THREAD_SET_PRIORITY( int prio)
 	// prio range [-3,+3] was checked by the caller
 	if (!SetThreadPriority( GetCurrentThread(), gs_prio_remap[prio + 3]))
 	{
-		FAIL( "THREAD_SET_PRIORITY", GetLastError());
+		LANES_FAIL( "THREAD_SET_PRIORITY", GetLastError());
 	}
 }
 
+void THREAD_SET_AFFINITY( unsigned int aff)
+{
+	if( !SetThreadAffinityMask( GetCurrentThread(), aff))
+	{
+		LANES_FAIL( "THREAD_SET_AFFINITY", GetLastError());
+	}
+}
 
 bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
 {
@@ -337,7 +367,7 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
         // WAIT_FAILED      more info via GetLastError()
 
     if (rc == WAIT_TIMEOUT) return FALSE;
-    if( rc !=0) FAIL( "WaitForSingleObject", rc==WAIT_FAILED ? GetLastError() : rc);
+    if( rc !=0) LANES_FAIL( "WaitForSingleObject", rc==WAIT_FAILED ? GetLastError() : rc);
     *ref= NULL;     // thread no longer usable
     return TRUE;
   }
@@ -347,7 +377,7 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
 		// nonexistent on Xbox360, simply disable until a better solution is found
 		#if !defined( PLATFORM_XBOX)
 		// in theory no-one should call this as it is very dangerous (memory and mutex leaks, no notification of DLLs, etc.)
-		if (!TerminateThread( *ref, 0 )) FAIL("TerminateThread", GetLastError());
+		if (!TerminateThread( *ref, 0 )) LANES_FAIL("TerminateThread", GetLastError());
 		#endif // PLATFORM_XBOX
 		*ref= NULL;
 	}
@@ -394,9 +424,9 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
 		InitializeCriticalSection( &ref->signalCS);
 		InitializeCriticalSection( &ref->countCS);
 		if( 0 == (ref->waitEvent = CreateEvent( 0, TRUE, FALSE, 0)))     // manual-reset
-			FAIL( "CreateEvent", GetLastError());
+			LANES_FAIL( "CreateEvent", GetLastError());
 		if( 0 == (ref->waitDoneEvent = CreateEvent( 0, FALSE, FALSE, 0)))    // auto-reset
-			FAIL( "CreateEvent", GetLastError());
+			LANES_FAIL( "CreateEvent", GetLastError());
 		ref->waitersCount = 0;
 	}
 
@@ -451,7 +481,7 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
 			return TRUE;
 		}
 
-		FAIL( "SignalObjectAndWait", GetLastError());
+		LANES_FAIL( "SignalObjectAndWait", GetLastError());
 		return FALSE;
 	}
 
@@ -477,7 +507,7 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
 		LeaveCriticalSection( &ref->signalCS);
 
 		if( WAIT_OBJECT_0 != errc)
-			FAIL( "WaitForSingleObject", GetLastError());
+			LANES_FAIL( "WaitForSingleObject", GetLastError());
 	}
 
 #else // CONDITION_VARIABLE are available, use them
@@ -491,7 +521,7 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
 	void SIGNAL_FREE( SIGNAL_T *ref )
 	{
 		// nothing to do
-		ref;
+		(void)ref;
 	}
 
 	bool_t SIGNAL_WAIT( SIGNAL_T *ref, MUTEX_T *mu_ref, time_d abs_secs)
@@ -521,7 +551,7 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
 			}
 			else
 			{
-				FAIL( "SleepConditionVariableCS", GetLastError());
+				LANES_FAIL( "SleepConditionVariableCS", GetLastError());
 			}
 		}
 		return TRUE;
@@ -546,6 +576,7 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
   // On Linux, SCHED_RR and su privileges are required..  !-(
   //
   #include <errno.h>
+  #include <sched.h>
 
 #	if (defined(__MINGW32__) || defined(__MINGW64__)) && defined pthread_attr_setschedpolicy
 #	if pthread_attr_setschedpolicy( A, S) == ENOTSUP
@@ -781,7 +812,9 @@ void THREAD_CREATE( THREAD_T* ref, THREAD_RETURN_T (*func)( void*), void* data, 
 		// "The specified scheduling parameters are only used if the scheduling
 		//  parameter inheritance attribute is PTHREAD_EXPLICIT_SCHED."
 		//
+#if !defined __ANDROID__ || ( defined __ANDROID__ && __ANDROID_API__ >= 28 )
 		PT_CALL( pthread_attr_setinheritsched( &a, PTHREAD_EXPLICIT_SCHED));
+#endif
 
 #ifdef _PRIO_SCOPE
 		PT_CALL( pthread_attr_setscope( &a, _PRIO_SCOPE));
@@ -862,6 +895,26 @@ void THREAD_SET_PRIORITY( int prio)
 	}
 }
 
+void THREAD_SET_AFFINITY( unsigned int aff)
+{
+	cpu_set_t cpuset;
+	int bit = 0;
+	CPU_ZERO( &cpuset);
+	while( aff != 0)
+	{
+		if( aff & 1)
+		{
+			CPU_SET( bit, &cpuset);
+		}
+		++ bit;
+		aff >>= 1;
+	}
+#ifdef __ANDROID__
+	PT_CALL( sched_setaffinity( pthread_self(), sizeof(cpu_set_t), &cpuset));
+#else
+	PT_CALL( pthread_setaffinity_np( pthread_self(), sizeof(cpu_set_t), &cpuset));
+#endif
+}
 
  /*
   * Wait for a thread to finish.
@@ -931,15 +984,23 @@ bool_t THREAD_WAIT( THREAD_T *ref, double secs , SIGNAL_T *signal_ref, MUTEX_T *
   }
 	//
   void THREAD_KILL( THREAD_T *ref ) {
+#ifdef __ANDROID__
+	  __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "Cannot kill thread!");
+#else
     pthread_cancel( *ref );
+#endif
   }
 
 	void THREAD_MAKE_ASYNCH_CANCELLABLE()
 	{
+#ifdef __ANDROID__
+	__android_log_print(ANDROID_LOG_WARN, LOG_TAG, "Cannot make thread async cancellable!");
+#else
 		// that's the default, but just in case...
 		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 		// we want cancellation to take effect immediately if possible, instead of waiting for a cancellation point (which is the default)
 		pthread_setcanceltype( PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+#endif
 	}
 
 	void THREAD_SETNAME( char const* _name)
@@ -959,7 +1020,7 @@ bool_t THREAD_WAIT( THREAD_T *ref, double secs , SIGNAL_T *signal_ref, MUTEX_T *
 #elif defined PLATFORM_OSX
 		pthread_setname_np(_name);
 #elif defined PLATFORM_WIN32 || defined PLATFORM_POCKETPC
-		// no API in win32-pthread yet :-(
+		PT_CALL( pthread_setname_np( pthread_self(), _name));
 #endif
 	}
 #endif // THREADAPI == THREADAPI_PTHREAD

@@ -4,30 +4,12 @@
 #ifndef __threading_h__
 #define __threading_h__ 1
 
-/* Platform detection
+/*
  * win32-pthread:
  * define HAVE_WIN32_PTHREAD and PTW32_INCLUDE_WINDOWS_H in your project configuration when building for win32-pthread.
  * link against pthreadVC2.lib, and of course have pthreadVC2.dll somewhere in your path.
  */
-#ifdef _WIN32_WCE
-  #define PLATFORM_POCKETPC
-#elif defined(_XBOX)
-  #define PLATFORM_XBOX
-#elif (defined _WIN32)
-  #define PLATFORM_WIN32
-#elif (defined __linux__)
-  #define PLATFORM_LINUX
-#elif (defined __APPLE__) && (defined __MACH__)
-  #define PLATFORM_OSX
-#elif (defined __NetBSD__) || (defined __FreeBSD__) || (defined BSD)
-  #define PLATFORM_BSD
-#elif (defined __QNX__)
-  #define PLATFORM_QNX
-#elif (defined __CYGWIN__)
-  #define PLATFORM_CYGWIN
-#else
-  #error "Unknown platform!"
-#endif
+#include "platform.h"
 
 typedef int bool_t;
 #ifndef FALSE
@@ -161,7 +143,7 @@ enum e_status { PENDING, RUNNING, WAITING, DONE, ERROR_ST, CANCELLED };
   //
   #if defined( PLATFORM_OSX)
     #define YIELD() pthread_yield_np()
-  #elif defined( PLATFORM_WIN32) || defined( PLATFORM_POCKETPC) // no PTHREAD for PLATFORM_XBOX
+#elif defined( PLATFORM_WIN32) || defined( PLATFORM_POCKETPC) || defined(__ANDROID__) // no PTHREAD for PLATFORM_XBOX
     // for some reason win32-pthread doesn't have pthread_yield(), but sched_yield()
     #define YIELD() sched_yield()
   #else
@@ -273,5 +255,6 @@ void THREAD_KILL( THREAD_T* ref);
 void THREAD_SETNAME( char const* _name);
 void THREAD_MAKE_ASYNCH_CANCELLABLE();
 void THREAD_SET_PRIORITY( int prio);
+void THREAD_SET_AFFINITY( unsigned int aff);
 
 #endif // __threading_h__

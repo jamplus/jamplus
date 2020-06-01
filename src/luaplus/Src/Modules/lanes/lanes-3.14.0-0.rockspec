@@ -7,11 +7,11 @@
 
 package = "Lanes"
 
-version = "3.8.3-1"
+version = "3.14.0-0"
 
 source= {
 	url= "git://github.com/LuaLanes/lanes.git",
-	branch= "v3.8.3"
+	branch= "v3.14.0"
 }
 
 description = {
@@ -36,7 +36,7 @@ supported_platforms= { "win32",
 }
 
 dependencies= {
-	"lua >= 5.1", -- builds with either 5.1 and 5.2
+	"lua >= 5.1", -- builds with either 5.1, 5.2, 5.3 and 5.4
 }
 
 build = {
@@ -58,7 +58,7 @@ build = {
 	{
 		["lanes.core"] =
 		{
-			sources = { "src/lanes.c", "src/keeper.c", "src/tools.c", "src/threading.c"},
+			sources = { "src/cancel.c", "src/compat.c", "src/deep.c", "src/lanes.c", "src/linda.c", "src/keeper.c", "src/tools.c", "src/threading.c", "src/universe.c"},
 			incdirs = { "src"},
 		},
 		lanes = "src/lanes.lua"

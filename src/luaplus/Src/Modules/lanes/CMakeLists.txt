@@ -6,13 +6,14 @@
 
 PROJECT(lanes C)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-INCLUDE(dist.cmake)
+
 
 FIND_PACKAGE(Lua51 REQUIRED)
-FIND_PROGRAM(LUA NAMES lua5.1 lua51 lua)
-FIND_PROGRAM(LUAC NAMES luac5.1 luac51 luac)
 INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIR})
 
+if(USE_PTHREAD)
+ADD_DEFINITIONS(-DHAVE_WIN32_PTHREAD)
+endif(USE_PTHREAD)
 #2DO - patch threading.c to suppot cygwin.
 # The following values are just a guess.
 # WARNING: test segfault under Cygwin
@@ -24,32 +25,32 @@ IF(CYGWIN)
   ADD_DEFINITIONS(-Dpthread_yield=sched_yield)
 ENDIF(CYGWIN)
 
-#2DO - use provided bin2c
-# Embed keeper.lua in text form in C (embedding bytecode is not LuaJIT2-compatible)
-#ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/keeper.lch
-#  DEPENDS src/keeper.lua
-#    COMMAND "${LUA}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/bin2c.lua"
-#            "${CMAKE_CURRENT_SOURCE_DIR}/src/keeper.lua"
-#            "-o" "${CMAKE_CURRENT_BINARY_DIR}/keeper.lch")
-#SET_SOURCE_FILES_PROPERTIES(src/lanes.c PROPERTIES OBJECT_DEPENDS
-#  ${CMAKE_CURRENT_BINARY_DIR}/keeper.lch)
-#INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-
 
 # Build
 INCLUDE_DIRECTORIES(src)
-ADD_LIBRARY(core MODULE src/lanes.c src/deep.c src/threading.c src/tools.c src/keeper.c src/compat.c)
+aux_source_directory(./src LANES_SRC)
+ADD_LIBRARY(core MODULE ${LANES_SRC})
 
 IF(UNIX AND NOT CYGWIN)
   SET(LIBS pthread)
 ENDIF(UNIX AND NOT CYGWIN)
 
 
-
+if(WIN32)
 TARGET_LINK_LIBRARIES(core ${LUA_LIBRARY} ${LIBS})
+else(WIN32)
+TARGET_LINK_LIBRARIES(core ${LIBS})
+endif(WIN32)
+
 SET_TARGET_PROPERTIES(core PROPERTIES PREFIX "")
 
 # Install all files and documentation
+set(INSTALL_LMOD share/lua/lmod CACHE PATH "Directory to install Lua modules.")
+set(INSTALL_CMOD share/lua/cmod CACHE PATH "Directory to install Lua binary modules.")
+set(INSTALL_DATA share/${PROJECT_NAME} CACHE PATH "Directory the package can store documentation, tests or other data in.")
+set(INSTALL_DOC ${INSTALL_DATA}/doc CACHE PATH "Recommended directory to install documentation into.")
+set(INSTALL_TEST ${INSTALL_DATA}/test CACHE PATH "Recommended directory to install tests into.")
+
 INSTALL (TARGETS core DESTINATION ${INSTALL_CMOD})
 INSTALL (FILES src/lanes.lua DESTINATION ${INSTALL_LMOD})
 
