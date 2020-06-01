@@ -123,7 +123,6 @@ static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym);
 */
 
 #if LUAPLUS_EXTENSIONS
-#define __USE_GNU
 #define _DARWIN_C_SOURCE
 #if !defined(__BSD_VISIBLE)
 #define __BSD_VISIBLE 1
@@ -175,7 +174,6 @@ static void lp_loadlocalconfig(lua_State *L) {
 static void setprogdir (lua_State *L) {
   char* buff;
   char *lb;
-  unsigned int path_len = sizeof(buff)/sizeof(char);
 #ifdef _DEBUG
   const char* luaplusdllName = "lua53_debug.so";
 #else // _DEBUG
