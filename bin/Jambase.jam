@@ -6,6 +6,8 @@
 # This file is part of Jam - see jam.c for Copyright information.
 #
 
+JAMBASE_ROOT_PATH = @($(JAM_CURRENT_SCRIPT:D):R=) ;
+
 # Helper rule used to get value of a variable bound to specific target.
 # [ on <target> Var <var> ]
 rule Var {
