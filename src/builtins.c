@@ -951,7 +951,7 @@ builtin_md5file(
 			do
 			{
 			    readSize = fread(buffer, 1, BUFFER_SIZE, file);
-			    MD5Update(&context, buffer, readSize);
+			    MD5Update(&context, buffer, (unsigned int)readSize);
 			} while (readSize != 0);
 
 			fclose(file);
@@ -1391,7 +1391,7 @@ builtin_expandfilelist(
 			int matches = 1;
 
 			path_parse( list_value(file), &f );
-			f.f_root.len = searchSourceLen;
+			f.f_root.len = (int)searchSourceLen;
 			f.f_root.ptr = searchSourceStr;
 #ifdef OPT_ROOT_PATHS_AS_ABSOLUTE_EXT
 			path_build( &f, buf, 0, absolute );

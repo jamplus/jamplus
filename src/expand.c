@@ -129,7 +129,7 @@ var_expand(
 	int literal = 0;
 
 	if( DEBUG_VAREXP )
-	    printf( "expand '%.*s'\n", end - in, in );
+	    printf( "expand '%.*s'\n", (int)(end - in), in );
 
 	/* This gets alot of cases: $(<) and $(>) */
 

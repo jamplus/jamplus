@@ -698,7 +698,7 @@ int main( int argc, char **argv, char **arg_environ )
 	{
 	    LIST *l = 0;
 	    int i;
-	    char num[3];
+	    char num[20];
 
 	    /* The number could be negative if the user is trying to be nasty */
 	    if( globs.jobs < 1 )

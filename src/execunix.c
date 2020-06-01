@@ -68,7 +68,7 @@
 # include <sys/wait.h>
 # endif
 
-static int my_wait( int *status );
+static intptr_t my_wait( int *status );
 
 #include <stdlib.h>
 #include <errno.h>
@@ -469,7 +469,7 @@ execcmd(
 		_dup2 (fd, 2);
 		close (fd);
 
-		if( ( pid = spawnvp( P_NOWAIT, argv[0], argv ) ) == -1 )
+		if( ( pid = spawnvp( P_NOWAIT, argv[0], (char *const *)argv ) ) == -1 )
 		{
 			bad_spawn = 1;
 			spawn_err = errno;
@@ -493,7 +493,7 @@ execcmd(
 #endif
 	{
 
-		if( ( pid = spawnvp( P_NOWAIT, argv[0], argv ) ) == -1 )
+		if( ( pid = spawnvp( P_NOWAIT, argv[0], (char *const *)argv ) ) == -1 )
 		{
 			perror( "spawn" );
 			exit( EXITBAD );
@@ -535,7 +535,7 @@ execcmd(
 			dup( fd );
 		}
 # endif
-		execvp( argv[0], argv );
+		execvp( argv[0], (char * const *)argv );
 		exit(127);
 	}
 # endif
@@ -571,7 +571,8 @@ int
 execwait()
 {
 	int i;
-	int status, w;
+	int status;
+	intptr_t w;
 	int rstat;
 
 	/* Handle naive make1() which doesn't know if cmds are running. */
@@ -637,7 +638,7 @@ execwait()
 	return 1;
 }
 
-static int
+static intptr_t
 my_wait( int *status )
 {
 	int i, num_active = 0;
@@ -753,7 +754,7 @@ my_wait( int *status )
 		if ( GetExitCodeProcess(active_handles[i], &exitcode) ) {
 			CloseHandle(active_handles[i]);
 			*status = (int)((exitcode & 0xff) << 8);
-			return (int)active_handles[i];
+			return (intptr_t)active_handles[i];
 		}
 	}
 #else

@@ -340,7 +340,7 @@ file_archscan(
 	    if( c = strrchr( name, '\\' ) )
 		name = c + 1;
 
-	    sprintf( buf, "%s(%.*s)", archive, endname - name, name );
+	    sprintf( buf, "%s(%.*s)", archive, (int)(endname - name), name );
 #ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
 	    (*func)( closure, buf, 1 /* time valid */, (time_t)lar_date, 0 );
 #else

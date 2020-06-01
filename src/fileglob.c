@@ -1044,7 +1044,7 @@ fileglob* fileglob_CreateWithAlloc(const char* inPattern, fileglob_Alloc allocFu
     context = self->startingContext;
     context->buf = self->buf;
     context->path = self->buf;
-    context->pathlen = strlen(self->buf);
+    context->pathlen = (long)strlen(self->buf);
     context->beg = &self->list;
     context->end = &self->list + 1;
 	context->new_beg = NULL;
@@ -1259,7 +1259,7 @@ TopContinue:
 			} else {
                 int ignore = 0;
                 if (self->ignoreDirectoryPatternsHead  ||  self->exclusiveDirectoryPatternsHead) {
-                    char* dirbuf = join_path(self, buf, strlen(buf), context->dirsep, "", 0);
+                    char* dirbuf = join_path(self, buf, (long)strlen(buf), context->dirsep, "", 0);
 
                     ignore = _fileglob_MatchIgnoreDirectoryPattern(self, dirbuf);
 
@@ -1299,7 +1299,7 @@ TopContinue:
 			context = _fileglob_AllocateContextLevel(self);
 			context->buf = buf;
 			context->path = context->buf;
-			context->pathlen = strlen(context->buf);
+			context->pathlen = (long)strlen(context->buf);
 			context->dirsep = 1;
 			context->exist = YES;
 			context->isdir = new_isdir;
@@ -1380,7 +1380,7 @@ NextFile:
                 context = _fileglob_AllocateContextLevel(self);
 				context->buf = buf;
 				context->path = context->buf;
-				context->pathlen = strlen(context->buf);
+				context->pathlen = (long)strlen(context->buf);
 				context->dirsep = 1;
 				context->exist = UNKNOWN;
 				context->isdir = UNKNOWN;
@@ -1621,7 +1621,7 @@ const char* fileglob_Permissions(fileglob* self) {
 			self->permissions[6] = 'r';
 			self->permissions[7] = 'w';
         }
-        if (p = strrchr(self->context->path, '.')) {
+        if ((p = strrchr(self->context->path, '.')) != NULL) {
             if ( !_stricmp(p, ".exe") ||
                 !_stricmp(p, ".cmd") ||
                 !_stricmp(p, ".bat") ||

@@ -119,7 +119,7 @@ yyfparse( const char *s )
 	/* If the filename is "+", it means use the internal jambase. */
 
 	if( !strcmp( s, "+" ) )
-	    i->strings = jambase;
+	    i->strings = (char**)jambase;
 }
 
 void
