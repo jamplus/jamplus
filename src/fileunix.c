@@ -990,8 +990,10 @@ void getexecutablepath(char* buffer, size_t bufferLen)
 #elif defined(__FreeBSD__)
 	sysctl_get_pathname(buffer, bufferLen);
 #else
-	if (readlink("/proc/self/exe", buffer, bufferLen) != -1)
+	int count = readlink("/proc/self/exe", buffer, bufferLen);
+	if (count != -1)
 	{
+		buffer[count] = 0;
 		return;
 	}
 	*buffer = 0;
