@@ -770,6 +770,17 @@ rule android.Library TARGET : SOURCES : OPTIONS {
     }
 
     local _javaFiles = $(SOURCES:I=.java) ;
+    local newsrcs ;
+    local _src ;
+
+    for _src in $(_javaFiles) {
+        local _gristedSrc = $(_src:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+        if $(ANDROID.EXCLUDED_FROM_BUILD:Z=$(_gristedSrc)) = true {
+            continue ;
+        }
+        newsrcs += $(_src) ;
+    }
+    _javaFiles = $(newsrcs) ;
 
     local _sources = [ C.GristFiles $(TARGET) : $(_javaFiles) ] ;
     if $(_sources[1]) {
@@ -1549,6 +1560,12 @@ rule android.PackageOutputPath TARGET : OUTPUT_PATH {
 }
 
 
+rule android.ExcludeFromBuild TARGET : SOURCES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.EXCLUDED_FROM_BUILD on $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) = true ;
+}
+
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -1634,6 +1651,10 @@ rule android.Library TARGET : SOURCES : OPTIONS {
 
     DumpProjectInfo $(TARGET) : $(SOURCES) : app $(OPTIONS) ;
     Depends all : $(TARGET) ;
+}
+
+
+rule android.ExcludeFromBuild TARGET : SOURCES {
 }
 
 
