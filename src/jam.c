@@ -155,7 +155,8 @@
 # endif
 
 # ifdef OS_MACOSX
-# include <CoreServices/CoreServices.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
 # endif
 
 /* And UNIX for this */
@@ -511,9 +512,24 @@ int main( int argc, char **argv, char **arg_environ )
 		globs.jobs = 1;
 }
 #elif defined(OS_MACOSX)
-	globs.jobs = MPProcessors();
-#endif
-
+{
+	int mib[2];
+	size_t len;
+	int numProcessors;
+	mib[0] = CTL_HW;
+	mib[1] = HW_NCPU;
+	len = sizeof(numProcessors);
+	int result = sysctl(mib, 2, &numProcessors, &len, NULL, 0);
+	if (result == -1)
+	{
+		globs.jobs = 1;
+	}
+	else
+	{
+		globs.jobs = numProcessors;
+	}
+}
+#endif /* OS_NT */
 #endif /* OPT_IMPROVE_JOBS_SETTING_EXT */
 
 	if( ( s = getoptval( optv, 'j', 0 ) ) )
