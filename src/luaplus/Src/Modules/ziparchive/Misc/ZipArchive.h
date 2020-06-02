@@ -13,7 +13,7 @@
 #define MISC_ZIPARCHIVE_H
 
 #include "Misc.h"
-#include "zlib.h"
+#include "../../lua-miniz/miniz.h"
 #include <time.h>
 #include "List.h"
 #include "HeapString.h"

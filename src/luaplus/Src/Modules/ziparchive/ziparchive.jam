@@ -136,7 +136,7 @@ local TRIO_SRCS =
 		trio/trionan.c
 		trio/trionan.h
 		trio/triop.h
-		trio/triostr.c
+		#trio/triostr.c
 		trio/triostr.h
 ;
 
@@ -162,6 +162,11 @@ local ZLIB_SRCS =
 		../zlib/zlib.h
 		../zlib/zutil.c
 		../zlib/zutil.h
+;
+
+local ZLIB_SRCS =
+		../lua-miniz/miniz.c
+		../lua-miniz/miniz.h
 ;
 
 PCH_SRCS = Misc/$(PCH_SRCS) ;

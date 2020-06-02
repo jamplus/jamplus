@@ -29,7 +29,7 @@ extern "C" {
 #define luaL_register(a, b, c) luaL_setfuncs(a, c, 0)
 #define lua_objlen lua_rawlen
 
-LUALIB_API int luaL_argerror (lua_State *L, int narg, const char *extramsg) {
+LUALIB_API int ziparchive_luaL_argerror (lua_State *L, int narg, const char *extramsg) {
   lua_Debug ar;
   if (!lua_getstack(L, 0, &ar))  /* no stack frame? */
     return luaL_error(L, "bad argument #%d (%s)", narg, extramsg);
@@ -50,7 +50,7 @@ LUALIB_API int luaL_argerror (lua_State *L, int narg, const char *extramsg) {
 LUALIB_API int luaL_typerror (lua_State *L, int narg, const char *tname) {
   const char *msg = lua_pushfstring(L, "%s expected, got %s",
                                     tname, luaL_typename(L, narg));
-  return luaL_argerror(L, narg, msg);
+  return ziparchive_luaL_argerror(L, narg, msg);
 }
 
 #endif
@@ -75,7 +75,7 @@ double ui64ToDouble(unsigned long long ui64)
 
 using namespace Misc;
 
-static int _lziparchive_buildfileentry(lua_State* L, int archiveIndex, ZipArchive* archive, int fileEntryIndex);
+static int _lziparchive_buildfileentry(lua_State* L, int archiveIndex, ZipArchive* archive, size_t fileEntryIndex);
 
 
 #define ARCHIVEFILEHANDLE_METATABLE "ArchiveFileHandleMetaTable"
@@ -741,7 +741,7 @@ int lziparchive_getfilename(lua_State* L)
 int lziparchive_fileentrycount(lua_State* L)
 {
 	ZipArchive* archive = lziparchive_check(L, 1);
-	lua_pushnumber(L, archive->GetFileEntryCount());
+	lua_pushinteger(L, archive->GetFileEntryCount());
 	return 1;
 }
 
@@ -806,7 +806,7 @@ int lziparchive_fileentryindex(lua_State* L) {
 	size_t index = archive->FindFileEntryIndex(fileName);
 	if (index == ZipArchive::INVALID_FILE_ENTRY)
 		return 0;
-	lua_pushnumber(L, archive->FindFileEntryIndex(fileName) + 1);
+	lua_pushinteger(L, (int)(archive->FindFileEntryIndex(fileName) + 1));
 	return 1;
 }
 
@@ -827,7 +827,7 @@ static int _lziparchive_fileentry_gc(lua_State* L) {
 }
 
 
-static int _lziparchive_buildfileentry(lua_State* L, int archiveIndex, ZipArchive* archive, int fileEntryIndex) {
+static int _lziparchive_buildfileentry(lua_State* L, int archiveIndex, ZipArchive* archive, size_t fileEntryIndex) {
 	struct fileentry_info* info = (struct fileentry_info*)lua_newuserdata(L, sizeof(struct fileentry_info));
 	lua_pushvalue(L, archiveIndex);
 	info->zipArchiveRef = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -879,7 +879,7 @@ static int _zafe_index_filename(lua_State* L, fileentry_info* info, ZipEntryInfo
 
 
 static int _zafe_index_index(lua_State* L, fileentry_info* info, ZipEntryInfo* entry) {
-	lua_pushnumber(L, info->entryIndex);
+	lua_pushinteger(L, (int)info->entryIndex);
 	return 1;
 }
 
@@ -919,7 +919,7 @@ static int _zafe_index_table(lua_State* L, fileentry_info* info, ZipEntryInfo* e
 	lua_pushnumber(L, (lua_Number)entry->GetCRC());
 	lua_setfield(L, -2, "crc");
 
-	lua_pushnumber(L, info->entryIndex);
+	lua_pushnumber(L, (int)info->entryIndex);
 	lua_setfield(L, -2, "index");
 
 	lua_pushlstring(L, (const char*)entry->GetMD5(), 16);

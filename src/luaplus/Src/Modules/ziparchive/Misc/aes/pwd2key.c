@@ -186,8 +186,9 @@ int main()
     return 0;
 }
 
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#endif

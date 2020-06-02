@@ -14,7 +14,6 @@
 #include "DiskFile.h"
 #include "ZipEntryFile.h"
 #include <time.h>
-#include "zlib.h"
 #include <assert.h>
 #include <stdio.h>
 #if defined(_WIN32)
@@ -51,7 +50,7 @@ extern "C"
 }
 
 #if defined(_WIN32)
-#define ZIPARCHIVE_USE_LIBLZMA 1
+#define ZIPARCHIVE_USE_LIBLZMA 0
 #endif
 #if ZIPARCHIVE_USE_LIBLZMA
 #include <lzma.h>
@@ -276,7 +275,7 @@ struct FWKCS_MD5
 #endif
 
 
-static voidpf zlib_alloc_func(voidpf opaque, uInt items, uInt size)
+static voidpf zlib_alloc_func(voidpf opaque, size_t items, size_t size)
 {
 	return new unsigned char[ items * size ];
 }
@@ -3216,9 +3215,7 @@ time_t ConvertFILETIME_To_time_t(const FILETIME& fileTime)
 	FileTimeToSystemTime(&fileTime, &universalSystemTime);
 
 	SYSTEMTIME sysTime;
-	if (CheckFor98Mill()) {
-		CORE_ASSERT(0);
-	} else {
+	{
 		if (!fnSystemTimeToTzSpecificLocalTime) {
 			HMODULE aLib = LoadLibraryA("kernel32.dll");
 			if (aLib == NULL)

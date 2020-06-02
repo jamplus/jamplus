@@ -134,6 +134,9 @@ extern "C" {
  * Features
  */
 
+# define TRIO_EMBED_NAN 1
+# define TRIO_EMBED_STRING 1
+
 #if defined(TRIO_SNPRINTF_ONLY)
 # define TRIO_FEATURE_SCANF 0
 # define TRIO_FEATURE_FILE 0

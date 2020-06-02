@@ -46,7 +46,7 @@ extern "C"
                         s(y,2) = s(x,2); s(y,3) = s(x,3);
 #define state_in(y,x,k) si(y,x,k,0); si(y,x,k,1); si(y,x,k,2); si(y,x,k,3)
 #define state_out(y,x)  so(y,x,0); so(y,x,1); so(y,x,2); so(y,x,3)
-#define round(rm,y,x,k) rm(y,x,k,0); rm(y,x,k,1); rm(y,x,k,2); rm(y,x,k,3)
+#define around(rm,y,x,k) rm(y,x,k,0); rm(y,x,k,1); rm(y,x,k,2); rm(y,x,k,3)
 
 #if ( FUNCS_IN_C & ENCRYPTION_IN_C )
 
@@ -112,24 +112,24 @@ AES_RETURN aes_encrypt(const unsigned char *in, unsigned char *out, const aes_en
     switch(cx->inf.b[0])
     {
     case 14 * 16:
-        round(fwd_rnd,  b1, b0, kp + 1 * N_COLS);
-        round(fwd_rnd,  b0, b1, kp + 2 * N_COLS);
+        around(fwd_rnd,  b1, b0, kp + 1 * N_COLS);
+        around(fwd_rnd,  b0, b1, kp + 2 * N_COLS);
         kp += 2 * N_COLS;
     case 12 * 16:
-        round(fwd_rnd,  b1, b0, kp + 1 * N_COLS);
-        round(fwd_rnd,  b0, b1, kp + 2 * N_COLS);
+        around(fwd_rnd,  b1, b0, kp + 1 * N_COLS);
+        around(fwd_rnd,  b0, b1, kp + 2 * N_COLS);
         kp += 2 * N_COLS;
     case 10 * 16:
-        round(fwd_rnd,  b1, b0, kp + 1 * N_COLS);
-        round(fwd_rnd,  b0, b1, kp + 2 * N_COLS);
-        round(fwd_rnd,  b1, b0, kp + 3 * N_COLS);
-        round(fwd_rnd,  b0, b1, kp + 4 * N_COLS);
-        round(fwd_rnd,  b1, b0, kp + 5 * N_COLS);
-        round(fwd_rnd,  b0, b1, kp + 6 * N_COLS);
-        round(fwd_rnd,  b1, b0, kp + 7 * N_COLS);
-        round(fwd_rnd,  b0, b1, kp + 8 * N_COLS);
-        round(fwd_rnd,  b1, b0, kp + 9 * N_COLS);
-        round(fwd_lrnd, b0, b1, kp +10 * N_COLS);
+        around(fwd_rnd,  b1, b0, kp + 1 * N_COLS);
+        around(fwd_rnd,  b0, b1, kp + 2 * N_COLS);
+        around(fwd_rnd,  b1, b0, kp + 3 * N_COLS);
+        around(fwd_rnd,  b0, b1, kp + 4 * N_COLS);
+        around(fwd_rnd,  b1, b0, kp + 5 * N_COLS);
+        around(fwd_rnd,  b0, b1, kp + 6 * N_COLS);
+        around(fwd_rnd,  b1, b0, kp + 7 * N_COLS);
+        around(fwd_rnd,  b0, b1, kp + 8 * N_COLS);
+        around(fwd_rnd,  b1, b0, kp + 9 * N_COLS);
+        around(fwd_lrnd, b0, b1, kp +10 * N_COLS);
     }
 
 #else
@@ -139,23 +139,23 @@ AES_RETURN aes_encrypt(const unsigned char *in, unsigned char *out, const aes_en
         for(rnd = 0; rnd < (cx->inf.b[0] >> 5) - 1; ++rnd)
         {
             kp += N_COLS;
-            round(fwd_rnd, b1, b0, kp);
+            around(fwd_rnd, b1, b0, kp);
             kp += N_COLS;
-            round(fwd_rnd, b0, b1, kp);
+            around(fwd_rnd, b0, b1, kp);
         }
         kp += N_COLS;
-        round(fwd_rnd,  b1, b0, kp);
+        around(fwd_rnd,  b1, b0, kp);
 #else
     {   uint_32t    rnd;
         for(rnd = 0; rnd < (cx->inf.b[0] >> 4) - 1; ++rnd)
         {
             kp += N_COLS;
-            round(fwd_rnd, b1, b0, kp);
+            around(fwd_rnd, b1, b0, kp);
             l_copy(b0, b1);
         }
 #endif
         kp += N_COLS;
-        round(fwd_lrnd, b0, b1, kp);
+        around(fwd_lrnd, b0, b1, kp);
     }
 #endif
 
@@ -213,9 +213,9 @@ AES_RETURN aes_encrypt(const unsigned char *in, unsigned char *out, const aes_en
 
 /* This code can work with the decryption key schedule in the   */
 /* order that is used for encrytpion (where the 1st decryption  */
-/* round key is at the high end ot the schedule) or with a key  */
+/* around key is at the high end ot the schedule) or with a key  */
 /* schedule that has been reversed to put the 1st decryption    */
-/* round key at the low end of the schedule in memory (when     */
+/* around key at the low end of the schedule in memory (when     */
 /* AES_REV_DKS is defined)                                      */
 
 #ifdef AES_REV_DKS
@@ -245,22 +245,22 @@ AES_RETURN aes_decrypt(const unsigned char *in, unsigned char *out, const aes_de
     switch(cx->inf.b[0])
     {
     case 14 * 16:
-        round(inv_rnd,  b1, b0, rnd_key(-13));
-        round(inv_rnd,  b0, b1, rnd_key(-12));
+        around(inv_rnd,  b1, b0, rnd_key(-13));
+        around(inv_rnd,  b0, b1, rnd_key(-12));
     case 12 * 16:
-        round(inv_rnd,  b1, b0, rnd_key(-11));
-        round(inv_rnd,  b0, b1, rnd_key(-10));
+        around(inv_rnd,  b1, b0, rnd_key(-11));
+        around(inv_rnd,  b0, b1, rnd_key(-10));
     case 10 * 16:
-        round(inv_rnd,  b1, b0, rnd_key(-9));
-        round(inv_rnd,  b0, b1, rnd_key(-8));
-        round(inv_rnd,  b1, b0, rnd_key(-7));
-        round(inv_rnd,  b0, b1, rnd_key(-6));
-        round(inv_rnd,  b1, b0, rnd_key(-5));
-        round(inv_rnd,  b0, b1, rnd_key(-4));
-        round(inv_rnd,  b1, b0, rnd_key(-3));
-        round(inv_rnd,  b0, b1, rnd_key(-2));
-        round(inv_rnd,  b1, b0, rnd_key(-1));
-        round(inv_lrnd, b0, b1, rnd_key( 0));
+        around(inv_rnd,  b1, b0, rnd_key(-9));
+        around(inv_rnd,  b0, b1, rnd_key(-8));
+        around(inv_rnd,  b1, b0, rnd_key(-7));
+        around(inv_rnd,  b0, b1, rnd_key(-6));
+        around(inv_rnd,  b1, b0, rnd_key(-5));
+        around(inv_rnd,  b0, b1, rnd_key(-4));
+        around(inv_rnd,  b1, b0, rnd_key(-3));
+        around(inv_rnd,  b0, b1, rnd_key(-2));
+        around(inv_rnd,  b1, b0, rnd_key(-1));
+        around(inv_lrnd, b0, b1, rnd_key( 0));
     }
 
 #else
@@ -270,23 +270,23 @@ AES_RETURN aes_decrypt(const unsigned char *in, unsigned char *out, const aes_de
         for(rnd = 0; rnd < (cx->inf.b[0] >> 5) - 1; ++rnd)
         {
             kp = rnd_key(1);
-            round(inv_rnd, b1, b0, kp);
+            around(inv_rnd, b1, b0, kp);
             kp = rnd_key(1);
-            round(inv_rnd, b0, b1, kp);
+            around(inv_rnd, b0, b1, kp);
         }
         kp = rnd_key(1);
-        round(inv_rnd, b1, b0, kp);
+        around(inv_rnd, b1, b0, kp);
 #else
     {   uint_32t    rnd;
         for(rnd = 0; rnd < (cx->inf.b[0] >> 4) - 1; ++rnd)
         {
             kp = rnd_key(1);
-            round(inv_rnd, b1, b0, kp);
+            around(inv_rnd, b1, b0, kp);
             l_copy(b0, b1);
         }
 #endif
         kp = rnd_key(1);
-        round(inv_lrnd, b0, b1, kp);
+        around(inv_lrnd, b0, b1, kp);
         }
 #endif
 

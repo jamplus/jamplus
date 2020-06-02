@@ -268,11 +268,6 @@ void DiskFile::SetLastWriteTime(time_t lastWriteTime)
 
 	SYSTEMTIME universalSystemTime;
 
-	if (CheckFor98Mill())
-	{
-		CORE_ASSERT(0);
-	}
-	else
 	{
 		if (!fnTzSpecificLocalTimeToSystemTime)
 		{

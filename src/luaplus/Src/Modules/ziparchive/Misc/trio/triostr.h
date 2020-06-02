@@ -65,6 +65,8 @@ enum {
 #  endif
 # endif
 
+#   define TRIO_FUNC_CREATE
+#   define TRIO_FUNC_COPY_MAX
 # if defined(TRIO_FUNC_DUPLICATE) \
   || defined(TRIO_FUNC_DUPLICATE_MAX) \
   || defined(TRIO_FUNC_STRING_DUPLICATE) \

@@ -23,11 +23,13 @@ DWORD GetMilliseconds()
 {
 #if defined(_WIN32)
 	return ::timeGetTime();
-#endif
-#if defined(PLATFORM_MAC)
+#elif defined(PLATFORM_MAC)
 	timeval time;
 	gettimeofday(&time, NULL);
 	return (time.tv_sec * 1000) + (time.tv_usec / 1000);
+#else
+	CORE_ASSERT(0);
+	return 0;
 #endif // _WIN32
 }
 
@@ -40,76 +42,5 @@ void SleepMilliseconds(unsigned int milliseconds)
 	usleep(milliseconds * 1000);
 #endif
 }
-
-#if defined(_WIN32)
-
-bool CheckFor98Mill()
-{
-	static bool needOsCheck = true;
-	static bool is98Mill = false;
-
-	if (needOsCheck)
-	{
-		bool invalid = false;
-		OSVERSIONINFOEXA osvi;
-		ZeroMemory(&osvi, sizeof(OSVERSIONINFOEXA));
-
-		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
-		if( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
-		{
-			osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOA);
-			if ( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
-				return false;
-		}
-
-		needOsCheck = false;
-		is98Mill = osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS; // let's check Win95, 98, *AND* ME.
-	}
-
-	return is98Mill;
-}
-
-bool CheckForVista()
-{
-	static bool needOsCheck = true;
-	static bool isVista = false;
-
-	if (needOsCheck)
-	{
-		bool invalid = false;
-		OSVERSIONINFOEXA osvi;
-		ZeroMemory(&osvi, sizeof(OSVERSIONINFOEXA));
-
-		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
-		if( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
-		{
-			osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOA);
-			if ( GetVersionExA((LPOSVERSIONINFOA)&osvi) == 0)
-				return false;
-		}
-
-		needOsCheck = false;
-		isVista = osvi.dwMajorVersion >= 6;
-	}
-
-	return isVista;
-}
-
-bool CheckForTabletPC()
-{
-	static bool needsCheck = true;
-	static bool isTabletPC = false;
-
-	if (needsCheck)
-	{
-		isTabletPC = GetSystemMetrics(86) != 0; // check for tablet pc
-		needsCheck = false;
-	}
-
-	return isTabletPC;
-}
-
-
-#endif // _WIN32
 
 } // namespace Misc

@@ -61,7 +61,8 @@
 #include "trionan.h"
 
 #if defined(TRIO_EMBED_STRING)
-# define TRIO_PUBLIC_STRING static
+//#undef TRIO_PUBLIC_STRING
+//# define TRIO_PUBLIC_STRING static
 # define TRIO_FUNC_LENGTH
 # define TRIO_FUNC_LENGTH_MAX
 # define TRIO_FUNC_TO_LONG
@@ -2815,7 +2816,7 @@ TRIO_ARGS6((self, number, flags, width, precision, base),
   int offset;
   BOOLEAN_T hasOnlyZeroes;
   int leadingFractionZeroes = -1;
-  register int trailingZeroes;
+  int trailingZeroes;
   BOOLEAN_T keepTrailingZeroes;
   BOOLEAN_T keepDecimalPoint;
   trio_long_double_t epsilon;

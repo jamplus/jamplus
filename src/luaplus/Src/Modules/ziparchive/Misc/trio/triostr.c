@@ -103,7 +103,9 @@
 # if defined(TRIO_PLATFORM_WINCE)
 #  define strcasecmp(x,y) _stricmp(x,y)
 # else
-#  define strcasecmp(x,y) strcmpi(x,y)
+#  ifndef strcasecmp
+#   define strcasecmp(x,y) strcmpi(x,y)
+#  endif
 # endif
 #endif
 

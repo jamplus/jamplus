@@ -7,13 +7,14 @@
 #if defined(_WIN32)
 #define PLATFORM_WINDOWS
 #define MISC_CDECL __cdecl
-#if defined(_MSC_VER)
-#include "stdint.vc.h"
-#endif
+//#if defined(_MSC_VER) && !defined(_STDINT)
+//#include "stdint.vc.h"
+//#endif
+#include <stdint.h>
 #elif defined(macintosh)  ||  defined(__APPLE__)
 #define PLATFORM_MAC
 #define MISC_CDECL
-#elif defined(linux)  ||  defined(__FreeBSD__)
+#elif defined(linux)  ||  defined(__linux__)  ||  defined(__FreeBSD__)
 #define PLATFORM_LINUX
 #define MISC_CDECL
 #endif
@@ -96,12 +97,6 @@ class Vector3i;
 class Vector4f;
 
 class WideString;
-
-
-bool				CheckFor98Mill();
-bool				CheckForVista();
-bool				CheckForTabletPC();
-bool				AllowAllAccess(const AnsiString& theFileName);
 
 } // namespace Misc
 

@@ -94,11 +94,11 @@
 #if !defined( _AESOPT_H )
 #define _AESOPT_H
 
-#if defined( __cplusplus )
-#include "aescpp.h"
-#else
+//#if defined( __cplusplus )
+//#include "aescpp.h"
+//#else
 #include "aes.h"
-#endif
+//#endif
 
 /*  PLATFORM SPECIFIC INCLUDES */
 
