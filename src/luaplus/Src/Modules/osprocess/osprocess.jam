@@ -6,8 +6,8 @@ if $(NT)
 {
     SRCS =
             w32api/ex.c
-            w32api/pusherror.c
-            w32api/pusherror.h
+            w32api/windows_pusherror.c
+            w32api/windows_pusherror.h
             w32api/spawn.c
             w32api/spawn.h
     ;

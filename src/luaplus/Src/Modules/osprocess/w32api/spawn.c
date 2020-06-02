@@ -11,35 +11,10 @@
 #include "lauxlib.h"
 
 #include "spawn.h"
-#include "pusherror.h"
+#include "windows_pusherror.h"
 
 #if LUA_VERSION_NUM >= 502
-#define luaL_register(a, b, c) luaL_setfuncs(a, c, 0)
 #define lua_objlen lua_rawlen
-
-static int luaL_argerror (lua_State *L, int narg, const char *extramsg) {
-  lua_Debug ar;
-  if (!lua_getstack(L, 0, &ar))  /* no stack frame? */
-    return luaL_error(L, "bad argument #%d (%s)", narg, extramsg);
-  lua_getinfo(L, "n", &ar);
-  if (strcmp(ar.namewhat, "method") == 0) {
-    narg--;  /* do not count `self' */
-    if (narg == 0)  /* error is in the self argument itself? */
-      return luaL_error(L, "calling " LUA_QS " on bad self (%s)",
-                           ar.name, extramsg);
-  }
-  if (ar.name == NULL)
-    ar.name = "?";
-  return luaL_error(L, "bad argument #%d to " LUA_QS " (%s)",
-                        narg, ar.name, extramsg);
-}
-
-
-static int luaL_typerror (lua_State *L, int narg, const char *tname) {
-  const char *msg = lua_pushfstring(L, "%s expected, got %s",
-                                    tname, luaL_typename(L, narg));
-  return luaL_argerror(L, narg, msg);
-}
 
 #endif
 
@@ -50,8 +25,6 @@ static int luaL_typerror (lua_State *L, int narg, const char *tname) {
 #define debug(...) /* fprintf(stderr, __VA_ARGS__) */
 #define debug_stack(L) /* #include "../lds.c" */
 #endif
-
-#define file_handle(fp) (HANDLE)_get_osfhandle(fileno(fp))
 
 struct spawn_params {
   lua_State *L;
@@ -281,7 +254,7 @@ int spawn_param_execute(struct spawn_params *p)
   ret = CreateProcess(0, c, 0, 0, p->detach ? FALSE : TRUE, flags, e, 0, &p->si, &proc->pi);
   free(c);
   if (!ret)
-    return windows_pushlasterror(L);
+    return osprocess_windows_pushlasterror(L);
   if (proc->jobHandle != INVALID_HANDLE_VALUE) {
 	  BOOL ret = AssignProcessToJobObject(proc->jobHandle, proc->pi.hProcess);
 	  DWORD lastError = GetLastError();
@@ -304,7 +277,7 @@ int process_wait(lua_State *L)
 		return 0;
     if (WAIT_FAILED == result
         || !GetExitCodeProcess(p->pi.hProcess, &exitcode))
-      return windows_pushlasterror(L);
+      return osprocess_windows_pushlasterror(L);
     p->status = exitcode;
   }
   process_close(L);

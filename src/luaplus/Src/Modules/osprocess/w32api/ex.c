@@ -24,14 +24,14 @@
 
 #include "spawn.h"
 
-#include "pusherror.h"
-#define push_error(L) windows_pushlasterror(L)
+#include "windows_pusherror.h"
+#define ex_push_error(L) osprocess_windows_pushlasterror(L)
 
 #if LUA_VERSION_NUM >= 502
 #define luaL_register(a, b, c) luaL_setfuncs(a, c, 0)
 #define lua_objlen lua_rawlen
 
-static int luaL_argerror (lua_State *L, int narg, const char *extramsg) {
+static int ex_luaL_argerror (lua_State *L, int narg, const char *extramsg) {
   lua_Debug ar;
   if (!lua_getstack(L, 0, &ar))  /* no stack frame? */
     return luaL_error(L, "bad argument #%d (%s)", narg, extramsg);
@@ -49,10 +49,10 @@ static int luaL_argerror (lua_State *L, int narg, const char *extramsg) {
 }
 
 
-static int luaL_typerror (lua_State *L, int narg, const char *tname) {
+static int ex_luaL_typerror (lua_State *L, int narg, const char *tname) {
   const char *msg = lua_pushfstring(L, "%s expected, got %s",
                                     tname, luaL_typename(L, narg));
-  return luaL_argerror(L, narg, msg);
+  return ex_luaL_argerror(L, narg, msg);
 }
 
 #endif
@@ -66,7 +66,7 @@ static int ex_getenv(lua_State *L)
   if (sizeof sval < len)
     len = GetEnvironmentVariable(nam, val = lua_newuserdata(L, len), len);
   if (len == 0)
-    return push_error(L);
+    return ex_push_error(L);
   lua_pushlstring(L, val, len);
   return 1;
 }
@@ -78,7 +78,7 @@ static int ex_setenv(lua_State *L)
   const char *nam = luaL_checkstring(L, 1);
   const char *val = lua_tostring(L, 2);
   if (!SetEnvironmentVariable(nam, val))
-    return push_error(L);
+    return ex_push_error(L);
   lua_pushboolean(L, 1);
   return 1;
 }
@@ -88,7 +88,7 @@ static int ex_environ(lua_State *L)
 {
   const char *nam, *val, *end;
   const char *envs = GetEnvironmentStrings();
-  if (!envs) return push_error(L);
+  if (!envs) return ex_push_error(L);
   lua_newtable(L);
   for (nam = envs; *nam; nam = end + 1) {
     end = strchr(val = strchr(nam, '=') + 1, '\0');
@@ -100,7 +100,7 @@ static int ex_environ(lua_State *L)
 }
 
 
-static FILE *check_file(lua_State *L, int idx, const char *argname)
+static FILE *ex_check_file(lua_State *L, int idx, const char *argname)
 {
 #if LUA_VERSION_NUM <= 501
   FILE **pf;
@@ -140,7 +140,7 @@ static void new_file(lua_State *L, HANDLE h, int dmode, const char *mode)
   p->f = NULL;
   p->closef = pipe_close;  /* mark file handle as 'closed' */
   luaL_setmetatable(L, LUA_FILEHANDLE);
-  p->f = _fdopen(_open_osfhandle((long)h, dmode), mode);
+  p->f = _fdopen(_open_osfhandle((intptr_t)h, dmode), mode);
 #endif
 }
 
@@ -152,7 +152,7 @@ static int ex_pipe(lua_State *L)
   HANDLE ph[2];
   int text = 1;
   if (!CreatePipe(ph + 0, ph + 1, 0, 0))
-    return push_error(L);
+    return ex_push_error(L);
   if (lua_gettop(L) > 0  &&  lua_isboolean(L, 1))
     text = lua_toboolean(L, 1);
   SetHandleInformation(ph[0], HANDLE_FLAG_INHERIT, 0);
@@ -184,7 +184,7 @@ static void get_redirect(lua_State *L,
 {
   lua_getfield(L, idx, stdname);
   if (!lua_isnil(L, -1))
-    spawn_param_redirect(p, stdname, file_handle(check_file(L, -1, stdname)));
+    spawn_param_redirect(p, stdname, file_handle(ex_check_file(L, -1, stdname)));
   lua_pop(L, 1);
 }
 
@@ -195,10 +195,10 @@ static int ex_spawn(lua_State *L)
   struct spawn_params *params;
   int have_options;
   switch (lua_type(L, 1)) {
-  default: return luaL_typerror(L, 1, "string or table");
+  default: return ex_luaL_typerror(L, 1, "string or table");
   case LUA_TSTRING:
     switch (lua_type(L, 2)) {
-    default: return luaL_typerror(L, 2, "table");
+    default: return ex_luaL_typerror(L, 2, "table");
     case LUA_TNONE: have_options = 0; break;
     case LUA_TTABLE: have_options = 1; break;
     }

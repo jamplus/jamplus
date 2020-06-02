@@ -5,11 +5,9 @@
  */
 #include <stdio.h> /* sprintf() */
 #include <ctype.h>
-#define WIN32_LEAN_AND_MEAN 1
-#define NOGDI 1
 #include <windows.h>
 
-#include "pusherror.h"
+#include "windows_pusherror.h"
 
 /* Push nil, followed by the Windows error message corresponding to
  * the error number, or a string giving the error value in decimal if
@@ -18,7 +16,7 @@
  * nresults is -1 and error is NO_ERROR, then push true and return 1.
  * Otherwise, if error is NO_ERROR, return nresults.
  */
-int windows_pusherror(lua_State *L, DWORD error, int nresults)
+int osprocess_windows_pusherror(lua_State *L, DWORD error, int nresults)
 {
   if (error != NO_ERROR || nresults == -2) {
     char buffer[1024];

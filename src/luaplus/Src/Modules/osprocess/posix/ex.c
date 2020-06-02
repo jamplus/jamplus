@@ -14,7 +14,7 @@
 #include <crt_externs.h>
 #define environ (*_NSGetEnviron())
 #else
-ENVIRON_DECL
+extern char **environ;
 #endif
 #include <dirent.h>
 #include <fcntl.h>
@@ -43,7 +43,7 @@ static int luaL_typerror (lua_State *L, int narg, const char *tname) {
 #include "spawn.h"
 
 /* -- nil error */
-extern int push_error(lua_State *L)
+extern int posix_push_error(lua_State *L)
 {
   lua_pushnil(L);
   lua_pushstring(L, strerror(errno));
@@ -56,7 +56,7 @@ static int ex_getenv(lua_State *L)
   const char *nam = luaL_checkstring(L, 1);
   char *val = getenv(nam);
   if (!val)
-    return push_error(L);
+    return posix_push_error(L);
   lua_pushstring(L, val);
   return 1;
 }
@@ -68,7 +68,7 @@ static int ex_setenv(lua_State *L)
   const char *nam = luaL_checkstring(L, 1);
   const char *val = lua_tostring(L, 2);
   int err = val ? setenv(nam, val, 1) : unsetenv(nam);
-  if (err == -1) return push_error(L);
+  if (err == -1) return posix_push_error(L);
   lua_pushboolean(L, 1);
   return 1;
 }
@@ -89,7 +89,7 @@ static int ex_environ(lua_State *L)
 }
 
 
-static FILE *check_file(lua_State *L, int idx, const char *argname)
+static FILE *posix_check_file(lua_State *L, int idx, const char *argname)
 {
 #if LUA_VERSION_NUM <= 501
   FILE **pf;
@@ -149,7 +149,7 @@ static int ex_pipe(lua_State *L)
 {
   int fd[2];
   if (-1 == pipe(fd))
-    return push_error(L);
+    return posix_push_error(L);
   closeonexec(fd[0]);
   closeonexec(fd[1]);
   new_file(L, fd[0], "r");
@@ -174,7 +174,7 @@ static void get_redirect(lua_State *L,
 {
   lua_getfield(L, idx, stdname);
   if (!lua_isnil(L, -1))
-    spawn_param_redirect(p, stdname, fileno(check_file(L, -1, stdname)));
+    spawn_param_redirect(p, stdname, fileno(posix_check_file(L, -1, stdname)));
   lua_pop(L, 1);
 }
 

@@ -8,7 +8,7 @@
 #include <crt_externs.h>
 #define environ (*_NSGetEnviron())
 #else
-ENVIRON_DECL
+extern char **environ;
 #endif
 #include <sys/wait.h>
 #if MISSING_POSIX_SPAWN
@@ -33,7 +33,7 @@ struct spawn_params {
   int useshell;
 };
 
-extern int push_error(lua_State *L);
+extern int posix_push_error(lua_State *L);
 
 struct spawn_params *spawn_param_init(lua_State *L)
 {
@@ -164,7 +164,7 @@ int spawn_param_execute(struct spawn_params *p)
   ret = posix_spawnp(&proc->pid, p->command, &p->redirect, 0,
                      (char *const *)p->argv, (char *const *)p->envp);
   posix_spawn_file_actions_destroy(&p->redirect);
-  return ret != 0 ? push_error(L) : 1;
+  return ret != 0 ? posix_push_error(L) : 1;
 }
 
 /* proc -- exitcode/nil error */
@@ -174,7 +174,7 @@ int process_wait(lua_State *L)
   if (p->status == -1) {
     int status;
     if (-1 == waitpid(p->pid, &status, 0))
-      return push_error(L);
+      return posix_push_error(L);
     p->status = WEXITSTATUS(status);
   }
   lua_pushnumber(L, p->status);
