@@ -835,9 +835,9 @@ LUALIB_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len) {
         lua_pushliteral(L, "nil");
         break;
 #if LUAPLUS_DUMPOBJECT
-      case LUA_TTABLE:
-        luaplus_dumptable(L, 1);
-        break;
+      //case LUA_TTABLE:
+        //luaplus_dumptable(L, 1);
+        //break;
 #endif
       default: {
         int tt = luaL_getmetafield(L, idx, "__name");  /* try name */
