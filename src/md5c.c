@@ -62,7 +62,7 @@ static unsigned char PADDING[64] = {
 /* F, G, H and I are basic MD5 functions.
  */
 #define F(x, y, z) (((x) & (y)) | ((~x) & (z)))
-#define G(x, y, z) (((x) & (z)) | ((y) & (~z)))
+#define MD5_G(x, y, z) (((x) & (z)) | ((y) & (~z)))
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define I(x, y, z) ((y) ^ ((x) | (~z)))
 
@@ -79,7 +79,7 @@ Rotation is separate from addition to prevent recomputation.
  (a) += (b); \
   }
 #define GG(a, b, c, d, x, s, ac) { \
- (a) += G ((b), (c), (d)) + (x) + (UINT4)(ac); \
+ (a) += MD5_G ((b), (c), (d)) + (x) + (UINT4)(ac); \
  (a) = ROTATE_LEFT ((a), (s)); \
  (a) += (b); \
   }
