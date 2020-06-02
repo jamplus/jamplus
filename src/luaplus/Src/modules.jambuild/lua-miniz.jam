@@ -1,0 +1,12 @@
+{
+
+local SRCS =
+        lminiz.c
+        miniz.c
+        miniz.h
+;
+
+Lua.CModule lua-miniz : miniz : $(SRCS) ;
+
+}
+

@@ -1,0 +1,12 @@
+*.dll
+*.exe
+*.obj
+*.lib
+*.pdb
+*.exp
+*.iobj
+*.ipdb
+
+*.7z
+*.zip
+*.xlsx
