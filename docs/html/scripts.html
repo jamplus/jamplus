@@ -16,8 +16,18 @@
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="scripts_overview"></a>
 Overview</h1>
-<p>JamPlus ships with useful scripts for the generation of Jamfiles from various sources. Those scripts can be found in the <code>bin/scripts/</code> directory, but they are run by executing the Jam executable with certain command-line options.</p>
-<h1><a class="anchor" id="folderstojamfile"></a>
+<p>JamPlus ships with several useful scripts for the generation of Jamfiles from various sources and other tasks. Those scripts can be found in the <code>bin/scripts/</code> directory, but they are run by executing the Jam executable with certain command-line options.</p>
+<h1><a class="anchor" id="extractbuildmodules"></a>
+Extract Build Modules</h1>
+<p><b>extractbuildmodules</b> dumps out the embedded modules and build support files originally collected during the build process (from the <code>jamplus/bin/</code> directory).</p>
+<p><b>extractbuildmodules</b> accepts an optional argument, the destination path. If the destination path is not provided, the build files will be written into the current directory. <b>extractbuildmodules</b> will not overwrite an existing file.</p>
+<p>When the Jam executable resides in the same directory as the extracted <code>Jambase.jam</code> or one directory level deeper than the <code>Jambase.jam</code>, an invocation of the Jam executable will use the build files on disk before falling back to its embedded versions.</p>
+<div class="fragment"><div class="line"><span class="preprocessor"># Extract to the current directory.</span></div>
+<div class="line">jam --extractbuildmodules</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># Extract to the directory above the executable&#39;s directory (assuming it is in jamplus/bin/macosx64):</span></div>
+<div class="line"><span class="preprocessor">[~/jamplus/bin/macosx64]jam --extractbuildmodules ..</span></div>
+</div><!-- fragment --><h1><a class="anchor" id="folderstojamfile"></a>
 FoldersToJamfile</h1>
 <p>From the specified directory, <b>FoldersToJamfile</b> recurses the directory structure and creates a Jamfile with all found files. A source group is generated automatically for every directory.</p>
 <p><b>FoldersToJamfile</b> accepts two arguments, the start path and the destination Jamfile. It is run like so:</p>

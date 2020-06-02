@@ -5,7 +5,7 @@
 
 #define BUFFER_STATIC_SIZE 260
 
-typedef void* (*buffer_Alloc)(void* userData, void* ptr, unsigned int size);
+typedef void* (*buffer_Alloc)(void* userData, void* ptr, size_t size);
 
 typedef struct _buffer {
 	char *buffer;

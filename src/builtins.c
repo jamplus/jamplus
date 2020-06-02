@@ -62,6 +62,7 @@
 
 #include "timestamp.h"
 #include "fileglob.h"
+#include "miniz.h"
 
 /*
  * compile_builtin() - define builtin rules
@@ -134,6 +135,7 @@ LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_search(PARSE *parse, LOL *args, int *jmp);
+LIST *builtin_searchinternal(PARSE *parse, LOL *args, int *jmp);
 
 int glob( const char *s, const char *c );
 
@@ -315,6 +317,9 @@ load_builtins()
 
 	bindrule( "Search" )->procedure =
 		parse_make( builtin_search, P0, P0, P0, C0, C0, 0 );
+
+	bindrule( "SearchInternal" )->procedure =
+		parse_make( builtin_searchinternal, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -1715,3 +1720,25 @@ LIST *builtin_search(PARSE *parse, LOL *args, int *jmp)
 	return list_append( L0, filename, 0 );
 }
 
+
+extern int zip_findfile(const char *filename);
+
+LIST *builtin_searchinternal(PARSE *parse, LOL *args, int *jmp)
+{
+	LIST* filenameList;
+
+	filenameList = lol_get(args, 0);
+	if (!list_first(filenameList))
+		return L0;
+
+	// Search for the file.
+	const char* filename = list_value(list_first(filenameList));
+	//printf("searchinternal: %s\n", filename);
+	int entryIndex = zip_findfile(filename);
+	if (entryIndex != -1)
+	{
+		return list_append(L0, filename, 0 );
+	}
+
+	return L0;
+}

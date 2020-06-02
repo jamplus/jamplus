@@ -17,7 +17,7 @@ end
 
 local files = {}
 
-local rootPath = ospath.add_slash(nonOpts[1])
+local rootPath = ospath.make_absolute(ospath.add_slash(nonOpts[1]))
 for entry in filefind.glob(ospath.join(rootPath, '**')) do
 	local relativePath = entry.filename:sub(#rootPath + 1)
 	local path, filename = relativePath:match('(.+)/(.*)')

@@ -144,6 +144,9 @@
 #include "execcmd.h"
 #endif
 
+#include "jamzipbuffer.c"
+#include "miniz.h"
+
 #ifdef NT
 #include <io.h>
 #endif
@@ -253,13 +256,48 @@ int main( int argc, char **argv, char **arg_environ )
             if ( argv[argstartindex][0] == '-'  &&  argv[argstartindex][1] == '-' ) {
                 char processPath[4096];
                 int i;
-                int size;
                 const char* name = argv[argstartindex] + 2;
-                char* scriptPath;
-                char* ptr;
-                char* commandLine;
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+				BUFFER buff;
+				const char* appsPath = "apps/";
 
                 getprocesspath( processPath, sizeof( processPath ) );
+
+                putenv( OSMINOR );
+                putenv( OSPLAT );
+
+				{
+					char exeName[ 4096 ];
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(__MINGW64__)
+					strcpy( exeName, "JAM_EXECUTABLE=" );
+
+					getexecutablepath( exeName + strlen( exeName ), 4096 - strlen( exeName ) );
+					putenv( exeName );
+#else
+					getexecutablepath( exeName, 4096 );
+					setenv( "JAM_EXECUTABLE", exeName, 1 );
+#endif
+				}
+
+				buffer_init(&buff);
+				buffer_addstring(&buff, processPath, strlen(processPath));
+				buffer_addstring(&buff, "/../", 4);
+				buffer_addstring(&buff, appsPath, strlen(appsPath));
+				buffer_addstring(&buff, name, strlen(name));
+				buffer_addstring(&buff, ".lua", 4);
+				buffer_addchar(&buff, 0);
+
+				LIST* args = L0;
+                for ( i = argstartindex + 1; i < argc; ++i ) {
+					args = list_append(args, argv[i], 0);
+                }
+				luahelper_call_script(buffer_ptr(&buff), args);
+				buffer_free(&buff);
+#else
+                char* scriptPath;
+                char* ptr;
+                int size;
+                char* commandLine;
 
                 scriptPath = malloc( strlen( processPath ) + 1 + strlen( name ) + 4 + 1 );
                 strcpy( scriptPath, processPath );
@@ -346,10 +384,15 @@ int main( int argc, char **argv, char **arg_environ )
 
 				{
 					char exeName[ 4096 ];
+#if defined(_MSC_VER)
 					strcpy( exeName, "JAM_EXECUTABLE=" );
 
 					getexecutablepath( exeName + strlen( exeName ), 4096 - strlen( exeName ) );
 					putenv( exeName );
+#else
+					getexecutablepath( exeName, 4096 );
+					setenv( "JAM_EXECUTABLE", exeName, 1 );
+#endif
 				}
 
                 exec_init();
@@ -359,6 +402,7 @@ int main( int argc, char **argv, char **arg_environ )
 
                 free( commandLine );
                 free( scriptPath );
+#endif
 
                 return EXITOK;
             }
@@ -589,6 +633,8 @@ int main( int argc, char **argv, char **arg_environ )
 	    default: printf( "Invalid debug flag '%c'.\n", s[-1] );
 	    }
 	}
+
+	var_set( "CRLF", list_append(L0, "\r\n", 0), VAR_SET );
 
 	/* Set JAMDATE first */
 
@@ -927,3 +973,86 @@ track_realloc(void *ptr, size_t size)
 //#define realloc(a,b) do_not_call_realloc_after_this(a,b)
 }
 #endif
+
+int zipArchiveOpenedSuccessfully = -1;
+mz_zip_archive *pZipArchive = NULL;
+
+const unsigned char *zip_get_jamZipBuffer() {
+	return jamZipBuffer;
+}
+
+size_t zip_get_jamZipBuffer_size() {
+	return sizeof(jamZipBuffer);
+}
+
+mz_zip_archive *zip_attemptopen() {
+	if (pZipArchive == NULL  &&  zipArchiveOpenedSuccessfully == -1)
+	{
+		pZipArchive = malloc(sizeof(mz_zip_archive));
+		memset(pZipArchive, 0, sizeof(mz_zip_archive));
+		if (!mz_zip_reader_init_mem(pZipArchive, jamZipBuffer, sizeof(jamZipBuffer), 0))
+		{
+			zipArchiveOpenedSuccessfully = 0;
+			free(pZipArchive);
+		}
+		else
+		{
+			zipArchiveOpenedSuccessfully = 1;
+		}
+	}
+	return pZipArchive;
+}
+
+int zip_findfile(const char *filename) {
+	//printf("zip_findfile: %s\n", filename);
+	zip_attemptopen();
+	if (pZipArchive == NULL)
+	{
+	//printf("zip_findfile: no zip\n", filename);
+		return -1;
+	}
+
+	// Search for the file.
+	const char* srcPtr = filename;
+	BUFFER buff;
+	buffer_init(&buff);
+	while (*srcPtr != 0)
+	{
+		if (*srcPtr == '\\')
+		{
+			buffer_addchar(&buff, '/');
+		}
+		else
+		{
+			buffer_addchar(&buff, *srcPtr);
+		}
+		++srcPtr;
+	}
+	buffer_addchar(&buff, 0);
+
+	const char* filenamePtr = buffer_ptr(&buff);
+	//printf("zip_findfile: filenamePtr: %s\n", filenamePtr);
+	int index = mz_zip_reader_locate_file(pZipArchive, filenamePtr, NULL, 0);
+	//printf("zip_findfile: index: %d\n", index);
+	if (index == -1)
+	{
+		while (*filenamePtr != 0)
+		{
+			if (*filenamePtr == '/')
+			{
+	//printf("zip_findfile: filenamePtr-again: %s\n", filenamePtr + 1);
+				index = mz_zip_reader_locate_file(pZipArchive, filenamePtr + 1, NULL, 0);
+				if (index != -1)
+				{
+					break;
+				}
+			}
+			++filenamePtr;
+		}
+	}
+
+	buffer_free(&buff);
+	return index;
+}
+
+

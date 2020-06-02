@@ -26,7 +26,11 @@
 # include "jamgram.h"
 # include "jambase.h"
 # include "newstr.h"
+# include "miniz.h"
 # include "variable.h"
+
+extern mz_zip_archive *zip_attemptopen();
+extern int zip_findfile(const char *filename);
 
 struct keyword {
 	const char *word;
@@ -160,6 +164,97 @@ yyline()
 	/* include insertion point so that the next include file becomes */
 	/* the head of the list. */
 
+	/* If necessary, open the file */
+
+	if( !i->strings && !i->file )
+	{
+		FILE *f = stdin;
+
+					//printf("fopencheck: %s\n", i->fname);
+		if( strcmp( i->fname, "-" ) && !( f = fopen( i->fname, "r" ) ) )
+		{
+					//printf("internalzip: %s\n", i->fname);
+			mz_zip_archive *pZipArchive = zip_attemptopen();
+			if (pZipArchive != NULL)
+			{
+				// Search for the file.
+					//printf("internalfind: %s\n", i->fname);
+				int entryIndex = zip_findfile(i->fname);
+				if (entryIndex != -1)
+				{
+
+					//printf("internal: %s\n", i->fname);
+
+					size_t bufferSize;
+					unsigned char* buffer = (unsigned char*)mz_zip_reader_extract_to_heap(pZipArchive, entryIndex, &bufferSize, 0);
+					unsigned char* ptr = buffer;
+					unsigned char* linePtr = buffer;
+					int numLines = 0;
+					while (ptr - buffer < (ptrdiff_t)bufferSize)
+					{
+						if (*ptr == '\n')
+						{
+							++numLines;
+							linePtr = ptr + 1;
+						}
+						++ptr;
+					}
+
+					if (ptr - linePtr != 0)
+					{
+						++numLines;
+					}
+
+					char** strings = (char**)malloc(sizeof(char*) * (size_t)(numLines + 1));
+					ptr = buffer;
+					linePtr = buffer;
+					numLines = 0;
+					while (ptr - buffer < (ptrdiff_t)bufferSize)
+					{
+						if (*ptr == '\n')
+						{
+							unsigned char* endOfLinePtr = ptr + 1;
+							char* string = malloc(endOfLinePtr - linePtr + 1);
+							memcpy(string, linePtr, endOfLinePtr - linePtr);
+							string[endOfLinePtr - linePtr] = 0;
+							strings[numLines++] = string;
+							linePtr = endOfLinePtr;
+						}
+						++ptr;
+					}
+
+					if (ptr - linePtr != 0)
+					{
+						++numLines;
+						unsigned char* endOfLinePtr = ptr + 1;
+						char* string = malloc(endOfLinePtr - linePtr + 1);
+						memcpy(string, linePtr, endOfLinePtr - linePtr);
+						string[endOfLinePtr - linePtr] = 0;
+						strings[numLines++] = string;
+					}
+
+					strings[numLines] = 0;
+
+					i->strings = strings;
+					i->string = "";
+				}
+				else
+				{
+					perror( i->fname );
+				}
+			}
+			else
+			{
+				perror( i->fname );
+			}
+		}
+		else
+		{
+			//printf("disk: %s\n", i->fname);
+			i->file = f;
+		}
+	}
+
 	/* If there is more data in this line, return it. */
 
 	if( *i->string )
@@ -176,18 +271,6 @@ yyline()
 	    i->line++;
 	    i->string = *(i->strings++);
 	    return *i->string++;
-	}
-
-	/* If necessary, open the file */
-
-	if( !i->file )
-	{
-	    FILE *f = stdin;
-
-	    if( strcmp( i->fname, "-" ) && !( f = fopen( i->fname, "r" ) ) )
-		perror( i->fname );
-
-	    i->file = f;
 	}
 
 	/* If there's another line in this file, start it. */

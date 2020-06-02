@@ -1,7 +1,6 @@
 local osprocess = require 'osprocess'
 local ospath = require 'ospath'
 
-local arg = {...}
 local argIndex = 1
 
 local ssl
@@ -11,14 +10,11 @@ if arg[argIndex] == '-ssl' then
 end
 
 local baseDirectory = arg[argIndex]
+argIndex = argIndex + 1
+
+JAM_EXECUTABLE = os.getenv('JAM_EXECUTABLE')
 
 print('-------------------------------------------------------------')
-
-function GetLocalIPAddress()
-	local socket = require 'socket'.udp()
-	socket:setpeername('10.10.10.10', '9999')
-	return socket:getsockname()
-end
 
 local outputPath
 local opensslExecutable = 'openssl'
@@ -33,18 +29,38 @@ else
     outputPath = ospath.join(os.getenv('HOME'), '.jamplus', 'webserver')
 end
 
+function GetLocalIPAddress()
+    if OS == 'NT' then
+        for line in osprocess.lines{"FOR /F \"tokens=4 delims= \" %%i in ('route print ^| find \" 0.0.0.0\"') do echo %%i"} do
+            return line:match('(.+)[^\n]')
+        end
+    else
+        -- https://stackoverflow.com/questions/13322485/how-to-get-the-primary-ip-address-of-the-local-machine-on-linux-and-os-x
+        local getipaddressScript = ospath.join(outputPath, 'getipaddress.sh')
+        ospath.mkdir(getipaddressScript)
+        ospath.write_file(getipaddressScript, [[ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p']])
+        ospath.chmod(getipaddressScript, 777)
+        for line in osprocess.lines{getipaddressScript} do
+            return line
+        end
+    end
+    error()
+end
+
 local hostname = GetLocalIPAddress()
 local caKeyFilename = ospath.join(outputPath, 'jamplusCA-' .. hostname .. '.key')
 local caCerFilename = ospath.join(outputPath, 'jamplusCA-' .. hostname .. '.cer')
 local serverKeyFilename = ospath.join(outputPath, 'jamplusServer-' .. hostname .. '.key')
 local serverCsrFilename = ospath.join(outputPath, 'jamplusServer-' .. hostname .. '.csr')
 local serverCerFilename = ospath.join(outputPath, 'jamplusServer-' .. hostname .. '.cer')
+local serverPemFilename = ospath.join(outputPath, 'jamplusServer-' .. hostname .. '.pem')
 
 if ssl  and  (not ospath.exists(caKeyFilename)
         or  not ospath.exists(caCerFilename)
         or  not ospath.exists(serverKeyFilename)
         or  not ospath.exists(serverCsrFilename)
-        or  not ospath.exists(serverCerFilename)) then
+        or  not ospath.exists(serverCerFilename)
+        or  not ospath.exists(serverPemFilename)) then
 
     if OS == 'NT' then
         opensslExecutable = 'c:/OpenSSL-Win32/bin/openssl.exe'
@@ -114,6 +130,17 @@ if ssl  and  (not ospath.exists(caKeyFilename)
 	os.remove('serial')
 end
 
+if ssl  and  not ospath.exists(serverPemFilename) then
+    local pemLines = {}
+    for line in io.lines(serverCerFilename) do
+        pemLines[#pemLines + 1] = line .. '\n'
+    end
+    for line in io.lines(serverKeyFilename) do
+        pemLines[#pemLines + 1] = line .. '\n'
+    end
+    ospath.write_file(serverPemFilename, table.concat(pemLines))
+end
+
 if ssl then
     print('Certificates are stored at: ' .. outputPath)
     print()
@@ -121,54 +148,65 @@ end
 
 
 -----------------------------------------------------------------------------------------------
-local xavante = require "xavante"
-local filehandler = require "xavante.filehandler"
-local redirecthandler = require 'xavante.redirecthandler'
+local civetwebPath = ospath.join(JAM_EXECUTABLE_PATH, 'civetweb')
+local civetwebExecutable
+if OS == 'NT' then
+    civetwebExecutable = ospath.join(civetwebPath, 'civetweb.exe')
+else
+    civetwebExecutable = ospath.join(civetwebPath, 'civetweb')
+end
+if not ospath.exists(civetwebExecutable) then
+    ospath.mkdir(civetwebExecutable)
+    ospath.write_file(ospath.join(civetwebPath, 'Jamfile.jam'), [[
+SubDir TOP ;
 
-local params
+local CIVETWEB_ROOT = civetweb_src/civetweb-1.12 ;
+local CIVETWEB_URL = https://github.com/civetweb/civetweb/archive/v1.12.zip ;
 
-if ssl then
-    params = {
-        mode = "server",
-        protocol = "sslv23",
-        verify = {"none"},
-        options = {"all", "no_sslv2"},
-        key = serverKeyFilename,
-        certificate = serverCerFilename,
+if ! $(PREPASS_FINISHED) {
+
+    QueueJamfile $(JAM_CURRENT_SCRIPT) ;
+
+    Download.DownloadAndUnzip civetweb : $(SUBDIR)/civetweb_src : $(CIVETWEB_URL) : $(SUBDIR)/$(CIVETWEB_ROOT)/src/civetweb.c ;
+
+    PREPASS_FINISHED = true ;
+
+} else {
+
+    C.Defines civetweb : OPENSSL_API_1_1 ;
+    C.IncludeDirectories : $(CIVETWEB_ROOT)/include ;
+    if $(NT) {
+        C.LinkPrebuiltLibraries : advapi32 comdlg32 gdi32 shell32 user32 ;
     }
+    C.OutputPath : "]] .. civetwebPath .. [[" ;
+
+    C.Application : $(CIVETWEB_ROOT)/src/civetweb.c $(CIVETWEB_ROOT)/src/main.c : console ;
+
+}
+]])
+
+    for line in osprocess.lines{ JAM_EXECUTABLE, '-C' .. civetwebPath} do
+        print(line)
+    end
 end
 
-local rules = {
-	{
-		match = "^[^%./]*/$",
-		with = redirecthandler,
-		params = {"index.html"}
-	}, 
+local confMakeSlash = OS == 'NT'  and  ospath.make_backslash  or  ospath.make_slash
+local civetwebconfFilename = ospath.join(baseDirectory, 'civetweb.conf')
+ospath.write_file(civetwebconfFilename,
+"document_root " .. confMakeSlash(baseDirectory) .. "\n" ..
+"listening_ports 9999" .. (ssl and 's' or '') .. "\n" ..
+"ssl_certificate " .. confMakeSlash(serverPemFilename) .. "\n" ..
+"url_rewrite_patterns /jamplusCA.cer=" .. confMakeSlash(caCerFilename))
 
-	{
-		match = "jamplusCA%.cer$",
-		with = redirecthandler,
-		params = {"jamplusCA-" .. hostname .. '.cer'}
-	},
+print('-------------------------------------------------------------')
+print(string.format('Local web server running at: %s://%s:%d/\n\nPress Ctrl-C twice to exit.', ssl  and  'https'  or  'http', hostname, 9999))
+local env = osprocess.environ()
 
-	{
-		match = "jamplusCA%-" .. hostname .. ".cer",
-		with = filehandler,
-		params = {baseDir = outputPath}
-	},
+if OS == 'MACOSX' then
+    env.DYLD_FALLBACK_LIBRARY_PATH = '/usr/local/opt/openssl/lib'
+end
 
-	{
-		match = ".",
-		with = filehandler,
-		params = {baseDir = baseDirectory}
-	},
-}
-
-xavante.start_message(function(ports) print(string.format('Local web server running at: %s://%s:%d/\n\nPress Enter to exit.', ssl  and  'https'  or  'http', hostname, ports[1])) end)
-xavante.HTTP{ server = { host = '*', port = 9999, ssl = params }, defaultHost = { rules = rules, } }
-
-local lanes = require 'lanes'.configure()
-local lane = lanes.gen('*', function() return io.stdin:read('*l') end)()
-
-xavante.start(function() return lane:join(0) ~= nil end, 0.1)
+for line in osprocess.lines{ ospath.escape(civetwebExecutable), civetwebconfFilename, env=env } do
+    print(line)
+end
 

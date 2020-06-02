@@ -440,7 +440,7 @@ end
 
 
 -- Detect OS
-if os.getenv("OS") == "Windows_NT" then
+if os.getenv("OS") == "Windows_NT"  or  os.getenv("OS") == "NT" then
 	Platform = 'win32'
 	PlatformDir = 'win64'
 	SUFEXE = '.exe'
@@ -543,7 +543,10 @@ else
 end
 table.sort(dirs)
 
-JAM_EXECUTABLE = ospath.join(scriptPath, '..', 'bin', PlatformDir, 'jam')
+JAM_EXECUTABLE = os.getenv('JAM_EXECUTABLE')
+if not JAM_EXECUTABLE then
+	JAM_EXECUTABLE = ospath.join(scriptPath, '..', 'bin', PlatformDir, 'jam')
+end
 
 if Platform == 'win32' then
     JAM_EXECUTABLE = ospath.make_backslash(JAM_EXECUTABLE)

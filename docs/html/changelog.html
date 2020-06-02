@@ -36,13 +36,13 @@ Version 1.0</h1>
 <li>Created a <code>c/win32resource</code> module with the <a class="el" href="module_c_win32resource.html">ResourceCompiler rules</a>.</li>
 </ul>
 </li>
-<li>The Jam binaries have been moved from the <code>jamplus/bin/</code> directory to <code>jamplus/bin/$(PLATFORM)</code>. On Windows, this ends up being <code>jamplus/bin/win32/</code>. On Mac OS X, the directory is <code>jamplus/bin/macosx32/</code>. All associated scripts have been moved to this directory, as has the Lua directory structure. This new structure allows for multiple platform binaries to exist side by side. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
+<li>The Jam binaries have been moved from the <code>jamplus/bin/</code> directory to <code>jamplus/bin/$(PLATFORM)</code>. On Windows, this ends up being <code>jamplus/bin/win32/</code>. On Mac OS X, the directory is <code>jamplus/bin/macosx32/</code>. All associated scripts have been moved to this directory, as has the Lua directory structure. This new structure allows for multiple platform binaries to exist side by side. See Building Overview for more information.</li>
 <li>Automated tests have been added consisting of over 50 categoric test suites made of nearing 500 individual tests. The suite is run by ensuring JamPlus's bin/platform/ directory is in the PATH and then running <code>tests/runtests.bat</code> (on Windows) or <code>tests/runtests-macosxx64</code> on Mac OS X or <code>tests/tuntests-linux32</code> on Linux.</li>
 </ul>
 <h2>Bootstrapping/Building:</h2>
 <ul>
 <li>Added a bootstrapping .xcodeproj as <code>src/jam.xcodeproj</code> to debug Mac OS X Jam issues in. This project is currently only set up for Debug mode; the Release configuration does not work. Use <b>make macosx</b> to build a high performance Release build.</li>
-<li>If the environment variable <code>LUA_BIN</code> is set, the appropriate Lua files are copied to the appropriate platform binary directory during the Jam executable build. See <a class="el" href="building.html#building_overview">Building Overview</a> for more information.</li>
+<li>If the environment variable <code>LUA_BIN</code> is set, the appropriate Lua files are copied to the appropriate platform binary directory during the Jam executable build. See Building Overview for more information.</li>
 <li>Support for building jam0 on FreeBSD. Thanks to Arseny Kapoulkine for the update.</li>
 <li>Turn on the Visual Studio 2010 support in jmake.cmd.</li>
 <li>Add jam.VS2010.sln/.vcxproj.</li>

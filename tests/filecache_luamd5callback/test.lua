@@ -19,7 +19,7 @@ function Test()
 	}
 
 	ospath.remove('cache/')
-	ospath.remove('.depcache')
+	ospath.remove('.jamchecksums')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -44,7 +44,7 @@ md5png: Calculating file1.png...
 
 	local pass1Files =
 	{
-		'?.depcache',
+		'?.jamchecksums',
 		'Jamfile.jam',
 		'extra.png',
 		'file1.image',

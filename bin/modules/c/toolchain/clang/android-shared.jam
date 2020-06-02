@@ -530,7 +530,7 @@ rule android._JavaHdrRule SOURCE : HEADERS {
 #######################################################################################
 
 LuaString "
-local ziparchive = require 'ziparchive'
+local miniz = require 'miniz'
 local ospath = require 'ospath'
 local filefind = require 'filefind'
 
@@ -541,16 +541,17 @@ function MirrorExtractZip(zipFilename, outputDirectory)
     end
 
     --print(zipFilename)
-    local archive = ziparchive.open(zipFilename, 'r')
-    for entry in archive:files() do
+    local archive = miniz.zip_read_file(zipFilename)
+    for index = 1, archive:get_num_files() do
+        local entry = archive:stat(index)
         local entryFilename = entry.filename
         if entry.filename:sub(-1) ~= '/' then
             local fullOutputFilename = ospath.join(outputDirectory, entry.filename)
-            if outputDirectoryEntries[fullOutputFilename] ~= entry.timestamp then
+            if outputDirectoryEntries[fullOutputFilename] ~= entry.time then
                 --print('Extracting ' .. entry.filename)
                 ospath.mkdir(fullOutputFilename)
-                archive:fileextract(entry.filename, fullOutputFilename)
-                ospath.touch(fullOutputFilename, entry.timestamp)
+                archive:extract_to_file(entry.filename, fullOutputFilename)
+                ospath.touch(fullOutputFilename, entry.time)
             end
             outputDirectoryEntries[fullOutputFilename] = nil
             local components = {}

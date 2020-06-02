@@ -3,18 +3,18 @@ function md5zip(filename)
 
 	local md5 = require 'md5'
 	local struct = require 'struct'
-	local ziparchive = require 'ziparchive'
+	local miniz = require 'miniz'
 
-	local archive = ziparchive.open(filename)
+	local archive = miniz.zip_read_file(filename)
 	if not archive then
 		return nil
 	end
 
 	local md5sum = md5.new()
-	for index = 1, archive:fileentrycount() do
-		local fileEntry = archive:fileentry(index)
+	for index = 1, archive:get_num_files() do
+		local fileEntry = archive:stat(index)
 		md5sum:update(struct.pack('c' .. tostring(fileEntry.filename:len()), fileEntry.filename))
-		md5sum:update(struct.pack('I4', fileEntry.crc))
+		md5sum:update(struct.pack('I4', fileEntry.crc32))
 	end
 
 	archive:close()

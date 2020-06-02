@@ -1,1 +1,1 @@
-../bin/linux64/lua/lua runtests.lua --platform linux64 $*
+../bin/linux64/jam --runscript runtests.lua --platform linux64 $*

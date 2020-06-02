@@ -111,6 +111,9 @@ rule IncludeModule MODULE_NAME : OPTIONS
 			break ;
 		}
 	}
+	if ! $(foundPath) {
+		foundPath = [ SearchInternal $(moduleName:G=:R=$(JAM_MODULES_PATH)) ] ;
+	}
 	if $(foundPath[1]:BL) = $(MODULE_NAME:BL) {
 		BINDING on $(moduleName) = $(foundPath[1]:BS) ;
 		LOCATE on $(moduleName) = $(foundPath[1]:D) ;

@@ -32,6 +32,8 @@ int luahelper_push_linefilter(const char* actionName);
 void luahelper_pop_linefilter();
 const char* luahelper_linefilter(const char* line, size_t lineSize);
 
+LIST* luahelper_call_script(const char* filename, LIST* args);
+
 #ifdef __cplusplus
 }
 #endif

@@ -21,7 +21,7 @@ scriptPath = ospath.simplify(ospath.make_absolute(((debug.getinfo(1, "S").source
 package.path = scriptPath .. "?.lua;" .. package.path
 FolderTree = require 'FolderTree'
 
-jamPath = ospath.simplify(ospath.make_absolute(scriptPath .. '../'))
+jamPath = ospath.simplify(ospath.join(ospath.make_absolute(scriptPath), '..'))
 
 Compilers =
 {
@@ -52,6 +52,17 @@ end
 
 buildWorkspaceName = '!BuildWorkspace'
 updateWorkspaceName = '!UpdateWorkspace'
+
+--[[
+prettydump = {}
+function prettydump.dumpascii(filename, key, value)
+	local out = require 'serpent'.block(value, { comment = false })
+	local file = io.open(filename, 'w')
+	file:write(key .. ' =\n')
+	file:write(out)
+	file:close()
+end
+--]]
 
 function ivalues(t)
 	if not t then return function() return nil end end

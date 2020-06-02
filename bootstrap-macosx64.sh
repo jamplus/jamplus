@@ -1,11 +1,4 @@
-rm -rf bin/macosx64 src/bin.macosx64 src/jam0 src/luaplus/.build/macosx64
 cd src
-make macosx64
-cd luaplus
-../../bin/macosx64/jam C.TOOLCHAIN=macosx64/releaseltcg
-cd ..
-export LUA_BIN=luaplus/.build/macosx64/bin
-make macosx64
-export LUA_BIN=
+./build-jam-macosx64-clang.sh
 cd ..
 

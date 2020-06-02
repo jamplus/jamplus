@@ -7,11 +7,11 @@ function Test()
 
     function GenerateWorkspace(overrideJambaseFilename)
         RemoveWorkspace()
-        osprocess.collectlines{ JAM_EXECUTABLE, '--workspace', '-gen=none', '"-jambase=' .. ospath.join(ospath.getcwd(), overrideJambaseFilename) .. '"', '.', workspacePath }
+        osprocess.collectlines{ JAM_EXECUTABLE, '--workspace', '-gen=none', '-jambase=' .. ospath.escape(ospath.join(ospath.getcwd(), overrideJambaseFilename)), '.', workspacePath }
     end
 
     function RunJamInWorkspace(commandLine)
-        commandLine[#commandLine + 1] = '-C' .. workspacePath
+        commandLine[#commandLine + 1] = '-C' .. ospath.remove_slash(workspacePath)
         return RunJam(commandLine)
     end
 

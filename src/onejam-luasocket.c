@@ -1,0 +1,15 @@
+// luasocket
+#include "luaplus/Src/Modules/socket/src/auxiliar.c"
+#include "luaplus/Src/Modules/socket/src/buffer.c"
+#include "luaplus/Src/Modules/socket/src/except.c"
+#include "luaplus/Src/Modules/socket/src/inet.c"
+#include "luaplus/Src/Modules/socket/src/io.c"
+#include "luaplus/Src/Modules/socket/src/luasocket.c"
+#include "luaplus/Src/Modules/socket/src/mime.c"
+#include "luaplus/Src/Modules/socket/src/options.c"
+#include "luaplus/Src/Modules/socket/src/select.c"
+#include "luaplus/Src/Modules/socket/src/tcp.c"
+#include "luaplus/Src/Modules/socket/src/timeout.c"
+//#include "luaplus/Src/Modules/socket/src/udp.c"
+#include "luaplus/Src/Modules/socket/src/wsocket.c"
+

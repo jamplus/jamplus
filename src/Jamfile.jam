@@ -179,6 +179,7 @@ Option OPT_UPDATED_CHILD_FIX ;
 Option OPT_USE_CHECKSUMS_EXT ;
 Option OPT_VAR_CWD_EXT : yes ;
 Option OPT_BUILTIN_LUA_SUPPORT_EXT ;
+Option OPT_BUILTIN_LUA_DLL_SUPPORT_EXT ;
 
 
 local options = [ Join $(ALL_OPTIONS) ] ;
@@ -255,6 +256,7 @@ if $(YACC) && $(SUFEXE) = ""
 #
 code += w32_getreg.c w32_shortname.c ;
 code += fileglob.c ;
+code += miniz.c ;
 if OPT_BUILTIN_MD5_EXT in $(LOCAL_DEFINES) {
 code += md5c.c ;
 }
@@ -385,6 +387,7 @@ if $(LUA_BIN)
 				modules/lfs.debug.dll
 				modules/lxp.debug.dll
 				modules/md5.debug.dll
+				modules/miniz.debug.dll
 				modules/ospath.debug.dll
 				modules/osprocess.debug.dll
 				modules/prettydump.debug.dll
@@ -409,6 +412,7 @@ if $(LUA_BIN)
 				modules/lfs.dll
 				modules/lxp.dll
 				modules/md5.dll
+				modules/miniz.dll
 				modules/ospath.dll
 				modules/osprocess.dll
 				modules/prettydump.dll
@@ -469,6 +473,7 @@ if $(LUA_BIN)
 				lib/lua/5.3/lfs.debug.$(MODULE_EXT)
 				lib/lua/5.3/lxp.debug.$(MODULE_EXT)
 				lib/lua/5.3/md5.debug.$(MODULE_EXT)
+				lib/lua/5.3/miniz.debug.$(MODULE_EXT)
 				lib/lua/5.3/ospath.debug.$(MODULE_EXT)
 				lib/lua/5.3/osprocess.debug.$(MODULE_EXT)
 				lib/lua/5.3/prettydump.debug.$(MODULE_EXT)
@@ -492,6 +497,7 @@ if $(LUA_BIN)
 				lib/lua/5.3/lfs.$(MODULE_EXT)
 				lib/lua/5.3/lxp.$(MODULE_EXT)
 				lib/lua/5.3/md5.$(MODULE_EXT)
+				lib/lua/5.3/miniz.$(MODULE_EXT)
 				lib/lua/5.3/ospath.$(MODULE_EXT)
 				lib/lua/5.3/osprocess.$(MODULE_EXT)
 				lib/lua/5.3/prettydump.$(MODULE_EXT)
