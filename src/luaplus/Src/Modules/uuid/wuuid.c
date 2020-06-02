@@ -13,6 +13,7 @@
 #include "wuuid.h"
 #include <rpc.h>
 
+#pragma comment(lib, "rpcrt4")
 
 /*
  * Note that no attempt is made here to really implement uuid_time()

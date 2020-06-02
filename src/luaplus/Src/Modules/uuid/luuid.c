@@ -12,19 +12,19 @@
 #include <uuid/uuid.h>
 #endif
 
-//#if 0	/* use these if you get link errors (unlikely) */
+#if !defined(_WIN32)	/* use these if you get link errors (unlikely) */
 #define	uuid_generate_random	uuid_generate
 #define	uuid_generate_time	uuid_generate
 #define	uuid_time(c,p)		(-1)
-//#endif
+#endif
 
 #include "lua.h"
 #include "lauxlib.h"
 
-#define MYNAME		"uuid"
-#define MYVERSION	MYNAME " library for " LUA_VERSION " / May 2012"
+#define UUIDNAME		"uuid"
+#define UUIDVERSION	UUIDNAME " library for " LUA_VERSION " / May 2012"
 
-static int Lnew(lua_State *L)			/** new([s]) */
+static int Luuidnew(lua_State *L)			/** new([s]) */
 {
  uuid_t c;
  char s[2*sizeof(c)+4+1];
@@ -68,7 +68,7 @@ static int Lunparse(lua_State *L)		/** unparse(uuidbuffer) */
 {
  char s[2*sizeof(uuid_t)+4+1];
  size_t len;
- uuid_t *c=luaL_checklstring(L,1,&len);
+ uuid_t *c=(uuid_t *)luaL_checklstring(L,1,&len);
  if (len != 16)
    return 0;
  uuid_unparse(*c,s);
@@ -76,10 +76,10 @@ static int Lunparse(lua_State *L)		/** unparse(uuidbuffer) */
  return 1;
 }
 
-static const luaL_Reg R[] =
+static const luaL_Reg uuidR[] =
 {
 	{ "isvalid",	Lisvalid	},
-	{ "new",	Lnew		},
+	{ "new",	Luuidnew		},
 	{ "time",	Ltime		},
 	{ "parse",	Lparse		},
 	{ "unparse",Lunparse	},
@@ -90,12 +90,12 @@ LUALIB_API int luaopen_uuid(lua_State *L)
 {
  lua_newtable(L);
 #if LUA_VERSION_NUM >= 502
- luaL_setfuncs(L,R,0);
+ luaL_setfuncs(L,uuidR,0);
 #else
- luaL_register(L,NULL,R);
+ luaL_register(L,NULL,uuidR);
 #endif
  lua_pushliteral(L,"version");			/** version */
- lua_pushliteral(L,MYVERSION);
+ lua_pushliteral(L,UUIDVERSION);
  lua_settable(L,-3);
  return 1;
 }
