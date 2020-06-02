@@ -1304,12 +1304,14 @@ TopContinue:
         fileglob_buffer_addstring(&wildcardBuff, "\\*.*", 5);
         context->handle = FindFirstFile(fileglob_buffer_ptr(&wildcardBuff), &context->fd);
         fileglob_buffer_free(&wildcardBuff);
-        if (context->handle == INVALID_HANDLE_VALUE) return 0;
+        if (context->handle == INVALID_HANDLE_VALUE)
+            goto NextContext;
 #else
 		context->dirp = opendir(path);
         if (context->dirp == NULL) return 0;
         context->dp = readdir(context->dirp);
-        if (!context->dp) return 0;
+        if (!context->dp)
+            goto NextContext;
 #endif
 
 		while (1) {
