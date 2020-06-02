@@ -37,9 +37,8 @@
 #include <sys/stat.h>
 #endif
 #include <time.h>
-#include "buffer.h"
 
-static void* fileglob_DefaultAllocFunction(void* userData, void* ptr, unsigned int size) {
+static void* fileglob_DefaultAllocFunction(void* userData, void* ptr, size_t size) {
 	(void)userData;
 
 	if (size == 0) {
@@ -54,13 +53,122 @@ static void* fileglob_DefaultAllocFunction(void* userData, void* ptr, unsigned i
 
 #define FILEGLOB_BUILD_IMPLEMENTATION
 
+#define FILEGLOB_BUFFER_STATIC_SIZE 260
+
+typedef void* (*fileglob_buffer_Alloc)(void* userData, void* ptr, size_t size);
+
+typedef struct _fileglob_buffer {
+	char *buffer;
+	char static_buffer[FILEGLOB_BUFFER_STATIC_SIZE];
+	size_t pos;
+	size_t buffsize;
+	fileglob_buffer_Alloc alloc_function;
+	void* user_data;
+} FILEGLOB_BUFFER;
+
+void fileglob_buffer_init(FILEGLOB_BUFFER* buff);
+void fileglob_buffer_initwithalloc(FILEGLOB_BUFFER* buff, fileglob_buffer_Alloc alloc, void* userData);
+
+#define fileglob_buffer_ptr(buff)	((buff)->buffer)
+#define fileglob_buffer_size(buff)	((buff)->buffsize)
+#define fileglob_buffer_sizeptr(buff)	((buff)->buffer + (buff)->buffsize)
+#define fileglob_buffer_pos(buff)	((buff)->pos)
+#define fileglob_buffer_posptr(buff)	((buff)->buffer + (buff)->pos)
+
+#define fileglob_buffer_reset(buff) ((buff)->pos = 0)
+
+
+void fileglob_buffer_openspacehelper(FILEGLOB_BUFFER *buff, size_t amount);
+void fileglob_buffer_resize(FILEGLOB_BUFFER* buff, size_t size);
+
+#define fileglob_buffer_free(buff)	fileglob_buffer_resize((buff), 0)
+
+#define fileglob_buffer_openspace(buff, amount) \
+  if (((size_t)(amount) + (buff)->pos) > (buff)->buffsize) \
+    fileglob_buffer_openspacehelper((buff), (amount));
+
+#define fileglob_buffer_addchar(buff, c) { fileglob_buffer_openspace((buff), 1); (buff)->buffer[(buff)->pos] = (c); (buff)->pos++; }
+#define fileglob_buffer_addstring(buff, str, len) { size_t _len = (len); fileglob_buffer_openspace((buff), _len); memcpy((buff)->buffer + (buff)->pos, str, _len); (buff)->pos += _len; }
+#define fileglob_buffer_putchar(buff, c) (buff)->buffer[(buff)->pos] = (c)
+#define fileglob_buffer_putstring(buff, str, len) { size_t _len = (len); fileglob_buffer_openspace((buff), _len); memcpy((buff)->buffer + (buff)->pos, str, _len); }
+#define fileglob_buffer_setpos(buff, newpos) (buff)->pos = newpos;
+#define fileglob_buffer_deltapos(buff, delta) (buff)->pos += delta
+#define fileglob_buffer_isempty(buff) ((buff)->pos == 0)
+
+#define fileglob_buffer_getchar(buff) ((buff)->pos + 1 < (buff)->buffsize ? (buff)->buffer[(buff)->pos++] : EOF)
+
+void* fileglob_buffer_DefaultAllocFunction(void* userData, void* ptr, size_t size)
+{
+	(void)userData;
+
+	if (size == 0) {
+		free(ptr);
+		return NULL;
+	} else {
+		return realloc(ptr, size);
+	}
+}
+
+
+void fileglob_buffer_init(FILEGLOB_BUFFER* buff) {
+	fileglob_buffer_initwithalloc( buff, NULL, NULL );
+}
+
+
+void fileglob_buffer_initwithalloc(FILEGLOB_BUFFER* buff, fileglob_buffer_Alloc alloc, void* userData) {
+	buff->buffer = (char*)&buff->static_buffer;
+	buff->pos = 0;
+	buff->buffsize = FILEGLOB_BUFFER_STATIC_SIZE;
+	buff->alloc_function = alloc ? alloc : fileglob_buffer_DefaultAllocFunction;
+	buff->user_data = userData;
+}
+
+
+void fileglob_buffer_resize(FILEGLOB_BUFFER* buff, size_t size) {
+    if (size == 0) {
+		if (buff->buffer != (char*)&buff->static_buffer) {
+			buff->alloc_function(buff->user_data, buff->buffer, 0);
+			buff->buffer = (char*)&buff->static_buffer;
+		}
+		return;
+    }
+
+    if (size < FILEGLOB_BUFFER_STATIC_SIZE) {
+		buff->buffsize = size;
+		buff->pos = buff->pos > size ? size : buff->pos;
+		if (buff->buffer != (char*)&buff->static_buffer) {
+			buff->alloc_function(buff->user_data, buff->buffer, 0);
+            buff->buffer = (char*)&buff->static_buffer;
+		}
+		return;
+    }
+
+	if (buff->buffer == (char*)&buff->static_buffer) {
+		buff->buffer = buff->alloc_function(buff->user_data, 0, size);
+		memcpy(buff->buffer, &buff->static_buffer, buff->pos);
+		buff->buffsize = size;
+	} else {
+		buff->buffsize = size > buff->buffsize * 2 ? size : buff->buffsize * 2;
+		buff->buffer = buff->alloc_function(buff->user_data, buff->buffer, buff->buffsize);
+    }
+}
+
+
+void fileglob_buffer_openspacehelper(FILEGLOB_BUFFER *buff, size_t amount) {
+	if (amount + buff->pos < FILEGLOB_BUFFER_STATIC_SIZE)
+		fileglob_buffer_resize(buff, FILEGLOB_BUFFER_STATIC_SIZE);
+	else
+		fileglob_buffer_resize(buff, amount + buff->pos);
+}
+
+
 typedef struct fileglob_StringNode {
 	struct fileglob_StringNode* next;
 	char buffer[1];
 } fileglob_StringNode;
 
 
-typedef void* (*fileglob_Alloc)(void* userData, void* ptr, unsigned int size);
+typedef void* (*fileglob_Alloc)(void* userData, void* ptr, size_t size);
 
 
 enum answer {UNKNOWN = -1, NO, YES};
@@ -449,7 +557,7 @@ static void _fileglob_FreeContextLevel(fileglob* self) {
 /**
 **/
 static fileglob_context* _fileglob_AllocateContextLevel(fileglob* self) {
-	fileglob_context* context = self->allocFunction(self->userData, 0, sizeof(fileglob_context));
+    fileglob_context* context = (fileglob_context*)self->allocFunction(self->userData, 0, sizeof(fileglob_context));
     context->prev = self->context;
 #if defined(_WIN32)  &&  !defined(MINGW)
     context->handle = INVALID_HANDLE_VALUE;
@@ -495,7 +603,7 @@ void fileglob_AddExclusivePattern(fileglob* self, const char* pattern) {
 	if (pattern[strlen(pattern) - 1] == '/') {
 		for (node = self->exclusiveDirectoryPatternsHead; node; node = node->next) {
 #if defined(_WIN32)
-			if (stricmp(node->buffer, pattern) == 0) {
+			if (_stricmp(node->buffer, pattern) == 0) {
 #else
 			if (strcasecmp(node->buffer, pattern) == 0) {
 #endif
@@ -507,7 +615,7 @@ void fileglob_AddExclusivePattern(fileglob* self, const char* pattern) {
 	} else {
 		for (node = self->exclusiveFilePatternsHead; node; node = node->next) {
 #if defined(_WIN32)
-			if (stricmp(node->buffer, pattern) == 0) {
+			if (_stricmp(node->buffer, pattern) == 0) {
 #else
 			if (strcasecmp(node->buffer, pattern) == 0) {
 #endif
@@ -534,7 +642,7 @@ void fileglob_AddIgnorePattern(fileglob* self, const char* pattern) {
 	if (pattern[strlen(pattern) - 1] == '/') {
 		for (node = self->ignoreDirectoryPatternsHead; node; node = node->next) {
 #if defined(_WIN32)
-			if (stricmp(node->buffer, pattern) == 0) {
+			if (_stricmp(node->buffer, pattern) == 0) {
 #else
 			if (strcasecmp(node->buffer, pattern) == 0) {
 #endif
@@ -546,7 +654,7 @@ void fileglob_AddIgnorePattern(fileglob* self, const char* pattern) {
 	} else {
 		for (node = self->ignoreFilePatternsHead; node; node = node->next) {
 #if defined(_WIN32)
-			if (stricmp(node->buffer, pattern) == 0) {
+			if (_stricmp(node->buffer, pattern) == 0) {
 #else
 			if (strcasecmp(node->buffer, pattern) == 0) {
 #endif
@@ -655,7 +763,7 @@ int rb_enc_mbclen(const char *p, const char *e) {
 static int has_magic(const char *p, const char *pend, int flags) {
 	const int nocase = flags & FNM_CASEFOLD;
 
-	register char c;
+	char c;
 
 	while (p < pend && (c = *p++) != 0) {
 		switch (c) {
@@ -678,7 +786,7 @@ static int has_magic(const char *p, const char *pend, int flags) {
 
 /* Find separator in globbing pattern. */
 static char *find_dirsep(const char *p, const char *pend, int flags) {
-	register char c;
+	char c;
 
 	while ((c = *p++) != 0) {
 		switch (c) {
@@ -843,12 +951,12 @@ static char *join_path(fileglob *self, const char *path, long len, int dirsep, c
 
 	\param inPattern The pattern to use for matching.
 **/
-void fileglob_MatchPattern(fileglob* self, const char* inPattern, BUFFER* destBuff) {
+void fileglob_MatchPattern(fileglob* self, const char* inPattern, FILEGLOB_BUFFER* destBuff) {
 	const char* srcPtr;
 	const char* lastSlashPtr;
 	int numPeriods;
 
-	buffer_initwithalloc(destBuff, self->allocFunction, self->userData);
+	fileglob_buffer_initwithalloc(destBuff, self->allocFunction, self->userData);
 
 	if (inPattern == 0)
 		inPattern = "*";
@@ -860,8 +968,8 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern, BUFFER* destBu
 	// Is it a Windows network path?   If so, don't convert the opening \\.
 	if (srcPtr[0] == '\\'   &&   srcPtr[1] == '\\')
 	{
-		buffer_addchar(destBuff, *srcPtr++);
-		buffer_addchar(destBuff, *srcPtr++);
+		fileglob_buffer_addchar(destBuff, *srcPtr++);
+		fileglob_buffer_addchar(destBuff, *srcPtr++);
 	}
 
 	lastSlashPtr = srcPtr - 1;
@@ -872,7 +980,7 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern, BUFFER* destBu
 		///////////////////////////////////////////////////////////////////////
 		// Check for slashes or backslashes.
 		if (ch == '\\'  ||  ch == '/') {
-			buffer_addchar(destBuff, '/');
+			fileglob_buffer_addchar(destBuff, '/');
 
 			lastSlashPtr = srcPtr;
 			numPeriods = 0;
@@ -884,14 +992,14 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern, BUFFER* destBu
 			if (srcPtr - numPeriods - 1 == lastSlashPtr) {
 				numPeriods++;
 				if (numPeriods > 2) {
-					buffer_addchar(destBuff, '/');
-					buffer_addchar(destBuff, '.');
-					buffer_addchar(destBuff, '.');
+					fileglob_buffer_addchar(destBuff, '/');
+					fileglob_buffer_addchar(destBuff, '.');
+					fileglob_buffer_addchar(destBuff, '.');
 				} else {
-					buffer_addchar(destBuff, '.');
+					fileglob_buffer_addchar(destBuff, '.');
 				}
 			} else {
-				buffer_addchar(destBuff, '.');
+				fileglob_buffer_addchar(destBuff, '.');
 			}
 		}
 
@@ -906,14 +1014,14 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern, BUFFER* destBu
 				// needs to be translated to:
 				//
 				// /Dir*/**/
-				buffer_addchar(destBuff, '*');
-				buffer_addchar(destBuff, '/');
+				fileglob_buffer_addchar(destBuff, '*');
+				fileglob_buffer_addchar(destBuff, '/');
 			}
 
 			srcPtr += 2;
 
-			buffer_addchar(destBuff, '*');
-			buffer_addchar(destBuff, '*');
+			fileglob_buffer_addchar(destBuff, '*');
+			fileglob_buffer_addchar(destBuff, '*');
 
 			// Did we get a double star this round?
 			if (srcPtr[0] != '/'  &&  srcPtr[0] != '\\') {
@@ -924,15 +1032,15 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern, BUFFER* destBu
 				// Translate to:
 				//
 				// /**/*Text
-				buffer_addchar(destBuff, '/');
-				buffer_addchar(destBuff, '*');
+				fileglob_buffer_addchar(destBuff, '/');
+				fileglob_buffer_addchar(destBuff, '*');
 			}
 			else if (srcPtr[1] == '\0'  ||  srcPtr[1] == MODIFIER_CHARACTER) {
 				srcPtr++;
 
-				buffer_addchar(destBuff, '/');
-				buffer_addchar(destBuff, '*');
-				buffer_addchar(destBuff, '/');
+				fileglob_buffer_addchar(destBuff, '/');
+				fileglob_buffer_addchar(destBuff, '*');
+				fileglob_buffer_addchar(destBuff, '/');
 			}
 
 			// We added one too many in here... the compiler will optimize.
@@ -949,13 +1057,13 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern, BUFFER* destBu
 		///////////////////////////////////////////////////////////////////////
 		// Everything else.
 		else {
-			buffer_addchar(destBuff, *srcPtr);
+			fileglob_buffer_addchar(destBuff, *srcPtr);
 		}
 
 		srcPtr++;
 	}
 
-	buffer_addchar(destBuff, 0);
+	fileglob_buffer_addchar(destBuff, 0);
 
 	// Check for the @.
 	if (*srcPtr == MODIFIER_CHARACTER) {
@@ -972,19 +1080,19 @@ void fileglob_MatchPattern(fileglob* self, const char* inPattern, BUFFER* destBu
 		///////////////////////////////////////////////////////////////////////
 		// Check for @- or @=
 		if (ch == '-'  ||  ch == '=') {
-			BUFFER buff;
-			buffer_initwithalloc(&buff, self->allocFunction, self->userData);
+			FILEGLOB_BUFFER buff;
+			fileglob_buffer_initwithalloc(&buff, self->allocFunction, self->userData);
 			while (*srcPtr != MODIFIER_CHARACTER  &&  *srcPtr != '\0') {
-				buffer_addchar(&buff, *srcPtr++);
+				fileglob_buffer_addchar(&buff, *srcPtr++);
 			}
 
-			buffer_addchar(&buff, 0);
+			fileglob_buffer_addchar(&buff, 0);
 
 			if (ch == '-')
-				fileglob_AddIgnorePattern(self, buffer_ptr(&buff));
+				fileglob_AddIgnorePattern(self, fileglob_buffer_ptr(&buff));
 			else if (ch == '=')
-				fileglob_AddExclusivePattern(self, buffer_ptr(&buff));
-			buffer_free(&buff);
+				fileglob_AddExclusivePattern(self, fileglob_buffer_ptr(&buff));
+			fileglob_buffer_free(&buff);
 
 		///////////////////////////////////////////////////////////////////////
 		// Check for @*
@@ -1012,9 +1120,9 @@ fileglob* fileglob_CreateWithAlloc(const char* inPattern, fileglob_Alloc allocFu
 	fileglob* self;
 	const char *root, *start;
 	size_t n;
-    int flags = 0;
-    fileglob_context* context;
-    BUFFER inPatternBuf;
+	int flags = 0;
+	fileglob_context* context;
+	FILEGLOB_BUFFER inPatternBuf;
 
 	allocFunction = allocFunction ? allocFunction : fileglob_DefaultAllocFunction;
 	self = (fileglob*)allocFunction(userData, NULL, sizeof(fileglob));
@@ -1023,7 +1131,7 @@ fileglob* fileglob_CreateWithAlloc(const char* inPattern, fileglob_Alloc allocFu
 	self->userData = userData;
 
 	fileglob_MatchPattern(self, inPattern, &inPatternBuf);
-	start = root = buffer_ptr(&inPatternBuf);
+	start = root = fileglob_buffer_ptr(&inPatternBuf);
 	flags |= FNM_SYSCASE;
 
 	if (root && *root == '/') root++;
@@ -1044,7 +1152,7 @@ fileglob* fileglob_CreateWithAlloc(const char* inPattern, fileglob_Alloc allocFu
     context = self->startingContext;
     context->buf = self->buf;
     context->path = self->buf;
-    context->pathlen = strlen(self->buf);
+    context->pathlen = (long)strlen(self->buf);
     context->beg = &self->list;
     context->end = &self->list + 1;
 	context->new_beg = NULL;
@@ -1190,12 +1298,12 @@ TopContinue:
 	if (context->magical || context->recursive) {
         const char* path = *context->path ? context->path : ".";
 #if defined(_WIN32)  &&  !defined(MINGW)
-        BUFFER wildcardBuff;
-        buffer_init(&wildcardBuff);
-        buffer_addstring(&wildcardBuff, path, strlen(path));
-        buffer_addstring(&wildcardBuff, "\\*.*", 5);
-        context->handle = FindFirstFile(buffer_ptr(&wildcardBuff), &context->fd);
-        buffer_free(&wildcardBuff);
+        FILEGLOB_BUFFER wildcardBuff;
+        fileglob_buffer_init(&wildcardBuff);
+        fileglob_buffer_addstring(&wildcardBuff, path, strlen(path));
+        fileglob_buffer_addstring(&wildcardBuff, "\\*.*", 5);
+        context->handle = FindFirstFile(fileglob_buffer_ptr(&wildcardBuff), &context->fd);
+        fileglob_buffer_free(&wildcardBuff);
         if (context->handle == INVALID_HANDLE_VALUE)
             goto NextContext;
 #else
@@ -1261,7 +1369,7 @@ TopContinue:
 			} else {
                 int ignore = 0;
                 if (self->ignoreDirectoryPatternsHead  ||  self->exclusiveDirectoryPatternsHead) {
-                    char* dirbuf = join_path(self, buf, strlen(buf), context->dirsep, "", 0);
+                    char* dirbuf = join_path(self, buf, (long)strlen(buf), context->dirsep, "", 0);
 
                     ignore = _fileglob_MatchIgnoreDirectoryPattern(self, dirbuf);
 
@@ -1301,7 +1409,7 @@ TopContinue:
 			context = _fileglob_AllocateContextLevel(self);
 			context->buf = buf;
 			context->path = context->buf;
-			context->pathlen = strlen(context->buf);
+			context->pathlen = (long)strlen(context->buf);
 			context->dirsep = 1;
 			context->exist = YES;
 			context->isdir = new_isdir;
@@ -1382,7 +1490,7 @@ NextFile:
                 context = _fileglob_AllocateContextLevel(self);
 				context->buf = buf;
 				context->path = context->buf;
-				context->pathlen = strlen(context->buf);
+				context->pathlen = (long)strlen(context->buf);
 				context->dirsep = 1;
 				context->exist = UNKNOWN;
 				context->isdir = UNKNOWN;
@@ -1438,16 +1546,16 @@ const char* fileglob_FileName(fileglob* self) {
 #if defined(_WIN32)  &&  !defined(MINGW)
 	//if (self->context->handle != INVALID_HANDLE_VALUE) {
         return self->context->path;
-		//SplicePath(&self->combinedName, buffer_ptr(&self->context->basePath), self->context->fd.cFileName);
-		//return buffer_ptr(&self->combinedName);
+		//SplicePath(&self->combinedName, fileglob_buffer_ptr(&self->context->basePath), self->context->fd.cFileName);
+		//return fileglob_buffer_ptr(&self->combinedName);
 	//}
 #else
         return self->context->path;
 	//if (self->context->dirp) {
-		//SplicePath(&self->combinedName, buffer_ptr(&self->context->basePath), self->context->dp->d_name);
-		//return buffer_ptr(&self->combinedName);
+		//SplicePath(&self->combinedName, fileglob_buffer_ptr(&self->context->basePath), self->context->dp->d_name);
+		//return fileglob_buffer_ptr(&self->combinedName);
 	//} else {
-		//return buffer_ptr(&self->context->patternBuf);
+		//return fileglob_buffer_ptr(&self->context->patternBuf);
 	//}
 #endif
 
@@ -1623,7 +1731,7 @@ const char* fileglob_Permissions(fileglob* self) {
 			self->permissions[6] = 'r';
 			self->permissions[7] = 'w';
         }
-        if (p = strrchr(self->context->path, '.')) {
+        if ((p = strrchr(self->context->path, '.')) != NULL) {
             if ( !_stricmp(p, ".exe") ||
                 !_stricmp(p, ".cmd") ||
                 !_stricmp(p, ".bat") ||
@@ -1670,7 +1778,7 @@ fileglob_uint64 fileglob_NumberOfLinks(fileglob* self) {
 
 		const char* fullPath = fileglob_FileName(self);
 
-		handle = CreateFile(fullPath, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
+		handle = CreateFileA(fullPath, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
 		if (handle == INVALID_HANDLE_VALUE) {
 			return 0;
 		}

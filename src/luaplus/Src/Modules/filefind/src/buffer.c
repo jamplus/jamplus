@@ -2,8 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-void* buffer_DefaultAllocFunction(void* userData, void* ptr, unsigned int size)
-{
+void* buffer_DefaultAllocFunction(void* userData, void* ptr, size_t size) {
 	(void)userData;
 
 	if (size == 0) {
