@@ -39,6 +39,7 @@
 
 #if (LUA_VERSION_NUM >= 502)
 
+#undef luaL_register
 #define luaL_register(L,n,f)	luaL_newlib(L,f)
 
 #endif
@@ -56,20 +57,20 @@ typedef unsigned STRUCT_INT Uinttype;
 
 
 /* maximum size (in bytes) for integral types */
-#define MAXINTSIZE	32
+#define STRUCT_MAXINTSIZE	32
 
 /* is 'x' a power of 2? */
 #define isp2(x)		((x) > 0 && ((x) & ((x) - 1)) == 0)
 
 /* dummy structure to get alignment requirements */
-struct cD {
+struct StructcD {
   char c;
   double d;
 };
 
 
-#define PADDING		(sizeof(struct cD) - sizeof(double))
-#define MAXALIGN  	(PADDING > sizeof(int) ? PADDING : sizeof(int))
+#define STRUCT_PADDING		(sizeof(struct StructcD) - sizeof(double))
+#define STRUCT_MAXALIGN  	(STRUCT_PADDING > sizeof(int) ? STRUCT_PADDING : sizeof(int))
 
 
 /* endian options */
@@ -83,13 +84,13 @@ static union {
 } const native = {1};
 
 
-typedef struct Header {
+typedef struct StructHeader {
   int endian;
   int align;
-} Header;
+} StructHeader;
 
 
-static int getnum (const char **fmt, int df) {
+static int struct_getnum (const char **fmt, int df) {
   if (!isdigit(**fmt))  /* no number? */
     return df;  /* return default value */
   else {
@@ -106,7 +107,7 @@ static int getnum (const char **fmt, int df) {
 
 
 
-static size_t optsize (lua_State *L, char opt, const char **fmt) {
+static size_t struct_optsize (lua_State *L, char opt, const char **fmt) {
   switch (opt) {
     case 'B': case 'b': return sizeof(char);
     case 'H': case 'h': return sizeof(short);
@@ -115,12 +116,12 @@ static size_t optsize (lua_State *L, char opt, const char **fmt) {
     case 'f':  return sizeof(float);
     case 'd':  return sizeof(double);
     case 'x': return 1;
-    case 'c': return getnum(fmt, 1);
+    case 'c': return struct_getnum(fmt, 1);
     case 'i': case 'I': {
-      int sz = getnum(fmt, sizeof(int));
-      if (sz > MAXINTSIZE)
+      int sz = struct_getnum(fmt, sizeof(int));
+      if (sz > STRUCT_MAXINTSIZE)
         luaL_error(L, "integral size %d is larger than limit of %d",
-                       sz, MAXINTSIZE);
+                       sz, STRUCT_MAXINTSIZE);
       return sz;
     }
     default: return 0;  /* other cases do not need alignment */
@@ -132,7 +133,7 @@ static size_t optsize (lua_State *L, char opt, const char **fmt) {
 ** return number of bytes needed to align an element of size 'size'
 ** at current position 'len'
 */
-static int gettoalign (size_t len, Header *h, int opt, size_t size) {
+static int gettoalign (size_t len, StructHeader *h, int opt, size_t size) {
   if (size == 0 || opt == 'c') return 0;
   if (size > (size_t)h->align)
     size = h->align;  /* respect max. alignment */
@@ -144,13 +145,13 @@ static int gettoalign (size_t len, Header *h, int opt, size_t size) {
 ** options to control endianess and alignment
 */
 static void controloptions (lua_State *L, int opt, const char **fmt,
-                            Header *h) {
+                            StructHeader *h) {
   switch (opt) {
     case  ' ': return;  /* ignore white spaces */
     case '>': h->endian = BIG; return;
     case '<': h->endian = LITTLE; return;
     case '!': {
-      int a = getnum(fmt, MAXALIGN);
+      int a = struct_getnum(fmt, STRUCT_MAXALIGN);
       if (!isp2(a))
         luaL_error(L, "alignment %d is not a power of 2", a);
       h->align = a;
@@ -168,7 +169,7 @@ static void putinteger (lua_State *L, luaL_Buffer *b, int arg, int endian,
                         int size) {
   lua_Number n = luaL_checknumber(L, arg);
   Uinttype value;
-  char buff[MAXINTSIZE];
+  char buff[STRUCT_MAXINTSIZE];
   if (n < 0)
     value = (Uinttype)(Inttype)n;
   else
@@ -206,7 +207,7 @@ static void correctbytes (char *b, int size, int endian) {
 static int b_pack (lua_State *L) {
   luaL_Buffer b;
   const char *fmt = luaL_checkstring(L, 1);
-  Header h;
+  StructHeader h;
   int arg = 2;
   size_t totalsize = 0;
   defaultoptions(&h);
@@ -214,7 +215,7 @@ static int b_pack (lua_State *L) {
   luaL_buffinit(L, &b);
   while (*fmt != '\0') {
     int opt = *fmt++;
-    size_t size = optsize(L, opt, &fmt);
+    size_t size = struct_optsize(L, opt, &fmt);
     int toalign = gettoalign(totalsize, &h, opt, size);
     totalsize += toalign;
     while (toalign-- > 0) luaL_addchar(&b, '\0');
@@ -289,7 +290,7 @@ static lua_Number getinteger (const char *buff, int endian,
 
 
 static int b_unpack (lua_State *L) {
-  Header h;
+  StructHeader h;
   const char *fmt = luaL_checkstring(L, 1);
   size_t ld;
   const char *data = luaL_checklstring(L, 2, &ld);
@@ -298,7 +299,7 @@ static int b_unpack (lua_State *L) {
   lua_settop(L, 2);
   while (*fmt) {
     int opt = *fmt++;
-    size_t size = optsize(L, opt, &fmt);
+    size_t size = struct_optsize(L, opt, &fmt);
     pos += gettoalign(pos, &h, opt, size);
     luaL_argcheck(L, pos+size <= ld, 2, "data string too short");
     luaL_checkstack(L, 1, "too many results");
@@ -356,13 +357,13 @@ static int b_unpack (lua_State *L) {
 
 
 static int b_size (lua_State *L) {
-  Header h;
+  StructHeader h;
   const char *fmt = luaL_checkstring(L, 1);
   size_t pos = 0;
   defaultoptions(&h);
   while (*fmt) {
     int opt = *fmt++;
-    size_t size = optsize(L, opt, &fmt);
+    size_t size = struct_optsize(L, opt, &fmt);
     pos += gettoalign(pos, &h, opt, size);
     if (opt == 's')
       luaL_argerror(L, 1, "option 's' has no fixed size");
