@@ -1,51 +1,100 @@
 local M = {}
 
--- Loosely based on a PHP implementation.
-local lom = require "lxp.lom"
+------------------------------------------------------------
+-- xmlize (from lminiz)
 
-local function xml_depth(vals)
-	local valCount = #vals
-	if valCount == 1  and  type(vals[1]) ~= 'table' then
-		return vals[1]
-	end
-
-	local orderTable = {}
-	local children = { ['*'] = orderTable }
-
-	for i = 1, #vals do
-		local val = vals[i]
-		if type(val) == "table" then
-			children[#children + 1] = val.tag
-			local tagEntry = children[val.tag]
-			if not tagEntry then
-				tagEntry = {}
-				children[val.tag] = tagEntry
-			end
-
-			local entry = {}
-			tagEntry[#tagEntry + 1] = entry
-			orderTable[#orderTable + 1] = { val.tag, #tagEntry }
-
-			entry['@'] = val.attr
-			entry['#'] = xml_depth(val)
-		else
-			children[#children + 1] = val
-		end
-	end
-
-	return children
+local function parseargs(s, arg)
+   arg = arg or {}
+   string.gsub(s, "([%-%w]+)=([\"'])(.-)%2", function (w, _, a)
+      arg[w] = a
+   end)
+   return arg
 end
 
+local function collect(s)
+   local stack = {}
+   local top = {}
+   table.insert(stack, top)
+   local i = 1
+   while true do
+      local ni,j,c,label,xarg, empty = string.find(s, "<(%/?)([%w:]+)(.-)(%/?)>", i)
+      if not ni then break end
+      local text = string.sub(s, i, ni-1)
+      if not string.find(text, "^%s*$") then
+         table.insert(top, text)
+      end
+      if empty == "/" then  -- empty element tag
+         table.insert(top, parseargs(xarg, {tag=label}))
+      elseif c == "" then   -- start tag
+         top = parseargs(xarg, {tag=label})
+         table.insert(stack, top)   -- new level
+      else  -- endtag
+         local toclose = table.remove(stack)  -- remove top
+         top = stack[#stack]
+         if #stack < 1 then
+            error("nothing to close with "..label)
+         end
+         if toclose.tag ~= label then
+            error("trying to close "..toclose.tag.." with "..label)
+         end
+         table.insert(top, toclose)
+      end
+      i = j+1
+   end
+   local text = string.sub(s, i)
+   if not string.find(text, "^%s*$") then
+      table.insert(stack[#stack], text)
+   end
+   if #stack > 1 then
+      error("unclosed "..stack[#stack].label)
+   end
+   if type(stack[1][1]) == "string" then
+      table.remove(stack[1], 1)
+   end
+   return stack[1][1]
+end
+
+local function xmlparse(t)
+   local count = #t
+   if count == 1 and type(t[1]) ~= 'table' then
+      return t[1]
+   end
+
+   local order = {}
+   local children = { ['*'] = order }
+   for i = 1, count do local v = t[i]
+      if type(v) == "table" then
+         children[#children + 1] = v.tag
+         local et = children[v.tag]
+         if not et then et = {}; children[v.tag] = et end
+
+         local attr = {}
+         for k, vv in pairs(v) do
+            if type(k) == "string" then
+               attr[k] = vv
+            end
+         end
+
+         local entry = {}
+         et[#et+1] = entry
+         order[#order+1] = { v.tag, v }
+
+         entry['@'] = attr
+         entry['#'] = xmlize(v)
+      else
+         children[#children + 1] = v
+      end
+   end
+
+   return children
+end
 
 function M.luaize(data)
-	data = data:gsub('<%?xml.-%?>(.+)', "%1")
-	data = '<root>' .. data .. '</root>'
-
-	local vals, err = lom.parse(data)
-
-    array = xml_depth(vals)
-
-	return array
+    if not buffer then return xmlparse {} end
+    return xmlparse {
+        tag = "root",
+        collect(buffer),
+    }
 end
 
 
