@@ -318,10 +318,10 @@ C.OutputPath jam : $(BIN_PATH) ;
 C.Application jam : jam.c jambase-j.c ;
 
 C.Library libjam :
-		    buffer.c builtins.c command.c compile.c $(code) expand.c
-		    glob.c hash.c headers.c lists.c luagsub.c luasupport.c make.c make1.c
-		    newstr.c option.c parse.c regexp.c rules.c scan.c
-		    search.c timestamp.c variable.c ;
+			buffer.c builtins.c command.c compile.c $(code) expand.c
+			glob.c hash.c headers.c lists.c luagsub.c luasupport.c make.c make1.c
+			newstr.c option.c parse.c regexp.c rules.c scan.c
+			search.c timestamp.c variable.c ;
 
 local filesRoot = $(OS:L) ;
 if $(UNIX)
