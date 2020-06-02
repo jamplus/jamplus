@@ -18,6 +18,10 @@
 
 #define USE_MULTIPLE
 
+#define OPENSSL_NO_MD2
+#define OPENSSL_NO_MD4
+#define OPENSSL_NO_MD5
+
 #ifdef OPENSSL_NO_MD2
 #define luaopen_md2(L)
 #else

@@ -6,6 +6,7 @@
 * This code is hereby placed in the public domain.
 */
 
+#define USE_MD5_RIVEST
 #ifndef USE_MD5_RIVEST
 #include <openssl/opensslv.h>
 #endif
@@ -102,8 +103,12 @@
 #endif
 
 #ifdef USE_MD5_RIVEST
+#ifndef MD5GLOBAL_H
 #include "md5global.h"
+#endif
+#ifndef MD5_H
 #include "md5.h"
+#endif
 #define MYNAME			"md5"
 #define luaopen_md5		luaopen_md5
 #define AUTHOR			"Rivest"

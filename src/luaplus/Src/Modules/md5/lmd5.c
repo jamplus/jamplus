@@ -69,7 +69,7 @@ static int Lupdate(lua_State *L)		/** update(c,s,...) */
  {
   size_t l;
   const char *s=luaL_checklstring(L,i,&l);
-  MD5Update(c,s,l);
+  MD5Update(c,(const unsigned char *)s,l);
  }
  lua_settop(L,1);
  return 1;
@@ -88,7 +88,7 @@ static int Ldigest(lua_State *L)		/** digest(c or s,[raw]) */
   const char *s=luaL_checklstring(L,1,&l);
   MD5_CTX c;
   MD5Init(&c);
-  MD5Update(&c,s,l);
+  MD5Update(&c,(const unsigned char *)s,l);
   MD5Final(digest,&c);
  }
  if (lua_toboolean(L,2))
@@ -121,21 +121,21 @@ static int Lupdatefile(lua_State *L)
 {
 	MD5_CTX *c=Pget(L,1);
 	const char *fileName=luaL_checkstring(L,2);
-	const size_t BLOCK_SIZE = 32768;
+	const size_t LBLOCK_SIZE = 32768;
 	unsigned char* buffer;
 	size_t fileLen;
 	size_t bytesToDo;
 	FILE* file = fopen(fileName, "rb");
 	if (!file)
 		return 0;
-	buffer = malloc(BLOCK_SIZE);
+	buffer = malloc(LBLOCK_SIZE);
 	fseek(file, 0, SEEK_END);
 	fileLen = ftell(file);
     fseek(file, 0, SEEK_SET);
 	bytesToDo = fileLen;
 	while (bytesToDo > 0)
 	{
-		size_t bytesToRead = bytesToDo < BLOCK_SIZE ? bytesToDo : BLOCK_SIZE;
+		size_t bytesToRead = bytesToDo < LBLOCK_SIZE ? bytesToDo : LBLOCK_SIZE;
 
         fread(buffer, bytesToRead, 1, file);
 		bytesToDo -= bytesToRead;
