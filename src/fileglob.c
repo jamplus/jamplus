@@ -38,7 +38,7 @@
 #endif
 #include <time.h>
 
-static void* fileglob_DefaultAllocFunction(void* userData, void* ptr, unsigned int size) {
+static void* fileglob_DefaultAllocFunction(void* userData, void* ptr, size_t size) {
 	(void)userData;
 
 	if (size == 0) {
@@ -168,7 +168,7 @@ typedef struct fileglob_StringNode {
 } fileglob_StringNode;
 
 
-typedef void* (*fileglob_Alloc)(void* userData, void* ptr, unsigned int size);
+typedef void* (*fileglob_Alloc)(void* userData, void* ptr, size_t size);
 
 
 enum answer {UNKNOWN = -1, NO, YES};
