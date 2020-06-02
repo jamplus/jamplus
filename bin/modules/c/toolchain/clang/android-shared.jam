@@ -899,6 +899,7 @@ rule android.Library TARGET : SOURCES : OPTIONS {
         if application in $(OPTIONS) {
             # JAR file depends on classes (including R.class for libraries) and packaged R.class file.
             Depends $(_jar) : $(_classes) $(_packageRFile) ;
+            UseCommandLine $(_jar) : $(_classes) $(_packageRFile) ;
 
             # Also need to package up R.class for each of our libraries...
             if $(needJars) {
@@ -916,6 +917,7 @@ rule android.Library TARGET : SOURCES : OPTIONS {
         } else {
             # JAR file depends on classes.
             Depends $(_jar) : $(_classes) ;
+            UseCommandLine $(_jar) : $(_classes) ;
         }
 
         # Action to make JAR file.
