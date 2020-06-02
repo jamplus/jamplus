@@ -4,18 +4,18 @@
 
 #include <lua.hpp>
 
-#include <rapidjson/document.h>
-#include <rapidjson/error/en.h>
-#include <rapidjson/istreamwrapper.h>
-#include <rapidjson/ostreamwrapper.h>
-#include <rapidjson/pointer.h>
+#include "../rapidjson/include/rapidjson/document.h"
+#include "../rapidjson/include/rapidjson/error/en.h"
+#include "../rapidjson/include/rapidjson/istreamwrapper.h"
+#include "../rapidjson/include/rapidjson/ostreamwrapper.h"
+#include "../rapidjson/include/rapidjson/pointer.h"
 
 #include "Userdata.hpp"
 #include "values.hpp"
-#include <rapidjson/schema.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/prettywriter.h>
-#include <rapidjson/filewritestream.h>
+#include "../rapidjson/include/rapidjson/schema.h"
+#include "../rapidjson/include/rapidjson/stringbuffer.h"
+#include "../rapidjson/include/rapidjson/prettywriter.h"
+#include "../rapidjson/include/rapidjson/filewritestream.h"
 #include "file.hpp"
 
 

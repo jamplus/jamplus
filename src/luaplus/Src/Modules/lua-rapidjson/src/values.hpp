@@ -3,10 +3,10 @@
 
 #include <vector>
 #include <lua.hpp>
-#include <rapidjson/rapidjson.h>
-#include <rapidjson/document.h>
-#include <rapidjson/reader.h>
-#include <rapidjson/error/en.h>
+#include "../rapidjson/include/rapidjson/rapidjson.h"
+#include "../rapidjson/include/rapidjson/document.h"
+#include "../rapidjson/include/rapidjson/reader.h"
+#include "../rapidjson/include/rapidjson/error/en.h"
 
 #include "luax.hpp"
 #include "StringStream.hpp"
