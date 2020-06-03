@@ -536,7 +536,7 @@ local filefind = require 'filefind'
 
 function MirrorExtractZip(zipFilename, outputDirectory)
     local outputDirectoryEntries = {}
-    for entry in filefind.glob(ospath.join(outputDirectory, '**+')) do
+    for entry in filefind.glob(ospath.join(outputDirectory, '**@*')) do
         outputDirectoryEntries[entry.filename] = entry.write_time
     end
 
