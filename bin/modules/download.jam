@@ -1,0 +1,76 @@
+actions screenoutput _DownloadAndUnzip {
+	rem curl -s -O $(URL)
+	wget -O @($(SOURCE_DIR)/$(URL:BS):C) $(URL)
+	unzip -q -d $(OUTPUT_DIR:C) $(URL:BS)
+	del $(URL:BS)
+}
+
+rule Download.DownloadAndUnzip TARGET : URL : OUTPUT_DIR : DEPENDS_ON_FILE {
+	local DOWNLOAD_TARGET = download:$(TARGET) ;
+	local CLEAN_DOWNLOAD_TARGET = clean:$(DOWNLOAD_TARGET) ;
+	CleanTree $(DOWNLOAD_TARGET) $(CLEAN_DOWNLOAD_TARGET) : $(OUTPUT_DIR) ;
+	NotFile $(DOWNLOAD_TARGET) $(CLEAN_DOWNLOAD_TARGET) ;
+	Depends clean : clean:$(TARGET) : $(CLEAN_DOWNLOAD_TARGET) ;
+	Always $(CLEAN_DOWNLOAD_TARGET) ;
+	Depends $(DOWNLOAD_TARGET) : $(DEPENDS_ON_FILE) ;
+
+	SOURCE_DIR on $(DEPENDS_ON_FILE) = $(SUBDIR) ;
+	URL on $(DEPENDS_ON_FILE) = $(URL) ;
+	OUTPUT_DIR on $(DEPENDS_ON_FILE) = $(OUTPUT_DIR) ;
+	_DownloadAndUnzip $(DEPENDS_ON_FILE) ;
+
+	return $(DOWNLOAD_TARGET) ;
+}
+
+
+	#wget -O $(OUTPUT_FILE:CT) $(URL)
+actions screenoutput _Download {
+    curl -L -o $(OUTPUT_FILE:CT) $(URL)
+}
+
+if $(OS) = MACOSX {
+
+actions screenoutput _DownloadHelper_Unzip {
+	ditto -kx $(ZIP_FILE:TC) $(OUTPUT_DIR:C)
+}
+
+} else {
+
+actions screenoutput _DownloadHelper_Unzip {
+	unzip -q -d $(OUTPUT_DIR:C) $(ZIP_FILE:TC)
+}
+
+}
+
+rule Download.DownloadAndUnzip TARGET : OUTPUT_DIR : URL : DEPENDS_ON_FILE {
+	OUTPUT_DIR = $(OUTPUT_DIR:R=$(SUBDIR)) ;
+
+	local DOWNLOAD_TARGET = download:$(TARGET) ;
+	local CLEAN_DOWNLOAD_TARGET = clean:$(DOWNLOAD_TARGET) ;
+	NotFile $(DOWNLOAD_TARGET) $(CLEAN_DOWNLOAD_TARGET) ;
+	Depends clean : clean:$(TARGET) : $(CLEAN_DOWNLOAD_TARGET) ;
+	Always $(CLEAN_DOWNLOAD_TARGET) ;
+
+	local URL_TARGET = $(URL:BSG=<$(DOWNLOAD_TARGET)>) ;
+	MakeLocate $(URL_TARGET) : $(LOCATE_TARGET) ;
+	Clean $(CLEAN_DOWNLOAD_TARGET) : $(URL_TARGET) ;
+
+	DEPENDS_ON_FILE = $(DEPENDS_ON_FILE:G=<$(DOWNLOAD_TARGET>) ;
+	Depends all : $(DOWNLOAD_TARGET) : $(DEPENDS_ON_FILE) ;
+	Needs $(DEPENDS_ON_FILE) : $(URL_TARGET) ;
+
+	URL on $(URL_TARGET) = $(URL) ;
+	OUTPUT_FILE on $(URL_TARGET) = $(URL_TARGET) ;
+	_Download $(URL_TARGET) ;
+
+	CleanTree $(DOWNLOAD_TARGET) $(CLEAN_DOWNLOAD_TARGET) : $(OUTPUT_DIR) ;
+
+	ZIP_FILE on $(DEPENDS_ON_FILE) = $(URL_TARGET) ;
+	OUTPUT_DIR on $(DEPENDS_ON_FILE) = $(OUTPUT_DIR) ;
+	_DownloadHelper_Unzip $(DEPENDS_ON_FILE) : $(URL_TARGET) ;
+
+	return $(DOWNLOAD_TARGET) ;
+}
+
+
+
