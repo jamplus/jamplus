@@ -1,0 +1,24 @@
+SubDir TOP ;
+
+local CIVETWEB_ROOT = civetweb_src/civetweb-1.12 ;
+local CIVETWEB_URL = https://github.com/civetweb/civetweb/archive/v1.12.zip ;
+
+if ! $(PREPASS_FINISHED) {
+
+	QueueJamfile $(JAM_CURRENT_SCRIPT) ;
+
+	Download.DownloadAndUnzip civetweb : $(SUBDIR)/civetweb_src : $(CIVETWEB_URL) : $(SUBDIR)/$(CIVETWEB_ROOT)/src/civetweb.c ;
+
+	PREPASS_FINISHED = true ;
+
+} else {
+
+	C.Defines civetweb : OPENSSL_API_1_1 ;
+	C.IncludeDirectories : $(CIVETWEB_ROOT)/include ;
+	if $(NT) {
+		C.LinkPrebuiltLibraries : advapi32 comdlg32 gdi32 shell32 user32 ;
+	}
+	C.Application : $(CIVETWEB_ROOT)/src/civetweb.c $(CIVETWEB_ROOT)/src/main.c : console ;
+
+}
+
