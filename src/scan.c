@@ -47,6 +47,7 @@ struct include {
 	FILE 		*file;		/* for yyfparse() -- file being read */
 	const char 	*fname;		/* for yyfparse() -- file name */
 	int 		line;		/* line counter for error messages */
+	char**		origstrings; /* strings list was allocated, so free it when done parsing its contents */
 	char 		buf[ 512 ];	/* for yyfparse() -- line buffer */
 } ;
 
@@ -118,6 +119,7 @@ yyfparse( const char *s )
 	i->file = 0;
 	i->fname = copystr( s );
 	i->line = 0;
+	i->origstrings = 0;
 	i->next = incp;
 	incp = i;
 
@@ -141,6 +143,7 @@ yyfparselines( const char* s, char **lines )
 	i->file = 0;
 	i->fname = copystr( s );
 	i->line = 0;
+	i->origstrings = 0;
 	i->next = incp;
 	incp = i;
 }
@@ -235,8 +238,11 @@ yyline()
 
 					strings[numLines] = 0;
 
+					pZipArchive->m_pFree(pZipArchive->m_pIO_opaque, buffer);
+
 					i->strings = strings;
 					i->string = "";
+					i->origstrings = strings;
 				}
 				else
 				{
@@ -300,6 +306,18 @@ yyline()
 
 	if( i->file && i->file != stdin )
 	    fclose( i->file );
+
+	if (i->origstrings != NULL)
+	{
+		char** strings = i->origstrings;
+		while (*strings != NULL)
+		{
+			free(*strings);
+			++strings;
+		}
+		free(i->origstrings);
+	}
+
 #ifdef OPT_IMPROVED_WARNINGS_EXT
 	/* memory leak */
 #else
