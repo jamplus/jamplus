@@ -144,7 +144,7 @@
 #include "execcmd.h"
 #endif
 
-#include "jamzipbuffer.c"
+#include "fileglob.h"
 #include "miniz.h"
 
 #ifdef NT
@@ -224,6 +224,9 @@ extern char **environ;
 extern int usechecksums;
 #endif /* OPT_USE_CHECKSUMS_EXT */
 
+int embedbuildmodules(const char *rootDirectory);
+int extractbuildmodules(const char *rootDirectory);
+
 int main( int argc, char **argv, char **arg_environ )
 {
 	int		n, num_targets;
@@ -257,6 +260,19 @@ int main( int argc, char **argv, char **arg_environ )
                 char processPath[4096];
                 int i;
                 const char* name = argv[argstartindex] + 2;
+
+				if (strcmp(name, "embedbuildmodules") == 0  ||  strcmp(name, "embed") == 0) {
+					++argstartindex;
+					embedbuildmodules(argc == argstartindex + 1 ? argv[argstartindex] : NULL);
+					return EXITOK;
+				}
+
+				if (strcmp(name, "extractbuildmodules") == 0  ||  strcmp(name, "extract") == 0) {
+					++argstartindex;
+					extractbuildmodules(argc == argstartindex + 1 ? argv[argstartindex] : NULL);
+					return EXITOK;
+				}
+
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 				BUFFER buff;
 				const char* appsPath = "apps/";
@@ -974,9 +990,22 @@ track_realloc(void *ptr, size_t size)
 }
 #endif
 
+#define ZIPBUFFERHEADER_SIGNATUREA "JamZipBu"
+#define ZIPBUFFERHEADER_SIGNATUREB "fferInfo"
+
+typedef struct _JamZipBufferInfo
+{
+	uint8_t signatureA[8];
+	uint64_t startOffset;
+	uint64_t size;
+	uint8_t signatureB[8];
+} JamZipBufferInfo;
+
+
 int zipArchiveOpenedSuccessfully = -1;
 mz_zip_archive *pZipArchive = NULL;
 
+/*
 const unsigned char *zip_get_jamZipBuffer() {
 	return jamZipBuffer;
 }
@@ -984,20 +1013,63 @@ const unsigned char *zip_get_jamZipBuffer() {
 size_t zip_get_jamZipBuffer_size() {
 	return sizeof(jamZipBuffer);
 }
+*/
 
 mz_zip_archive *zip_attemptopen() {
 	if (pZipArchive == NULL  &&  zipArchiveOpenedSuccessfully == -1)
 	{
+		JamZipBufferInfo jamZipBufferInfo;
+		uint64_t executableSize = 0;
+		char executablePath[1000];
+
 		pZipArchive = malloc(sizeof(mz_zip_archive));
-		memset(pZipArchive, 0, sizeof(mz_zip_archive));
-		if (!mz_zip_reader_init_mem(pZipArchive, jamZipBuffer, sizeof(jamZipBuffer), 0))
+		mz_zip_zero_struct(pZipArchive);
+
+		getexecutablepath(executablePath, sizeof(executablePath));
+
+		memcpy(&jamZipBufferInfo.signatureA, ZIPBUFFERHEADER_SIGNATUREA, 8);
+		jamZipBufferInfo.startOffset = 0;
+		jamZipBufferInfo.size = 0;
+		memcpy(&jamZipBufferInfo.signatureB, ZIPBUFFERHEADER_SIGNATUREB, 8);
+
 		{
-			zipArchiveOpenedSuccessfully = 0;
-			free(pZipArchive);
-		}
-		else
-		{
-			zipArchiveOpenedSuccessfully = 1;
+			FILE *file = NULL;
+#if defined(_MSC_VER)
+			fopen_s(&file, executablePath, "rb");
+#else
+			file = fopen(executablePath, "rb");
+#endif
+			if (file != NULL)
+			{
+				JamZipBufferInfo testJamZipBufferInfo;
+				fseek(file, -(int)sizeof(JamZipBufferInfo), SEEK_END);
+				fread(&testJamZipBufferInfo, sizeof(JamZipBufferInfo), 1, file);
+				executableSize = ftell(file);
+				fclose(file);
+
+				if (memcmp(&testJamZipBufferInfo.signatureA, ZIPBUFFERHEADER_SIGNATUREA, 8) == 0
+						&& memcmp(&testJamZipBufferInfo.signatureB, ZIPBUFFERHEADER_SIGNATUREB, 8) == 0
+						&& testJamZipBufferInfo.startOffset + testJamZipBufferInfo.size == executableSize - sizeof(JamZipBufferInfo)
+					)
+				{
+					jamZipBufferInfo.startOffset = testJamZipBufferInfo.startOffset;
+					jamZipBufferInfo.size = testJamZipBufferInfo.size;
+					executableSize = jamZipBufferInfo.startOffset;
+
+
+					if (!mz_zip_reader_init_file_v2(pZipArchive, executablePath, 0, jamZipBufferInfo.startOffset, jamZipBufferInfo.size))
+					{
+						zipArchiveOpenedSuccessfully = 0;
+						mz_zip_end(pZipArchive);
+						free(pZipArchive);
+					}
+					else
+					{
+						zipArchiveOpenedSuccessfully = 1;
+						return pZipArchive;
+					}
+				}
+			}
 		}
 	}
 	return pZipArchive;
@@ -1056,3 +1128,376 @@ int zip_findfile(const char *filename) {
 }
 
 
+int copyfilemaxbytes(const char *dst, const char *src, size_t maxBytesToCopy)
+{
+	size_t size = 0, sizeout = 0;
+	size_t bytesCopied = 0;
+	FILE *fsrc = NULL, *fdst = NULL;
+	unsigned char block[1 << 16];
+
+#if defined(_MSC_VER)
+	fopen_s(&fsrc, src, "rb");
+#else
+	fsrc = fopen(src, "rb");
+#endif
+	if (fsrc == NULL) {
+		return 0;
+	}
+
+	file_mkdir(dst);
+
+#if defined(_MSC_VER)
+	fopen_s(&fdst, dst, "wb");
+#else
+	fdst = fopen(dst, "wb");
+#endif
+	if (fdst == NULL) {
+		fclose(fsrc);
+		return 0;
+	}
+
+	while (!feof(fsrc) && bytesCopied < maxBytesToCopy) {
+		size_t bytesToCopy = sizeof(block);
+		if (bytesCopied + bytesToCopy > maxBytesToCopy) {
+			bytesToCopy = maxBytesToCopy - bytesCopied;
+		}
+		size = fread(block, 1, (size_t)bytesToCopy, fsrc);
+		if (size == 0) {
+			break;
+		}
+
+		sizeout = fwrite(block, 1, size, fdst);
+		if (sizeout != size) {
+			fclose(fsrc);
+			fclose(fdst);
+			return 0;
+		}
+
+		bytesCopied += bytesToCopy;
+	}
+
+	fclose(fsrc);
+	fclose(fdst);
+	return 1;
+}
+
+int appenddatatoexecutable(void* buffer, size_t bufferSize)
+{
+	JamZipBufferInfo jamZipBufferInfo;
+	uint64_t executableSize = 0;
+	char newExecutablePath[1000];
+	char executablePath[1000];
+	getexecutablepath(executablePath, sizeof(executablePath));
+
+	memcpy(&jamZipBufferInfo.signatureA, ZIPBUFFERHEADER_SIGNATUREA, 8);
+	jamZipBufferInfo.startOffset = 0;
+	jamZipBufferInfo.size = 0;
+	memcpy(&jamZipBufferInfo.signatureB, ZIPBUFFERHEADER_SIGNATUREB, 8);
+
+	{
+		FILE *file = NULL;
+#if defined(_MSC_VER)
+		fopen_s(&file, executablePath, "rb");
+#else
+		file = fopen(executablePath, "rb");
+#endif
+		//FILE* file = fopen(executablePath, "rb");
+		if (file != NULL)
+		{
+			JamZipBufferInfo testJamZipBufferInfo;
+			fseek(file, -(int)sizeof(JamZipBufferInfo), SEEK_END);
+			fread(&testJamZipBufferInfo, sizeof(JamZipBufferInfo), 1, file);
+			executableSize = ftell(file);
+			fclose(file);
+
+			if (memcmp(&testJamZipBufferInfo.signatureA, ZIPBUFFERHEADER_SIGNATUREA, 8) == 0
+					&& memcmp(&testJamZipBufferInfo.signatureB, ZIPBUFFERHEADER_SIGNATUREB, 8) == 0
+					&& testJamZipBufferInfo.startOffset + testJamZipBufferInfo.size == executableSize - sizeof(JamZipBufferInfo)
+				)
+			{
+				jamZipBufferInfo.startOffset = testJamZipBufferInfo.startOffset;
+				jamZipBufferInfo.size = testJamZipBufferInfo.size;
+				executableSize = jamZipBufferInfo.startOffset;
+			}
+		}
+	}
+
+	if (executableSize == 0)
+	{
+		FILE *file = NULL;
+#if defined(_MSC_VER)
+		fopen_s(&file, executablePath, "rb");
+#else
+		file = fopen(executablePath, "rb");
+#endif
+		if (file != NULL)
+		{
+			fseek(file, 0, SEEK_END);
+			executableSize = ftell(file);
+			fclose(file);
+		}
+	}
+
+	strcpy(newExecutablePath, executablePath);
+	strcat(newExecutablePath, ".embed");
+	copyfilemaxbytes(newExecutablePath, executablePath, executableSize);
+
+	FILE* file = NULL;
+#if defined(_MSC_VER)
+	fopen_s(&file, newExecutablePath, "ab");
+#else
+	file = fopen(newExecutablePath, "ab");
+#endif
+	jamZipBufferInfo.startOffset = executableSize;
+	jamZipBufferInfo.size = bufferSize;
+	fwrite(buffer, bufferSize, 1, file);
+	fwrite(&jamZipBufferInfo, sizeof(JamZipBufferInfo), 1, file);
+	fclose(file);
+
+	printf("embedbuildmodules: Created [%s] with new build modules.\n", newExecutablePath);
+	printf("embedbuildmodules: Rename to [%s] to use.\n", executablePath);
+	return 0;
+}
+
+int embedbuildmodules(const char *rootDirectory)
+{
+	FILE *fin;
+	char cwdbuf[4096];
+	char buf[ 1024 ];
+	BUFFER pathBuffer;
+	size_t pathLength = 0;
+	const char* ptr;
+#ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
+	const char* jambuildmodulesFilename = "jambuildmodules.txt";
+#else
+	const char* jambuildmodulesFilename = "jambuildmodules-nolua.txt";
+#endif /* OPT_BUILTIN_LUA_SUPPORT_EXT */
+
+	mz_zip_archive zip;
+	memset(&zip, 0, sizeof(zip));
+	mz_bool ret = mz_zip_writer_init_heap(&zip, 0, 512 * 1024);
+
+	buffer_init(&pathBuffer);
+	if (rootDirectory == NULL)
+	{
+		if (getcwd(cwdbuf, sizeof(cwdbuf)))
+		{
+			rootDirectory = cwdbuf;
+		}
+	}
+	if (rootDirectory != NULL)
+	{
+		ptr = rootDirectory;
+		while (*ptr != 0)
+		{
+			if (*ptr == '\\')
+			{
+				buffer_addchar(&pathBuffer, '/');
+			}
+			else
+			{
+				buffer_addchar(&pathBuffer, *ptr);
+			}
+			++ptr;
+		}
+		if (buffer_pos(&pathBuffer) != 0 && buffer_posptr(&pathBuffer)[-1] != '/')
+		{
+			buffer_addchar(&pathBuffer, '/');
+		}
+	}
+	pathLength = buffer_pos(&pathBuffer);
+
+	buffer_addstring(&pathBuffer, jambuildmodulesFilename, strlen(jambuildmodulesFilename));
+	buffer_addchar(&pathBuffer, 0);
+	fin = fopen(buffer_ptr(&pathBuffer), "r");
+	if (fin == NULL)
+	{
+		printf("embedbuildmodules: Unable to access %s.\n", buffer_ptr(&pathBuffer));
+		exit(EXITBAD);
+		return 0;
+	}
+	buffer_setpos(&pathBuffer, pathLength);
+
+	while (fgets(buf, sizeof(buf), fin))
+	{
+		char *p = buf;
+
+		/* Strip leading whitespace. */
+		while (*p == ' ' || *p == '\t' || *p == '\n')
+			p++;
+
+		/* Drop comments and empty lines. */
+		if (*p == '#' || !*p)
+			continue;
+
+		unsigned char* srcPtr = (unsigned char*)p;
+		buffer_setpos(&pathBuffer, pathLength);
+		char* destPtr = buffer_posptr(&pathBuffer);
+		while (*srcPtr && *srcPtr != '\n' && *srcPtr != '$')
+		{
+			if (*srcPtr == '\\')
+			{
+				buffer_addchar(&pathBuffer, '/');
+			}
+			else
+			{
+				buffer_addchar(&pathBuffer, *srcPtr);
+			}
+			++srcPtr;
+			++destPtr;
+		}
+		if (*srcPtr == '$')
+		{
+			++srcPtr;
+		}
+		if (buffer_pos(&pathBuffer) != pathLength && buffer_posptr(&pathBuffer)[-1] != '/')
+		{
+			buffer_addchar(&pathBuffer, '/');
+		}
+		size_t pathLength = buffer_pos(&pathBuffer);
+		buffer_addchar(&pathBuffer, 0);
+
+		BUFFER wildcardBuf;
+		buffer_init(&wildcardBuf);
+		buffer_addstring(&wildcardBuf, buffer_ptr(&pathBuffer), pathLength);
+
+		while (*srcPtr && *srcPtr != '\n' && *srcPtr != '$')
+		{
+			if (*srcPtr == '\\')
+			{
+				buffer_addchar(&wildcardBuf, '/');
+			}
+			else
+			{
+				buffer_addchar(&wildcardBuf, *srcPtr);
+			}
+			++srcPtr;
+		}
+		buffer_addchar(&wildcardBuf, 0);
+
+		if (*srcPtr == '$')
+		{
+			++srcPtr;
+		}
+
+		unsigned char* entryFilename = srcPtr;
+		while (*srcPtr && *srcPtr != '\n')
+		{
+			++srcPtr;
+		}
+		*srcPtr = 0;
+		if (*entryFilename == 0)
+		{
+			entryFilename = NULL;
+		}
+
+		//printf("Searching wildcard %s\n", wildcard);
+		fileglob* glob = fileglob_Create(buffer_ptr(&wildcardBuf));
+		while (fileglob_Next(glob))
+		{
+			const char* filename = fileglob_FileName(glob);
+			//printf("%s\n", filename);
+			mz_zip_writer_add_file(&zip, entryFilename != NULL ? (const char*)entryFilename : filename + pathLength, filename, NULL, 0, MZ_BEST_COMPRESSION);
+		}
+	}
+	fclose(fin);
+
+	void* buffer;
+	size_t bufferSize;
+	mz_zip_writer_finalize_heap_archive(&zip, &buffer, &bufferSize);
+	appenddatatoexecutable(buffer, bufferSize);
+
+	zip.m_pFree(zip.m_pAlloc_opaque, buffer);
+
+	mz_zip_writer_end(&zip);
+	return 0;
+}
+
+
+int extractbuildmodules(const char *rootDirectory)
+{
+	char cwdbuf[4096];
+	BUFFER pathBuffer;
+	size_t pathLength = 0;
+	int index;
+	const char* ptr;
+
+	mz_zip_archive *archive = zip_attemptopen();
+	if (archive == NULL)
+	{
+		printf("extractbuildmodules: No embedded archive to extract.\n");
+		exit(EXITBAD);
+	}
+
+	buffer_init(&pathBuffer);
+	if (rootDirectory == NULL)
+	{
+		if (getcwd(cwdbuf, sizeof(cwdbuf)))
+		{
+			rootDirectory = cwdbuf;
+		}
+	}
+	if (rootDirectory != NULL)
+	{
+		ptr = rootDirectory;
+		while (*ptr != 0)
+		{
+			if (*ptr == '\\')
+			{
+				buffer_addchar(&pathBuffer, '/');
+			}
+			else
+			{
+				buffer_addchar(&pathBuffer, *ptr);
+			}
+			++ptr;
+		}
+		if (buffer_pos(&pathBuffer) != 0 && buffer_posptr(&pathBuffer)[-1] != '/')
+		{
+			buffer_addchar(&pathBuffer, '/');
+		}
+	}
+	pathLength = buffer_pos(&pathBuffer);
+	buffer_addchar(&pathBuffer, 0);
+
+	printf("extractbuildmodules: Extracting files to [%s].\n", buffer_ptr(&pathBuffer));
+	for (index = 0; index < (int)mz_zip_reader_get_num_files(archive); ++index)
+	{
+		mz_zip_archive_file_stat fileEntry;
+		if (mz_zip_reader_file_stat(archive, index, &fileEntry))
+		{
+			if (!fileEntry.m_is_directory)
+			{
+				time_t fileTime;
+
+				buffer_setpos(&pathBuffer, pathLength);
+				buffer_addstring(&pathBuffer, fileEntry.m_filename, strlen(fileEntry.m_filename));
+				buffer_addchar(&pathBuffer, 0);
+
+				if (file_time(buffer_ptr(&pathBuffer), &fileTime) == 0)
+				{
+					printf("extractbuildmodules: Refusing to overwrite [%s].\n", buffer_ptr(&pathBuffer));
+					exit(EXITBAD);
+				}
+			}
+		}
+	}
+
+	for (index = 0; index < (int)mz_zip_reader_get_num_files(archive); ++index)
+	{
+		mz_zip_archive_file_stat fileEntry;
+		if (mz_zip_reader_file_stat(archive, index, &fileEntry))
+		{
+			if (!fileEntry.m_is_directory)
+			{
+				buffer_setpos(&pathBuffer, pathLength);
+				buffer_addstring(&pathBuffer, fileEntry.m_filename, strlen(fileEntry.m_filename));
+				buffer_addchar(&pathBuffer, 0);
+
+				file_mkdir(buffer_ptr(&pathBuffer));
+				mz_zip_reader_extract_to_file(archive, index, buffer_ptr(&pathBuffer), 0);
+			}
+		}
+	}
+	return 0;
+}

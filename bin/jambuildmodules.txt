@@ -1,0 +1,6 @@
+$packagebuildmodules.txt
+$Jambase.jam
+$apps/**
+$lua/**
+$modules/**
+$scripts/**

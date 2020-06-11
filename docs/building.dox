@@ -26,9 +26,64 @@ The directions in the sections below describe the build process in better detail
 
     # If you are on Windows, have Visual Studio installed, and want a 64-bit build, launch x64 Native Tools Command Prompt and run:
     bootstrap-win64-vc.bat
+
+    # If you are on Windows, have Clang installed, and want a 64-bit build:
+    bootstrap-win64-clang.bat
 \endcode
 
 Binaries are built into a platform specific directory under the <tt>bin/</tt> directory, such as <tt>bin/win64/</tt> or <tt>bin/macosx64/</tt>.  All associated scripts and optional binaries (such as the webserver used for iOS .ipa serving to device) are also within this platform directory.  Multiple JamPlus platform binaries can be deployed within the same directory tree, making it easy to check into your source control system.
+
+
+
+
+
+\section embedbuildmodules Embed Build Modules
+
+(Note: Embedding of build modules is done as part of the bootstrapping step described above. Re-embedding of build modules is only needed if updates are being made to the embedded .jam or .lua files.)
+
+JamPlus has the ability to store its build modules in the Jam executable itself. The built-in command-line options <tt>--embedbuildmodules [DIRECTORY_WHERE_JAMBUILDMODULES_TXT_RESIDES]</tt> or <tt>--embed [DIRECTORY_WHERE_JAMBUILDMODULES_TXT_RESIDES]</tt> packages up and embeds all of the needed files directly into a Jam executable that can be used in a standalone fashion without any additional support files.
+
+The embedded build modules are searched for last. When the Jam executable resides relative to the various JamPlus module directories and files (<tt>Jambase.jam</tt>, <tt>apps/</tt>, <tt>lua/</tt>, <tt>modules/</tt>, and <tt>scripts/</tt>), either one directory level deeper (such as in its default source distribution build location at <tt>bin/PLATFORM/jam[.exe]</tt>) or immediately relative to the <tt>Jambase.jam</tt>, the Jam executable will access its modules from the individual disk files first and then attempt access the embedded build modules after exhausting the disk search.
+
+\b embedbuildmodules accepts an optional argument, the <tt>DIRECTORY_WHERE_JAMBUILDMODULES_TXT_RESIDE</tt>. If no directory is provided, the current directory will be used. Then, <tt>jam --embedbuildmodules</tt> will use <tt>jambuildmodules.txt</tt> is used as a source file list of what files and directories should be embedded within the Jam executable.
+
+The updated Jam executable is called <tt>jam.exe.embed</tt> or <tt>jam.embed</tt> depending on your platform. It should be renamed and appropriate executable bits set on it.
+
+\code
+# Embed build modules specified from the current directory's jambuildmodules.txt.
+jam --embedbuildmodules
+move jam.exe.embed jam.exe
+
+# Embed build modules specified in ../bin/jambuildmodules.txt.
+jam --embed ../bin
+mv jam.embed jam
+chmod +x jam
+\endcode
+
+
+
+
+
+
+\section extractbuildmodules Extract Build Modules
+
+\b extractbuildmodules dumps out the embedded build modules and build support files collected during <tt>jam --embedbuildmodules</tt>.
+
+\b extractbuildmodules accepts an optional argument, the destination path. If the destination path is not provided, the build files will be written into the current directory. \b extractbuildmodules will not overwrite an existing file.
+
+When the Jam executable resides in the same directory as the extracted <tt>Jambase.jam</tt> or one directory level deeper than the <tt>Jambase.jam</tt>, an invocation of the Jam executable will use the build files on disk before falling back to its embedded versions, allowing easy modification and testing before re-embedding.
+
+\code
+# Extract to the current directory.
+jam --extractbuildmodules
+
+# Extract to the directory above the executable's directory (assuming it is in jamplus/bin/macosx64):
+[~/jamplus/bin/macosx64]jam --extractbuildmodules ..
+\endcode
+
+
+
+
 
 
 

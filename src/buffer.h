@@ -41,8 +41,8 @@ void buffer_resize(BUFFER* buff, size_t size);
 #define buffer_addstring(buff, str, len) { size_t _len = (len); buffer_openspace((buff), _len); memcpy((buff)->buffer + (buff)->pos, str, _len); (buff)->pos += _len; }
 #define buffer_putchar(buff, c) (buff)->buffer[(buff)->pos] = (c)
 #define buffer_putstring(buff, str, len) { size_t _len = (len); buffer_openspace((buff), _len); memcpy((buff)->buffer + (buff)->pos, str, _len); }
-#define buffer_setpos(buff, newpos) (buff)->pos = newpos;
-#define buffer_deltapos(buff, delta) (buff)->pos += delta
+#define buffer_setpos(buff, newpos) (buff)->pos = (newpos)
+#define buffer_deltapos(buff, delta) (buff)->pos += (delta)
 #define buffer_isempty(buff) ((buff)->pos == 0)
 
 #define buffer_getchar(buff) ((buff)->pos + 1 < (buff)->buffsize ? (buff)->buffer[(buff)->pos++] : EOF)

@@ -6,28 +6,6 @@ JamPlus ships with several useful scripts for the generation of Jamfiles from va
 
 
 
-\section extractbuildmodules Extract Build Modules
-
-\b extractbuildmodules dumps out the embedded modules and build support files originally collected during the build process (from the <tt>jamplus/bin/</tt> directory).
-
-\b extractbuildmodules accepts an optional argument, the destination path. If the destination path is not provided, the build files will be written into the current directory. \b extractbuildmodules will not overwrite an existing file.
-
-When the Jam executable resides in the same directory as the extracted <tt>Jambase.jam</tt> or one directory level deeper than the <tt>Jambase.jam</tt>, an invocation of the Jam executable will use the build files on disk before falling back to its embedded versions.
-
-\code
-# Extract to the current directory.
-jam --extractbuildmodules
-
-# Extract to the directory above the executable's directory (assuming it is in jamplus/bin/macosx64):
-[~/jamplus/bin/macosx64]jam --extractbuildmodules ..
-\endcode
-
-
-
-
-
-
-
 \section folderstojamfile FoldersToJamfile
 
 From the specified directory, \b FoldersToJamfile recurses the directory structure and creates a Jamfile with all found files.  A source group is generated automatically for every directory.

@@ -1,2 +1,2 @@
 cd %~dp0src
-call build-jam-win64-llvm-mingw.bat
+call build-jam-win64-clang.bat

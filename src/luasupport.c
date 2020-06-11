@@ -974,37 +974,6 @@ static int lanes_on_state_create(ls_lua_State *L) {
 }
 
 
-extern const unsigned char *zip_get_jamZipBuffer();
-extern size_t zip_get_jamZipBuffer_size();
-
-#define LMZ_ZIP_READER "miniz.ZipReader"
-
-static int ls_lmz_zip_pusherror(lua_State *L, mz_zip_archive *za, const char *prefix) {
-    mz_zip_error err = mz_zip_get_last_error(za);
-    const char *emsg = mz_zip_get_error_string(err);
-    lua_pushnil(L);
-    if (prefix == NULL)
-        lua_pushstring(L, emsg);
-    else
-        lua_pushfstring(L, "%s: %s", prefix, emsg);
-    return 2;
-}
-
-static int ls_zip_attemptopen(ls_lua_State *L)
-{
-    const unsigned char *p = zip_get_jamZipBuffer();
-    size_t len = zip_get_jamZipBuffer_size();
-    mz_uint32 flags = 0;
-    mz_zip_archive *za = lua_newuserdata((lua_State *)L, sizeof(mz_zip_archive));
-    mz_zip_zero_struct(za);
-    if (!mz_zip_reader_init_mem(za, p, len, flags))
-        return ls_lmz_zip_pusherror((lua_State*)L, za, NULL);
-    luaL_setmetatable((lua_State*)L, LMZ_ZIP_READER);
-    ls_lua_pushvalue(L, 1);
-    lua_rawsetp((lua_State*)L, LUA_REGISTRYINDEX, za);
-    return 1;
-}
-
 static int pmain (ls_lua_State *L)
 {
     int top;
@@ -1016,9 +985,6 @@ static int pmain (ls_lua_State *L)
         "package.path = JAM_EXECUTABLE_PATH .. '/lua/?.lua;' .. JAM_EXECUTABLE_PATH .. '/../lua/?.lua' .. package.path\n"
         "package.path = JAM_EXECUTABLE_PATH .. '/lua/?/init.lua;' .. JAM_EXECUTABLE_PATH .. '/../lua/?/init.lua'  .. package.path\n"
     );
-
-    ls_lua_pushcclosure(L, ls_zip_attemptopen, 0);
-    ls_lua_setglobal(L, "jam_zip_attemptopen");
 
     ls_lua_pushcclosure(L, LS_jam_getvar, 0);
     ls_lua_setglobal(L, "jam_getvar");

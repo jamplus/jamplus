@@ -34,9 +34,37 @@ Quick Bootstrapping of JamPlus</h1>
 <div class="line">bootstrap-win32-vc.bat</div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># If you are on Windows, have Visual Studio installed, and want a 64-bit build, launch x64 Native Tools Command Prompt and run:</span></div>
-<div class="line"><span class="preprocessor">bootstrap-win64-vc.bat</span></div>
+<div class="line">bootstrap-win64-vc.bat</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># If you are on Windows, have Clang installed, and want a 64-bit build:</span></div>
+<div class="line"><span class="preprocessor">bootstrap-win64-clang.bat</span></div>
 </div><!-- fragment --><p>Binaries are built into a platform specific directory under the <code>bin/</code> directory, such as <code>bin/win64/</code> or <code>bin/macosx64/</code>. All associated scripts and optional binaries (such as the webserver used for iOS .ipa serving to device) are also within this platform directory. Multiple JamPlus platform binaries can be deployed within the same directory tree, making it easy to check into your source control system.</p>
-<h1><a class="anchor" id="building_testing"></a>
+<h1><a class="anchor" id="embedbuildmodules"></a>
+Embed Build Modules</h1>
+<p>(Note: Embedding of build modules is done as part of the bootstrapping step described above. Re-embedding of build modules is only needed if updates are being made to the embedded .jam or .lua files.)</p>
+<p>JamPlus has the ability to store its build modules in the Jam executable itself. The built-in command-line options <code>&ndash;embedbuildmodules [DIRECTORY_WHERE_JAMBUILDMODULES_TXT_RESIDES]</code> or <code>&ndash;embed [DIRECTORY_WHERE_JAMBUILDMODULES_TXT_RESIDES]</code> packages up and embeds all of the needed files directly into a Jam executable that can be used in a standalone fashion without any additional support files.</p>
+<p>The embedded build modules are searched for last. When the Jam executable resides relative to the various JamPlus module directories and files (<code>Jambase.jam</code>, <code>apps/</code>, <code>lua/</code>, <code>modules/</code>, and <code>scripts/</code>), either one directory level deeper (such as in its default source distribution build location at <code>bin/PLATFORM/jam[.exe]</code>) or immediately relative to the <code>Jambase.jam</code>, the Jam executable will access its modules from the individual disk files first and then attempt access the embedded build modules after exhausting the disk search.</p>
+<p><b>embedbuildmodules</b> accepts an optional argument, the <code>DIRECTORY_WHERE_JAMBUILDMODULES_TXT_RESIDE</code>. If no directory is provided, the current directory will be used. Then, <code>jam &ndash;embedbuildmodules</code> will use <code>jambuildmodules.txt</code> is used as a source file list of what files and directories should be embedded within the Jam executable.</p>
+<p>The updated Jam executable is called <code>jam.exe.embed</code> or <code>jam.embed</code> depending on your platform. It should be renamed and appropriate executable bits set on it.</p>
+<div class="fragment"><div class="line"><span class="preprocessor"># Embed build modules specified from the current directory&#39;s jambuildmodules.txt.</span></div>
+<div class="line">jam --embedbuildmodules</div>
+<div class="line">move jam.exe.embed jam.exe</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># Embed build modules specified in ../bin/jambuildmodules.txt.</span></div>
+<div class="line">jam --embed ../bin</div>
+<div class="line">mv jam.embed jam</div>
+<div class="line">chmod +x jam</div>
+</div><!-- fragment --><h1><a class="anchor" id="extractbuildmodules"></a>
+Extract Build Modules</h1>
+<p><b>extractbuildmodules</b> dumps out the embedded build modules and build support files collected during <code>jam &ndash;embedbuildmodules</code>.</p>
+<p><b>extractbuildmodules</b> accepts an optional argument, the destination path. If the destination path is not provided, the build files will be written into the current directory. <b>extractbuildmodules</b> will not overwrite an existing file.</p>
+<p>When the Jam executable resides in the same directory as the extracted <code>Jambase.jam</code> or one directory level deeper than the <code>Jambase.jam</code>, an invocation of the Jam executable will use the build files on disk before falling back to its embedded versions, allowing easy modification and testing before re-embedding.</p>
+<div class="fragment"><div class="line"><span class="preprocessor"># Extract to the current directory.</span></div>
+<div class="line">jam --extractbuildmodules</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># Extract to the directory above the executable&#39;s directory (assuming it is in jamplus/bin/macosx64):</span></div>
+<div class="line"><span class="preprocessor">[~/jamplus/bin/macosx64]jam --extractbuildmodules ..</span></div>
+</div><!-- fragment --><h1><a class="anchor" id="building_testing"></a>
 Run the JamPlus Test Suite</h1>
 <p>It may also be useful to run the JamPlus test suite after the bootstrap is finished. Note that the test suite may fail depending on platform and compiler version and so on, even though JamPlus itself will work fine. The varied combinations of output text and intermediate files are difficult to determine.</p>
 <div class="fragment"><div class="line">cd tests</div>
