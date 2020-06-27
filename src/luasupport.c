@@ -949,6 +949,22 @@ static void ls_register_custom_libs(ls_lua_State* L)
 }
 
 static int lanes_on_state_create(ls_lua_State *L) {
+	{
+        char exeName[4096];
+        getexecutablepath(exeName, sizeof(exeName));
+        ls_lua_pushlstring(L, exeName, strlen(exeName));
+        ls_lua_setglobal(L, "JAM_EXECUTABLE");
+
+        getprocesspath(exeName, sizeof(exeName));
+        ls_lua_pushlstring(L, exeName, strlen(exeName));
+        ls_lua_setglobal(L, "JAM_EXECUTABLE_PATH");
+    }
+
+    ls_luaL_dostring(L,
+        "package.path = JAM_EXECUTABLE_PATH .. '/lua/?.lua;' .. JAM_EXECUTABLE_PATH .. '/../lua/?.lua;' .. package.path\n"
+        "package.path = JAM_EXECUTABLE_PATH .. '/lua/?/init.lua;' .. JAM_EXECUTABLE_PATH .. '/../lua/?/init.lua;'  .. package.path\n"
+    );
+
     ls_lua_pushcclosure(L, LS_jam_getvar, 0);
     ls_lua_setglobal(L, "jam_getvar");
     ls_lua_pushcclosure(L, LS_jam_setvar, 0);
@@ -982,8 +998,8 @@ static int pmain (ls_lua_State *L)
     ls_luaL_openlibs(L);
 
     ls_luaL_dostring(L,
-        "package.path = JAM_EXECUTABLE_PATH .. '/lua/?.lua;' .. JAM_EXECUTABLE_PATH .. '/../lua/?.lua' .. package.path\n"
-        "package.path = JAM_EXECUTABLE_PATH .. '/lua/?/init.lua;' .. JAM_EXECUTABLE_PATH .. '/../lua/?/init.lua'  .. package.path\n"
+        "package.path = JAM_EXECUTABLE_PATH .. '/lua/?.lua;' .. JAM_EXECUTABLE_PATH .. '/../lua/?.lua;' .. package.path\n"
+        "package.path = JAM_EXECUTABLE_PATH .. '/lua/?/init.lua;' .. JAM_EXECUTABLE_PATH .. '/../lua/?/init.lua;'  .. package.path\n"
     );
 
     ls_lua_pushcclosure(L, LS_jam_getvar, 0);
@@ -1252,16 +1268,14 @@ void ls_lua_init()
     L = ls_luaL_newstate();
 
 	{
-		char exeName[4096];
-		strcpy(exeName, "JAM_EXECUTABLE=[[");
-		getexecutablepath(exeName + strlen(exeName), 4096 - strlen(exeName));
-        strcat(exeName, "]]");
-		ls_luaL_dostring(L, exeName);
+        char exeName[4096];
+        getexecutablepath(exeName, sizeof(exeName));
+        ls_lua_pushlstring(L, exeName, strlen(exeName));
+        ls_lua_setglobal(L, "JAM_EXECUTABLE");
 
-		strcpy(exeName, "JAM_EXECUTABLE_PATH=[[");
-		getprocesspath(exeName + strlen(exeName), 4096 - strlen(exeName));
-        strcat(exeName, "]]");
-		ls_luaL_dostring(L, exeName);
+        getprocesspath(exeName, sizeof(exeName));
+        ls_lua_pushlstring(L, exeName, strlen(exeName));
+        ls_lua_setglobal(L, "JAM_EXECUTABLE_PATH");
     }
 
     ls_lua_pushcclosure(L, &pmain, 0);
