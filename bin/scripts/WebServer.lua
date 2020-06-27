@@ -199,14 +199,51 @@ ospath.write_file(civetwebconfFilename,
 "url_rewrite_patterns /jamplusCA.cer=" .. confMakeSlash(caCerFilename))
 
 print('-------------------------------------------------------------')
-print(string.format('Local web server running at: %s://%s:%d/\n\nPress Ctrl-C twice to exit.', ssl  and  'https'  or  'http', hostname, 9999))
-local env = osprocess.environ()
+print(string.format('Local web server running at: %s://%s:%d/\n\nPress Enter to exit.', ssl  and  'https'  or  'http', hostname, 9999))
 
-if OS == 'MACOSX' then
-    env.DYLD_FALLBACK_LIBRARY_PATH = '/usr/local/opt/openssl/lib'
+local lanes = require 'lanes'
+
+local processInfo
+if true then
+    --do
+    local linda = lanes.linda()
+    local lane = lanes.gen('*', function(civetwebExecutable, civetwebconfFilename)
+        local ospath = require 'ospath'
+        local osprocess = require 'osprocess'
+        local env = osprocess.environ()
+
+        if OS == 'MACOSX' then
+            env.DYLD_FALLBACK_LIBRARY_PATH = '/usr/local/opt/openssl/lib'
+        end
+
+        local command =
+        {
+            ospath.escape(civetwebExecutable), civetwebconfFilename,
+            env = env,
+            stderr_to_stdout = true,
+            can_terminate = true,
+        }
+
+        local proc, input = osprocess.popen(command, false)
+        local processInfo = proc:getinfo()
+        linda:send('info', { processInfo = processInfo })
+        while not cancel_test() do
+            local line = input:read("*l")
+            if not line then break end
+        end
+        input:close()
+        args.exitcode = proc:wait()
+    end)(civetwebExecutable, civetwebconfFilename)
+
+    local startTime = os.clock()
+    while os.clock() - startTime < 5 do
+        local key, info = linda:receive(0.1, "info")
+        if info then
+            processInfo = info.processInfo
+            break
+        end
+    end
 end
 
-for line in osprocess.lines{ ospath.escape(civetwebExecutable), civetwebconfFilename, env=env } do
-    print(line)
-end
-
+io.stdin:read('*l')
+osprocess.terminate(processInfo, 1)
