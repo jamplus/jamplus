@@ -176,6 +176,8 @@ rule C.CompileOptions OPTIONS {
 
 __MultiCppCompile_OutputAsTree = 0 ;
 
+} # ! $(TARGETINFO_LOCATE)
+
 rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO_LINK {
 	local COMPILER_SUITE = $(C.COMPILER_SUITE_SYMBOL) ;
 	if $(ADD_TO_EXTENSIONS[1]) = 1 {
@@ -199,6 +201,9 @@ rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_
 	C.BUILD$(EXTS).PCHFLAGS on $(COMPILER_SUITE) = PCH$(TYPE)FLAGS ;
 }
 
+
+if ! $(TARGETINFO_LOCATE)
+{
 
 rule C._MultiCppCompile_ObjName_Pass1_OutputAsTree {
 	local outputAsTree_obj = [ Subst $(_obj) : %.%. : __ ] ;
@@ -1042,6 +1047,7 @@ rule C.NoPrecompiledHeader TARGET : FILES {
 	NOPCH on $(FILES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) = 1 ;
 }
 
+} # ! $(TARGETINFO_LOCATE)
 
 rule C.Flags TARGET : TYPE : FLAGS {
 	C.ActiveTarget $(TARGET) ;
@@ -1101,7 +1107,15 @@ rule C.LibFlags TARGET : FLAGS {
 
 rule C.LinkDirectories TARGET : DIRECTORIES {
 	C.ActiveTarget $(TARGET) ;
-	LINKDIRECTORIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DIRECTORIES:R=$(SUBDIR:E="")) ;
+	DIRECTORIES = $(DIRECTORIES:R=$(SUBDIR:E="")) ;
+	LINKDIRECTORIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DIRECTORIES) ;
+
+	if $(TARGETINFO_LOCATE) {
+		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ].LinkDirectories[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ]" ;
+		Contents += "$(prefix) = concat($(prefix), {$(NEWLINE)" ;
+			Contents += "$(TAB)[[$(DIRECTORIES:T)]],$(NEWLINE)" ;
+		Contents += "})$(NEWLINE)" ;
+	}
 }
 
 
@@ -1183,7 +1197,7 @@ rule C.C++Exceptions TARGET : TYPE {
 
 
 # TARGETINFO_LOCATE
-} else {
+if $(TARGETINFO_LOCATE) {
 
 
 rule C.BatchCompileGroupSize SIZE {
@@ -1191,10 +1205,6 @@ rule C.BatchCompileGroupSize SIZE {
 
 
 rule C.CompileOptions {
-}
-
-
-rule C.AddBuildExtensions {
 }
 
 
@@ -1214,10 +1224,74 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 	local outputPath = [ C._retrieveOutputPath ] ;
 
 	C._ApplicationTargetInfo ;
+	local theRule ;
+	for theRule in $(C._ApplicationTargetInfo:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+		$(theRule) ;
+	}
 
 	LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
 	C.ARCHITECTURE on $(linkTargets) = $(C.ARCHITECTURE) ;
 
+	if $(TARGETINFO_LOCATE) {
+		local _linkLibs =
+			$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+			$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+		;
+		local linkLibs ;
+		local lib ;
+		for lib in $(_linkLibs) {
+			if ! $(lib) in $(linkLibs) {
+				linkLibs += $(lib) ;
+			}
+		}
+		local _needLibs =
+			$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+			$(NEEDLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+		;
+		local needLibs ;
+		for lib in $(_needLibs) {
+			if ! $(lib) in $(needLibs) {
+				needLibs += $(lib) ;
+			}
+		}
+
+		local prefixlib = $(PREFIXLIB:Z=$(C.COMPILER_SUITE_SYMBOL):E="") ;
+		local suflib = $(SUFLIB:Z=$(C.COMPILER_SUITE_SYMBOL):E="") ;
+
+		Contents += "Projects['$(C.ACTIVE_TARGET)'].Libraries = concat(Projects['$(C.ACTIVE_TARGET)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
+		local lib ;
+		for lib in $(linkLibs) {
+			if $(lib:G) {
+				Contents += "$(TAB)'$(lib:T)',$(NEWLINE)" ;
+			} else {
+				Contents += "$(TAB)'$(lib)',$(NEWLINE)" ;
+			}
+		}
+		Contents += "})$(NEWLINE)" ;
+
+		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
+		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
+		for lib in $(linkLibs) {
+			if $(lib:G) {
+				Contents += "$(TAB)[[$(lib:T)]],$(NEWLINE)" ;
+			} else {
+				Contents += "$(TAB)'$(prefixlib)$(lib:S=$(suflib))',$(NEWLINE)" ;
+			}
+		}
+		Contents += "})$(NEWLINE)" ;
+
+#		Contents += "--++++++++++++++$(NEWLINE)" ;
+#		local projectsString = "$(TAB)'$(needLibs:S=:G=)',$(NEWLINE)" ;
+#		Contents += "Projects['$(C.ACTIVE_TARGET)'].Libraries = concat(Projects['$(C.ACTIVE_TARGET)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
+#		Contents += "$(projectsString:J=$(EMPTY):E="")})$(NEWLINE)" ;
+#
+#		Contents += "--&&&&&&&&&&&&&&&& $(NEWLINE)" ;
+#		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
+#		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
+#			Contents += "$(TAB)[[$(prefixlib)$(needLibs:S=$(suflib):G=)]],$(NEWLINE)" ;
+#		Contents += "})$(NEWLINE)" ;
+#		Contents += "--------------------$(NEWLINE)" ;
+	}
 	DumpProjectInfo $(TARGET) : $(SOURCES) : app $(OPTIONS) ;
 	Depends all : $(TARGET) ;
 }
@@ -1268,86 +1342,6 @@ rule C.PrecompiledHeader TARGET {
 
 
 rule C.NoPrecompiledHeader TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.Flags TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.CFlags TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.C++Flags TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.AddFlags TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.RemoveFlags TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.ForceFileType TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.IncludeDirectories TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.InstallNamePath TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.LinkDirectories TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.LinkFlags TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.LinkLibraries TARGET : LIBRARIES : OPTIONS {
-	C.Inherits $(TARGET) : $(LIBRARIES) : $(OPTIONS) optional ;
-}
-
-
-rule C.LinkPrebuiltLibraries TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.ObjectCFlags TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.ObjectC++Flags TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.ObjectForceInclude TARGET {
-	C.ActiveTarget $(TARGET) ;
-}
-
-
-rule C.RuntimeType TARGET {
 	C.ActiveTarget $(TARGET) ;
 }
 
@@ -1510,12 +1504,6 @@ rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
 			$(theRule) ;
 		}
 
-	}
-
-	if $(TARGETINFO_LOCATE) {
-		local projectsString = "	'$(LINKLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))',$(NEWLINE)" ;
-		Contents += "Projects['$(C.ACTIVE_TARGET)'].Libraries = concat(Projects['$(C.ACTIVE_TARGET)'].Libraries,$(NEWLINE){$(NEWLINE)" ;
-		Contents += "$(projectsString:J=$(EMPTY):E="")})$(NEWLINE)" ;
 	}
 }
 

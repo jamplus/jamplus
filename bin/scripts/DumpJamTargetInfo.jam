@@ -20,10 +20,97 @@ EMPTY = "" ;
 
 rule DumpSources prefix : SOURCES
 {
+	local sources ;
+	local source ;
+	for source in $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) {
+		if ! $(EXCLUDED_FROM_BUILD:Z=$(source)) {
+			sources += $(source:G=) ;
+		}
+	}
+
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 	Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
-			Contents += "$(TAB)[[$(SOURCES:TR=$(subdir))]],$(NEWLINE)" ;
+			Contents += "$(TAB)[[$(sources:TR=$(subdir))]],$(NEWLINE)" ;
 	Contents += "})$(NEWLINE)" ;
+
+	local postHDRS ;
+	local postREFERENCEDIRECTORIES ;
+	local preDEFINES ;
+	local preCCFLAGS ;
+	local preC++FLAGS ;
+	local preMFLAGS ;
+	local preMMFLAGS ;
+	local flagsToRemove ;
+	local flagsToAdd ;
+
+	local forceIncludes ;
+	on $(C.ACTIVE_TOOLCHAIN_*) {
+		postHDRS += $(HDRS) ;
+		if $(MSVCNT) {
+			local flags = /I /AI ;
+			postREFERENCEDIRECTORIES += $(flags)\"$(REFERENCEDIRECTORIES)\" ; #"
+		}
+		preDEFINES += $(DEFINES) ;
+		preCCFLAGS += $(CCFLAGS) ;
+		preC++FLAGS += $(C++FLAGS) ;
+		preMFLAGS += $(MFLAGS) ;
+		preMMFLAGS += $(MMFLAGS) ;
+		flagsToRemove += $(FLAGS_TO_REMOVE) ;
+		flagsToAdd += $(FLAGS_TO_ADD) ;
+		forceIncludes = $(FORCE_INCLUDES) ;
+	}
+
+	on $(C.ACTIVE_TOOLCHAIN_TARGET) {
+		postHDRS = $(HDRS) $(postHDRS) ;
+		if $(MSVCNT) {
+			local flags = /I /AI ;
+			postREFERENCEDIRECTORIES = $(flags)\"$(REFERENCEDIRECTORIES)\" $(postREFERENCEDIRECTORIES) ; #"
+		}
+		preDEFINES += $(DEFINES) ;
+		preCCFLAGS += $(CCFLAGS) ;
+		preC++FLAGS += $(C++FLAGS) ;
+		preMFLAGS += $(MFLAGS) ;
+		preMMFLAGS += $(MMFLAGS) ;
+		flagsToRemove += $(FLAGS_TO_REMOVE) ;
+		flagsToAdd += $(FLAGS_TO_ADD) ;
+		forceIncludes = $(FORCE_INCLUDES) $(forceIncludes) ;
+	}
+
+	SOURCES = [ C._FilterSourcesForCompilableOnly ] ;
+	local sufobj = $(SUFOBJ:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+	local source ;
+	for source in $(SOURCES) {
+		local objTarget = $(source:S=$(sufobj):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+
+		local ext = $(source:S) ;
+		local forceFileType = $(FORCE_FILE_TYPE:Z=$(source)) ;
+		local BUILD_EXT = C.BUILD$(forceFileType:E=$(ext)) ;
+		local objflags = $($(BUILD_EXT).FLAGS:Z=$(objTarget)) ;
+		local objdefines = $(DEFINES:Z=$(objTarget)) ;
+		local objincludes = $(HDRS:Z=$(objTarget)) ;
+		local objectFlagsToRemove = $(FLAGS_TO_REMOVE:Z=$(objTarget)) ;
+		local objectFlagsToAdd = $(FLAGS_TO_ADD:Z=$(objTarget)) ;
+
+		if $(objectFlagsToRemove[1]) {
+			objflags -= $(objectFlagsToRemove) ;
+		}
+		if $(objectFlagsToAdd[1]) {
+			objflags += $(objectFlagsToAdd) ;
+		}
+		local fullprefix = "$(prefix).SourcesInfo[ [[$(source:TR=$(subdir))]] ]" ;
+		if $(objdefines) {
+			Contents += "$(fullprefix).Defines={@(\"$(objdefines)\":J=,)}$(NEWLINE)" ;
+		}
+		if $(objflags) {
+			Contents += "$(fullprefix).Flags={@(\"$(objflags)\":J=,)}$(NEWLINE)" ;
+		}
+		if $(objincludes) {
+			Contents += "$(fullprefix).IncludeDirectories={@(\"$(objincludes)\":J=,)}$(NEWLINE)" ;
+		}
+		if $(forceFileType) {
+			Contents += "$(fullprefix).ForceFileType=\"$(forceFileType)\"$(NEWLINE)" ;
+		}
+	}
 }
 
 

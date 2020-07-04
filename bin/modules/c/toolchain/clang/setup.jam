@@ -9,6 +9,7 @@ rule C.Toolchain.clang.Setup COMPILER_BIN_PATH : SUFFIXES {
     local SUFOBJ = $(SUFFIXES[1]:E=.o) ;
     local SUFSHAREDLIB ;
     local SUFEXE ;
+    local PREFIXLIB ;
     if $(NT) {
         SUFEXE = $(SUFFIXES[2]:E=.exe) ;
         SUFSHAREDLIB = $(SUFFIXES[3]:E=.dll) ;
@@ -16,6 +17,7 @@ rule C.Toolchain.clang.Setup COMPILER_BIN_PATH : SUFFIXES {
         SUFOBJ = $(SUFFIXES[1]:E=.o) ;
         SUFEXE = $(SUFFIXES[2]:E="") ;
         SUFSHAREDLIB = $(SUFFIXES[3]:E=.so) ;
+        PREFIXLIB = lib ;
     }
     SUFEXE on $(C.COMPILER_SUITE_SYMBOL) = $(SUFEXE) ;
     SUFLIB on $(C.COMPILER_SUITE_SYMBOL) = .a ;
@@ -23,6 +25,7 @@ rule C.Toolchain.clang.Setup COMPILER_BIN_PATH : SUFFIXES {
     SUFLINKLIBS on $(C.COMPILER_SUITE_SYMBOL) = .a $(SUFSHAREDLIB) ;
     SUFOBJ on $(C.COMPILER_SUITE_SYMBOL) = $(SUFOBJ) ;
     SUFSHAREDLIB on $(C.COMPILER_SUITE_SYMBOL) = $(SUFSHAREDLIB) ;
+    PREFIXLIB on $(C.COMPILER_SUITE_SYMBOL) = $(PREFIXLIB) ;
 
     NOARSCAN on $(C.COMPILER_SUITE_SYMBOL) = true ;
     NOARUPDATE on $(C.COMPILER_SUITE_SYMBOL) = true ;
