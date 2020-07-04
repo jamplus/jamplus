@@ -914,6 +914,22 @@ include "$(scriptPath)DumpJamTargetInfo.jam" ;
 					end
 				end
 
+				local RemoveDuplicates = function(inputTable)
+					if not inputTable then return inputTable end
+
+					local outputTable = {}
+					local alreadyUsedTable = {}
+
+					for _, input in ipairs(inputTable) do
+						if not alreadyUsedTable[input] then
+							alreadyUsedTable[input] = true
+							outputTable[#outputTable + 1] = input
+						end
+					end
+
+					return outputTable
+				end
+
 				-- Add any of the listed projects' libraries.
 				if workspace.Projects then
 					for index = 1, #workspace.Projects do
@@ -922,6 +938,7 @@ include "$(scriptPath)DumpJamTargetInfo.jam" ;
 						if not project then
 							print('* Project [' .. projectName .. '] is in workspace [' .. workspace.Name .. '] but not defined.')
 						else
+							project.Libraries = RemoveDuplicates(project.Libraries)
 							for projectName in ivalues(project.Libraries) do
 								if Projects[projectName]  and  not usedProjects[projectName] then
 									workspace.Projects[#workspace.Projects + 1] = projectName
