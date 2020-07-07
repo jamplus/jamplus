@@ -635,6 +635,11 @@ execwait()
 		(*cmdtab[ i ].func)( cmdtab[ i ].closure, rstat );
 #endif
 
+#ifdef OPT_SERIAL_OUTPUT_EXT
+	if (cmdtab[ i ].outputFilenameUsed)
+		unlink(cmdtab[ i ].outputFilename);
+#endif
+
 	return 1;
 }
 
