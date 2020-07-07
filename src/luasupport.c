@@ -1548,11 +1548,16 @@ const char* luahelper_linefilter(const char* line, size_t lineSize) {
         return NULL;
     }
 
-    out = (char*)malloc(ls_lua_rawlen(L, -1) + 1);
-    strcpy(out, ls_lua_tostring(L, -1));
-    ls_lua_settop(L, top);
+    if (ls_lua_isstring(L, -1))
+    {
+        out = (char*)malloc(ls_lua_rawlen(L, -1) + 1);
+        strcpy(out, ls_lua_tostring(L, -1));
+        ls_lua_settop(L, top);
+        return out;
+    }
 
-    return out;
+    ls_lua_settop(L, top);
+    return NULL;
 }
 
 
