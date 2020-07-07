@@ -1,0 +1,8 @@
+rule CompilerPlatformInfo
+{
+}
+
+rule CompilerConfigInfo
+{
+}
+

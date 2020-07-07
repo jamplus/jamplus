@@ -403,6 +403,7 @@ require 'ide/vs2017'
 require 'ide/vs2019'
 require 'ide/codeblocks'
 require 'ide/xcode'
+require 'ide/xcode-native'
 
 if uname == 'windows' then
 	DefaultExporter = 'vs2015'
@@ -572,6 +573,18 @@ Exporters =
 		WorkspaceExporter = XcodeWorkspace,
 		Shutdown = XcodeShutdown,
 		Description = 'Generate Xcode project',
+		Options =
+		{
+		}
+	},
+
+	["xcode-native"] =
+	{
+		Initialize = XcodeNativeInitialize,
+		ProjectExporter = XcodeNativeProject,
+		WorkspaceExporter = XcodeNativeWorkspace,
+		Shutdown = XcodeNativeShutdown,
+		Description = 'Generate Xcode-Native project',
 		Options =
 		{
 		}
