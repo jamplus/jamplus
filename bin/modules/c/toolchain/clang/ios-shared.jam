@@ -2276,3 +2276,68 @@ actions ios._Archive
 
 } # TARGETINFO_LOCATE
 
+
+rule ios.CopyFilesToBundle TARGET : SOURCE_PATHS {
+	C.ActiveTarget $(TARGET) ;
+
+	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+	if ! $(TARGETINFO_LOCATE) {
+		local source ;
+		for source in $(SOURCE_PATHS) {
+			CopyFile $(bundleTarget) : $(bundlePath)/$(source) : $(source) ;
+		}
+	} else {
+		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
+		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
+			Contents += "$(TAB)[[$(SOURCE_PATHS:T)]],$(NEWLINE)" ;
+		Contents += "})$(NEWLINE)" ;
+
+		local source ;
+		for source in $(SOURCE_PATHS) {
+			local fullprefix = "$(prefix).SourcesInfo[ [[$(source:TR=$(SUBDIR))]] ]" ;
+			Contents += "$(fullprefix).buildResources=true$(NEWLINE)" ;
+			Contents += "$(fullprefix).fileType=\"file\"$(NEWLINE)" ;
+		}
+	}
+}
+
+rule ios.CopyDirectoryContentsToBundle TARGET : DESTINATION_RELATIVE_PATH : SOURCE_PATHS {
+	C.ActiveTarget $(TARGET) ;
+
+	local bundlePath = $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	if $(DESTINATION_RELATIVE_PATH) {
+		bundlePath = $(bundlePath)/$(DESTINATION_RELATIVE_PATH) ;
+	}
+	local bundleTarget = $(BUNDLE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+	if ! $(TARGETINFO_LOCATE) {
+		local source ;
+		for source in $(SOURCE_PATHS) {
+			local dirs = @($(source)/*/:W) ;
+			local dir ;
+			for dir in $(dirs) {
+				CopyDirectory $(bundleTarget) : $(bundlePath)/@($(dir:P):BS) : $(dir) : * : 1 ;
+			}
+
+			local files = @($(source)/*:W) ;
+			local file ;
+			for file in $(files) {
+				CopyFile $(bundleTarget) : $(bundlePath)/$(file:BS) : $(file) ;
+			}
+		}
+	} else {
+#		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
+#		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
+#			Contents += "$(TAB)[[$(SOURCE_PATHS:T)]],$(NEWLINE)" ;
+#		Contents += "})$(NEWLINE)" ;
+#
+#		local source ;
+#		for source in $(SOURCE_PATHS) {
+#			local fullprefix = "$(prefix).SourcesInfo[ [[$(source:TR=$(SUBDIR))]] ]" ;
+#			Contents += "$(fullprefix).buildResources=true$(NEWLINE)" ;
+#			Contents += "$(fullprefix).fileType=\"file\"$(NEWLINE)" ;
+#		}
+	}
+}
