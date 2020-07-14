@@ -8,6 +8,7 @@
 rule C.Toolchain.clang.android-shared {
 }
 
+ANDROID.USE_GRADLE ?= 1 ;
 
 if $(NT) {
 
@@ -29,7 +30,7 @@ actions C.android.clang.Link {
 rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
     ARCHITECTURE ?= $(C.ARCHITECTURE:E=armv7-a) ;
     C.ARCHITECTURE ?= $(ARCHITECTURE) ;
-    SDK_VERSION ?= 28 ;
+    SDK_VERSION ?= 30 ;
     NDK_VERSION ?= 24 ;
 
     if $(OS) in MACOSX {
@@ -37,11 +38,13 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
         ndkRoot ?= $(NDKROOT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
         if ! $(ndkRoot) {
             local PATHS =
+                $(HOME)/Library/Android/
                 $(HOME)/
             ;
 
             local PATH_SUFFIXES =
                 android-ndk
+                android-ndk-r21d
                 android-ndk-r18b
                 android-ndk-r14b
                 android-ndk-r12b
@@ -67,6 +70,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
         ndkRoot ?= $(NDKROOT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
         if ! $(ndkRoot) {
             local PATHS =
+                $(LOCALAPPDATA)/Android/
                 $(NVPACK_ROOT)
                 $(ProgramFiles(x86):J=$(SPACE))/Android/
                 c:/
@@ -74,6 +78,8 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
 
             local PATH_SUFFIXES =
                 android-ndk
+                android-ndk-r21d
+                android-ndk-r18b
                 android-ndk-r14b
                 android-ndk-r12b
                 android-ndk-r10e
@@ -112,12 +118,12 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             linkflags += -mthumb ;
         case armv7-a :
             NDK_COMPILER_PREFIX = arm-linux-androideabi- ;
-            cflags += -isystem $(NDKROOT)/sysroot/usr/include/arm-linux-androideabi ;
-            cflags += -target armv7-none-linux-androideabi ;
+            #cflags += -isystem $(NDKROOT)/sysroot/usr/include/arm-linux-androideabi ;
+            cflags += -target armv7-linux-androideabi$(NDK_VERSION) ;
             cflags += -march=armv7-a -mfpu=neon -mfloat-abi=softfp ;
             cflags += -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -marm ;
             linkflags += -no-canonical-prefixes ;
-            linkflags += -target armv7-linux-androideabi ;
+            linkflags += -target armv7-linux-androideabi$(NDK_VERSION) ;
             linkflags += -march=armv7-a -Wl,--fix-cortex-a8 ;
             linkflags += -mthumb ;
             sysroot = $(developerRoot)/android-$(NDK_VERSION)/arch-arm ;
@@ -132,12 +138,12 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             # Fill in linkflags
         case arm64 :
             NDK_COMPILER_PREFIX = aarch64-linux-android- ;
-            cflags += -isystem $(NDKROOT)/sysroot/usr/include/aarch64-linux-android ;
-            cflags += -target aarch64-none-linux-android ;
+            #cflags += -isystem $(NDKROOT)/sysroot/usr/include/aarch64-linux-android ;
+            cflags += -target aarch64-linux-android$(NDK_VERSION) ;
             cflags += -march=armv8-a ;
             cflags += -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes ;
             linkflags += -no-canonical-prefixes ;
-            linkflags += -target aarch64-none-linux-android ;
+            linkflags += -target aarch64-linux-android$(NDK_VERSION) ;
             linkflags += -march=armv8-a ;
             linkflags += -mthumb ;
             sysroot = $(developerRoot)/android-$(NDK_VERSION)/arch-arm64 ;
@@ -156,6 +162,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
     }
 
     cflags += -D__ANDROID_API__=$(NDK_VERSION) ;
+    cflags += -fPIC ;
 
     ARCHITECTURE_CFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(cflags) ;
     ARCHITECTURE_LINKFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(linkflags) ;
@@ -171,7 +178,8 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             local lastDirectory = [ Subst $(NDK_COMPILER_PREFIX) : -$ ] ;
             EXTRA_LINK_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/bin ;
             C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
-            C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/include ;
+            #C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/include ;
+            C.C++Flags * : -stdlib=libc++ ;
             C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/lib/gcc/$(lastDirectory)/$(NDK_COMPILER_VERSION).x ;
             switch $(C.ARCHITECTURE) {
                 case armv7-a :
@@ -212,13 +220,22 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
 
     # Set up the SDK side of things.
     if $(OS) in MACOSX {
-        JAVA.JAVA ?= java ;
-        JAVA.JAVAC ?= javac ;
-        JAVA.JAR ?= jar ;
-        JAVA.JARSIGNER ?= jarsigner ;
+        #JAVA.HOME on $(C.COMPILER_SUITE_SYMBOL) = /usr/bin ;
+        JAVA.JAVA on $(C.COMPILER_SUITE_SYMBOL) = java ;
+        JAVA.JAVAC on $(C.COMPILER_SUITE_SYMBOL) = javac ;
+        JAVA.JAR on $(C.COMPILER_SUITE_SYMBOL) = jar ;
+        JAVA.JARSIGNER on $(C.COMPILER_SUITE_SYMBOL) = jarsigner ;
+        #local javaHome = "/Applications/Android Studio.app/Contents/jre/jdk/Contents/Home" ;
+        #JAVA.HOME on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome) ;
+        #JAVA.JAVA on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome)/bin/java ;
+        #JAVA.JAVAC on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome)/bin/javac ;
+        #JAVA.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome)/bin/jar ;
+        #JAVA.JARSIGNER on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome)/bin/jarsigner ;
     } else if $(OS) = NT {
         # Java home
+        local ProgramFilesCombined = $(ProgramFiles:J=" ":/) ;
         local javaHome = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE JavaSoft "Java Development Kit" 1.8 "JavaHome" ] ;
+        javaHome ?= "$(ProgramFilesCombined)/Android/Android Studio/jre" ;
         javaHome ?= $(NVPACK_ROOT:/)/jdk1.8.0_77 ;
         #javaHome ?= $(ProgramFiles(x86):J=" ")/Java/jdk1.7.0_55 ;
 
@@ -231,14 +248,18 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
 
     local sdkRoot = $(ANDROID_SDK_ROOT) ;
     if $(OS) = NT {
+        sdkRoot ?= $(LOCALAPPDATA:/)/Android/sdk ;
         sdkRoot ?= $(NVPACK_ROOT:/)/android-sdk-windows ;
         sdkRoot ?= $(ProgramFiles(x86):J=" ")/Android/android-sdk ;
     } else if $(OS) = MACOSX {
+        sdkRoot ?= $(HOME:/)/Library/Android/sdk ;
         sdkRoot ?= $(NVPACK_ROOT:/)/android-sdk-macosx ;
         sdkRoot ?= $(HOME)/android-sdk-macosx ;
     }
     sdkRoot = $(sdkRoot:J=" ") ;
     ANDROID.SDK_ROOT on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot) ;
+
+    ANDROID.SDK_VERSION on $(C.COMPILER_SUITE_SYMBOL) = $(SDK_VERSION) ;
 
     local sdkPlatform = $(ANDROID_SDK_PLATFORM) ;
     sdkPlatform ?= android-$(SDK_VERSION) ;
@@ -248,7 +269,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
 
     local buildToolsDir = [ Glob $(sdkRoot)/build-tools : $(SDK_VERSION).* ] ;
     if ! $(buildToolsDir) {
-        buildToolsDir = $(sdkRoot)/build-tools/28.0.3 ;
+        buildToolsDir = $(sdkRoot)/build-tools/30.0.1 ;
     }
     if $(buildToolsDir[1]) {
         ANDROID.ZIPALIGN on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/zipalign ;
@@ -262,10 +283,9 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
     ANDROID.FRAMEWORK.AIDL on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/platforms/$(sdkPlatform)/framework.aidl ;
 
     local libVersion = "" ;
-    if $(OS) = NT {
-        libVersion = -$(SDK_VERSION).0.0-dev ;
-        libVersion = -26.0.0-dev ;
-    }
+    libVersion = -$(SDK_VERSION).0.0-dev ;
+    libVersion = -26.0.0-dev ;
+
     ANDROID.COMMON.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/common$(libVersion).jar ;
     ANDROID.SDK-COMMON.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/sdk-common$(libVersion).jar ;
     ANDROID.SDKLIB.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/lib/sdklib$(libVersion).jar ;
@@ -281,12 +301,34 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
 }
 
 
+rule android.SDKCompileVersion TARGET : SDK_COMPILE_VERSION {
+    TARGET = [ ActiveTarget $(TARGET) ] ;
+
+    ANDROID.SDK_COMPILE_VERSION on $(C.COMPILER_SUITE_SYMBOL) = $(SDK_COMPILE_VERSION) ;
+}
+
+
+rule android.SDKMinimumVersion TARGET : SDK_MINIMUM_VERSION {
+    TARGET = [ ActiveTarget $(TARGET) ] ;
+
+    ANDROID.SDK_MINIMUM_VERSION on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_MINIMUM_VERSION) ;
+}
+
+
+rule android.ProductVersion TARGET : VERSION_NAME : VERSION_CODE {
+    TARGET = [ ActiveTarget $(TARGET) ] ;
+
+    ANDROID.VERSION_NAME on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VERSION_NAME) ;
+    ANDROID.VERSION_CODE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VERSION_CODE) ;
+}
+
+
 rule C.android._MultiCppCompile_SetupFlags {
     local extraflags ;
 
     local sysroot = $(SYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-    extraflags += "--sysroot $(sysroot:C)" ;
-    extraflags += "-isystem @($(NDKROOT)/sysroot/usr/include:C)" ;
+    #extraflags += "--sysroot $(sysroot:C)" ;
+    #extraflags += "-isystem @($(NDKROOT)/sysroot/usr/include:C)" ;
     local developerRoot = $(NDKROOT)/platforms ;
     extraflags += $(ARCHITECTURE_CFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 
@@ -300,7 +342,7 @@ rule C.android._ApplicationFromObjects_LinkFlags {
     linkRule = C.android.clang.Link ;
 
     local sysroot = $(SYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-    linkFlags += "--sysroot $(sysroot:C)" ;
+    #linkFlags += "--sysroot $(sysroot:C)" ;
     linkFlags += $(ARCHITECTURE_LINKFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 }
 
@@ -312,9 +354,10 @@ rule C.android._SharedLibraryFromObjects_LinkFlags {
     linkFlags += -shared ;
 
     local sysroot = $(SYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-    linkFlags += "--sysroot $(sysroot:C)" ;
+    #linkFlags += "--sysroot $(sysroot:C)" ;
     linkFlags += $(ARCHITECTURE_LINKFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
     linkFlags += -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now ;
+    linkFlags += -fPIC ;
 
     #_flags = $(_flags[1-4]) $(extraflags) $(_flags[5-]) ;
 }
@@ -326,7 +369,7 @@ C.android.IGNORE_ASSETS_LIST = "\"!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:
 
 # Java -> Class
 actions response android._JavaC {
-    $(JAVA.JAVAC:TC) -source 1.7 -target 1.7 $(JFLAGS) @@($(2:TC)) -d $(OUTPUT_FOLDER)
+    $(JAVA.JAVAC:TC) -source 1.8 -target 1.8 $(JFLAGS) @@($(2:TC)) -d $(OUTPUT_FOLDER)
 }
 
 
@@ -349,9 +392,22 @@ actions android._CompileAidl {
 
 
 # Class/Jar -> Dex
+if $(OS) = NT {
+
+actions android._DXBundle {
+    set JAVA_HOME=$(JAVA.HOME)
+    set PATH=%ANDROID_SDK_ROOT%\platform-tools;%PATH%
+    $(ANDROID.DX:TC) --dex --output=$(1:TC) --positions=lines $(2:TC)
+}
+
+} else {
+
 actions android._DXBundle {
     $(ANDROID.DX:TC) --dex --output=$(1:TC) --positions=lines $(2:TC)
 }
+
+}
+
 
 
 # Dex/Resources -> Apk
@@ -582,6 +638,43 @@ end
 # Create library from given sources.
 rule android.Library TARGET : SOURCES : OPTIONS {
     TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+    if $(ANDROID.USE_GRADLE) = 1 {
+        # Lib path
+        JAVA.LIBPATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SUBDIR) ;
+
+        # Source path
+        local sourcePaths = $(JAVA.SOURCEPATHS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+        sourcePaths ?= $(SUBDIR) ;
+        JAVA.SOURCEPATHS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(sourcePaths) ;
+
+        # Manifest.
+        local manifest = $(ANDROID.MANIFEST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+        manifest ?= @(AndroidManifest.xml:R=$(SUBDIR:E="")) ;
+        ANDROID.MANIFEST on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(manifest) ;
+
+        # Package
+        local package = $(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+        if ! $(package) {
+            package = [ android._ReadPackageFromAndroidManifest $(manifest) ] ;
+            ANDROID.PACKAGE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(package) ;
+        }
+
+
+        # Verify the assets directory is actually there.
+        local assets = $(ANDROID.ASSETS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+        assets ?= @(assets:R=$(SUBDIR:E="")) ;
+        assets = [ Glob $(assets:TP) : $(assets:BS)/ ] ;
+        ANDROID.ASSETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(assets) ;
+
+        # Resources
+        local resources = $(ANDROID.RESOURCES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+        resources ?= @(res:R=$(SUBDIR:E="")) ;
+        resources = [ Glob $(resources:TP) : $(resources:BS)/ ] ;
+        ANDROID.RESOURCES on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(resources) ;
+
+        return ;
+    }
 
     # Shove this in a special output directory. That way, we can collect any of the
     # generated files from javac, since javac doesn't tell us what it is going to
@@ -949,6 +1042,46 @@ rule android.Application TARGET : SOURCES : OPTIONS {
 }
 
 
+if $(OS) = NT {
+
+actions android._GradleInit {
+    set JAVA_HOME=$(JAVA.HOME)
+    cd "$(1:D\\)"
+    call c:\gradle\bin\gradle.bat init --type basic --dsl groovy --project-name app
+}
+
+
+actions screenoutput android._GradleAssemble {
+    set JAVA_HOME=$(JAVA.HOME)
+    set ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT)
+    set ANDROID_NDK_ROOT=$(NDKROOT)
+    set PATH=%ANDROID_SDK_ROOT%\platform-tools;%PATH%
+    cd "$(2[1]:D\\)"
+    call gradlew.bat $(ASSEMBLE_COMMAND)
+}
+
+} else {
+
+    #export JAVA_HOME=$(JAVA.HOME:C)
+actions android._GradleInit {
+    cd $(1:DC)
+    gradle init --type basic --dsl groovy --project-name app
+}
+
+
+    #export JAVA_HOME=$(JAVA.HOME:C)
+    #export PATH=$JAVA_HOME/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+actions screenoutput android._GradleAssemble {
+    export ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT)
+    export ANDROID_NDK_ROOT=$(NDKROOT)
+    export PATH=$ANDROID_SDK_ROOT/platform-tools:$PATH
+    cd $(2[1]:DC)
+    ./gradlew $(ASSEMBLE_COMMAND)
+}
+
+}
+
+
 # Create the APK for an Android application.
 rule android.Package TARGET : TOOLCHAINS : OPTIONS {
     # Activate the requested target.
@@ -975,6 +1108,469 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
     C.Toolchain $(saveActiveToolchainSpec) ;
     C.ActiveTarget $(TARGET) ;
 
+    if $(ANDROID.USE_GRADLE) = 1 {
+        local packageOutputPath = $(ANDROID.PACKAGE_OUTPUT_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):E=$(ALL_LOCATE_TARGET)/package) ;
+
+        local GRADLE_OUTPUT_DIRECTORY = @($(ALL_LOCATE_TARGET)/gradle:R=) ;
+        local grist = $(C.ACTIVE_TOOLCHAIN_GRIST)|gradle ;
+        local gradleTarget = $(TARGET:G=$(grist)) ;
+        NotFile $(gradleTarget) ;
+
+        # gradlew
+        local gradlew ;
+        if $(OS) = NT {
+            gradlew = @(gradlew:G=$(grist)) ;
+        } else {
+            gradlew = @(gradlew.bat:G=$(grist)) ;
+        }
+        MakeLocate $(gradlew) : $(GRADLE_OUTPUT_DIRECTORY) ;
+        JAVA_HOME on $(gradlew) = $(JAVA.HOME:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+        Depends $(gradleTarget) : $(gradlew) ;
+        android._GradleInit $(gradlew) ;
+
+        if $(OS) = NT {
+            # env.bat
+            local envgradlew.bat = @(envgradlew.bat:G=$(grist)) ;
+            MakeLocate $(envgradlew.bat) : $(GRADLE_OUTPUT_DIRECTORY) ;
+            CONTENTS on $(envgradlew.bat) = "@setlocal
+@set JAVA_HOME=$(JAVA.HOME:Z=$(C.COMPILER_SUITE_SYMBOL))
+@set ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT:Z=$(C.COMPILER_SUITE_SYMBOL))
+@set ANDROID_NDK_ROOT=$(NDKROOT:Z=$(C.COMPILER_SUITE_SYMBOL))
+@set PATH=%ANDROID_SDK_ROOT%\platform-tools;%PATH%
+@call %~dp0gradlew.bat %*
+" ;
+            UseCommandLine $(envgradlew.bat) : $(CONTENTS:Z=$(envgradlew.bat)) ;
+            WriteFile $(envgradlew.bat) ;
+            Depends $(gradleTarget) : $(envgradlew.bat) : $(gradlew) ;
+        }
+
+        # Native libs.
+        local nativeLibs =
+            $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+            $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+        local hasNativeLibs ;
+        local toolchain ;
+        for toolchain in $(TOOLCHAINS) {
+            local linkTargets = [ C.GetLinkTargets $(nativeLibs) : $(toolchain) ] ;
+
+            local linkTarget ;
+            for linkTarget in $(linkTargets) {
+                if $(linkTarget:S) != .so {
+                    continue ;
+                }
+
+                hasNativeLibs = true ;
+
+                # Copy .so into output directory.
+                local _outputSo = $(linkTarget:G=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+                local _binding = $(linkTarget:TBS) ;
+                switch $(C.ARCHITECTURE:Z=$(linkTarget)) {
+                    case arm :
+                        _outputSo = $(_outputSo)|arm ;
+                        BINDING on $(_outputSo) = $(_binding) ;
+                        MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/armeabi ;
+                    case armv7-a :
+                        _outputSo = $(_outputSo)|armv7-a ;
+                        BINDING on $(_outputSo) = $(_binding) ;
+                        MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+                    case arm64 :
+                        _outputSo = $(_outputSo)|arm64-v8a ;
+                        BINDING on $(_outputSo) = $(_binding) ;
+                        MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/arm64-v8a ;
+                    case x86 :
+                        _outputSo = $(_outputSo)|x86 ;
+                        BINDING on $(_outputSo) = $(_binding) ;
+                        MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/x86 ;
+                }
+
+                # Output file depends on input stripped SO file.
+                Depends $(_outputSo) : $(linkTarget) ;
+
+                CopyFile $(gradleTarget) : $(_outputSo) : $(linkTarget) ;
+            }
+        }
+
+        # Native prebuilt libraries.
+        local nativePrebuiltLibs = $(ANDROID.NATIVEPREBUILTLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+        local nativePrebuiltLibraryDirectories =
+            $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+            $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+        local nativePrebuiltLib ;
+        for nativePrebuiltLib in $(nativePrebuiltLibs) {
+            # Get final filenames.
+            local nativeLibraryFullName = lib$(nativePrebuiltLib).so ;
+
+            # Copy it into output directory.
+            local architecture ;
+            for architecture in $(architectures) {
+                local target = $(nativeLibraryFullName:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(architecture)) ;
+                local source = $(nativeLibraryFullName:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(architecture)|source) ;
+
+                switch $(architecture) {
+                    case arm :
+                        SEARCH on $(source) +=
+                            $(nativePrebuiltLibraryDirectories)/armeabi
+                            $(nativePrebuiltLibraryDirectories)/armeabi-v7a
+                        ;
+                        MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi ;
+                    case armv7-a :
+                        SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/armeabi-v7a ;
+                        MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+                    case arm64 :
+                        SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/arm64-v8a ;
+                        MakeLocate $(target) : $(LOCATE_TARGET)/lib/arm64-v8a ;
+                    case x86 :
+                        SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/x86 ;
+                        MakeLocate $(target) : $(LOCATE_TARGET)/lib/x86 ;
+                }
+
+                CopyFile $(gradleTarget) : $(target) : $(source) ;
+                Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(target) ;
+            }
+        }
+
+        #########################################################################################
+        # build.gradle
+        #########################################################################################
+        {
+            local contents ;
+            contents += "// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.0.0'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        google()
+" ;
+            contents += $(ANDROID.GRADLE_ALLPROJECTS_REPOSITORIES:Z=$(C.COMPILER_SUITE_SYMBOL):E=) ;
+            contents += "    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+" ;
+            local root-build.gradle = @(build.gradle:G=$(grist)) ;
+            MakeLocate $(root-build.gradle) : $(GRADLE_OUTPUT_DIRECTORY) ;
+            CONTENTS on $(root-build.gradle) = $(contents) ;
+            UseCommandLine $(root-build.gradle) : $(CONTENTS:Z=$(root-build.gradle)) ;
+            WriteFile $(root-build.gradle) ;
+            Depends $(gradleTarget) : $(root-build.gradle) : $(gradlew) ;
+        }
+
+        #########################################################################################
+        # settings.gradle
+        #########################################################################################
+        {
+            local contents = "rootProject.name = 'app'
+include ':app'
+" ;
+            local root-settings.gradle = @(settings.gradle:G=$(grist)) ;
+            MakeLocate $(root-settings.gradle) : $(GRADLE_OUTPUT_DIRECTORY) ;
+            CONTENTS on $(root-settings.gradle) = $(contents) ;
+            UseCommandLine $(root-settings.gradle) : $(CONTENTS:Z=$(root-settings.gradle)) ;
+            WriteFile $(root-settings.gradle) ;
+            Depends $(gradleTarget) : $(root-settings.gradle) : $(gradlew) ;
+        }
+
+        #########################################################################################
+        # app/build.gradle
+        {
+            local _keyStorePath =
+                $(ANDROID.KEYSTORE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+                $(ANDROID.KEYSTORE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+            local _keyStorePassword =
+                $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+                $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+            local _keyStoreKey =
+                $(ANDROID.KEYSTORE_KEY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+                $(ANDROID.KEYSTORE_KEY:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+            if ! $(_keyStorePath) || ! $(_keyStorePassword) || ! $(_keyStoreKey) {
+                Exit *** error \: Must call android.Sign and specify keystore path, password and key ;
+            }
+
+            # Resources
+            local sdkVersion = $(ANDROID.SDK_VERSION:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+            local sdkMinimumVersion = $(ANDROID.SDK_MINIMUM_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+            local sdkCompileVersion = $(ANDROID.SDK_COMPILE_VERSION:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+            local versionName = $(ANDROID.VERSION_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+            local versionCode = $(ANDROID.VERSION_CODE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+            local abiFilters ;
+            local architecture ;
+            for architecture in $(architectures) {
+                switch $(architecture) {
+                    case arm :
+                        Exit * Fix me ;
+                    case armv7-a :
+                        abiFilters += 'armeabi-v7a' ;
+                    case arm64 :
+                        abiFilters += 'arm64-v8a' ;
+                    case x86 :
+                        abiFilters += 'x86' ;
+                }
+            }
+
+            local contents = "" ;
+            contents += "apply plugin: 'com.android.application'
+
+apply from: 'buildHelpers.gradle'
+
+android {
+    compileSdkVersion $(sdkCompileVersion:E=$(sdkVersion))
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    defaultConfig {
+        applicationId '$(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))'
+        minSdkVersion $(sdkMinimumVersion:E=$(sdkVersion))
+        targetSdkVersion $(sdkVersion)
+        versionCode $(versionCode)
+        versionName '$(versionName)'
+        ndk {
+            abiFilters $(abiFilters:J=,)
+        }
+    }
+    signingConfigs {
+        release {
+            storeFile file('$(_keyStorePath:T)')
+            storePassword '$(_keyStorePassword)'
+            keyAlias '$(_keyStoreKey)'
+            keyPassword '$(_keyStorePassword)'
+        }
+    }
+    buildTypes {
+        release {
+            debuggable true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            debuggable true
+        }
+    }
+    sourceSets.main {
+        manifest.srcFile '$(ANDROID.MANIFEST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))'
+        java.srcDirs += [
+" ;
+
+            local sourcePaths = $(JAVA.SOURCEPATHS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+            sourcePaths ?= $(SUBDIR) ;
+            contents += "            '$(sourcePaths)',$(NEWLINE)" ;
+            contents += "        ]
+        aidl.srcDirs += [
+" ;
+            contents += "            '$(sourcePaths)',$(NEWLINE)" ;
+            contents += "        ]
+        assets.srcDirs += [
+" ;
+            contents += "            '$(ANDROID.ASSETS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))',$(NEWLINE)" ;
+            contents += "        ]$(NEWLINE)" ;
+            if $(hasNativeLibs) {
+                contents += "        jniLibs.srcDirs += [$(NEWLINE)" ;
+                contents += "            '$(LOCATE_TARGET)/lib'$(NEWLINE)" ;
+                contents += "        ]$(NEWLINE)" ;
+            }
+            contents += "        res.srcDirs += [$(NEWLINE)" ;
+            contents += "            '$(ANDROID.RESOURCES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))'$(NEWLINE)" ;
+            contents += "        ]
+    }
+    aaptOptions {
+" ;
+            contents += "        noCompress '$(ANDROID.UNCOMPRESSED_ASSET_EXTENSIONS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))'$(NEWLINE)" ;
+            contents += "        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~'
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+repositories {
+    jcenter()
+    google()
+" ;
+            contents += $(ANDROID.GRADLE_REPOSITORIES:Z=$(C.COMPILER_SUITE_SYMBOL):E=) ;
+            contents += "}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+" ;
+
+            contents += "$(ANDROID.GRADLE_DEPENDENCIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))$(NEWLINE)" ;
+            contents += "}$(NEWLINE)" ;
+
+            local app-build.gradle = @(build.gradle:G=$(grist)|app) ;
+            MakeLocate $(app-build.gradle) : $(GRADLE_OUTPUT_DIRECTORY)/app ;
+            UseCommandLine $(app-build.gradle) : $(contents) ;
+            CONTENTS on $(app-build.gradle) = $(contents) ;
+            WriteFile $(app-build.gradle) ;
+            Depends $(gradleTarget) : $(app-build.gradle) : $(gradlew) ;
+        }
+
+        #########################################################################################
+        # app/buildHelpers.gradle
+        #########################################################################################
+        {
+            #String name = \"$(TARGET)-${variant.versionName}-${output.baseName}.apk\"
+            #def destinationFolder = \"$(packageOutputPath)${output.baseName.replace(\"-\", \"/\")}\"
+            #print \"Copying APK folder from: $sourceFolder into $destinationFolder\\n\"
+            local contents ;
+            contents += "// From https://stackoverflow.com/questions/22833297/how-to-define-apk-output-directory-when-using-gradle$(NEWLINE)" ;
+            if $(C.CONFIG) = debug {
+                contents += "def archiveBuildTypes = [\"debug\"];$(NEWLINE)" ;
+            } else {
+                contents += "def archiveBuildTypes = [\"release\"];$(NEWLINE)" ;
+            }
+
+            contents += "
+android {
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            if (variant.buildType.name in archiveBuildTypes) {
+                // Update output filename
+                if (variant.versionName != null) {
+                    String name = \"$(TARGET)-${variant.versionName}.apk\"
+                    outputFileName = new File(name)
+                }
+                def taskSuffix = variant.name.capitalize()
+                def assembleTaskName = \"assemble${taskSuffix}\"
+                if (tasks.findByName(assembleTaskName)) {
+                    def copyAPKFolderTask = tasks.create(name: \"archive${taskSuffix}\", type: org.gradle.api.tasks.Copy) {
+                        description \"Archive/copy APK folder to a shared folder.\"
+                        def sourceFolder = \"$buildDir/outputs/apk/${output.baseName.replace(\"-\", \"/\")}\"
+                        def destinationFolder = \"$(packageOutputPath)\"
+                        from(sourceFolder)
+                        into destinationFolder
+                        eachFile { file ->
+                            file.path = file.name // so we have a \"flat\" copy
+                        }
+                        includeEmptyDirs = false
+                    }
+                    tasks[assembleTaskName].finalizedBy = [copyAPKFolderTask]
+                }
+            }
+        }
+    }
+}
+" ;
+
+            local app-buildHelpers.gradle = @(buildHelpers.gradle:G=$(grist)|app) ;
+            MakeLocate $(app-buildHelpers.gradle) : $(GRADLE_OUTPUT_DIRECTORY)/app ;
+            UseCommandLine $(app-buildHelpers.gradle) : $(contents) ;
+            CONTENTS on $(app-buildHelpers.gradle) = $(contents) ;
+            WriteFile $(app-buildHelpers.gradle) ;
+            Depends $(gradleTarget) : $(app-buildHelpers.gradle) : $(gradlew) ;
+        }
+
+        #########################################################################################
+        # app/proguard-rules.pro
+        {
+            local contents ;
+            contents += "
+# Add project specific ProGuard rules here.
+# By default, the flags in this file are appended to flags specified
+# in [sdk]/tools/proguard/proguard-android.txt
+# You can edit the include path and order by changing the proguardFiles
+# directive in build.gradle.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# Add any project specific keep options here:
+
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#   public *;
+#}
+" ;
+            local app-proguard-rules.pro = @(proguard-rules.pro:G=$(grist)|app) ;
+            MakeLocate $(app-proguard-rules.pro) : $(GRADLE_OUTPUT_DIRECTORY)/app ;
+            UseCommandLine $(app-proguard-rules.pro) : $(contents) ;
+            CONTENTS on $(app-proguard-rules.pro) = $(contents) ;
+            WriteFile $(app-proguard-rules.pro) ;
+            Depends $(gradleTarget) : $(app-proguard-rules.pro) : $(gradlew) ;
+        }
+
+        # Set up the .apk dependencies.
+        local _apk = [ C.GristFiles $(TARGET) : $(TARGET)-$(ANDROID.VERSION_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)).apk ] ;
+        APK_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_apk) ;
+
+        MakeLocate $(_apk) : $(packageOutputPath:E=$(LOCATE_TARGET)) ;
+        Depends $(_apk) : $(gradleTarget) ;
+
+        if $(C.CONFIG) = debug {
+            ASSEMBLE_COMMAND on $(_apk) = assembleDebug ;
+        } else {
+            ASSEMBLE_COMMAND on $(_apk) = assembleRelease ;
+        }
+        Always $(_apk) ;
+        #MightNotUpdate $(_apk) ;
+        android._GradleAssemble $(_apk) : [ DependsList $(gradleTarget) ] : $(C.COMPILER_SUITE_SYMBOL) ;
+
+        # Make target depend on our aligned (signed) APK.
+        Depends all : $(TARGET) : $(_apk) ;
+
+        # To help deploy the APK generate a little launcher batch.
+    #    local _deploy = [ C.GristFiles $(TARGET) : deploy.bat ] ;
+    #    MakeLocate $(_deploy) : $(LOCATE_TARGET) ;
+    #    local package = $(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    #    local adb = $(ANDROID.ADB:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+    #    local _deployContents = "pushd %~dp0 & $(adb:TC) uninstall $(package) & $(adb:TC) install $(_alignedApk:TC) & popd" ;
+    #    CONTENTS on $(_deploy) = $(_deployContents) ;
+    #    WriteFile $(_deploy) ;
+    #    UseCommandLine $(_deploy) : $(_deployContents) ;
+    #    Depends $(TARGET) : $(_deploy) ;
+
+        # Set up an install target.
+        Depends install:$(TARGET) : $(_apk) ;
+        Always install:$(TARGET) ;
+        NotFile install:$(TARGET) ;
+        android._Install install:$(TARGET) : $(_apk) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+        # Set up an auto-install if requested.
+        if install in $(OPTIONS) {
+            Depends autoinstall:$(TARGET) : $(_apk) ;
+            NotFile autoinstall:$(TARGET) ;
+            android._Install autoinstall:$(TARGET) : $(_apk) : $(C.COMPILER_SUITE_SYMBOL) ;
+            Depends $(TARGET) : autoinstall:$(TARGET) ;
+        }
+
+        # Set up an uninstall target.
+        Always uninstall:$(TARGET) ;
+        NotFile uninstall:$(TARGET) ;
+        PACKAGE on uninstall:$(TARGET) = $(package) ;
+        android._Uninstall uninstall:$(TARGET) : : $(C.COMPILER_SUITE_SYMBOL) ;
+
+        # Depend on the link targets.
+        Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(linkTargets) ;
+
+        # Hook up the project specific clean for this TARGET.
+        Depends clean : clean:$(TARGET) : $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+        NotFile clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+        Always clean:$(TARGET) $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) ;
+        Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_deploy) $(_alignedApk) ;
+
+        return ;
+    }
+
     # JARs that we depend on.
     local needJars = $(JAVA.NEEDJARS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
@@ -1000,10 +1596,34 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
     # Resources
     local resources = $(ANDROID.RESOURCES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
+    # Build AndroidManifest-extras.xml
+    local libAndroidManifests ;
+    local sdkVersion = $(ANDROID.SDK_VERSION:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+    local sdkMinimumVersion = $(ANDROID.SDK_MINIMUM_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):E=$(sdkVersion)) ;
+    local versionName = $(ANDROID.VERSION_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    local versionCode = $(ANDROID.VERSION_CODE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    local contents = "<?xml version=\"1.0\" encoding=\"utf-8\"?>$(NEWLINE)" ;
+    contents += "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"$(NEWLINE)" ;
+    contents += "    xmlns:tools=\"http://schemas.android.com/tools\"$(NEWLINE)" ;
+    contents += "    android:versionCode=\"$(versionCode)\"$(NEWLINE)" ;
+    #contents += "    android:versionName=\"$(versionName)\" tools:replace=\"versionCode,versionName\"$(NEWLINE)" ;
+    contents += "    android:versionName=\"$(versionName)\"$(NEWLINE)" ;
+    contents += "    tools:replace=\"versionCode,versionName\"$(NEWLINE)" ;
+    #contents += "    tools:node=\"merge\"$(NEWLINE)" ;
+    #contents += "    package=\"$(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))\">$(NEWLINE)" ;
+    contents += ">$(NEWLINE)" ;
+    contents += "    <uses-sdk android:minSdkVersion=\"$(sdkMinimumVersion)\" android:targetSdkVersion=\"$(sdkVersion)\" />$(NEWLINE)" ;
+    contents += "</manifest>$(NEWLINE)" ;
+    local extrasAndroidManifest = @(AndroidManifest-extras.xml:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+    MakeLocate $(extrasAndroidManifest) : $(LOCATE_TARGET) ;
+    CONTENTS on $(extrasAndroidManifest) = $(contents) ;
+    UseCommandLine $(extrasAndroidManifest) : $(contents) ;
+    WriteFile $(extrasAndroidManifest) ;
+    libAndroidManifests += $(extrasAndroidManifest) ;
+
     # Get list of resource/asset directories from libraries we have built.
     local _needJarResourceDirs = $(resources) ;
     local classesJars ;
-    local libAndroidManifests ;
     if $(needJars) {
         local _needJar ;
 
@@ -1560,6 +2180,26 @@ rule android.LinkJars TARGET : LIBRARIES {
 rule android.PackageOutputPath TARGET : OUTPUT_PATH {
     C.ActiveTarget $(TARGET) ;
     ANDROID.PACKAGE_OUTPUT_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(OUTPUT_PATH[1]:R=$(SUBDIR:E="")) ;
+}
+
+
+#
+rule android.GradleDependencies TARGET : PACKAGES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.GRADLE_DEPENDENCIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += "    implementation '$(PACKAGES)'" ;
+}
+
+
+#
+rule android.GradleAllProjectsRepositories TARGET : REPOSITORIES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.GRADLE_ALLPROJECTS_REPOSITORIES on $(C.COMPILER_SUITE_SYMBOL) += "    $(REPOSITORIES)$(NEWLINE)" ;
+}
+
+
+rule android.GradleRepositories TARGET : REPOSITORIES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.GRADLE_REPOSITORIES on $(C.COMPILER_SUITE_SYMBOL) += "    $(REPOSITORIES)$(NEWLINE)" ;
 }
 
 
