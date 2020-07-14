@@ -80,7 +80,7 @@ local function xmlparse(t)
          order[#order+1] = { v.tag, v }
 
          entry['@'] = attr
-         entry['#'] = xmlize(v)
+         entry['#'] = xmlparse(v)
       else
          children[#children + 1] = v
       end
@@ -89,7 +89,7 @@ local function xmlparse(t)
    return children
 end
 
-function M.luaize(data)
+function M.luaize(buffer)
     if not buffer then return xmlparse {} end
     return xmlparse {
         tag = "root",
