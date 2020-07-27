@@ -1189,7 +1189,14 @@ make0(
 	else if( t->binding == T_BIND_EXISTS && p &&
 		p->binding != T_BIND_UNBOUND && t->time > p->time )
 	{
+#ifdef OPT_BUILTIN_NEEDS_EXT
+		if (!(p->flags & T_FLAG_MIGHTNOTUPDATE))
+		{
+#endif
 		fate = T_FATE_NEWER;
+#ifdef OPT_BUILTIN_NEEDS_EXT
+		}
+#endif
 	}
 	else
 	{
