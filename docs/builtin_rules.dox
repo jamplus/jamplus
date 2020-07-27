@@ -261,6 +261,7 @@ The remaining rules are utility rules.
 \refitem rule_Glob Glob
 \refitem rule_GroupByVar GroupByVar
 \refitem rule_ListSort ListSort
+\refitem rule_MakeRelativePath MakeRelativePath
 \refitem rule_Match Match
 \refitem rule_Math Math
 \refitem rule_MD5 MD5
@@ -488,6 +489,31 @@ Sorts the provided \c LIST in either a case sensitive or case insensitive fashio
     Echo [ ListSort $(FILES) ] ;
 	# abc.cpp qrs.cpp xyz.cpp
 \endcode
+
+
+
+
+
+
+<hr>
+\section rule_MakeRelativePath rule MakeRelativePath INPUT_PATHS : START_PATH ;
+\addindex rule_MakeRelativePath
+
+Changes \c INPUT_PATHS into relative paths from \c START_PATH.
+
+\param INPUT_PATHS The list of input paths to be converted to relative format, if possible.
+\param START_PATH The path to change \c INPUT_PATHS to relative against.
+\return Returns the list of relative paths.
+
+\code
+    A1 = c:/Users/JamPlus ;
+    A2 = c:/Users/JamPlus/Deep/Deeper ;
+    A3 = c:/Users/JamPlus/AppData/Roaming ;
+    B = c:/Users/JamPlus/AppData/Local ;
+    Echo [ MakeRelativePath $(A1) $(A2) $(A3) $(B) : $(B) ] ;
+	# ../.. ../../Deep/Deeper ../Roaming .
+\endcode
+
 
 
 

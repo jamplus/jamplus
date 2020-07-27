@@ -31,6 +31,11 @@
  * 01/14/03 (seiwald) - fix includes fix with new internal includes TARGET
  */
 
+#if _MSC_VER
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
 # include "jam.h"
 
 # include "lists.h"
@@ -136,6 +141,7 @@ LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_search(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_searchinternal(PARSE *parse, LOL *args, int *jmp);
+LIST *builtin_makerelativepath(PARSE *parse, LOL *args, int *jmp);
 
 int glob( const char *s, const char *c );
 
@@ -320,6 +326,9 @@ load_builtins()
 
 	bindrule( "SearchInternal" )->procedure =
 		parse_make( builtin_searchinternal, P0, P0, P0, C0, C0, 0 );
+
+	bindrule( "MakeRelativePath" )->procedure =
+		parse_make( builtin_makerelativepath, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -1741,4 +1750,172 @@ LIST *builtin_searchinternal(PARSE *parse, LOL *args, int *jmp)
 	}
 
 	return L0;
+}
+
+
+LIST *builtin_makerelativepath(PARSE *parse, LOL *args, int *jmp)
+{
+	LIST* targetNameList;
+	LIST* startPathList;
+	LIST* resultList = L0;
+	LISTITEM* item;
+
+	const char *startPath;
+	const char *startPathEnd;
+	char *cwd;
+
+	targetNameList = lol_get(args, 0);
+	if (!list_first(targetNameList))
+		return L0;
+
+	cwd = NULL;
+	startPathList = lol_get(args, 1);
+	if (!list_first(startPathList)) {
+		cwd = getcwd(NULL, 0);
+		startPath = cwd;
+	}
+	else {
+		startPath = list_value(list_first(startPathList));
+	}
+
+	startPathEnd = startPath + strlen(startPath);
+	if (startPathEnd > startPath  &&  (startPathEnd[-1] == '/'  ||  startPathEnd[-1] == '\\')) {
+		--startPathEnd;
+	}
+
+	if (startPath[0] == '.') {
+		if (startPath[1] == 0) {
+			++startPath;
+		} else if (startPath[1] == '/'  ||  startPath[1] == '\\') {
+			startPath += 2;
+		}
+	}
+
+	for (item = list_first(targetNameList); item; item = list_next(item)) {
+		const char* path = list_value(item);
+		const char *pathEnd = path + strlen(path);
+		if (pathEnd > path  &&  (pathEnd[-1] == '/'  ||  pathEnd[-1] == '\\')) {
+			--pathEnd;
+		}
+
+		if (path[0] == '.') {
+			if (path[1] == '/'  ||  path[1] == '\\') {
+				path += 2;
+			}
+		}
+
+		if (startPath[0] == 0) {
+			resultList = list_append(resultList, path, 0);
+			continue;
+		}
+
+		int pathDirectoryComponents = 0;
+		int startPathDirectoryComponents = 0;
+		int matchedComponents = 0;
+
+		int pathHasColon = path[1] == ':';
+		int startPathHasColon = startPath[1] == ':';
+		if (pathHasColon && startPathHasColon) {
+			if (tolower(path[0]) != tolower(startPath[0])) {
+				resultList = list_append(resultList, path, 0);
+				continue;
+			}
+			++matchedComponents;
+			++pathDirectoryComponents;
+			++startPathDirectoryComponents;
+		}
+		else if ((pathHasColon && !startPathHasColon) || (!pathHasColon && startPathHasColon)) {
+			resultList = list_append(resultList, path, 0);
+			continue;
+		}
+
+		// Count the components and compare.
+		const char* pathPtr = path + (pathHasColon ? 3 : 0);
+		const char* startPathPtr = startPath + (startPathHasColon ? 3 : 0);
+		const char* lastPathMatchAfterPtr = pathPtr;
+		while (1) {
+			if (pathPtr > pathEnd) {
+				break;
+			}
+
+			if (startPathPtr > startPathEnd) {
+				break;
+			}
+
+			int pathHasSlash = *pathPtr == '/' || *pathPtr == '\\' || *pathPtr == 0;
+			int startPathHasSlash = *startPathPtr == '/' || *startPathPtr == '\\' || *startPathPtr == 0;
+			if (*pathPtr != *startPathPtr) {
+				if (pathHasSlash + startPathHasSlash != 2) {
+					break;
+				}
+			}
+
+			if (pathHasSlash) {
+				++pathDirectoryComponents;
+			}
+			if (startPathHasSlash) {
+				++startPathDirectoryComponents;
+			}
+			if ((pathHasSlash | startPathHasSlash) == 1) {
+				++matchedComponents;
+				if (*pathPtr != 0) {
+					lastPathMatchAfterPtr = pathPtr + 1;
+				}
+				else {
+					lastPathMatchAfterPtr = pathPtr;
+				}
+			}
+
+			++pathPtr;
+			++startPathPtr;
+		}
+
+		while (startPathPtr <= startPathEnd) {
+			int startPathHasSlash = *startPathPtr == '/' || *startPathPtr == '\\' || *startPathPtr == 0;
+			if (startPathHasSlash) {
+				++startPathDirectoryComponents;
+			}
+			++startPathPtr;
+		}
+
+		if (pathPtr < pathEnd) {
+			// Add one more just to make it different without counting the rest.
+			++pathDirectoryComponents;
+		}
+
+		char outputBuffer[MAXJPATH];
+		char* outputBufferPtr = outputBuffer;
+
+		if (pathDirectoryComponents == startPathDirectoryComponents  &&  matchedComponents == pathDirectoryComponents) {
+			*outputBufferPtr++ = '.';
+		} else {
+			char *lastOutputBufferPtr = NULL;
+			for (int i = matchedComponents; i < startPathDirectoryComponents; ++i) {
+				*outputBufferPtr++ = '.';
+				*outputBufferPtr++ = '.';
+				*outputBufferPtr++ = '/';
+				lastOutputBufferPtr = outputBufferPtr;
+			}
+			while (*lastPathMatchAfterPtr) {
+				if (*lastPathMatchAfterPtr == '\\') {
+					*outputBufferPtr = '/';
+				}
+				else {
+					*outputBufferPtr = *lastPathMatchAfterPtr;
+				}
+				++lastPathMatchAfterPtr;
+				++outputBufferPtr;
+			}
+			if (lastOutputBufferPtr == outputBufferPtr) {
+				--outputBufferPtr;
+			}
+		}
+		*outputBufferPtr = 0;
+
+		resultList = list_append(resultList, outputBuffer, 0);
+	}
+	if (cwd != NULL) {
+		free(cwd);
+	}
+	return resultList;
 }
