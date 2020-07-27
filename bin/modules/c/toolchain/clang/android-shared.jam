@@ -1288,6 +1288,8 @@ include ':app'
         #########################################################################################
         # app/build.gradle
         {
+            local gradleAppOutputDirectory = $(GRADLE_OUTPUT_DIRECTORY)/app ;
+
             local _keyStorePath =
                 $(ANDROID.KEYSTORE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
                 $(ANDROID.KEYSTORE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
@@ -1301,6 +1303,7 @@ include ':app'
             if ! $(_keyStorePath) || ! $(_keyStorePassword) || ! $(_keyStoreKey) {
                 Exit *** error \: Must call android.Sign and specify keystore path, password and key ;
             }
+            _keyStorePath = [ MakeRelativePath $(_keyStorePath:T) : $(gradleAppOutputDirectory) ] ;
 
             # Resources
             local sdkVersion = $(ANDROID.SDK_VERSION:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
@@ -1323,6 +1326,8 @@ include ':app'
                         abiFilters += 'x86' ;
                 }
             }
+
+            local androidManifest = [ MakeRelativePath $(ANDROID.MANIFEST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):T) : $(gradleAppOutputDirectory) ] ;
 
             local contents = "" ;
             contents += "apply plugin: 'com.android.application'
@@ -1347,7 +1352,7 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('$(_keyStorePath:T)')
+            storeFile file('$(_keyStorePath)')
             storePassword '$(_keyStorePassword)'
             keyAlias '$(_keyStoreKey)'
             keyPassword '$(_keyStorePassword)'
@@ -1365,12 +1370,16 @@ android {
         }
     }
     sourceSets.main {
-        manifest.srcFile '$(ANDROID.MANIFEST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))'
+        manifest.srcFile '$(androidManifest)'
         java.srcDirs += [
 " ;
 
             local sourcePaths = $(JAVA.SOURCEPATHS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
             sourcePaths ?= $(SUBDIR) ;
+            sourcePaths = [ MakeRelativePath $(sourcePaths) : $(gradleAppOutputDirectory) ] ;
+
+            local assetsPaths = [ MakeRelativePath $(ANDROID.ASSETS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(gradleAppOutputDirectory) ] ;
+
             contents += "            '$(sourcePaths)',$(NEWLINE)" ;
             contents += "        ]
         aidl.srcDirs += [
@@ -1379,15 +1388,18 @@ android {
             contents += "        ]
         assets.srcDirs += [
 " ;
-            contents += "            '$(ANDROID.ASSETS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))',$(NEWLINE)" ;
+            contents += "            '$(assetsPaths)',$(NEWLINE)" ;
             contents += "        ]$(NEWLINE)" ;
             if $(hasNativeLibs) {
+                local nativeLibsPaths = [ MakeRelativePath $(LOCATE_TARGET)/lib : $(gradleAppOutputDirectory) ] ;
                 contents += "        jniLibs.srcDirs += [$(NEWLINE)" ;
-                contents += "            '$(LOCATE_TARGET)/lib'$(NEWLINE)" ;
+                contents += "            '$(nativeLibsPaths)'$(NEWLINE)" ;
                 contents += "        ]$(NEWLINE)" ;
             }
+
+            local resourcesPaths = [ MakeRelativePath $(ANDROID.RESOURCES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(gradleAppOutputDirectory) ] ;
             contents += "        res.srcDirs += [$(NEWLINE)" ;
-            contents += "            '$(ANDROID.RESOURCES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))'$(NEWLINE)" ;
+            contents += "            '$(resourcesPaths)'$(NEWLINE)" ;
             contents += "        ]
     }
     aaptOptions {
@@ -1416,7 +1428,7 @@ dependencies {
             contents += "}$(NEWLINE)" ;
 
             local app-build.gradle = @(build.gradle:G=$(grist)|app) ;
-            MakeLocate $(app-build.gradle) : $(GRADLE_OUTPUT_DIRECTORY)/app ;
+            MakeLocate $(app-build.gradle) : $(gradleAppOutputDirectory) ;
             UseCommandLine $(app-build.gradle) : $(contents) ;
             CONTENTS on $(app-build.gradle) = $(contents) ;
             WriteFile $(app-build.gradle) ;
@@ -1427,6 +1439,9 @@ dependencies {
         # app/buildHelpers.gradle
         #########################################################################################
         {
+            local gradleAppOutputDirectory = $(GRADLE_OUTPUT_DIRECTORY)/app ;
+            local relativePackageOutputPath = [ MakeRelativePath $(packageOutputPath) : $(gradleAppOutputDirectory) ] ;
+
             #String name = \"$(TARGET)-${variant.versionName}-${output.baseName}.apk\"
             #def destinationFolder = \"$(packageOutputPath)${output.baseName.replace(\"-\", \"/\")}\"
             #print \"Copying APK folder from: $sourceFolder into $destinationFolder\\n\"
@@ -1454,7 +1469,7 @@ android {
                     def copyAPKFolderTask = tasks.create(name: \"archive${taskSuffix}\", type: org.gradle.api.tasks.Copy) {
                         description \"Archive/copy APK folder to a shared folder.\"
                         def sourceFolder = \"$buildDir/outputs/apk/${output.baseName.replace(\"-\", \"/\")}\"
-                        def destinationFolder = \"$(packageOutputPath)\"
+                        def destinationFolder = \"$(relativePackageOutputPath)\"
                         from(sourceFolder)
                         into destinationFolder
                         eachFile { file ->
@@ -1471,7 +1486,7 @@ android {
 " ;
 
             local app-buildHelpers.gradle = @(buildHelpers.gradle:G=$(grist)|app) ;
-            MakeLocate $(app-buildHelpers.gradle) : $(GRADLE_OUTPUT_DIRECTORY)/app ;
+            MakeLocate $(app-buildHelpers.gradle) : $(gradleAppOutputDirectory) ;
             UseCommandLine $(app-buildHelpers.gradle) : $(contents) ;
             CONTENTS on $(app-buildHelpers.gradle) = $(contents) ;
             WriteFile $(app-buildHelpers.gradle) ;
