@@ -82,7 +82,7 @@ Rules</h1>
 <hr  />
  <h1><a class="anchor" id="rule_C_ActiveTarget"></a>
 rule C.ActiveTarget TARGET</h1>
-<p><a name="a91_rule_C_ActiveTarget"></a></p>
+<p><a name="a94_rule_C_ActiveTarget"></a></p>
 <p>Changes the active target to <code>TARGET</code>. All rules taking an optional <code>TARGET</code> parameter will default to the active target if empty.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -95,14 +95,14 @@ rule C.ActiveTarget TARGET</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_AddBuildExtensions"></a>
 rule C.AddBuildExtensions TYPE : EXTS : RULE : SUFOBJ : ADD_TO_EXTENSIONS : ADD_TO_LINK</h1>
-<p><a name="a92_rule_C_AddBuildExtensions"></a></p>
+<p><a name="a95_rule_C_AddBuildExtensions"></a></p>
 <p>Makes a new C/C++ source extensions available to the compiler. This rule requires some additional setup, described below.</p>
 <p>TODO: Finish me.</p>
 <p><code>TYPE</code> identifies a category of files and is a short identifier, usually all caps. It is used to access compiler flags variables during a file's compilation. If <code>TYPE</code> were specified as <code>CC</code>, then the compiler flags in the variables called <code>preCCFLAGS</code>, <code>CCFLAGS</code>, <code>SUBDIRCCFLAGS</code>, and <code>PCHCCFLAGS</code> would be used.</p>
 <hr  />
  <h1><a class="anchor" id="rule_C_AddFlags"></a>
 rule C.AddFlags TARGET : FLAGS</h1>
-<p><a name="a93_rule_C_AddFlags"></a></p>
+<p><a name="a96_rule_C_AddFlags"></a></p>
 <p>For the given project <code>TARGET</code>, add the compilation <code>FLAGS</code> for the current toolchain.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -115,7 +115,7 @@ rule C.AddFlags TARGET : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_Application"></a>
 rule C.Application TARGET : SOURCES [ : OPTIONS ]</h1>
-<p><a name="a94_rule_C_Application"></a></p>
+<p><a name="a97_rule_C_Application"></a></p>
 <p>Compiles <code>SOURCES</code> and links them into <code>TARGET</code>. Platform specific <code>.o</code> files or, on Visual C++ compilers, <code>.res</code> files are passed straight through to the linker. Any file excluded from the build via <a class="el" href="module_c.html#rule_C_ExcludeFromBuild">rule C.ExcludeFromBuild TARGET : SOURCES</a> is ignored.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -137,7 +137,7 @@ rule C.Application TARGET : SOURCES [ : OPTIONS ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_BatchCompileGroupSize"></a>
 rule C.BatchCompileGroupSize TARGET [ : SIZE ]</h1>
-<p><a name="a95_rule_C_BatchCompileGroupSize"></a></p>
+<p><a name="a98_rule_C_BatchCompileGroupSize"></a></p>
 <p>For the given project <code>TARGET</code>, only allow <code>SIZE</code> files to be batch compiled in a given compiler execution.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -152,7 +152,7 @@ rule C.BatchCompileGroupSize TARGET [ : SIZE ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_CFlags"></a>
 rule C.CFlags TARGET : FLAGS</h1>
-<p><a name="a96_rule_C_CFlags"></a></p>
+<p><a name="a99_rule_C_CFlags"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>FLAGS</code> to the appropriate configuration and platform.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -175,7 +175,7 @@ rule C.CFlags TARGET : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_Clean"></a>
 rule C.Clean TARGET : FILES</h1>
-<p><a name="a97_rule_C_Clean"></a></p>
+<p><a name="a100_rule_C_Clean"></a></p>
 <p>Add <code>FILES</code> to the <code>clean</code> target for <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -188,7 +188,7 @@ rule C.Clean TARGET : FILES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_CppExceptions"></a>
 rule C.C++Exceptions TARGET : TYPE</h1>
-<p><a name="a98_rule_C_C:2b:2bExceptions"></a></p>
+<p><a name="a101_rule_C_C:2b:2bExceptions"></a></p>
 <p>For the given project <code>TARGET</code>, turn on/off C++ exception support within the current toolchain.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -205,7 +205,7 @@ rule C.C++Exceptions TARGET : TYPE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_CppFlags"></a>
 rule C.C++Flags TARGET : FLAGS</h1>
-<p><a name="a99_rule_C_CppFlags"></a></p>
+<p><a name="a102_rule_C_CppFlags"></a></p>
 <p>For the given project <code>TARGET</code>, assign the C++ <code>FLAGS</code> for the current toolchain.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -219,7 +219,7 @@ rule C.C++Flags TARGET : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_CompileOptions"></a>
 rule C.CompileOptions OPTIONS</h1>
-<p><a name="a100_rule_C_CompileOptions"></a></p>
+<p><a name="a103_rule_C_CompileOptions"></a></p>
 <p>Sets options that affect how the compiler builds.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -236,7 +236,7 @@ rule C.CompileOptions OPTIONS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ConfigureFile"></a>
 rule C.ConfigureFile TARGET : DESTINATION : SOURCE : OPTIONS</h1>
-<p><a name="a101_rule_C_ConfigureFile"></a></p>
+<p><a name="a104_rule_C_ConfigureFile"></a></p>
 <p>For the given <code>TARGET</code>, run the file specified through <code>SOURCE</code> through a CMake-like configure mechanism and output the file to <code>DESTINATION</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -252,7 +252,7 @@ rule C.ConfigureFile TARGET : DESTINATION : SOURCE : OPTIONS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_DefFile"></a>
 rule C.DefFile TARGET : SOURCES</h1>
-<p><a name="a102_rule_C_DefFile"></a></p>
+<p><a name="a105_rule_C_DefFile"></a></p>
 <p>When linking the given <code>TARGET</code>, link the <code>.def</code> file(s) specified in <code>SOURCES</code>.</p>
 <dl class="section note"><dt>Note</dt><dd>At this time, the def file only affects Visual C++ applications.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -267,7 +267,7 @@ rule C.DefFile TARGET : SOURCES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_Defines"></a>
 rule C.Defines TARGET : DEFINES [ : OPTIONS ]</h1>
-<p><a name="a103_rule_C_Defines"></a></p>
+<p><a name="a106_rule_C_Defines"></a></p>
 <p>Assign the <code>DEFINES</code> to the given project <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -294,7 +294,7 @@ rule C.Defines TARGET : DEFINES [ : OPTIONS ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ExcludeFromBuild"></a>
 rule C.ExcludeFromBuild TARGET : SOURCES</h1>
-<p><a name="a104_rule_C_ExcludeFromBuild"></a></p>
+<p><a name="a107_rule_C_ExcludeFromBuild"></a></p>
 <p>For the given project <code>TARGET</code>, exclude the <code>SOURCES</code> from the build. If using <b>JamToWorkspace</b> for project generation, sources must be excluded and not simply removed from the list. Otherwise, they don't all show in the generated projects.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -310,7 +310,7 @@ rule C.ExcludeFromBuild TARGET : SOURCES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_Flags"></a>
 rule C.Flags TYPE : TARGET : FLAGS</h1>
-<p><a name="a105_rule_C_Flags"></a></p>
+<p><a name="a108_rule_C_Flags"></a></p>
 <p>Assign the compilation <code>FLAGS</code> to the project <code>TARGET</code>. <code>TYPE</code> can be any known source compilation type, such as <code>CC</code> for C-style files, <code>C++</code> for C++-style files, and on certain compilers, <code>M</code> for Objective C files, or <code>MM</code> for Objective C++ files.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -327,7 +327,7 @@ rule C.Flags TYPE : TARGET : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ForceFileType"></a>
 rule C.ForceFileType TARGET : SOURCES : FILE_TYPE</h1>
-<p><a name="a106_rule_C_ForceFileType"></a></p>
+<p><a name="a109_rule_C_ForceFileType"></a></p>
 <p>Force the <code>FILE_TYPE</code> of the provided <code>SOURCES</code> attached to <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -341,7 +341,7 @@ rule C.ForceFileType TARGET : SOURCES : FILE_TYPE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ForceInclude"></a>
 rule C.ForceInclude TARGET : INCLUDES</h1>
-<p><a name="a107_rule_C_ForceInclude"></a></p>
+<p><a name="a110_rule_C_ForceInclude"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>INCLUDES</code> for the current toolchain causing that project's compilation to force the inclusion of the header before anything else.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -355,7 +355,7 @@ rule C.ForceInclude TARGET : INCLUDES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ForcePublic"></a>
 rule C.ForcePublic TARGET</h1>
-<p><a name="a108_rule_C_ForcePublic"></a></p>
+<p><a name="a111_rule_C_ForcePublic"></a></p>
 <p>Force the <a class="el" href="module_c.html#rule_C_Inherits">rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]</a> public inheritance pattern for <code>TARGET</code>. This will treat <code>TARGET</code> as if one of the flag setting functions, such as <a class="el" href="module_c.html#rule_C_Defines">rule C.Defines TARGET : DEFINES [ : OPTIONS ]</a> or <a class="el" href="module_c.html#rule_C_IncludeDirectories">rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]</a>, had been called with <code>public</code> <code>OPTIONS</code>.</p>
 <p><code>C.ForcePublic</code> is usually used in situations where <a class="el" href="module_c.html#rule_C_Inherits">rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]</a> is called with <code>TARGET</code> to inherit from, but <code>TARGET</code> has no public defines or include directories or other flags. <code>C.Inherits</code> will abort as a precautionary measure assuming that Jam has not yet defined <code>TARGET</code> yet.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -368,7 +368,7 @@ rule C.ForcePublic TARGET</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_GetArchitecture"></a>
 rule C.GetArchitecture TOOLCHAIN_SPEC</h1>
-<p><a name="a109_rule_C_GetArchitecture"></a></p>
+<p><a name="a112_rule_C_GetArchitecture"></a></p>
 <p>Retrieves the <code>C.ARCHITECTURE</code> assigned to the specified toolchain.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -381,7 +381,7 @@ rule C.GetArchitecture TOOLCHAIN_SPEC</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_GetLinkTargets"></a>
 rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC</h1>
-<p><a name="a110_rule_C_GetLinkTargets"></a></p>
+<p><a name="a113_rule_C_GetLinkTargets"></a></p>
 <p>The <a class="el" href="module_c.html#rule_C_Application">rule C.Application TARGET : SOURCES [ : OPTIONS ]</a> and <a class="el" href="module_c.html#rule_C_Library">rule C.Library TARGET : SOURCES [ : OPTIONS ]</a> rules return the target name of the executable or library being built. The properly gristed target name is unique within the dependency graph and takes into account the currently active toolchain.</p>
 <p>When it is not possible to save off the result when calling the <code>C.Application</code> or <code>C.Library</code> rules, the <code>C.GetLinkTargets</code> rule can retrieve the properly gristed target later.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -410,7 +410,7 @@ rule C.GetLinkTargets TARGET : TOOLCHAIN_SPEC</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_GetActiveToolchain"></a>
 rule C.GetActiveToolchain</h1>
-<p><a name="a111_rule_C_GetActiveToolchain"></a></p>
+<p><a name="a114_rule_C_GetActiveToolchain"></a></p>
 <dl class="section return"><dt>Returns</dt><dd>Returns the active toolchain.</dd></dl>
 <div class="fragment"><div class="line">local saveActiveToolchain = [ C.GetActiveToolchain ] ;</div>
 <div class="line">local toolchainsUsed = [ BuildSimple $(saveActiveToolchain)@C.ARCHITECTURE=arm64 ] ;</div>
@@ -419,7 +419,7 @@ rule C.GetActiveToolchain</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_GristFiles"></a>
 rule C.GristFiles TARGET : FILES</h1>
-<p><a name="a112_rule_C_GristFiles"></a></p>
+<p><a name="a115_rule_C_GristFiles"></a></p>
 <p>Grists the passed in <code>FILES</code> against <code>TARGET</code> and returns them to the user in the form: <code>&lt;win32/debug:TARGET&gt;FILES</code></p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -434,7 +434,7 @@ rule C.GristFiles TARGET : FILES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_GristTarget"></a>
 rule C.GristTarget TARGET</h1>
-<p><a name="a113_rule_C_GristTarget"></a></p>
+<p><a name="a116_rule_C_GristTarget"></a></p>
 <p>Grists the passed in <code>TARGET</code> and returns it to the user in the form: <code>&lt;win32/debug&gt;TARGET</code></p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -448,7 +448,7 @@ rule C.GristTarget TARGET</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_IncludeDirectories"></a>
 rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]</h1>
-<p><a name="a114_rule_C_IncludeDirectories"></a></p>
+<p><a name="a117_rule_C_IncludeDirectories"></a></p>
 <p>Add the <code>INCLUDEPATHS</code> to the given project <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -469,7 +469,7 @@ rule C.IncludeDirectories TARGET : INCLUDEPATHS [ : OPTIONS ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_IncludeInBuild"></a>
 rule C.IncludeInBuild TARGET : SOURCES</h1>
-<p><a name="a115_rule_C_IncludeInBuild"></a></p>
+<p><a name="a118_rule_C_IncludeInBuild"></a></p>
 <p>For the given project <code>TARGET</code>, re-include the <code>SOURCES</code> into the build.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -488,7 +488,7 @@ rule C.IncludeInBuild TARGET : SOURCES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_Inherits"></a>
 rule C.Inherits TARGET : INHERITS_TARGETS [ : OPTIONS ]</h1>
-<p><a name="a116_rule_C_Inherits"></a></p>
+<p><a name="a119_rule_C_Inherits"></a></p>
 <p>Inherits the settings from <code>INHERITS_TARGETS</code> and apply them to <code>TARGET</code>.</p>
 <ul>
 <li>
@@ -512,7 +512,7 @@ All libraries made public via <code>C.LinkLibraries</code> are inherited and pas
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_InstallNamePath"></a>
 rule C.InstallNamePath TARGET : INSTALL_NAME_PATH</h1>
-<p><a name="a117_rule_C_InstallNamePath"></a></p>
+<p><a name="a120_rule_C_InstallNamePath"></a></p>
 <p>On platforms with Unix-like shared libraries, <code>C.InstallNamePath</code> allows adjustment of the directory in which the shared library is allowed to run from.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -525,7 +525,7 @@ rule C.InstallNamePath TARGET : INSTALL_NAME_PATH</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_LibFlags"></a>
 rule C.LibFlags TARGET : FLAGS</h1>
-<p><a name="a118_rule_C_LibFlags"></a></p>
+<p><a name="a121_rule_C_LibFlags"></a></p>
 <p>For the given project <code>TARGET</code>, assign the lib <code>FLAGS</code> to the current toolchain to be used when archiving object files into library files.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -538,7 +538,7 @@ rule C.LibFlags TARGET : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_Library"></a>
 rule C.Library TARGET : SOURCES [ : OPTIONS ]</h1>
-<p><a name="a119_rule_C_Library"></a></p>
+<p><a name="a122_rule_C_Library"></a></p>
 <p>Compiles <code>SOURCES</code> and archives them into a library called <code>TARGET</code>. Filenames with an <code>.obj</code> or <code>.res</code> are passed straight through to the linker. Any file excluded from the build via <a class="el" href="module_c.html#rule_C_ExcludeFromBuild">rule C.ExcludeFromBuild TARGET : SOURCES</a> is ignored.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -580,7 +580,7 @@ rule C.Library TARGET : SOURCES [ : OPTIONS ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_LinkDirectories"></a>
 rule C.LinkDirectories TARGET : DIRECTORIES</h1>
-<p><a name="a120_rule_C_LinkDirectories"></a></p>
+<p><a name="a123_rule_C_LinkDirectories"></a></p>
 <p>Assign the linker search <code>DIRECTORIES</code> for the given project <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -601,7 +601,7 @@ rule C.LinkDirectories TARGET : DIRECTORIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_LinkFlags"></a>
 rule C.LinkFlags TARGET : FLAGS</h1>
-<p><a name="a121_rule_C_LinkFlags"></a></p>
+<p><a name="a124_rule_C_LinkFlags"></a></p>
 <p>Assign extra link <code>FLAGS</code> to the given project <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -619,7 +619,7 @@ rule C.LinkFlags TARGET : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_LinkLibraries"></a>
 rule C.LinkLibraries TARGET : LIBRARIES [ : OPTIONS ]</h1>
-<p><a name="a122_rule_C_LinkLibraries"></a></p>
+<p><a name="a125_rule_C_LinkLibraries"></a></p>
 <p>Makes <code>TARGET</code> depend on Jam generated <code>LIBRARIES</code> and includes them during linking.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -634,7 +634,7 @@ rule C.LinkLibraries TARGET : LIBRARIES [ : OPTIONS ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_LinkPrebuiltLibraries"></a>
 rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : OPTIONS ]</h1>
-<p><a name="a123_rule_C_LinkPrebuiltLibraries"></a></p>
+<p><a name="a126_rule_C_LinkPrebuiltLibraries"></a></p>
 <p>Makes <code>TARGET</code> depend on <code>LIBRARIES</code> and includes them during linking.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -651,7 +651,7 @@ rule C.LinkPrebuiltLibraries TARGET : LIBRARIES [ : OPTIONS ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_Lump"></a>
 rule C.Lump PARENT : SOURCES_VARIABLE_NAME : LUMP_NAME [ : PCH_FILENAMES : EXTRA_INCLUDE_PATHS ]</h1>
-<p><a name="a124_rule_C_Lump"></a></p>
+<p><a name="a127_rule_C_Lump"></a></p>
 <p>Generates a small file containing an <code>#include</code> amalgamation of files passed into the rule.</p>
 <p>The name of the generated lump file is <code>$(LOCATE_SOURCE)/!$(LUMP_NAME)!.$(LUMP_NAME:S)</code>. If <code>LUMP_NAME</code> does not have an extension, then the extension from $(PCH_FILENAMES[1]:S) is used. If that doesn't exist, then the default is <code>.cpp</code>.</p>
 <p>The lump file has the following contents:</p>
@@ -684,7 +684,7 @@ For each C-style source specified in <code>SOURCES_VARIABLE_NAME</code> that is 
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_NoPrecompiledHeader"></a>
 rule C.NoPrecompiledHeader TARGET : FILES</h1>
-<p><a name="a125_rule_C_NoPrecompiledHeader"></a></p>
+<p><a name="a128_rule_C_NoPrecompiledHeader"></a></p>
 <p>Creates a precompiled header and uses it on the specified <code>FILES</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -710,7 +710,7 @@ rule C.NoPrecompiledHeader TARGET : FILES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ObjectAddFlags"></a>
 rule C.ObjectAddFlags TARGET : SOURCES : FLAGS</h1>
-<p><a name="a126_rule_C_ObjectAddFlags"></a></p>
+<p><a name="a129_rule_C_ObjectAddFlags"></a></p>
 <p>For the given <code>SOURCES</code>, add the compilation <code>FLAGS</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -724,7 +724,7 @@ rule C.ObjectAddFlags TARGET : SOURCES : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ObjectCFlags"></a>
 rule C.ObjectCFlags TARGET : SOURCES : FLAGS</h1>
-<p><a name="a127_rule_C_ObjectCFlags"></a></p>
+<p><a name="a130_rule_C_ObjectCFlags"></a></p>
 <p>For the given <code>SOURCES</code> matching <code>*.c</code>, assign the passed in <code>FLAGS</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -740,7 +740,7 @@ rule C.ObjectCFlags TARGET : SOURCES : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ObjectCppFlags"></a>
 rule C.ObjectC++Flags TARGET : SOURCES : FLAGS</h1>
-<p><a name="a128_rule_C_ObjectCppFlags"></a></p>
+<p><a name="a131_rule_C_ObjectCppFlags"></a></p>
 <p>For the given <code>SOURCES</code> matching *.cpp or *.cxx, assign the passed in <code>FLAGS</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -756,7 +756,7 @@ rule C.ObjectC++Flags TARGET : SOURCES : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ObjectDefines"></a>
 rule C.ObjectDefines TARGET : SOURCES : DEFINES</h1>
-<p><a name="a129_rule_C_ObjectDefines"></a></p>
+<p><a name="a132_rule_C_ObjectDefines"></a></p>
 <p>For the given <code>SOURCES</code>, assign the passed in <code>DEFINES</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -772,7 +772,7 @@ rule C.ObjectDefines TARGET : SOURCES : DEFINES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ObjectForceInclude"></a>
 rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES</h1>
-<p><a name="a130_rule_C_ObjectForceInclude"></a></p>
+<p><a name="a133_rule_C_ObjectForceInclude"></a></p>
 <p>For the given <code>SOURCES</code>, assign the <code>INCLUDES</code> to the <code>TARGET</code>, causing that project's compilation to force the inclusion of the header before anything else.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -787,7 +787,7 @@ rule C.ObjectForceInclude TARGET : SOURCES : INCLUDES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ObjectIncludeDirectories"></a>
 rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS</h1>
-<p><a name="a131_rule_C_ObjectIncludeDirectories"></a></p>
+<p><a name="a134_rule_C_ObjectIncludeDirectories"></a></p>
 <p>For the given <code>SOURCES</code>, assign the <code>INCLUDEPATHS</code> as part of the <code>TARGET</code> compilation of the <code>SOURCES</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -803,7 +803,7 @@ rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ObjectRemoveFlags"></a>
 rule C.ObjectRemoveFlags TARGET : SOURCES : FLAGS</h1>
-<p><a name="a132_rule_C_ObjectRemoveFlags"></a></p>
+<p><a name="a135_rule_C_ObjectRemoveFlags"></a></p>
 <p>For the given <code>SOURCES</code>, remove the compilation <code>FLAGS</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -817,7 +817,7 @@ rule C.ObjectRemoveFlags TARGET : SOURCES : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_OutputName"></a>
 rule C.OutputName TARGET : NAME</h1>
-<p><a name="a133_rule_C_OutputName"></a></p>
+<p><a name="a136_rule_C_OutputName"></a></p>
 <p>By default, the name of a generated executable or library is determined by the name of the <code>TARGET</code>. <code>OutputName</code> is used to override the name of the executable or library.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -832,7 +832,7 @@ rule C.OutputName TARGET : NAME</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_OutputPath"></a>
 rule C.OutputPath TARGET : OUTPUTPATH</h1>
-<p><a name="a134_rule_C_OutputPath"></a></p>
+<p><a name="a137_rule_C_OutputPath"></a></p>
 <p>By default, the output location of a generated executable or library is at <code>LOCATE_TARGET</code>. <code>OutputPath</code> is used to override the output location of the executable or library.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -850,7 +850,7 @@ rule C.OutputPath TARGET : OUTPUTPATH</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_OutputPostfix"></a>
 rule C.OutputPostfix TARGET : POSTFIX</h1>
-<p><a name="a135_rule_C_OutputPostfix"></a></p>
+<p><a name="a138_rule_C_OutputPostfix"></a></p>
 <p>The output postfix is appended to the end of the generated target name. By default, the output postfix is empty. This means the resultant filename is $(OUTPUTNAME).$(EXT).</p>
 <p>If there is no assigned output postfix for <code>TARGET</code>, then the global target <code>*</code> is checked for a postfix.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -877,7 +877,7 @@ rule C.OutputPostfix TARGET : POSTFIX</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_OutputPostfixClear"></a>
 rule C.OutputPostfixClear TARGET</h1>
-<p><a name="a136_rule_C_OutputPostfixClear"></a></p>
+<p><a name="a139_rule_C_OutputPostfixClear"></a></p>
 <p>Clear the output postfix.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -892,7 +892,7 @@ rule C.OutputPostfixClear TARGET</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_OutputSuffix"></a>
 rule C.OutputSuffix TARGET : SUFFIX</h1>
-<p><a name="a137_rule_C_OutputSuffix"></a></p>
+<p><a name="a140_rule_C_OutputSuffix"></a></p>
 <p>The output suffix is the file extension of the generated target. By default, the output suffix is appropriate for an executable or library.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -906,7 +906,7 @@ rule C.OutputSuffix TARGET : SUFFIX</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_OverrideToolchainSpec"></a>
 rule C.OverrideToolchainSpec TOOLCHAIN_SPEC_OPTIONS : OPTIONS</h1>
-<p><a name="a138_rule_C_OverrideToolchainSpec"></a></p>
+<p><a name="a141_rule_C_OverrideToolchainSpec"></a></p>
 <p>Advanced functionality used when setting up overlay toolchains.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -933,7 +933,7 @@ rule C.OverrideToolchainSpec TOOLCHAIN_SPEC_OPTIONS : OPTIONS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_PrecompiledHeader"></a>
 rule C.PrecompiledHeader TARGET : NAME : FILES</h1>
-<p><a name="a139_rule_C_PrecompiledHeader"></a></p>
+<p><a name="a142_rule_C_PrecompiledHeader"></a></p>
 <p>Creates a precompiled header based around <code>NAME</code> and uses it on the specified <code>FILES</code>.</p>
 <p>Under Visual C++, <code>NAME.cpp</code> is expected to exist as part of the build. If <code>NAME.cpp</code> is not provided by the user, JamPlus will create an empty one automatically tied to the <code>.cpp</code> extension. If another extension is desired, the first parameter to <code>NAME</code> should be the alternate filename.</p>
 <p>Under GCC-based compilers, the precompiled header name is automatic based on the flags and file extensions going into the build.</p>
@@ -956,7 +956,7 @@ rule C.PrecompiledHeader TARGET : NAME : FILES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_RemoveFlags"></a>
 rule C.RemoveFlags TARGET : FLAGS</h1>
-<p><a name="a140_rule_C_RemoveFlags"></a></p>
+<p><a name="a143_rule_C_RemoveFlags"></a></p>
 <p>For the given project <code>TARGET</code>, remove the compilation <code>FLAGS</code> from the current toolchain.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -969,7 +969,7 @@ rule C.RemoveFlags TARGET : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_RuntimeType"></a>
 rule C.RuntimeType TARGET : TYPE [ : THE_PLATFORM ]</h1>
-<p><a name="a141_rule_C_RuntimeType"></a></p>
+<p><a name="a144_rule_C_RuntimeType"></a></p>
 <p>For the given project <code>TARGET</code>, alter the build to use either a statically linked C runtime or a dynamically linked C runtime.</p>
 <dl class="section note"><dt>Note</dt><dd>At this time, the C runtime type only affects Visual C++ applications.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -988,7 +988,7 @@ rule C.RuntimeType TARGET : TYPE [ : THE_PLATFORM ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_Toolchain"></a>
 rule C.Toolchain TOOLCHAIN_SPEC</h1>
-<p><a name="a142_rule_C_Toolchain"></a></p>
+<p><a name="a145_rule_C_Toolchain"></a></p>
 <p>Activate the toolchain specified by <code>TOOLCHAIN_SPEC</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1000,7 +1000,7 @@ rule C.Toolchain TOOLCHAIN_SPEC</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_LocateSource"></a>
 rule LocateSource TARGET : DIRECTORY</h1>
-<p><a name="a143_rule_LocateSource"></a></p>
+<p><a name="a146_rule_LocateSource"></a></p>
 <p>Helper function to set <code>LOCATE_SOURCE</code> on <code>TARGET</code> to <code>DIRECTORY</code> and to override the current global <code>LOCATE_SOURCE</code> provided from <a class="el" href="jambase_rules.html#rule_SubDir">rule SubDir TOP d1...dn : SUBNAME</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1013,7 +1013,7 @@ rule LocateSource TARGET : DIRECTORY</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_LocateTarget"></a>
 rule LocateTarget TARGET : DIRECTORY</h1>
-<p><a name="a144_rule_LocateTarget"></a></p>
+<p><a name="a147_rule_LocateTarget"></a></p>
 <p>Helper function to set <code>LOCATE_TARGET</code> on <code>TARGET</code> to <code>DIRECTORY</code> and to override the current global <code>LOCATE_TARGET</code> provided from <a class="el" href="jambase_rules.html#rule_SubDir">rule SubDir TOP d1...dn : SUBNAME</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

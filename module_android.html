@@ -53,8 +53,11 @@ List of Rules</h1>
 <li><a href="module_android.html#rule_android_PackageOutputPath">android.PackageOutputPath</a></li>
 <li><a href="module_android.html#rule_android_PrebuiltAars">android.PrebuiltAars</a></li>
 <li><a href="module_android.html#rule_android_PrebuiltJars">android.PrebuiltJars</a></li>
+<li><a href="module_android.html#rule_android_ProductVersion">android.ProductVersion</a></li>
 <li><a href="module_android.html#rule_android_Resources">android.Resources</a></li>
 <li><a href="module_android.html#rule_android_SDK">android.SDK</a></li>
+<li><a href="module_android.html#rule_android_SDKCompileVersion">android.SDKCompileVersion</a></li>
+<li><a href="module_android.html#rule_android_SDKMinimumVersion">android.SDKMinimumVersion</a></li>
 <li><a href="module_android.html#rule_android_Sign">android.Sign</a></li>
 <li><a href="module_android.html#rule_android_SourcePaths">android.SourcePaths</a></li>
 <li><a href="module_android.html#rule_android_UncompressedAssetExtensions">android.UncompressedAssetExtensions</a></li>
@@ -259,7 +262,7 @@ rule android.Package TARGET [ : TOOLCHAINS [ : OPTIONS ] ]</h1>
 <div class="line"><span class="preprocessor">android.Package MyGame : : install ;</span></div>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_PackageName"></a>
-TARGET : PACKAGE_NAME</h1>
+rule android.PackageName TARGET : PACKAGE_NAME</h1>
 <p><a name="a82_rule_android_PackageName"></a></p>
 <p>Specify the package name for <code>TARGET</code>, generally in the form of <code>com.module.submodule</code>.</p>
 <p>By default, this is read from the AndroidManifest.xml, so only call this if an override is needed.</p>
@@ -335,9 +338,22 @@ rule android.PrebuiltJars TARGET : LIBRARIES</h1>
 <div class="line">        UnitySoomlaAndroidCore</div>
 <div class="line">;</div>
 </div><!-- fragment --><hr  />
+ <h1><a class="anchor" id="rule_android_ProductVersion"></a>
+rule android.ProductVersion TARGET : VERSION_NAME : VERSION_CODE</h1>
+<p><a name="a86_rule_android_ProductVersion"></a></p>
+<p>Sets the <code>android.versionName</code> and <code>android.versionCode</code> properties in a <code>build.gradle</code> file.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">VERSION_NAME</td><td>The version name to be put into the <code>AndroidManifest.xml</code>'s <code>android:versionName</code>. </td></tr>
+    <tr><td class="paramname">VERSION_CODE</td><td>The version code to be put into the <code>AndroidManifest.xml</code>'s <code>android:versionCode</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><div class="line">android.ProductVersion THE_TARGET : 1.0 : 5 ;</div>
+</div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_Resources"></a>
 rule android.Resources TARGET : DIRECTORIES</h1>
-<p><a name="a86_rule_android_Resources"></a></p>
+<p><a name="a87_rule_android_Resources"></a></p>
 <p>Sets <code>DIRECTORIES</code> as the locations to search for Android resources at when <code>TARGET</code> is built.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -353,7 +369,7 @@ rule android.Resources TARGET : DIRECTORIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_SDK"></a>
 rule android.SDK SDK_VERSION : ARCHITECTURE</h1>
-<p><a name="a87_rule_android_SDK"></a></p>
+<p><a name="a88_rule_android_SDK"></a></p>
 <p>Sets the Android <code>SDK_VERSION</code> and <code>ARCHITECTURE</code> for the toolchain. Call this before any other <code>android.*</code> rules.</p>
 <p><code>android.SDK</code> attempts detection number of Android-specific tools and SDKs:</p>
 <p> <blockquote>  </p><ul>
@@ -384,9 +400,33 @@ On Windows, <code>c:/Program Files (x86)/Android/android-sdk</code> is assumed t
 </dl>
 <div class="fragment"><div class="line">android.SDK 19 : armv7-a ;</div>
 </div><!-- fragment --><hr  />
+ <h1><a class="anchor" id="rule_android_SDKCompileVersion"></a>
+rule android.SDKCompileVersion TARGET : SDK_COMPILE_VERSION</h1>
+<p><a name="a89_rule_android_SDKCompileVersion"></a></p>
+<p>Sets the Android <code>SDK_COMPILE_VERSION</code> to build against. Corresponds to the <code>android.compileSdkVersion</code> property in a <code>build.gradle</code> file.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">SDK_COMPILE_VERSION</td><td>Defaults to the version specified by <a class="el" href="module_android.html#rule_android_SDK">rule android.SDK SDK_VERSION : ARCHITECTURE</a>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><div class="line">android.SDKCompileVersion THE_TARGET : 30 ;</div>
+</div><!-- fragment --><hr  />
+ <h1><a class="anchor" id="rule_android_SDKMinimumVersion"></a>
+rule android.SDKMinimumVersion TARGET : SDK_MINIMUM_VERSION</h1>
+<p><a name="a90_rule_android_SDKMinimumVersion"></a></p>
+<p>Sets the Android <code>SDK_MINIMUM_VERSION</code> to ensure a build against. Corresponds to the <code>android.minSdkVersion</code> property in a <code>build.gradle</code> file.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">SDK_MINIMUM_VERSION</td><td>Defaults to the version specified by <a class="el" href="module_android.html#rule_android_SDK">rule android.SDK SDK_VERSION : ARCHITECTURE</a>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="fragment"><div class="line">android.SDKMinimumVersion THE_TARGET : 24 ;</div>
+</div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_Sign"></a>
 rule android.Sign TARGET : KEYSTORE_PATH_PASSWORD_KEY</h1>
-<p><a name="a88_rule_android_Sign"></a></p>
+<p><a name="a91_rule_android_Sign"></a></p>
 <p>Sets up the keystore information for the Android package. <code>android.Sign</code> must be called before <code>android.Package</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -399,7 +439,7 @@ rule android.Sign TARGET : KEYSTORE_PATH_PASSWORD_KEY</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_SourcePaths"></a>
 rule android.SourcePaths TARGET : DIRECTORIES</h1>
-<p><a name="a89_android_SourcePaths"></a></p>
+<p><a name="a92_android_SourcePaths"></a></p>
 <p>Specify the source path for the Java files being built by <code>TARGET</code>. <code>android.SourcePaths</code> must be called before <code>android.Application</code> or <code>android.Library</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -413,7 +453,7 @@ rule android.SourcePaths TARGET : DIRECTORIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_UncompressedAssetExtensions"></a>
 rule android.UncompressedAssetExtensions TARGET : UNCOMPRESSED_ASSET_EXTENSIONS</h1>
-<p><a name="a90_android_UncompressedAssetExtensions"></a></p>
+<p><a name="a93_android_UncompressedAssetExtensions"></a></p>
 <p>Specify extensions to leave uncompressed when building the .apk. This must be called before <code>android.Package</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
