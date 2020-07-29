@@ -54,8 +54,11 @@ An Android build is initiated with a <tt>C.TOOLCHAIN</tt> of <tt>android/CONFIG<
 \refitem rule_android_PackageOutputPath android.PackageOutputPath
 \refitem rule_android_PrebuiltAars android.PrebuiltAars
 \refitem rule_android_PrebuiltJars android.PrebuiltJars
+\refitem rule_android_ProductVersion android.ProductVersion
 \refitem rule_android_Resources android.Resources
 \refitem rule_android_SDK android.SDK
+\refitem rule_android_SDKCompileVersion android.SDKCompileVersion
+\refitem rule_android_SDKMinimumVersion android.SDKMinimumVersion
 \refitem rule_android_Sign android.Sign
 \refitem rule_android_SourcePaths android.SourcePaths
 \refitem rule_android_UncompressedAssetExtensions android.UncompressedAssetExtensions
@@ -316,7 +319,7 @@ In order to output a final .apk to be installed on an Android device, the \c and
 
 
 <hr>
-\section rule_android_PackageName TARGET : PACKAGE_NAME
+\section rule_android_PackageName rule android.PackageName TARGET : PACKAGE_NAME
 \addindex rule_android_PackageName
 
 Specify the package name for \c TARGET, generally in the form of <tt>com.module.submodule</tt>.
@@ -421,6 +424,27 @@ The \c LIBRARIES specified are, by default, searched for in <tt>\$(SUBDIR)</tt>.
 
 
 <hr>
+\section rule_android_ProductVersion rule android.ProductVersion TARGET : VERSION_NAME : VERSION_CODE
+\addindex rule_android_ProductVersion
+
+Sets the <tt>android.versionName</tt> and <tt>android.versionCode</tt> properties in a <tt>build.gradle</tt> file.
+
+\param VERSION_NAME The version name to be put into the <tt>AndroidManifest.xml</tt>'s <tt>android:versionName</tt>.
+\param VERSION_CODE The version code to be put into the <tt>AndroidManifest.xml</tt>'s <tt>android:versionCode</tt>.
+
+\code
+    android.ProductVersion THE_TARGET : 1.0 : 5 ;
+\endcode
+
+
+
+
+
+
+
+
+
+<hr>
 \section rule_android_Resources rule android.Resources TARGET : DIRECTORIES
 \addindex rule_android_Resources
 
@@ -470,6 +494,42 @@ Sets the Android \c SDK_VERSION and \c ARCHITECTURE for the toolchain. Call this
 
 \code
     android.SDK 19 : armv7-a ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_SDKCompileVersion rule android.SDKCompileVersion TARGET : SDK_COMPILE_VERSION
+\addindex rule_android_SDKCompileVersion
+
+Sets the Android \c SDK_COMPILE_VERSION to build against. Corresponds to the <tt>android.compileSdkVersion</tt> property in a <tt>build.gradle</tt> file.
+
+\param SDK_COMPILE_VERSION Defaults to the version specified by \ref rule_android_SDK.
+
+\code
+    android.SDKCompileVersion THE_TARGET : 30 ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_android_SDKMinimumVersion rule android.SDKMinimumVersion TARGET : SDK_MINIMUM_VERSION
+\addindex rule_android_SDKMinimumVersion
+
+Sets the Android \c SDK_MINIMUM_VERSION to ensure a build against. Corresponds to the <tt>android.minSdkVersion</tt> property in a <tt>build.gradle</tt> file.
+
+\param SDK_MINIMUM_VERSION Defaults to the version specified by \ref rule_android_SDK.
+
+\code
+    android.SDKMinimumVersion THE_TARGET : 24 ;
 \endcode
 
 
