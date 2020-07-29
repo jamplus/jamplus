@@ -25,7 +25,7 @@ Using Lua during the Parsing Phase</h1>
 <p>There are two rules for execution of Lua script available for use during the rule parsing phase of JamPlus. They are <a class="el" href="lua_support.html#rule_LuaString">rule LuaString LUA_SCRIPT</a> and <a class="el" href="lua_support.html#rule_LuaFile">rule LuaFile LUA_FILENAME</a>.</p>
 <h2><a class="anchor" id="rule_LuaString"></a>
 rule LuaString LUA_SCRIPT</h2>
-<p><a name="a62_rule_LuaString"></a></p>
+<p><a name="a63_rule_LuaString"></a></p>
 <p> <blockquote> </p>
 <p>Executes <code>LUA_SCRIPT</code>, returning any results back to the caller.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -38,7 +38,7 @@ rule LuaString LUA_SCRIPT</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="rule_LuaFile"></a>
 rule LuaFile LUA_FILENAME</h2>
-<p><a name="a63_rule_LuaFile"></a></p>
+<p><a name="a64_rule_LuaFile"></a></p>
 <p> <blockquote> </p>
 <p>Executes <code>LUA_FILENAME</code>, returning any results back to the caller.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -157,7 +157,7 @@ Lua to Jam API</h1>
 <p>Within a Lua script, it is possible to access Jam variables and execute Jam rules.</p>
 <h2><a class="anchor" id="lua_jam_action"></a>
 function jam_action(ACTION_NAME, ACTION_TEXT [, FLAGS])</h2>
-<p><a name="a64_lua_jam_action"></a></p>
+<p><a name="a65_lua_jam_action"></a></p>
 <p> <blockquote> </p>
 <p>Creates an action to be executed by Jam called <code>ACTION_NAME</code> made up of <code>ACTION_TEXT</code>. If written in the Jam language, the equivalent would be:</p>
 <p> <blockquote>  </p><div class="fragment"><div class="line">jam_action(ACTION_NAME, ACTION_TEXT)</div>
@@ -190,7 +190,7 @@ function jam_action(ACTION_NAME, ACTION_TEXT [, FLAGS])</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_evaluaterule"></a>
 function jam_evaluaterule(RULE_NAME [, PARAMETERS])</h2>
-<p><a name="a65_lua_jam_evaluaterule"></a></p>
+<p><a name="a66_lua_jam_evaluaterule"></a></p>
 <p> <blockquote> </p>
 <p>Executes rule <code>RULE_NAME</code> using any optional <code>PARAMETERS</code> specified. Returns the result as a Lua table.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -204,7 +204,7 @@ function jam_evaluaterule(RULE_NAME [, PARAMETERS])</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_expand"></a>
 function jam_expand(TEXT_TO_EXPAND)</h2>
-<p><a name="a66_lua_jam_expand"></a></p>
+<p><a name="a67_lua_jam_expand"></a></p>
 <p> <blockquote> </p>
 <p>Expands <code>TEXT_TO_EXPAND</code> according to Jam rules. <code>TEXT_TO_EXPAND</code> must use the $() or @() expansion forms described elsewhere.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -217,7 +217,7 @@ function jam_expand(TEXT_TO_EXPAND)</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_getvar"></a>
 function jam_getvar([ TARGET_NAME, ] VARIABLE_NAME)</h2>
-<p><a name="a67_lua_jam_getvar"></a></p>
+<p><a name="a68_lua_jam_getvar"></a></p>
 <p> <blockquote> </p>
 <p>Retrieves <code>VARIABLE_NAME</code> from the active Jam globals and returns it as a table of strings.</p>
 <p>If <code>TARGET_NAME</code> is specified, <code>VARIABLE_NAME</code> is retrieved as if an <code>on TARGET_NAME</code> had been issued in Jam.</p>
@@ -232,7 +232,7 @@ function jam_getvar([ TARGET_NAME, ] VARIABLE_NAME)</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_parse"></a>
 function jam_parse(TEXT_TO_PARSE)</h2>
-<p><a name="a68_lua_jam_parse"></a></p>
+<p><a name="a69_lua_jam_parse"></a></p>
 <p> <blockquote> </p>
 <p>Parses <code>TEXT_TO_PARSE</code> as if it existed in a Jamfile.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -244,7 +244,7 @@ function jam_parse(TEXT_TO_PARSE)</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_print"></a>
 function jam_print(TEXT_TO_PRINT)</h2>
-<p><a name="a69_lua_jam_print"></a></p>
+<p><a name="a70_lua_jam_print"></a></p>
 <p> <blockquote> </p>
 <p>Prints <code>TEXT_TO_PRINT</code> to the standard output stream.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -256,7 +256,7 @@ function jam_print(TEXT_TO_PRINT)</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_setvar"></a>
 function jam_setvar([ TARGET_NAME, ] VARIABLE_NAME, VALUE)</h2>
-<p><a name="a70_lua_jam_setvar"></a></p>
+<p><a name="a71_lua_jam_setvar"></a></p>
 <p> <blockquote> </p>
 <p>Sets <code>VALUE</code> into the active Jam global <code>VARIABLE_NAME</code>. <code>VALUE</code> can be a boolean, number, string, or table. Nested tables are collapsed.</p>
 <p>If <code>TARGET_NAME</code> is specified, <code>VALUE</code> is set into <code>VARIABLE_NAME</code> as if an <code>VARIABLE_NAME on TARGET_NAME</code> had been issued in Jam.</p>
