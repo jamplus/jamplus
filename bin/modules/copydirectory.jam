@@ -5,7 +5,6 @@ if ! $(TARGETINFO_LOCATE)
 
 rule _CopyDirectoryRecursiveHelper PARENT : DESTINATION_PATH : SOURCE_PATH : SEARCH_STRING : RECURSIVE
 {
-	Echo PARENT - $(PARENT) ;
 	local files = @($(SOURCE_PATH)/$(SEARCH_STRING:E=*):W) ;
 	local file ;
 	for file in $(files) {
