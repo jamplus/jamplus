@@ -79,7 +79,7 @@ Rules</h1>
 <hr  />
  <h1><a class="anchor" id="rule_C_ios_FrameworkDirectories"></a>
 rule C.ios.FrameworkDirectories TARGET : DIRECTORIES</h1>
-<p><a name="a167_rule_C_ios_FrameworkDirectories"></a></p>
+<p><a name="a168_rule_C_ios_FrameworkDirectories"></a></p>
 <p>For the given project <code>TARGET</code>, assign the framework search <code>DIRECTORIES</code> to the current toolchain.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -92,7 +92,7 @@ rule C.ios.FrameworkDirectories TARGET : DIRECTORIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ios_LinkFrameworks"></a>
 rule C.ios.LinkFrameworks TARGET : FRAMEWORKS</h1>
-<p><a name="a168_rule_C_ios_LinkFrameworks"></a></p>
+<p><a name="a169_rule_C_ios_LinkFrameworks"></a></p>
 <p>Links <code>TARGET</code> against the <code>FRAMEWORKS</code> specified. No dependencies are set, so changes to the framework will not be relinked.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -105,7 +105,7 @@ rule C.ios.LinkFrameworks TARGET : FRAMEWORKS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ios_WeakLinkFrameworks"></a>
 rule C.ios.WeakLinkFrameworks TARGET : FRAMEWORKS</h1>
-<p><a name="a169_rule_C_ios_WeakLinkFrameworks"></a></p>
+<p><a name="a170_rule_C_ios_WeakLinkFrameworks"></a></p>
 <p>Weak links <code>TARGET</code> against the <code>FRAMEWORKS</code> specified. No dependencies are set, so changes to the framework will not be relinked.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -118,7 +118,7 @@ rule C.ios.WeakLinkFrameworks TARGET : FRAMEWORKS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_Archive"></a>
 rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK : OPTIONS</h1>
-<p><a name="a170_rule_ios_Archive"></a></p>
+<p><a name="a171_rule_ios_Archive"></a></p>
 <p>In order to output a final <code>.ipa</code> to be installed on an iOS device, <code>ios.Archive</code> must be called for the <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -140,7 +140,7 @@ rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK : OPTIONS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_AssetCatalog"></a>
 rule ios.AssetCatalog TARGET : ASSET_CATALOG_PATH ;</h1>
-<p><a name="a171_rule_ios_AssetCatalog"></a></p>
+<p><a name="a172_rule_ios_AssetCatalog"></a></p>
 <p>Takes a provided asset catalog and builds it into its individual components. <code>ios.AssetCatalog</code> currently handles <code>.appiconset</code>, <code>.imageset</code>, and <code>.launchimage</code> directories.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -154,7 +154,7 @@ rule ios.AssetCatalog TARGET : ASSET_CATALOG_PATH ;</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_Bundle"></a>
 rule ios.Bundle TARGET [ : TOOLCHAINS ]</h1>
-<p><a name="a172_rule_ios_Bundle"></a></p>
+<p><a name="a173_rule_ios_Bundle"></a></p>
 <p>In order to output an application bundle, the <code>ios.Bundle</code> rule must be called. If <code>TOOLCHAINS</code> is specified, those requested toolchain link targets are run through <code>C.ios.Lipo</code>, and all necessary components are bundled together.</p>
 <p><code>ios.Bundle</code> should be the last rule called in a sequence of rule calls describing the build of an iOS application.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -172,7 +172,7 @@ rule ios.Bundle TARGET [ : TOOLCHAINS ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoArrayBegin"></a>
 rule ios.BundleInfoArrayBegin TARGET : KEY</h1>
-<p><a name="a173_rule_ios_BundleInfoArrayBegin"></a></p>
+<p><a name="a174_rule_ios_BundleInfoArrayBegin"></a></p>
 <p>For the given bundle <code>TARGET</code>, begin an array entry within the <code>Info.plist</code>. Call <a class="el" href="module_ios.html#rule_ios_BundleInfoArrayEnd">rule ios.BundleInfoArrayEnd TARGET</a> to complete the array entry.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -190,7 +190,7 @@ rule ios.BundleInfoArrayBegin TARGET : KEY</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoArrayBoolean"></a>
 rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE</h1>
-<p><a name="a174_rule_ios_BundleInfoArrayBoolean"></a></p>
+<p><a name="a175_rule_ios_BundleInfoArrayBoolean"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as an array of booleans to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -204,7 +204,7 @@ rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoArrayDictBegin"></a>
 rule ios.BundleInfoArrayDictBegin TARGET</h1>
-<p><a name="a175_rule_ios_BundleInfoArrayDictBegin"></a></p>
+<p><a name="a176_rule_ios_BundleInfoArrayDictBegin"></a></p>
 <p>For the given bundle <code>TARGET</code>, begin a array dict entry within the <code>Info.plist</code>. Call <a class="el" href="module_ios.html#rule_ios_BundleInfoArrayDictEnd">rule C.ios.BundleInfoArrayDictEnd TARGET</a> to complete the dict entry.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -221,7 +221,7 @@ rule ios.BundleInfoArrayDictBegin TARGET</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoArrayDictEnd"></a>
 rule C.ios.BundleInfoArrayDictEnd TARGET</h1>
-<p><a name="a176_rule_ios_BundleInfoArrayDictEnd"></a></p>
+<p><a name="a177_rule_ios_BundleInfoArrayDictEnd"></a></p>
 <p>For the given bundle <code>TARGET</code>, end the current array entry begun with <a class="el" href="module_ios.html#rule_ios_BundleInfoArrayDictBegin">rule ios.BundleInfoArrayDictBegin TARGET</a> within the <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -238,7 +238,7 @@ rule C.ios.BundleInfoArrayDictEnd TARGET</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoArrayEnd"></a>
 rule ios.BundleInfoArrayEnd TARGET</h1>
-<p><a name="a177_rule_ios_BundleInfoArrayEnd"></a></p>
+<p><a name="a178_rule_ios_BundleInfoArrayEnd"></a></p>
 <p>For the given bundle <code>TARGET</code>, end the current array entry begun with <a class="el" href="module_ios.html#rule_ios_BundleInfoArrayBegin">rule ios.BundleInfoArrayBegin TARGET : KEY</a> within the <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -255,7 +255,7 @@ rule ios.BundleInfoArrayEnd TARGET</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoArrayInteger"></a>
 rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE</h1>
-<p><a name="a178_rule_ios_BundleInfoArrayInteger"></a></p>
+<p><a name="a179_rule_ios_BundleInfoArrayInteger"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as an array of integers to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -269,7 +269,7 @@ rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoArrayString"></a>
 rule ios.BundleInfoArrayString TARGET : KEY : VALUE</h1>
-<p><a name="a179_rule_ios_BundleInfoArrayString"></a></p>
+<p><a name="a180_rule_ios_BundleInfoArrayString"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as an array of strings to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -283,7 +283,7 @@ rule ios.BundleInfoArrayString TARGET : KEY : VALUE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoBoolean"></a>
 rule ios.BundleInfoBoolean TARGET : KEY : VALUE</h1>
-<p><a name="a180_rule_ios_BundleInfoBoolean"></a></p>
+<p><a name="a181_rule_ios_BundleInfoBoolean"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as a boolean type to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -297,7 +297,7 @@ rule ios.BundleInfoBoolean TARGET : KEY : VALUE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoDictBegin"></a>
 rule ios.BundleInfoDictBegin TARGET : KEY</h1>
-<p><a name="a181_rule_ios_BundleInfoDictBegin"></a></p>
+<p><a name="a182_rule_ios_BundleInfoDictBegin"></a></p>
 <p>For the given bundle <code>TARGET</code>, begin a dict entry within the <code>Info.plist</code>. Call <a class="el" href="module_ios.html#rule_ios_BundleInfoDictEnd">rule ios.BundleInfoDictEnd TARGET</a> to complete the dict entry.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -312,7 +312,7 @@ rule ios.BundleInfoDictBegin TARGET : KEY</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoDictEnd"></a>
 rule ios.BundleInfoDictEnd TARGET</h1>
-<p><a name="a182_rule_ios_BundleInfoDictEnd"></a></p>
+<p><a name="a183_rule_ios_BundleInfoDictEnd"></a></p>
 <p>For the given bundle <code>TARGET</code>, end the current dict entry begun with <a class="el" href="module_ios.html#rule_ios_BundleInfoDictBegin">rule ios.BundleInfoDictBegin TARGET : KEY</a> within the <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -326,7 +326,7 @@ rule ios.BundleInfoDictEnd TARGET</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoInteger"></a>
 rule ios.BundleInfoInteger TARGET : KEY : VALUE</h1>
-<p><a name="a183_rule_ios_BundleInfoInteger"></a></p>
+<p><a name="a184_rule_ios_BundleInfoInteger"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as an integer type to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -340,7 +340,7 @@ rule ios.BundleInfoInteger TARGET : KEY : VALUE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoString"></a>
 rule ios.BundleInfoString TARGET : KEY : VALUE</h1>
-<p><a name="a184_rule_ios_BundleInfoString"></a></p>
+<p><a name="a185_rule_ios_BundleInfoString"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as string type to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -354,7 +354,7 @@ rule ios.BundleInfoString TARGET : KEY : VALUE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfo"></a>
 rule ios.BundleInfo TARGET : KEY : VALUE</h1>
-<p><a name="a185_rule_ios_BundleInfo"></a></p>
+<p><a name="a186_rule_ios_BundleInfo"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as an array of strings to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -414,7 +414,7 @@ rule ios.BundleInfo TARGET : KEY : VALUE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundlePath"></a>
 rule ios.BundlePath TARGET : BUNDLE_PATH</h1>
-<p><a name="a186_rule_ios_BundlePath"></a></p>
+<p><a name="a187_rule_ios_BundlePath"></a></p>
 <p>For the given bundle <code>TARGET</code>, set the output location for the bundle via <code>BUNDLE_PATH</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -428,7 +428,7 @@ rule ios.BundlePath TARGET : BUNDLE_PATH</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_CodeSign"></a>
 rule ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN</h1>
-<p><a name="a187_rule_ios_CodeSign"></a></p>
+<p><a name="a188_rule_ios_CodeSign"></a></p>
 <p>For <code>TARGET</code>, use the provided <code>SIGNING_IDENTITY</code> and <code>CERTIFICATE_CHAIN</code> to sign the application bundle.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -443,7 +443,7 @@ rule ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_GetBundlePath"></a>
 rule ios.GetBundlePath TARGET</h1>
-<p><a name="a188_rule_ios_GetBundlePath"></a></p>
+<p><a name="a189_rule_ios_GetBundlePath"></a></p>
 <p>For the given bundle <code>TARGET</code>, return the output location for the bundle.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -456,7 +456,7 @@ rule ios.GetBundlePath TARGET</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_GetBundleTarget"></a>
 rule ios.GetBundleTarget TARGET</h1>
-<p><a name="a189_rule_ios_GetBundleTarget"></a></p>
+<p><a name="a190_rule_ios_GetBundleTarget"></a></p>
 <p>For the given bundle <code>TARGET</code>, return the actual dependency graph target name of the bundle.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -469,7 +469,7 @@ rule ios.GetBundleTarget TARGET</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_InfoPListFile"></a>
 rule ios.InfoPListFile TARGET : SOURCE</h1>
-<p><a name="a190_rule_ios_InfoPListFile"></a></p>
+<p><a name="a191_rule_ios_InfoPListFile"></a></p>
 <p>For the given bundle <code>TARGET</code>, use the <code>Info.plist</code> file found at <code>SOURCE</code>. Run it through the <a class="el" href="module_c.html#rule_C_ConfigureFile">rule C.ConfigureFile TARGET : DESTINATION : SOURCE : OPTIONS</a> rule to expand any variables. Use the result in the <code>TARGET</code> bundle.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -483,7 +483,7 @@ rule ios.InfoPListFile TARGET : SOURCE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ios_Lipo"></a>
 rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH</h1>
-<p><a name="a191_rule_C_ios_Lipo"></a></p>
+<p><a name="a192_rule_C_ios_Lipo"></a></p>
 <p>For the given <code>TARGET</code>, take the <code>LINK_TARGETS</code>, run lipo, and output the end result at <code>OUTPUT_PATH</code>.</p>
 <p>This rule does not need to be called if using <a class="el" href="module_ios.html#rule_ios_Bundle">rule ios.Bundle TARGET [ : TOOLCHAINS ]</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -503,7 +503,7 @@ rule C.ios.Lipo TARGET : LINK_TARGETS : OUTPUT_PATH</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_MergeInfoPList"></a>
 rule ios.MergeInfoPList TARGET : SOURCE</h1>
-<p><a name="a192_rule_ios_MergeInfoPList"></a></p>
+<p><a name="a193_rule_ios_MergeInfoPList"></a></p>
 <p>For the given bundle <code>TARGET</code>, merge the <code>Info.plist</code>-style file found at <code>SOURCE</code> into the main <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -521,7 +521,7 @@ rule ios.MergeInfoPList TARGET : SOURCE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_MinimumOSVersion"></a>
 rule ios.MinimumOSVersion TARGET : SDK_VERSION_MIN</h1>
-<p><a name="a193_rule_ios_MinimumOSVersion"></a></p>
+<p><a name="a194_rule_ios_MinimumOSVersion"></a></p>
 <p>Sets the minimum iOS version for the <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -534,7 +534,7 @@ rule ios.MinimumOSVersion TARGET : SDK_VERSION_MIN</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_ProvisionFile"></a>
 rule ios.ProvisionFile TARGET : FILENAME</h1>
-<p><a name="a194_rule_ios_ProvisionFile"></a></p>
+<p><a name="a195_rule_ios_ProvisionFile"></a></p>
 <p>For <code>TARGET</code>, uses the specified <code>.mobileprovision</code> file at <code>FILENAME</code> as the bundle's <code>embedded.mobileprovision</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -547,7 +547,7 @@ rule ios.ProvisionFile TARGET : FILENAME</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_Provision"></a>
 rule ios.Provision TARGET : PROFILE_ID</h1>
-<p><a name="a195_rule_ios_Provision"></a></p>
+<p><a name="a196_rule_ios_Provision"></a></p>
 <p>For <code>TARGET</code>, uses the specified <code>PROFILE_ID</code> to look up a matching <code>.mobileprovision</code> file from <code>$(HOME)/Library/MobileDevice/Provisioning Profiles</code> on the Mac. This rule does not work on Windows.</p>
 <p>In general, store your application's <code>.mobileprovision</code> file with the application and use <a class="el" href="module_ios.html#rule_ios_ProvisionFile">rule ios.ProvisionFile TARGET : FILENAME</a> instead.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -561,7 +561,7 @@ rule ios.Provision TARGET : PROFILE_ID</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_SDK"></a>
 rule ios.SDK SDK_VERSION</h1>
-<p><a name="a196_rule_ios_SDK"></a></p>
+<p><a name="a197_rule_ios_SDK"></a></p>
 <p>Sets the iOS <code>SDK_VERSION</code> for the toolchain. Call this before any other <code>ios.*</code> rules.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -573,7 +573,7 @@ rule ios.SDK SDK_VERSION</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_Storyboards"></a>
 rule ios.Storyboards TARGET : LANGUAGE_DIRECTORY [ : STORYBOARD_FILES ]</h1>
-<p><a name="a197_rule_ios_Storyboards"></a></p>
+<p><a name="a198_rule_ios_Storyboards"></a></p>
 <p>Compiles a directory of storyboards.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -587,7 +587,7 @@ rule ios.Storyboards TARGET : LANGUAGE_DIRECTORY [ : STORYBOARD_FILES ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_WebServer"></a>
 rule ios.WebServer TARGET</h1>
-<p><a name="a198_rule_ios_WebServer"></a></p>
+<p><a name="a199_rule_ios_WebServer"></a></p>
 <p>After <code>ios.Archive</code>, launch a secure webserver for <code>TARGET</code> to install the <code>.ipa</code> onto the device.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
