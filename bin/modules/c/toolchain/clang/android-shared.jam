@@ -1271,6 +1271,18 @@ task clean(type: Delete) {
         }
 
         #########################################################################################
+        # gradle.properties
+        #########################################################################################
+        {
+            local root-gradle.properties = @(gradle.properties:G=$(grist)) ;
+            MakeLocate $(root-gradle.properties) : $(GRADLE_OUTPUT_DIRECTORY) ;
+            CONTENTS on $(root-gradle.properties) = $(ANDROID.GRADLE_PROPERTIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+            UseCommandLine $(root-gradle.properties) : $(CONTENTS:Z=$(root-gradle.properties)) ;
+            WriteFile $(root-gradle.properties) ;
+            Depends $(gradleTarget) : $(root-gradle.properties) : $(gradlew) ;
+        }
+
+        #########################################################################################
         # settings.gradle
         #########################################################################################
         {
@@ -2205,6 +2217,21 @@ rule android.GradleDependencies TARGET : PACKAGES {
 }
 
 
+#
+rule android.GradleDependenciesLines TARGET : LINES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.GRADLE_DEPENDENCIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(LINES) ;
+}
+
+
+#
+rule android.GradleProperties TARGET : PROPERTIES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.GRADLE_PROPERTIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(PROPERTIES)$(NEWLINE) ;
+}
+
+
+#
 #
 rule android.GradleAllProjectsRepositories TARGET : REPOSITORIES {
     C.ActiveTarget $(TARGET) ;
