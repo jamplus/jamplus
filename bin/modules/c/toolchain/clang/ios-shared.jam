@@ -48,7 +48,7 @@ actions C.ios.clang.Archive {
 if ! $(NT) {
 
 actions C.ios.clang.Link {
-	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) -filelist ^^^($(NEEDLIBS:TCJ=$(NEWLINE))) -filelist ^^^($(LINKLIBS:TCJ=$(NEWLINE)))
+	$(C.LINK:C) $(LINKFLAGS) -o $(<[1]:C) -filelist ^^^($(>:J=$(NEWLINE))) -filelist ^^^($(NEEDLIBS:TCJ=$(NEWLINE))) $(LINKLIBS:TC)
 }
 
 rule ios.SDK SDK_VERSION {
