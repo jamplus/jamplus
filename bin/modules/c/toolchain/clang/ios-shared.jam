@@ -1260,8 +1260,8 @@ rule C.ios._ApplicationFromObjects_LinkFlags {
 		linkFlags += "-arch $(architecture)" ;
 		linkFlags += "-syslibroot $(isysroot:C\\)" ;
 		linkFlags += -demangle -dead_strip ;
-		linkFlags += -ios_version_min $(minimumsdkversion) ;
-		linkFlags += -sdk_version $(sdkversion) ;
+		linkFlags += "-ios_version_min $(minimumsdkversion)" ;
+		linkFlags += "-sdk_version $(sdkversion)" ;
 		linkFlags += -lobjc -lSystem -lc++ ;
 		linkFlags += \"$(IOSBUILDENV_PATH)/SDK/libclang_rt.ios.a\" ;
 		linkFlags += -F\"$(IOSBUILDENV_PATH)/SDK/System/Library/Frameworks\" ;
