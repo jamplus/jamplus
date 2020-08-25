@@ -552,7 +552,7 @@ rule SubInclude TOKENS : FILENAME
 
 	SubDir $(TOKENS) ;
 
-	local TARGET = $(FILENAME) ;
+	local TARGET = $(FILENAME:D=) ;
 	if ! $(TARGET)
 	{
 		local token ;
