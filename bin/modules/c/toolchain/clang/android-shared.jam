@@ -26,6 +26,41 @@ actions C.android.clang.Link {
 } # if $(NT)
 
 
+rule android.NDK.FindHighestVersion NDK_ROOT : NDK_VERSION {
+    local dirs = [ Glob $(NDK_ROOT) : */ ] ;
+    local highestMajor = 0 ;
+    local highestMinor = 0 ;
+    local highestBuild = 0 ;
+    local dir ;
+    for dir in @($(dirs:P):D=) {
+        local ndk-build = [ Glob $(NDK_ROOT)/$(dir) : ndk-build ndk-build.cmd ] ;
+        if $(ndk-build) {
+            local version = [ Match ([0-9]*)\.([0-9]*)\.([0-9]*) : @($(dirs:P):D=) ] ;
+            if [ Math $(version[1]) ">" $(highestMajor) ] {
+                highestMajor = $(version[1]) ;
+                highestMinor = $(version[2]) ;
+                highestBuild = $(version[3]) ;
+            } else if [ Math $(version[1]) "=" $(highestMajor) ] {
+                if [ Math $(version[2]) ">" $(highestMinor) ] {
+                    highestMinor = $(version[2]) ;
+                    highestBuild = $(version[3]) ;
+                } else if [ Math $(version[2]) "=" $(highestMinor) ] {
+                    if [ Math $(version[3]) ">" $(highestBuild) ] {
+                        highestBuild = $(version[3]) ;
+                    }
+                }
+            }
+        }
+    }
+
+    if $(highestMajor) = 0  &&  $(highestMinor) = 0  &&  $(highestBuild) = 0 {
+        return ;
+    }
+
+    return $(highestMajor).$(highestMinor).$(highestBuild) ;
+}
+
+
 rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
     ARCHITECTURE ?= $(C.ARCHITECTURE:E=armv7-a) ;
     C.ARCHITECTURE ?= $(ARCHITECTURE) ;
@@ -68,27 +103,34 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
         local ndkRoot = $(NDKROOT:J=" ") ;
         ndkRoot ?= $(NDKROOT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
         if ! $(ndkRoot) {
-            local PATHS =
-                $(LOCALAPPDATA)/Android/
-                $(NVPACK_ROOT)
-                $(ProgramFiles(x86):J=$(SPACE))/Android/
-                c:/
-            ;
-
-            local PATH_SUFFIXES =
-                android-ndk
-                android-ndk-r21d
-                android-ndk-r18b
-                android-ndk-r14b
-                android-ndk-r12b
-                android-ndk-r10e
-            ;
-
-            local ndk-build = [ Glob $(PATHS)$(PATH_SUFFIXES) : ndk-build.cmd ndk-build ] ;
-            if $(ndk-build) {
-                ndkRoot = [ Match (.+)/ : $(ndk-build[1]) ] ;
+            local androidStudioNDK = $(LOCALAPPDATA)/Android/sdk/ndk ;
+            local androidStudioHighestVersion = [ android.NDK.FindHighestVersion $(androidStudioNDK) ] ;
+            if $(androidStudioHighestVersion) {
+                ndkRoot = $(androidStudioNDK)/$(androidStudioHighestVersion) ;
+                NDK_VERSION_COMPLETE on $(C.COMPILER_SUITE_SYMBOL) = $(androidStudioHighestVersion) ;
             } else {
-                ndkRoot = _ ;
+                local PATHS =
+                    $(LOCALAPPDATA)/Android/sdk/ndk
+                    $(NVPACK_ROOT)
+                    $(ProgramFiles(x86):J=$(SPACE))/Android/
+                    c:/
+                ;
+
+                local PATH_SUFFIXES =
+                    android-ndk
+                    android-ndk-r21d
+                    android-ndk-r18b
+                    android-ndk-r14b
+                    android-ndk-r12b
+                    android-ndk-r10e
+                ;
+
+                local ndk-build = [ Glob $(PATHS)$(PATH_SUFFIXES) : ndk-build.cmd ndk-build ] ;
+                if $(ndk-build) {
+                    ndkRoot = [ Match (.+)/ : $(ndk-build[1]) ] ;
+                } else {
+                    ndkRoot = _ ;
+                }
             }
         }
 
