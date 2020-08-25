@@ -1369,9 +1369,18 @@ include ':app'
             _keyStorePath = [ MakeRelativePath $(_keyStorePath:T) : $(gradleAppOutputDirectory) ] ;
 
             # Resources
-            local sdkVersion = $(ANDROID.SDK_VERSION:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+            local sdkVersion = $(ANDROID.SDK_TARGET_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
             local sdkMinimumVersion = $(ANDROID.SDK_MINIMUM_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-            local sdkCompileVersion = $(ANDROID.SDK_COMPILE_VERSION:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+            local sdkCompileVersion = $(ANDROID.SDK_COMPILE_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+            if ! $(sdkVersion) {
+                sdkVersion = $(sdkMinimumVersion) ;
+                if ! $(sdkVersion) {
+                    sdkVersion = $(ANDROID.SDK_VERSION:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+                }
+            }
+            if ! $(sdkCompileVersion) {
+                sdkCompileVersion = $(ANDROID.SDK_VERSION:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+            }
             local versionName = $(ANDROID.VERSION_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
             local versionCode = $(ANDROID.VERSION_CODE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
