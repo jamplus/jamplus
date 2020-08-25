@@ -2,8 +2,7 @@
 # by Steven Craft via a forum posting at http://jamplus.org/boards/1/topics/403.
 #
 # It has been updated from the original posting to work against the JamPlus
-# toolchain support. Some functionality has been renamed. Currently, .aidl support
-# is likely broken. Other functionality has been added.
+# toolchain support. Some functionality has been renamed.
 
 rule C.Toolchain.clang.android-shared {
 }
