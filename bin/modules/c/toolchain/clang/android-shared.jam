@@ -356,6 +356,13 @@ rule android.SDKMinimumVersion TARGET : SDK_MINIMUM_VERSION {
 }
 
 
+rule android.SDKTargetVersion TARGET : SDK_TARGET_VERSION {
+    TARGET = [ ActiveTarget $(TARGET) ] ;
+
+    ANDROID.SDK_TARGET_VERSION on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SDK_TARGET_VERSION) ;
+}
+
+
 rule android.ProductVersion TARGET : VERSION_NAME : VERSION_CODE {
     TARGET = [ ActiveTarget $(TARGET) ] ;
 
