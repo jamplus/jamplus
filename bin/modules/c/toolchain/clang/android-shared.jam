@@ -1197,7 +1197,8 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
         # Native libs.
         local nativeLibs =
             $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-            $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+            $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+        ;
 
         local hasNativeLibs ;
         local toolchain ;
@@ -2328,7 +2329,8 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
     # Native lib.
     local nativeLibs =
         $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-        $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+        $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+    ;
 
     local toolchain ;
     for toolchain in $(TOOLCHAINS) {
