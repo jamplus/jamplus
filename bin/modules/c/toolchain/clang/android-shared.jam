@@ -1416,9 +1416,18 @@ android {
         applicationId '$(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))'
         minSdkVersion $(sdkMinimumVersion:E=$(sdkVersion))
         targetSdkVersion $(sdkVersion)
-        versionCode $(versionCode)
-        versionName '$(versionName)'
-        ndk {
+" ;
+            local ndkVersionComplete = $(NDK_VERSION_COMPLETE:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+            if $(ndkVersionComplete) {
+                contents += "        ndkVersion '$(ndkVersionComplete)'$(NEWLINE)" ;
+            }
+            if $(versionCode) {
+                contents += "        versionCode $(versionCode)$(NEWLINE)" ;
+            }
+            if $(versionName) {
+                contents += "        versionName '$(versionName)'$(NEWLINE)" ;
+            }
+            contents += "        ndk {
             abiFilters $(abiFilters:J=,)
         }
     }
