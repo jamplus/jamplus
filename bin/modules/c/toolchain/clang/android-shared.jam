@@ -1175,9 +1175,8 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
             gradlew = @(gradlew.bat:G=$(grist)) ;
         }
         MakeLocate $(gradlew) : $(GRADLE_OUTPUT_DIRECTORY) ;
-        JAVA_HOME on $(gradlew) = $(JAVA.HOME:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
         Depends $(gradleTarget) : $(gradlew) ;
-        android._GradleInit $(gradlew) ;
+        android._GradleInit $(gradlew) : : $(C.COMPILER_SUITE_SYMBOL) ;
 
         if $(OS) = NT {
             # env.bat
