@@ -72,7 +72,8 @@ int main(int argc, char** argv)
 			}
 		}
 
-		glClearColor(rand() % 255 / 255.0f, rand() % 255 / 255.0f, rand() % 255 / 255.0f, 1);
+		//glClearColor(rand() % 255 / 255.0f, rand() % 255 / 255.0f, rand() % 255 / 255.0f, 1);
+		glClearColor(0.0f, 0.0f, 1.0f, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		SDL_GL_SwapWindow(window);
 	}

@@ -1,16 +1,20 @@
-BuildSDL2_SaveSubDir = $(ALL_SUBDIR_TOKENS) ;
+SDL2_ROOT = $(SUBDIR) ;
 
-rule BuildSDL2 TOOLCHAINS {
-    local saveActiveToolchain = [ C.GetActiveToolchain ] ;
+rule Build.sdl2 TOOLCHAINS {
+        if $(C.PLATFORM) = android {
+            C.ActiveTarget sdl2-hidapi ;
 
-    local toolchains ;
-    local toolchain ;
-    local saveSubDir = $(ALL_SUBDIR_TOKENS) ;
-
-    for toolchain in $(TOOLCHAINS:E=$(saveActiveToolchain)) {
-        toolchains += [ C.Toolchain $(toolchain) ] ;
-
-        SubDir $(BuildSDL2_SaveSubDir) ;
+            local SRCS =
+                    src/hidapi/android/hid.cpp
+                    src/hidapi/hidapi/hidapi.h
+            ;
+            C.Defines : ANDROID ;
+            C.ForcePublic ;
+            C.OutputName : libhidapi ;
+            C.OutputPostfix ;
+            C.LinkPrebuiltLibraries : android c++abi c++_static log ;
+            C.Library : $(SRCS) : shared ;
+        }
 
         C.ActiveTarget sdl2 ;
 
@@ -30,12 +34,18 @@ rule BuildSDL2 TOOLCHAINS {
                 src/events/*.h
                 src/file/*.c
                 src/file/*.h
+                src/joystick/hidapi/*.c
+                src/joystick/hidapi/*.h
                 src/libm/*.c
                 src/libm/*.h
                 src/render/*.c
                 src/render/*.h
                 src/render/*/*.c
                 src/render/*/*.h
+                src/sensor/*.c
+                src/sensor/*.h
+                src/sensor/dummy/*.c
+                src/sensor/dummy/*.h
                 src/stdlib/*.c
                 src/stdlib/*.h
                 src/thread/*.c
@@ -44,6 +54,8 @@ rule BuildSDL2 TOOLCHAINS {
                 src/timer/*.h
                 src/video/*.c
                 src/video/*.h
+                src/video/yuv2rgb/*.c
+                src/video/yuv2rgb/*.h
         ;
 
         if $(C.PLATFORM) in win32 win64 {
@@ -57,6 +69,8 @@ rule BuildSDL2 TOOLCHAINS {
                     src/audio/winmm/*.h
                     src/audio/directsound/*.c
                     src/audio/directsound/*.h
+                    src/audio/wasapi/*.c
+                    src/audio/wasapi/*.h
                     src/audio/xaudio2/*.c
                     src/audio/xaudio2/*.h
             ;
@@ -120,6 +134,11 @@ rule BuildSDL2 TOOLCHAINS {
                         src/haptic/SDL_haptic_c.h
                         src/haptic/SDL_syshaptic.h
                 ;
+
+                SRCS +=
+                        src/hidapi/windows/*.c
+                        src/hidapi/windows/*.h
+                ;
             }
 
             SRCS +=
@@ -127,7 +146,7 @@ rule BuildSDL2 TOOLCHAINS {
                     src/video/dummy/*.h
             ;
 
-            C.LinkPrebuiltLibraries : gdi32 imm32 ole32 oleaut32 opengl32 shell32 user32 uuid version winmm : public ;
+            C.LinkPrebuiltLibraries : advapi32 gdi32 imm32 ole32 oleaut32 opengl32 setupapi shell32 user32 uuid version winmm : public ;
             C.LinkPrebuiltLibraries : dinput8 dxguid : public ;
         }
 
@@ -140,6 +159,7 @@ rule BuildSDL2 TOOLCHAINS {
             SRCS +=
                     src/audio/coreaudio/*.c
                     src/audio/coreaudio/*.h
+                    src/audio/coreaudio/*.m
             ;
 
             SDL_JOYSTICK = 1 ;
@@ -161,6 +181,11 @@ rule BuildSDL2 TOOLCHAINS {
                         src/haptic/SDL_syshaptic.h
                 ;
             }
+
+            SRCS +=
+                    src/hidapi/mac/*.c
+                    src/hidapi/mac/*.h
+            ;
 
             SRCS +=
                     src/power/*.c
@@ -194,13 +219,16 @@ rule BuildSDL2 TOOLCHAINS {
             ;
 
             SRCS +=
+                    src/render/metal/*.m
+                    src/render/metal/*.h
                     src/video/dummy/*.c
                     src/video/dummy/*.h
             ;
 
             C.Defines : SDL_POWER_MACOSX ;
             #C.Flags : M MM : -fobjc-arc : public ;
-            C.IncludeDirectories : src/render : public ;
+            C.IncludeDirectories : src/video/khronos ;
+            C.ObjectIncludeDirectories : src/hidapi/mac/hid.c : src/hidapi/hidapi ;
             C.macosx.LinkFrameworks : AudioToolbox AudioUnit Carbon Cocoa CoreAudio CoreFoundation CoreGraphics CoreVideo ForceFeedback Foundation IOKit OpenGL : public ;
         }
 
@@ -213,16 +241,30 @@ rule BuildSDL2 TOOLCHAINS {
             SRCS +=
                     src/audio/coreaudio/*.c
                     src/audio/coreaudio/*.h
+                    src/audio/coreaudio/*.m
             ;
 
+            SDL_JOYSTICK = 1 ;
             if $(SDL_JOYSTICK) = 1 {
                 SRCS +=
                         src/joystick/iphoneos/*.m
                         src/joystick/iphoneos/*.h
+                        src/joystick/steam/*.c
+                        src/joystick/steam/*.h
+                ;
+
+                SRCS +=
+                        src/sensor/coremotion/*.m
+                        src/sensor/coremotion/*.h
                 ;
 
                 SRCS +=
                         src/haptic/dummy/*.c
+                ;
+
+                SRCS +=
+                        src/hidapi/ios/*.m
+                        src/hidapi/ios/*.h
                 ;
             }
 
@@ -244,6 +286,8 @@ rule BuildSDL2 TOOLCHAINS {
             ;
 
             SRCS +=
+                    src/render/metal/*.m
+                    src/render/metal/*.h
                     #src/render/opengles/*.c
                     #src/render/opengles/*.h
                     #src/render/opengles2/*.c
@@ -273,13 +317,18 @@ rule BuildSDL2 TOOLCHAINS {
             ;
 
             C.Flags : M MM : -fobjc-arc : public ;
-            C.ios.LinkFrameworks : AudioToolbox CoreAudio CoreGraphics Foundation OpenGLES QuartzCore UIKit : public ;
+            C.ios.LinkFrameworks : AudioToolbox CoreAudio CoreGraphics Foundation QuartzCore UIKit : public ;
         }
 
         else if $(C.PLATFORM) in android {
             SRCS +=
                     src/audio/android/*.c
                     src/audio/android/*.h
+            ;
+
+            SRCS +=
+                    src/audio/openslES/*.c
+                    src/audio/openslES/*.h
             ;
 
             SDL_JOYSTICK = 1 ;
@@ -290,7 +339,13 @@ rule BuildSDL2 TOOLCHAINS {
                 ;
 
                 SRCS +=
-                        src/haptic/dummy/*.c
+                        src/haptic/android/SDL_syshaptic.c
+                        src/haptic/android/SDL_syshaptic_c.h
+                        src/hidapi/android/*.cpp
+                ;
+
+                SRCS +=
+                        #src/haptic/dummy/*.c
                 ;
             }
 
@@ -331,67 +386,8 @@ rule BuildSDL2 TOOLCHAINS {
             ;
 
             SRCS +=
-                    src/thread/pthread/*.c
-                    src/thread/pthread/*.h
-            ;
-
-            SRCS +=
-                    src/core/android/*.c
-                    src/core/android/*.h
-            ;
-        }
-
-        else if $(C.PLATFORM) in android {
-            SRCS +=
-                    src/audio/android/*.c
-                    src/audio/android/*.h
-            ;
-
-            if $(SDL_JOYSTICK) = 1 {
-                SRCS +=
-                        src/joystick/android/*.c
-                        src/joystick/android/*.h
-                ;
-
-                SRCS +=
-                        src/haptic/dummy/*.c
-                ;
-            }
-
-            SRCS +=
-                    src/power/*.c
-                    src/power/*.h
-                    src/power/android/*.c
-                    src/power/android/*.h
-            ;
-
-            SRCS +=
-                    src/timer/unix/*.c
-                    src/timer/unix/*.h
-            ;
-
-            SRCS +=
-                    src/filesystem/dummy/*.c
-                    src/filesystem/dummy/*.h
-            ;
-
-            SRCS +=
-                    #src/render/opengles/*.c
-                    #src/render/opengles/*.h
-                    #src/render/opengles2/*.c
-                    #src/render/opengles2/*.h
-                    #src/render/software/*.c
-                    #src/render/software/*.h
-            ;
-
-            SRCS +=
-                    src/video/android/*.c
-                    src/video/android/*.h
-            ;
-
-            SRCS +=
-                    src/loadso/dlopen/*.c
-                    src/loadso/dlopen/*.h
+                    src/sensor/android/*.c
+                    src/sensor/android/*.h
             ;
 
             SRCS +=
@@ -402,6 +398,10 @@ rule BuildSDL2 TOOLCHAINS {
             SRCS +=
                     src/core/android/*.c
                     src/core/android/*.h
+            ;
+
+            SRCS +=
+                    $(NDKROOT)/sources/android/cpufeatures/cpu-features.*
             ;
         }
 
@@ -430,6 +430,8 @@ rule BuildSDL2 TOOLCHAINS {
         ;
         # */
 
+        AutoSourceGroup : $(SRCS) ;
+
         #C.Defines : USING_GENERATED_CONFIG_H ;
         C.Defines : HAVE_LIBC GL_GLEXT_PROTOTYPES ;
 
@@ -440,13 +442,17 @@ rule BuildSDL2 TOOLCHAINS {
 
         C.IncludeDirectories : include : public ;
 
-        AutoSourceGroup : $(SRCS) ;
-
+#        if $(C.PLATFORM) in win32 win64 {
+#            C.LinkPrebuiltLibraries : advapi32 : public ;
+#
+#        } else if $(C.PLATFORM) in android {
         if $(C.PLATFORM) in android {
+            C.Inherits : sdl2-hidapi ;
             C.Defines : ANDROID ;
+            C.IncludeDirectories : $(NDKROOT)/sources/android/cpufeatures ;
             C.OutputName : libSDL2 ;
             C.OutputPostfix ;
-            C.LinkPrebuiltLibraries : gcc dl GLESv1_CM GLESv2 log android c m ;
+            C.LinkPrebuiltLibraries : dl GLESv1_CM GLESv2 log android c m OpenSLES stdc++ ;
             C.Library : $(SRCS) : shared ;
 
         } else {
@@ -455,6 +461,7 @@ rule BuildSDL2 TOOLCHAINS {
 
         #########################
         C.ActiveTarget sdl2main ;
+        #C.ForcePublic ;
 
         SRCS = ;
 
@@ -478,11 +485,5 @@ rule BuildSDL2 TOOLCHAINS {
 
         C.IncludeDirectories : include : public ;
         C.Library : $(SRCS) ;
-    }
-
-    C.Toolchain $(saveActiveToolchain) ;
-    SubDir $(saveSubDir) ;
-
-    return $(toolchains) ;
 }
 
