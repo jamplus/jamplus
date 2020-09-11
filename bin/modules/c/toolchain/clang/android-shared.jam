@@ -1448,9 +1448,11 @@ android {
             keyPassword '$(_keyStorePassword)'
         }
     }
+" ;
+            contents += "
     buildTypes {
         release {
-            debuggable true
+            //debuggable true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
@@ -1459,6 +1461,8 @@ android {
             debuggable true
         }
     }
+" ;
+            contents += "
     sourceSets.main {
         manifest.srcFile '$(androidManifest)'
         java.srcDirs += [
