@@ -342,6 +342,13 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
 }
 
 
+rule android.ApplicationId TARGET : APPLICATION_ID {
+    TARGET = [ ActiveTarget $(TARGET) ] ;
+
+    ANDROID.APPLICATION_ID on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(APPLICATION_ID) ;
+}
+
+
 rule android.SDKCompileVersion TARGET : SDK_COMPILE_VERSION {
     TARGET = [ ActiveTarget $(TARGET) ] ;
 
@@ -1400,6 +1407,8 @@ include ':app'
             }
 
             local androidManifest = [ MakeRelativePath $(ANDROID.MANIFEST:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):T) : $(gradleAppOutputDirectory) ] ;
+            local applicationId = $(ANDROID.APPLICATION_ID:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+            applicationId ?= $(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
             local contents = "" ;
             contents += "apply plugin: 'com.android.application'
@@ -1413,7 +1422,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     defaultConfig {
-        applicationId '$(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))'
+        applicationId '$(applicationId)'
         minSdkVersion $(sdkMinimumVersion:E=$(sdkVersion))
         targetSdkVersion $(sdkVersion)
 " ;
