@@ -667,14 +667,14 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 			elseif platformName == 'macosx32'  or  platformName == 'macosx64' then
 				archs = "$(ARCHS_STANDARD_32_64_BIT)"
 			elseif platformName == 'ios'  or  platformName == 'iossimulator' then
-				archs = "$(ARCHS_UNIVERSAL_IPHONE_OS)"
+				archs = "$(ARCHS_STANDARD)"
 			else
 				archs = "$(ARCHS_STANDARD_32_64_BIT)"
 			end
 			self.Contents[#self.Contents + 1] = "\t\t\t\tARCHS = \"" .. archs .. "\";\n"
 
 			if platformName == 'ios'  or  platformName == 'iossimulator' then
-				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";\n')
+				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_STANDARD)";\n')
 				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
 				local targetedDeviceFamily = "1,2"
 				if subProject.TARGETED_DEVICE_FAMILY  and  subProject.TARGETED_DEVICE_FAMILY[platformName]  and  subProject.TARGETED_DEVICE_FAMILY[platformName][configName] then
