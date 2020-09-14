@@ -87,6 +87,22 @@ function M.read(filename)
 end
 
 
+function M.readbuffer(buffer)
+    local lom = require 'lxp.lom'
+    local info, err = lom.parse(buffer:match('(<%?xml .+</plist>)'))
+
+    if info.tag == 'plist' then
+        for _, entry in ipairs(info) do
+            if type(entry) == 'table' then
+                return setmetatable(RecurseEntry(entry), plistDictMetatable)
+            end
+        end
+    end
+
+    return setmetatable({}, plistDictMetatable)
+end
+
+
 local function ExportDict(entry, out, spaces)
     local origSpaces = spaces
     out[#out + 1] = origSpaces .. '<dict>\n'
