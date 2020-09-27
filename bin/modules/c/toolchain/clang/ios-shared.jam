@@ -513,6 +513,23 @@ rule ios.MergeInfoPList TARGET : SOURCE {
 }
 
 
+rule ios.MergeEntitlements TARGET : SOURCE {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):source ;
+	local source = $(SOURCE:BSG=$(grist)) ;
+	if $(SOURCE:D) != "" {
+		SEARCH on $(source) ?= $(SOURCE:D) ;
+	}
+	SEARCH on $(source) ?= $(SEARCH_SOURCE) ;
+	MERGE_ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(source) ;
+
+	if $(TARGETINFO_LOCATE) {
+		Contents += "Projects[ [[$(TARGET)]] ].XCODE_ENTITLEMENTS[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(source:T)]]$(NEWLINE)" ;
+	}
+}
+
+
 rule ios.InfoPListFile TARGET : SOURCE {
 	#TARGET = [ ActiveTarget $(TARGET) ] ;
 
@@ -701,7 +718,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 			}
 		}
 
-		if $(C.PLATFORM) in ios  &&  ! $(NT) {
+		if $(DISABLE_ME)  &&  $(C.PLATFORM) in ios  &&  ! $(NT) {
 			# Create Entitlements.plist.
 			local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
 			SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
@@ -713,6 +730,109 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 			local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			PROVISION on $(destEntitlementsPlist) = $(provisionFileTarget:TC/) ;
 			ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+		}
+		if $(C.PLATFORM) in ios { #  &&  $(NT) {
+#			local plistutil = $(JAM_EXECUTABLE_PATH:D)/libimobiledevice/libimobiledevice-windows-master/plistutil.exe ;
+#			if ! [ Search $(plistutil) ]
+#			{
+#				local downloadDirectory = $(JAM_EXECUTABLE_PATH:D)/libimobiledevice ;
+#				Shell "mkdir $(downloadDirectory:\\C)" ;
+#				local libimobiledevice.zip = $(downloadDirectory)/libimobiledevice.zip ;
+#				local command = "curl -L -o $(libimobiledevice.zip:C) https://github.com/iFred09/libimobiledevice-windows/archive/master.zip" ;
+#				Shell $(command) ;
+#				local command = "unzip $(libimobiledevice.zip) -o -d $(downloadDirectory)" ;
+#				Shell $(command) ;
+#			}
+
+#			local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
+#			SEARCH on $(sourceEntitlementsPlist) = $(isysroot) ;
+
+#Echo sourceEntitlementsPlist - [ $(sourceEntitlementsPlist) ] ;
+#			if [ Search $(sourceEntitlementsPlist) ]
+#			{
+#				local buffer = [ Shell "$(plistutil) -i $(sourceEntitlementsPlist:C)" ] ;
+#				Echo buffer - $(buffer) ;
+#			}
+
+			LuaString "
+				if not plist then
+					plist = require 'plist'
+				end
+" ;
+
+			local getTaskAllowTrueEntitlement = "
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>get-task-allow</key>
+	<true />
+
+</dict>
+</plist>
+" ;
+
+			local mergeEntitlements = $(MERGE_ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			if $(mergeEntitlements)
+			{
+				local sourcePath = $(mergeEntitlements[1]:T) ;
+				LuaString "
+					entitlementsPlist = plist.read(jam_getvar('sourcePath')[1])
+" ;
+				local sourceEntitlement ;
+				for sourceEntitlement in $(mergeEntitlements[2-]) {
+					local sourcePath = $(sourceEntitlement:T) ;
+					LuaString "
+						local newEntitlementsPlist = plist.read(jam_getvar('sourcePath')[1])
+						plist.merge(newEntitlementsPlist, entitlementsPlist)
+" ;
+				}
+				LuaString "
+					local newEntitlementsPlist = plist.readbuffer(jam_getvar('getTaskAllowTrueEntitlement')[1])
+					plist.merge(newEntitlementsPlist, entitlementsPlist)
+" ;
+				#if $(contents) {
+				if 1 {
+					local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+					MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
+					ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destEntitlementsPlist) ;
+					Depends $(bundleTarget) : $(destEntitlementsPlist) : $(mergeEntitlements) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+					Clean $(cleanBundleTarget) : $(destEntitlementsPlist) ;
+
+					local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+					local provisionFileTargetExpanded = $(provisionFileTarget:T) ;
+					local CFBundleIdentifier ;
+					local AppIdentifierPrefix ;
+					local TeamIdentifier ;
+					contents = [ LuaString "
+						local plist = require 'plist'
+						local pl = plist.read(jam_getvar('provisionFileTargetExpanded')[1])
+						local prefix = pl.ApplicationIdentifierPrefix
+						jam_setvar('AppIdentifierPrefix', prefix)
+						local identifier = pl.Entitlements[\"application-identifier\"]
+						identifier = identifier:sub(#prefix[1] + 1)
+						jam_setvar('CFBundleIdentifier', identifier)
+						local identifier = pl.Entitlements[\"com.apple.developer.team-identifier\"]
+						jam_setvar('TeamIdentifier', identifier)
+						--local buffer = plist.dump(pl.Entitlements)
+						--local plEntitlements = plist.readbuffer(buffer)
+						--plist.merge(plEntitlements, entitlementsPlist)
+						--print(plist.dump(entitlementsPlist))
+						return plist.dump(entitlementsPlist)
+" ] ;
+
+					#AppIdentifierPrefix = $(TeamIdentifier) ;
+					contents = $(contents:A) ;
+
+					PROVISION on $(destEntitlementsPlist) = $(provisionFileTarget:TC/) ;
+					#ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
+
+					CONTENTS on $(destEntitlementsPlist) = $(contents) ;
+					WriteFile $(destEntitlementsPlist) ;
+
+					UseCommandLine $(destEntitlementsPlist) : $(contents) ;
+				}
+			}
 		}
 
 		{
@@ -752,6 +872,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 			Clean $(cleanBundleTarget) : $(codeResources) ;
 
 			CERTIFICATE_CHAIN on $(codeResources) $(linkTarget) = $(CERTIFICATE_CHAIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			ENTITLEMENTS on $(codeResources) $(linkTarget) = $(entitlements) ;
 			ios._CodeSign $(codeResources) $(linkTarget) : $(dependsList) $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
 		} else {
 			local codeResourcesSymbolicLink = [ C.GristFiles : CodeResourcesLink ] ;
@@ -1630,7 +1751,7 @@ if $(NT) {
 
 actions ios._CodeSign
 {
-    "$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S$(CERTIFICATE_CHAIN) -E"" $(1[2]:CT)
+    "$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S$(CERTIFICATE_CHAIN) -E"$(ENTITLEMENTS:T)" $(1[2]:CT)
     copy /B $(1[2]:CT\\)+,, $(1[2]:CT\\) > nul
     copy /B $(1[1]:C\\)+,, $(1[1]:CT\\) > nul
 }
