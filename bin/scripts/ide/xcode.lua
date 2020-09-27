@@ -607,6 +607,15 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 				end
 			end
 
+			--INFOPLIST_FILE = "$(SRCROOT)/../../../../Info.plist";
+			local infoPlistFile
+			if subProject.INFOPLIST_FILE  and  subProject.INFOPLIST_FILE[platformName]  and  subProject.INFOPLIST_FILE[platformName][configName] then
+				infoPlistFile = subProject.INFOPLIST_FILE[platformName][configName]
+			end
+			if infoPlistFile then
+				table.insert(self.Contents, "\t\t\t\tINFOPLIST_FILE = " .. infoPlistFile .. ";\n")
+			end
+
 			-- Write DEVELOPMENT_TEAM.
 			local teamIdentifier
 			if subProject.TEAM_IDENTIFIER  and  subProject.TEAM_IDENTIFIER[platformName]  and  subProject.TEAM_IDENTIFIER[platformName][configName] then

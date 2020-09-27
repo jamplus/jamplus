@@ -1223,12 +1223,14 @@ rule ios.Storyboards TARGET : LANGUAGE_DIRECTORY : STORYBOARD_FILES {
     SEARCH on $(storyboards) = $(LANGUAGE_DIRECTORY) ;
     ios.Storyboard $(TARGET) : $(storyboards) ;
 
-    if $(STORYBOARD_FILES[1]) {
-        ios.BundleInfoString : UILaunchStoryboardName : $(STORYBOARD_FILES[1]) ;
-    }
-    if $(STORYBOARD_FILES[2]) {
-        ios.BundleInfoString : UIMainStoryboardFile : $(STORYBOARD_FILES[2]) ;
-    }
+	if ! $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+		if $(STORYBOARD_FILES[1]) {
+			ios.BundleInfoString : UILaunchStoryboardName : $(STORYBOARD_FILES[1]) ;
+		}
+		if $(STORYBOARD_FILES[2]) {
+			ios.BundleInfoString : UIMainStoryboardFile : $(STORYBOARD_FILES[2]) ;
+		}
+	}
 }
 
 
