@@ -116,14 +116,14 @@ local function ExportDict(entry, out, spaces)
             out[#out + 1] = spaces .. '<integer>' .. subEntry.value .. '</integer>\n'
         elseif type(subEntry.value) == 'boolean' then
             if subEntry.value then
-                out[#out + 1] = spaces .. '<true />\n'
+                out[#out + 1] = spaces .. '<true/>\n'
             else
-                out[#out + 1] = spaces .. '<false />\n'
+                out[#out + 1] = spaces .. '<false/>\n'
             end
         elseif type(subEntry.value) == 'table'  and  not getmetatable(subEntry.value) then
-            out[#out + 1] = spaces .. '<array>\n'
             local subValue = subEntry.value[1]
             if subValue then
+                out[#out + 1] = spaces .. '<array>\n'
                 if type(subValue) == 'table' then
                     for dictIndex = 1, #subEntry.value do
                         local dictEntry = subEntry.value[dictIndex]
@@ -140,8 +140,10 @@ local function ExportDict(entry, out, spaces)
                         out[#out + 1] = spaces .. '  <integer>' .. tostring(listEntry) .. '</integer>\n'
                     end
                 end
+                out[#out + 1] = spaces .. '</array>\n'
+            else
+                out[#out + 1] = spaces .. '<array/>\n'
             end
-            out[#out + 1] = spaces .. '</array>\n'
         elseif type(subEntry.value) == 'table'  and  getmetatable(subEntry.value) == plistDictMetatable then
             ExportDict(subEntry.value, out, spaces)
         end
@@ -153,6 +155,7 @@ end
 function M.dump(dict)
     local out = {}
     out[#out + 1] = '<?xml version="1.0" encoding="utf-8"?>\n'
+    out[#out + 1] = '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n'
     out[#out + 1] = '<plist version="1.0">\n'
 
     if dict then
@@ -226,6 +229,9 @@ function M.merge(sourceDict, destinationDict)
                         destinationArray[#destinationArray + 1] = sourceListEntry
                     end
                 end
+            else
+                destinationArray = M.newarray()
+                destinationEntry.value = destinationArray
             end
         end
     end
