@@ -703,8 +703,26 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 		Depends $(bundleTarget) : $(infoplist) ;
 		Clean $(cleanBundleTarget) : $(infoplist) ;
 
-		if $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
-			CopyFile $(bundleTarget) : $(infoplist) : $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local sourceInfoPlistFile = $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		if $(sourceInfoPlistFile) {
+			CopyFile $(bundleTarget) : $(infoplist) : $(sourceInfoPlistFile) ;
+
+			local sourceInfoPlistFilePath = $(sourceInfoPlistFile:T) ;
+			local CFBundleIdentifier ;
+			local CFBundleVersion ;
+			local CFBundleDisplayName ;
+			LuaString "
+				local pl = require 'plist'.read(jam_getvar('sourceInfoPlistFilePath')[1])
+				local CFBundleIdentifier = pl['CFBundleIdentifier']
+				jam_setvar('CFBundleIdentifier', CFBundleIdentifier)
+				local CFBundleVersion = pl['CFBundleVersion']
+				jam_setvar('CFBundleVersion', CFBundleVersion)
+				local CFBundleDisplayName = pl['CFBundleDisplayName']
+				jam_setvar('CFBundleDisplayName', CFBundleDisplayName)
+			" ;
+			CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleIdentifier) ;
+			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleVersion) ;
+			CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleDisplayName) ;
 		} else {
 			local infoplistcontents = [ LuaString "
 				local currentLevel = GetInfoPlistCurrentLevel()
