@@ -1119,12 +1119,26 @@ rule C.LinkDirectories TARGET : DIRECTORIES {
 }
 
 
-rule C.LinkFlags TARGET : FLAGS : OPTIONS {
+rule C._LinkFlagsHelper TARGET : FLAGS : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	LINKFLAGS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
 	if public in $(OPTIONS) {
 		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
 		PUBLIC_LINKFLAGS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
+	}
+}
+
+
+rule C.LinkFlags TARGET : FLAGS : OPTIONS {
+	C._LinkFlagsHelper $(TARGET) : $(FLAGS) : $(OPTIONS) ;
+
+	if $(TARGETINFO_LOCATE) {
+		if ! private in $(OPTIONS) {
+			local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ].LinkFlags[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ]" ;
+			Contents += "$(prefix) = concat($(prefix), {$(NEWLINE)" ;
+				Contents += "$(TAB)[[$(FLAGS)]],$(NEWLINE)" ;
+			Contents += "})$(NEWLINE)" ;
+		}
 	}
 }
 
@@ -1262,7 +1276,12 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 		local lib ;
 		for lib in $(linkLibs) {
 			if $(lib:G) {
-				Contents += "$(TAB)'$(lib:T)',$(NEWLINE)" ;
+				local libFullName = $(lib) ;
+				if ! $(libFullName:S)  &&  ! $(libFullName:D) {
+					libFullName = $(libFullName:G)$(prefixlib)$(libFullName:G=:S=$(suflib)) ;
+					SEARCH on $(libFullName) = $(LINKDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				}
+				Contents += "$(TAB)'$(libFullName:T)',$(NEWLINE)" ;
 			} else {
 				Contents += "$(TAB)'$(lib)',$(NEWLINE)" ;
 			}
@@ -1273,7 +1292,12 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
 		for lib in $(linkLibs) {
 			if $(lib:G) {
-				Contents += "$(TAB)[[$(lib:T)]],$(NEWLINE)" ;
+				local libFullName = $(lib) ;
+				if ! $(libFullName:S)  &&  ! $(libFullName:D) {
+					libFullName = $(libFullName:G)$(prefixlib)$(libFullName:G=:S=$(suflib)) ;
+					SEARCH on $(libFullName) = $(LINKDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				}
+				Contents += "$(TAB)[[$(libFullName:T)]],$(NEWLINE)" ;
 			} else {
 				Contents += "$(TAB)'$(prefixlib)$(lib:S=$(suflib))',$(NEWLINE)" ;
 			}

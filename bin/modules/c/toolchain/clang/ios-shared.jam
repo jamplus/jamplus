@@ -5,8 +5,9 @@ rule C.Toolchain.clang.ios-shared {
 rule C.ios.FrameworkDirectories TARGET : FRAMEWORKDIRS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	FRAMEWORKDIRS = $(FRAMEWORKDIRS:R=$(SUBDIR:E="")) ;
-	C.Flags $(TARGET) : CC C++ M MM : -F\"$(FRAMEWORKDIRS)\" ;
-	C.LinkFlags $(TARGET) : -F\"$(FRAMEWORKDIRS)\" ;
+	FRAMEWORK_DIRECTORIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FRAMEWORKDIRS) ;
+	C.Flags $(TARGET) : CC C++ M MM : -F$(FRAMEWORKDIRS) ;
+	C._LinkFlagsHelper $(TARGET) : -F$(FRAMEWORKDIRS) ;
 
 	if $(TARGETINFO_LOCATE) {
 		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ].FrameworkDirectories[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ]" ;
@@ -36,7 +37,68 @@ rule C.ios.LinkFrameworks TARGET : FRAMEWORKS : OPTIONS {
 
 rule C.ios.WeakLinkFrameworks TARGET : FRAMEWORKS {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	C.LinkFlags $(TARGET) : "-weak_framework $(FRAMEWORKS)" ;
+	WEAK_FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FRAMEWORKS) ;
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_WEAK_FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FRAMEWORKS) ;
+	}
+}
+
+
+rule C.ios.EmbedFrameworks TARGET : FRAMEWORKS : OPTIONS {
+	C.ActiveTarget $(TARGET) ;
+	FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FRAMEWORKS) ;
+	EMBED_FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FRAMEWORKS) ;
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FRAMEWORKS) ;
+		PUBLIC_EMBED_FRAMEWORKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FRAMEWORKS) ;
+	}
+
+	if $(TARGETINFO_LOCATE) {
+		local frameworks ;
+
+		#if embed in $(OPTIONS)
+		{
+			local frameworkDirectories = $(FRAMEWORK_DIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			local source ;
+			for source in $(FRAMEWORKS) {
+				source = $(source:S=.framework) ;
+				local foundFramework = [ Glob $(frameworkDirectories) : $(source)/ ] ;
+				frameworks += $(foundFramework[1]:P) ;
+			}
+		}
+
+		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
+		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
+			Contents += "$(TAB)[[$(frameworks)]],$(NEWLINE)" ;
+		Contents += "})$(NEWLINE)" ;
+
+		local source ;
+		for source in $(frameworks) {
+			local fullprefix = "$(prefix).SourcesInfo[ [[$(source)]] ]" ;
+			Contents += "$(fullprefix).buildFrameworks=true$(NEWLINE)" ;
+			Contents += "$(fullprefix).embedFramework=true$(NEWLINE)" ;
+		}
+
+		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ].EmbedFrameworks[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ]" ;
+		Contents += "$(prefix) = concat($(prefix), {$(NEWLINE)" ;
+			Contents += "$(TAB)[[$(frameworks)]],$(NEWLINE)" ;
+		Contents += "})$(NEWLINE)" ;
+	}
+}
+
+
+rule C.ios.RPaths TARGET : RPATHS {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	C._LinkFlagsHelper $(TARGET) : "-rpath $(RPATHS)" ;
+
+	if $(TARGETINFO_LOCATE) {
+		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ].RPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ]" ;
+		Contents += "$(prefix) = concat($(prefix), {$(NEWLINE)" ;
+			Contents += "$(TAB)[[$(RPATHS)]],$(NEWLINE)" ;
+		Contents += "})$(NEWLINE)" ;
+	}
 }
 
 
@@ -874,6 +936,52 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 	}
 
 	if $(C.PLATFORM) in ios {
+		local destinationPath = $(bundlePath)/Frameworks ;
+
+		local frameworkDirectories = $(FRAMEWORK_DIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+		local framework ;
+		for framework in $(EMBED_FRAMEWORKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+			framework = $(framework:S=.framework) ;
+			local foundFramework = [ Glob $(frameworkDirectories) : $(framework)/ ] ;
+			if ! $(foundFramework) {
+				Exit * Cannot find framework $(framework). ;
+			}
+			local frameworkTarget = $(bundleTarget)|$(framework) ;
+			NotFile $(frameworkTarget) ;
+			CopyDirectory $(frameworkTarget) : $(destinationPath)/$(framework) : $(foundFramework) : **@-**/Headers/@-**/Modules/@-**/PrivateHeaders/@-**/_CodeSignature/ ;
+
+			local dependsList = [ DependsList $(frameworkTarget) ] ;
+			dependsList = [ ListSort $(dependsList) ] ;
+
+			local codeResources = @(CodeResources:G=$(frameworkTarget)) ;
+			MakeLocate $(codeResources) : $(destinationPath)/$(framework)/_CodeSignature ;
+			Depends $(bundleTarget) : $(frameworkTarget) ;
+
+			if $(IOSBUILDENV_PATH) {
+				UseCommandLine $(codeResources) : $(dependsList) ;
+				Depends $(frameworkTarget) : $(codeResources) : $(dependsList) ;
+				#Clean $(cleanBundleTarget) : $(codeResources) ;
+
+				local framework = $(destinationPath)/$(framework)/$(framework:S=) ;
+				CERTIFICATE_CHAIN on $(codeResources) $(framework) = $(CERTIFICATE_CHAIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				ios._CodeSignFramework $(codeResources) $(framework) : $(dependsList) $(framework) : $(C.COMPILER_SUITE_SYMBOL) ;
+			} else {
+				UseCommandLine $(codeResources) : $(dependsList) ;
+				Depends $(frameworkTarget) : $(codeResources) : $(dependsList) ;
+				#Clean $(cleanBundleTarget) : $(codeResources) ;
+
+				local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				SIGNING_IDENTITY on $(codeResources) $(framework) = $(signingIdentity) ;
+
+				local framework = $(destinationPath)/$(framework)/$(framework:S=) ;
+				FRAMEWORK_PATH on $(codeResources) $(framework) = $(framework) ;
+				ios._CodeSignFramework $(codeResources) $(framework) : $(dependsList) $(framework) : $(C.COMPILER_SUITE_SYMBOL) ;
+			}
+		}
+	}
+
+	if $(C.PLATFORM) in ios {
 		local linkTarget = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -1061,6 +1169,7 @@ rule C.ios._ApplicationFromObjects_LinkFlags {
 	}
 
 	linkFlags += "-framework $(FRAMEWORKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))" ;
+	linkFlags += "-weak_framework $(WEAK_FRAMEWORKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))" ;
 }
 
 
@@ -1776,6 +1885,13 @@ actions ios._CodeSign
     copy /B $(1[1]:C\\)+,, $(1[1]:CT\\) > nul
 }
 
+actions ios._CodeSignFramework
+{
+    "$(IOSBUILDENV_PATH)/Toolchain/ldid" -k"$(IOSBUILDENV_PATH)/Keychain" -S$(CERTIFICATE_CHAIN) $(1[2]:CT)
+    copy /B $(1[2]:CT\\)+,, $(1[2]:CT\\) > nul
+    copy /B $(1[1]:C\\)+,, $(1[1]:CT\\) > nul
+}
+
 } else {
 
 actions ios._CodeSign
@@ -1784,6 +1900,13 @@ actions ios._CodeSign
 	/usr/bin/codesign --force --no-strict --sign "$(SIGNING_IDENTITY)" --entitlements $(ENTITLEMENTS:CT) --timestamp=none $(BUNDLE_PATH)
 	touch $(1[1]:C)
 	touch $(DSYM_NAME:CT)
+}
+
+actions ios._CodeSignFramework
+{
+	export CODESIGN_ALLOCATE=$(COMPILER_BIN_PATH_SECONDARY)/codesign_allocate
+	/usr/bin/codesign --force --sign "$(SIGNING_IDENTITY)" --preserve-metadata=identifier,entitlements $(FRAMEWORK_PATH)
+	touch $(1[1]:C)
 }
 
 }
@@ -2050,6 +2173,7 @@ actions lua ios._Archive
 	local archive = ziparchive.open([[$(1)]], 'a')
 	archive:processfilelist(filelist)
 	archive:close()
+	ospath.touch([[$(1)]])
 }
 
 } else {
@@ -2075,7 +2199,7 @@ rule ios.CopyFilesToBundle TARGET : SOURCE_PATHS {
 	if ! $(TARGETINFO_LOCATE) {
 		local source ;
 		for source in $(SOURCE_PATHS) {
-			CopyFile $(bundleTarget) : $(bundlePath)/$(source) : $(source) ;
+			CopyFile $(bundleTarget) : $(bundlePath)/$(source:D=) : $(source) ;
 		}
 	} else {
 		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
@@ -2087,6 +2211,7 @@ rule ios.CopyFilesToBundle TARGET : SOURCE_PATHS {
 		for source in $(SOURCE_PATHS) {
 			local fullprefix = "$(prefix).SourcesInfo[ [[$(source:TR=$(SUBDIR))]] ]" ;
 			Contents += "$(fullprefix).buildResources=true$(NEWLINE)" ;
+			#Contents += "$(fullprefix).copyFiles=true$(NEWLINE)" ;
 			Contents += "$(fullprefix).fileType=\"file\"$(NEWLINE)" ;
 		}
 	}

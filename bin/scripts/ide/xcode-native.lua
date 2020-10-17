@@ -32,6 +32,16 @@ local function GetWorkspaceConfigList(workspace)
 end
 
 
+local function GetSourceInfo(self, entry)
+	local ext = ospath.get_extension(entry)
+	local sourcesInfo = Projects[self.ProjectName].SourcesInfo
+	local sourceInfo
+	if sourcesInfo then
+		sourceInfo = sourcesInfo[entry]
+	end
+	return sourceInfo
+end
+
 -- Use the upper 24 characters of a UUID as the Xcode UUID.
 local function XcodeUuid()
 	return uuid.new():gsub('%-', ''):upper():sub(1, 24)
@@ -39,17 +49,23 @@ end
 
 
 -- Assign UUIDs to every entry in the folder tree.
-local function XcodeHelper_AssignEntryUuids(entryUuids, folder, fullPath, prefix)
+local function XcodeHelper_AssignEntryUuids(self, entryUuids, folder, fullPath, prefix)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
 			local fullFolderName = prefix .. fullPath .. entry.folder .. '/'
 			if not entryUuids[fullFolderName] then
 				entryUuids[fullFolderName] = XcodeUuid()
 			end
-			XcodeHelper_AssignEntryUuids(entryUuids, entry, fullFolderName, prefix)
+			XcodeHelper_AssignEntryUuids(self, entryUuids, entry, fullFolderName, prefix)
 		else
 			if not entryUuids[prefix .. entry] then
 				entryUuids[prefix .. entry] = XcodeUuid()
+			end
+			if not entryUuids[prefix .. entry .. '|embed'] then
+				local sourceInfo = GetSourceInfo(self, entry)
+				if sourceInfo  and  sourceInfo.embedFramework then
+					entryUuids[prefix .. entry .. '|embed'] = XcodeUuid()
+				end
 			end
 		end
 	end
@@ -146,6 +162,12 @@ local function XcodeHelper_GetProjectExportInfo(self, projectName, workspace)
 	end
 	if type(info.FrameworksUuid) ~= 'string' then
 		info.FrameworksUuid = XcodeUuid()
+	end
+	if type(info.EmbedFrameworksUuid) ~= 'string' then
+		info.EmbedFrameworksUuid = XcodeUuid()
+	end
+	if type(info.CopyFilesUuid) ~= 'string' then
+		info.CopyFilesUuid = XcodeUuid()
 	end
 	if type(info.ResourcesUuid) ~= 'string' then
 		info.ResourcesUuid = XcodeUuid()
@@ -336,16 +358,6 @@ local function GetFileDescriptionType(fileInfo)
 	return fileDescriptionType
 end
 
-local function GetSourceInfo(self, entry)
-	local ext = ospath.get_extension(entry)
-	local sourcesInfo = Projects[self.ProjectName].SourcesInfo
-	local sourceInfo
-	if sourcesInfo then
-		sourceInfo = sourcesInfo[entry]
-	end
-	return sourceInfo
-end
-
 local function XcodeHelper_WritePBXBuildFiles(self, folder)
 	for entry in ivalues(folder) do
 		if type(entry) == 'table' then
@@ -356,45 +368,65 @@ local function XcodeHelper_WritePBXBuildFiles(self, folder)
 			if not strippedEntry then
 				strippedEntry = entry
 			end
-			local settingsString = ""
+			local settingsString
 			local sourceInfo = GetSourceInfo(self, entry)
-			if sourceInfo  and  (sourceInfo.Defines  or  sourceInfo.Flags  or  sourceInfo.IncludeDirectories  or  sourceInfo.ForceFileType) then
-				settingsString = "; settings = {COMPILER_FLAGS = \""
-				if sourceInfo.Defines then
-					for _, define in ipairs(sourceInfo.Defines) do
-						settingsString = settingsString .. "-D" .. define .. " "
+			if sourceInfo then
+				if sourceInfo.Defines  or  sourceInfo.Flags or  sourceInfo.IncludeDirectories  or  sourceInfo.ForceFileType then
+					settingsString = "; settings = {"
+					settingsString = settingsString .. "COMPILER_FLAGS = \""
+					if sourceInfo.Defines then
+						for _, define in ipairs(sourceInfo.Defines) do
+							settingsString = settingsString .. "-D" .. define .. " "
+						end
 					end
-				end
-				if sourceInfo.Flags then
-					for _, flag in ipairs(sourceInfo.Flags) do
-						settingsString = settingsString .. flag .. " "
+					if sourceInfo.Flags then
+						for _, flag in ipairs(sourceInfo.Flags) do
+							settingsString = settingsString .. flag .. " "
+						end
 					end
-				end
-				if sourceInfo.IncludeDirectories then
-					for _, includeDirectory in ipairs(sourceInfo.IncludeDirectories) do
-						settingsString = settingsString .. "-I" .. includeDirectory .. " "
+					if sourceInfo.IncludeDirectories then
+						for _, includeDirectory in ipairs(sourceInfo.IncludeDirectories) do
+							settingsString = settingsString .. "-I" .. includeDirectory .. " "
+						end
 					end
-				end
-				if sourceInfo.ForceFileType then
-					if sourceInfo.ForceFileType == '.cpp' then
-						settingsString = settingsString .. "-x c++ "
-					elseif sourceInfo.ForceFileType == '.m' then
-						settingsString = settingsString .. "-x objective-c "
-					elseif sourceInfo.ForceFileType == '.mm' then
-						settingsString = settingsString .. "-x objective-c++ "
+					if sourceInfo.ForceFileType then
+						if sourceInfo.ForceFileType == '.cpp' then
+							settingsString = settingsString .. "-x c++ "
+						elseif sourceInfo.ForceFileType == '.m' then
+							settingsString = settingsString .. "-x objective-c "
+						elseif sourceInfo.ForceFileType == '.mm' then
+							settingsString = settingsString .. "-x objective-c++ "
+						end
 					end
-				end
 
-				settingsString = settingsString .. "\"; }"
+					settingsString = settingsString .. "\"; "
+					settingsString = settingsString .. "}"
+				end
 			end
 			local fileInfo = sourceInfo  or  buildFiles[ext]
 			if fileInfo then
-				local fileDescriptionType = GetFileDescriptionType(fileInfo)
-				table.insert(self.Contents, ('\t\t%s /* %s in %s */ = {isa = PBXBuildFile; fileRef = %s /* %s */%s; };\n'):format(
-						self.EntryUuids['PBXBuildFile*' .. entry], ospath.remove_directory(strippedEntry), fileDescriptionType, self.EntryUuids[entry], ospath.remove_directory(strippedEntry), settingsString))
+				if fileInfo.copyFiles then
+					local fileDescriptionType = "Copy Files"
+					table.insert(self.Contents, ('\t\t%s /* %s in %s */ = {isa = PBXBuildFile; fileRef = %s /* %s */%s; };\n'):format(
+							self.EntryUuids['PBXBuildFile*' .. entry], ospath.remove_directory(strippedEntry), fileDescriptionType, self.EntryUuids[entry], ospath.remove_directory(strippedEntry), settingsString or ""))
+				else
+					local fileDescriptionType = GetFileDescriptionType(fileInfo)
+					table.insert(self.Contents, ('\t\t%s /* %s in %s */ = {isa = PBXBuildFile; fileRef = %s /* %s */%s; };\n'):format(
+							self.EntryUuids['PBXBuildFile*' .. entry], ospath.remove_directory(strippedEntry), fileDescriptionType, self.EntryUuids[entry], ospath.remove_directory(strippedEntry), settingsString or ""))
+				end
 			else
 				table.insert(self.Contents, ('\t\t%s /* %s in %s */ = {isa = PBXBuildFile; fileRef = %s /* %s */%s; };\n'):format(
-						self.EntryUuids['PBXBuildFile*' .. entry], ospath.remove_directory(strippedEntry), "Sources", self.EntryUuids[entry], ospath.remove_directory(strippedEntry), settingsString))
+						self.EntryUuids['PBXBuildFile*' .. entry], ospath.remove_directory(strippedEntry), "Sources", self.EntryUuids[entry], ospath.remove_directory(strippedEntry), settingsString or ""))
+			end
+
+			if sourceInfo  and  sourceInfo.embedFramework then
+				settingsString = "; settings = {"
+				settingsString = settingsString .. "ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); "
+				settingsString = settingsString .. "}"
+
+				table.insert(self.Contents, ('\t\t%s /* %s in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = %s /* %s */%s; };\n'):format(
+						self.EntryUuids['PBXBuildFile*' .. entry .. '|embed'], ospath.remove_directory(strippedEntry), self.EntryUuids[entry],
+							ospath.remove_directory(strippedEntry), settingsString or ""))
 			end
 		end
 	end
@@ -449,6 +481,40 @@ local function XcodeHelper_WritePBXFrameworkFileReferences(self, folder)
 				local fileDescriptionType = GetFileDescriptionType(fileInfo)
 				table.insert(self.Contents, ('\t\t\t\t%s /* %s in %s */,\n'):format(
 						self.EntryUuids['PBXBuildFile*' .. entry], ospath.remove_directory(entry), fileDescriptionType))
+			end
+		end
+	end
+end
+
+
+local function XcodeHelper_WritePBXEmbedFrameworkFileReferences(self, folder)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			XcodeHelper_WritePBXEmbedFrameworkFileReferences(self, entry)
+		else
+			local ext = ospath.get_extension(entry)
+			local sourceInfo = GetSourceInfo(self, entry)
+			local fileInfo = sourceInfo  or  buildFiles[ext]
+			if fileInfo  and  fileInfo.embedFramework then
+				table.insert(self.Contents, ('\t\t\t\t%s /* %s in Embed Frameworks */,\n'):format(
+						self.EntryUuids['PBXBuildFile*' .. entry .. '|embed'], ospath.remove_directory(entry)))
+			end
+		end
+	end
+end
+
+
+local function XcodeHelper_WritePBXCopyFilesFileReferences(self, folder)
+	for entry in ivalues(folder) do
+		if type(entry) == 'table' then
+			XcodeHelper_WritePBXCopyFilesFileReferences(self, entry)
+		else
+			local ext = ospath.get_extension(entry)
+			local sourceInfo = GetSourceInfo(self, entry)
+			local fileInfo = sourceInfo  or  buildFiles[ext]
+			if fileInfo  and  fileInfo.copyFiles then
+				table.insert(self.Contents, ('\t\t\t\t%s /* %s in Copy Files */,\n'):format(
+						self.EntryUuids['PBXBuildFile*' .. entry], ospath.remove_directory(entry)))
 			end
 		end
 	end
@@ -529,6 +595,8 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 				table.insert(self.Contents, '\t\t\t\t' .. subProjectInfo.SourcesUuid .. ' /* Sources */,\n')
 				table.insert(self.Contents, '\t\t\t\t' .. subProjectInfo.FrameworksUuid .. ' /* Frameworks */,\n')
 				table.insert(self.Contents, '\t\t\t\t' .. subProjectInfo.ResourcesUuid .. ' /* Resources */,\n')
+				table.insert(self.Contents, '\t\t\t\t' .. subProjectInfo.EmbedFrameworksUuid .. ' /* Embed Frameworks */,\n')
+				table.insert(self.Contents, '\t\t\t\t' .. subProjectInfo.CopyFilesUuid .. ' /* Copy Files */,\n')
 				table.insert(self.Contents, '\t\t\t);\n')
 				if projectType == 'legacy' then
 					if subProject.BuildCommandLine then
@@ -549,13 +617,13 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 				if subProjectInfo.ExecutablePath then
 					local entryUuid = info.EntryUuids['app>' .. subProjectInfo.ExecutablePath]
 					if entryUuid then
-						table.insert(self.Contents, '\t\t\tproductReference = ' .. entryUuid .. '; /* ' .. subProjectInfo.ExecutablePath .. ' */\n')
+						table.insert(self.Contents, '\t\t\tproductReference = ' .. entryUuid .. ' /* ' .. subProjectInfo.ExecutablePath .. ' */;\n')
 					end
 				end
 				if subProjectInfo.LibraryPath then
 					local entryUuid = info.EntryUuids['lib>' .. subProjectInfo.LibraryPath]
 					if entryUuid then
-						table.insert(self.Contents, '\t\t\tproductReference = ' .. entryUuid .. '; /* ' .. subProjectInfo.LibraryPath .. ' */\n')
+						table.insert(self.Contents, '\t\t\tproductReference = ' .. entryUuid .. ' /* ' .. subProjectInfo.LibraryPath .. ' */;\n')
 					end
 				end
 				if subProject.Options then
@@ -755,6 +823,7 @@ local function XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectN
 			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = NO;\n")
 			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_OBJC_LITERAL_CONVERSION = YES;\n")
 			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;\n")
 			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_RANGE_LOOP_ANALYSIS = YES;\n")
 			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_STRICT_PROTOTYPES = YES;\n")
 			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_SUSPICIOUS_MOVE = YES;\n")
@@ -799,7 +868,19 @@ local function XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectN
 			table.insert(self.Contents, "\t\t\t\tGCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;\n")
 			table.insert(self.Contents, "\t\t\t\tGCC_WARN_UNUSED_FUNCTION = NO;\n")
 			table.insert(self.Contents, "\t\t\t\tGCC_WARN_UNUSED_VARIABLE = NO;\n")
-			table.insert(self.Contents, "\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 13.5;\n")
+
+			-- Deployment target (iOS).
+			local iosSdkVersionMin
+			if subProject.IOS_SDK_VERSION_MIN and  subProject.IOS_SDK_VERSION_MIN[platformName]  and  subProject.IOS_SDK_VERSION_MIN[platformName][configName] then
+				iosSdkVersionMin = subProject.IOS_SDK_VERSION_MIN[platformName][configName]
+			elseif Projects['C.*']  and  Projects['C.*'].IOS_SDK_VERSION_MIN  and  Projects['C.*'].IOS_SDK_VERSION_MIN[platformName]  and  Projects['C.*'].IOS_SDK_VERSION_MIN[platformName][configName] then
+				iosSdkVersionMin = Projects['C.*'].IOS_SDK_VERSION_MIN[platformName][configName]
+			end
+
+			if iosSdkVersionMin then
+				table.insert(self.Contents, "\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = \"" .. iosSdkVersionMin .. "\";\n")
+			end
+
 			if isDebug then
 				table.insert(self.Contents, "\t\t\t\tMTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;\n")
 			else
@@ -901,6 +982,18 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 				end
 			end
 
+			if subProject.RPaths and subProject.RPaths[platformName] and subProject.RPaths[platformName][configName] then
+				local paths = subProject.RPaths[platformName][configName]
+				if paths[1] then
+					table.insert(self.Contents, "\t\t\t\tLD_RUNPATH_SEARCH_PATHS = (\n")
+					table.insert(self.Contents, "\t\t\t\t\t\"$(inherited)\",\n")
+					for _, path in ipairs(paths) do
+						table.insert(self.Contents, "\t\t\t\t\t\"" .. path .. "\",\n")
+					end
+					table.insert(self.Contents, "\t\t\t\t);\n")
+				end
+			end
+
 			if configInfo.LinkDirectories then
 				local libraryDirectories = configInfo.LinkDirectories
 				if libraryDirectories[1] then
@@ -909,6 +1002,17 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 						table.insert(self.Contents, "\t\t\t\t\t\"" .. path .. "\",\n")
 					end
 					table.insert(self.Contents, "\t\t\t\t\t\"$(inherited)\",\n")
+					table.insert(self.Contents, "\t\t\t\t);\n")
+				end
+			end
+
+			if subProject.LinkFlags and subProject.LinkFlags[platformName] and subProject.LinkFlags[platformName][configName] then
+				local linkFlags = subProject.LinkFlags[platformName][configName]
+				if linkFlags[1] then
+					table.insert(self.Contents, "\t\t\t\tOTHER_LDFLAGS = (\n")
+					for _, linkFlag in ipairs(linkFlags) do
+						table.insert(self.Contents, "\t\t\t\t\t\"" .. linkFlag .. "\",\n")
+					end
 					table.insert(self.Contents, "\t\t\t\t);\n")
 				end
 			end
@@ -1148,8 +1252,8 @@ function XcodeProjectMetaTable:Write(outputPath)
 
 	project.SourcesTree.folder = project.Name
 	local projectTree = { project.SourcesTree }
-	XcodeHelper_AssignEntryUuids(info.EntryUuids, projectTree, '', '')
-	XcodeHelper_AssignEntryUuids(info.EntryUuids, projectTree, '', 'PBXBuildFile*')
+	XcodeHelper_AssignEntryUuids(self, info.EntryUuids, projectTree, '', '')
+	XcodeHelper_AssignEntryUuids(self, info.EntryUuids, projectTree, '', 'PBXBuildFile*')
 	info.GroupUuid = info.EntryUuids[project.Name .. '/']
 	self.EntryUuids = info.EntryUuids
 
@@ -1168,6 +1272,69 @@ function XcodeProjectMetaTable:Write(outputPath)
 /* End PBXBuildFile section */
 
 ]])
+
+	-- Write PBXCopyFilesBuildPhase section.
+	table.insert(self.Contents, "/* Begin PBXCopyFilesBuildPhase section */\n")
+	for curProject in ivalues(allTargets) do
+		if true then
+			local subProjectInfo = XcodeHelper_GetProjectExportInfo(self, curProject.Name, self.Workspace)
+			local subProject = Projects[curProject.Name]
+			table.insert(self.Contents, expand([[
+		$(EmbedFrameworksUuid) /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+]], subProjectInfo))
+
+			XcodeHelper_WritePBXEmbedFrameworkFileReferences(self, subProject.SourcesTree)
+
+			table.insert(self.Contents,[[
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+]])
+		end
+	end
+
+	for curProject in ivalues(allTargets) do
+		if true then
+			local subProjectInfo = XcodeHelper_GetProjectExportInfo(self, curProject.Name, self.Workspace)
+			local subProject = Projects[curProject.Name]
+			table.insert(self.Contents, expand([[
+		$(CopyFilesUuid) /* Copy Files */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+]], subProjectInfo))
+
+			XcodeHelper_WritePBXCopyFilesFileReferences(self, subProject.SourcesTree)
+
+			table.insert(self.Contents,[[
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+]])
+        end
+	end
+	--[[
+		42C919E6252E64A4001AE6FC /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				42C919E8252E6533001AE6FC /* assets.dat in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+	--]]
+
+	table.insert(self.Contents, "\n/* End PBXCopyFilesBuildPhase section */\n\n")
+
 
 --[==[
 	table.insert(self.Contents, [[
