@@ -1563,7 +1563,8 @@ function XcodeWorkspaceMetaTable:_WriteNestedProjects(folder, tabs)
 			local info = ProjectExportInfo[entry:lower()]
 			if info then
 				self.Contents[#self.Contents + 1] = tabs .. '<FileRef\n'
-				self.Contents[#self.Contents + 1] = tabs .. '   location = "absolute:' .. info.Filename:gsub('/project.pbxproj', '') .. '">\n'
+				--self.Contents[#self.Contents + 1] = tabs .. '   location = "absolute:' .. info.Filename:gsub('/project.pbxproj', '') .. '">\n'
+				self.Contents[#self.Contents + 1] = tabs .. '   location = "group:' .. ospath.make_relative(info.Filename:gsub('/project.pbxproj', ''), self.outputPath) .. '">\n'
 				self.Contents[#self.Contents + 1] = tabs .. '</FileRef>\n'
 			end
 		end
@@ -1572,6 +1573,8 @@ end
 
 
 function XcodeWorkspaceMetaTable:Write(outputPath)
+	self.outputPath = outputPath
+
 	local filename = ospath.join(outputPath, self.Name .. '.xcworkspace', 'contents.xcworkspacedata')
 
 	local workspace = Workspaces[self.Name]
