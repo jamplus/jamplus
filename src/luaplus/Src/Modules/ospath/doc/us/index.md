@@ -244,7 +244,7 @@ Equivalent to `ospath.lock(file, "u", offset, length)`.
 
 Adds `extension` to the end of `path` even if one already exists.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.add_extension('', 'ext') == '.ext')
@@ -264,7 +264,7 @@ Returns the new ospath.
 
 Adds a slash to the end of `path` if it doesn't already exist.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.add_slash('') == '/')
@@ -283,7 +283,7 @@ Returns the new ospath.
 
 Appends `leftPath` and `rightPath` together, adding a slash between the two path components.  If `rightPath` is an absolute path, it is not appended to `leftPath` and is returned directly.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.append('', 'filename.txt') == 'filename.txt')
@@ -306,7 +306,7 @@ Returns the new ospath.
 
 Combines `leftPath` and `rightPath`, adding a slash between the two path components and simplifying the path by collapsing `.` and `..` directories.  If `rightPath` is an absolute path, it is not appended to `leftPath` and is returned directly.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.combine('', 'filename.txt') == 'filename.txt')
@@ -327,7 +327,7 @@ Returns the new ospath.
 
 Properly escapes and quotes `path`, if needed.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.escape('') == '')
@@ -378,6 +378,20 @@ For the given `path`, return the index of the filename.
     assert(ospath.find_filename('/pathtests') == 2)
     assert(ospath.find_filename('c:/pathtests') == 4)
     assert(ospath.find_filename('c:pathtests') == 3)
+</pre>
+
+
+
+
+
+### ospath.get_directory(path)
+
+For the given `path`, return the directory component.
+
+<pre>
+    assert(ospath.get_directory('') == '')
+    assert(ospath.get_directory('c:/directory/filename.ext') == 'c:/directory/')
+    assert(ospath.get_directory('c:/directory/') == 'c:/directory/')
 </pre>
 
 
@@ -515,7 +529,7 @@ Returns *true* if `path` is writable, *false* if read-only.
 
 Converts `path` into an absolute path, simplifying the path as necessary.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     local cwd = os.getcwd():gsub('\\', '/')
@@ -534,7 +548,7 @@ Returns the new ospath.
 
 Convert any forward slashes in `path` to backslashes.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.make_backslash('') == '')
@@ -549,11 +563,34 @@ Returns the new ospath.
 
 
 
+### ospath.make_relative(path, startPath)
+
+Converts `path` into a relative path positioned against `startPath`. If `startPath` is not provided, the current working directory is used.
+
+Returns the new path.
+
+<pre>
+    local path1 = "c:/Users/JamPlus"
+    local path2 = "c:/Users/JamPlus/Deep/Deeper"
+    local path3 = "c:/Users/JamPlus/AppData/Roaming"
+
+    local startPath = "c:/Users/JamPlus/AppData/Local"
+    print(ospath.make_relative(path1, startPath))       -- ../..
+    print(ospath.make_relative(path2, startPath))       -- ../../Deep/Deeper
+    print(ospath.make_relative(path3, startPath))       -- ../Roaming
+    print(ospath.make_relative(startPath, startPath))   -- .
+</pre>
+
+
+
+
+
+
 ### ospath.make_slash(path)
 
 Convert any backslashes in `path` to slashes.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.make_slash('') == '')
@@ -613,7 +650,7 @@ Returns *true* if the `wildcard` matches `path`, *false* otherwise.
 
 Removes the directory component from `path`.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.remove_directory('') == '')
@@ -634,7 +671,7 @@ Returns the new ospath.
 
 Removes the extension component from `path`.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.remove_extension('') == '')
@@ -654,7 +691,7 @@ Returns the new ospath.
 
 Removes the filename component from `path`.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.remove_filename('') == '')
@@ -675,7 +712,7 @@ Returns the new ospath.
 
 Removes the trailing slash from `path`.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.remove_slash('abc') == 'abc')
@@ -691,7 +728,7 @@ Returns the new ospath.
 
 Replaces the extension of `path` with the new one specified in `extension`.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.replace_extension('', 'ext') == '.ext')
@@ -713,7 +750,7 @@ Returns the new ospath.
 
 Simplifies `path` by collapsing `.` and `..` directories and removing multiple directory slashes.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.simplify('') == '')
@@ -765,7 +802,7 @@ Splits `path` into directory and filename components.  Returns both the director
 
 Trims whitespace from the beginning and end of `path`.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.trim('abc.txt') == 'abc.txt')
@@ -783,7 +820,7 @@ Returns the new ospath.
 
 Unescapes `path`.
 
-Returns the new ospath.
+Returns the new path.
 
 <pre>
     assert(ospath.unescape('') == '')

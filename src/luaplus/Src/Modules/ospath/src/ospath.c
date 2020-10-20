@@ -808,6 +808,18 @@ static int ospath_find_filename(lua_State *L) {
 }
 
 
+static int ospath_get_directory(lua_State *L) {
+  const char *path = luaL_checkstring(L, 1);
+  const char *pathEnd = path + strlen(path);
+
+  while (pathEnd > path  &&  *(pathEnd - 1) != '\\'  &&  *(pathEnd - 1) != '/'  &&  *(pathEnd - 1) != ':')
+    --pathEnd;
+
+  lua_pushlstring(L, path, pathEnd - path);
+  return 1;
+}
+
+
 static int ospath_get_extension(lua_State *L) {
   const char *path = luaL_checkstring(L, 1);
   const char *pathEnd = path + strlen(path);
@@ -959,11 +971,19 @@ static int ospath_match(lua_State *L) {
 
 static int ospath_make_absolute(lua_State *L) {
   const char *path = luaL_checkstring(L, 1);
-  const char *cwd = getcwd(NULL, 0);
+  const char *rootPath = luaL_optstring(L, 2, NULL);
+  char *cwd = NULL;
+  if (rootPath == NULL) {
+    cwd = getcwd(NULL, 0);
+    rootPath = cwd;
+  }
   int start = lua_gettop(L);
   (void)path; /* avoid warning about unused parameter */
 
-  lua_pushstring(L, cwd);
+  lua_pushstring(L, rootPath);
+  if (cwd != NULL) {
+    free(cwd);
+  }
   lua_pushvalue(L, 1);
   path_append_helper(L, start, start + 2);
   return path_simplify_helper(L, -1);
@@ -988,6 +1008,171 @@ static int ospath_make_backslash(lua_State *L) {
   lua_pushstring(L, newPath);
   free(newPath);
   return 1;
+}
+
+
+static int ospath_make_relative(lua_State *L) {
+    const char *startPath;
+    const char *startPathEnd;
+    char *cwd;
+
+    const char *path = luaL_checkstring(L, 1);
+
+    cwd = NULL;
+    startPath = luaL_optstring(L, 2, NULL);
+    if (startPath == NULL) {
+        cwd = getcwd(NULL, 0);
+        startPath = cwd;
+    }
+
+    startPathEnd = startPath + strlen(startPath);
+    if (startPathEnd > startPath  &&  (startPathEnd[-1] == '/'  ||  startPathEnd[-1] == '\\')) {
+        --startPathEnd;
+    }
+
+    if (startPath[0] == '.') {
+        if (startPath[1] == 0) {
+            ++startPath;
+        } else if (startPath[1] == '/'  ||  startPath[1] == '\\') {
+            startPath += 2;
+        }
+    }
+
+    {
+        const char *pathEnd = path + strlen(path);
+        if (pathEnd > path  &&  (pathEnd[-1] == '/'  ||  pathEnd[-1] == '\\')) {
+            --pathEnd;
+        }
+
+        if (path[0] == '.') {
+            if (path[1] == '/'  ||  path[1] == '\\') {
+                path += 2;
+            }
+        }
+
+        if (startPath[0] == 0) {
+            lua_pushvalue(L, 1);
+            if (cwd) {
+                free(cwd);
+            }
+            return 1;
+        }
+
+        int pathDirectoryComponents = 0;
+        int startPathDirectoryComponents = 0;
+        int matchedComponents = 0;
+
+        int pathHasColon = path[1] == ':';
+        int startPathHasColon = startPath[1] == ':';
+        if (pathHasColon && startPathHasColon) {
+            if (tolower(path[0]) != tolower(startPath[0])) {
+                lua_pushvalue(L, 1);
+                if (cwd) {
+                    free(cwd);
+                }
+                return 1;
+            }
+            ++matchedComponents;
+            ++pathDirectoryComponents;
+            ++startPathDirectoryComponents;
+        }
+        else if ((pathHasColon && !startPathHasColon) || (!pathHasColon && startPathHasColon)) {
+            lua_pushvalue(L, 1);
+            if (cwd) {
+                free(cwd);
+            }
+            return 1;
+        }
+
+        // Count the components and compare.
+        const char* pathPtr = path + (pathHasColon ? 3 : 0);
+        const char* startPathPtr = startPath + (startPathHasColon ? 3 : 0);
+        const char* lastPathMatchAfterPtr = pathPtr;
+        while (1) {
+            if (pathPtr > pathEnd) {
+                break;
+            }
+
+            if (startPathPtr > startPathEnd) {
+                break;
+            }
+
+            int pathHasSlash = *pathPtr == '/' || *pathPtr == '\\' || *pathPtr == 0;
+            int startPathHasSlash = *startPathPtr == '/' || *startPathPtr == '\\' || *startPathPtr == 0;
+            if (*pathPtr != *startPathPtr) {
+                if (pathHasSlash + startPathHasSlash != 2) {
+                    break;
+                }
+            }
+
+            if (pathHasSlash) {
+                ++pathDirectoryComponents;
+            }
+            if (startPathHasSlash) {
+                ++startPathDirectoryComponents;
+            }
+            if ((pathHasSlash | startPathHasSlash) == 1) {
+                ++matchedComponents;
+                if (*pathPtr != 0) {
+                    lastPathMatchAfterPtr = pathPtr + 1;
+                }
+                else {
+                    lastPathMatchAfterPtr = pathPtr;
+                }
+            }
+
+            ++pathPtr;
+            ++startPathPtr;
+        }
+
+        while (startPathPtr <= startPathEnd) {
+            int startPathHasSlash = *startPathPtr == '/' || *startPathPtr == '\\' || *startPathPtr == 0;
+            if (startPathHasSlash) {
+                ++startPathDirectoryComponents;
+            }
+            ++startPathPtr;
+        }
+
+        if (pathPtr < pathEnd) {
+            // Add one more just to make it different without counting the rest.
+            ++pathDirectoryComponents;
+        }
+
+        char outputBuffer[10000];
+        char* outputBufferPtr = outputBuffer;
+
+        if (pathDirectoryComponents == startPathDirectoryComponents  &&  matchedComponents == pathDirectoryComponents) {
+            *outputBufferPtr++ = '.';
+        } else {
+            char *lastOutputBufferPtr = NULL;
+            for (int i = matchedComponents; i < startPathDirectoryComponents; ++i) {
+                *outputBufferPtr++ = '.';
+                *outputBufferPtr++ = '.';
+                *outputBufferPtr++ = '/';
+                lastOutputBufferPtr = outputBufferPtr;
+            }
+            while (*lastPathMatchAfterPtr) {
+                if (*lastPathMatchAfterPtr == '\\') {
+                    *outputBufferPtr = '/';
+                }
+                else {
+                    *outputBufferPtr = *lastPathMatchAfterPtr;
+                }
+                ++lastPathMatchAfterPtr;
+                ++outputBufferPtr;
+            }
+            if (lastOutputBufferPtr == outputBufferPtr) {
+                --outputBufferPtr;
+            }
+        }
+        *outputBufferPtr = 0;
+
+        lua_pushstring(L, outputBuffer);
+    }
+    if (cwd != NULL) {
+        free(cwd);
+    }
+    return 1;
 }
 
 
@@ -1296,6 +1481,7 @@ int luaopen_ospath_core(lua_State *L) {
     {"exists",            ospath_exists},
     {"find_extension",    ospath_find_extension},
     {"find_filename",     ospath_find_filename},
+    {"get_directory",     ospath_get_directory},
     {"get_extension",     ospath_get_extension},
     {"get_filename",      ospath_get_filename},
     {"is_directory",      ospath_is_directory},
@@ -1307,6 +1493,7 @@ int luaopen_ospath_core(lua_State *L) {
     {"join",              ospath_join},
     {"make_absolute",     ospath_make_absolute},
     {"make_backslash",    ospath_make_backslash},
+    {"make_relative",     ospath_make_relative},
     {"make_slash",        ospath_make_slash},
     {"make_writable",     ospath_make_writable},
     {"match",             ospath_match},
