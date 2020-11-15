@@ -1453,7 +1453,7 @@ android {
     buildTypes {
         release {
             //debuggable true
-            minifyEnabled false
+            minifyEnabled $(ANDROID.MINIFY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):E=false)
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
@@ -2324,6 +2324,16 @@ rule android.GradleAllProjectsRepositories TARGET : REPOSITORIES {
 rule android.GradleRepositories TARGET : REPOSITORIES {
     C.ActiveTarget $(TARGET) ;
     ANDROID.GRADLE_REPOSITORIES on $(C.COMPILER_SUITE_SYMBOL) += "    $(REPOSITORIES)$(NEWLINE)" ;
+}
+
+
+rule android.Minify TARGET : MINIFY {
+    C.ActiveTarget $(TARGET) ;
+    if $(MINIFY) in 1 true {
+        ANDROID.MINIFY on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+    } else {
+        ANDROID.MINIFY on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+    }
 }
 
 
