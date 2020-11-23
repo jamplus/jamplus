@@ -1095,6 +1095,14 @@ include $$(CUSTOMSETTINGS) ;
 	ospath.mkdir(ospath.add_slash(_getWorkspacesPath()))
 	if uname == 'windows' then
 		-- Write updateworkspace.bat.
+		ospath.write_file(ospath.join(destinationRootPath, 'updateworkspaces.bat'),
+				("@%s --workspace --gen=%s --config=%s %s %s\n"):format(
+				ospath.escape(jamScript), table.concat(opts.gen, ','),
+				ospath.escape(ospath.join(destinationRootPath, 'buildenvironment.config')),
+				ospath.escape(sourceJamfilePath),
+				ospath.escape(destinationRootPath)))
+
+		-- Write updateworkspace.bat.
 		ospath.write_file(ospath.join(_getWorkspacesPath(), 'updateworkspaces.bat'),
 				("@%s --workspace --gen=%s --config=%s %s %s\n"):format(
 				ospath.escape(jamScript), table.concat(opts.gen, ','),
@@ -1103,12 +1111,17 @@ include $$(CUSTOMSETTINGS) ;
 				ospath.escape(destinationRootPath)))
 	else
 		-- Write updateworkspace.sh.
-		ospath.write_file(ospath.join(_getWorkspacesPath(), 'updateworkspaces'),
-				("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s %s\n"):format(
+		local contents = ("#!/bin/sh\n%s --workspace --gen=%s --config=%s %s %s\n"):format(
 				ospath.escape(jamScript), table.concat(opts.gen, ','),
 				ospath.escape(ospath.join(destinationRootPath, 'buildenvironment.config')),
 				ospath.escape(sourceJamfilePath),
-				ospath.escape(destinationRootPath)))
+				ospath.escape(destinationRootPath))
+
+		ospath.write_file(ospath.join(destinationRootPath, 'updateworkspaces'), contents)
+		ospath.chmod(ospath.join(destinationRootPath, 'updateworkspaces'), 777)
+
+		-- Write updateworkspace.sh.
+		ospath.write_file(ospath.join(_getWorkspacesPath(), 'updateworkspaces'), contents)
 		ospath.chmod(ospath.join(_getWorkspacesPath(), 'updateworkspaces'), 777)
 	end
 
