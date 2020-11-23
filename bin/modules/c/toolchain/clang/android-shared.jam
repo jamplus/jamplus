@@ -2321,7 +2321,7 @@ rule android.GradleRepositories TARGET : REPOSITORIES {
 
 
 #
-rule android.ProguardLines TARGET : LINES {
+rule android.ProGuardLines TARGET : LINES {
     C.ActiveTarget $(TARGET) ;
     ANDROID.PROGUARD_LINES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(LINES) ;
 }
