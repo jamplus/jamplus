@@ -1652,6 +1652,27 @@ end
 
 
 function XcodeNativeShutdown()
+	if Config.PodfileDirectory then
+		local variablesTable = {
+			sourceRootPath = sourceRootPath,
+			destinationRootPath = destinationRootPath,
+		}
+		local podfileDirectory = expand(Config.PodfileDirectory, variablesTable)
+
+		local args =
+		{
+			'pod',
+			'install',
+			'--project-directory=' .. podfileDirectory,
+		}
+
+		print('Running pod install')
+		--print(table.concat(args, ' '))
+		for line in osprocess.lines(args) do
+			print(line)
+		end
+	end
+
 	prettydump.dumpascii(ospath.join(_getTargetInfoPath(), 'ProjectExportInfo.lua'), 'ProjectExportInfo', ProjectExportInfo)
 end
 
