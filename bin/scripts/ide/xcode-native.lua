@@ -1077,6 +1077,19 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 				table.insert(self.Contents, "\t\t\t\tINFOPLIST_FILE = " .. infoPlistFile .. ";\n")
 			end
 
+			-- Look up code sign information.
+			local codeSignIdentity = "iPhone Developer"
+			if subProject.IOS_SIGNING_IDENTITY  and  subProject.IOS_SIGNING_IDENTITY[platformName]  and  subProject.IOS_SIGNING_IDENTITY[platformName][configName] then
+				codeSignIdentity = subProject.IOS_SIGNING_IDENTITY[platformName][configName]
+			elseif Projects['C.*']  and  Projects['C.*'].IOS_SIGNING_IDENTITY  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName]  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName] then
+				codeSignIdentity = Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName]
+			end
+
+			local codeSignAutomatic
+			if subProject.IOS_SIGNING_AUTOMATIC  and  subProject.IOS_SIGNING_AUTOMATIC[platformName]  and  subProject.IOS_SIGNING_AUTOMATIC[platformName][configName] then
+				codeSignAutomatic = subProject.IOS_SIGNING_AUTOMATIC[platformName][configName]
+			end
+
 			-- Write DEVELOPMENT_TEAM.
 			local teamIdentifier
 			if subProject.TEAM_IDENTIFIER  and  subProject.TEAM_IDENTIFIER[platformName]  and  subProject.TEAM_IDENTIFIER[platformName][configName] then
@@ -1106,7 +1119,7 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 			elseif Projects['C.*']  and  Projects['C.*'].PROVISIONING_PROFILE_SPECIFIER  and  Projects['C.*'].PROVISIONING_PROFILE_SPECIFIER[platformName]  and  Projects['C.*'].PROVISIONING_PROFILE_SPECIFIER[platformName][configName] then
 				provisioningProfileSpecifier = Projects['C.*'].PROVISIONING_PROFILE_SPECIFIER[platformName][configName]			
 			end
-			if provisioningProfileSpecifier then
+			if not codeSignAutomatic  and  provisioningProfileSpecifier then
 				table.insert(self.Contents, "\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = \"" .. provisioningProfileSpecifier .. "\";\n")
 			end
 
@@ -1122,13 +1135,6 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 			end
 
 			-- Write CODE_SIGN_IDENTITY.
-			local codeSignIdentity = "iPhone Developer"
-			if subProject.IOS_SIGNING_IDENTITY  and  subProject.IOS_SIGNING_IDENTITY[platformName]  and  subProject.IOS_SIGNING_IDENTITY[platformName][configName] then
-				codeSignIdentity = subProject.IOS_SIGNING_IDENTITY[platformName][configName]
-			elseif Projects['C.*']  and  Projects['C.*'].IOS_SIGNING_IDENTITY  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName]  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName] then
-				codeSignIdentity = Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName]			
-		   	end
-
 			local archs
 			if subProject.XCODE_ARCHITECTURE  and  subProject.XCODE_ARCHITECTURE[platformName]  and  subProject.XCODE_ARCHITECTURE[platformName][configName] then
 				archs = table.concat(subProject.XCODE_ARCHITECTURE[platformName][configName], ' ')
@@ -1152,7 +1158,12 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 
 			if platformName == 'ios'  or  platformName == 'iossimulator' then
 				--table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_STANDARD)";\n')
-				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
+				if not codeSignAutomatic then
+					table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
+				else
+					table.insert(self.Contents, '\t\t\t\tCODE_SIGN_STYLE = Automatic;\n')
+				end
+
 				local targetedDeviceFamily = "1,2"
 				if subProject.TARGETED_DEVICE_FAMILY  and  subProject.TARGETED_DEVICE_FAMILY[platformName]  and  subProject.TARGETED_DEVICE_FAMILY[platformName][configName] then
 					targetedDeviceFamily = subProject.TARGETED_DEVICE_FAMILY[platformName][configName]

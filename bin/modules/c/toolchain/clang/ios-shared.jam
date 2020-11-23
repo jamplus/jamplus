@@ -1300,6 +1300,13 @@ rule ios.CodeSign TARGET : SIGNING_IDENTITY {
 }
 
 
+rule ios.CodeSignAutomatic TARGET {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	Contents += "Projects[ [[$(TARGET)]] ].IOS_SIGNING_AUTOMATIC[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = true$(NEWLINE)" ;
+}
+
+
 rule C.ios._ApplicationTargetInfo {
 #	if $(C.PLATFORM) in ios  &&  ! $(NT) {
 #		local isysroot $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -1940,6 +1947,11 @@ rule ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
 			SIGNING_IDENTITY on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SIGNING_IDENTITY) ;
 		}
 	}
+}
+
+
+rule ios.CodeSignAutomatic TARGET {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
 }
 
 
