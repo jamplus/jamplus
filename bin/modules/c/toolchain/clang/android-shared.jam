@@ -719,7 +719,7 @@ rule android.Library TARGET : SOURCES : OPTIONS {
         # Verify the assets directory is actually there.
         local assets = $(ANDROID.ASSETS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
         assets ?= @(assets:R=$(SUBDIR:E="")) ;
-        assets = [ Glob $(assets:TP) : $(assets:BS)/ ] ;
+        #assets = [ Glob $(assets:TP) : $(assets:BS)/ ] ;
         ANDROID.ASSETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(assets) ;
 
         # Resources
@@ -805,7 +805,7 @@ rule android.Library TARGET : SOURCES : OPTIONS {
     # Verify the assets directory is actually there.
     local assets = $(ANDROID.ASSETS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
     assets ?= @(assets:R=$(SUBDIR:E="")) ;
-    assets = [ Glob $(assets:TP) : $(assets:BS)/ ] ;
+    #assets = [ Glob $(assets:TP) : $(assets:BS)/ ] ;
     ANDROID.ASSETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(assets) ;
 
     # Resources
