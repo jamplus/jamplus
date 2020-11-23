@@ -1074,6 +1074,19 @@ rule C.ios._Inherits {
 }
 
 
+rule ios.ProductVersion TARGET : VERSION_NAME : VERSION_CODE {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+
+	IOS.VERSION_NAME on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VERSION_NAME) ;
+	IOS.VERSION_CODE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VERSION_CODE) ;
+
+	if $(TARGETINFO_LOCATE) {
+		Contents += "Projects[ [[$(TARGET)]] ].PRODUCT_VERSION_NAME[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(VERSION_NAME)]]$(NEWLINE)" ;
+		Contents += "Projects[ [[$(TARGET)]] ].PRODUCT_VERSION_CODE[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(VERSION_CODE)]]$(NEWLINE)" ;
+	}
+}
+
+
 rule C.ios._MultiCppCompile_SetupFlags {
 	local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;

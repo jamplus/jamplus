@@ -881,6 +881,24 @@ local function XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectN
 				table.insert(self.Contents, "\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = \"" .. iosSdkVersionMin .. "\";\n")
 			end
 
+			local productVersionCode
+			if subProject.PRODUCT_VERSION_CODE  and  subProject.PRODUCT_VERSION_CODE[platformName]  and  subProject.PRODUCT_VERSION_CODE[platformName][configName] then
+				productVersionCode = subProject.PRODUCT_VERSION_CODE[platformName][configName]
+			end
+
+			if productVersionCode then
+				table.insert(self.Contents, "\t\t\t\tCURRENT_PROJECT_VERSION = " .. productVersionCode .. ";\n")
+			end
+
+			local productVersionName
+			if subProject.PRODUCT_VERSION_NAME  and  subProject.PRODUCT_VERSION_NAME[platformName]  and  subProject.PRODUCT_VERSION_NAME[platformName][configName] then
+				productVersionName = subProject.PRODUCT_VERSION_NAME[platformName][configName]
+			end
+
+			if productVersionName then
+				table.insert(self.Contents, "\t\t\t\tMARKETING_VERSION = " .. productVersionName .. ";\n")
+			end
+
 			if isDebug then
 				table.insert(self.Contents, "\t\t\t\tMTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;\n")
 			else
