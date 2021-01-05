@@ -204,6 +204,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
 
     cflags += -D__ANDROID_API__=$(NDK_VERSION) ;
     cflags += -fPIC ;
+    cflags += -fvisibility=hidden ;
 
     ARCHITECTURE_CFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(cflags) ;
     ARCHITECTURE_LINKFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(linkflags) ;
