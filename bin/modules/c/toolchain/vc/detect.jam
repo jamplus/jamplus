@@ -4,9 +4,14 @@ rule FindVisualStudioHelper VERSION : COMPILER {
     switch $(VERSION) {
         case vs2019 :
             local pf = $(ProgramFiles(x86):J=" ") ;
-            VS150COMNTOOLS = "$(pf)/Microsoft Visual Studio/2019/Community/Common7/Tools" ;
+            VS150COMNTOOLS = "$(pf)/Microsoft Visual Studio/2019/Professional/Common7/Tools" ;
             if [ Glob $(VS150COMNTOOLS) : VsDevCmd.bat ] {
                 MSVCNT = $(VS150COMNTOOLS) ;
+            } else {
+                VS150COMNTOOLS = "$(pf)/Microsoft Visual Studio/2019/Community/Common7/Tools" ;
+                if [ Glob $(VS150COMNTOOLS) : VsDevCmd.bat ] {
+                    MSVCNT = $(VS150COMNTOOLS) ;
+                }
             }
             if $(MSVCNT) {
                 MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
@@ -17,9 +22,14 @@ rule FindVisualStudioHelper VERSION : COMPILER {
 
         case vs2017 :
             local pf = $(ProgramFiles(x86):J=" ") ;
-            VS150COMNTOOLS = "$(pf)/Microsoft Visual Studio/2017/Community/Common7/Tools" ;
+            VS150COMNTOOLS = "$(pf)/Microsoft Visual Studio/2017/Professional/Common7/Tools" ;
             if [ Glob $(VS150COMNTOOLS) : VsDevCmd.bat ] {
                 MSVCNT = $(VS150COMNTOOLS) ;
+            } else {
+                VS150COMNTOOLS = "$(pf)/Microsoft Visual Studio/2017/Community/Common7/Tools" ;
+                if [ Glob $(VS150COMNTOOLS) : VsDevCmd.bat ] {
+                    MSVCNT = $(VS150COMNTOOLS) ;
+                }
             }
             if $(MSVCNT) {
                 MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
