@@ -187,7 +187,7 @@ Utility Rules</h1>
 rule ConfigureFileHelper TARGET : SOURCE [ : OPTIONS ] ;</h1>
 <p><a name="a14_rule_ConfigureFileHelper"></a></p>
 <p>Copies <code>SOURCE</code> to <code>TARGET</code>, potentially modifying its contents during the transfer.</p>
-<p>While processing the text lines of <code>SOURCE</code>, text found in the form ${VAR} are replaced with the current value of the variable within Jam. If the variable doesn't exist, ${VAR} is replaced with an empty string.</p>
+<p>While processing the text lines of <code>SOURCE</code>, text found in the form ${VAR} (or $(VAR) if <code>parens</code> is specified in <code>OPTIONS</code>) are replaced with the current value of the variable within Jam. If the variable doesn't exist, ${VAR} is replaced with an empty string.</p>
 <p><code>ConfigureFileHelper</code> is based on input formats for CMake's configure_file function. As such, input lines containing:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#cmakedefine VAR ...</span></div>
 </div><!-- fragment --><p>will be replaced with the following if <code>VAR</code> is defined:</p>
@@ -198,7 +198,7 @@ rule ConfigureFileHelper TARGET : SOURCE [ : OPTIONS ] ;</h1>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The destination target for the expansion copy. </td></tr>
     <tr><td class="paramname">SOURCE</td><td>The source file target to expansion copy from. </td></tr>
-    <tr><td class="paramname">OPTIONS</td><td>(optional) May be <code>noexpand</code>, in which case no variable expansion is performed when copying from <code>SOURCE</code> to <code>TARGET</code>.</td></tr>
+    <tr><td class="paramname">OPTIONS</td><td>(optional) May be <code>noexpand</code>, in which case no variable expansion is performed when copying from <code>SOURCE</code> to <code>TARGET</code>. Can also specify <code>parens</code> to use $(VAR) as the replacement format instead of ${VAR}.</td></tr>
   </table>
   </dd>
 </dl>
