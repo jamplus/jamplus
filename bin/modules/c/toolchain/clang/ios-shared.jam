@@ -812,7 +812,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 			ios.ProcessEntitlements $(destEntitlementsPlist) : $(sourceEntitlementsPlist) $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(C.ACTIVE_TOOLCHAIN_TARGET) ;
 		}
 		if $(C.PLATFORM) in ios { #  &&  $(NT) {
-#			local plistutil = $(JAM_EXECUTABLE_PATH:D)/libimobiledevice/libimobiledevice-windows-master/plistutil.exe ;
+#			local plistutil = $(JAM_EXECUTABLE_PATH:D)/libimobiledevice/plistutil.exe ;
 #			if ! [ Search $(plistutil) ]
 #			{
 #				local downloadDirectory = $(JAM_EXECUTABLE_PATH:D)/libimobiledevice ;
@@ -1046,9 +1046,9 @@ rule ios._SetDefaultBundlePath {
 	local bundlePath = $(outputPath)/$(outputName).app ;
 	BUNDLE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundlePath) ;
 
-	local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
+	local bundleTarget = $(C.ACTIVE_TOOLCHAIN_TARGET):bundle ;
 	local colon = ":" ;
-	local cleanBundleTarget = @(clean$(colon)$(TARGET)$(colon)bundle:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
+	local cleanBundleTarget = @(clean$(colon)$(bundleTarget:G=):G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
 	BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleTarget) ;
 	CLEAN_BUNDLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(cleanBundleTarget) ;
 }
@@ -2029,17 +2029,17 @@ rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK : OPTIONS {
 
 
 actions screenoutput ios._Install {
-	"$(JAM_EXECUTABLE_PATH:D)/../libimobiledevice/ideviceinstaller" -i $(IPA_TARGET:TC)
+	"$(JAM_EXECUTABLE_PATH:D)/libimobiledevice/ideviceinstaller" -i $(IPA_TARGET:TC)
 }
 
 
 actions screenoutput ios._Uninstall {
-	"$(JAM_EXECUTABLE_PATH:D)/../libimobiledevice/ideviceinstaller" -U $(APPID)
+	"$(JAM_EXECUTABLE_PATH:D)/libimobiledevice/ideviceinstaller" -U $(APPID)
 }
 
 
 actions screenoutput ios._Run {
-	"$(JAM_EXECUTABLE_PATH:D)/../libimobiledevice/idevicedebug" run $(APPID)
+	"$(JAM_EXECUTABLE_PATH:D)/libimobiledevice/idevicedebug" run $(APPID)
 }
 
 
