@@ -605,7 +605,7 @@ rule ios.InfoPListFile TARGET : SOURCE {
 	SEARCH on $(source) ?= $(SOURCE:D:R=$(SEARCH_SOURCE)) ;
 
 	local EXECUTABLE_NAME = [ C._retrieveOutputName $(TARGET) ] ;
-	C.ConfigureFile $(TARGET) : $(destination) : $(source) ;
+	C.ConfigureFile $(TARGET) : $(destination) : $(source) : parens ;
 	INFO_PLIST_FILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destination) ;
 
 	if $(TARGETINFO_LOCATE) {
