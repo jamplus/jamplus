@@ -28,6 +28,7 @@ rule C.Toolchain.clang.ios.Detect {
 	if $(IOSBUILDENV_PATH) {
 		C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/ld ;
 		IMCONVERT on $(C.COMPILER_SUITE_SYMBOL) = $(COMPILER_BIN_PATH)/imconvert ;
+		ACTOOL on $(C.COMPILER_SUITE_SYMBOL) = @($(COMPILER_BIN_PATH)/cartool) ;
 		IBTOOL on $(C.COMPILER_SUITE_SYMBOL) = @($(COMPILER_BIN_PATH)/nibtool) ;
 	} else {
 	    ACTOOL on $(C.COMPILER_SUITE_SYMBOL) = @($(COMPILER_BIN_PATH)/../../../../usr/bin/actool:R=) ;

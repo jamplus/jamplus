@@ -1565,6 +1565,10 @@ if $(NT) {
     actions ios._ImageResize {
         $(IMCONVERT:C) $(2:C) -quiet -resize $(IMAGE_SIZE) $(1:C)
     }
+
+    actions ios._CompileAssetCatalog {
+        $(ACTOOL:C) -idioms ipad,iphone -compile $(SOURCE_PATH) -out $(1[1]:D)\Assets.car
+    }
 } else {
     actions ios._CompileAssetCatalog {
         $(ACTOOL:C) --output-format human-readable-text --output-partial-info-plist $(OUTPUT_PARTIAL_INFO_PLIST) --notices --warnings $(APP_ICON) $(LAUNCH_IMAGE) --compress-pngs --enable-on-demand-resources YES --sticker-pack-identifier-prefix .sticker-pack. --target-device iphone --target-device ipad --minimum-deployment-target 6.0 --platform iphoneos --product-type com.apple.product-type.application --compile $(1[1]:D) $(SOURCE_PATH)
@@ -1637,11 +1641,11 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
                     local inputTarget = '<' .. targetGrist .. ':source>' .. entry.filename
                     local outputTarget = '<' .. targetGrist .. '>' .. filename
                     jam_setvar(inputTarget, 'SEARCH', sourcePath)
-                    jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
-                    jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
-                    jam_evaluaterule('Clean', cleanTarget, outputTarget)
+                    --jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
+                    --jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
+                    --jam_evaluaterule('Clean', cleanTarget, outputTarget)
 
-                    if NT then
+                    if false then
                         local width, height = entry.size:match('(%d+)x(%d+)')
                         jam_setvar(outputTarget, 'IMAGE_SIZE', (width * scale) .. 'x' .. (height * scale))
                         jam_evaluaterule('ios._ImageResize', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
@@ -1694,11 +1698,11 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
                     local inputTarget = '<' .. targetGrist .. ':source>' .. entry.filename
                     local outputTarget = '<' .. targetGrist .. '>' .. filename
                     jam_setvar(inputTarget, 'SEARCH', sourcePath)
-                    jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
-                    jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
-                    jam_evaluaterule('Clean', cleanTarget, outputTarget)
+                    --jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
+                    --jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
+                    --jam_evaluaterule('Clean', cleanTarget, outputTarget)
 
-                    if NT then
+                    if false then
                         jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
                         jam_evaluaterule('ios._ImageCopy', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
                     else
@@ -1784,11 +1788,11 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
                     local inputTarget = '<' .. targetGrist .. ':source>' .. entry.filename
                     local outputTarget = '<' .. targetGrist .. '>' .. filename
                     jam_setvar(inputTarget, 'SEARCH', sourcePath)
-                    jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
-                    jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
-                    jam_evaluaterule('Clean', cleanTarget, outputTarget)
+                    --jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
+                    --jam_evaluaterule('Depends', parent, outputTarget, inputTarget)
+                    --jam_evaluaterule('Clean', cleanTarget, outputTarget)
 
-                    if NT then
+                    if false then
                         jam_setvar(outputTarget, 'IMAGE_SIZE', entry.size)
                         jam_evaluaterule('ios._ImageCopy', outputTarget, inputTarget, jam_getvar('C.COMPILER_SUITE_SYMBOL'))
                     else
@@ -1807,10 +1811,15 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
             end
         until true end
 
-        if not NT then
+        if true then
             local generatedInfoPlist = jam_getvar('LOCATE_TARGET')[1] .. '/assetcatalog_generated_info.plist'
             jam_evaluaterule('Clean', cleanTarget, generatedInfoPlist)
 
+            local outputTarget = '<' .. targetGrist .. '>Assets.car'
+            jam_evaluaterule('MakeLocate', outputTarget, destinationPath)
+            jam_evaluaterule('Clean', cleanTarget, outputTarget)
+
+            destinationTargets = { outputTarget }
             for _, target in ipairs(destinationTargets) do
                 if appIcon ~= '' then
                     jam_setvar(target, 'APP_ICON',  '--app-icon ' .. appIcon)
@@ -1821,6 +1830,7 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
                 jam_setvar(target, 'SOURCE_PATH',  assetCatalogPath)
                 jam_setvar(target, 'OUTPUT_PARTIAL_INFO_PLIST', generatedInfoPlist)
             end
+            jam_evaluaterule('Depends', parent, destinationTargets, sourceTargets)
             jam_evaluaterule('ios._CompileAssetCatalog', destinationTargets, sourceTargets, jam_getvar('C.COMPILER_SUITE_SYMBOL')[1])
         end
 
