@@ -289,7 +289,7 @@ The remaining rules are utility rules.
 
 Copies \c SOURCE to \c TARGET, potentially modifying its contents during the transfer.
 
-While processing the text lines of \c SOURCE, text found in the form \${VAR} are replaced with the current value of the variable within Jam. If the variable doesn't exist, \${VAR} is replaced with an empty string.
+While processing the text lines of \c SOURCE, text found in the form \${VAR} (or \$(VAR) if <tt>parens</tt> is specified in \c OPTIONS) are replaced with the current value of the variable within Jam. If the variable doesn't exist, \${VAR} is replaced with an empty string.
 
 \c ConfigureFileHelper is based on input formats for CMake's configure_file function. As such, input lines containing:
 
@@ -311,7 +311,7 @@ or if \c VAR is not defined, a line of this format will be output:
 
 \param TARGET The destination target for the expansion copy.
 \param SOURCE The source file target to expansion copy from.
-\param OPTIONS (optional) May be \c noexpand, in which case no variable expansion is performed when copying from \c SOURCE to \c TARGET.
+\param OPTIONS (optional) May be \c noexpand, in which case no variable expansion is performed when copying from \c SOURCE to \c TARGET. Can also specify \c parens to use \$(VAR) as the replacement format instead of \${VAR}.
 
 \code
     local boundName = [ Search TheTarget.lib ] ;

@@ -1548,6 +1548,8 @@ LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp)
 	LIST* newLines = L0;
 	int mustWrite;
 	int expand;
+	int whichLeftParen = '{';
+	int whichRightParen = '}';
 	time_t time;
 
 	targetName = lol_get(args, 0);
@@ -1566,6 +1568,10 @@ LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp)
 			const char* option = list_value(item);
 			if (strcmp(option, "noexpand") == 0) {
 				expand = 0;
+			}
+			else if (strcmp(option, "parens") == 0) {
+				whichLeftParen = '(';
+				whichRightParen = ')';
 			}
 		}
 	}
@@ -1588,8 +1594,8 @@ LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp)
 
 			if (expand) {
 				lol_init(&lol);
-				leftParen = '{';
-				rightParen = '}';
+				leftParen = whichLeftParen;
+				rightParen = whichRightParen;
 				list = var_expand(L0, line, line + strlen(line), &lol, 0);
 				leftParen = '(';
 				rightParen = ')';
