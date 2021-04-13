@@ -1504,6 +1504,24 @@ rule ios.Storyboard TARGET : SOURCES {
 }
 
 
+if $(NT) {
+
+actions ios._CompileStoryboard
+{
+	rmdir /s/q $(OUTPUT_DIRECTORY:C\\)\\$(2:BS)c
+	copy $(2:C\\) $(OUTPUT_DIRECTORY:C\\)
+	$(IBTOOL:C) -compile $(OUTPUT_DIRECTORY)/$(2:D=)
+}
+
+
+actions ios._LinkStoryboards
+{
+	rem rmdir /s/q $(1:DC\\)
+	xcopy $(2:DC\\)\*.* $(1:DC\\)\*.* /s/e/Y
+}
+
+} else {
+
 actions ios._CompileStoryboard
 {
 	PATH=$(MACOSX_SDK_DEVELOPER_ROOT)/usr/bin:$PATH
@@ -1515,6 +1533,8 @@ actions ios._LinkStoryboards
 {
 	PATH=$(MACOSX_SDK_DEVELOPER_ROOT)/usr/bin:$PATH
 	/Applications/Xcode.app/Contents/Developer/usr/bin/ibtool --errors --warnings --notices --module $(TARGET) --target-device iphone --target-device ipad --minimum-deployment-target 10.2 --output-format human-readable-text --link $(BUNDLE_DIRECTORY) $(2:CD)
+}
+
 }
 
 
