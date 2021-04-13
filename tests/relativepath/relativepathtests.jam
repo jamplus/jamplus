@@ -1,0 +1,77 @@
+NotFile all ;
+
+numTests = 0 ;
+numTestsPassed = 0 ;
+
+rule TestPaths START_PATH : PATHS : EXPECTED
+{
+	numTests = [ Math $(numTests) + 1 ] ;
+	local relativePaths = [ MakeRelativePath $(PATHS) : $(START_PATH) ] ;
+	if $(relativePaths) = $(EXPECTED)
+	{
+		numTestsPassed = [ Math $(numTestsPassed) + 1 ] ;
+	}
+	else
+	{
+		SPACE = " " ;
+		Echo "fail test $(numTests): $(relativePaths:J=$(SPACE)) \!\= $(EXPECTED:J=$(SPACE))" ;
+	}
+}
+
+# Windows-style with forward slashes
+Path1 = c:/Users/JamPlus ;
+Path2 = c:/Users/JamPlus/Deep/Deeper ;
+Path3 = c:/Users/JamPlus/AppData/Roaming ;
+
+startPath = c:/Users/JamPlus/AppData/Local ;
+TestPaths $(startPath) : $(Path1) $(Path2) $(Path3) $(startPath) : ../.. ../../Deep/Deeper ../Roaming . ;
+
+startPath = c:/ ;
+TestPaths $(startPath) : $(Path1) $(Path2) $(Path3) $(startPath) : Users/JamPlus Users/JamPlus/Deep/Deeper Users/JamPlus/AppData/Roaming . ;
+
+# Windows-style
+Path1 = c:\\Users\\JamPlus ;
+Path2 = c:\\Users\\JamPlus\\Deep\\Deeper ;
+Path3 = c:\\Users\\JamPlus\\AppData\\Roaming ;
+
+startPath = c:\\Users\\JamPlus\\AppData\\Local ;
+TestPaths $(startPath) : $(Path1) $(Path2) $(Path3) $(startPath) : ../.. ../../Deep/Deeper ../Roaming . ;
+
+startPath = c:\\ ;
+TestPaths $(startPath) : $(Path1) $(Path2) $(Path3) $(startPath) : Users/JamPlus Users/JamPlus/Deep/Deeper Users/JamPlus/AppData/Roaming . ;
+
+# Unix-style
+Path1 = /Users/JamPlus ;
+Path2 = /Users/JamPlus/Deep/Deeper ;
+Path3 = /Users/JamPlus/AppData/Roaming ;
+
+startPath = /Users/JamPlus/AppData/Local ;
+TestPaths $(startPath) : $(Path1) $(Path2) $(Path3) $(startPath) : ../.. ../../Deep/Deeper ../Roaming . ;
+
+startPath = / ;
+TestPaths $(startPath) : $(Path1) $(Path2) $(Path3) $(startPath) : Users/JamPlus Users/JamPlus/Deep/Deeper Users/JamPlus/AppData/Roaming . ;
+
+# Relative (not absolute)
+Path1 = Users/JamPlus ;
+Path2 = Users/JamPlus/Deep/Deeper ;
+Path3 = Users/JamPlus/AppData/Roaming ;
+
+startPath = Users/JamPlus/AppData/Local ;
+TestPaths $(startPath) : $(Path1) $(Path2) $(Path3) $(startPath) : ../.. ../../Deep/Deeper ../Roaming . ;
+
+startPath = . ;
+TestPaths $(startPath) : $(Path1) $(Path2) $(Path3) $(startPath) : Users/JamPlus Users/JamPlus/Deep/Deeper Users/JamPlus/AppData/Roaming . ;
+
+# Relative (not absolute)
+Path1 = Users/JamPlus ;
+Path2 = Users/JamPlus/Deep/Deeper ;
+Path3 = Users/JamPlus/AppData/Roaming ;
+
+startPath = Users/JamPlus/AppData/Local ;
+TestPaths $(startPath) : $(Path1) $(Path2) $(Path3) $(startPath) : ../.. ../../Deep/Deeper ../Roaming . ;
+
+# Force a failure
+#TestPaths $(startPath) : $(A1) $(A2) $(A3) $(B) : ../../Deep/Deeper ../Roaming . ;
+
+#------------------------------------------------------------------------------
+Echo "Tests passed: $(numTestsPassed)/$(numTests)" ;
