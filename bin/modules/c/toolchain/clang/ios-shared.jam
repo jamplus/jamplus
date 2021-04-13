@@ -1473,7 +1473,7 @@ rule ios.Storyboard TARGET : SOURCES {
         local compileTarget = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(source:BS)) ;
         Depends $(bundleTarget) : $(compileTarget) : $(source) ;
         local compileIntermediateDirectory = $(intermediateDirectory)/$(source:BS)c ;
-        LOCATE on $(compileTarget) = $(compileIntermediateDirectory) ;
+        MakeLocate $(compileTarget) : $(compileIntermediateDirectory) ;
         CleanTree $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(compileIntermediateDirectory) ;
         storyboardsToLink += $(compileTarget) ;
 
