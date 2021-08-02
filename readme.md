@@ -1,5 +1,4 @@
-JamPlus
-=======
+# JamPlus Overview
 
 JamPlus is a very fast and powerful code and data build system built on the code base of the original Perforce version of Jam written by Christopher Seiwald. JamPlus is regularly used to efficiently parallelize the builds of massive code and data sets.
 
@@ -18,10 +17,82 @@ A sampling of the features in the JamPlus distribution follows:
 - **Checksum support:** Enable a flag, and JamPlus will use the checksums of files to detect change instead of timestamps.
 - **Lua support:** Either a partial build description or the entire build description can be written in Lua.
 
-Authors
--------
 
-Jam's author is Christopher Seiwald (seiwald@perforce.com).  *Note: Much of this documentation is taken verbatim from the jam.html file which ships with the Perforce Jam build.*
+# Build JamPlus on Windows
+
+## Prequisites
+
+Detailed instructions are found in the Bootstrapping documentation, but a concise version is here for Visual Studio.
+
+## Build JamPlus
+
+* If you haven't already, clone JamPlus with:
+
+<pre>
+d:\>git clone https://github.com/jamplus/jamplus.git
+</pre>
+
+* Bootstrap JamPlus by launching `x64 Native Tools Command Prompt` for whichever version of Visual Studio you are using and running:
+
+<pre>
+d:\jamplus>bootstrap-win64-vc.bat
+</pre>
+
+* Close the `x64 Native Tools Command Prompt`.
+
+
+
+# Building JamPlus for Mac
+
+## Prerequisites
+
+* FILL ME IN.
+
+## Build LuaPlus
+
+* If you haven't already, clone JamPlus with:
+
+<pre>
+[~]git clone https://github.com/jamplus/jamplus.git
+</pre>
+
+* Bootstrap the JamPlus build tool by running:
+
+<pre>
+[~/jamplus] ./bootstrap-macosx64.sh
+</pre>
+
+
+
+# Building JamPlus for Linux
+
+## Prerequisites
+
+If building on Ubuntu, install the following:
+
+<pre>
+sudo apt install build-essential uuid-dev
+</pre>
+
+## Build JamPlus
+
+* If you haven't already, clone JamPlus with:
+
+<pre>
+[~]git clone https://github.com/jamplus/jamplus.git
+</pre>
+
+* Bootstrap the JamPlus build tool by running:
+
+<pre>
+[~/jamplus] ./bootstrap-linux64.sh
+</pre>
+
+
+
+# Authors
+
+Jam's author is Christopher Seiwald (seiwald@perforce.com).  *Note: Much of the documentation is taken verbatim from the jam.html file which ships with the Perforce Jam build.*
 
 JamPlus's primary maintainer is Joshua Jensen (jjensen@workspacewhiz.com).
 

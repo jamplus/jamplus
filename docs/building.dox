@@ -2,7 +2,7 @@
 
 \section building_prerequisites Prerequisites
 
-Linux requires certain packages installed to complete the entire bootstrap process. The packages are: <tt>uuid-dev</tt>.
+Linux requires certain packages installed to complete the entire bootstrap process. The packages are: <tt>build-essential</tt> <tt>uuid-dev</tt>.
 
 FreeBSD should have an install of the package <tt>e2fsprogs-libuuid</tt>.
 
