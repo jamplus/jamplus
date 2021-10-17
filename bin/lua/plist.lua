@@ -71,6 +71,9 @@ end
 function M.read(filename)
     local lom = require 'lxp.lom'
     local file = io.open(filename, 'rb')
+    if not file then
+        error('Cannot read ' .. filename)
+    end
     local buffer = file:read('*a')
     file:close()
     local info, err = lom.parse(buffer:match('(<%?xml .+</plist>)'))
