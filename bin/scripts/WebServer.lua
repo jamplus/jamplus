@@ -160,8 +160,8 @@ if not ospath.exists(civetwebExecutable) then
     ospath.write_file(ospath.join(civetwebPath, 'Jamfile.jam'), [[
 SubDir TOP ;
 
-local CIVETWEB_ROOT = civetweb_src/civetweb-1.12 ;
-local CIVETWEB_URL = https://github.com/civetweb/civetweb/archive/v1.12.zip ;
+local CIVETWEB_ROOT = civetweb_src/civetweb-1.15 ;
+local CIVETWEB_URL = https://github.com/civetweb/civetweb/archive/refs/tags/v1.15.zip ;
 
 if ! $(PREPASS_FINISHED) {
 
