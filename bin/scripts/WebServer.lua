@@ -31,7 +31,7 @@ end
 
 function GetLocalIPAddress()
     if OS == 'NT' then
-        for line in osprocess.lines{"FOR /F \"tokens=4 delims= \" %%i in ('route print ^| find \" 0.0.0.0\"') do echo %%i"} do
+        for line in osprocess.lines{[[FOR /F "tokens=4 delims= " %i in ('route print ^| find " 0.0.0.0"') do @echo %i]]} do
             return line:match('(.+)[^\n]')
         end
     else

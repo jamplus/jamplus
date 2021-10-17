@@ -2094,7 +2094,7 @@ rule ios.WebServer TARGET {
 		local IP ;
 		if ! $(URL) {
 			if $(NT) {
-				IP = [ Match ([^$(CRLF)]*) : [ Shell "FOR /F \"tokens=4 delims= \" %%i in ('route print ^| find \" 0.0.0.0\"') do echo %%i" ] ] ;
+				IP = [ Match ([^$(CRLF)]*) : [ Shell "FOR /F \"tokens=4 delims= \" %%i in ('route print ^| find \" 0.0.0.0\"') do @echo %%i" ] ] ;
 			} else {
 				# https://stackoverflow.com/questions/13322485/how-to-get-the-primary-ip-address-of-the-local-machine-on-linux-and-os-x
 				IP = [ Match ([^$(NEWLINE)]*) : [ Shell "ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\\.){3}[0-9]*).*/\\2/p'" ] ] ;
