@@ -218,7 +218,7 @@ if true then
 
         local command =
         {
-            ospath.escape(civetwebExecutable), civetwebconfFilename,
+            ospath.escape(civetwebExecutable), ospath.escape(civetwebconfFilename),
             env = env,
             stderr_to_stdout = true,
             can_terminate = true,
