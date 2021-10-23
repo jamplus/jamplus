@@ -660,6 +660,15 @@ rule ios.InfoPListFile TARGET : SOURCE {
 	C.ConfigureFile $(TARGET) : $(destination) : $(source) : parens ;
 	INFO_PLIST_FILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destination) ;
 
+	local sourcePath = $(destination:T) ;
+	LuaString "
+		if not plist then
+			plist = require 'plist'
+		end
+		local left = plist.read(jam_getvar('sourcePath')[1])
+		plist.merge(left, GetInfoPlistCurrentLevel())
+" ;
+
 	if $(TARGETINFO_LOCATE) {
 		Contents += "Projects[ [[$(C.ACTIVE_TARGET)]] ].INFOPLIST_FILE[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(source:T)]]$(NEWLINE)" ;
 		Contents += "Projects[ [[$(C.ACTIVE_TARGET)]] ].Sources = concat(Projects[ [[$(C.ACTIVE_TARGET)]] ].Sources, { [[$(source:T)]] })$(NEWLINE)" ;
@@ -817,30 +826,51 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 		Depends $(bundleTarget) : $(infoplist) ;
 		Clean $(cleanBundleTarget) : $(infoplist) ;
 
+		local CFBundleIdentifier ;
 		local sourceInfoPlistFile = $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		if $(sourceInfoPlistFile) {
-			CopyFile $(bundleTarget) : $(infoplist) : $(sourceInfoPlistFile) ;
+		if ! $(sourceInfoPlistFile) {
+			local customPlistExists = [ LuaString "
+				local currentLevel = GetInfoPlistCurrentLevelNoCreate()
+				return currentLevel and true or false
+" ] ;
+			if $(customPlistExists) = false {
+				local infoPlist = [ Glob $(SUBDIR) : Info.plist ] ;
+				if $(infoPlist) {
+					ios.InfoPListFile $(TARGET) : Info.plist ;
+					sourceInfoPlistFile = $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				}
+			}
+		}
+		local writeInternalInfoPlist = 1 ;
 
-			local sourceInfoPlistFilePath = $(sourceInfoPlistFile:T) ;
-			local CFBundleIdentifier ;
-			local CFBundleVersion ;
-			local CFBundleDisplayName ;
-			LuaString "
-				local pl = require 'plist'.read(jam_getvar('sourceInfoPlistFilePath')[1])
+		local CFBundleVersion ;
+		local CFBundleDisplayName ;
+		local CFBundleExecutable ;
+		LuaString "local pl = GetInfoPlistCurrentLevel()
 				local CFBundleIdentifier = pl['CFBundleIdentifier']
 				jam_setvar('CFBundleIdentifier', CFBundleIdentifier)
 				local CFBundleVersion = pl['CFBundleVersion']
 				jam_setvar('CFBundleVersion', CFBundleVersion)
 				local CFBundleDisplayName = pl['CFBundleDisplayName']
 				jam_setvar('CFBundleDisplayName', CFBundleDisplayName)
-			" ;
-			CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleIdentifier) ;
-			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleVersion) ;
-			CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleDisplayName) ;
-		} else {
+				local CFBundleExecutable = pl['CFBundleExecutable']
+				jam_setvar('CFBundleExecutable', CFBundleExecutable)
+				" ;
+		CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleIdentifier) ;
+		CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleVersion) ;
+		CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleDisplayName) ;
+
+		#if $(CFBundleExecutable) {
+			#CopyFile $(bundleTarget) : $(infoplist) : $(sourceInfoPlistFile) ;
+			#writeInternalInfoPlist = 0 ;
+		#} else {
+		ios.BundleInfo $(TARGET) : : : 1 ;
+		#}
+
+		if $(writeInternalInfoPlist) = 1 {
 			local infoplistcontents = [ LuaString "
 				local currentLevel = GetInfoPlistCurrentLevel()
-				return plist.dump(currentLevel)
+				return plist.dump(currentLevel, true)
 " ] ;
 			if $(infoplistcontents) {
 				CONTENTS on $(infoplist) = $(infoplistcontents) ;
