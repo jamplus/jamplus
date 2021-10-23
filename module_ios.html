@@ -189,14 +189,15 @@ rule ios.BundleInfoArrayBegin TARGET : KEY</h1>
 <div class="line">ios.BundleInfoArrayEnd ;</div>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoArrayBoolean"></a>
-rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE</h1>
+rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE : NO_OVERRIDE</h1>
 <p><a name="a178_rule_ios_BundleInfoArrayBoolean"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as an array of booleans to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The bundle target to affect the <code>Info.plist</code> for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">KEY</td><td>The key portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
-    <tr><td class="paramname">VALUE</td><td>The boolean array value portion of the key/value pair to set within the <code>Info.plist</code>.</td></tr>
+    <tr><td class="paramname">VALUE</td><td>The boolean array value portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
+    <tr><td class="paramname">NO_OVERRIDE</td><td>Pass <code>1</code> or <code>true</code> to not affect an already existing entry.</td></tr>
   </table>
   </dd>
 </dl>
@@ -254,42 +255,45 @@ rule ios.BundleInfoArrayEnd TARGET</h1>
 <div class="line">ios.BundleInfoArrayEnd ;</div>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoArrayInteger"></a>
-rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE</h1>
+rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE : NO_OVERRIDE</h1>
 <p><a name="a182_rule_ios_BundleInfoArrayInteger"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as an array of integers to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The bundle target to affect the <code>Info.plist</code> for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">KEY</td><td>The key portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
-    <tr><td class="paramname">VALUE</td><td>The integer array value portion of the key/value pair to set within the <code>Info.plist</code>.</td></tr>
+    <tr><td class="paramname">VALUE</td><td>The integer array value portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
+    <tr><td class="paramname">NO_OVERRIDE</td><td>Pass <code>1</code> or <code>true</code> to not affect an already existing entry.</td></tr>
   </table>
   </dd>
 </dl>
 <div class="fragment"><div class="line">ios.BundleInfoArrayInteger : MyIntegerArray : 0 1 2 3 4 5 ;</div>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoArrayString"></a>
-rule ios.BundleInfoArrayString TARGET : KEY : VALUE</h1>
+rule ios.BundleInfoArrayString TARGET : KEY : VALUE : NO_OVERRIDE</h1>
 <p><a name="a183_rule_ios_BundleInfoArrayString"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as an array of strings to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The bundle target to affect the <code>Info.plist</code> for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">KEY</td><td>The key portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
-    <tr><td class="paramname">VALUE</td><td>The string array value portion of the key/value pair to set within the <code>Info.plist</code>.</td></tr>
+    <tr><td class="paramname">VALUE</td><td>The string array value portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
+    <tr><td class="paramname">NO_OVERRIDE</td><td>Pass <code>1</code> or <code>true</code> to not affect an already existing entry.</td></tr>
   </table>
   </dd>
 </dl>
 <div class="fragment"><div class="line">ios.BundleInfoArrayString : UIRequiredDeviceCapabilities : armv7 armv8 ;</div>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoBoolean"></a>
-rule ios.BundleInfoBoolean TARGET : KEY : VALUE</h1>
+rule ios.BundleInfoBoolean TARGET : KEY : VALUE : NO_OVERRIDE</h1>
 <p><a name="a184_rule_ios_BundleInfoBoolean"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as a boolean type to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The bundle target to affect the <code>Info.plist</code> for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">KEY</td><td>The key portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
-    <tr><td class="paramname">VALUE</td><td>The value portion of the key/value pair to set within the <code>Info.plist</code>.</td></tr>
+    <tr><td class="paramname">VALUE</td><td>The value portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
+    <tr><td class="paramname">NO_OVERRIDE</td><td>Pass <code>1</code> or <code>true</code> to not affect an already existing entry.</td></tr>
   </table>
   </dd>
 </dl>
@@ -325,42 +329,45 @@ rule ios.BundleInfoDictEnd TARGET</h1>
 <div class="line">ios.BundleInfoDictEnd ;</div>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoInteger"></a>
-rule ios.BundleInfoInteger TARGET : KEY : VALUE</h1>
+rule ios.BundleInfoInteger TARGET : KEY : VALUE : NO_OVERRIDE</h1>
 <p><a name="a187_rule_ios_BundleInfoInteger"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as an integer type to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The bundle target to affect the <code>Info.plist</code> for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">KEY</td><td>The key portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
-    <tr><td class="paramname">VALUE</td><td>The value portion of the key/value pair to set within the <code>Info.plist</code>.</td></tr>
+    <tr><td class="paramname">VALUE</td><td>The value portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
+    <tr><td class="paramname">NO_OVERRIDE</td><td>Pass <code>1</code> or <code>true</code> to not affect an already existing entry.</td></tr>
   </table>
   </dd>
 </dl>
 <div class="fragment"><div class="line">ios.BundleInfoInteger : Unity_LoadingActivityIndicatorStyle : -1 ;</div>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfoString"></a>
-rule ios.BundleInfoString TARGET : KEY : VALUE</h1>
+rule ios.BundleInfoString TARGET : KEY : VALUE : NO_OVERRIDE</h1>
 <p><a name="a188_rule_ios_BundleInfoString"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as string type to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The bundle target to affect the <code>Info.plist</code> for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">KEY</td><td>The key portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
-    <tr><td class="paramname">VALUE</td><td>The value portion of the key/value pair to set within the <code>Info.plist</code>.</td></tr>
+    <tr><td class="paramname">VALUE</td><td>The value portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
+    <tr><td class="paramname">NO_OVERRIDE</td><td>Pass <code>1</code> or <code>true</code> to not affect an already existing entry.</td></tr>
   </table>
   </dd>
 </dl>
 <div class="fragment"><div class="line">ios.BundleInfoString : CFBundleName : simple ;</div>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_ios_BundleInfo"></a>
-rule ios.BundleInfo TARGET : KEY : VALUE</h1>
+rule ios.BundleInfo TARGET : KEY : VALUE : NO_OVERRIDE</h1>
 <p><a name="a189_rule_ios_BundleInfo"></a></p>
 <p>For the given bundle <code>TARGET</code>, assign <code>KEY=VALUE</code> as an array of strings to the bundle's <code>Info.plist</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The bundle target to affect the <code>Info.plist</code> for. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. </td></tr>
     <tr><td class="paramname">KEY</td><td>The key portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
-    <tr><td class="paramname">VALUE</td><td>The value portion of the key/value pair to set within the <code>Info.plist</code>.</td></tr>
+    <tr><td class="paramname">VALUE</td><td>The value portion of the key/value pair to set within the <code>Info.plist</code>. </td></tr>
+    <tr><td class="paramname">NO_OVERRIDE</td><td>Pass <code>1</code> or <code>true</code> to not affect an already existing entry.</td></tr>
   </table>
   </dd>
 </dl>
