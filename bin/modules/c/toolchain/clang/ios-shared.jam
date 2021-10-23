@@ -880,6 +880,11 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 			}
 		}
 
+		local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		if ! $(provisionFileTarget) {
+			ios.Provision $(TARGET) : $(CFBundleIdentifier) ;
+		}
+
 		if $(DISABLE_ME)  &&  $(C.PLATFORM) in ios  &&  ! $(NT) {
 			# Create Entitlements.plist.
 			local sourceEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|source) ;
@@ -1960,19 +1965,47 @@ rule ios.Provision TARGET : PROFILE_ID {
 		}
 	}
 
+	local _systemProfileDirectory ;
 	if ! $(_matchingProvision)
 	{
-		# Find profile from GUID.
-		local _profileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
+		if $(NT)
+		{
+			_systemProfileDirectory = "$(IOSBUILDENV_PATH)/Keychain" ;
+		}
+		else
+		{
+			_systemProfileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
+		}
 
-		# Open each profile and search for : "<string>$(PROFILE_ID)</string>"
-		local _mobileProvisions = [ Glob $(_profileDirectory) : *.mobileprovision ] ;
+		SEARCH on $(_profileFilename) = $(_systemProfileDirectory) ;
+		if $(_profileFilename:TC/) != $(PROFILE_ID:BSTC/)
+		{
+			_matchingProvision = $(_profileFilename) ;
+		}
+	}
+
+	if ! $(_matchingProvision)
+	{
+		local _mobileProvisions = [ Glob $(_systemProfileDirectory) : *.mobileprovision ] ;
 
 		local _mobileProvision ;
+		local AppIdentifierPrefix ;
+		local CFBundleIdentifier ;
+		local TeamIdentifier ;
 		for _mobileProvision in $(_mobileProvisions) {
-			local _cmd = "cat \"$(_mobileProvision)\" | grep \"<string>$(PROFILE_ID)</string>\"" ;
-			local result = [ Shell $(_cmd) ] ;
-			if $(result) != "" {
+			LuaString "
+				local plist = require 'plist'
+				local pl = plist.read(jam_getvar('_mobileProvision')[1])
+				local prefix = pl.ApplicationIdentifierPrefix
+				jam_setvar('AppIdentifierPrefix', prefix)
+				local identifier = pl.Entitlements[\"application-identifier\"]
+				identifier = identifier:sub(#prefix[1] + 2)
+				jam_setvar('CFBundleIdentifier', identifier)
+				local identifier = pl.Entitlements[\"com.apple.developer.team-identifier\"]
+				jam_setvar('TeamIdentifier', identifier)
+			" ;
+
+			if $(CFBundleIdentifier[1]) = $(PROFILE_ID) {
 				_matchingProvision = $(_mobileProvision) ;
 				break ;
 			}
@@ -1983,30 +2016,45 @@ rule ios.Provision TARGET : PROFILE_ID {
 		Exit *** No mobile provisions found that match PROFILE_ID \: $(PROFILE_ID) ;
 	}
 
-	# Get bundle path.
-	local _bundlePath = [ ios.GetBundlePath ] ;
-	local _bundleTarget = [ ios.GetBundleTarget ] ;
+	local _provisionFileTarget = $(_matchingProvision:BS/G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+	SEARCH on $(_provisionFileTarget) = $(_matchingProvision:D) ;
+	PROVISION_FILE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_provisionFileTarget) ;
 
-	if ! $(_bundlePath) {
-		Echo *** ios.Provision $(TARGET) \: $(PROFILE_ID) ;
-		Exit *** Bundle path not setup for target $(TARGET) ;
+	_provisionFileTarget = $(_provisionFileTarget:T) ;
+
+	local bundleIdentifier ;
+	local teamIdentifier ;
+	local provisioningProfileSpecifier ;
+	LuaString "
+		local pl = require 'plist'.read(jam_getvar('_provisionFileTarget')[1])
+		local prefix = pl.ApplicationIdentifierPrefix
+		local identifier = pl.Entitlements[\"application-identifier\"]
+		identifier = identifier:sub(#prefix[1] + 2)
+		jam_setvar('bundleIdentifier', identifier)
+
+		local identifier = pl.Entitlements[\"com.apple.developer.team-identifier\"]
+		jam_setvar('teamIdentifier', identifier)
+
+		local name = pl.Name
+		jam_setvar('provisioningProfileSpecifier', name)
+	" ;
+	if $(bundleIdentifier) != * {
+		ios.BundleInfoString $(TARGET) : CFBundleIdentifier : $(bundleIdentifier) ;
+		CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(bundleIdentifier) ;
+
+		if $(TARGETINFO_LOCATE) {
+			Contents += "Projects[ [[$(TARGET)]] ].PRODUCT_BUNDLE_IDENTIFIER[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(bundleIdentifier)]]
+" ;
+			Contents += "Projects[ [[$(TARGET)]] ].PROVISIONING_PROFILE_SPECIFIER[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(provisioningProfileSpecifier)]]
+" ;
+		}
 	}
-	if ! $(_bundleTarget) {
-		Echo *** ios.Provision $(TARGET) \: $(PROFILE_ID) ;
-		Exit *** Bundle target not setup for target $(TARGET) ;
+	if $(teamIdentifier) {
+		if $(TARGETINFO_LOCATE) {
+			Contents += "Projects[ [[$(TARGET)]] ].TEAM_IDENTIFIER[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(teamIdentifier)]]
+" ;
+		}
 	}
-
-	local _dstProvision = [ C.GristFiles : embedded.mobileprovision ] ;
-	MakeLocate $(_dstProvision) : $(_bundlePath) ;
-
-	# Copy provision into the bundle and name it embedded.mobileprovision
-	CopyFile $(TARGET) : $(_dstProvision) : $(_matchingProvision) ;
-	Depends $(_bundleTarget) : $(_dstProvision) ;
-
-	# Without this, if we change between profiles, the copy will not always
-	# work due to destination time stamp being newer than source (despite
-	# coming from a different file).
-	UseCommandLine $(_dstProvision) : $(_matchingProvision) ;
 }
 
 
