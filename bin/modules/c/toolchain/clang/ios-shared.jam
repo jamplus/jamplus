@@ -1059,6 +1059,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 				#Clean $(cleanBundleTarget) : $(codeResources) ;
 
 				local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				signingIdentify ?= "Apple Development" ;
 				SIGNING_IDENTITY on $(codeResources) $(framework) = $(signingIdentity) ;
 
 				local framework = $(destinationPath)/$(framework)/$(framework:S=) ;
@@ -1072,6 +1073,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 		local linkTarget = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		signingIdentity ?= "Apple Development" ;
 
 		local dependsList = [ DependsList $(bundleTarget) ] ;
 		dependsList = [ ListSort $(dependsList) ] ;
