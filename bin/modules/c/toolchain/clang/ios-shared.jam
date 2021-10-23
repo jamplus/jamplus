@@ -191,7 +191,7 @@ rule ios.SDK SDK_VERSION {
 } else {
 
 actions C.ios.clang.Link {
-	$(C.LINK:C) -optlist ^^^($(LINKFLAGS:J=$(NEWLINE))) -o $(<[1]:C) -filelist ^^^($(>:\\J=$(NEWLINE))) -optlist ^^^($(NEEDLIBS:\\TCJ=$(NEWLINE))) -optlist ^^^($(LINKLIBS:TCJ=$(NEWLINE)))
+	$(C.LINK:C) -optlist ^^^($(LINKFLAGS:J=$(NEWLINE))) -o $(<[1]:C) -filelist ^^^($(>:\\J=$(NEWLINE))$(NEWLINE)$(NEEDLIBS:\\TCJ=$(NEWLINE):E=)$(NEWLINE)$(LINKLIBS:\\TCJ=$(NEWLINE):E=))
 }
 
 rule ios.SDK SDK_VERSION {
