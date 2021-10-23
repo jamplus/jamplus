@@ -976,11 +976,11 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 						jam_setvar('CFBundleIdentifier', identifier)
 						local identifier = pl.Entitlements[\"com.apple.developer.team-identifier\"]
 						jam_setvar('TeamIdentifier', identifier)
-						--local buffer = plist.dump(pl.Entitlements)
+						--local buffer = plist.dump(pl.Entitlements, true)
 						--local plEntitlements = plist.readbuffer(buffer)
 						--plist.merge(plEntitlements, entitlementsPlist)
-						--print(plist.dump(entitlementsPlist))
-						return plist.dump(entitlementsPlist)
+						--print(plist.dump(entitlementsPlist, true))
+						return plist.dump(entitlementsPlist, true)
 " ] ;
 
 					#AppIdentifierPrefix = $(TeamIdentifier) ;
