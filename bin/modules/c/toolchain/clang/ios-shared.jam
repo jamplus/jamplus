@@ -1058,7 +1058,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 				#Clean $(cleanBundleTarget) : $(codeResources) ;
 
 				local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-				signingIdentify ?= "Apple Development" ;
+				signingIdentity ?= "Apple Development" ;
 				SIGNING_IDENTITY on $(codeResources) $(framework) = $(signingIdentity) ;
 
 				local framework = $(destinationPath)/$(framework)/$(framework:S=) ;
