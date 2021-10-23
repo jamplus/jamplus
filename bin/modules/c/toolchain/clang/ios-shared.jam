@@ -2139,6 +2139,9 @@ rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK : OPTIONS {
 		MakeLocate $(ipaTarget) : $(OUTPUT_PATH) ;
 
 		if $(ITUNES_ARTWORK) {
+			local itunesArtworkDirectory = $(ITUNES_ARTWORK:D) ;
+			ITUNES_ARTWORK = $(ITUNES_ARTWORK:BSG=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
+			Search on $(ITUNES_ARTWORK) = $(itunesArtworkDirectory:E=$(SUBDIR)) ;
 			Depends $(archiveTarget) : $(ipaTarget) : $(ITUNES_ARTWORK) ;
 		}
 		Depends $(archiveTarget) : $(ipaTarget) : $(TARGET:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
@@ -2146,7 +2149,7 @@ rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK : OPTIONS {
 		BUNDLE_PATH on $(ipaTarget) = $(bundlePath) ;
 		SIGNING_IDENTITY on $(ipaTarget) = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		ITUNES_ARTWORK on $(ipaTarget) = $(ITUNES_ARTWORK) ;
-		ios._Archive $(ipaTarget) : $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
+		ios._Archive $(ipaTarget) : $(linkTarget) $(ITUNES_ARTWORK) : $(C.COMPILER_SUITE_SYMBOL) ;
 
 		if $(NT) {
 			# Set up an install target.
@@ -2357,8 +2360,8 @@ actions lua ios._Archive
 			SourcePath = entry.filename,
 		}
 	end
-	local itunesArtwork = jam_expand('$(C.__JUST_DOLLAR)(ITUNES_ARTWORK:T)')
-	if itunesArtwork then
+	local itunesArtwork = [[$(ITUNES_ARTWORK:T:E=)]]
+	if itunesArtwork ~= '' then
 		filelist[#filelist + 1] = { EntryName = 'iTunesArtwork', SourcePath = itunesArtwork }
 	end
 
