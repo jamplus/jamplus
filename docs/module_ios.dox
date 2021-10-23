@@ -235,7 +235,7 @@ For the given bundle \c TARGET, begin an array entry within the <tt>Info.plist</
 
 
 <hr>
-\section rule_ios_BundleInfoArrayBoolean rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE
+\section rule_ios_BundleInfoArrayBoolean rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE : NO_OVERRIDE
 \addindex rule_ios_BundleInfoArrayBoolean
 
 For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of booleans to the bundle's <tt>Info.plist</tt>.
@@ -243,6 +243,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of boolean
 \param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
 \param VALUE The boolean array value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param NO_OVERRIDE Pass <tt>1</tt> or <tt>true</tt> to not affect an already existing entry.
 
 \code
     ios.BundleInfoArrayBoolean : MyBooleanArray : false true true false ;
@@ -329,7 +330,7 @@ For the given bundle \c TARGET, end the current array entry begun with \ref rule
 
 
 <hr>
-\section rule_ios_BundleInfoArrayInteger rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE
+\section rule_ios_BundleInfoArrayInteger rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE : NO_OVERRIDE
 \addindex rule_ios_BundleInfoArrayInteger
 
 For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of integers to the bundle's <tt>Info.plist</tt>.
@@ -337,6 +338,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of integer
 \param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
 \param VALUE The integer array value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param NO_OVERRIDE Pass <tt>1</tt> or <tt>true</tt> to not affect an already existing entry.
 
 \code
     ios.BundleInfoArrayInteger : MyIntegerArray : 0 1 2 3 4 5 ;
@@ -350,7 +352,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of integer
 
 
 <hr>
-\section rule_ios_BundleInfoArrayString rule ios.BundleInfoArrayString TARGET : KEY : VALUE
+\section rule_ios_BundleInfoArrayString rule ios.BundleInfoArrayString TARGET : KEY : VALUE : NO_OVERRIDE
 \addindex rule_ios_BundleInfoArrayString
 
 For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of strings to the bundle's <tt>Info.plist</tt>.
@@ -358,6 +360,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of strings
 \param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
 \param VALUE The string array value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param NO_OVERRIDE Pass <tt>1</tt> or <tt>true</tt> to not affect an already existing entry.
 
 \code
     ios.BundleInfoArrayString : UIRequiredDeviceCapabilities : armv7 armv8 ;
@@ -371,7 +374,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of strings
 
 
 <hr>
-\section rule_ios_BundleInfoBoolean rule ios.BundleInfoBoolean TARGET : KEY : VALUE
+\section rule_ios_BundleInfoBoolean rule ios.BundleInfoBoolean TARGET : KEY : VALUE : NO_OVERRIDE
 \addindex rule_ios_BundleInfoBoolean
 
 For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as a boolean type to the bundle's <tt>Info.plist</tt>.
@@ -379,6 +382,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as a boolean type to t
 \param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
 \param VALUE The value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param NO_OVERRIDE Pass <tt>1</tt> or <tt>true</tt> to not affect an already existing entry.
 
 \code
     ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
@@ -434,7 +438,7 @@ For the given bundle \c TARGET, end the current dict entry begun with \ref rule_
 
 
 <hr>
-\section rule_ios_BundleInfoInteger rule ios.BundleInfoInteger TARGET : KEY : VALUE
+\section rule_ios_BundleInfoInteger rule ios.BundleInfoInteger TARGET : KEY : VALUE : NO_OVERRIDE
 \addindex rule_ios_BundleInfoInteger
 
 For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an integer type to the bundle's <tt>Info.plist</tt>.
@@ -442,6 +446,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an integer type to 
 \param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
 \param VALUE The value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param NO_OVERRIDE Pass <tt>1</tt> or <tt>true</tt> to not affect an already existing entry.
 
 \code
     ios.BundleInfoInteger : Unity_LoadingActivityIndicatorStyle : -1 ;
@@ -455,7 +460,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an integer type to 
 
 
 <hr>
-\section rule_ios_BundleInfoString rule ios.BundleInfoString TARGET : KEY : VALUE
+\section rule_ios_BundleInfoString rule ios.BundleInfoString TARGET : KEY : VALUE : NO_OVERRIDE
 \addindex rule_ios_BundleInfoString
 
 For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as string type to the bundle's <tt>Info.plist</tt>.
@@ -463,6 +468,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as string type to the 
 \param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
 \param VALUE The value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param NO_OVERRIDE Pass <tt>1</tt> or <tt>true</tt> to not affect an already existing entry.
 
 \code
     ios.BundleInfoString : CFBundleName : simple ;
@@ -476,7 +482,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as string type to the 
 
 
 <hr>
-\section rule_ios_BundleInfo rule ios.BundleInfo TARGET : KEY : VALUE
+\section rule_ios_BundleInfo rule ios.BundleInfo TARGET : KEY : VALUE : NO_OVERRIDE
 \addindex rule_ios_BundleInfo
 
 For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of strings to the bundle's <tt>Info.plist</tt>.
@@ -484,6 +490,7 @@ For the given bundle \c TARGET, assign <tt>KEY=VALUE</tt> as an array of strings
 \param TARGET The bundle target to affect the <tt>Info.plist</tt> for. \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param KEY The key portion of the key/value pair to set within the <tt>Info.plist</tt>.
 \param VALUE The value portion of the key/value pair to set within the <tt>Info.plist</tt>.
+\param NO_OVERRIDE Pass <tt>1</tt> or <tt>true</tt> to not affect an already existing entry.
 
 \htmlonly <blockquote> \endhtmlonly
 <ul>

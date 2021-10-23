@@ -243,6 +243,15 @@ rule ios.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 }
 
 LuaString "
+function GetInfoPlistCurrentLevelNoCreate()
+	if not plist then
+		plist = require 'plist'
+	end
+	local plistName = jam_getvar('C.ACTIVE_TOOLCHAIN_TARGET_GRIST')[1] .. ':Info.plist'
+	return _G[plistName]
+end
+
+
 function GetInfoPlistCurrentLevel()
 	if not plist then
 		plist = require 'plist'
@@ -279,21 +288,40 @@ end
 " ;
 
 
-rule ios.BundleInfoBoolean TARGET : KEY : VALUE {
+rule ios.BundleInfoBoolean TARGET : KEY : VALUE : NO_OVERRIDE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')[1] == 'true'" ;
+	LuaString "
+		local key = jam_getvar('KEY')[1]
+		local pl = GetInfoPlistCurrentLevel()
+		if not jam_getvar('NO_OVERRIDE')[1] or not pl[key] then
+			pl[key] = jam_getvar('VALUE')[1] == 'true'
+		end
+		" ;
 }
 
 
-rule ios.BundleInfoInteger TARGET : KEY : VALUE {
+rule ios.BundleInfoInteger TARGET : KEY : VALUE : NO_OVERRIDE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = tonumber(jam_getvar('VALUE')[1])" ;
+	LuaString "
+		local key = jam_getvar('KEY')[1]
+		local pl = GetInfoPlistCurrentLevel()
+		if not jam_getvar('NO_OVERRIDE')[1] or not pl[key] then
+			pl[key] = tonumber(jam_getvar('VALUE')[1])
+		end
+		" ;
 }
 
 
-rule ios.BundleInfoString TARGET : KEY : VALUE {
+rule ios.BundleInfoString TARGET : KEY : VALUE : NO_OVERRIDE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
-	LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')[1]" ;
+	LuaString "
+		local key = jam_getvar('KEY')[1]
+		local pl = GetInfoPlistCurrentLevel()
+		if not jam_getvar('NO_OVERRIDE')[1] or not pl[key] then
+			pl[key] = jam_getvar('VALUE')[1]
+		end
+		" ;
 }
 
 
@@ -354,10 +382,20 @@ rule ios.BundleInfoArrayDictEnd TARGET {
 }
 
 
-rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE {
+rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE : NO_OVERRIDE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	if $(VALUE) {
-		LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')" ;
+		LuaString "
+			local key = jam_getvar('KEY')[1]
+			local pl = GetInfoPlistCurrentLevel()
+			if not jam_getvar('NO_OVERRIDE')[1] or not pl[key] then
+				local values = jam_getvar('VALUE')
+				for index, value in ipairs(values) do
+					values[index] = value == 'true'
+				end
+				pl[key] = values
+			end
+			" ;
 	} else {
 		LuaString "
 			local currentLevel = GetInfoPlistCurrentLevel()
@@ -371,15 +409,19 @@ rule ios.BundleInfoArrayBoolean TARGET : KEY : VALUE {
 }
 
 
-rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE {
+rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE : NO_OVERRIDE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	if $(VALUE) {
 		LuaString "
-			local values = jam_getvar('VALUE')
-			for index, value in ipairs(values) do
-				values[index] = tonumber(value)
+			local key = jam_getvar('KEY')[1]
+			local pl = GetInfoPlistCurrentLevel()
+			if not jam_getvar('NO_OVERRIDE')[1] or not pl[key] then
+				local values = jam_getvar('VALUE')
+				for index, value in ipairs(values) do
+					values[index] = tonumber(value)
+				end
+				pl[key] = values
 			end
-			GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = values
 " ;
 	} else {
 		LuaString "
@@ -393,10 +435,16 @@ rule ios.BundleInfoArrayInteger TARGET : KEY : VALUE {
 }
 
 
-rule ios.BundleInfoArrayString TARGET : KEY : VALUE {
+rule ios.BundleInfoArrayString TARGET : KEY : VALUE : NO_OVERRIDE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	if $(VALUE) {
-		LuaString "GetInfoPlistCurrentLevel()[jam_getvar('KEY')[1]] = jam_getvar('VALUE')" ;
+		LuaString "
+			local key = jam_getvar('KEY')[1]
+			local pl = GetInfoPlistCurrentLevel()
+			if not jam_getvar('NO_OVERRIDE')[1] or not pl[key] then
+				pl[key] = jam_getvar('VALUE')
+			end
+			" ;
 	} else {
 		LuaString "
 			local currentLevel = GetInfoPlistCurrentLevel()
@@ -409,16 +457,16 @@ rule ios.BundleInfoArrayString TARGET : KEY : VALUE {
 }
 
 
-rule ios.BundleInfo TARGET : TYPE : VALUE {
+rule ios.BundleInfo TARGET : TYPE : VALUE : NO_OVERRIDE {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	on $(C.ACTIVE_TOOLCHAIN_TARGET) if ! $(INFO_PLIST_KEYS) {
 		INFO_PLIST_KEYS on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
 
-		ios.BundleInfoString : CFBundleDevelopmentRegion : en ;
-		ios.BundleInfoString : CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] ;
-		ios.BundleInfoString : CFBundleInfoDictionaryVersion : 6.0 ;
-		ios.BundleInfoString : CFBundlePackageType : APPL ;
-		ios.BundleInfoString : CFBundleSignature : ???? ;
+		ios.BundleInfoString : CFBundleDevelopmentRegion : en : $(NO_OVERRIDE) ;
+		ios.BundleInfoString : CFBundleExecutable : [ C._retrieveOutputName $(TARGET) ] : $(NO_OVERRIDE) ;
+		ios.BundleInfoString : CFBundleInfoDictionaryVersion : 6.0 : $(NO_OVERRIDE) ;
+		ios.BundleInfoString : CFBundlePackageType : APPL : $(NO_OVERRIDE) ;
+		ios.BundleInfoString : CFBundleSignature : ???? : $(NO_OVERRIDE) ;
 
 		switch $(C.PLATFORM) {
 			case ios :
@@ -429,27 +477,27 @@ rule ios.BundleInfo TARGET : TYPE : VALUE {
 				minimumsdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 				minimumsdkversion ?= $(IOS_DEFAULT_MINIMUM_SDK_VERSION) ;
 
-				ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
-				ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 ;
-				ios.BundleInfoString : DTPlatformName : iphoneos ;
-				ios.BundleInfoString : DTPlatformVersion : $(sdkversion) ;
-				ios.BundleInfoString : DTSDKName : iphoneos$(sdkversion) ;
+				ios.BundleInfoBoolean : LSRequiresIPhoneOS : true : $(NO_OVERRIDE) ;
+				ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 : $(NO_OVERRIDE) ;
+				ios.BundleInfoString : DTPlatformName : iphoneos : $(NO_OVERRIDE) ;
+				ios.BundleInfoString : DTPlatformVersion : $(sdkversion) : $(NO_OVERRIDE) ;
+				ios.BundleInfoString : DTSDKName : iphoneos$(sdkversion) : $(NO_OVERRIDE) ;
 				if ! $(NT) {
 					local xcodeVersions = [ Match "Xcode ([^$(NEWLINE)]*).*Build version ([^$(NEWLINE)]*)" : [ Shell "xcodebuild -version" ] ] ;
 					xcodeVersions = [ Subst $(xcodeVersions[1]) : "%." : "" ] $(xcodeVersions[2]) ;
 					xcodeVersions = 0$(xcodeVersions[1]) $(xcodeVersions[2]) ;
-					ios.BundleInfoString : DTXcode : $(xcodeVersions[1]) ;
-					ios.BundleInfoString : DTXcodeBuild : $(xcodeVersions[2]) ;
+					ios.BundleInfoString : DTXcode : $(xcodeVersions[1]) : $(NO_OVERRIDE) ;
+					ios.BundleInfoString : DTXcodeBuild : $(xcodeVersions[2]) : $(NO_OVERRIDE) ;
 
 					local sdkVersion = [ Match "([^$(NEWLINE)]*)" : [ Shell "xcrun --sdk iphoneos$(sdkversion) --show-sdk-build-version" ] ] ;
-					ios.BundleInfoString : DTSDKBuild : $(sdkVersion) ;
-					ios.BundleInfoString : DTPlatformBuild : $(sdkVersion) ;
+					ios.BundleInfoString : DTSDKBuild : $(sdkVersion) : $(NO_OVERRIDE) ;
+					ios.BundleInfoString : DTPlatformBuild : $(sdkVersion) : $(NO_OVERRIDE) ;
 
 					local osVersion = [ Match "([^$(NEWLINE)]*)" : [ Shell "sw_vers -buildVersion" ] ] ;
-					ios.BundleInfoString : BuildMachineOSBuild : $(osVersion) ;
+					ios.BundleInfoString : BuildMachineOSBuild : $(osVersion) : $(NO_OVERRIDE) ;
 				}
-				ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneOS ;
-				ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) ;
+				ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneOS : $(NO_OVERRIDE) ;
+				ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) : $(NO_OVERRIDE) ;
 				if $(TARGETINFO_LOCATE) {
 					Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
 
@@ -464,12 +512,12 @@ rule ios.BundleInfo TARGET : TYPE : VALUE {
 				minimumsdkversion ?= $(IOS_SDK_VERSION_MIN:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 				minimumsdkversion ?= $(IOS_DEFAULT_MINIMUM_SDK_VERSION) ;
 
-				ios.BundleInfoBoolean : LSRequiresIPhoneOS : true ;
-				ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 ;
-				ios.BundleInfoString : DTPlatformName : iphonesimulator ;
-				ios.BundleInfoString : DTSDKName : iphonesimulator$(sdkversion) ;
-				ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneSimulator ;
-				ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) ;
+				ios.BundleInfoBoolean : LSRequiresIPhoneOS : true : $(NO_OVERRIDE) ;
+				ios.BundleInfoArrayInteger : UIDeviceFamily : 1 2 : $(NO_OVERRIDE) ;
+				ios.BundleInfoString : DTPlatformName : iphonesimulator : $(NO_OVERRIDE) ;
+				ios.BundleInfoString : DTSDKName : iphonesimulator$(sdkversion) : $(NO_OVERRIDE) ;
+				ios.BundleInfoArrayString : CFBundleSupportedPlatforms : iPhoneSimulator : $(NO_OVERRIDE) ;
+				ios.BundleInfoString : MinimumOSVersion : $(minimumsdkversion) : $(NO_OVERRIDE) ;
 				if $(TARGETINFO_LOCATE) {
 					Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
 
@@ -479,28 +527,28 @@ rule ios.BundleInfo TARGET : TYPE : VALUE {
 	}
 
 	switch $(TYPE:L) {
-		case info :					ios.BundleInfoString : CFBundleGetInfoString : $(VALUE) ;
-		case iconfile :				ios.BundleInfoString : CFBundleIconFile : $(VALUE) ;
-		case iconfiles :			ios.BundleInfoArrayString : CFBundleIconFiles : $(VALUE) ;
-		case longversion :			ios.BundleInfoString : CFBundleLongVersionString : $(VALUE) ;
+		case info :					ios.BundleInfoString : CFBundleGetInfoString : $(VALUE) : $(NO_OVERRIDE) ;
+		case iconfile :				ios.BundleInfoString : CFBundleIconFile : $(VALUE) : $(NO_OVERRIDE) ;
+		case iconfiles :			ios.BundleInfoArrayString : CFBundleIconFiles : $(VALUE) : $(NO_OVERRIDE) ;
+		case longversion :			ios.BundleInfoString : CFBundleLongVersionString : $(VALUE) : $(NO_OVERRIDE) ;
 		case bundlename :
-			ios.BundleInfoString : CFBundleName : $(VALUE) ;
+			ios.BundleInfoString : CFBundleName : $(VALUE) : $(NO_OVERRIDE) ;
 			CFBundleName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case displayname :
-			ios.BundleInfoString : CFBundleDisplayName : $(VALUE) ;
+			ios.BundleInfoString : CFBundleDisplayName : $(VALUE) : $(NO_OVERRIDE) ;
 			CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case executable :			ios.BundleInfoString : CFBundleExecutable : $(VALUE) ;
 		case identifier :
-			ios.BundleInfoString : CFBundleIdentifier : $(VALUE) ;
+			ios.BundleInfoString : CFBundleIdentifier : $(VALUE) : $(NO_OVERRIDE) ;
 			CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
 		case shortversion :			ios.BundleInfoString : CFBundleShortVersionString : $(VALUE) ;
 		case bundleversion :
-			ios.BundleInfoString : CFBundleVersion : $(VALUE) ;
+			ios.BundleInfoString : CFBundleVersion : $(VALUE) : $(NO_OVERRIDE) ;
 			CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VALUE) ;
-		case copyright :			ios.BundleInfoString : NSHumanReadableCopyright : $(VALUE) ;
-		case mainnibfile :			ios.BundleInfoString : NSMainNibFile : $(VALUE) ;
-		case supportedplatforms :   ios.BundleInfoArrayString : CFBundleSupportedPlatforms : $(VALUE) ;
-		case minimumosversion :		ios.BundleInfoString : MinimumOSVersion : $(VALUE) ;
+		case copyright :			ios.BundleInfoString : NSHumanReadableCopyright : $(VALUE) : $(NO_OVERRIDE) ;
+		case mainnibfile :			ios.BundleInfoString : NSMainNibFile : $(VALUE) : $(NO_OVERRIDE) ;
+		case supportedplatforms :   ios.BundleInfoArrayString : CFBundleSupportedPlatforms : $(VALUE) : $(NO_OVERRIDE) ;
+		case minimumosversion :		ios.BundleInfoString : MinimumOSVersion : $(VALUE) : $(NO_OVERRIDE) ;
 		case uidevicefamily :
 			local actualValues ;
 			local value ;
@@ -517,27 +565,27 @@ rule ios.BundleInfo TARGET : TYPE : VALUE {
 					actualValues += $(value) ;
 				}
 			}
-			ios.BundleInfoArrayInteger : UIDeviceFamily : $(actualValues) ;
+			ios.BundleInfoArrayInteger : UIDeviceFamily : $(actualValues) : $(NO_OVERRIDE) ;
 			if $(TARGETINFO_LOCATE) {
 				Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(actualValues:J=,)]]
 
 " ;
 			}
-		case uiprerenderedicon :	ios.BundleInfoBoolean : UIPrerenderedIcon : $(VALUE) ;
-		case uistatusbarhidden :	ios.BundleInfoBoolean : UIStatusBarHidden : $(VALUE) ;
-		case uiviewcontrollerbasedstatusbarappearance : ios.BundleInfoBoolean : UIViewControllerBasedStatusBarAppearance : $(VALUE) ;
+		case uiprerenderedicon :	ios.BundleInfoBoolean : UIPrerenderedIcon : $(VALUE) : $(NO_OVERRIDE) ;
+		case uistatusbarhidden :	ios.BundleInfoBoolean : UIStatusBarHidden : $(VALUE) : $(NO_OVERRIDE) ;
+		case uiviewcontrollerbasedstatusbarappearance : ios.BundleInfoBoolean : UIViewControllerBasedStatusBarAppearance : $(VALUE) : $(NO_OVERRIDE) ;
 		case uiinterfaceorientation :
 			if $(VALUE) = portrait {
-				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationPortrait ;
+				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationPortrait : $(NO_OVERRIDE) ;
 			}
 			if $(VALUE) = portraitupsidedown {
-				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationPortraitUpsideDown ;
+				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationPortraitUpsideDown : $(NO_OVERRIDE) ;
 			}
 			if $(VALUE) = landscapeleft {
-				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationLandscapeLeft ;
+				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationLandscapeLeft : $(NO_OVERRIDE) ;
 			}
 			if $(VALUE) = landscaperight {
-				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationLandscapeRight ;
+				ios.BundleInfoString : UIInterfaceOrientation : UIInterfaceOrientationLandscapeRight : $(NO_OVERRIDE) ;
 			}
 		case uisupportedinterfaceorientations :
 			local values = ;
@@ -553,7 +601,7 @@ rule ios.BundleInfo TARGET : TYPE : VALUE {
 			if landscaperight in $(VALUE) {
 				values += UIInterfaceOrientationLandscapeRight ;
 			}
-			ios.BundleInfoArrayString : UISupportedInterfaceOrientations : $(values) ;
+			ios.BundleInfoArrayString : UISupportedInterfaceOrientations : $(values) : $(NO_OVERRIDE) ;
 	}
 }
 
