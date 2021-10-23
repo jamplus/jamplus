@@ -1147,6 +1147,10 @@ rule C.ios._ApplicationFromObjects_PostBuild {
 	if bundle in $(OPTIONS) {
 		ios.Bundle ;
 	}
+
+	if archive in $(OPTIONS) {
+		ios.Archive ;
+	}
 }
 
 
