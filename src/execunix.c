@@ -73,6 +73,8 @@ static intptr_t my_wait( int *status );
 #include <stdlib.h>
 #include <errno.h>
 
+#include "filesys.h"
+
 #ifdef OPT_INTERRUPT_FIX
 int intr = 0;
 #else
@@ -117,10 +119,13 @@ onintr( int disp )
 }
 
 #ifdef OPT_SERIAL_OUTPUT_EXT
+char* tempjamdir;
+
 void
 exec_init()
 {
 	char 	*tempdir;
+	size_t	tempdirlen;
 	int		i;
 
 # ifdef USE_EXECNT
@@ -136,6 +141,12 @@ exec_init()
 	else if( getenv( "TMP" ) )
 		tempdir = getenv( "TMP" );
 
+	tempdirlen = strlen(tempdir);
+
+	tempjamdir = malloc(tempdirlen + 1 + 3 + 1);	/* "/jam/" */
+	strncpy(tempjamdir, tempdir, tempdirlen);
+	tempjamdir[tempdirlen] = PATH_DELIM;
+	strcpy(tempjamdir + tempdirlen + 1, "jam");
 	{
 		LIST *jobsList = var_get( "JAM_NUM_JOBS" );
 		if ( list_first(jobsList) )
@@ -148,9 +159,13 @@ exec_init()
 
 	for( i = 0; i < globs.jobs; ++i )
 	{
-		cmdtab[ i ].outputFilename = malloc( strlen( tempdir ) + 32 );
+		cmdtab[ i ].outputFilename = malloc( strlen( tempjamdir ) + 32 );
 		sprintf( cmdtab[ i ].outputFilename, "%s%cjam%dout%d",
-			tempdir, PATH_DELIM, getpid(), i );
+			tempjamdir, PATH_DELIM, getpid(), i );
+		if (i == 0)
+		{
+			file_mkdir( cmdtab[i].outputFilename );
+		}
 	}
 }
 
@@ -333,23 +348,12 @@ execcmd(
 /* # ifdef USE_EXECNT *//* CWM */
 	if( !cmdtab[ slot ].tempfile )
 	{
-		char *tempdir;
-
-		if( !( tempdir = getenv( "TMPDIR" ) ) &&
-			!( tempdir = getenv( "TEMP" ) ) &&
-			!( tempdir = getenv( "TMP" ) ) )
-# ifdef USE_EXECNT /* CWM */
-			tempdir = "\\temp";
-# else
-		    tempdir = "/tmp";
-# endif
-
 		/* +32 is room for \jamXXXXXcmdSS.bat (at least) */
 
-		cmdtab[ slot ].tempfile = malloc( strlen( tempdir ) + 32 );
+		cmdtab[ slot ].tempfile = malloc( strlen( tempjamdir ) + 32 );
 
 		sprintf( cmdtab[ slot ].tempfile, "%s%cjam%dcmd%d.bat",
-			tempdir, PATH_DELIM, getpid(), slot );
+			tempjamdir, PATH_DELIM, getpid(), slot );
 	}
 
 # ifdef USE_EXECNT
