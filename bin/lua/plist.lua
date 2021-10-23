@@ -106,12 +106,22 @@ function M.readbuffer(buffer)
 end
 
 
-local function ExportDict(entry, out, spaces)
+local function ExportDict(entry, out, spaces, sort)
     local origSpaces = spaces
     out[#out + 1] = origSpaces .. '<dict>\n'
     spaces = spaces .. '  '
+
+    local sortedEntries = {}
     for index = 1, #entry do
-        local subEntry = entry[index]
+        sortedEntries[#sortedEntries + 1] = index
+    end
+
+    if sort then
+        table.sort(sortedEntries, function(left, right) return entry[left].key < entry[right].key end)
+    end
+
+    for index = 1, #sortedEntries do
+        local subEntry = entry[sortedEntries[index]]
         out[#out + 1] = spaces .. '<key>' .. subEntry.key .. '</key>\n'
         if type(subEntry.value) == 'string' then
             out[#out + 1] = spaces .. '<string>' .. subEntry.value .. '</string>\n'
@@ -130,7 +140,7 @@ local function ExportDict(entry, out, spaces)
                 if type(subValue) == 'table' then
                     for dictIndex = 1, #subEntry.value do
                         local dictEntry = subEntry.value[dictIndex]
-                        ExportDict(dictEntry, out, spaces .. '  ')
+                        ExportDict(dictEntry, out, spaces .. '  ', sort)
                     end
                 elseif type(subValue) == 'string' then
                     for listIndex = 1, #subEntry.value do
@@ -148,21 +158,21 @@ local function ExportDict(entry, out, spaces)
                 out[#out + 1] = spaces .. '<array/>\n'
             end
         elseif type(subEntry.value) == 'table'  and  getmetatable(subEntry.value) == plistDictMetatable then
-            ExportDict(subEntry.value, out, spaces)
+            ExportDict(subEntry.value, out, spaces, sort)
         end
     end
     out[#out + 1] = origSpaces .. '</dict>\n'
 end
 
 
-function M.dump(dict)
+function M.dump(dict, sort)
     local out = {}
     out[#out + 1] = '<?xml version="1.0" encoding="utf-8"?>\n'
     out[#out + 1] = '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n'
     out[#out + 1] = '<plist version="1.0">\n'
 
     if dict then
-        ExportDict(dict, out, '  ')
+        ExportDict(dict, out, '  ', sort)
     end
 
     out[#out + 1] = '</plist>'
@@ -170,10 +180,10 @@ function M.dump(dict)
 end
 
 
-function M.write(dict, filename)
+function M.write(dict, filename, sort)
     local file = io.open(filename, 'w')
     if not file then return end
-    file:write(M.dump(dict))
+    file:write(M.dump(dict, sort))
     file:close()
     return true
 end
