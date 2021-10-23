@@ -1051,7 +1051,9 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 				#Clean $(cleanBundleTarget) : $(codeResources) ;
 
 				local framework = $(destinationPath)/$(framework)/$(framework:S=) ;
-				CERTIFICATE_CHAIN on $(codeResources) $(framework) = $(CERTIFICATE_CHAIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				local certificateChain = $(CERTIFICATE_CHAIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+				certificateChain ?= "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCAG3.cer:private_key01.key:password" ;
+				CERTIFICATE_CHAIN on $(codeResources) $(framework) = $(certificateChain) ;
 				ios._CodeSignFramework $(codeResources) $(framework) : $(dependsList) $(framework) : $(C.COMPILER_SUITE_SYMBOL) ;
 			} else {
 				UseCommandLine $(codeResources) : $(dependsList) ;
@@ -1086,7 +1088,9 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 			Depends $(bundleTarget) : $(codeResources) : $(dependsList) $(linkTarget) ;
 			Clean $(cleanBundleTarget) : $(codeResources) ;
 
-			CERTIFICATE_CHAIN on $(codeResources) $(linkTarget) = $(CERTIFICATE_CHAIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			local certificateChain = $(CERTIFICATE_CHAIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			certificateChain ?= "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCAG3.cer:private_key01.key:password" ;
+			CERTIFICATE_CHAIN on $(codeResources) $(linkTarget) = $(certificateChain) ;
 			ENTITLEMENTS on $(codeResources) $(linkTarget) = $(entitlements) ;
 			ios._CodeSign $(codeResources) $(linkTarget) : $(dependsList) $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
 		} else {
@@ -2104,16 +2108,12 @@ rule ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
 	ActiveTarget $(TARGET) ;
 
 	if $(C.PLATFORM) in ios {
-		if $(IOSBUILDENV_PATH) {
-			if $(CERTIFICATE_CHAIN) {
-				CERTIFICATE_CHAIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CERTIFICATE_CHAIN) ;
-			} else {
-				CERTIFICATE_CHAIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = "::" ;
-			}
+		if $(CERTIFICATE_CHAIN) {
+			CERTIFICATE_CHAIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CERTIFICATE_CHAIN) ;
 		} else {
-			ENTITLEMENTS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(entitlements) ;
-			SIGNING_IDENTITY on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SIGNING_IDENTITY) ;
+			CERTIFICATE_CHAIN on $(C.ACTIVE_TOOLCHAIN_TARGET) = "::" ;
 		}
+		SIGNING_IDENTITY on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(SIGNING_IDENTITY) ;
 	}
 }
 
