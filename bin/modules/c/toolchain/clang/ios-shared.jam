@@ -804,7 +804,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 	for toolchain in $(TOOLCHAINS:E=$(C.ACTIVE_TOOLCHAIN)) {
 		linkTargets += [ C.GetLinkTargets $(TARGET) : $(toolchain) ] ;
 	}
-	C.ios.Lipo $(TARGET) : $(linkTargets) : $(bundlePath) ;
+	C.ios.Lipo $(TARGET) : $(linkTargets) : $(bundlePath).lipo ;
 
 	{
 		local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -1018,9 +1018,6 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 		}
 	}
 	
-	if $(C.PLATFORM) in ios iossimulator {
-		C.ios.GenerateDSYMFile $(TARGET) ;
-	}
 
 	if $(C.PLATFORM) in ios {
 		local destinationPath = $(bundlePath)/Frameworks ;
@@ -1072,7 +1069,17 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 	}
 
 	if $(C.PLATFORM) in ios {
-		local linkTarget = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		# Copy the lipo'ed executable to the bundle.
+		local lipoTarget = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local bundleTargetGrist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):bundle ;
+		local bundleLipoTarget = $(lipoTarget:G=$(bundleTargetGrist)) ;
+		MakeLocate $(bundleLipoTarget) : $(bundlePath) ;
+		Depends $(bundleTarget) : $(bundleLipoTarget) : $(lipoTarget) ;
+		BINDING on $(bundleLipoTarget) = $(lipoTarget:BS) ;
+		Copy1File $(bundleLipoTarget) : $(lipoTarget) ;
+		Clean $(cleanBundleTarget) : $(bundleLipoTarget) ;
+		BUNDLE_LIPO_TARGET on $(bundleTarget) = $(bundleLipoTarget) ;
+
 		local entitlements = $(ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		local signingIdentity = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		signingIdentity ?= "Apple Development" ;
@@ -1085,25 +1092,25 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 
 		if $(IOSBUILDENV_PATH) {
 			UseCommandLine $(codeResources) : $(dependsList) ;
-			Depends $(bundleTarget) : $(codeResources) : $(dependsList) $(linkTarget) ;
+			Depends $(bundleTarget) : $(codeResources) : $(dependsList) ;
 			Clean $(cleanBundleTarget) : $(codeResources) ;
 
 			local certificateChain = $(CERTIFICATE_CHAIN:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 			certificateChain ?= "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCAG3.cer:private_key01.key:password" ;
-			CERTIFICATE_CHAIN on $(codeResources) $(linkTarget) = $(certificateChain) ;
-			ENTITLEMENTS on $(codeResources) $(linkTarget) = $(entitlements) ;
-			ios._CodeSign $(codeResources) $(linkTarget) : $(dependsList) $(linkTarget) : $(C.COMPILER_SUITE_SYMBOL) ;
+			CERTIFICATE_CHAIN on $(codeResources) $(bundleLipoTarget) = $(certificateChain) ;
+			ENTITLEMENTS on $(codeResources) $(bundleLipoTarget) = $(entitlements) ;
+			ios._CodeSign $(codeResources) $(bundleLipoTarget) : $(dependsList) : $(C.COMPILER_SUITE_SYMBOL) ;
 		} else {
 			local codeResourcesSymbolicLink = [ C.GristFiles : CodeResourcesLink ] ;
 			BINDING on $(codeResourcesSymbolicLink) = CodeResources ;
 			MakeLocate $(codeResourcesSymbolicLink) : $(bundlePath) ;
 
-			BUNDLE_PATH on $(codeResources) $(linkTarget) = $(bundlePath) ;
-			ENTITLEMENTS on $(codeResources) $(linkTarget) = $(entitlements) ;
-			SIGNING_IDENTITY on $(codeResources) $(linkTarget) = $(signingIdentity) ;
+			BUNDLE_PATH on $(codeResources) $(bundleLipoTarget) = $(bundlePath) ;
+			ENTITLEMENTS on $(codeResources) $(bundleLipoTarget) = $(entitlements) ;
+			SIGNING_IDENTITY on $(codeResources) $(bundleLipoTarget) = $(signingIdentity) ;
 
 			local dsym_name = $(DSYM_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-			DSYM_NAME on $(codeResources) $(linkTarget) = $(dsym_name) ;
+			DSYM_NAME on $(codeResources) $(bundleLipoTarget) = $(dsym_name) ;
 
 			UseCommandLine $(codeResources) : $(dependsList) $(dsym_name) ;
 			Depends $(bundleTarget) : $(codeResources) : $(dependsList) $(dsym_name) ;
@@ -1113,6 +1120,9 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 		}
 	}
 
+	if $(C.PLATFORM) in ios iossimulator {
+		C.ios.GenerateDSYMFile $(TARGET) ;
+	}
 }
 
 } else { # TARGETINFO_LOCATE
@@ -2129,7 +2139,8 @@ rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK : OPTIONS {
 		TARGET = [ ActiveTarget $(TARGET) ] ;
 
 		local bundlePath = [ ios.GetBundlePath ] ;
-		local linkTarget = $(LINK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+		local bundleTarget = [ ios.GetBundleTarget ] ;
+		local bundleTargetDependsList = [ DependsList $(bundleTarget) ] ;
 
 		local archiveTarget = archive:$(TARGET) ;
 		NotFile $(archiveTarget) ;
@@ -2144,12 +2155,12 @@ rule ios.Archive TARGET : OUTPUT_PATH : ITUNES_ARTWORK : OPTIONS {
 			Search on $(ITUNES_ARTWORK) = $(itunesArtworkDirectory:E=$(SUBDIR)) ;
 			Depends $(archiveTarget) : $(ipaTarget) : $(ITUNES_ARTWORK) ;
 		}
-		Depends $(archiveTarget) : $(ipaTarget) : $(TARGET:G=$(C.ACTIVE_TOOLCHAIN_GRIST)) ;
+		Depends $(archiveTarget) : $(ipaTarget) : $(bundleTarget) ;
 		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(ipaTarget) ;
 		BUNDLE_PATH on $(ipaTarget) = $(bundlePath) ;
 		SIGNING_IDENTITY on $(ipaTarget) = $(SIGNING_IDENTITY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		ITUNES_ARTWORK on $(ipaTarget) = $(ITUNES_ARTWORK) ;
-		ios._Archive $(ipaTarget) : $(linkTarget) $(ITUNES_ARTWORK) : $(C.COMPILER_SUITE_SYMBOL) ;
+		ios._Archive $(ipaTarget) : $(bundleTargetDependsList) $(ITUNES_ARTWORK) : $(C.COMPILER_SUITE_SYMBOL) ;
 
 		if $(NT) {
 			# Set up an install target.
