@@ -16,9 +16,7 @@
 <div class="contents">
 <div class="textblock"><p>The iOS module contains special build rules to create a C/C++/Objective C/Objective C++ iOS application from start to finish.</p>
 <p>The <code>ios</code> module will automatically detect the appropriate compilers and set up some architecture-specific items.</p>
-<div class="fragment"><div class="line"><span class="preprocessor"># This goes in the Jamfile.</span></div>
-<div class="line"><span class="preprocessor">ios.SDK 8.0 ;</span></div>
-</div><!-- fragment --><p>Next, some combination of the following rule calls (and any others described below) are needed to build a full iOS .ipa for installation and distribution.</p>
+<p>Next, some combination of the following rule calls (and any others described below) are needed to build a full iOS .ipa for installation and distribution.</p>
 <div class="fragment"><div class="line">C.ActiveTarget sdltest ;</div>
 <div class="line">ios.BundleInfo : displayname : sdltest ;</div>
 <div class="line">ios.BundleInfo : bundleversion : 1.0 ;</div>
@@ -32,11 +30,13 @@
 <div class="line">ios.Bundle ;</div>
 <div class="line"> </div>
 <div class="line">local bundlePath = [ ios.GetBundlePath ] ;</div>
-<div class="line">ios.Archive : $(bundlePath)/../package : : webserver ;</div>
+<div class="line">ios.Archive : $(bundlePath)/../package : : install webserver ;</div>
 </div><!-- fragment --><p>An iOS build is initiated with a <code>C.TOOLCHAIN</code> of <code>ios/CONFIG</code>. This will build the application bundle, but it will not build the <code>.ipa</code>.</p>
 <div class="fragment"><div class="line">&gt;jam C.TOOLCHAIN=ios/release</div>
 </div><!-- fragment --><p>To bundle up an <code>.ipa</code>, build the <code>archive:TARGET</code> target.</p>
 <div class="fragment"><div class="line">&gt;jam C.TOOLCHAIN=ios/release archive:TARGET</div>
+</div><!-- fragment --><p>To install the <code>.ipa</code>, build the <code>install:TARGET</code> target. Be sure to have the <code>ideviceinstaller.exe</code> binaries in <code>bin/PLATFORM/libimobiledevice/</code>.</p>
+<div class="fragment"><div class="line">&gt;jam C.TOOLCHAIN=ios/release install:TARGET</div>
 </div><!-- fragment --><h1><a class="anchor" id="module_ios_ruleslist"></a>
 List of Rules</h1>
 <div>

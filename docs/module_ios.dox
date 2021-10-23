@@ -4,10 +4,6 @@ The iOS module contains special build rules to create a C/C++/Objective C/Object
 
 The \c ios module will automatically detect the appropriate compilers and set up some architecture-specific items.
 
-\code
-    # This goes in the Jamfile.
-    ios.SDK 8.0 ;
-\endcode
 
 Next, some combination of the following rule calls (and any others described below) are needed to build a full iOS .ipa for installation and distribution.
 
@@ -25,7 +21,7 @@ Next, some combination of the following rule calls (and any others described bel
     ios.Bundle ;
 
     local bundlePath = [ ios.GetBundlePath ] ;
-    ios.Archive : $(bundlePath)/../package : : webserver ;
+    ios.Archive : $(bundlePath)/../package : : install webserver ;
 \endcode
 
 An iOS build is initiated with a <tt>C.TOOLCHAIN</tt> of <tt>ios/CONFIG</tt>. This will build the application bundle, but it will not build the <tt>.ipa</tt>.
@@ -38,6 +34,12 @@ To bundle up an <tt>.ipa</tt>, build the <tt>archive:TARGET</tt> target.
 
 \code
 >jam C.TOOLCHAIN=ios/release archive:TARGET
+\endcode
+
+To install the <tt>.ipa</tt>, build the <tt>install:TARGET</tt> target. Be sure to have the <tt>ideviceinstaller.exe</tt> binaries in <tt>bin/PLATFORM/libimobiledevice/</tt>.
+
+\code
+>jam C.TOOLCHAIN=ios/release install:TARGET
 \endcode
 
 \section module_ios_ruleslist List of Rules
