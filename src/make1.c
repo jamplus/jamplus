@@ -922,7 +922,14 @@ make1d(
 
 	if( DEBUG_EXEC || (status == EXEC_CMD_FAIL && DEBUG_MAKE) )
 	{
-	    printf( "%s\n", buffer_ptr(&cmd->commandbuff) );
+		if (!buffer_isempty(&cmd->commandbuff))
+		{
+			printf( "%s\n", buffer_ptr(&cmd->commandbuff) );
+		}
+		if (cmd->luastring)
+		{
+			printf( "%s\n", cmd->luastring );
+		}
 #ifdef OPT_RESPONSE_FILES
 	    printResponseFiles(cmd);
 #endif
