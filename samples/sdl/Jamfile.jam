@@ -1,6 +1,6 @@
 SubDir TOP ;
 
-SubIncludeRelative SDL2-2.0.12 : ../sdl2 ;
+SubIncludeRelative SDL2-2.0.16 : ../sdl2 ;
 
 local SRCS =
         sdltest.c
@@ -39,8 +39,9 @@ if $(PLATFORM) in * win32 win64 {
 
     C.Application : $(SRCS) ;
 
-    ios.ProvisionFile : test.mobileprovision ;
-    ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
+    ios.BundleInfo : identifier : com.jamplus.test ;
+    #ios.ProvisionFile : test.mobileprovision ;
+    #ios.CodeSign : "iPhone Developer" : "ios_development.cer:AppleIncRootCertificate.cer:AppleWWDRCA.cer:my_key.key:" ;
     ios.Bundle ;
 
     ios.Archive : $(BUNDLE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))/../package ;

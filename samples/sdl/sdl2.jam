@@ -36,8 +36,14 @@ rule Build.sdl2 TOOLCHAINS {
                 src/file/*.h
                 src/joystick/hidapi/*.c
                 src/joystick/hidapi/*.h
+                src/joystick/virtual/*.c
+                src/joystick/virtual/*.h
                 src/libm/*.c
                 src/libm/*.h
+                src/locale/*.c
+                src/locale/*.h
+                src/misc/*.c
+                src/misc/*.h
                 src/render/*.c
                 src/render/*.h
                 src/render/*/*.c
@@ -81,11 +87,10 @@ rule Build.sdl2 TOOLCHAINS {
             ;
 
             SRCS +=
-                    src/thread/windows/SDL_sysmutex.c
-                    src/thread/windows/SDL_syssem.c
-                    src/thread/windows/SDL_systhread.c
-                    src/thread/windows/SDL_systls.c
                     src/thread/generic/SDL_syscond.c
+                    src/thread/generic/SDL_syscond.h
+                    src/thread/windows/*.c
+                    src/thread/windows/*.h
             ;
 
             SRCS +=
@@ -113,13 +118,26 @@ rule Build.sdl2 TOOLCHAINS {
                     src/core/windows/*.h
             ;
 
+            SRCS +=
+                    src/locale/windows/*.c
+                    src/locale/windows/*.h
+            ;
+
+            SRCS +=
+                    src/misc/windows/*.c
+                    src/misc/windows/*.h
+            ;
+
             SDL_JOYSTICK = 1 ;
             if $(SDL_JOYSTICK) = 1 {
                 SRCS +=
-                        src/joystick/windows/SDL_dinputjoystick.c
-                        src/joystick/windows/SDL_dinputjoystick_c.h
-                        src/joystick/windows/SDL_windowsjoystick.c
-                        src/joystick/windows/SDL_xinputjoystick.c
+                        src/joystick/windows/*.c
+                        src/joystick/windows/*.h
+                ;
+
+                SRCS +=
+                        src/sensor/windows/*.c
+                        src/sensor/windows/*.h
                 ;
 
                 SRCS +=
@@ -316,8 +334,12 @@ rule Build.sdl2 TOOLCHAINS {
                     src/video/dummy/*.h
             ;
 
+            SRCS +=
+                    src/misc/ios/*.m
+            ;
+
             C.Flags : M MM : -fobjc-arc : public ;
-            C.ios.LinkFrameworks : AudioToolbox CoreAudio CoreGraphics Foundation QuartzCore UIKit : public ;
+            C.ios.LinkFrameworks : AVFAudio AudioToolbox CoreAudio CoreGraphics CoreHaptics CoreMotion Foundation GameController Metal OpenGLES QuartzCore UIKit : public ;
         }
 
         else if $(C.PLATFORM) in android {
@@ -401,6 +423,16 @@ rule Build.sdl2 TOOLCHAINS {
             ;
 
             SRCS +=
+                    src/locale/android/*.c
+                    src/locale/android/*.h
+            ;
+
+            SRCS +=
+                    src/misc/android/*.c
+                    src/misc/android/*.h
+            ;
+
+            SRCS +=
                     $(NDKROOT)/sources/android/cpufeatures/cpu-features.*
             ;
         }
@@ -461,7 +493,6 @@ rule Build.sdl2 TOOLCHAINS {
 
         #########################
         C.ActiveTarget sdl2main ;
-        #C.ForcePublic ;
 
         SRCS = ;
 
@@ -481,7 +512,12 @@ rule Build.sdl2 TOOLCHAINS {
             C.LinkPrebuiltLibraries : GLESv1_CM GLESv2 log c m : public ;
             C.LinkFlags : -Wl,--undefined=Java_org_libsdl_app_SDLActivity_nativeInit : public ;
 
+        } else if $(C.PLATFORM) in ios iossimulator {
+            SRCS =
+                    src/main/uikit/SDL_uikit_main.c
+            ;
         }
+
 
         C.IncludeDirectories : include : public ;
         C.Library : $(SRCS) ;
