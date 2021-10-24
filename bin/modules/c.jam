@@ -171,10 +171,14 @@ rule C.CompileOptions OPTIONS {
 	{
 		__MultiCppCompile_OutputAsTree = 1 ;
 	}
+	else if outputasflat in $(OPTIONS)
+	{
+		__MultiCppCompile_OutputAsTree = 0 ;
+	}
 }
 
 
-__MultiCppCompile_OutputAsTree = 0 ;
+__MultiCppCompile_OutputAsTree = 1 ;
 
 } # ! $(TARGETINFO_LOCATE)
 
