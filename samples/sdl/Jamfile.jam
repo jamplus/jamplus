@@ -30,7 +30,7 @@ if $(PLATFORM) in * win32 win64 {
     C.Application : $(SRCS) : windows ;
 
 } else if $(PLATFORM) in macosx32 macosx64 {
-    C.Application : $(SRCS) ;
+    C.Application : $(SRCS) : bundle ;
 
 } else if $(PLATFORM) in ios iossimulator {
     ios.BundleInfo : displayname : sdltest ;
