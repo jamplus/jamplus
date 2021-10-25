@@ -927,6 +927,22 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 				end
 " ;
 
+			local defaultEntitlements = "
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>application-identifier</key>
+	<string>__(AppIdentifierPrefix)__(CFBundleIdentifier)</string>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>__(AppIdentifierPrefix)__(CFBundleIdentifier)</string>
+	</array>
+</dict>
+</plist>
+" ;
+	defaultEntitlements = [ Subst $(defaultEntitlements) : __ : \$ ] ;
+
 			local getTaskAllowTrueEntitlement = "
 <?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
@@ -940,12 +956,18 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 " ;
 
 			local mergeEntitlements = $(MERGE_ENTITLEMENTS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			if ! $(mergeEntitlements) {
+				LuaString "
+					entitlementsPlist = plist.readbuffer(jam_getvar('defaultEntitlements')[1])
+" ;
+			}
 			if $(mergeEntitlements)
 			{
 				local sourcePath = $(mergeEntitlements[1]:T) ;
 				LuaString "
 					entitlementsPlist = plist.read(jam_getvar('sourcePath')[1])
 " ;
+
 				local sourceEntitlement ;
 				for sourceEntitlement in $(mergeEntitlements[2-]) {
 					local sourcePath = $(sourceEntitlement:T) ;
@@ -954,11 +976,13 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 						plist.merge(newEntitlementsPlist, entitlementsPlist)
 " ;
 				}
+			}
+			if 1 {
 				LuaString "
 					local newEntitlementsPlist = plist.readbuffer(jam_getvar('getTaskAllowTrueEntitlement')[1])
 					plist.merge(newEntitlementsPlist, entitlementsPlist)
 " ;
-				#if $(contents) {
+
 				if 1 {
 					local destEntitlementsPlist = @(Entitlements.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 					MakeLocate $(destEntitlementsPlist) : $(LOCATE_TARGET) ;
@@ -1068,6 +1092,10 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 		}
 	}
 
+	if $(C.PLATFORM) in ios iossimulator {
+		C.ios.GenerateDSYMFile $(TARGET) ;
+	}
+
 	if $(C.PLATFORM) in ios {
 		# Copy the lipo'ed executable to the bundle.
 		local lipoTarget = $(LIPO_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -1118,10 +1146,6 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 
 			ios._CodeSign $(codeResources) : $(dependsList) $(dsym_name) : $(C.COMPILER_SUITE_SYMBOL) ;
 		}
-	}
-
-	if $(C.PLATFORM) in ios iossimulator {
-		C.ios.GenerateDSYMFile $(TARGET) ;
 	}
 }
 
