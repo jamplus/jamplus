@@ -133,7 +133,12 @@ function VisualStudio201xProjectMetaTable:WriteHelper(outputPath, commandLines, 
 	end
 
 	-- Write header.
-    if self.Options.vs2019 then
+    if self.Options.vs2022 then
+        table.insert(self.Contents, expand([[
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+]]))
+	elseif self.Options.vs2019 then
         table.insert(self.Contents, expand([[
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -213,8 +218,15 @@ function VisualStudio201xProjectMetaTable:WriteHelper(outputPath, commandLines, 
     <ProjectGuid>$(Uuid)</ProjectGuid>
     <Keyword>MakeFileProj</Keyword>
 ]], extraInfo, info))
+		elseif self.Options.vs2022 then
+			table.insert(self.Contents, expand([[
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>$(Uuid)</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+]], extraInfo, info))
 		end
-		if not self.Options.vs2017  and  not self.Options.vs2019 then
+		if not self.Options.vs2017  and  not self.Options.vs2019  and  not self.Options.vs2022 then
 			table.insert(self.Contents, expand([[
   <PropertyGroup Label="Globals">
     <ProjectGUID>$(Uuid)</ProjectGUID>
@@ -363,13 +375,17 @@ function VisualStudio201xProjectMetaTable:WriteHelper(outputPath, commandLines, 
 				self.Contents[#self.Contents + 1] = [[
     <PlatformToolset>v120</PlatformToolset>
 ]]
-			elseif self.Options.vs2015  or  self.Options.vs2017  or  self.Options.vs2019 then
+			elseif self.Options.vs2015  or  self.Options.vs2017  or  self.Options.vs2019  or  self.Options.vs2022 then
 				if androidApplication then
 					self.Contents[#self.Contents + 1] = [[
     <PlatformToolset>Clang_3_8</PlatformToolset>
 ]]
 				else
-					if self.Options.vs2019 then
+					if self.Options.vs2022 then
+						self.Contents[#self.Contents + 1] = [[
+    <PlatformToolset>v143</PlatformToolset>
+]]
+					elseif self.Options.vs2019 then
 						self.Contents[#self.Contents + 1] = [[
     <PlatformToolset>v142</PlatformToolset>
 ]]
@@ -671,6 +687,13 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29503.13
+MinimumVisualStudioVersion = 10.0.40219.1
+]])
+	elseif self.Options.vs2022 then
+		table.insert(self.Contents, [[
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31815.197
 MinimumVisualStudioVersion = 10.0.40219.1
 ]])
 	end

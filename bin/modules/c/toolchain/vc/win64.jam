@@ -37,6 +37,30 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
     local RC ;
     local rc_nologo ;
     switch $(COMPILER) {
+        case vs2022 :
+            local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot10 ;
+            MSSDK10 = [ W32_GETREG $(key) ] ;
+            MSSDK = $(MSSDK10) ;
+
+            local MSSDK_VERSION = [ C.Toolchain.vc.win64.FindHighestValidSDKVersion ] ;
+            MSSDK_STDHDRS =
+                $(MSVCNT)/include
+                $(MSVCNT)/../../../Auxiliary/VS/include
+                $(MSSDK)/Include/$(MSSDK_VERSION)/ucrt
+                $(MSSDK)/Include/$(MSSDK_VERSION)/um
+                $(MSSDK)/Include/$(MSSDK_VERSION)/shared
+                $(MSSDK)/Include/$(MSSDK_VERSION)/winrt
+            ;
+            MSSDK_LINKDIRECTORIES =
+                $(MSVCNT)/lib/x64
+                $(MSVCNT)/lib/onecore/x64
+                $(MSSDK)/lib/$(MSSDK_VERSION)/ucrt/x64
+                $(MSSDK)/lib/$(MSSDK_VERSION)/um/x64
+            ;
+            MSVCBIN = "$(MSVCNT)/bin/HostX64/x64/" ;
+            RC = $(MSSDK)/bin/x64/rc ;
+            rc_nologo = /nologo ;
+
         case vs2019 :
             local key = HKEY_LOCAL_MACHINE SOFTWARE Microsoft "Windows Kits" "Installed Roots" KitsRoot10 ;
             MSSDK10 = [ W32_GETREG $(key) ] ;

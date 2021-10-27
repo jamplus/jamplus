@@ -2,6 +2,29 @@
 
 rule FindVisualStudioHelper VERSION : COMPILER {
     switch $(VERSION) {
+        case vs2022 :
+            local pf = $(ProgramFiles:J=" ") ;
+            VS170COMNTOOLS = "$(pf)/Microsoft Visual Studio/2022/Preview/Common7/Tools" ;
+            if [ Glob $(VS170COMNTOOLS) : VsDevCmd.bat ] {
+                MSVCNT = $(VS170COMNTOOLS) ;
+            } else {
+                VS170COMNTOOLS = "$(pf)/Microsoft Visual Studio/2022/Professional/Common7/Tools" ;
+                if [ Glob $(VS170COMNTOOLS) : VsDevCmd.bat ] {
+                    MSVCNT = $(VS170COMNTOOLS) ;
+                } else {
+                    VS170COMNTOOLS = "$(pf)/Microsoft Visual Studio/2022/Community/Common7/Tools" ;
+                    if [ Glob $(VS170COMNTOOLS) : VsDevCmd.bat ] {
+                        MSVCNT = $(VS170COMNTOOLS) ;
+                    }
+                }
+            }
+            if $(MSVCNT) {
+                MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
+                local dirs = [ Glob @(..\\..\\VC\\Tools\\MSVC:R=$(MSVCNT)) : * ] ;
+                MSVCNT = $(dirs[1]) ;
+                COMPILER = vs2022 ;
+            }
+
         case vs2019 :
             local pf = $(ProgramFiles(x86):J=" ") ;
             VS150COMNTOOLS = "$(pf)/Microsoft Visual Studio/2019/Professional/Common7/Tools" ;
@@ -222,7 +245,7 @@ rule C.Toolchain.vc.Detect THE_COMPILER : OPTIONS {
 
     # Do we need to attempt to detect the compiler?
     if ! $(THE_COMPILER)  ||  $(THE_COMPILER) = * {
-        for ver in $(VISUAL_STUDIO_FORCE_VERSION) vs2019 vs2017 vs2015 vs2013 vs2012 vs2010 vs2008 vs2005 vs2003 vs2002 vc6 {
+        for ver in $(VISUAL_STUDIO_FORCE_VERSION) vs2022 vs2019 vs2017 vs2015 vs2013 vs2012 vs2010 vs2008 vs2005 vs2003 vs2002 vc6 {
             C.COMPILER = [ FindVisualStudio $(ver) ] ;
             if $(C.COMPILER) {
                 break ;

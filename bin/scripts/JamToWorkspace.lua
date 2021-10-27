@@ -25,6 +25,7 @@ jamPath = ospath.simplify(ospath.join(ospath.make_absolute(scriptPath), '..'))
 
 Compilers =
 {
+	{ 'vs2022', 'Visual Studio 2022' },
 	{ 'vs2019', 'Visual Studio 2019' },
 	{ 'vs2017', 'Visual Studio 2017' },
 	{ 'vs2015', 'Visual Studio 2015' },
@@ -401,12 +402,13 @@ require 'ide/vs2013'
 require 'ide/vs2015'
 require 'ide/vs2017'
 require 'ide/vs2019'
+require 'ide/vs2022'
 require 'ide/codeblocks'
 require 'ide/xcode'
 require 'ide/xcode-native'
 
 if uname == 'windows' then
-	DefaultExporter = 'vs2015'
+	DefaultExporter = 'vs2019'
 elseif uname == 'darwin' then
 	DefaultExporter = 'xcode'
 else
@@ -551,6 +553,19 @@ Exporters =
 		Options =
 		{
 			vs2019 = true,
+		}
+	},
+
+	vs2022 =
+	{
+		Initialize = VisualStudio201xInitialize,
+		ProjectExporter = VisualStudio201xProject,
+		WorkspaceExporter = VisualStudio201xSolution,
+		Shutdown = VisualStudio201xShutdown,
+		Description = 'Generate Visual Studio 2022 solutions and projects.',
+		Options =
+		{
+			vs2022 = true,
 		}
 	},
 
