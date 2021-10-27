@@ -178,7 +178,7 @@ rule C.CompileOptions OPTIONS {
 }
 
 
-__MultiCppCompile_OutputAsTree = 1 ;
+__MultiCppCompile_OutputAsTree ?= 0 ;
 
 } # ! $(TARGETINFO_LOCATE)
 
