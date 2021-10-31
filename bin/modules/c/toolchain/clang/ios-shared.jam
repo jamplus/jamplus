@@ -2088,8 +2088,9 @@ rule ios.Provision TARGET : PROFILE_ID {
 	}
 
 	local _systemProfileDirectory ;
-	if ! $(_matchingProvision)
+	if ! $(_matchingProvision) && $(PROFILE_ID:SL) = .mobileprovision
 	{
+		_profileFilename = $(PROFILE_ID) ;
 		if $(NT)
 		{
 			_systemProfileDirectory = "$(IOSBUILDENV_PATH)/Keychain" ;
@@ -2099,8 +2100,8 @@ rule ios.Provision TARGET : PROFILE_ID {
 			_systemProfileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
 		}
 
-		SEARCH on $(_profileFilename) = $(_systemProfileDirectory) ;
-		if $(_profileFilename:TC/) != $(PROFILE_ID:BSTC/)
+		local _mobileProvision = [ Glob $(_systemProfileDirectory) : $(_profileFilename) ] ;
+		if $(_mobileProvision)
 		{
 			_matchingProvision = $(_profileFilename) ;
 		}
