@@ -970,6 +970,8 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 }
 
 
+} # ! $(TARGETINFO_LOCATE)
+
 ########################################################################
 ########################################################################
 
@@ -988,6 +990,9 @@ rule C.ConfigureFile TARGET : DESTINATION : SOURCE : OPTIONS {
 	ConfigureFileHelper $(DESTINATION) : $(SOURCE) : $(OPTIONS) ;
 }
 
+
+if ! $(TARGETINFO_LOCATE)
+{
 
 rule C.CreatePrecompiledHeader TARGET : NAME : HEADER {
 	C.ActiveTarget $(TARGET) ;

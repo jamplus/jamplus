@@ -416,6 +416,7 @@ local function XcodeHelper_WritePBXLegacyTarget(self, info, allTargets, projects
 			table.insert(self.Contents, expand([[
 		$(ShellScriptUuid) /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -503,6 +504,32 @@ local function XcodeHelper_WriteProjectXCBuildConfiguration(self, info, projectN
 			table.insert(self.Contents, "\t\t" .. info.ProjectConfigUuids[platformName][configName] .. ' /* ' .. platformAndConfigText .. ' */ = {\n')
 			table.insert(self.Contents, "\t\t\tisa = XCBuildConfiguration;\n")
 			table.insert(self.Contents, "\t\t\tbuildSettings = {\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_BOOL_CONVERSION = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_COMMA = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_CONSTANT_CONVERSION = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_EMPTY_BODY = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_ENUM_CONVERSION = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_INFINITE_RECURSION = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_INT_CONVERSION = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_OBJC_LITERAL_CONVERSION = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_RANGE_LOOP_ANALYSIS = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_STRICT_PROTOTYPES = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_SUSPICIOUS_MOVE = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN_UNREACHABLE_CODE = NO;\n")
+			table.insert(self.Contents, "\t\t\t\tCLANG_WARN__DUPLICATE_METHOD_MATCH = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tENABLE_STRICT_OBJC_MSGSEND = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tGCC_NO_COMMON_BLOCKS = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tGCC_WARN_64_TO_32_BIT_CONVERSION = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tGCC_WARN_ABOUT_RETURN_TYPE = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tGCC_WARN_UNDECLARED_SELECTOR = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tGCC_WARN_UNINITIALIZED_AUTOS = YES;\n")
+			table.insert(self.Contents, "\t\t\t\tGCC_WARN_UNUSED_FUNCTION = NO;\n")
+			table.insert(self.Contents, "\t\t\t\tGCC_WARN_UNUSED_VARIABLE = NO;\n")
 	--			table.insert(self.Contents, "\t\t\t\tOS = MACOSX;\n")
 			local productName = configInfo.OutputName
 --[[			if subProject.Options  and  subProject.Options.app then
@@ -580,6 +607,7 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 				table.insert(self.Contents, "\t\t\t\tCONFIGURATION_BUILD_DIR = \"" .. ospath.remove_slash(configInfo.OutputPath) .. "\";\n")
 			end
 
+			self.Contents[#self.Contents + 1] = '\t\t\t\tALWAYS_SEARCH_USER_PATHS = NO;\n'
 			if configInfo.Includes ~= '' then
 				self.Contents[#self.Contents + 1] = '\t\t\t\tUSER_HEADER_SEARCH_PATHS = "' .. configInfo.Includes .. '";\n'
 			end
@@ -661,12 +689,17 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 			end
 
 			-- Write CODE_SIGN_IDENTITY.
-			local codeSignIdentity = "iPhone Developer"
-			if subProject.IOS_SIGNING_IDENTITY  and  subProject.IOS_SIGNING_IDENTITY[platformName]  and  subProject.IOS_SIGNING_IDENTITY[platformName][configName] then
-				codeSignIdentity = subProject.IOS_SIGNING_IDENTITY[platformName][configName]
-			elseif Projects['C.*']  and  Projects['C.*'].IOS_SIGNING_IDENTITY  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName]  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName] then
-				codeSignIdentity = Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName]			
-		   	end
+			local codeSignIdentity
+			if platformName == 'ios'  or  platformName == 'iossimulator' then
+				codeSignIdentity = "iPhone Developer"
+				if subProject.IOS_SIGNING_IDENTITY  and  subProject.IOS_SIGNING_IDENTITY[platformName]  and  subProject.IOS_SIGNING_IDENTITY[platformName][configName] then
+					codeSignIdentity = subProject.IOS_SIGNING_IDENTITY[platformName][configName]
+				elseif Projects['C.*']  and  Projects['C.*'].IOS_SIGNING_IDENTITY  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName]  and  Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName] then
+					codeSignIdentity = Projects['C.*'].IOS_SIGNING_IDENTITY[platformName][configName]			
+				end
+			elseif platformName == 'macosx64'  or  platformName == 'macosx32' then
+				codeSignIdentity = "-"
+			end
 
 			local archs
 			if subProject.XCODE_ARCHITECTURE  and  subProject.XCODE_ARCHITECTURE[platformName]  and  subProject.XCODE_ARCHITECTURE[platformName][configName] then
@@ -680,10 +713,10 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 			else
 				archs = "$(ARCHS_STANDARD_32_64_BIT)"
 			end
-			self.Contents[#self.Contents + 1] = "\t\t\t\tARCHS = \"" .. archs .. "\";\n"
+			--self.Contents[#self.Contents + 1] = "\t\t\t\tARCHS = \"" .. archs .. "\";\n"
 
 			if platformName == 'ios'  or  platformName == 'iossimulator' then
-				table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_STANDARD)";\n')
+				--table.insert(self.Contents, '\t\t\t\tARCHS = "$(ARCHS_STANDARD)";\n')
 				table.insert(self.Contents, '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "' .. codeSignIdentity .. '";\n')
 				local targetedDeviceFamily = "1,2"
 				if subProject.TARGETED_DEVICE_FAMILY  and  subProject.TARGETED_DEVICE_FAMILY[platformName]  and  subProject.TARGETED_DEVICE_FAMILY[platformName][configName] then
@@ -692,7 +725,10 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 					targetedDeviceFamily = Projects['C.*'].TARGETED_DEVICE_FAMILY[platformName][configName]
 				end
 				table.insert(self.Contents, "\t\t\t\tTARGETED_DEVICE_FAMILY = \"" .. targetedDeviceFamily .. "\";\n")
+			elseif platformName == 'macosx64'  or  platformName == 'macosx32' then
+				table.insert(self.Contents, '\t\t\t\tCODE_SIGN_IDENTITY = "' .. codeSignIdentity .. '";\n')
 			end
+			table.insert(self.Contents, '\t\t\t\tCLANG_ENABLE_OBJC_WEAK = YES;\n')
 			table.insert(self.Contents, "\t\t\t};\n")
 			table.insert(self.Contents, '\t\t\tname = "' .. platformAndConfigText .. '";\n')
 			table.insert(self.Contents, "\t\t};\n")
@@ -768,7 +804,7 @@ function XcodeProjectMetaTable:Write(outputPath)
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 55;
 	objects = {
 
 ]])
@@ -799,6 +835,7 @@ function XcodeProjectMetaTable:Write(outputPath)
 	XcodeHelper_SortFoldersAndFiles(self, projectTree)
 
 	-- Write PBXBuildFile section.
+--[==[
 	table.insert(self.Contents, [[
 /* Begin PBXBuildFile section */
 ]])
@@ -807,6 +844,7 @@ function XcodeProjectMetaTable:Write(outputPath)
 /* End PBXBuildFile section */
 
 ]])
+--]==]
 
 	table.insert(self.Contents, [[
 /* Begin PBXBuildRule section */

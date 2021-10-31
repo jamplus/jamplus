@@ -1155,6 +1155,80 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 	TARGET = [ C.ActiveTarget $(TARGET) ] ;
 	local project = "Projects[ [[$(TARGET)]] ]" ;
 	local bundlePath = [ ios.GetBundlePath ] ;
+
+	# Handle the Info.plist file.
+	local infoplist = @(Info.plist:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+	MakeLocate $(infoplist) : $(TARGETINFO_LOCATE) ;
+	Depends $(TARGET) : $(infoplist) ;
+
+	local CFBundleIdentifier ;
+	local sourceInfoPlistFile = $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	if ! $(sourceInfoPlistFile) {
+		local customPlistExists = [ LuaString "
+			local currentLevel = GetInfoPlistCurrentLevelNoCreate()
+			return currentLevel and true or false
+" ] ;
+		if $(customPlistExists) = false {
+			local infoPlist = [ Glob $(SUBDIR) : Info.plist ] ;
+			if $(infoPlist) {
+				ios.InfoPListFile $(TARGET) : Info.plist ;
+				sourceInfoPlistFile = $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+			}
+		}
+	}
+
+	local CFBundleVersion ;
+	local CFBundleDisplayName ;
+	local CFBundleExecutable ;
+	LuaString "local pl = GetInfoPlistCurrentLevel()
+			local CFBundleIdentifier = pl['CFBundleIdentifier']
+			jam_setvar('CFBundleIdentifier', CFBundleIdentifier)
+			local CFBundleVersion = pl['CFBundleVersion']
+			jam_setvar('CFBundleVersion', CFBundleVersion)
+			local CFBundleDisplayName = pl['CFBundleDisplayName']
+			jam_setvar('CFBundleDisplayName', CFBundleDisplayName)
+			local CFBundleExecutable = pl['CFBundleExecutable']
+			jam_setvar('CFBundleExecutable', CFBundleExecutable)
+			" ;
+	CFBundleIdentifier on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleIdentifier) ;
+	CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleVersion) ;
+	CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleDisplayName) ;
+
+	ios.BundleInfo $(TARGET) : : : 1 ;
+
+	local UIDeviceFamily ;
+	LuaString "local pl = GetInfoPlistCurrentLevel()
+			local UIDeviceFamily = pl['UIDeviceFamily']
+			jam_setvar('UIDeviceFamily', UIDeviceFamily)
+			pl['UIDeviceFamily'] = nil
+			" ;
+
+	{
+		local infoplistcontents = [ LuaString "
+			local currentLevel = GetInfoPlistCurrentLevel()
+			return plist.dump(currentLevel, true)
+" ] ;
+		if $(infoplistcontents) {
+			CONTENTS on $(infoplist) = $(infoplistcontents) ;
+			WriteFile $(infoplist) ;
+
+			Always $(infoplist) ;
+		}
+	}
+
+	if $(TARGETINFO_LOCATE) {
+		Contents += "Projects[ [[$(C.ACTIVE_TARGET)]] ].INFOPLIST_FILE[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(infoplist:T)]]$(NEWLINE)" ;
+		Contents += "Projects[ [[$(C.ACTIVE_TARGET)]] ].Sources = concat(Projects[ [[$(C.ACTIVE_TARGET)]] ].Sources, { [[$(infoplist:T)]] })$(NEWLINE)" ;
+		if $(UIDeviceFamily) {
+			Contents += "Projects[ [[C.*]] ].TARGETED_DEVICE_FAMILY[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(UIDeviceFamily:J=,)]]$(NEWLINE)" ;
+		}
+	}
+
+	local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	if ! $(provisionFileTarget) {
+		ios.Provision $(TARGET) : $(CFBundleIdentifier) ;
+	}
+
 	Contents += "$(project).BUNDLE_PATH[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(bundlePath)]]$(NEWLINE)" ;
 	Contents += "if not $(project).Options then $(project).Options = {} end$(NEWLINE)" ;
 	Contents += "$(project).Options['bundle'] = true$(NEWLINE)" ;
@@ -1992,6 +2066,10 @@ rule ios.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE
 }
 
 
+
+} # TARGETINFO_LOCATE
+
+
 rule ios.Provision TARGET : PROFILE_ID {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
 	local _matchingProvision ;
@@ -2101,6 +2179,9 @@ rule ios.Provision TARGET : PROFILE_ID {
 	}
 }
 
+
+if ! $(TARGETINFO_LOCATE)
+{
 
 if $(NT) {
 
