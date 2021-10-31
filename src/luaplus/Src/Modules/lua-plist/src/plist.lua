@@ -16,7 +16,11 @@ local plistDictMetatable = {
         for index = 1, #self do
             local entry = rawget(self, index)
             if entry.key:lower() == lowerKey then
-                entry.value = value
+                if value then
+                    entry.value = value
+                else
+                    table.remove(self, index)
+                end
                 return
             end
         end
