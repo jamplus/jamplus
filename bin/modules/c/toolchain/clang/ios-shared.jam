@@ -1,4 +1,4 @@
-IOS_DEFAULT_MINIMUM_SDK_VERSION = 11.0 ;
+IOS_DEFAULT_MINIMUM_SDK_VERSION = 12.0 ;
 
 rule C.Toolchain.clang.ios-shared {
 }
