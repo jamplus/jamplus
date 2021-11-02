@@ -350,6 +350,7 @@ rule Build.sdl2 TOOLCHAINS {
                     src/misc/ios/*.m
             ;
 
+            C.Defines : GLES_SILENCE_DEPRECATION ;
             C.Flags : M MM : -fobjc-arc : public ;
             C.ios.LinkFrameworks : AVFAudio AudioToolbox CoreAudio CoreGraphics CoreHaptics CoreMotion Foundation GameController Metal OpenGLES QuartzCore UIKit : public ;
         }

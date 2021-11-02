@@ -36,6 +36,8 @@ if $(PLATFORM) in * win32 win64 {
     ios.BundleInfo : displayname : sdltest ;
     ios.BundleInfo : bundleversion : 1.0 ;
     ios.BundleInfo : uistatusbarhidden : true ;
+    ios.BundleInfo : uisupportedinterfaceorientations : portrait ;
+    ios.BundleInfoBoolean : UIRequiresFullScreen : true ;
 
     C.Application : $(SRCS) ;
 
