@@ -1,5 +1,7 @@
 local M = {}
 
+local date
+
 local plistDictMetatable = {
     __index = function(self, key)
         local lowerKey = key:lower()
@@ -39,6 +41,9 @@ local function RecurseEntry(entry)
                 key = subEntry[1]
             elseif subEntry.tag == 'string' then
                 value = subEntry[1] or ''
+            elseif subEntry.tag == 'date' then
+                if not date then date = require 'date' end
+                value = date(subEntry[1])
             elseif subEntry.tag == 'false' then
                 value = false
             elseif subEntry.tag == 'true' then
