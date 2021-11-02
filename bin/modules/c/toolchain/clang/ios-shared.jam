@@ -2090,17 +2090,18 @@ rule ios.Provision TARGET : PROFILE_ID {
 	}
 
 	local _systemProfileDirectory ;
+	if $(NT)
+	{
+		_systemProfileDirectory = "$(IOSBUILDENV_PATH)/Keychain" ;
+	}
+	else
+	{
+		_systemProfileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
+	}
+
 	if ! $(_matchingProvision) && $(PROFILE_ID:SL) = .mobileprovision
 	{
 		_profileFilename = $(PROFILE_ID) ;
-		if $(NT)
-		{
-			_systemProfileDirectory = "$(IOSBUILDENV_PATH)/Keychain" ;
-		}
-		else
-		{
-			_systemProfileDirectory = "$(HOME)/Library/MobileDevice/Provisioning Profiles" ;
-		}
 
 		local _mobileProvision = [ Glob $(_systemProfileDirectory) : $(_profileFilename) ] ;
 		if $(_mobileProvision)
@@ -2121,6 +2122,18 @@ rule ios.Provision TARGET : PROFILE_ID {
 			LuaString "
 				local plist = require 'plist'
 				local pl = plist.read(jam_getvar('_mobileProvision')[1])
+				local IsXcodeManaged = pl.IsXcodeManaged
+				if IsXcodeManaged == true then
+					return
+				end
+				local ExpirationDate = pl.ExpirationDate
+				if ExpirationDate then
+					if not date then date = require 'date' end
+					local spanDays = date.diff(ExpirationDate, date()):spandays()
+					if spanDays < 0 then
+						return
+					end
+				end
 				local prefix = pl.ApplicationIdentifierPrefix
 				jam_setvar('AppIdentifierPrefix', prefix)
 				local identifier = pl.Entitlements[\"application-identifier\"]
