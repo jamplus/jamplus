@@ -178,6 +178,7 @@ rule ios.SDK SDK_VERSION {
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(isysroot) ;
 	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(minimumVersion:E=$(SDK_VERSION)) ;
+	ios.MinimumOSVersion * : $(minimumVersion:E=$(SDK_VERSION)) ;
 	XCODE_SDKROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sdkroot) ;
 
 	if $(TARGETINFO_LOCATE) {
@@ -212,6 +213,7 @@ rule ios.SDK SDK_VERSION {
 	ISYSROOT on $(C.ACTIVE_TOOLCHAIN_*) = $(sysroot) ;
 	IPHONEOS_SDK_VERSION on $(C.ACTIVE_TOOLCHAIN_*) = $(SDK_VERSION) ;
 	IOS_SDK_VERSION_MIN on $(C.ACTIVE_TOOLCHAIN_*) = $(IOS_DEFAULT_MINIMUM_SDK_VERSION) ;
+	ios.MinimumOSVersion * : $(IOS_DEFAULT_MINIMUM_SDK_VERSION) ;
 }
 
 } # if ! $(NT)
