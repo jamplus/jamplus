@@ -63,27 +63,24 @@ if ssl  and  (not ospath.exists(caKeyFilename)
         or  not ospath.exists(serverPemFilename)) then
 
     if OS == 'NT' then
-        opensslExecutable = 'c:/OpenSSL-Win32/bin/openssl.exe'
+        opensslExecutable = 'c:/openssl-1.1/x64/bin/openssl.exe'
         if not ospath.exists(opensslExecutable) then
             opensslExecutable = 'c:/OpenSSL-Win64/bin/openssl.exe'
             if not ospath.exists(opensslExecutable) then
-                opensslExecutable = 'c:/openssl-1.1.0f-vs2017/bin/openssl.exe'
-                if not ospath.exists(opensslExecutable) then
-                    opensslExecutable = nil
-                else
-                    osprocess.setenv('OPENSSL_CONF', ospath.join(ospath.remove_filename(opensslExecutable), '..', 'ssl', 'openssl.cnf'))
-                end
+                opensslExecutable = nil
             end
         end
         if not opensslExecutable then
             for entry in os.getenv('PATH'):gmatch('[^;]*') do
                 opensslExecutable = ospath.join(entry, 'openssl.exe')
                 if ospath.exists(opensslExecutable) then
-                    print(opensslExecutable)
                     break
                 end
                 opensslExecutable = nil
             end
+        end
+        if opensslExecutable then
+            osprocess.setenv('OPENSSL_CONF', ospath.join(ospath.remove_filename(opensslExecutable), '..', '..', 'ssl', 'openssl.cnf'))
         end
     else
         for entry in os.getenv('PATH'):gmatch('[^:]*') do
@@ -102,30 +99,31 @@ if ssl  and  (not ospath.exists(caKeyFilename)
 
     opensslExecutable = ospath.escape(opensslExecutable)
 
-    local cn = 'JamPlus-' .. hostname
+    local cn = 'JamPlusCA-' .. hostname
 
     ospath.mkdir(caKeyFilename)
 
     print('Generating certificates...')
-    for line in osprocess.lines{ opensslExecutable, 'genrsa', '-out', caKeyFilename, '2048', stderr_to_stdout = true } do
+    for line in osprocess.lines{ opensslExecutable, 'genrsa', '-out', caKeyFilename, '4096', stderr_to_stdout = true } do
         --print(line)
     end
 
-    for line in osprocess.lines{ opensslExecutable, 'req', '-x509', '-new', '-key', caKeyFilename, '-out', caCerFilename, '-days', '3650', '-subj', '/CN=' .. ospath.escape(cn), stderr_to_stdout = true } do
+    for line in osprocess.lines{ opensslExecutable, 'req', '-x509', '-new', '-nodes', '-key', caKeyFilename, '-out', caCerFilename, '-days', '365', '-subj', '"/O=Development/CN=' .. ospath.escape(cn) .. '"', stderr_to_stdout = true } do
         --print(line)
     end
 
-    for line in osprocess.lines{ opensslExecutable, 'genrsa', '-out', serverKeyFilename, '2048', stderr_to_stdout = true } do
+    for line in osprocess.lines{ opensslExecutable, 'req', '-newkey', 'rsa:4096', '-nodes', '-keyout', serverKeyFilename, '-out', serverCsrFilename, '-subj', '"/O=Development/CN=JamPlusServer-' .. ospath.escape(hostname) .. '"', stderr_to_stdout = true } do
         --print(line)
     end
 
-    for line in osprocess.lines{ opensslExecutable, 'req', '-new', '-key', serverKeyFilename, '-out', serverCsrFilename, '-subj', '/CN=' .. ospath.escape(hostname), stderr_to_stdout = true } do
+    local serverExtFile = serverCsrFilename .. '.extfile'
+    local file = io.open(serverExtFile, 'w')
+    file:write("extendedKeyUsage=serverAuth\nsubjectAltName=IP:" .. hostname)
+    file:close()
+    for line in osprocess.lines{ opensslExecutable, 'x509', '-req', '-in', serverCsrFilename, '-out', serverCerFilename, '-CAkey', caKeyFilename, '-CA', caCerFilename, '-days', '365', '-CAcreateserial', '-CAserial', 'serial', '-extfile', ospath.escape(serverExtFile), stderr_to_stdout = true } do
         --print(line)
     end
-
-    for line in osprocess.lines{ opensslExecutable, 'x509', '-req', '-in', serverCsrFilename, '-out', serverCerFilename, '-CAkey', caKeyFilename, '-CA', caCerFilename, '-days', '3650', '-CAcreateserial', '-CAserial', 'serial', stderr_to_stdout = true } do
-        --print(line)
-    end
+    os.remove(serverExtFile)
 
 	os.remove('serial')
 end
@@ -195,6 +193,7 @@ local civetwebconfFilename = ospath.join(baseDirectory, 'civetweb.conf')
 ospath.write_file(civetwebconfFilename,
 "document_root " .. confMakeSlash(baseDirectory) .. "\n" ..
 "listening_ports 9999" .. (ssl and 's' or '') .. "\n" ..
+"error_log_file " .. confMakeSlash(baseDirectory) .. "/error.log\n" ..
 "ssl_certificate " .. confMakeSlash(serverPemFilename) .. "\n" ..
 "url_rewrite_patterns /jamplusCA.cer=" .. confMakeSlash(caCerFilename))
 
