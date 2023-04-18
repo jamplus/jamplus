@@ -739,6 +739,7 @@ make0(
 #ifdef OPT_GRAPH_DEBUG_EXT
 	int	savedFate, oldTimeStamp;
 #endif
+	LIST* hdrextra;
 
 	/*
 	 * Step 1: initialize
@@ -799,8 +800,10 @@ make0(
 		ptime = p;
 	}
 
+	hdrextra = var_get("HDREXTRA");
+
 	/* Step 2c: If its a file, search for headers. */
-	if( t->binding == T_BIND_EXISTS )
+	if( t->binding == T_BIND_EXISTS || hdrextra )
 		headers( t );
 
 #ifdef OPT_SEMAPHORE
