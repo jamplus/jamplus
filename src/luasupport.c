@@ -457,6 +457,34 @@ int LS_jam_setvar(ls_lua_State *L)
 }
 
 
+int LS_jam_appendvar(ls_lua_State *L)
+{
+    int numParams = ls_lua_gettop(L);
+    if (numParams < 2  ||  numParams > 3)
+        return 0;
+
+    if (!ls_lua_isstring(L, 1))
+        return 0;
+
+    if (numParams == 2)
+    {
+        var_set(ls_lua_tostring(L, 1), luahelper_addtolist(L, L0, 2), VAR_APPEND);
+    }
+    else
+    {
+        TARGET *t;
+
+        if (!ls_lua_isstring(L, 2))
+            return 0;
+
+        t = bindtarget(ls_lua_tostring(L, 1));
+        t->settings = addsettings(t->settings, VAR_APPEND, ls_lua_tostring(L, 2), luahelper_addtolist(L, L0, 3));
+    }
+
+    return 0;
+}
+
+
 int LS_jam_getvar(ls_lua_State *L)
 {
     LIST *list;
@@ -969,6 +997,8 @@ static int lanes_on_state_create(ls_lua_State *L) {
     ls_lua_setglobal(L, "jam_getvar");
     ls_lua_pushcclosure(L, LS_jam_setvar, 0);
     ls_lua_setglobal(L, "jam_setvar");
+    ls_lua_pushcclosure(L, LS_jam_appendvar, 0);
+    ls_lua_setglobal(L, "jam_appendvar");
     ls_lua_pushcclosure(L, LS_jam_expand, 0);
     ls_lua_setglobal(L, "jam_expand");
     ls_lua_pushcclosure(L, LS_jam_print, 0);
@@ -1006,6 +1036,8 @@ static int pmain (ls_lua_State *L)
     ls_lua_setglobal(L, "jam_getvar");
     ls_lua_pushcclosure(L, LS_jam_setvar, 0);
     ls_lua_setglobal(L, "jam_setvar");
+    ls_lua_pushcclosure(L, LS_jam_appendvar, 0);
+    ls_lua_setglobal(L, "jam_appendvar");
     ls_lua_pushcclosure(L, LS_jam_action, 0);
     ls_lua_setglobal(L, "jam_action");
     ls_lua_pushcclosure(L, LS_jam_evaluaterule, 0);
