@@ -603,7 +603,7 @@ void fileglob_AddExclusivePattern(fileglob* self, const char* pattern) {
 	if (pattern[strlen(pattern) - 1] == '/') {
 		for (node = self->exclusiveDirectoryPatternsHead; node; node = node->next) {
 #if defined(_WIN32)
-			if (stricmp(node->buffer, pattern) == 0) {
+			if (_stricmp(node->buffer, pattern) == 0) {
 #else
 			if (strcasecmp(node->buffer, pattern) == 0) {
 #endif
@@ -615,7 +615,7 @@ void fileglob_AddExclusivePattern(fileglob* self, const char* pattern) {
 	} else {
 		for (node = self->exclusiveFilePatternsHead; node; node = node->next) {
 #if defined(_WIN32)
-			if (stricmp(node->buffer, pattern) == 0) {
+			if (_stricmp(node->buffer, pattern) == 0) {
 #else
 			if (strcasecmp(node->buffer, pattern) == 0) {
 #endif
@@ -642,7 +642,7 @@ void fileglob_AddIgnorePattern(fileglob* self, const char* pattern) {
 	if (pattern[strlen(pattern) - 1] == '/') {
 		for (node = self->ignoreDirectoryPatternsHead; node; node = node->next) {
 #if defined(_WIN32)
-			if (stricmp(node->buffer, pattern) == 0) {
+			if (_stricmp(node->buffer, pattern) == 0) {
 #else
 			if (strcasecmp(node->buffer, pattern) == 0) {
 #endif
@@ -654,7 +654,7 @@ void fileglob_AddIgnorePattern(fileglob* self, const char* pattern) {
 	} else {
 		for (node = self->ignoreFilePatternsHead; node; node = node->next) {
 #if defined(_WIN32)
-			if (stricmp(node->buffer, pattern) == 0) {
+			if (_stricmp(node->buffer, pattern) == 0) {
 #else
 			if (strcasecmp(node->buffer, pattern) == 0) {
 #endif
@@ -1778,7 +1778,7 @@ fileglob_uint64 fileglob_NumberOfLinks(fileglob* self) {
 
 		const char* fullPath = fileglob_FileName(self);
 
-		handle = CreateFile(fullPath, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
+		handle = CreateFileA(fullPath, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
 		if (handle == INVALID_HANDLE_VALUE) {
 			return 0;
 		}
