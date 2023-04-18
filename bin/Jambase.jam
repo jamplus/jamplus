@@ -876,7 +876,7 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 	}
 	else if $(UNIX)
 	{
-		VALID_PLATFORMS ?= linux64 linux32 ;
+		VALID_PLATFORMS ?= linux64 ; # linux32 ;
 	}
 
 	CONFIG ?= $(C.CONFIG) ;
