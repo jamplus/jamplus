@@ -868,7 +868,7 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 
 	if $(NT)
 	{
-		VALID_PLATFORMS ?= win64 win32 ;
+		VALID_PLATFORMS ?= win64 ; # win32 ;
 	}
 	else if $(OS) = MACOSX
 	{
