@@ -408,7 +408,7 @@ require 'ide/xcode'
 require 'ide/xcode-native'
 
 if uname == 'windows' then
-	DefaultExporter = 'vs2019'
+	DefaultExporter = 'vs2022'
 elseif uname == 'darwin' then
 	DefaultExporter = 'xcode'
 else
