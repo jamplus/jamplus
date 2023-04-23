@@ -86,6 +86,12 @@ rule C.GristFiles TARGET : FILES {
 }
 
 
+rule C.GristFilesLite TARGET : FILES {
+	local grist = $(C.ACTIVE_TOOLCHAIN_GRIST):$(TARGET) ;
+	return $(FILES:G=$(grist)) ;
+}
+
+
 rule LocateSource TARGET : DIRECTORY {
 	C.ActiveTarget $(TARGET) ;
 	LOCATE_SOURCE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(DIRECTORY) ;
