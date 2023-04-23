@@ -53,3 +53,5 @@ unsigned __int64 getmilliseconds();
 unsigned long long getmilliseconds();
 #endif
 #endif
+
+int dir_isempty(const char* indir);

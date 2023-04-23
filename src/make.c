@@ -332,13 +332,43 @@ static void remove_empty_dirs()
 				while ( 1 ) {
 					char* olddirslashptr = dirslashptr;
 
-					/* walk up directories removing any empty ones */
-					if ( rmdir( lastdirptr ) == -1 ) {
-						if ( errno != ENOENT ) {
-							*olddirslashptr = '/';
+					int dirret = dir_isempty( lastdirptr );
+					if (dirret == ENOTEMPTY) {
+						*olddirslashptr = '/';
+						break;
+					}
+
+					if ( dirret == 0 ) {
+						/* walk up directories removing any empty ones */
+						int MAX_RETRIES = 10;
+						int retries = 0;
+						while ( retries < MAX_RETRIES ) {
+							int ret = rmdir( lastdirptr );
+							if ( ret == -1 ) {
+								int err = errno;
+								if ( err == EACCES ) {
+									printf("remove %s - %d - %d\n", lastdirptr, ret, err);
+#if defined(_WIN32)
+									_sleep(1);
+#else
+									usleep(1000);
+#endif
+									++retries;
+									continue;
+								}
+								if ( err != ENOENT ) {
+									*olddirslashptr = '/';
+									retries = MAX_RETRIES;
+									break;
+								}
+							}
+							break;
+						}
+						if ( retries == MAX_RETRIES ) {
 							break;
 						}
 					}
+
 					dirslashptr = strrchr( lastdirptr, '/' );
 					*olddirslashptr = '/';
 					if ( !dirslashptr )

@@ -97,7 +97,7 @@ file_dirscan(
 
 	/* Now enter contents of directory */
 
-	sprintf( filespec, "%s/*", dir );
+	sprintf( filespec, "%s/*.*", dir );
 
 	if( DEBUG_BINDSCAN )
 	    printf( "scan directory %s\n", dir );
@@ -741,5 +741,49 @@ unsigned long long getmilliseconds()
 }
 
 #endif
+
+int dir_isempty(const char* indir)
+{
+	FINDTYPE handle;
+	struct _finddata_t finfo[1];
+	int ret = 0;
+	int err = 0;
+
+	BUFFER dirbuff;
+	buffer_init( &dirbuff );
+	buffer_addstring( &dirbuff, indir, strlen( indir ) );
+	buffer_addstring( &dirbuff, "/*.*", 5 );
+
+	handle = _findfirst( buffer_ptr( &dirbuff ), finfo );
+	if ( handle == (FINDTYPE)-1 ) {
+		err = ENOENT;
+		goto done;
+	}
+
+	while ( !ret )
+	{
+		if ( finfo->attrib & _A_SUBDIR )
+		{
+			if ( ! ( ( finfo->name[0] == '.'  &&  finfo->name[1] == 0 )  ||
+						( finfo->name[0] == '.'  &&  finfo->name[1] == '.'  &&  finfo->name[2] == 0 ) ) )
+			{
+				err = ENOTEMPTY;
+				break;
+			}
+
+			ret = _findnext( handle, finfo );
+			continue;
+		}
+
+		err = ENOTEMPTY;
+		break;
+	}
+
+	_findclose( handle );
+
+done:
+	buffer_free( &dirbuff );
+	return err;
+}
 
 # endif /* NT */

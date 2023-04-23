@@ -1015,5 +1015,40 @@ unsigned long long getmilliseconds()
 
 #endif
 
+int dir_isempty(const char* indir)
+{
+	DIR *d;
+	STRUCT_DIRENT *dirent;
+	int err = 0;
+
+	if ( !( d = opendir( indir ) ) ) {
+		err = ENOENT;
+		goto done;
+	}
+
+	while ( ( dirent = readdir( d ) ) )
+	{
+		if ( dirent->d_type & DT_DIR )
+	    {
+			if ( ! ( ( dirent->d_name[0] == '.'  &&  dirent->d_name[1] == 0 )  ||
+					( dirent->d_name[0] == '.'  &&  dirent->d_name[1] == '.'  &&  dirent->d_name[2] == 0 ) ) )
+			{
+				err = ENOTEMPTY;
+				break;
+			}
+
+			continue;
+		}
+
+		err = ENOTEMPTY;
+		break;
+	}
+
+	closedir( d );
+
+done:
+	return err;
+}
+
 # endif /* USE_FILEUNIX */
 
