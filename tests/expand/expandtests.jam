@@ -132,6 +132,31 @@ VAR = /home/stuff/file.txt ;
 TestExpansion $(VAR:DB:U) : /HOME/STUFF/FILE ;
 
 #------------------------------------------------------------------------------
+FILENAME = <thegrist>/some/directory/filename.txt ;
+TEST_FILENAME = <thegrist>/some/directory/.txt ;
+TestExpansion $(FILENAME:B?=anothername) : <thegrist>/some/directory/filename.txt ;
+TestExpansion $(TEST_FILENAME:B?=anothername) : <thegrist>/some/directory/anothername.txt ;
+
+TEST_FILENAME = <thegrist>/some/directory/filename ;
+TestExpansion $(FILENAME:S?=.dat) : <thegrist>/some/directory/filename.txt ;
+TestExpansion $(TEST_FILENAME:S?=.bin) : <thegrist>/some/directory/filename.bin ;
+
+TestExpansion $(FILENAME:B?=anothername:S?=.dat) : <thegrist>/some/directory/filename.txt ;
+TEST_FILENAME = <thegrist>/some/directory/filename ;
+TestExpansion $(FILENAME:B?=anothername:S?=.dat) : <thegrist>/some/directory/filename.txt ;
+TestExpansion $(FILENAME:B=anothername:S?=.dat) : <thegrist>/some/directory/anothername.txt ;
+TEST_FILENAME = <thegrist>/some/directory/ ;
+TestExpansion $(TEST_FILENAME:B?=anothername:S?=.dat) : <thegrist>/some/directory/anothername.dat ;
+
+TestExpansion $(FILENAME:D=/usr/local/bin) : <thegrist>/usr/local/bin/filename.txt ;
+TEST_FILENAME = filename.txt ;
+TestExpansion $(TEST_FILENAME:D?=/usr/local/bin) : /usr/local/bin/filename.txt ;
+
+TestExpansion $(FILENAME:G=anothergrist) : <anothergrist>/some/directory/filename.txt ;
+TEST_FILENAME = /some/directory/filename.txt ;
+TestExpansion $(TEST_FILENAME:G?=anothergrist) : <anothergrist>/some/directory/filename.txt ;
+
+#------------------------------------------------------------------------------
 TestWildcard @(../sharedlib/app/*:WBS) : Jamfile.jam main.c ;
 TestWildcard @(@(../sharedlib/app/*:W):BS) : Jamfile.jam main.c ;
 

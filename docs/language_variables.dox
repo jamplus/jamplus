@@ -176,12 +176,20 @@ A variable element's string value can be parsed into grist and filename-related 
 	<td>Replace the base part of file name with <i>base</i>.</td>
   </tr>
   <tr>
+    <td><code> :B?=<i>base</i> </code></td>
+      <td>If the base part of the file name is empty, replace it with <i>base</i>.</td>
+  </tr>
+  <tr>
     <td><code> :S </code></td>
 	<td>Select (last) filename suffix.</td>
   </tr>
   <tr>
     <td><code> :S=<i>suf</i> </code></td>
 	<td>Replace the suffix of file name with <i>suf</i>.</td>
+  </tr>
+  <tr>
+    <td><code> :S?=<i>suf</i> </code></td>
+      <td>If the suffix of the file name is empty, replace it with <i>suf</i>.</td>
   </tr>
   <tr>
     <td><code> :M </code></td>
@@ -192,12 +200,20 @@ A variable element's string value can be parsed into grist and filename-related 
 	<td>Replace the archive member name with <i>mem</i>.</td>
   </tr>
   <tr>
+    <td><code> :M?=<i>mem</i> </code></td>
+      <td>If the archive member name is empty, replace it with <i>mem</i>.</td>
+  </tr>
+  <tr>
     <td><code> :D </code></td>
 	<td>Select directory path.</td>
   </tr>
   <tr>
     <td><code> :D=<i>path</i> </code></td>
 	<td>Replace directory with <i>path</i>.</td>
+  </tr>
+  <tr>
+    <td><code> :D?=<i>path</i> </code></td>
+      <td>If the directory is empty, replace it with <i>path</i>.</td>
   </tr>
   <tr>
     <td><code> :P </code></td>
@@ -210,6 +226,10 @@ A variable element's string value can be parsed into grist and filename-related 
   <tr>
     <td><code> :G=<i>grist</i> </code></td>
 	<td>Replace grist with <i>grist</i>.</td>
+  </tr>
+  <tr>
+    <td><code> :G?=<i>grist</i> </code></td>
+      <td>If the grist is empty, replace it with <i>grist</i>.</td>
   </tr>
   <tr>
     <td><code> :R=<i>root</i> </code></td>

@@ -49,6 +49,7 @@
 
 typedef struct {
 	PATHNAME	f;		/* :GDBSMR -- pieces */
+	PATHNAME	optionalf;	/* :GDBSMR?= -- pieces */
 	char		parent;		/* :P -- go to parent directory */
 	char		filemods;	/* one of the above applied */
 	char		downshift;	/* :L -- downshift result */
@@ -761,7 +762,12 @@ var_edit_parse(
 
 	    edits->filemods = 1;
 
-	    if( *mods != '=' )
+		if( *mods == '?' && *(mods + 1) == '=' )
+		{
+			mods++;
+			fp = (PATHPART*)((unsigned char*)&edits->optionalf + ((unsigned char*)fp - (unsigned char*)&edits->f));
+		}
+		else if( *mods != '=' )
 	    {
 		int i;
 
@@ -770,6 +776,8 @@ var_edit_parse(
 		{
 		    edits->f.part[ i ].len = 0;
 		    edits->f.part[ i ].ptr = "";
+		    edits->optionalf.part[ i ].len = 0;
+		    edits->optionalf.part[ i ].ptr = NULL;
 		}
 
 		fp->ptr = 0;
@@ -844,21 +852,33 @@ var_edit_file(
 
 	if( edits->f.f_grist.ptr )
 	    pathname.f_grist = edits->f.f_grist;
+	else if( edits->optionalf.f_grist.ptr && pathname.f_grist.len == 0 )
+	    pathname.f_grist = edits->optionalf.f_grist;
 
 	if( edits->f.f_root.ptr )
 	    pathname.f_root = edits->f.f_root;
+	else if( edits->optionalf.f_root.ptr && pathname.f_root.len == 0 )
+	    pathname.f_root = edits->optionalf.f_root;
 
 	if( edits->f.f_dir.ptr )
 	    pathname.f_dir = edits->f.f_dir;
+	else if( edits->optionalf.f_dir.ptr && pathname.f_dir.len == 0 )
+	    pathname.f_dir = edits->optionalf.f_dir;
 
 	if( edits->f.f_base.ptr )
 	    pathname.f_base = edits->f.f_base;
+	else if( edits->optionalf.f_base.ptr && pathname.f_base.len == 0 )
+	    pathname.f_base = edits->optionalf.f_base;
 
 	if( edits->f.f_suffix.ptr )
 	    pathname.f_suffix = edits->f.f_suffix;
+	else if( edits->optionalf.f_suffix.ptr && pathname.f_suffix.len == 0 )
+	    pathname.f_suffix = edits->optionalf.f_suffix;
 
 	if( edits->f.f_member.ptr )
 	    pathname.f_member = edits->f.f_member;
+	else if( edits->optionalf.f_member.ptr && pathname.f_member.len == 0 )
+	    pathname.f_member = edits->optionalf.f_member;
 
 	/* If requested, modify pathname to point to parent */
 
