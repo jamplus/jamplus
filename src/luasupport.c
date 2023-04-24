@@ -941,6 +941,9 @@ extern int luaopen_miniz(lua_State *L);
 extern int luaopen_ospath_core(lua_State *L);
 extern int luaopen_osprocess_core(lua_State *L);
 extern int luaopen_prettydump(lua_State *L);
+#ifdef JAM_LUA_ADD_PYTHON
+extern int luaopen_python(lua_State *L);
+#endif /* JAM_LUA_ADD_PYTHON */
 extern int luaopen_rapidjson(lua_State *L);
 extern int luaopen_struct(lua_State *L);
 extern int luaopen_uuid(lua_State *L);
@@ -965,6 +968,10 @@ static void ls_register_custom_libs(ls_lua_State* L)
     ls_lua_pop(L, 1);
     luaL_requiref((lua_State*)L, "prettydump", luaopen_prettydump, 1);
     ls_lua_pop(L, 1);
+#ifdef JAM_LUA_ADD_PYTHON
+    luaL_requiref((lua_State*)L, "python", luaopen_python, 1);
+    ls_lua_pop(L, 1);
+#endif /* JAM_LUA_ADD_PYTHON */
     luaL_requiref((lua_State*)L, "rapidjson", luaopen_rapidjson, 1);
     ls_lua_pop(L, 1);
     luaL_requiref((lua_State*)L, "struct", luaopen_struct, 1);

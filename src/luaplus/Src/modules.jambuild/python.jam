@@ -1,0 +1,55 @@
+{
+
+local SRCS =
+		src/luainpython.c
+		src/luainpython.h
+		src/pythoninlua.c
+		src/pythoninlua.h
+;
+
+local HAS_PYTHON_LIB ;
+
+if $(NT) {
+	PYTHON_ROOT = c:/python310 ;
+	PYTHON_LIB = python310 ;
+
+	local libName ;
+	switch $(CONFIG) {
+		case debug :		libName = $(PYTHON_LIB)_d ;
+		case release :		libName = $(PYTHON_LIB) ;
+		case releaseltcg :	libName = $(PYTHON_LIB) ;
+	}
+
+	C.IncludeDirectories python : $(PYTHON_ROOT)/include ;
+	C.LinkDirectories python : $(PYTHON_ROOT)/libs ;
+
+	if $(CONFIG) != *  &&  [ Glob $(PYTHON_ROOT)/libs : $(libName).lib ] {
+#		switch $(CONFIG) {
+#			case debug :
+#				C.LinkFlags python : /DELAYLOAD:lua51_debug.dll ;
+#			case * :
+#				C.LinkFlags python : /DELAYLOAD:lua51.dll ;
+#		}
+#		C.LinkPrebuiltLibraries python : DelayImp ;
+		
+		C.LinkPrebuiltLibraries python : $(libName) ;
+
+		HAS_PYTHON_LIB = 1 ;
+	}
+} else if $(MACOSX) {
+	PYTHON_ROOT = /System/Library/Frameworks/Python.framework/Versions/2.7 ;
+	C.IncludeDirectories python : $(PYTHON_ROOT)/include/python2.7 ;
+	C.LinkDirectories python : $(PYTHON_ROOT)/lib ;
+	C.LinkPrebuiltLibraries python : python2.7 ; 
+	HAS_PYTHON_LIB = 1 ;
+}
+
+if $(PLATFORM) = * {
+	Project python : $(SRCS) ;
+} else if $(HAS_PYTHON_LIB) = 1 {
+	Lua.CModule python : : $(SRCS) ;
+}
+
+
+}
+
