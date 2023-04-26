@@ -596,7 +596,15 @@ Add the \c INCLUDEPATHS to the given project \c TARGET.
 
 \param TARGET The target to assign the \c INCLUDEPATHS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param INCLUDEPATHS The list of include paths to apply.
-\param OPTIONS If \c public is specified, the paths specified by \c INCLUDEPATHS are made available to a project using \c C.Inherits.
+\param OPTIONS The following options are available:
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c prepend - Instead of appending the paths specified by \c INCLUDEPATHS to the include directories list, the paths will be prepended instead.</li>
+  <li>\c public - If \c public is specified, the paths specified by \c INCLUDEPATHS are made available to a project using \c C.Inherits.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
+
 
 \code
     # Add $(Code)/Shared as an include path to myproject.

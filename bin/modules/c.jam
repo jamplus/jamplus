@@ -1446,7 +1446,11 @@ rule C.ForceInclude TARGET : INCLUDES {
 rule C.IncludeDirectories TARGET : INCLUDEPATHS : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	local paths = $(INCLUDEPATHS:R=$(SUBDIR:E="")) ;
-	HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(paths) ;
+	if prepend in $(OPTIONS) {
+		HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(paths) $(HDRS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	} else {
+		HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(paths) ;
+	}
 	if public in $(OPTIONS) {
 		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
 		PUBLIC_HDRS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(paths) ;
