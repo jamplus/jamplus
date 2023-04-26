@@ -1595,12 +1595,20 @@ rule C._FilterSourcesForCompilableOnly {
 	return $(sources) ;
 }
 
-rule C.ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS {
+rule C.ObjectIncludeDirectories TARGET : SOURCES : INCLUDEPATHS : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	SOURCES = [ C._FilterSourcesForCompilableOnly ] ;
+
 	local sufobj = $(SUFOBJ:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local objTargets = $(SOURCES:S=$(sufobj)) ;
-	HDRS on $(objTargets) += $(INCLUDEPATHS:R=$(SUBDIR:E="")) ;
+	if prepend in $(OPTIONS) {
+		local objTarget ;
+		for objTarget in $(objTargets) {
+			HDRS on $(objTarget) = $(INCLUDEPATHS:R=$(SUBDIR:E="")) $(HDRS:Z=$(objTarget)) ;
+		}
+	} else {
+		HDRS on $(objTargets) += $(INCLUDEPATHS:R=$(SUBDIR:E="")) ;
+	}
 }
 
 
