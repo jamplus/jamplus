@@ -122,7 +122,7 @@ rule C.HdrRule SOURCE : HEADERS {
 	# care if we can't actually find the headers (they may have been
 	# within ifdefs),
 
-	local s = $(HEADERS:G=$(HDRGRIST:E)) ;
+	local s = $(HEADERS:G?=$(HDRGRIST:E)) ;
 
 	Includes $(SOURCE) : $(s) ;
 ## LOCAL CHANGE
