@@ -35,17 +35,17 @@ rule android.NDK.FindHighestVersion NDK_ROOT : NDK_VERSION {
     for dir in @($(dirs:P):D=) {
         local ndk-build = [ Glob $(NDK_ROOT)/$(dir) : ndk-build ndk-build.cmd ] ;
         if $(ndk-build) {
-            local version = [ Match ([0-9]*)\.([0-9]*)\.([0-9]*) : @($(dirs:P):D=) ] ;
-            if [ Math $(version[1]) ">" $(highestMajor) ] {
+            local version = [ Match ([0-9]*)\.([0-9]*)\.([0-9]*) : $(dir) ] ;
+            if [ Math $(version[1]) ">" $(highestMajor) ] = 1 {
                 highestMajor = $(version[1]) ;
                 highestMinor = $(version[2]) ;
                 highestBuild = $(version[3]) ;
-            } else if [ Math $(version[1]) "=" $(highestMajor) ] {
-                if [ Math $(version[2]) ">" $(highestMinor) ] {
+            } else if [ Math $(version[1]) "=" $(highestMajor) ] = 1 {
+                if [ Math $(version[2]) ">" $(highestMinor) ] = 1 {
                     highestMinor = $(version[2]) ;
                     highestBuild = $(version[3]) ;
-                } else if [ Math $(version[2]) "=" $(highestMinor) ] {
-                    if [ Math $(version[3]) ">" $(highestBuild) ] {
+                } else if [ Math $(version[2]) "=" $(highestMinor) ] = 1 {
+                    if [ Math $(version[3]) ">" $(highestBuild) ] = 1 {
                         highestBuild = $(version[3]) ;
                     }
                 }
@@ -143,13 +143,23 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
         NDKROOT = $(ndkRoot) ;
     }
 
-    local developerRoot = $(NDKROOT)/platforms ;
+    switch $(OS) {
+        case NT :       NDK_HOST    = "windows-x86_64" ;
+        case CYGWIN :   NDK_HOST    = "windows" ;
+        case MACOSX :   NDK_HOST    = "darwin-x86_64" ;
+        case LINUX :    NDK_HOST    = "darwin-x86_64" ;
+        case * :
+            Exit *** Error \: Unable to detect host platform for NDK based on '$(OS)' ;
+    }
+
+    NDK_TOOLCHAIN_ROOT = $(NDKROOT)/toolchains/llvm/prebuilt/$(NDK_HOST) ; #$(NDK_DIRECTORY_PREFIX:E=$(NDK_COMPILER_PREFIX))$(NDK_COMPILER_VERSION)/prebuilt/$(NDK_HOST) ;
+    local sysroot = $(NDK_TOOLCHAIN_ROOT)/sysroot ;
 
     local NDK_DIRECTORY_PREFIX ;
     local NDK_COMPILER_PREFIX ;
     local cflags ;
     local linkflags ;
-    local sysroot ;
+    local NDK_SYSROOT_LIB ;
     switch $(C.ARCHITECTURE) {
         case arm :
             NDK_COMPILER_PREFIX = arm-linux-androideabi- ;
@@ -158,7 +168,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             linkflags += -no-canonical-prefixes ;
             linkflags += -mthumb ;
         case armv7-a :
-            NDK_COMPILER_PREFIX = arm-linux-androideabi- ;
+            NDK_COMPILER_PREFIX = armv7a-linux-androideabi$(NDK_VERSION)- ;
             #cflags += -isystem $(NDKROOT)/sysroot/usr/include/arm-linux-androideabi ;
             cflags += -target armv7-linux-androideabi$(NDK_VERSION) ;
             cflags += -march=armv7-a -mfpu=neon -mfloat-abi=softfp ;
@@ -167,7 +177,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             linkflags += -target armv7-linux-androideabi$(NDK_VERSION) ;
             linkflags += -march=armv7-a -Wl,--fix-cortex-a8 ;
             linkflags += -mthumb ;
-            sysroot = $(developerRoot)/android-$(NDK_VERSION)/arch-arm ;
+            NDK_SYSROOT_LIB = $(sysroot)/usr/lib/arm-linux-androideabi ;
         case x86 :
             NDK_DIRECTORY_PREFIX = x86- ;
             NDK_COMPILER_PREFIX = i686-linux-android- ;
@@ -178,7 +188,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             # Fill in cflags
             # Fill in linkflags
         case arm64 :
-            NDK_COMPILER_PREFIX = aarch64-linux-android- ;
+            NDK_COMPILER_PREFIX = aarch64-linux-android$(NDK_VERSION)- ;
             #cflags += -isystem $(NDKROOT)/sysroot/usr/include/aarch64-linux-android ;
             cflags += -target aarch64-linux-android$(NDK_VERSION) ;
             cflags += -march=armv8-a ;
@@ -187,7 +197,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             linkflags += -target aarch64-linux-android$(NDK_VERSION) ;
             linkflags += -march=armv8-a ;
             linkflags += -mthumb ;
-            sysroot = $(developerRoot)/android-$(NDK_VERSION)/arch-arm64 ;
+            NDK_SYSROOT_LIB = $(sysroot)/usr/lib/aarch64-linux-android ;
             # Fill in cflags
             # Fill in linkflags
         case x86-64 :
@@ -202,7 +212,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             Exit *** Error \: Unknown architecture for NDK\: $(C.ARCHITECTURE) ;
     }
 
-    cflags += -D__ANDROID_API__=$(NDK_VERSION) ;
+    #cflags += -D__ANDROID_API__=$(NDK_VERSION) ;
     cflags += -fPIC ;
     cflags += -fvisibility=hidden ;
 
@@ -216,10 +226,10 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             NDK_TOOLCHAIN_ROOT = $(NDKROOT)/toolchains/$(NDK_DIRECTORY_PREFIX:E=$(NDK_COMPILER_PREFIX))$(NDK_COMPILER_VERSION)/prebuilt/$(NDK_HOST) ;
         case clang :
             NDK_COMPILER_VERSION = $(C.COMPILER_VERSION:E=4.9) ;
-            NDK_TOOLCHAIN_ROOT = $(NDKROOT)/toolchains/$(NDK_DIRECTORY_PREFIX:E=$(NDK_COMPILER_PREFIX))$(NDK_COMPILER_VERSION)/prebuilt/$(NDK_HOST) ;
             local lastDirectory = [ Subst $(NDK_COMPILER_PREFIX) : -$ ] ;
             EXTRA_LINK_PATH on $(C.COMPILER_SUITE_SYMBOL) = $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/bin ;
-            C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
+            #Echo C.AR on $(C.COMPILER_SUITE_SYMBOL)          \= $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
+            #C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
             #C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/include ;
             C.C++Flags * : -stdlib=libc++ ;
             C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/lib/gcc/$(lastDirectory)/$(NDK_COMPILER_VERSION).x ;
@@ -241,24 +251,17 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
     }
     NDK_COMPILER_VERSION on $(C.COMPILER_SUITE_SYMBOL) = $(NDK_COMPILER_VERSION) ;
 
-    switch $(OS) {
-        case NT :       NDK_HOST    = "windows-x86_64" ;
-        case CYGWIN :   NDK_HOST    = "windows" ;
-        case MACOSX :   NDK_HOST    = "darwin-x86_64" ;
-        case LINUX :    NDK_HOST    = "darwin-x86_64" ;
-        case * :
-            Exit *** Error \: Unable to detect host platform for NDK based on '$(OS)' ;
-    }
-    NDK_TOOLCHAIN_ROOT = $(NDKROOT)/toolchains/llvm/prebuilt/$(NDK_HOST) ;
+    NDK_TOOLCHAIN_ROOT on $(C.COMPILER_SUITE_SYMBOL) = $(NDK_TOOLCHAIN_ROOT) ;
 
-    sysroot ?= $(developerRoot)/android-$(NDK_VERSION)/arch-$(ARCHITECTURE) ;
+    NDK_SYSROOT_LIBPATHS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(NDK_SYSROOT_LIB) $(NDK_SYSROOT_LIB)/$(NDK_VERSION) ;
 
-    C.AR on $(C.COMPILER_SUITE_SYMBOL)          ?= $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
+    #C.AR on $(C.COMPILER_SUITE_SYMBOL)          ?= $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
+    C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/llvm-ar ruc ;
     C.CC on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)clang ;
     C.C++ on $(C.COMPILER_SUITE_SYMBOL)         = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)clang++ ;
     C.LINK on $(C.COMPILER_SUITE_SYMBOL)        = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)clang++ ;
     C.RANLIB on $(C.COMPILER_SUITE_SYMBOL)      = ;
-    C.STRIP on $(C.COMPILER_SUITE_SYMBOL)       = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)strip ;
+    C.STRIP on $(C.COMPILER_SUITE_SYMBOL)       = $(NDK_TOOLCHAIN_ROOT)/bin/llvm-strip ;
 
     # Set up the SDK side of things.
     if $(OS) in MACOSX {
@@ -277,9 +280,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
         # Java home
         local ProgramFilesCombined = $(ProgramFiles:J=" ":/) ;
         local javaHome = [ W32_GETREG HKEY_LOCAL_MACHINE SOFTWARE JavaSoft "Java Development Kit" 1.8 "JavaHome" ] ;
-        javaHome ?= "$(ProgramFilesCombined)/Android/Android Studio/jre" ;
-        javaHome ?= $(NVPACK_ROOT:/)/jdk1.8.0_77 ;
-        #javaHome ?= $(ProgramFiles(x86):J=" ")/Java/jdk1.7.0_55 ;
+        javaHome ?= "$(ProgramFilesCombined)/Android/Android Studio/jbr" ;
 
         JAVA.HOME on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome) ;
         JAVA.JAVA on $(C.COMPILER_SUITE_SYMBOL) = $(javaHome)/bin/java.exe ;
@@ -1101,19 +1102,19 @@ rule android.Application TARGET : SOURCES : OPTIONS {
 if $(OS) = NT {
 
 actions android._GradleInit {
-    set JAVA_HOME=$(JAVA.HOME)
+    set JAVA_HOME=$(JAVA.HOME:C)
     cd "$(1:D\\)"
-    call c:\gradle\bin\gradle.bat init --type basic --dsl groovy --project-name app
+    call c:\gradle\bin\gradle.bat init --type basic --dsl groovy --project-name app --incubating
 }
 
 
 actions screenoutput android._GradleAssemble {
-    set JAVA_HOME=$(JAVA.HOME)
+    set JAVA_HOME=$(JAVA.HOME:C)
     set ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT)
     set ANDROID_NDK_ROOT=$(NDKROOT)
     set PATH=%ANDROID_SDK_ROOT%\platform-tools;%PATH%
     cd "$(2[1]:D\\)"
-    call gradlew.bat $(ASSEMBLE_COMMAND)
+    call c:\gradle\bin\gradle.bat $(ASSEMBLE_COMMAND)
 }
 
 } else {
@@ -1195,7 +1196,7 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
 @set ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT:Z=$(C.COMPILER_SUITE_SYMBOL))
 @set ANDROID_NDK_ROOT=$(NDKROOT:Z=$(C.COMPILER_SUITE_SYMBOL))
 @set PATH=%ANDROID_SDK_ROOT%\platform-tools;%PATH%
-@call %~dp0gradlew.bat %*
+@call %~dp0gradle.bat %*
 " ;
             UseCommandLine $(envgradlew.bat) : $(CONTENTS:Z=$(envgradlew.bat)) ;
             WriteFile $(envgradlew.bat) ;
@@ -1250,44 +1251,84 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
             }
         }
 
-        # Native prebuilt libraries.
-        local nativePrebuiltLibs = $(ANDROID.NATIVEPREBUILTLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+        local globalNativePrebuiltLibs =
+            $(ANDROID.NATIVEPREBUILTLIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+            $(ANDROID.NATIVEPREBUILTLIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
+        ;
 
-        local nativePrebuiltLibraryDirectories =
+        local globalNativePrebuiltLibraryDirectories =
             $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-            $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+            $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_*))
+        ;
 
-        local nativePrebuiltLib ;
-        for nativePrebuiltLib in $(nativePrebuiltLibs) {
-            # Get final filenames.
-            local nativeLibraryFullName = lib$(nativePrebuiltLib).so ;
+        local toolchain ;
+        for toolchain in $(TOOLCHAINS) {
+            local toolChainTarget = $(TARGET:G=$(toolchain)) ;
+            local toolChain_* = @(C.*:G=$(toolchain)) ;
 
-            # Copy it into output directory.
-            local architecture ;
-            for architecture in $(architectures) {
-                local target = $(nativeLibraryFullName:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(architecture)) ;
-                local source = $(nativeLibraryFullName:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(architecture)|source) ;
+            # Native prebuilt libraries.
+            local nativePrebuiltLibs = $(ANDROID.NATIVEPREBUILTLIBS:Z=$(toolchainTarget)) ;
+            nativePrebuiltLibs += $(globalNativePrebuiltLibs) ;
 
-                switch $(architecture) {
-                    case arm :
-                        SEARCH on $(source) +=
-                            $(nativePrebuiltLibraryDirectories)/armeabi
-                            $(nativePrebuiltLibraryDirectories)/armeabi-v7a
-                        ;
-                        MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi ;
-                    case armv7-a :
-                        SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/armeabi-v7a ;
-                        MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
-                    case arm64 :
-                        SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/arm64-v8a ;
-                        MakeLocate $(target) : $(LOCATE_TARGET)/lib/arm64-v8a ;
-                    case x86 :
-                        SEARCH on $(source) += $(nativePrebuiltLibraryDirectories)/x86 ;
-                        MakeLocate $(target) : $(LOCATE_TARGET)/lib/x86 ;
+            local nativePrebuiltLibraryDirectories =
+                $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(toolChainTarget))
+                $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(toolChain_*)) ;
+
+            local ndkSysRootLibPaths = $(NDK_SYSROOT_LIBPATHS:Z=$(toolChain_*)) ;
+
+            local nativePrebuiltLib ;
+            for nativePrebuiltLib in $(nativePrebuiltLibs) {
+                # Get final filenames.
+                local nativeLibraryFullName = lib$(nativePrebuiltLib).so ;
+
+                local architecture ;
+                local found ;
+                for keyValue in $(TOOLCHAIN_SPEC_OPTIONS:Z=$(toolchain)) {
+                    local info = [ Split $(keyValue) : "=" ] ;
+                    if $(info[1]) = C.ARCHITECTURE {
+                        architecture = $(info[2]) ;
+                        break ;
+                    }
                 }
 
-                CopyFile $(gradleTarget) : $(target) : $(source) ;
-                Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(target) ;
+                # Copy it into output directory.
+                #for architecture in $(architectures) {
+                {
+                    local target = $(nativeLibraryFullName:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(architecture)) ;
+                    local source = $(nativeLibraryFullName:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(architecture)|source) ;
+
+                    switch $(architecture) {
+                        case arm :
+                            SEARCH on $(source) +=
+                                $(nativePrebuiltLibraryDirectories)/armeabi
+                                $(nativePrebuiltLibraryDirectories)/armeabi-v7a
+                                $(ndkSysRootLibPaths)
+                            ;
+                            MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi ;
+                        case armv7-a :
+                            SEARCH on $(source) +=
+                                $(nativePrebuiltLibraryDirectories)/armeabi-v7a
+                                $(ndkSysRootLibPaths)
+                            ;
+                            MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+                        case arm64 :
+                            SEARCH on $(source) +=
+                                $(nativePrebuiltLibraryDirectories)/arm64-v8a
+                                $(ndkSysRootLibPaths)
+                            ;
+                            MakeLocate $(target) : $(LOCATE_TARGET)/lib/arm64-v8a ;
+                        case x86 :
+                            SEARCH on $(source) +=
+                                $(nativePrebuiltLibraryDirectories)/x86
+                                $(ndkSysRootLibPaths)
+                            ;
+                            MakeLocate $(target) : $(LOCATE_TARGET)/lib/x86 ;
+                    }
+
+                    CopyFile $(gradleTarget) : $(target) : $(source) ;
+                    UseCommandLine $(target) : $(source:T) ;
+                    Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(target) ;
+                }
             }
         }
 
@@ -1298,25 +1339,15 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
             local contents ;
             contents += "// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-buildscript {
-    repositories {
-        jcenter()
-        google()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
-    }
+plugins {
+    id 'com.android.application' version '7.4.2' apply false
 }
-
-allprojects {
-    repositories {
-        jcenter()
-        google()
 " ;
-            contents += $(ANDROID.GRADLE_ALLPROJECTS_REPOSITORIES:Z=$(C.COMPILER_SUITE_SYMBOL):E=) ;
-            contents += "    }
-}
-
+            #contents += $(ANDROID.GRADLE_ALLPROJECTS_REPOSITORIES:Z=$(C.COMPILER_SUITE_SYMBOL):E=) ;
+            #contents += "    }
+#}
+#
+            contents += "
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
@@ -1345,7 +1376,15 @@ task clean(type: Delete) {
         # settings.gradle
         #########################################################################################
         {
-            local contents = "rootProject.name = 'app'
+            local contents = "pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'app'
 include ':app'
 " ;
             local root-settings.gradle = @(settings.gradle:G=$(grist)) ;
@@ -1378,16 +1417,17 @@ include ':app'
 
             # Resources
             local sdkVersion = $(ANDROID.SDK_TARGET_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-            local sdkMinimumVersion = $(ANDROID.SDK_MINIMUM_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-            local sdkCompileVersion = $(ANDROID.SDK_COMPILE_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
             if ! $(sdkVersion) {
                 sdkVersion = $(sdkMinimumVersion) ;
                 if ! $(sdkVersion) {
                     sdkVersion = $(ANDROID.SDK_VERSION:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
                 }
             }
+            local sdkMinimumVersion = $(ANDROID.SDK_MINIMUM_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+            local sdkCompileVersion = $(ANDROID.SDK_COMPILE_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
             if ! $(sdkCompileVersion) {
-                sdkCompileVersion = $(ANDROID.SDK_VERSION:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+                local firstToolchainCompilerSuiteSymbol = [ C._retrieveCompilerSuiteSymbol $(TOOLCHAINS[1]) ] ;
+                sdkCompileVersion = $(ANDROID.SDK_VERSION:Z=$(firstToolchainCompilerSuiteSymbol)) ;
             }
             local versionName = $(ANDROID.VERSION_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
             local versionCode = $(ANDROID.VERSION_CODE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -1412,7 +1452,9 @@ include ':app'
             applicationId ?= $(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
             local contents = "" ;
-            contents += "apply plugin: 'com.android.application'
+            contents += "plugins {
+    id 'com.android.application'
+}
 
 apply from: 'buildHelpers.gradle'
 
@@ -1497,14 +1539,15 @@ android {
             contents += "            '$(resourcesPaths)'$(NEWLINE)" ;
             contents += "        ]
     }
-    aaptOptions {
+    androidResources {
 " ;
+            contents += "        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~'$(NEWLINE)" ;
             contents += "        noCompress '$(ANDROID.UNCOMPRESSED_ASSET_EXTENSIONS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))'$(NEWLINE)" ;
-            contents += "        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~'
+            contents += "
     }
-    lintOptions {
-        checkReleaseBuilds false
+    lint {
         abortOnError false
+        checkReleaseBuilds false
     }
 }
 
@@ -1512,7 +1555,7 @@ repositories {
     jcenter()
     google()
 " ;
-            contents += $(ANDROID.GRADLE_REPOSITORIES:Z=$(C.COMPILER_SUITE_SYMBOL):E=) ;
+            contents += $(ANDROID.GRADLE_REPOSITORIES:Z=$(C.COMPILER_SUITE_SYMBOL):E="") ;
             contents += "}
 
 dependencies {
@@ -1899,16 +1942,18 @@ android {
         $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
         $(ANDROID.NATIVEPREBUILTLIBRARYDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-    local nativePrebuiltLib ;
-    for nativePrebuiltLib in $(nativePrebuiltLibs) {
-        # Get final filenames.
-        local nativeLibraryFullName = lib$(nativePrebuiltLib).so ;
+    for toolchain in $(TOOLCHAINS) {
+        local nativePrebuiltLib ;
+        for nativePrebuiltLib in $(nativePrebuiltLibs) {
+            # Get final filenames.
+            local nativeLibraryFullName = lib$(nativePrebuiltLib).so ;
 
-        # Copy it into output directory.
-        local architecture ;
-        for architecture in $(architectures) {
-            local target = $(nativeLibraryFullName:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(architecture)) ;
-            local source = $(nativeLibraryFullName:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)|$(architecture)|source) ;
+            # Copy it into output directory.
+            local target = $(nativeLibraryFullName:G=$(toolchain) ;
+            local source = $(nativeLibraryFullName:G=$(toolchain)|source) ;
+            Echo target - $(target) ;
+            Echo source - $(source) ;
+            Exit ;
 
             switch $(architecture) {
                 case arm :
