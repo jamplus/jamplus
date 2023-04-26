@@ -262,6 +262,11 @@ rule RmTemps
 	Temporary $(>) ;
 }
 
+rule _GetSubDir_LOCATE_TARGET SUBDIR_PATH : TARGET_DIRECTORY {
+	local _top = $(SUBDIR_PATH[1]) ;
+	local locate_target = [ FDirName $(ALL_LOCATE_TARGET) $(TARGET_DIRECTORY[1]) $(_top) $(SUBDIR_DOWN) $(TARGET_DIRECTORY[2]) ] ;
+}
+
 rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 {
 	#
