@@ -1,0 +1,842 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+    <Filter Include="Lua Files">
+      <UniqueIdentifier>{ced0706b-e458-454c-b873-04e74d53f541}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules">
+      <UniqueIdentifier>{4e103816-f94f-4108-9077-8c58950dd0ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\lanes">
+      <UniqueIdentifier>{22058efc-2ef4-41e0-89a7-9067c1dc7aa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\ospath">
+      <UniqueIdentifier>{7fc93a5f-5447-41ab-87f1-76c0f3a9409d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\osprocess">
+      <UniqueIdentifier>{c0ec7bd9-ac51-4891-9f96-036dadeb8b31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\md5">
+      <UniqueIdentifier>{b38bb727-7a10-4c9a-8815-1f876b09c0fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\uuid">
+      <UniqueIdentifier>{21ffc9de-7b3b-4239-a427-df89e1d636c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\lua-miniz">
+      <UniqueIdentifier>{9d73afc3-5889-4f92-b8c9-7e0c1c0ce260}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\filefind">
+      <UniqueIdentifier>{eaa9a4c4-baf8-4cbd-bfe9-d8f306c2dc97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\struct">
+      <UniqueIdentifier>{5d7060ad-c6e7-49f7-90dd-39384fdf59de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\luaexpat">
+      <UniqueIdentifier>{2726e0a3-0859-4ef3-a872-999f7f34f1ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\luaexpat\libexpat">
+      <UniqueIdentifier>{9006fc00-e509-412d-a240-f400dc88bb64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\lua-prettydump">
+      <UniqueIdentifier>{5536b1a2-b548-4cc2-863a-66521c175062}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\rapidjson">
+      <UniqueIdentifier>{1dafaad9-f42e-4c02-9178-6b79df19b04f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\ziparchive">
+      <UniqueIdentifier>{4039913e-a2d7-4d1e-8329-0e1467d5036e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\ziparchive\Misc">
+      <UniqueIdentifier>{8ad7dac0-8c76-42f2-97a7-0b46a302c5ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\ziparchive\Misc\trio">
+      <UniqueIdentifier>{96d405b7-4483-4875-a64a-1850c75e4c88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\ziparchive\Misc\aes">
+      <UniqueIdentifier>{7a2560fe-9806-473c-b8af-f392e5f4a4c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua Files\Lua Modules\python">
+      <UniqueIdentifier>{bef5f00e-67c3-442a-8785-df69124b1f37}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="builtins.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="command.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="compile.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="execmac.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="execunix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="execvms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="expand.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fileglob.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filemac.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filent.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fileos2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fileunix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filevms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glob.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hash.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hcache.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="headers.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jam.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jambase-j.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jamgram.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lists.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luagsub.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luasupport.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="make.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="make1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="md5c.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mempool.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="newstr.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="option.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parse.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pathmac.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pathunix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pathvms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="progress.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="regexp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rules.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scan.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="search.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="timestamp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tmpunix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="variable.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="w32_getreg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="w32_shortname.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="miniz.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lapi.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lauxlib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lbaselib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lbitlib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lcode.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lcorolib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lctype.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ldblib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ldebug.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ldo.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ldump.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lfunc.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lgc.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\linit.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\liolib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\llex.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lmathlib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lmem.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\loadlib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lobject.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lopcodes.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\loslib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lparser.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lstate.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lstring.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lstrlib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ltable.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ltablib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ltm.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lundump.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lutf8lib.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lvm.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lzio.c">
+      <Filter>Lua Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ospath\src\ospath.c">
+      <Filter>Lua Files\Lua Modules\ospath</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ospath\src\pusherror.c">
+      <Filter>Lua Files\Lua Modules\ospath</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\osprocess\w32api\ex.c">
+      <Filter>Lua Files\Lua Modules\osprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\osprocess\w32api\spawn.c">
+      <Filter>Lua Files\Lua Modules\osprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\osprocess\w32api\windows_pusherror.c">
+      <Filter>Lua Files\Lua Modules\osprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\md5\lmd5.c">
+      <Filter>Lua Files\Lua Modules\md5</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\uuid\luuid.c">
+      <Filter>Lua Files\Lua Modules\uuid</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\uuid\wuuid.c">
+      <Filter>Lua Files\Lua Modules\uuid</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lua-miniz\lminiz.c">
+      <Filter>Lua Files\Lua Modules\lua-miniz</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\filefind\src\filefind.c">
+      <Filter>Lua Files\Lua Modules\filefind</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\struct\struct.c">
+      <Filter>Lua Files\Lua Modules\struct</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lanes\src\cancel.c">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lanes\src\compat.c">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lanes\src\deep.c">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lanes\src\keeper.c">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lanes\src\lanes.c">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lanes\src\linda.c">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lanes\src\threading.c">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lanes\src\tools.c">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lanes\src\universe.c">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\libexpat\expat\lib\loadlibrary.c">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\libexpat\expat\lib\xmlparse.c">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\libexpat\expat\lib\xmlrole.c">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\libexpat\expat\lib\xmltok.c">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\libexpat\expat\lib\xmltok_impl.c">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\libexpat\expat\lib\xmltok_ns.c">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\luaexpat\src\lxplib.c">
+      <Filter>Lua Files\Lua Modules\luaexpat</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lua-prettydump\src\LuaState_DumpObject.cpp">
+      <Filter>Lua Files\Lua Modules\lua-prettydump</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lua-rapidjson\src\Document.cpp">
+      <Filter>Lua Files\Lua Modules\rapidjson</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lua-rapidjson\src\rapidjson.cpp">
+      <Filter>Lua Files\Lua Modules\rapidjson</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lua-rapidjson\src\Schema.cpp">
+      <Filter>Lua Files\Lua Modules\rapidjson</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\lua-rapidjson\src\values.cpp">
+      <Filter>Lua Files\Lua Modules\rapidjson</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\lziparchive.cpp">
+      <Filter>Lua Files\Lua Modules\ziparchive</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\DiskFile.cpp">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\HeapString.cpp">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\MemFile.cpp">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\Misc.cpp">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\Misc_InternalPch.cpp">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\ZipArchive.cpp">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\ZipEntryFile.cpp">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\aes\fileenc.c">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc\aes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\aes\aeskey.c">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc\aes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\aes\aescrypt.c">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc\aes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\aes\aestab.c">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc\aes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\aes\pwd2key.c">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc\aes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\aes\hmac.c">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc\aes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\aes\sha1.c">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc\aes</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\ziparchive\Misc\trio\trio.c">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc\trio</Filter>
+    </ClCompile>
+    <ClCompile Include="buffer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\python\src\luainpython.c">
+      <Filter>Lua Files\Lua Modules\python</Filter>
+    </ClCompile>
+    <ClCompile Include="luaplus\Src\Modules\python\src\pythoninlua.c">
+      <Filter>Lua Files\Lua Modules\python</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="builtins.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="command.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="compile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="envexp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="execcmd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="expand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fileglob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="filesys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hcache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jambase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jamgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jamgramtab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lists.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luasupport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="make.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mempool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="newstr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="option.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="patchlevel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pathsys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="progress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="regexp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rules.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="search.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timestamp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tmpfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="variable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="w32_getreg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="w32_shortname.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="miniz.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lapi.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lauxlib.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lcode.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lctype.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ldebug.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ldo.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lfunc.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lgc.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\llex.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\llimits.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lmem.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lobject.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lopcodes.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lparser.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lprefix.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lstate.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lstring.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ltable.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\ltm.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lua.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lua.hpp">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\luaconf.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lualib.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lundump.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lvm.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\LuaPlus\lua53-luaplus\src\lzio.h">
+      <Filter>Lua Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ospath\src\pusherror.h">
+      <Filter>Lua Files\Lua Modules\ospath</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\osprocess\w32api\spawn.h">
+      <Filter>Lua Files\Lua Modules\osprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\osprocess\w32api\windows_pusherror.h">
+      <Filter>Lua Files\Lua Modules\osprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\md5\lmd5.h">
+      <Filter>Lua Files\Lua Modules\md5</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\uuid\wuuid.h">
+      <Filter>Lua Files\Lua Modules\uuid</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\cancel.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\compat.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\deep.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\keeper.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\lanes.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\lanes_private.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\macros_and_utils.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\platform.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\threading.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\threading_osx.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\tools.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\uniquekey.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lanes\src\universe.h">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\ascii.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\asciitab.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\expat.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\iasciitab.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\internal.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\latin1tab.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\nametab.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\siphash.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\utf8tab.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\winconfig.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\xmlrole.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\xmltok.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\libexpat\expat\lib\xmltok_impl.h">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\luaexpat\src\lxplib.h">
+      <Filter>Lua Files\Lua Modules\luaexpat</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lua-prettydump\src\LuaStateOutFile.h">
+      <Filter>Lua Files\Lua Modules\lua-prettydump</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lua-prettydump\src\LuaStateOutString.h">
+      <Filter>Lua Files\Lua Modules\lua-prettydump</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lua-rapidjson\src\file.hpp">
+      <Filter>Lua Files\Lua Modules\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lua-rapidjson\src\luax.hpp">
+      <Filter>Lua Files\Lua Modules\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lua-rapidjson\src\StringStream.hpp">
+      <Filter>Lua Files\Lua Modules\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lua-rapidjson\src\Userdata.hpp">
+      <Filter>Lua Files\Lua Modules\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\lua-rapidjson\src\values.hpp">
+      <Filter>Lua Files\Lua Modules\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\Array.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\ArrayOwnedPtr.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\DiskFile.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\File.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\FixedSizeAllocator.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\HeapAllocator.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\HeapString.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\List.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\ListOwnedPtr.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\Map.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\MemFile.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\Misc.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\Misc_InternalPch.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\OwnedPtr.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\TypeTraits.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\ZipArchive.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\ZipEntryFile.h">
+      <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\python\src\luainpython.h">
+      <Filter>Lua Files\Lua Modules\python</Filter>
+    </ClInclude>
+    <ClInclude Include="luaplus\Src\Modules\python\src\pythoninlua.h">
+      <Filter>Lua Files\Lua Modules\python</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="luaplus\Src\Modules\lanes\src\lanes.lua">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </None>
+    <None Include="luaplus\Src\Modules\lanes\src\Makefile">
+      <Filter>Lua Files\Lua Modules\lanes</Filter>
+    </None>
+    <None Include="luaplus\Src\Modules\libexpat\expat\lib\libexpat.def">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </None>
+    <None Include="luaplus\Src\Modules\libexpat\expat\lib\libexpatw.def">
+      <Filter>Lua Files\Lua Modules\luaexpat\libexpat</Filter>
+    </None>
+  </ItemGroup>
+</Project>
