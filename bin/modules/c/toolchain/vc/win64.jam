@@ -58,7 +58,7 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
                 $(MSSDK)/lib/$(MSSDK_VERSION)/um/x64
             ;
             MSVCBIN = "$(MSVCNT)/bin/HostX64/x64/" ;
-            RC = $(MSSDK)/bin/x64/rc ;
+            RC = $(MSSDK)/bin/$(MSSDK_VERSION)/x64/rc ;
             rc_nologo = /nologo ;
 
         case vs2019 :
@@ -85,7 +85,7 @@ rule C.Toolchain.vc.win64.Detect COMPILER {
                 $(MSSDK)/lib/$(MSSDK_VERSION)/um/x64
             ;
             MSVCBIN = "$(MSVCNT)/bin/HostX64/x64/" ;
-            RC = $(MSSDK)/bin/x64/rc ;
+            RC = $(MSSDK)/bin/$(MSSDK_VERSION)/x64/rc ;
             rc_nologo = /nologo ;
 
         case vs2017 :
