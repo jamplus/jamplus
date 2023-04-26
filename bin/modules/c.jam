@@ -321,7 +321,7 @@ rule C._MultiCppCompile SOURCES {
 	HDRSCAN on $(sources) = $(C.HDRPATTERN) ;
 	HDRGRIST on $(sources) = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST) ;
 
-	SEARCH on $(sources) = $(SEARCH_SOURCE) ;
+	SEARCH on $(sources) ?= $(SEARCH_SOURCE) ;
 
 	local _src ;
 
