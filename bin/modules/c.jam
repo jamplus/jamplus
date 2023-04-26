@@ -1642,6 +1642,10 @@ rule C.OutputSuffix TARGET : SUFFIX {
 }
 
 
+rule C._retrieveCompilerSuiteSymbol TOOLCHAIN_GRIST {
+	return !c.$(TOOLCHAIN_GRIST).info! ;
+}
+
 
 rule C.ToolchainSpecKeys TOOLCHAIN_SPEC_KEYS {
 	if $(TOOLCHAIN_SPEC_KEYS)  &&  ! $(TOOLCHAIN_SPEC_OPTIONS:Z=$(C.ACTIVE_TOOLCHAIN_GRIST)) {
