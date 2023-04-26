@@ -1375,8 +1375,30 @@ rule C.UsePrecompiledHeader TARGET {
 }
 
 
-rule C.PrecompiledHeader TARGET {
+rule C.PrecompiledHeader TARGET : NAME : FILES {
 	C.ActiveTarget $(TARGET) ;
+
+	local buildExtensions =
+			$(C.C_STYLE_BUILD_EXTENSIONS:Z=$(C.COMPILER_SUITE_SYMBOL):X=.s)
+			$(C.CPP_STYLE_BUILD_EXTENSIONS:Z=$(C.COMPILER_SUITE_SYMBOL))
+	;
+
+	local SOURCE = $(NAME[1]) ;
+	if ! $(SOURCE:S) in $(buildExtensions) {
+		SOURCE = $(SOURCE:S=.cpp) ;
+	}
+	local HEADER = $(NAME[2]:E=$(SOURCE:S=.h)) ;
+
+	local sufobj = $(SUFOBJ:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+	local gristedHeader = $(HEADER:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+	local file ;
+	for file in $(FILES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) {
+		if $(file:S) in $(buildExtensions)  &&  $(file) != $(cppPchFilename) {
+			local objTargets = $(file:S=$(sufobj)) ;
+			FORCE_INCLUDES on $(objTargets) += $(gristedHeader) ;
+		}
+	}
+	#FORCE_INCLUDES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(HEADER:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 }
 
 

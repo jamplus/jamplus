@@ -371,7 +371,8 @@ local function XcodeHelper_WritePBXBuildFiles(self, folder)
 			local settingsString
 			local sourceInfo = GetSourceInfo(self, entry)
 			if sourceInfo then
-				if sourceInfo.Defines  or  sourceInfo.Flags or  sourceInfo.IncludeDirectories  or  sourceInfo.ForceFileType then
+				if sourceInfo.Defines  or  sourceInfo.Flags or  sourceInfo.IncludeDirectories  or  sourceInfo.ForceFileType
+						or  sourceInfo.ForceIncludes then
 					settingsString = "; settings = {"
 					settingsString = settingsString .. "COMPILER_FLAGS = \""
 					if sourceInfo.Defines then
@@ -387,6 +388,11 @@ local function XcodeHelper_WritePBXBuildFiles(self, folder)
 					if sourceInfo.IncludeDirectories then
 						for _, includeDirectory in ipairs(sourceInfo.IncludeDirectories) do
 							settingsString = settingsString .. "-I" .. includeDirectory .. " "
+						end
+					end
+					if sourceInfo.ForceIncludes then
+						for _, forceInclude in ipairs(sourceInfo.ForceIncludes) do
+							settingsString = settingsString .. "-include " .. forceInclude .. " "
 						end
 					end
 					if sourceInfo.ForceFileType then
