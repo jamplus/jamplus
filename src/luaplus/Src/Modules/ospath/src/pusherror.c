@@ -10,8 +10,12 @@
 
 #if defined(_WIN32)
 
+#if !defined(WIN32_LEAN_AND_MEAN)
 #define WIN32_LEAN_AND_MEAN 1
+#endif
+#if !defined(NOGDI)
 #define NOGDI 1
+#endif
 #include <windows.h>
 
 /* Push nil, followed by the Windows error message corresponding to
