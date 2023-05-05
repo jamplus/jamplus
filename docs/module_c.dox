@@ -1038,7 +1038,7 @@ For the given \c SOURCES, assign the \c INCLUDES to the \c TARGET, causing that 
 
 
 <hr>
-\section rule_C_ObjectIncludeDirectories rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS
+\section rule_C_ObjectIncludeDirectories rule C.ObjectIncludeDirectories TARGET : SOURCE : INCLUDEPATHS [ : OPTIONS ]
 \addindex rule_C_ObjectIncludeDirectories
 
 For the given \c SOURCES, assign the \c INCLUDEPATHS as part of the \c TARGET compilation of the \c SOURCES.
@@ -1046,6 +1046,13 @@ For the given \c SOURCES, assign the \c INCLUDEPATHS as part of the \c TARGET co
 \param TARGET The target containing the \c SOURCES.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
 \param SOURCES The list of sources to assign the include paths to.
 \param INCLUDEPATHS The list of include paths to apply.
+\param OPTIONS The following options are available:
+
+\htmlonly <blockquote> \endhtmlonly
+<ul>
+  <li>\c prepend - Instead of appending the paths specified by \c INCLUDEPATHS to the include directories list, the paths will be prepended instead.</li>
+</ul>
+\htmlonly </blockquote> \endhtmlonly
 
 \code
     # Add $(Code)/Shared to myproject's somefile.cpp for all configurations
