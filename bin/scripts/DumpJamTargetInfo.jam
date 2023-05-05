@@ -156,10 +156,21 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES {
 
 rule AutoSourceGroup TARGET : SOURCES
 {
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
+	if $(TARGET) = C.* {
+		__AutoSourceGroup_Automatic = 1 ;
+		return ;
+	}
+
 	if ! $(SOURCES)  {  return ;  }
 
-	TARGET = [ C.ActiveTarget $(TARGET) ] ;
-	SOURCES = [ ExpandFileList $(SOURCES) ] ;
+	if $($(TARGET).__AppliedAutoSourceGroup) {
+		return ;
+	}
+
+	$(TARGET).__AppliedAutoSourceGroup = 1 ;
+
+	SOURCES = [ ExpandFileList $(SOURCES) : 0 ] ;
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 
@@ -198,6 +209,10 @@ rule ExternalProject TARGET : PROJECT_PATH : OPTIONS {
 
 
 rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
+	if $(__AutoSourceGroup_Automatic) {
+		AutoSourceGroup $(TARGET) : $(SOURCES) ;
+	}
+
 	SOURCES = [ ExpandFileList $(SOURCES:T) ] ;
 
 	# Write initial Project information.

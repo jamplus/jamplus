@@ -66,17 +66,18 @@ Set the default target to use when the target isn't specified.  Calls \ref rule_
 
 
 <hr>
-\section rule_AutoSourceGroup rule AutoSourceGroup TARGET : SOURCES
+\section rule_AutoSourceGroup rule AutoSourceGroup [ TARGET ] [ : SOURCES ]
 \addindex rule_AutoSourceGroup
 
-For workspace projects that support grouping of files into folders, the \c AutoSourceGroup rule is used to tell the <b>jam --workspace</b> generator to create folders within a project based on the relative paths of the \c SOURCES.
+For workspace projects that support grouping of files into folders, the \c AutoSourceGroup rule is used to tell the <pre>jam --workspace</pre> generator to create folders within a project based on the relative paths of the \c SOURCES.
 
-\param TARGET The project to which the folders will be created.
-\param SOURCES The list of files to derive folder names from.
+\param TARGET (optional) The project for which the folders will be created. If no project is specified, \c AutoSourceGroup will be automatically applied to all projects.
+\param SOURCES (optional) The list of files to derive folder names from.
 
 \code
+
     # Put helloworld.cpp and .h in the top-level project folder.
-    # Put filename.cpp and .h in a project folder caled platform\\directory (in SourceGroup syntax).
+    # Put filename.cpp and .h in a project folder called platform\\directory (in SourceGroup syntax).
     SRCS =
             helloworld.cpp
             helloworld.h
@@ -84,6 +85,10 @@ For workspace projects that support grouping of files into folders, the \c AutoS
             platform/directory/filename.h
     ;
 
+    # Apply to every project:
+    AutoSourceGroup ;
+
+    # or just a specific project:
     AutoSourceGroup MyProject : $(SRCS) ;
 \endcode
 
