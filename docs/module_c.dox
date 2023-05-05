@@ -371,10 +371,10 @@ Assign the \c DEFINES to the given project \c TARGET.
 \section rule_C_ExcludeFromBuild rule C.ExcludeFromBuild TARGET : SOURCES
 \addindex rule_C_ExcludeFromBuild
 
-For the given project \c TARGET, exclude the \c SOURCES from the build.  If using <b>JamToWorkspace</b> for project generation, sources must be excluded and not simply removed from the list.  Otherwise, they don't all show in the generated projects.
+For the given project \c TARGET, exclude the \c SOURCES from the build.  When using <pre>jam --workspace</pre> for project generation, sources must be excluded and not simply removed from the list.  Otherwise, they will not show in the generated projects.
 
 \param TARGET The target to exclude the \c SOURCES from.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
-\param SOURCES The list of defines to exclude.
+\param SOURCES The list of sources to exclude.
 
 \code
     if $(PLATFORM) != xbox
