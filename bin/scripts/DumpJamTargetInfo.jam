@@ -23,7 +23,7 @@ rule DumpSources prefix : SOURCES
 	local sources ;
 	local source ;
 	for source in $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) {
-		if ! $(EXCLUDED_FROM_BUILD:Z=$(source)) {
+		if ! $(EXCLUDED_FROM_WORKSPACE:Z=$(source)) {
 			sources += $(source:G=) ;
 		}
 	}
