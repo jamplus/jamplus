@@ -1313,7 +1313,7 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 		Contents += "})$(NEWLINE)" ;
 
 		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
-		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
+		Contents += "$(prefix).SourcesLibraries = concat($(prefix).SourcesLibraries, {$(NEWLINE)" ;
 		for lib in $(linkLibs) {
 			if $(lib:G) {
 				local libFullName = $(lib) ;
