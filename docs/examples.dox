@@ -11,7 +11,7 @@ Detailed on this page are various examples with descriptions on how JamPlus can 
 
 In this example, we are going to quickly build Lua 5.3 using Jam.
 
-First, download Lua from http://lua.org/. Expand it into a directory, and change to the expanded Lua directory's <tt>src/<tt> folder.
+First, download Lua from http://lua.org/. Expand it into a directory, and change to the expanded Lua directory's <tt>src/</tt> folder.
 
 \code
 [lua] cd src
