@@ -252,6 +252,7 @@ rule C._MultiCppCompile SOURCES {
 	local preMMFLAGS ;
 	local flagsToRemove ;
 	local flagsToAdd ;
+	local excludePatternsFromBuild ;
 
 	local forceIncludes ;
 	on $(C.ACTIVE_TOOLCHAIN_*) {
@@ -284,6 +285,11 @@ rule C._MultiCppCompile SOURCES {
 		flagsToRemove += $(FLAGS_TO_REMOVE) ;
 		flagsToAdd += $(FLAGS_TO_ADD) ;
 		forceIncludes = $(FORCE_INCLUDES) $(forceIncludes) ;
+		excludePatternsFromBuild = $(EXCLUDE_PATTERNS_FROM_BUILD) ;
+	}
+
+	if $(excludePatternsFromBuild) {
+		SOURCES -= [ Match ($(excludePatternsFromBuild)) : $(SOURCES) ] ;
 	}
 
 	preDEFINES = [ C.$(C.COMPILER_SUITE).FDefines $(preDEFINES) ] ;
@@ -733,6 +739,9 @@ rule C.Library TARGET : SOURCES : OPTIONS {
 		}
 	}
 	C.ARCHITECTURE on $(linkTargets) = $(C.ARCHITECTURE) ;
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+	}
 	return $(linkTargets) ;
 }
 
@@ -1456,6 +1465,12 @@ rule C.Defines TARGET : DEFINES : OPTIONS {
 rule C.ExcludeFromBuild TARGET : SOURCES {
 	C.ActiveTarget $(TARGET) ;
 	EXCLUDED_FROM_BUILD on $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) = true ;
+}
+
+
+rule C.ExcludePatternsFromBuild TARGET : PATTERNS {
+	C.ActiveTarget $(TARGET) ;
+	EXCLUDE_PATTERNS_FROM_BUILD on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(PATTERNS) ;
 }
 
 

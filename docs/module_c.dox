@@ -24,6 +24,7 @@ Support for more than one toolchain used during the same Jam execution is provid
 \refitem rule_C_DefFile C.DefFile
 \refitem rule_C_Defines C.Defines
 \refitem rule_C_ExcludeFromBuild C.ExcludeFromBuild
+\refitem rule_C_ExcludePatternsFromBuild C.ExcludePatternsFromBuild
 \refitem rule_C_Flags C.Flags
 \refitem rule_C_ForceFileType C.ForceFileType
 \refitem rule_C_ForceInclude C.ForceInclude
@@ -381,6 +382,28 @@ For the given project \c TARGET, exclude the \c SOURCES from the build.  When us
     {
         C.ExcludeFromBuild myproject : $(XBOX_SRCS) ;
     }
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_ExcludePatternsFromBuild rule C.ExcludePatternsFromBuild TARGET : PATTERNS
+\addindex rule_C_ExcludePatternsFromBuild
+
+For the given project \c TARGET, exclude the files matching regular express \c PATTERNS from the build.  When using <pre>jam --workspace</pre> for project generation, sources must be excluded and not simply removed from the list.  Otherwise, they will not show in the generated projects.
+
+\param TARGET The target to exclude the files matching \c PATTERNS from.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param PATTERNS The list of patterns used to match files to exclude from the project.
+
+\code
+    # Exclude files ending with _opengl. Effectively, this is a '*_opengl.*' exclusion.
+    C.ExcludePatternsFromBuild :
+        .*_opengl\\..*$
+    ;
 \endcode
 
 
