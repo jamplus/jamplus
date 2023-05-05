@@ -1,5 +1,40 @@
 #VISUAL_STUDIO_FORCE_VERSION = 10.0 ;
 
+rule FindMSVCHighestVersion MSVC_ROOT {
+    local dirs = [ Glob $(MSVC_ROOT) : */ ] ;
+    local highestMajor = 0 ;
+    local highestMinor = 0 ;
+    local highestBuild = 0 ;
+    local dir ;
+    for dir in @($(dirs:P):D=) {
+        local binDir = [ Glob $(MSVC_ROOT)/$(dir) : bin/ ] ;
+        if $(binDir) {
+            local version = [ Match ([0-9]*)\.([0-9]*)\.([0-9]*) : $(dir) ] ;
+            if [ Math $(version[1]) ">" $(highestMajor) ] = 1 {
+                highestMajor = $(version[1]) ;
+                highestMinor = $(version[2]) ;
+                highestBuild = $(version[3]) ;
+            } else if [ Math $(version[1]) "=" $(highestMajor) ] = 1 {
+                if [ Math $(version[2]) ">" $(highestMinor) ] = 1 {
+                    highestMinor = $(version[2]) ;
+                    highestBuild = $(version[3]) ;
+                } else if [ Math $(version[2]) "=" $(highestMinor) ] = 1 {
+                    if [ Math $(version[3]) ">" $(highestBuild) ] = 1 {
+                        highestBuild = $(version[3]) ;
+                    }
+                }
+            }
+        }
+    }
+
+    if $(highestMajor) = 0  &&  $(highestMinor) = 0  &&  $(highestBuild) = 0 {
+        return ;
+    }
+
+    return $(highestMajor).$(highestMinor).$(highestBuild) ;
+}
+
+
 rule FindVisualStudioHelper VERSION : COMPILER {
     switch $(VERSION) {
         case vs2022 :
@@ -20,8 +55,9 @@ rule FindVisualStudioHelper VERSION : COMPILER {
             }
             if $(MSVCNT) {
                 MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
-                local dirs = [ Glob @(..\\..\\VC\\Tools\\MSVC:R=$(MSVCNT)) : * ] ;
-                MSVCNT = $(dirs[1]) ;
+                local MSVC = @(..\\..\\VC\\Tools\\MSVC\\:R=$(MSVCNT)) ;
+                local version = [ FindMSVCHighestVersion $(MSVC) ] ;
+                MSVCNT = @($(MSVC)\\$(version)) ;
                 COMPILER = vs2022 ;
             }
 
@@ -38,8 +74,9 @@ rule FindVisualStudioHelper VERSION : COMPILER {
             }
             if $(MSVCNT) {
                 MSVCNT_BIN_PATH = @(../Common7/IDE:R=$(MSVCNT)) ;
-                local dirs = [ Glob @(..\\..\\VC\\Tools\\MSVC:R=$(MSVCNT)) : * ] ;
-                MSVCNT = $(dirs[1]) ;
+                local MSVC = @(..\\..\\VC\\Tools\\MSVC\\:R=$(MSVCNT)) ;
+                local version = [ FindMSVCHighestVersion $(MSVC) ] ;
+                MSVCNT = @($(MSVC)\\$(version)) ;
                 COMPILER = vs2019 ;
             }
 
