@@ -22,7 +22,7 @@ Next, some combination of the following rule calls (and any others described bel
     android.Assets : assets ;
     android.UncompressedAssetExtensions : dat ;
     android.NativeLibraries : sdl2main sdl2 ;
-    android.Sign : $(SUBDIR)/my-keystore.keystore mypassword mykey ;
+    android.Sign : $(SUBDIR)/my-keystore.keystore keystorepassword keyalias keypassword ;
     android.Package ;
 \endcode
 
@@ -545,10 +545,10 @@ Sets the Android \c SDK_MINIMUM_VERSION to ensure a build against. Corresponds t
 Sets up the keystore information for the Android package. \c android.Sign must be called before \c android.Package.
 
 \param TARGET The target to sign.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
-\param KEYSTORE_PATH_PASSWORD_KEY This parameter contains 3 entries, the path to the keystore, the password of the keystore, and the key to use when accessing the keystore.
+\param KEYSTORE_PATH_PASSWORD_KEY This parameter contains 4 entries, the path to the keystore, the password of the keystore, the key to use when accessing the keystore, and the password.
 
 \code
-    android.Sign : $(SUBDIR)/my-keystore.keystore mypassword mykey ;
+    android.Sign : $(SUBDIR)/my-keystore.keystore keystorepassword keyalias keypassword ;
 \endcode
 
 

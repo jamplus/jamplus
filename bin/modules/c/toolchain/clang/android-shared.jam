@@ -475,7 +475,7 @@ actions android._APKPackage {
 
 # Apk -> Signed APK
 actions android._SignApk {
-    $(JAVA.JARSIGNER:TC) -keystore $(KEYSTORE_PATH:TC) -storepass $(KEYSTORE_PASSWORD) -signedjar $(1:TC) $(2:TC) $(KEYSTORE_KEY)
+    $(JAVA.JARSIGNER:TC) -keystore $(KEYSTORE_PATH:TC) -storepass $(KEYSTORE_PASSWORD) -signedjar $(1:TC) $(2:TC) $(KEYSTORE_KEY_ALIAS)
 }
 
 
@@ -1406,12 +1406,15 @@ include ':app'
             local _keyStorePassword =
                 $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
                 $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-            local _keyStoreKey =
-                $(ANDROID.KEYSTORE_KEY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-                $(ANDROID.KEYSTORE_KEY:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+            local _keyStoreKeyAlias =
+                $(ANDROID.KEYSTORE_KEY_ALIAS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+                $(ANDROID.KEYSTORE_KEY_ALIAS:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+            local _keyStoreKeyPassword =
+                $(ANDROID.KEYSTORE_KEY_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+                $(ANDROID.KEYSTORE_KEY_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-            if ! $(_keyStorePath) || ! $(_keyStorePassword) || ! $(_keyStoreKey) {
-                Exit *** error \: Must call android.Sign and specify keystore path, password and key ;
+            if ! $(_keyStorePath) || ! $(_keyStorePassword) || ! $(_keyStoreKeyAlias) || ! $(_keyStoreKeyPassword) {
+                Exit *** error \: Must call android.Sign and specify keystore path, keystore password, key alias, and key password ;
             }
             _keyStorePath = [ MakeRelativePath $(_keyStorePath:T) : $(gradleAppOutputDirectory) ] ;
 
@@ -1487,8 +1490,8 @@ android {
         release {
             storeFile file('$(_keyStorePath)')
             storePassword '$(_keyStorePassword)'
-            keyAlias '$(_keyStoreKey)'
-            keyPassword '$(_keyStorePassword)'
+            keyAlias '$(_keyStoreKeyAlias)'
+            keyPassword '$(_keyStoreKeyPassword)'
         }
     }
 " ;
@@ -2042,17 +2045,21 @@ android {
     local _keyStorePassword =
         $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
         $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-    local _keyStoreKey =
-        $(ANDROID.KEYSTORE_KEY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-        $(ANDROID.KEYSTORE_KEY:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+    local _keyStoreKeyAlias =
+        $(ANDROID.KEYSTORE_KEY_ALIAS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+        $(ANDROID.KEYSTORE_KEY_ALIAS:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+    local _keyStoreKeyPassword =
+        $(ANDROID.KEYSTORE_KEY_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+        $(ANDROID.KEYSTORE_KEY_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
-    if ! $(_keyStorePath) || ! $(_keyStorePassword) || ! $(_keyStoreKey) {
-        Exit *** error \: Must call android.Sign and specify keystore path, password and key ;
+    if ! $(_keyStorePath) || ! $(_keyStorePassword) || ! $(_keyStoreKeyAlias) || ! $(_keyStoreKeyPassword) {
+        Exit *** error \: Must call android.Sign and specify keystore path, keystore password, key alias, and key password ;
     }
 
     KEYSTORE_PATH on $(_signedApk) = $(_keyStorePath) ;
     KEYSTORE_PASSWORD on $(_signedApk) = $(_keyStorePassword) ;
-    KEYSTORE_KEY on $(_signedApk) = $(_keyStoreKey) ;
+    KEYSTORE_KEY_ALIAS on $(_signedApk) = $(_keyStoreKeyAlias) ;
+    KEYSTORE_KEY_PASSWORD on $(_signedApk) = $(_keyStoreKeyPassword) ;
 
     Depends $(_signedApk) : $(_keystorePath) ;
     UseCommandLine $(_signedApk) : $(_keyStorePassword) $(_keyStoreKey) ;
@@ -2304,7 +2311,8 @@ rule android.Sign TARGET : KEYSTORE_PATH_PASSWORD_KEY {
     SEARCH on $(KEYSTORE_PATH_PASSWORD_KEY[1]) = $(SUBDIR) ;
 
     ANDROID.KEYSTORE_PASSWORD on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(KEYSTORE_PATH_PASSWORD_KEY[2]) ;
-    ANDROID.KEYSTORE_KEY on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(KEYSTORE_PATH_PASSWORD_KEY[3]) ;
+    ANDROID.KEYSTORE_KEY_ALIAS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(KEYSTORE_PATH_PASSWORD_KEY[3]) ;
+    ANDROID.KEYSTORE_KEY_PASSWORD on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(KEYSTORE_PATH_PASSWORD_KEY[4]) ;
 }
 
 
