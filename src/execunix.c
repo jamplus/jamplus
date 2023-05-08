@@ -165,6 +165,7 @@ exec_init()
 		if (i == 0)
 		{
 			file_mkdir( cmdtab[i].outputFilename );
+			unlink( cmdtab[ i ].outputFilename );
 		}
 	}
 }
@@ -260,6 +261,12 @@ execlua(
 	}
 
 	/* Save the operation for execwait() to find. */
+
+	if (cmdtab[ slot ].outputFilenameUsed)
+	{
+		unlink(cmdtab[ slot ].outputFilename);
+		cmdtab[ slot ].outputFilenameUsed = 0;
+	}
 
 	cmdtab[ slot ].pid = pid;
 	cmdtab[ slot ].func = func;
@@ -641,7 +648,10 @@ execwait()
 
 #ifdef OPT_SERIAL_OUTPUT_EXT
 	if (cmdtab[ i ].outputFilenameUsed)
+	{
 		unlink(cmdtab[ i ].outputFilename);
+		cmdtab[ i ].outputFilenameUsed = 0;
+	}
 #endif
 
 	return 1;
