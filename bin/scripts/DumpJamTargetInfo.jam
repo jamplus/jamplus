@@ -199,7 +199,9 @@ rule AutoSourceGroup TARGET : SOURCES
 				Contents += "$(TAB)$(TAB)[[$(source:TR=$(subdir))]],$(NEWLINE)" ;
 			}
 		}
-		Contents += "})$(NEWLINE)" ;
+		if $(lastFolderName) {
+			Contents += "})$(NEWLINE)" ;
+		}
 	}
 
 }
