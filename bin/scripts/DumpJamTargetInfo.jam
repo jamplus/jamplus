@@ -229,7 +229,7 @@ rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
 
 	# Write initial Project information.
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
-	local project = "Projects['$(TARGET)']" ;
+	local project = "Projects[ [[$(TARGET)]] ]" ;
 	Contents += "$(NEWLINE)$(NEWLINE)--------------------------------------------------------------------$(NEWLINE)" ;
 
 	Contents += "$(project).Name = '$(TARGET)'$(NEWLINE)" ;
