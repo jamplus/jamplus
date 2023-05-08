@@ -590,6 +590,7 @@ Exporters =
 		Description = 'Generate Xcode project',
 		Options =
 		{
+			NeedsSourcesLibraries = true,
 		}
 	},
 
@@ -602,6 +603,7 @@ Exporters =
 		Description = 'Generate Xcode-Native project',
 		Options =
 		{
+			NeedsSourcesLibraries = true,
 		}
 	},
 
@@ -611,7 +613,7 @@ Exporters =
 
 
 
-function BuildSourceTree(project)
+function BuildSourceTree(project, needsSourcesLibraries)
 	-- Filter files.
 	local files = {}
 	local sourcesMap = {}
@@ -624,6 +626,26 @@ function BuildSourceTree(project)
 				sourcesMap[lowerSource] = source
 			end
 		end
+	end
+	if project.SourcesLibraries  and  needsSourcesLibraries then
+		for _, source in ipairs(project.SourcesLibraries) do
+			local lowerSource = source:lower()
+			if not sourcesMap[lowerSource] then
+				newSources[#newSources + 1] = source
+				sourcesMap[lowerSource] = source
+			end
+		end
+		project.SourceGroups['Libraries'] = project.SourcesLibraries
+	end
+	if project.SourcesFrameworks  and  needsSourcesLibraries then
+		for _, source in ipairs(project.SourcesFrameworks) do
+			local lowerSource = source:lower()
+			if not sourcesMap[lowerSource] then
+				newSources[#newSources + 1] = source
+				sourcesMap[lowerSource] = source
+			end
+		end
+		project.SourceGroups['Frameworks'] = project.SourcesFrameworks
 	end
 	project.Sources = newSources
 
@@ -765,7 +787,7 @@ function DumpWorkspace(workspace)
 	for projectName in ivalues(workspace.Projects) do
 		local project = Projects[projectName]
 		if project then
-			BuildSourceTree(project)
+			BuildSourceTree(project, exporter.Options.NeedsSourcesLibraries)
 		end
 	end
 
