@@ -246,8 +246,10 @@ else
 		pass3Pattern_useChecksums = [[
 		*** found 26 target(s)...
 		*** updating 7 target(s)...
-		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.o 
-		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.o 
+		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.o
+		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so
+		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.o
+		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so
 		*** updated 7 target(s)...
 ]]
 	end

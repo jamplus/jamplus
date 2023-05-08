@@ -379,6 +379,8 @@ void LibA()
 *** updating 4 target(s)...
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):project1>project1.o 
 @ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):libA>libA.o 
+@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):libA>libA.a 
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):project1>project1
 *** updated 4 target(s)...
 ]]
 		TestPattern(pattern4, RunJam())
