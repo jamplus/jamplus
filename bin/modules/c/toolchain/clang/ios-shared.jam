@@ -30,7 +30,7 @@ rule C.ios.LinkFrameworks TARGET : FRAMEWORKS : OPTIONS {
 
 	if $(TARGETINFO_LOCATE) {
 		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
-		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
+		Contents += "$(prefix).SourcesFrameworks = concat($(prefix).SourcesFrameworks, {$(NEWLINE)" ;
 			Contents += "$(TAB)[[$(FRAMEWORKS:T:S=.framework)]],$(NEWLINE)" ;
 		Contents += "})$(NEWLINE)" ;
 	}

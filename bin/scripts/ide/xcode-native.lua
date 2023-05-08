@@ -952,6 +952,25 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 
 			table.insert(self.Contents, "\t\t\t\tENABLE_BITCODE = NO;\n")
 
+			local sourcesExcludedFromBuild = {}
+			local sourcesInfo = Projects[self.ProjectName].SourcesInfo
+			if sourcesInfo then
+				for filename, sourceInfo in pairs(sourcesInfo) do
+					if sourceInfo.ExcludeFromBuild then
+						sourcesExcludedFromBuild[#sourcesExcludedFromBuild + 1] = filename
+					end
+				end
+			end
+			table.sort(sourcesExcludedFromBuild)
+
+			if sourcesExcludedFromBuild[1] then
+				table.insert(self.Contents, "\t\t\t\tEXCLUDED_SOURCE_FILE_NAMES = (\n")
+				for _, filename in ipairs(sourcesExcludedFromBuild) do
+					table.insert(self.Contents, "\t\t\t\t\t\"" .. filename .. "\",\n")
+				end
+				table.insert(self.Contents, "\t\t\t\t);\n")
+			end
+
 			-- Deployment target (iOS).
 			local iosSdkVersionMin
 			if subProject.IOS_SDK_VERSION_MIN and  subProject.IOS_SDK_VERSION_MIN[platformName]  and  subProject.IOS_SDK_VERSION_MIN[platformName][configName] then
@@ -1245,6 +1264,7 @@ function XcodeProjectMetaTable:Write(outputPath)
 	local project = Projects[self.ProjectName]
 
 	local workspaceConfigs = GetWorkspaceConfigList(self.Workspace)
+	self.workspaceConfigs = workspaceConfigs
 
 	local sourcesInfo = project.SourcesInfo
 	if sourcesInfo then

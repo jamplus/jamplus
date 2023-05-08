@@ -83,6 +83,7 @@ rule DumpSources prefix : SOURCES
 		local objTarget = $(source:S=$(sufobj):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 
 		local ext = $(source:S) ;
+		local excludedFromBuild = $(EXCLUDED_FROM_BUILD:Z=$(source)) ;
 		local forceFileType = $(FORCE_FILE_TYPE:Z=$(source)) ;
 		local BUILD_EXT = C.BUILD$(forceFileType:E=$(ext)) ;
 		local objflags = $($(BUILD_EXT).FLAGS:Z=$(objTarget)) ;
@@ -98,7 +99,11 @@ rule DumpSources prefix : SOURCES
 		if $(objectFlagsToAdd[1]) {
 			objflags += $(objectFlagsToAdd) ;
 		}
-		local fullprefix = "$(prefix).SourcesInfo[ [[$(source:TR=$(subdir))]] ]" ;
+		local sourceFullPath = $(source:TR=$(subdir)) ;
+		local fullprefix = "$(prefix).SourcesInfo[ [[$(sourceFullPath)]] ]" ;
+		if $(excludedFromBuild) {
+			Contents += "$(fullprefix).ExcludeFromBuild=true$(NEWLINE)" ;
+		}
 		if $(objdefines) {
 			Contents += "$(fullprefix).Defines={@(\"$(objdefines)\":J=,)}$(NEWLINE)" ;
 		}

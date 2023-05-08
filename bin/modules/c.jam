@@ -1477,6 +1477,7 @@ rule C.ExcludePatternsFromBuild TARGET : PATTERNS {
 rule C.ExcludeFromWorkspace TARGET : SOURCES {
 	C.ActiveTarget $(TARGET) ;
 	EXCLUDED_FROM_WORKSPACE on $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) = true ;
+	EXCLUDED_FROM_BUILD on $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) = true ;
 }
 
 
