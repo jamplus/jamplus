@@ -48,7 +48,7 @@ rule macosx.SDK SDK_VERSION {
 	local architecture ;
 
 	developerRoot = /Developer/SDKs ;
-	SDK_VERSION ?= 10.15 ;
+	#SDK_VERSION ?= ;
 	switch $(SDK_VERSION) {
 		case 10.4 :
 			isysroot = $(developerRoot)/MacOSX10.4u.sdk ;
