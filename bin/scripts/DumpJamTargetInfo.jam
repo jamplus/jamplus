@@ -184,15 +184,22 @@ rule AutoSourceGroup TARGET : SOURCES
 	{
 		local prefix = "Projects[ [[$(project)]] ]" ;
 
+		local lastFolderName ;
 		local source ;
 		for source in $(SOURCES) {
 			local folderName = $(source:D\\) ;
 			if $(folderName) {
-				Contents += "$(prefix).SourceGroups[ [[$(folderName)]] ] = concat($(prefix).SourceGroups[ [[$(folderName)]] ], $(NEWLINE){$(NEWLINE)" ;
-					Contents += "$(TAB)$(TAB)[[$(source:TR=$(subdir))]],$(NEWLINE)" ;
-				Contents += "})$(NEWLINE)" ;
+				if $(lastFolderName) != $(folderName) {
+					if $(lastFolderName) {
+						Contents += "})$(NEWLINE)" ;
+					}
+					Contents += "$(prefix).SourceGroups[ [[$(folderName)]] ] = concat($(prefix).SourceGroups[ [[$(folderName)]] ], $(NEWLINE){$(NEWLINE)" ;
+					lastFolderName = $(folderName) ;
+				}
+				Contents += "$(TAB)$(TAB)[[$(source:TR=$(subdir))]],$(NEWLINE)" ;
 			}
 		}
+		Contents += "})$(NEWLINE)" ;
 	}
 
 }
