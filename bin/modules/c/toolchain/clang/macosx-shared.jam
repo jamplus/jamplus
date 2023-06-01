@@ -156,6 +156,15 @@ rule macosx.MinimumOSVersion TARGET : SDK_VERSION_MIN {
 
 
 InfoPlistHelper = "
+function GetInfoPlistCurrentLevelNoCreate()
+	if not plist then
+		plist = require 'plist'
+	end
+	local plistName = jam_getvar('C.ACTIVE_TOOLCHAIN_TARGET_GRIST')[1] .. ':Info.plist'
+	return _G[plistName]
+end
+
+
 function GetInfoPlistCurrentLevel()
 	if not plist then
 		plist = require 'plist'
@@ -444,6 +453,8 @@ rule macosx.MergeInfoPList TARGET : SOURCE {
 
 
 rule macosx.InfoPListFile TARGET : SOURCE {
+	if $(InfoPlistHelper) {  LuaString $(InfoPlistHelper) ;  InfoPlistHelper = ;  }
+
 	#TARGET = [ ActiveTarget $(TARGET) ] ;
 
 	local grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):intermediate ;
@@ -451,12 +462,27 @@ rule macosx.InfoPListFile TARGET : SOURCE {
 	MakeLocate $(destination) : $(LOCATE_SOURCE) ;
 
 	grist = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST):source ;
-	local source = $(SOURCE:BSG=$(grist)) ;
-	SEARCH on $(source) ?= $(SEARCH_SOURCE) ;
+	local source = $(SOURCE:G=$(grist)) ;
+	BINDING on $(source) = $(SOURCE:BS) ;
+	SEARCH on $(source) ?= $(SOURCE:D:R=$(SEARCH_SOURCE)) ;
 
 	local EXECUTABLE_NAME = [ C._retrieveOutputName $(TARGET) ] ;
-	C.ConfigureFile $(TARGET) : $(destination) : $(source) ;
+	C.ConfigureFile $(TARGET) : $(destination) : $(source) : parens ;
 	INFO_PLIST_FILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(destination) ;
+
+	local sourcePath = $(destination:T) ;
+	LuaString "
+		if not plist then
+			plist = require 'plist'
+		end
+		local left = plist.read(jam_getvar('sourcePath')[1])
+		plist.merge(left, GetInfoPlistCurrentLevel())
+" ;
+
+	if $(TARGETINFO_LOCATE) {
+		Contents += "Projects[ [[$(C.ACTIVE_TARGET)]] ].INFOPLIST_FILE[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(source:T)]]$(NEWLINE)" ;
+		Contents += "Projects[ [[$(C.ACTIVE_TARGET)]] ].Sources = concat(Projects[ [[$(C.ACTIVE_TARGET)]] ].Sources, { [[$(source:T)]] })$(NEWLINE)" ;
+	}
 }
 
 
