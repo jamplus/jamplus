@@ -93,7 +93,8 @@ rule DumpSources prefix : SOURCES
 		}
 		local forceFileType = $(FORCE_FILE_TYPE:Z=$(source)) ;
 		local BUILD_EXT = C.BUILD$(forceFileType:E=$(ext)) ;
-		local objflags = $($(BUILD_EXT).FLAGS:Z=$(objTarget)) ;
+		local preflags = $($(BUILD_EXT).PREFLAGS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+		local objflags = $($(preflags)) $($(BUILD_EXT).FLAGS:Z=$(objTarget)) ;
 		local objdefines = $(DEFINES:Z=$(objTarget)) ;
 		local objincludes = $(HDRS:Z=$(objTarget)) ;
 		local objForceIncludes = $(FORCE_INCLUDES:Z=$(objTarget)) ;
