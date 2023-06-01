@@ -71,24 +71,31 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
         local ndkRoot = $(NDKROOT:J=" ") ;
         ndkRoot ?= $(NDKROOT:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
         if ! $(ndkRoot) {
-            local PATHS =
-                $(HOME)/Library/Android/
-                $(HOME)/
-            ;
-
-            local PATH_SUFFIXES =
-                android-ndk
-                android-ndk-r21d
-                android-ndk-r18b
-                android-ndk-r14b
-                android-ndk-r12b
-            ;
-
-            local ndk-build = [ Glob $(PATHS)$(PATH_SUFFIXES) : ndk-build ] ;
-            if $(ndk-build) {
-                ndkRoot = [ Match (.+)/ : $(ndk-build[1]) ] ;
+            local androidStudioNDK = $(HOME)/Library/Android/sdk/ndk ;
+            local androidStudioHighestVersion = [ android.NDK.FindHighestVersion $(androidStudioNDK) ] ;
+            if $(androidStudioHighestVersion) {
+                ndkRoot = $(androidStudioNDK)/$(androidStudioHighestVersion) ;
+                NDK_VERSION_COMPLETE on $(C.COMPILER_SUITE_SYMBOL) = $(androidStudioHighestVersion) ;
             } else {
-                ndkRoot = _ ;
+                local PATHS =
+                    $(HOME)/Library/Android/
+                    $(HOME)/
+                ;
+
+                local PATH_SUFFIXES =
+                    android-ndk
+                    android-ndk-r21d
+                    android-ndk-r18b
+                    android-ndk-r14b
+                    android-ndk-r12b
+                ;
+
+                local ndk-build = [ Glob $(PATHS)$(PATH_SUFFIXES) : ndk-build ] ;
+                if $(ndk-build) {
+                    ndkRoot = [ Match (.+)/ : $(ndk-build[1]) ] ;
+                } else {
+                    ndkRoot = _ ;
+                }
             }
         }
 
