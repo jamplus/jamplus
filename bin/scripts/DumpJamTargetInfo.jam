@@ -116,7 +116,9 @@ rule DumpSources prefix : SOURCES
 			Contents += "$(fullprefix).Defines={@(\"$(objdefines)\":J=,)}$(NEWLINE)" ;
 		}
 		if $(objflags) {
-			Contents += "$(fullprefix).Flags={@(\"$(objflags)\":J=,)}$(NEWLINE)" ;
+			local LBRACKETS = "[[" ;
+			local RBRACKETS = "]]" ;
+			Contents += "$(fullprefix).Flags={@($(LBRACKETS)$(objflags)$(RBRACKETS):J=,)}$(NEWLINE)" ;
 		}
 		if $(objincludes) {
 			Contents += "$(fullprefix).IncludeDirectories={@(\"$(objincludes)\":J=,)}$(NEWLINE)" ;
