@@ -1595,11 +1595,8 @@ dependencies {
             #print \"Copying APK folder from: $sourceFolder into $destinationFolder\\n\"
             local contents ;
             contents += "// From https://stackoverflow.com/questions/22833297/how-to-define-apk-output-directory-when-using-gradle$(NEWLINE)" ;
-            if $(C.CONFIG) = debug {
-                contents += "def archiveBuildTypes = [\"debug\"];$(NEWLINE)" ;
-            } else {
-                contents += "def archiveBuildTypes = [\"release\"];$(NEWLINE)" ;
-            }
+            contents += "def archiveBuildTypes = [\"debug\", \"release\"]$(NEWLINE)" ;
+            contents += "def distFolder = \"$(relativePackageOutputPath)\"$(NEWLINE)" ;
 
             contents += "
 android {
@@ -1608,7 +1605,7 @@ android {
             if (variant.buildType.name in archiveBuildTypes) {
                 // Update output filename
                 if (variant.versionName != null) {
-                    String name = \"$(TARGET)-${variant.versionName}.apk\"
+                    String name = \"$(TARGET)-${variant.versionName}-${variant.buildType.name}.apk\"
                     outputFileName = new File(name)
                 }
                 def taskSuffix = variant.name.capitalize()
@@ -1666,7 +1663,8 @@ android {
         }
 
         # Set up the .apk dependencies.
-        local _apk = [ C.GristFiles $(TARGET) : $(TARGET)-$(ANDROID.VERSION_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)).apk ] ;
+        local _apk = $(TARGET)-$(ANDROID.VERSION_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))-$(C.CONFIG).apk ;
+        _apk = [ C.GristFiles $(TARGET) : $(_apk) ] ;
         APK_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_apk) ;
 
         MakeLocate $(_apk) : $(packageOutputPath:E=$(LOCATE_TARGET)) ;
