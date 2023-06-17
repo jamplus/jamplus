@@ -28,6 +28,7 @@
 # include "newstr.h"
 # include "miniz.h"
 # include "variable.h"
+# include "filesys.h"
 
 extern mz_zip_archive *zip_attemptopen();
 extern int zip_findfile(const char *filename);
@@ -186,6 +187,14 @@ yyline()
 				if (entryIndex != -1)
 				{
 
+					BUFFER buff;
+					buffer_init(&buff);
+					buffer_addstring(&buff, "embed:", 6);
+					buffer_addstring(&buff, i->fname, strlen(i->fname));
+					buffer_addchar(&buff, 0);
+					var_set("JAM_CURRENT_SCRIPT", list_append(L0, buffer_ptr(&buff), 0), VAR_SET);
+					buffer_free(&buff);
+
 					//printf("internal: %s\n", i->fname);
 
 					size_t bufferSize;
@@ -257,6 +266,14 @@ yyline()
 		else
 		{
 			//printf("disk: %s\n", i->fname);
+			BUFFER buff;
+			if ( file_absolutepath( i->fname, &buff ) ) {
+				var_set( "JAM_CURRENT_SCRIPT", list_append(L0, buffer_ptr( &buff ), 0), VAR_SET );
+			} else {
+				var_set( "JAM_CURRENT_SCRIPT", list_append(L0, i->fname, 0), VAR_SET );
+			}
+			buffer_free( &buff );
+
 			i->file = f;
 		}
 	}

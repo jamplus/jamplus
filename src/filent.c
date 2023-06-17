@@ -786,4 +786,16 @@ done:
 	return err;
 }
 
+int file_absolutepath(const char* partialPath, BUFFER* absbuff)
+{
+	buffer_init( absbuff );
+	buffer_openspace( absbuff, MAX_PATH );
+	if ( _fullpath( buffer_ptr( absbuff ), partialPath, MAX_PATH ) != NULL )
+	{
+		buffer_setpos( absbuff, strlen( buffer_ptr( absbuff ) ) );
+		return 1;
+	}
+	return 0;
+}
+
 # endif /* NT */

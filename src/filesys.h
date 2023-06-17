@@ -55,3 +55,5 @@ unsigned long long getmilliseconds();
 #endif
 
 int dir_isempty(const char* indir);
+
+int file_absolutepath(const char* partialPath, BUFFER* absbuff);
