@@ -1347,7 +1347,7 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
             contents += "// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 plugins {
-    id 'com.android.application' version '7.4.2' apply false
+    id 'com.android.application' version '8.0.2' apply false
 }
 " ;
             #contents += $(ANDROID.GRADLE_ALLPROJECTS_REPOSITORIES:Z=$(C.COMPILER_SUITE_SYMBOL):E=) ;
@@ -1469,13 +1469,13 @@ include ':app'
 apply from: 'buildHelpers.gradle'
 
 android {
+    namespace '$(applicationId)'
     compileSdkVersion $(sdkCompileVersion:E=$(sdkVersion))
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
     defaultConfig {
-        applicationId '$(applicationId)'
         minSdkVersion $(sdkMinimumVersion:E=$(sdkVersion))
         targetSdkVersion $(sdkVersion)
 " ;
@@ -1558,6 +1558,9 @@ android {
     lint {
         abortOnError false
         checkReleaseBuilds false
+    }
+    buildFeatures {
+        aidl true
     }
 }
 
