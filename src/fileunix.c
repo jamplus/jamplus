@@ -1050,5 +1050,17 @@ done:
 	return err;
 }
 
+int file_absolutepath(const char* partialPath, BUFFER* absbuff)
+{
+	buffer_init( absbuff );
+	buffer_openspace( absbuff, PATH_MAX );
+	if ( realpath( partialPath, buffer_ptr( absbuff ) ) != NULL )
+	{
+		buffer_setpos( absbuff, strlen( buffer_ptr( absbuff ) ) );
+		return 1;
+	}
+	return 0;
+}
+
 # endif /* USE_FILEUNIX */
 
