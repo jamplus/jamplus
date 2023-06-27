@@ -1,6 +1,7 @@
 SubDir TOP ;
 
+C.CompileOptions outputastree ;
 C.IncludeDirectories glob : ../../src ;
 C.RuntimeType glob : static ;
 
-C.Application glob : glob.c ../../src/buffer.c ../../src/buffer.h ../../src/fileglob.c ../../src/fileglob.h ;
+C.Application glob : glob.c ../../src/buffer.* ../../src/fileglob.* ;
