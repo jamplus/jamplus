@@ -1,3 +1,4 @@
-$packagebuildmodules-nolua.txt
+$jambuildmodules.txt
+$jambuildmodules-nolua.txt
 $Jambase.jam
 $modules/**
