@@ -205,17 +205,22 @@ When \c IncludeModule is specified more than once for the same \c MODULE_NAME, t
 
 
 <hr>
-\section rule_MakeLocate rule MakeLocate TARGETS : DIRECTORY
+\section rule_MakeLocate rule MakeLocate TARGETS : DIRECTORY : OPTIONS
 \addindex rule_MakeLocate
 
 Creates \c DIRECTORY and causes \c TARGETS to be built into the directory.  It does so by setting the special Jam variable \c LOCATE on each of the \c TARGETS and then arranges with \ref rule_MkDir to create the target directory.
 
 \param TARGETS The targets to set the output directory on.
 \param DIRECTORY The output directory to build the targets into.
+\param OPTIONS If \c combine is specified, then any directory attached to the \c TARGETS name is created, and a \c BINDING is set to allow the target to work properly.
 
 \code
     # Set the output location of the given target to be the TEMP directory.
     MakeLocate junkfile.txt : $(TEMP) ;
+
+    # Creates the directory $(TEMP)/abc/def, sets the LOCATE for target abc/def/file.txt
+    # to $(TEMP)/abc/def and sets the BINDING to be file.txt.
+    MakeLocate abc/def/file.txt : $(TEMP) : combine ;
 \endcode
 
 

@@ -172,8 +172,23 @@ rule FGristDirectories DIRECTORIES
 }
 
 
-rule MakeLocate TARGETS : DIRECTORY
+rule MakeLocate TARGETS : DIRECTORY : OPTIONS
 {
+	if combine in $(OPTIONS) {
+		DIRECTORY ?= $(LOCATE_TARGET) ;
+
+		local target ;
+		for target in $(TARGETS) {
+			local targetDirectory = $(target:DR=$(DIRECTORY)) ;
+			LOCATE on $(target) = $(targetDirectory) ;
+			BINDING on $(target) = $(target:BS) ;
+			Depends $(target) : $(targetDirectory:G=!dir!) ;
+			MkDir $(targetDirectory:G=!dir!) ;
+		}
+
+		return ;
+	}
+
 	# MakeLocate targets : directory ;
 
 	# Sets special variable LOCATE on targets, and arranges
