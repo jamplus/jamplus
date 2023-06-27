@@ -690,7 +690,9 @@ pass:
 #endif /* OPT_BUILTIN_MD5CACHE_EXT */
 
 #ifdef OPT_CLEAN_GLOBS_EXT
-	clean_unused_files();
+	if ( var_get( "TARGETINFO_LOCATE" ) == NULL ) {
+		clean_unused_files();
+	}
 #endif /* OPT_CLEAN_GLOBS_EXT */
 
 #ifdef OPT_REMOVE_EMPTY_DIRS_EXT
