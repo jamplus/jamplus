@@ -450,12 +450,6 @@
     <ClCompile Include="buffer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="luaplus\Src\Modules\python\src\luainpython.c">
-      <Filter>Lua Files\Lua Modules\python</Filter>
-    </ClCompile>
-    <ClCompile Include="luaplus\Src\Modules\python\src\pythoninlua.c">
-      <Filter>Lua Files\Lua Modules\python</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.h">
@@ -817,12 +811,6 @@
     </ClInclude>
     <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\ZipEntryFile.h">
       <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
-    </ClInclude>
-    <ClInclude Include="luaplus\Src\Modules\python\src\luainpython.h">
-      <Filter>Lua Files\Lua Modules\python</Filter>
-    </ClInclude>
-    <ClInclude Include="luaplus\Src\Modules\python\src\pythoninlua.h">
-      <Filter>Lua Files\Lua Modules\python</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
