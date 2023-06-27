@@ -367,22 +367,43 @@ Prints out the message \c ARGS to stdout and then exits with a failure status.
 
 
 <hr>
-\section rule_ExpandFileList rule ExpandFileList WILDCARDS ;
+\section rule_ExpandFileList rule ExpandFileList WILDCARDS : ABSOLUTE : SEARCH_SOURCE
 \addindex rule_ExpandFileList
 
 \c ExpandFileList takes a list of files or including glob-capable wildcards and expands them.  The result of the expansion is returned to the user.
 
-If \c SEARCH_SOURCE is defined (generally through the \c SubDir rule), then it is removed from the beginning of each expansion.
+If \c ABSOLUTE is specified, then the result(s) of the wildcard expansion will rooted against \c SEARCH_SOURCE.
 
 \param WILDCARDS A list of files or \ref rule_Glob "Glob"-capable wildcards.
+\param ABSOLUTE Whether to root the result of the wildcard expansion against \c SEARCH_SOURCE. Set to \c 1 or \c true to enable it.
+\param SEARCH_SOURCE A directory to root the \c WILDCARDS against.
 \return Returns the wildcard expanded file list.
 
 \code
-	Echo [ ExpandFileList myfile.cpp **.cpp **.h ] ;
-	# myfile.cpp
-	# All *.cpp files recursively
-	# All *.h files recursively
+    Echo [ ExpandFileList myfile.cpp **.cpp **.h ] ;
+    # myfile.cpp
+    # All *.cpp files recursively
+    # All *.h files recursively
+
+    # When run from s:/jamplus/src:
+    Echo [ ExpandFileList ../*.sh : 1 : s:/jamplus/src ] ;
+        # s:/jamplus/bootstrap-linux32.sh s:/jamplus/bootstrap-linux64.sh s:/jamplus/bootstrap-macosx64.sh s:/jamplus/bootstrap-win64-msys2.sh
+
+    # When run from s:/jamplus/src:
+    Echo [ ExpandFileList ../*.sh : 0 : s:/jamplus/src ] ;
+        # ../bootstrap-linux32.sh ../bootstrap-linux64.sh ../bootstrap-macosx64.sh ../bootstrap-win64-msys2.sh
+
+    # When run from s:/jamplus/src:
+    Echo [ ExpandFileList ../*.sh : 1 ] ;
+        # ../bootstrap-linux32.sh ../bootstrap-linux64.sh ../bootstrap-macosx64.sh ../bootstrap-win64-msys2.sh
+
+    # When run from s:/jamplus/src:
+    Echo [ ExpandFileList ../*.sh : 0 ] ;
+        # ../bootstrap-linux32.sh ../bootstrap-linux64.sh ../bootstrap-macosx64.sh ../bootstrap-win64-msys2.sh
 \endcode
+
+
+
 
 
 
@@ -1113,21 +1134,39 @@ Returns a registry entry, given a list of \c KEYS.
 
 
 <hr>
-\section rule_Wildcard rule Wildcard WILDCARDS ;
+\section rule_Wildcard rule Wildcard WILDCARDS : ABSOLUTE : SEARCH_SOURCE
 \addindex rule_Wildcard
 
 \c Wildcard takes a list of files or including glob-capable wildcards and expands them.  The result of the expansion is returned to the user.
 
-If \c SEARCH_SOURCE is defined (generally through the \c SubDir rule), then it is removed from the beginning of each expansion.
+If \c ABSOLUTE is specified, then the result(s) of the wildcard expansion will rooted against \c SEARCH_SOURCE.
 
 \param WILDCARDS A list of files or \ref rule_Glob "Glob"-capable wildcards.
+\param ABSOLUTE Whether to root the result of the wildcard expansion against \c SEARCH_SOURCE. Set to \c 1 or \c true to enable it.
+\param SEARCH_SOURCE A directory to root the \c WILDCARDS against.
 \return Returns the wildcard expanded file list.
 
 \code
-	Echo [ Wildcard myfile.cpp **.cpp **.h ] ;
-	# myfile.cpp
-	# All *.cpp files recursively
-	# All *.h files recursively
+    Echo [ Wildcard myfile.cpp **.cpp **.h ] ;
+    # myfile.cpp
+    # All *.cpp files recursively
+    # All *.h files recursively
+
+    # When run from s:/jamplus/src:
+    Echo [ Wildcard ../*.sh : 1 : s:/jamplus/src ] ;
+        # s:/jamplus/bootstrap-linux32.sh s:/jamplus/bootstrap-linux64.sh s:/jamplus/bootstrap-macosx64.sh s:/jamplus/bootstrap-win64-msys2.sh
+
+    # When run from s:/jamplus/src:
+    Echo [ Wildcard ../*.sh : 0 : s:/jamplus/src ] ;
+        # ../bootstrap-linux32.sh ../bootstrap-linux64.sh ../bootstrap-macosx64.sh ../bootstrap-win64-msys2.sh
+
+    # When run from s:/jamplus/src:
+    Echo [ Wildcard ../*.sh : 1 ] ;
+        # ../bootstrap-linux32.sh ../bootstrap-linux64.sh ../bootstrap-macosx64.sh ../bootstrap-win64-msys2.sh
+
+    # When run from s:/jamplus/src:
+    Echo [ Wildcard ../*.sh : 0 ] ;
+        # ../bootstrap-linux32.sh ../bootstrap-linux64.sh ../bootstrap-macosx64.sh ../bootstrap-win64-msys2.sh
 \endcode
 
 

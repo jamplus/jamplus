@@ -232,7 +232,7 @@ rule C._MultiCppCompile_ObjName_Pass1 {
 
 rule C._MultiCppCompile SOURCES {
 	local TARGET = $(C.ACTIVE_TOOLCHAIN_TARGET) ;
-	SOURCES = [ ExpandFileList $(SOURCES) ] ;
+	SOURCES = [ ExpandFileList $(SOURCES) : 0 : $(SEARCH_SOURCE) ] ;
 
 	#
 	# Pass 1: Bind final flags to each file

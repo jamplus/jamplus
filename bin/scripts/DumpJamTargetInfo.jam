@@ -154,7 +154,7 @@ rule SourceGroup TARGET : FOLDERNAME : SOURCES {
 	if ! $(FOLDERNAME)  ||  ! $(SOURCES)  {  return ;  }
 
 	TARGET = [ C.ActiveTarget $(TARGET) ] ;
-	SOURCES = [ ExpandFileList $(SOURCES) ] ;
+	SOURCES = [ ExpandFileList $(SOURCES) : 0 : $(SEARCH_SOURCE) ] ;
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 
@@ -185,7 +185,7 @@ rule AutoSourceGroup TARGET : SOURCES
 
 	$(TARGET).__AppliedAutoSourceGroup = 1 ;
 
-	SOURCES = [ ExpandFileList $(SOURCES) : 0 ] ;
+	SOURCES = [ ExpandFileList $(SOURCES) : 0 : $(SEARCH_SOURCE) ] ;
 
 	local subdir = $(SUBDIR[1]:R=$(CWD)) ;
 
@@ -233,7 +233,7 @@ rule ExternalProject TARGET : PROJECT_PATH : OPTIONS {
 
 
 rule DumpProjectInfo TARGET : SOURCES : OPTIONS {
-	SOURCES = [ ExpandFileList $(SOURCES:T) ] ;
+	SOURCES = [ ExpandFileList $(SOURCES:T) : 0 : $(SEARCH_SOURCE) ] ;
 
 	if $(__AutoSourceGroup_Automatic) {
 		AutoSourceGroup $(TARGET) : $(SOURCES) ;

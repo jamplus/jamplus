@@ -1365,11 +1365,11 @@ builtin_expandfilelist(
 	LIST* files = lol_get( args, 0 );
 	LISTITEM* file;
 	LIST* result = L0;
-	LIST* searchSource = var_get( "SEARCH_SOURCE" );
 	size_t searchSourceLen = 0;
 	int searchSourceExtraLen = 0;
 	char const* searchSourceStr = "";
 	LIST* absoluteList = lol_get( args, 1 );
+	LIST* searchSourceList = lol_get( args, 2 );
 	int absolute = 1;
 	if ( list_first( absoluteList ) )
 	{
@@ -1377,8 +1377,9 @@ builtin_expandfilelist(
 		absolute = strcmp( str, "1" ) == 0  ||  strcmp( str, "true" ) == 0;
 	}
 
-	if ( list_first(searchSource) ) {
-		searchSourceStr = list_value(list_first(searchSource));
+	if ( list_first( searchSourceList ) )
+	{
+		searchSourceStr = list_value( list_first( searchSourceList ) );
 		searchSourceLen = strlen(searchSourceStr);
 		if ( searchSourceStr[ searchSourceLen - 1 ] != '/'  &&  searchSourceStr[ searchSourceLen - 1 ] != '\\' )
 			searchSourceExtraLen = 1;
