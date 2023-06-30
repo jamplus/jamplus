@@ -1123,7 +1123,8 @@ const char *filecache_getpath(TARGET *t)
 	cachevar = var_get( buffer );
 	if( list_first(cachevar) ) {
 		TARGET *t = bindtarget(list_value(list_first(cachevar)));
-		t->boundname = search( t->name, &t->time );
+		//t->boundname = search( t->name, &t->time );
+		t->boundname = t->name;
 		cachedir = copystr( t->boundname );
 	}
 
