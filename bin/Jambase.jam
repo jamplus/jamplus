@@ -913,10 +913,13 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 	C.COMPILER ?= $(COMPILER) ;
 
 	C.TOOLCHAIN ?= $(c.toolchain) ;
+	C.TOOLCHAIN ?= $(TOOLCHAIN) ;
+	C.TOOLCHAIN ?= $(toolchain) ;
 	if $(C.TOOLCHAIN)
 	{
 		C.Use ;
 	}
+	TOOLCHAIN = $(C.TOOLCHAIN) ;
 }
 
 JAMFILE.LUA ?= Jamfile.lua ;
