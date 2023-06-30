@@ -783,6 +783,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 ]])
 
+	local startupProjectName
+
 	function WriteSolutionConfigInfo(projectName)
 		local info = ProjectExportInfo[projectName]
 		if not info then return end
@@ -837,13 +839,35 @@ Global
 			$(Uuid).$(VSConfig)|$(VSPlatform).ActiveCfg = $(RealVSConfig)|$(RealVSPlatform)
 	]], configInfo, info))
 
-				if projectName == buildWorkspaceName then
+				if projectName == startupProjectName then
 					table.insert(self.Contents, expand([[
 			$(Uuid).$(VSConfig)|$(VSPlatform).Build.0 = $(RealVSConfig)|$(RealVSPlatform)
 	]], configInfo, info))
 				end
 			end
 		end
+	end
+
+	for projectName in ivalues(workspace.Projects) do
+		local project = Projects[projectName]
+		if project  and  project.Options  and  project.Options.startup then
+			startupProjectName = projectName
+			break
+		end
+	end
+
+	if not startupProjectName then
+		for projectName in ivalues(workspace.Projects) do
+			local project = Projects[projectName]
+			if project  and  project.Options.app then
+				startupProjectName = projectName
+				break
+			end
+		end
+	end
+
+	if not startupProjectName then
+		startupProjectName = buildWorkspaceName
 	end
 
 	WriteSolutionConfigInfo(buildWorkspaceName)
