@@ -1210,6 +1210,9 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
             Depends $(gradleTarget) : $(envgradlew.bat) : $(gradlew) ;
         }
 
+        #
+        local jniLibsDirectory = $(GRADLE_OUTPUT_DIRECTORY)/jniLibs ;
+
         # Native libs.
         local nativeLibs =
             $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
@@ -1230,31 +1233,33 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
                 hasNativeLibs = true ;
 
                 # Copy .so into output directory.
-                local _outputSo = $(linkTarget:G=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+                local _outputSo = $(linkTarget:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
                 local _binding = $(linkTarget:TBS) ;
                 switch $(C.ARCHITECTURE:Z=$(linkTarget)) {
                     case arm :
                         _outputSo = $(_outputSo)|arm ;
                         BINDING on $(_outputSo) = $(_binding) ;
-                        MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/armeabi ;
+                        MakeLocate $(_outputSo) : $(jniLibsDirectory)/$(C.CONFIG)/armeabi ;
                     case armv7-a :
                         _outputSo = $(_outputSo)|armv7-a ;
                         BINDING on $(_outputSo) = $(_binding) ;
-                        MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+                        MakeLocate $(_outputSo) : $(jniLibsDirectory)/$(C.CONFIG)/armeabi-v7a ;
                     case arm64 :
                         _outputSo = $(_outputSo)|arm64-v8a ;
                         BINDING on $(_outputSo) = $(_binding) ;
-                        MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/arm64-v8a ;
+                        MakeLocate $(_outputSo) : $(jniLibsDirectory)/$(C.CONFIG)/arm64-v8a ;
                     case x86 :
                         _outputSo = $(_outputSo)|x86 ;
                         BINDING on $(_outputSo) = $(_binding) ;
-                        MakeLocate $(_outputSo) : $(LOCATE_TARGET)/lib/x86 ;
+                        MakeLocate $(_outputSo) : $(jniLibsDirectory)/$(C.CONFIG)/x86 ;
                 }
 
                 # Output file depends on input stripped SO file.
-                Depends $(_outputSo) : $(linkTarget) ;
+                #Depends $(_outputSo) : $(linkTarget) ;
 
                 CopyFile $(gradleTarget) : $(_outputSo) : $(linkTarget) ;
+                UseCommandLine $(_outputSo) : $(source:T) ;
+                Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(_outputSo) ;
             }
         }
 
@@ -1311,25 +1316,25 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
                                 $(nativePrebuiltLibraryDirectories)/armeabi-v7a
                                 $(ndkSysRootLibPaths)
                             ;
-                            MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi ;
+                            MakeLocate $(target) : $(jniLibsDirectory)/$(C.CONFIG)/armeabi ;
                         case armv7-a :
                             SEARCH on $(source) +=
                                 $(nativePrebuiltLibraryDirectories)/armeabi-v7a
                                 $(ndkSysRootLibPaths)
                             ;
-                            MakeLocate $(target) : $(LOCATE_TARGET)/lib/armeabi-v7a ;
+                            MakeLocate $(target) : $(jniLibsDirectory)/$(C.CONFIG)/armeabi-v7a ;
                         case arm64 :
                             SEARCH on $(source) +=
                                 $(nativePrebuiltLibraryDirectories)/arm64-v8a
                                 $(ndkSysRootLibPaths)
                             ;
-                            MakeLocate $(target) : $(LOCATE_TARGET)/lib/arm64-v8a ;
+                            MakeLocate $(target) : $(jniLibsDirectory)/$(C.CONFIG)/arm64-v8a ;
                         case x86 :
                             SEARCH on $(source) +=
                                 $(nativePrebuiltLibraryDirectories)/x86
                                 $(ndkSysRootLibPaths)
                             ;
-                            MakeLocate $(target) : $(LOCATE_TARGET)/lib/x86 ;
+                            MakeLocate $(target) : $(jniLibsDirectory)/$(C.CONFIG)/x86 ;
                     }
 
                     CopyFile $(gradleTarget) : $(target) : $(source) ;
@@ -1549,18 +1554,28 @@ android {
 " ;
             contents += "            '$(assetsPaths)',$(NEWLINE)" ;
             contents += "        ]$(NEWLINE)" ;
-            if $(hasNativeLibs) {
-                local nativeLibsPaths = [ MakeRelativePath $(LOCATE_TARGET)/lib : $(gradleAppOutputDirectory) ] ;
-                contents += "        jniLibs.srcDirs += [$(NEWLINE)" ;
-                contents += "            '$(nativeLibsPaths)'$(NEWLINE)" ;
-                contents += "        ]$(NEWLINE)" ;
-            }
 
             local resourcesPaths = [ MakeRelativePath $(ANDROID.RESOURCES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(gradleAppOutputDirectory) ] ;
             contents += "        res.srcDirs += [$(NEWLINE)" ;
             contents += "            '$(resourcesPaths)'$(NEWLINE)" ;
             contents += "        ]
     }
+" ;
+
+    if $(hasNativeLibs) {
+        local configs = debug release ;
+        local config ;
+        for config in $(configs) {
+            contents += "    sourceSets.$(config) {$(NEWLINE)" ;
+            local nativeLibsPaths = [ MakeRelativePath $(jniLibsDirectory)/$(config) : $(gradleAppOutputDirectory) ] ;
+            contents += "        jniLibs.srcDirs += [$(NEWLINE)" ;
+            contents += "            '$(nativeLibsPaths)'$(NEWLINE)" ;
+            contents += "        ]$(NEWLINE)" ;
+            contents += "    }$(NEWLINE)" ;
+        }
+    }
+
+    contents += "
     androidResources {
 " ;
             contents += "        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~'$(NEWLINE)" ;
