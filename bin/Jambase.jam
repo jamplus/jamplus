@@ -767,6 +767,10 @@ rule FDirName
 # First the defaults
 #
 
+actions cleanunusedtargets CleanRoots
+{
+}
+
 actions piecemeal together existing removeemptydirs Clean
 {
 	$(RM) $(>:C)

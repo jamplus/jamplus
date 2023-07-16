@@ -40,68 +40,77 @@
 #pragma once
 
 
-/* Tokens.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     _BANG_t = 258,
-     _BANG_EQUALS_t = 259,
-     _AMPER_t = 260,
-     _AMPERAMPER_t = 261,
-     _LPAREN_t = 262,
-     _RPAREN_t = 263,
-     _PLUS_EQUALS_t = 264,
-     _MINUS_EQUALS_t = 265,
-     _COLON_t = 266,
-     _SEMIC_t = 267,
-     _LANGLE_t = 268,
-     _LANGLE_EQUALS_t = 269,
-     _EQUALS_t = 270,
-     _RANGLE_t = 271,
-     _RANGLE_EQUALS_t = 272,
-     _QUESTION_EQUALS_t = 273,
-     _LBRACKET_t = 274,
-     _RBRACKET_t = 275,
-     ACTIONS_t = 276,
-     BIND_t = 277,
-     BREAK_t = 278,
-     CASE_t = 279,
-     CONTINUE_t = 280,
-     DEFAULT_t = 281,
-     ELSE_t = 282,
-     EXISTING_t = 283,
-     FOR_t = 284,
-     IF_t = 285,
-     IGNORE_t = 286,
-     IN_t = 287,
-     INCLUDE_t = 288,
-     LOCAL_t = 289,
-     LUA_t = 290,
-     MAXLINE_t = 291,
-     MAXTARGETS_t = 292,
-     ON_t = 293,
-     PIECEMEAL_t = 294,
-     QUIETLY_t = 295,
-     REMOVEEMPTYDIRS_t = 296,
-     RESPONSE_t = 297,
-     RETURN_t = 298,
-     RULE_t = 299,
-     SCREENOUTPUT_t = 300,
-     SWITCH_t = 301,
-     TOGETHER_t = 302,
-     UPDATED_t = 303,
-     WHILE_t = 304,
-     _LBRACE_t = 305,
-     _BAR_t = 306,
-     _BARBAR_t = 307,
-     _RBRACE_t = 308,
-     ARG = 309,
-     STRING = 310
-   };
+  enum yytokentype
+  {
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    _BANG_t = 258,                 /* _BANG_t  */
+    _BANG_EQUALS_t = 259,          /* _BANG_EQUALS_t  */
+    _AMPER_t = 260,                /* _AMPER_t  */
+    _AMPERAMPER_t = 261,           /* _AMPERAMPER_t  */
+    _LPAREN_t = 262,               /* _LPAREN_t  */
+    _RPAREN_t = 263,               /* _RPAREN_t  */
+    _PLUS_EQUALS_t = 264,          /* _PLUS_EQUALS_t  */
+    _MINUS_EQUALS_t = 265,         /* _MINUS_EQUALS_t  */
+    _COLON_t = 266,                /* _COLON_t  */
+    _SEMIC_t = 267,                /* _SEMIC_t  */
+    _LANGLE_t = 268,               /* _LANGLE_t  */
+    _LANGLE_EQUALS_t = 269,        /* _LANGLE_EQUALS_t  */
+    _EQUALS_t = 270,               /* _EQUALS_t  */
+    _RANGLE_t = 271,               /* _RANGLE_t  */
+    _RANGLE_EQUALS_t = 272,        /* _RANGLE_EQUALS_t  */
+    _QUESTION_EQUALS_t = 273,      /* _QUESTION_EQUALS_t  */
+    _LBRACKET_t = 274,             /* _LBRACKET_t  */
+    _RBRACKET_t = 275,             /* _RBRACKET_t  */
+    ACTIONS_t = 276,               /* ACTIONS_t  */
+    BIND_t = 277,                  /* BIND_t  */
+    BREAK_t = 278,                 /* BREAK_t  */
+    CASE_t = 279,                  /* CASE_t  */
+    CLEANUNUSEDTARGETS_t = 280,    /* CLEANUNUSEDTARGETS_t  */
+    CONTINUE_t = 281,              /* CONTINUE_t  */
+    DEFAULT_t = 282,               /* DEFAULT_t  */
+    ELSE_t = 283,                  /* ELSE_t  */
+    EXISTING_t = 284,              /* EXISTING_t  */
+    FOR_t = 285,                   /* FOR_t  */
+    IF_t = 286,                    /* IF_t  */
+    IGNORE_t = 287,                /* IGNORE_t  */
+    IN_t = 288,                    /* IN_t  */
+    INCLUDE_t = 289,               /* INCLUDE_t  */
+    LOCAL_t = 290,                 /* LOCAL_t  */
+    LUA_t = 291,                   /* LUA_t  */
+    MAXLINE_t = 292,               /* MAXLINE_t  */
+    MAXTARGETS_t = 293,            /* MAXTARGETS_t  */
+    ON_t = 294,                    /* ON_t  */
+    PIECEMEAL_t = 295,             /* PIECEMEAL_t  */
+    QUIETLY_t = 296,               /* QUIETLY_t  */
+    REMOVEEMPTYDIRS_t = 297,       /* REMOVEEMPTYDIRS_t  */
+    RESPONSE_t = 298,              /* RESPONSE_t  */
+    RETURN_t = 299,                /* RETURN_t  */
+    RULE_t = 300,                  /* RULE_t  */
+    SCREENOUTPUT_t = 301,          /* SCREENOUTPUT_t  */
+    SWITCH_t = 302,                /* SWITCH_t  */
+    TOGETHER_t = 303,              /* TOGETHER_t  */
+    UPDATED_t = 304,               /* UPDATED_t  */
+    WHILE_t = 305,                 /* WHILE_t  */
+    _LBRACE_t = 306,               /* _LBRACE_t  */
+    _BAR_t = 307,                  /* _BAR_t  */
+    _BARBAR_t = 308,               /* _BARBAR_t  */
+    _RBRACE_t = 309,               /* _RBRACE_t  */
+    ARG = 310,                     /* ARG  */
+    STRING = 311                   /* STRING  */
+  };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define _BANG_t 258
 #define _BANG_EQUALS_t 259
 #define _AMPER_t 260
@@ -124,38 +133,38 @@
 #define BIND_t 277
 #define BREAK_t 278
 #define CASE_t 279
-#define CONTINUE_t 280
-#define DEFAULT_t 281
-#define ELSE_t 282
-#define EXISTING_t 283
-#define FOR_t 284
-#define IF_t 285
-#define IGNORE_t 286
-#define IN_t 287
-#define INCLUDE_t 288
-#define LOCAL_t 289
-#define LUA_t 290
-#define MAXLINE_t 291
-#define MAXTARGETS_t 292
-#define ON_t 293
-#define PIECEMEAL_t 294
-#define QUIETLY_t 295
-#define REMOVEEMPTYDIRS_t 296
-#define RESPONSE_t 297
-#define RETURN_t 298
-#define RULE_t 299
-#define SCREENOUTPUT_t 300
-#define SWITCH_t 301
-#define TOGETHER_t 302
-#define UPDATED_t 303
-#define WHILE_t 304
-#define _LBRACE_t 305
-#define _BAR_t 306
-#define _BARBAR_t 307
-#define _RBRACE_t 308
-#define ARG 309
-#define STRING 310
-
+#define CLEANUNUSEDTARGETS_t 280
+#define CONTINUE_t 281
+#define DEFAULT_t 282
+#define ELSE_t 283
+#define EXISTING_t 284
+#define FOR_t 285
+#define IF_t 286
+#define IGNORE_t 287
+#define IN_t 288
+#define INCLUDE_t 289
+#define LOCAL_t 290
+#define LUA_t 291
+#define MAXLINE_t 292
+#define MAXTARGETS_t 293
+#define ON_t 294
+#define PIECEMEAL_t 295
+#define QUIETLY_t 296
+#define REMOVEEMPTYDIRS_t 297
+#define RESPONSE_t 298
+#define RETURN_t 299
+#define RULE_t 300
+#define SCREENOUTPUT_t 301
+#define SWITCH_t 302
+#define TOGETHER_t 303
+#define UPDATED_t 304
+#define WHILE_t 305
+#define _LBRACE_t 306
+#define _BAR_t 307
+#define _BARBAR_t 308
+#define _RBRACE_t 309
+#define ARG 310
+#define STRING 311
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef int YYSTYPE;

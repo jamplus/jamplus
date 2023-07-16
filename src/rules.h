@@ -77,7 +77,8 @@ struct _rule {
 /* commented out so jamgram.y can compile #ifdef OPT_REMOVE_EMPTY_DIRS_EXT */
 # define	RULE_SCREENOUTPUT   0x800	/* screen the output from the action */
 /* commented out so jamgram.y can compile #ifdef OPT_REMOVE_EMPTY_DIRS_EXT */
-# define	RULE_REMOVEEMPTYDIRS 0x1000	/* screen the output from the action */
+# define	RULE_REMOVEEMPTYDIRS 0x1000	/* */
+# define	RULE_CLEANUNUSEDTARGETS 0x2000	/* */
 
 	int		maxline;
 /* commented out so jamgram.y can compile #ifdef OPT_ACTION_MAXTARGETS_EXT */

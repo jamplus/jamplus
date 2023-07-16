@@ -118,6 +118,9 @@ void make0calcmd5sum( TARGET *t, int source, int depth );
 void make1buildchecksum( TARGET *t, MD5SUM buildmd5sum );
 #endif
 
+extern int clean_unused_files(int usealltargets);
+extern void remove_empty_dirs();
+
 #ifdef OPT_MULTIPASS_EXT
 extern LIST *queuedjamfiles;
 #endif
@@ -872,6 +875,19 @@ make1d(
 
 	if( status == EXEC_CMD_INTR )
 	    ++intr;
+
+	if( status == EXEC_CMD_OK && ( cmd->rule->flags & RULE_CLEANUNUSEDTARGETS ) )
+	{
+		int filesremoved;
+		pushsettings( t->settings );
+		filesremoved = clean_unused_files(0);
+		popsettings( t->settings );
+
+		if( cmd->rule->flags & RULE_REMOVEEMPTYDIRS )
+		{
+			remove_empty_dirs();
+		}
+	}
 
 #ifndef OPT_SERIAL_OUTPUT_EXT
 	if( status == EXEC_CMD_FAIL && DEBUG_MAKE )

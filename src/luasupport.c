@@ -696,6 +696,10 @@ int LS_jam_action(ls_lua_State *L)
         rule->flags |= ls_lua_toboolean(L, -1) ? RULE_REMOVEEMPTYDIRS : 0;
         ls_lua_pop(L, 1);
 
+        ls_lua_getfield(L, paramIndex, "cleanunusedtargets");
+        rule->flags |= ls_lua_toboolean(L, -1) ? RULE_CLEANUNUSEDTARGETS : 0;
+        ls_lua_pop(L, 1);
+
         ls_lua_getfield(L, paramIndex, "maxtargets");
         if (ls_lua_isnumber(L, -1)) {
             rule->flags |= RULE_MAXTARGETS;

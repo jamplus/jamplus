@@ -20,6 +20,7 @@
 %token BIND_t
 %token BREAK_t
 %token CASE_t
+%token CLEANUNUSEDTARGETS_t
 %token CONTINUE_t
 %token DEFAULT_t
 %token ELSE_t
@@ -357,6 +358,8 @@ eflag	: UPDATED_t
 		{ $$.number = RULE_SCREENOUTPUT; }
 	| REMOVEEMPTYDIRS_t
 		{ $$.number = RULE_REMOVEEMPTYDIRS; }
+	| CLEANUNUSEDTARGETS_t
+		{ $$.number = RULE_CLEANUNUSEDTARGETS; }
 	;
 
 

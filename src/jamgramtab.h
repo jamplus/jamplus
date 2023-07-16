@@ -20,6 +20,7 @@
 	{ "bind", BIND_t },
 	{ "break", BREAK_t },
 	{ "case", CASE_t },
+	{ "cleanunusedtargets", CLEANUNUSEDTARGETS_t },
 	{ "continue", CONTINUE_t },
 	{ "default", DEFAULT_t },
 	{ "else", ELSE_t },

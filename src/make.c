@@ -278,7 +278,7 @@ int compare_sortedtargets( const void *_left, const void *_right ) {
 }
 
 
-static void remove_empty_dirs()
+void remove_empty_dirs()
 {
 	BUFFER lastdirbuff;
 	LISTITEM *l;
@@ -387,6 +387,8 @@ static void remove_empty_dirs()
 	free( sortedfiles );
 
 	list_free( emptydirtargets );
+
+	hashdone( dirlisthash );
 }
 
 #endif /* OPT_REMOVE_EMPTY_DIRS_EXT */
@@ -446,7 +448,7 @@ static void add_files_to_keepfileshash( void *userdata, HASHDATA *hashdata ) {
 	}
 }
 
-static void clean_unused_files() {
+int clean_unused_files(int usealltargets) {
 	LISTITEM *l;
 	LIST* clean_verbose;
 	LIST* clean_noop;
@@ -463,7 +465,7 @@ static void clean_unused_files() {
 		add_files_to_keepfileshash(keepfileshash, (HASHDATA *)&keepfilesdata);
 	}
 
-	if (usedtargetshash) {
+	if (usedtargetshash && (usealltargets || var_get("CLEAN.KEEP_USED_TARGETS"))) {
 		hashiterate(usedtargetshash, add_files_to_keepfileshash, keepfileshash);
 	}
 
@@ -500,6 +502,7 @@ static void clean_unused_files() {
 		noop = 1;
 	}
 
+	int filesremoved = 0;
 	clean_roots = var_get("CLEAN.ROOTS");
 	for (l = list_first(clean_roots); l; l = list_next(l)) {
 		fileglob* glob;
@@ -526,10 +529,11 @@ static void clean_unused_files() {
 			} else {
 				if (!hashcheck(keepfileshash, (HASHDATA **)&c)) {
 					if (verbose) {
-						printf("Removing %s...\n", target);
+						printf("* Removing %s...\n", target);
 					}
 					if (!noop) {
 						unlink(target);
+						filesremoved = 1;
 					}
 				}
 			}
@@ -541,6 +545,8 @@ static void clean_unused_files() {
 	hashdone(keepfileshash);
 	hashdone(usedtargetshash);
 	usedtargetshash = NULL;
+
+	return filesremoved;
 }
 
 #endif /* OPT_CLEAN_GLOBS_EXT */
@@ -691,7 +697,7 @@ pass:
 
 #ifdef OPT_CLEAN_GLOBS_EXT
 	if ( var_get( "TARGETINFO_LOCATE" ) == NULL ) {
-		clean_unused_files();
+		clean_unused_files(1);
 	}
 #endif /* OPT_CLEAN_GLOBS_EXT */
 

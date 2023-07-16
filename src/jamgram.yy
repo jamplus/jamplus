@@ -306,6 +306,8 @@ eflag	: `updated`
 		{ $$.number = RULE_SCREENOUTPUT; }
 	| `removeemptydirs`
 		{ $$.number = RULE_REMOVEEMPTYDIRS; }
+	| `cleanunusedtargets`
+		{ $$.number = RULE_CLEANUNUSEDTARGETS; }
 	;
 
 
