@@ -1380,6 +1380,18 @@ task clean(type: Delete) {
         }
 
         #########################################################################################
+        # local.properties
+        #########################################################################################
+        {
+            local root-local.properties = @(local.properties:G=$(grist)) ;
+            MakeLocate $(root-local.properties) : $(GRADLE_OUTPUT_DIRECTORY) ;
+            CONTENTS on $(root-local.properties) = "sdk.dir=$(ANDROID.SDK_ROOT:Z=$(C.COMPILER_SUITE_SYMBOL))$(NEWLINE)$(ANDROID.GRADLE_LOCAL_PROPERTIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):E="")" ;
+            UseCommandLine $(root-local.properties) : $(CONTENTS:Z=$(root-local.properties)) ;
+            WriteFile $(root-local.properties) ;
+            Depends $(gradleTarget) : $(root-local.properties) : $(gradlew) ;
+        }
+
+        #########################################################################################
         # settings.gradle
         #########################################################################################
         {
