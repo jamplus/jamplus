@@ -1203,7 +1203,7 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
 @set ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT:Z=$(C.COMPILER_SUITE_SYMBOL))
 @set ANDROID_NDK_ROOT=$(NDKROOT:Z=$(C.COMPILER_SUITE_SYMBOL))
 @set PATH=%ANDROID_SDK_ROOT%\platform-tools;%PATH%
-@call %~dp0gradle.bat %*
+@call %~dp0gradlew.bat %*
 " ;
             UseCommandLine $(envgradlew.bat) : $(CONTENTS:Z=$(envgradlew.bat)) ;
             WriteFile $(envgradlew.bat) ;
