@@ -1355,7 +1355,7 @@ make1cmds( ACTIONS *a0 )
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 		if (
 #ifdef OPT_USE_CHECKSUMS_EXT
-				usechecksums  ||
+				(usechecksums  &&  !(t->flags & T_FLAG_TOUCHED))  ||
 #endif /* OPT_USE_CHECKSUMS_EXT */
 				t->filecache_generate  ||  t->filecache_use)
 		{
