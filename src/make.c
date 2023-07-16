@@ -260,6 +260,13 @@ int compare_queuedfileinfo( const void *_left, const void *_right ) {
 
 LIST* emptydirtargets = L0;
 
+struct dirlistdata {
+	const char	*name;
+} ;
+
+typedef struct dirlistdata DIRLISTDATA;
+
+
 typedef struct _sortedtargets SORTEDTARGETS;
 
 struct _sortedtargets {
@@ -286,6 +293,10 @@ void remove_empty_dirs()
 	int count;
 	SORTEDTARGETS* sortedfiles;
 
+	struct hash *dirlisthash;
+	DIRLISTDATA dirlistdata, *c = &dirlistdata;
+
+
 	if ( !list_first(emptydirtargets) )
 		return;
 
@@ -297,6 +308,8 @@ void remove_empty_dirs()
 		++count;
 	}
 
+	dirlisthash = hashinit( sizeof(DIRLISTDATA), "dirlisthash" );
+
 	sortedfiles = malloc( sizeof( SORTEDTARGETS ) * count );
 	i = 0;
 	for( l = list_first(emptydirtargets); l; l = list_next( l ) ) {
@@ -305,12 +318,27 @@ void remove_empty_dirs()
 		pushsettings( t->settings );
 		t->boundname = search( t->name, &t->time );
 		popsettings( t->settings );
-		sortedfiles[ i ].filename = t->boundname;
-		sortedfiles[ i ].filenamelen = strlen( t->boundname );
-		++i;
+
+		char* slashptr = strrchr( t->boundname, '/' );
+		char path[MAXJPATH];
+		strncpy( path, t->boundname, slashptr - t->boundname + 1 );
+		path[ slashptr - t->boundname + 1 ] = 0;
+
+		c->name = path;
+		if ( hashenter( dirlisthash, (HASHDATA **)&c ) ) {
+			c->name = newstr( path );
+
+			sortedfiles[ i ].filename = c->name;
+			sortedfiles[ i ].filenamelen = slashptr - t->boundname;
+			++i;
+		}
 	}
+	count = i;
 
 	qsort( sortedfiles,	count, sizeof( SORTEDTARGETS ), compare_sortedtargets );
+
+	hashdone( dirlisthash );
+	dirlisthash = hashinit( sizeof(DIRLISTDATA), "dirlisthash" );
 
 	buffer_init( &lastdirbuff );
 	buffer_addchar( &lastdirbuff, 0 );
@@ -340,26 +368,30 @@ void remove_empty_dirs()
 
 					if ( dirret == 0 ) {
 						/* walk up directories removing any empty ones */
-						int MAX_RETRIES = 10;
+						int MAX_RETRIES = 1;
 						int retries = 0;
 						while ( retries < MAX_RETRIES ) {
-							int ret = rmdir( lastdirptr );
-							if ( ret == -1 ) {
-								int err = errno;
-								if ( err == EACCES ) {
-									printf("remove %s - %d - %d\n", lastdirptr, ret, err);
+							c->name = lastdirptr;
+							if ( hashenter( dirlisthash, (HASHDATA **)&c ) ) {
+								c->name = newstr( lastdirptr );
+								int ret = rmdir( lastdirptr );
+								if ( ret == -1 ) {
+									int err = errno;
+									if ( err == EACCES ) {
+										printf("remove %s - %d - %d\n", lastdirptr, ret, err);
 #if defined(_WIN32)
-									_sleep(1);
+										_sleep(1);
 #else
-									usleep(1000);
+										usleep(1000);
 #endif
-									++retries;
-									continue;
-								}
-								if ( err != ENOENT ) {
-									*olddirslashptr = '/';
-									retries = MAX_RETRIES;
-									break;
+										++retries;
+										continue;
+									}
+									if ( err != ENOENT ) {
+										*olddirslashptr = '/';
+										retries = MAX_RETRIES;
+										break;
+									}
 								}
 							}
 							break;
