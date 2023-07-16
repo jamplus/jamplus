@@ -469,7 +469,7 @@ make1b( TARGET *t )
 			}
 		}
 	} else {
-		if ( t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS )
+		if ( t->fate == T_FATE_UPDATE  &&  !childupdated  &&  t->status != EXEC_CMD_NEXTPASS  &&  !( t->flags & T_FLAG_TOUCHED ) )
 			if ( md5matchescommandline( t ) )
 				t->fate = T_FATE_STABLE;
 	}
