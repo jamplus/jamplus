@@ -2,7 +2,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 
-#define MINIZ_NO_ZLIB_APIS
+//#define MINIZ_NO_ZLIB_APIS
 #include "miniz.h"
 //#include "miniz.c"
 
