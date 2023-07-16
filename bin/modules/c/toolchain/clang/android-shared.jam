@@ -328,6 +328,8 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
         ANDROID.DX on $(C.COMPILER_SUITE_SYMBOL) = $(buildToolsDir)/dx ;
     }
 
+    ANDROID.BUNDLETOOL.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/tools/bundletool.jar ;
+
     ANDROID.ANDROID.JAR on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/platforms/$(sdkPlatform)/android.jar ;
 
     ANDROID.FRAMEWORK.AIDL on $(C.COMPILER_SUITE_SYMBOL) = $(sdkRoot)/platforms/$(sdkPlatform)/framework.aidl ;
@@ -1115,13 +1117,32 @@ actions android._GradleInit {
 }
 
 
-actions screenoutput android._GradleAssemble {
+actions screenoutput android._Gradle {
     set JAVA_HOME=$(JAVA.HOME:C)
     set ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT)
     set ANDROID_NDK_ROOT=$(NDKROOT)
     set PATH=%ANDROID_SDK_ROOT%\platform-tools;%PATH%
     cd "$(2[1]:D\\)"
-    call c:\gradle\bin\gradle.bat $(ASSEMBLE_COMMAND)
+    call c:\gradle\bin\gradle.bat $(GRADLE_COMMAND)
+}
+
+actions screenoutput android._bundletool_build-apks {
+    del $(1:C\\)
+    set JAVA_HOME=$(JAVA.HOME:C)
+    set ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT)
+    set ANDROID_NDK_ROOT=$(NDKROOT)
+    set PATH=%ANDROID_SDK_ROOT%\platform-tools;%PATH%
+    cd "$(2[1]:D\\)"
+    java -jar %ANDROID_SDK_ROOT%/tools/bundletool.jar build-apks --bundle $(2:C) --output $(1:C) --local-testing
+}
+
+actions screenoutput android._bundletool_install-apks {
+    set JAVA_HOME=$(JAVA.HOME:C)
+    set ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT)
+    set ANDROID_NDK_ROOT=$(NDKROOT)
+    set PATH=%ANDROID_SDK_ROOT%\platform-tools;%PATH%
+    cd "$(2[1]:D\\)"
+    java -jar %ANDROID_SDK_ROOT%/tools/bundletool.jar install-apks --apks $(2:C)
 }
 
 } else {
@@ -1135,12 +1156,28 @@ actions android._GradleInit {
 
     #export JAVA_HOME=$(JAVA.HOME:C)
     #export PATH=$JAVA_HOME/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
-actions screenoutput android._GradleAssemble {
+actions screenoutput android._Gradle {
     export ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT)
     export ANDROID_NDK_ROOT=$(NDKROOT)
     export PATH=$ANDROID_SDK_ROOT/platform-tools:$PATH
     cd $(2[1]:DC)
-    ./gradlew $(ASSEMBLE_COMMAND)
+    ./gradlew $(GRADLE_COMMAND)
+}
+
+actions screenoutput android._bundletool_build-apks {
+    export ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT)
+    export ANDROID_NDK_ROOT=$(NDKROOT)
+    export PATH=$ANDROID_SDK_ROOT/platform-tools:$PATH
+    cd $(2[1]:DC)
+    java -jar %ANDROID_SDK_ROOT%/tools/bundletool.jar build-apks --bundle $(2:C) --output $(1:C) --local-testing
+}
+
+actions screenoutput android._bundletool_build-apks {
+    export ANDROID_SDK_ROOT=$(ANDROID.SDK_ROOT)
+    export ANDROID_NDK_ROOT=$(NDKROOT)
+    export PATH=$ANDROID_SDK_ROOT/platform-tools:$PATH
+    cd $(2[1]:DC)
+    java -jar %ANDROID_SDK_ROOT%/tools/bundletool.jar install-apks --apks $(2:C)
 }
 
 }
@@ -1411,6 +1448,13 @@ task clean(type: Delete) {
 rootProject.name = 'app'
 include ':app'
 " ;
+            if $(ANDROID.ASSET_PACKS) {
+                local packName ;
+                for packName in $(ANDROID.ASSET_PACKS) {
+                    contents += "include ':$(packName)'$(NEWLINE)" ;
+                }
+            }
+
             local root-settings.gradle = @(settings.gradle:G=$(grist)) ;
             MakeLocate $(root-settings.gradle) : $(GRADLE_OUTPUT_DIRECTORY) ;
             CONTENTS on $(root-settings.gradle) = $(contents) ;
@@ -1589,7 +1633,14 @@ android {
     buildFeatures {
         aidl true
     }
-}
+" ;
+
+    if $(ANDROID.ASSET_PACKS) {
+        local assetStrings = \":$(ANDROID.ASSET_PACKS)\" ;
+        contents += "    assetPacks = [$(assetStrings:J=, )]$(NEWLINE)" ;
+    }
+
+contents += "}
 
 repositories {
     jcenter()
@@ -1692,6 +1743,148 @@ android {
             Depends $(gradleTarget) : $(app-proguard-rules.pro) : $(gradlew) ;
         }
 
+        #########################################################################################
+        #if $(ANDROID_BUNDLE) = 1
+        {
+            #########################################################################################
+            # Write asset pack directories
+            if $(ANDROID.ASSET_PACKS) {
+                local packName ;
+                for packName in $(ANDROID.ASSET_PACKS) {
+                    local assetPackOutputDirectory = $(GRADLE_OUTPUT_DIRECTORY)/$(packName) ;
+
+                    local contents = "
+apply plugin: 'com.android.asset-pack'
+//plugins {
+//    id 'com.android.asset-pack'
+//}
+
+assetPack {
+    packName = \"$(packName)\"
+
+    dynamicDelivery {
+        deliveryType = \"$(ANDROID.ASSET_PACK.$(packName).TYPE)\"
+    }
+}
+" ;
+
+                    # Set up the packTarget to collect all of the targets that go into the asset pack.
+                    local packGrist = $(grist)|$(packName) ;
+                    local packTarget = $(TARGET:G=$(packGrist)) ;
+                    Always $(packTarget) ;
+                    NotFile $(packTarget) ;
+                    Depends $(gradleTarget) : $(packTarget) ;
+
+                    # packName/build.gradle
+                    local assetpack-build.gradle = @(build.gradle:G=$(packGrist)) ;
+                    MakeLocate $(assetpack-build.gradle) : $(assetPackOutputDirectory) ;
+                    UseCommandLine $(assetpack-build.gradle) : $(contents) ;
+                    CONTENTS on $(assetpack-build.gradle) = $(contents) ;
+                    WriteFile $(assetpack-build.gradle) ;
+                    Depends $(packTarget) : $(assetpack-build.gradle) : $(gradlew) ;
+
+                    # If wildcards were requested to be copied, do so here.
+                    local assetsOutputDirectory = $(assetPackOutputDirectory)/src/main/assets ;
+                    local destinationRelativePath = $(ANDROID.ASSET_PACK.$(packName).DESTINATION_RELATIVE_PATH) ;
+                    if $(destinationRelativePath) != "" {
+                        assetsOutputDirectory = $(ANDROID.ASSET_PACK.$(packName).DESTINATION_RELATIVE_PATH:R=$(assetsOutputDirectory)) ;
+                    }
+
+                    local processedFiles ;
+                    local wildcard ;
+                    for wildcard in $(ANDROID.ASSET_PACK.$(packName).WILDCARDS) {
+                        local wildcardSplit = [ Split $(wildcard) : "|" ] ;
+                        local files = @($(wildcardSplit[1])/$(wildcardSplit[2]):W=$(wildcardSplit[1])/) ;
+                        files -= $(processedFiles) ;
+
+                        local targets = $(files:G=$(packGrist)) ;
+                        Depends $(packTarget) : $(targets) ;
+                        MakeLocate $(targets) : $(assetsOutputDirectory) : combine ;
+                        Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(targets) ;
+
+                        local sources = $(files:G=$(packGrist)|source) ;
+                        SEARCH on $(sources) = $(wildcardSplit[1]) ;
+
+                        local target ;
+                        for target in $(targets) {
+                            local source = $(target:G=$(packGrist)|source) ;
+
+                            Depends $(target) : $(source) ;
+                            Copy1File $(target) : $(source) ;
+                        }
+                    }
+
+                    # If targets were requested to be copied from, do so here.
+                    local source ;
+                    for source in $(ANDROID.ASSET_PACK.$(packName).TARGETS_TO_COPY) {
+                        local outputRelativePath = $(OUTPUT_RELATIVE_PATH:Z=$(source)) ;
+                        local outputDirectory = $(assetsOutputDirectory) ;
+                        if $(outputRelativePath) != "" {
+                            outputDirectory = $(outputDirectory)/$(outputRelativePath) ;
+                        }
+
+                        local target = $(source:G=$(packGrist)) ;
+                        Depends $(packTarget) : $(target) : $(source) ;
+                        MakeLocate $(target) : $(assetsOutputDirectory) : combine ;
+                        Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(target) ;
+
+                        Copy1File $(target) : $(source) ;
+                    }
+
+                    # Clean any leftover fluff.
+                    CLEAN.ROOTS on $(packTarget) = $(assetPackOutputDirectory)/**@-**/build/ ;
+                    CLEAN.KEEP_TARGETS on $(packTarget) = [ DependsList $(packTarget) ] ;
+                    CLEAN.VERBOSE on $(packTarget) = 1 ;
+                    #CLEAN.NOOP on $(packTarget) = 1 ;
+                    CleanRoots $(packTarget) ;
+                }
+            }
+
+            # Set up the .aab dependencies.
+            local _aab = $(TARGET)-$(ANDROID.VERSION_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))-$(C.CONFIG).aab ;
+            _aab = [ C.GristFiles $(TARGET) : $(_aab) ] ;
+            AAB_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_aab) ;
+
+            MakeLocate $(_aab) : $(packageOutputPath:E=$(LOCATE_TARGET)) ;
+            Depends $(_aab) : $(gradleTarget) ;
+
+            if $(C.CONFIG) = debug {
+                GRADLE_COMMAND on $(_aab) = bundleDebug ;
+            } else {
+                GRADLE_COMMAND on $(_aab) = bundleRelease ;
+            }
+            Always $(_aab) ;
+            #MightNotUpdate $(_aab) ;
+            android._Gradle $(_aab) : [ DependsList $(gradleTarget) ] : $(C.COMPILER_SUITE_SYMBOL) ;
+
+            # Make target depend on our aligned (signed) APK.
+            #Depends all : $(TARGET) : $(_apk) ;
+            # Set up the build-aab target.
+            Depends build-aab:$(TARGET) : $(_aab) ;
+            Always build-aab:$(TARGET) ;
+            NotFile build-aab:$(TARGET) ;
+
+            #
+            local _apks = $(_aab:S=.apks) ;
+            MakeLocate $(_apks) : $(packageOutputPath:E=$(LOCATE_TARGET)) ;
+            Depends $(_apks) : $(_aab) ;
+            #MightNotUpdate $(_apks) ;
+            android._bundletool_build-apks $(_apks) : $(_aab) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+            # Set up the build-apks target.
+            Depends build-apks:$(TARGET) : $(_apks) ;
+#            Always build-apks:$(TARGET) ;
+            NotFile build-apks:$(TARGET) ;
+
+            # Set up an install target.
+            Depends install-apks:$(TARGET) : $(_apks) ;
+            Always install-apks:$(TARGET) ;
+            NotFile install-apks:$(TARGET) ;
+            android._bundletool_install-apks install-apks:$(TARGET) : $(_apks) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+            #return ;
+        }
+
         # Set up the .apk dependencies.
         local _apk = $(TARGET)-$(ANDROID.VERSION_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))-$(C.CONFIG).apk ;
         _apk = [ C.GristFiles $(TARGET) : $(_apk) ] ;
@@ -1701,13 +1894,13 @@ android {
         Depends $(_apk) : $(gradleTarget) ;
 
         if $(C.CONFIG) = debug {
-            ASSEMBLE_COMMAND on $(_apk) = assembleDebug ;
+            GRADLE_COMMAND on $(_apk) = assembleDebug ;
         } else {
-            ASSEMBLE_COMMAND on $(_apk) = assembleRelease ;
+            GRADLE_COMMAND on $(_apk) = assembleRelease ;
         }
         Always $(_apk) ;
         #MightNotUpdate $(_apk) ;
-        android._GradleAssemble $(_apk) : [ DependsList $(gradleTarget) ] : $(C.COMPILER_SUITE_SYMBOL) ;
+        android._Gradle $(_apk) : [ DependsList $(gradleTarget) ] : $(C.COMPILER_SUITE_SYMBOL) ;
 
         # Make target depend on our aligned (signed) APK.
         Depends all : $(TARGET) : $(_apk) ;
@@ -2314,6 +2507,17 @@ rule android.Assets TARGET : DIRECTORY {
 rule android.UncompressedAssetExtensions TARGET : UNCOMPRESSED_ASSET_EXTENSIONS {
     C.ActiveTarget $(TARGET) ;
     ANDROID.UNCOMPRESSED_ASSET_EXTENSIONS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(UNCOMPRESSED_ASSET_EXTENSIONS) ;
+}
+
+
+#
+rule android.AssetPack TARGET : PACK_NAME : TYPE : WILDCARDS : TARGETS_TO_COPY : DESTINATION_RELATIVE_PATH {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.ASSET_PACK.$(PACK_NAME).TYPE = $(TYPE) ;
+    ANDROID.ASSET_PACK.$(PACK_NAME).WILDCARDS = $(WILDCARDS) ;
+    ANDROID.ASSET_PACK.$(PACK_NAME).TARGETS_TO_COPY = $(TARGETS_TO_COPY) ;
+    ANDROID.ASSET_PACK.$(PACK_NAME).DESTINATION_RELATIVE_PATH = $(DESTINATION_RELATIVE_PATH) ;
+    ANDROID.ASSET_PACKS += $(PACK_NAME) ;
 }
 
 
