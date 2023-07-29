@@ -1448,9 +1448,9 @@ task clean(type: Delete) {
 rootProject.name = 'app'
 include ':app'
 " ;
-            if $(ANDROID.ASSET_PACKS) {
+            if $(ANDROID.ASSET_PACKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
                 local packName ;
-                for packName in $(ANDROID.ASSET_PACKS) {
+                for packName in $(ANDROID.ASSET_PACKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
                     contents += "include ':$(packName)'$(NEWLINE)" ;
                 }
             }
@@ -1635,9 +1635,12 @@ android {
     }
 " ;
 
-    if $(ANDROID.ASSET_PACKS) {
-        local assetStrings = \":$(ANDROID.ASSET_PACKS)\" ;
-        contents += "    assetPacks = [$(assetStrings:J=, )]$(NEWLINE)" ;
+    {
+        local assetPacks = $(ANDROID.ASSET_PACKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+        if $(assetPacks) {
+            local assetStrings = \":$(assetPacks)\" ;
+            contents += "    assetPacks = [$(assetStrings:J=, )]$(NEWLINE)" ;
+        }
     }
 
 contents += "}
@@ -1748,9 +1751,9 @@ android {
         {
             #########################################################################################
             # Write asset pack directories
-            if $(ANDROID.ASSET_PACKS) {
+            if $(ANDROID.ASSET_PACKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
                 local packName ;
-                for packName in $(ANDROID.ASSET_PACKS) {
+                for packName in $(ANDROID.ASSET_PACKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
                     local assetPackOutputDirectory = $(GRADLE_OUTPUT_DIRECTORY)/$(packName) ;
 
                     local contents = "
@@ -1763,7 +1766,7 @@ assetPack {
     packName = \"$(packName)\"
 
     dynamicDelivery {
-        deliveryType = \"$(ANDROID.ASSET_PACK.$(packName).TYPE)\"
+        deliveryType = \"$(ANDROID.ASSET_PACK.$(packName).TYPE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))\"
     }
 }
 " ;
@@ -1785,14 +1788,14 @@ assetPack {
 
                     # If wildcards were requested to be copied, do so here.
                     local assetsOutputDirectory = $(assetPackOutputDirectory)/src/main/assets ;
-                    local destinationRelativePath = $(ANDROID.ASSET_PACK.$(packName).DESTINATION_RELATIVE_PATH) ;
+                    local destinationRelativePath = $(ANDROID.ASSET_PACK.$(packName).DESTINATION_RELATIVE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
                     if $(destinationRelativePath) != "" {
-                        assetsOutputDirectory = $(ANDROID.ASSET_PACK.$(packName).DESTINATION_RELATIVE_PATH:R=$(assetsOutputDirectory)) ;
+                        assetsOutputDirectory = $(ANDROID.ASSET_PACK.$(packName).DESTINATION_RELATIVE_PATH:R=$(assetsOutputDirectory):Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
                     }
 
                     local processedFiles ;
                     local wildcard ;
-                    for wildcard in $(ANDROID.ASSET_PACK.$(packName).WILDCARDS) {
+                    for wildcard in $(ANDROID.ASSET_PACK.$(packName).WILDCARDS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
                         local wildcardSplit = [ Split $(wildcard) : "|" ] ;
                         local files = @($(wildcardSplit[1])/$(wildcardSplit[2]):W=$(wildcardSplit[1])/) ;
                         files -= $(processedFiles) ;
@@ -1816,7 +1819,7 @@ assetPack {
 
                     # If targets were requested to be copied from, do so here.
                     local source ;
-                    for source in $(ANDROID.ASSET_PACK.$(packName).TARGETS_TO_COPY) {
+                    for source in $(ANDROID.ASSET_PACK.$(packName).TARGETS_TO_COPY:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
                         local outputRelativePath = $(OUTPUT_RELATIVE_PATH:Z=$(source)) ;
                         local outputDirectory = $(assetsOutputDirectory) ;
                         if $(outputRelativePath) != "" {
@@ -2513,11 +2516,11 @@ rule android.UncompressedAssetExtensions TARGET : UNCOMPRESSED_ASSET_EXTENSIONS 
 #
 rule android.AssetPack TARGET : PACK_NAME : TYPE : WILDCARDS : TARGETS_TO_COPY : DESTINATION_RELATIVE_PATH {
     C.ActiveTarget $(TARGET) ;
-    ANDROID.ASSET_PACK.$(PACK_NAME).TYPE = $(TYPE) ;
-    ANDROID.ASSET_PACK.$(PACK_NAME).WILDCARDS = $(WILDCARDS) ;
-    ANDROID.ASSET_PACK.$(PACK_NAME).TARGETS_TO_COPY = $(TARGETS_TO_COPY) ;
-    ANDROID.ASSET_PACK.$(PACK_NAME).DESTINATION_RELATIVE_PATH = $(DESTINATION_RELATIVE_PATH) ;
-    ANDROID.ASSET_PACKS += $(PACK_NAME) ;
+    ANDROID.ASSET_PACK.$(PACK_NAME).TYPE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(TYPE) ;
+    ANDROID.ASSET_PACK.$(PACK_NAME).WILDCARDS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(WILDCARDS) ;
+    ANDROID.ASSET_PACK.$(PACK_NAME).TARGETS_TO_COPY on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(TARGETS_TO_COPY) ;
+    ANDROID.ASSET_PACK.$(PACK_NAME).DESTINATION_RELATIVE_PATH on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(DESTINATION_RELATIVE_PATH) ;
+    ANDROID.ASSET_PACKS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(PACK_NAME) ;
 }
 
 
