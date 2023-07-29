@@ -1630,10 +1630,15 @@ android {
         abortOnError false
         checkReleaseBuilds false
     }
-    buildFeatures {
-        aidl true
+" ;
+
+    local buildFeaturesLines = $(ANDROID.GRADLE_BUILD_FEATURES_LINES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+    if $(buildFeaturesLines) {
+        contents += "    buildFeatures {
+$(buildFeaturesLines:J=$(NEWLINE))
     }
 " ;
+    }
 
     {
         local assetPacks = $(ANDROID.ASSET_PACKS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -2602,6 +2607,14 @@ rule android.GradleProperties TARGET : PROPERTIES {
 }
 
 
+#
+rule android.GradleBuildFeaturesLines TARGET : LINES {
+    C.ActiveTarget $(TARGET) ;
+    ANDROID.GRADLE_BUILD_FEATURES_LINES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(LINES) ;
+}
+
+
+#
 #
 #
 rule android.GradleAllProjectsRepositories TARGET : REPOSITORIES {
