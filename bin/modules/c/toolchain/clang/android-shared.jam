@@ -1957,7 +1957,9 @@ assetPack {
         # Set up an uninstall target.
         Always uninstall:$(TARGET) ;
         NotFile uninstall:$(TARGET) ;
-        PACKAGE on uninstall:$(TARGET) = $(package) ;
+        local applicationId = $(ANDROID.APPLICATION_ID:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+        applicationId ?= $(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+        PACKAGE on uninstall:$(TARGET) = $(applicationId) ;
         android._Uninstall uninstall:$(TARGET) : : $(C.COMPILER_SUITE_SYMBOL) ;
 
         # Depend on the link targets.
