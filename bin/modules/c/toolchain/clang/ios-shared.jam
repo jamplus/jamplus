@@ -2197,6 +2197,15 @@ rule ios.Provision TARGET : PROFILE_ID {
 }
 
 
+rule ios.TeamIdentifier TARGET : TEAM_IDENTIFIER {
+	TARGET = [ ActiveTarget $(TARGET) ] ;
+	if $(TARGETINFO_LOCATE) {
+		Contents += "Projects[ [[$(TARGET)]] ].TEAM_IDENTIFIER[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(TEAM_IDENTIFIER)]]
+" ;
+	}
+}
+
+
 if ! $(TARGETINFO_LOCATE)
 {
 
