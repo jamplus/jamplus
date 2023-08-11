@@ -885,3 +885,21 @@ rule macosx.Storyboards TARGET : LANGUAGE_DIRECTORY : STORYBOARD_FILES {
 }
 
 
+rule macosx.AssetCatalog PARENT : ASSET_CATALOG_PATH : APP_ICON_NAME : LAUNCH_IMAGE_NAME : DESTINATION_PATH {
+    ASSET_CATALOG_PATH = $(ASSET_CATALOG_PATH:R=$(SUBDIR)) ;
+
+    local target = [ macosx.GetBundleTarget ] ;
+    local bundlePath = [ macosx.GetBundlePath ] ;
+    if ! $(DESTINATION_PATH) {
+        DESTINATION_PATH = $(bundlePath) ;
+    }
+    ASSET_CATALOG_PATH = $(ASSET_CATALOG_PATH:R=$(SUBDIR)) ;
+
+	if $(TARGETINFO_LOCATE) {
+		Contents += "Projects[ [[$(C.ACTIVE_TARGET)]] ].Sources = concat(Projects[ [[$(C.ACTIVE_TARGET)]] ].Sources, { [[$(ASSET_CATALOG_PATH:T)]] })$(NEWLINE)" ;
+		Contents += "Projects[ [[$(C.ACTIVE_TARGET)]] ].ASSETCATALOG_COMPILER_APPICON_NAME[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(APP_ICON_NAME:E=AppIcon)]]$(NEWLINE)" ;
+	}
+}
+
+
+
