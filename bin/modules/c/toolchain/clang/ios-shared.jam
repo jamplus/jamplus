@@ -808,7 +808,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 	}
 	C.ios.Lipo $(TARGET) : $(linkTargets) : $(bundlePath).lipo ;
 
-	{
+	if ! $(CODESIGN_AUTOMATIC:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 		local isysroot = $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 		isysroot ?= $(ISYSROOT:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
 
@@ -883,7 +883,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 		}
 
 		local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-		if ! $(provisionFileTarget) {
+		if ! $(provisionFileTarget) && ! $(CODESIGN_AUTOMATIC:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 			ios.Provision $(TARGET) : $(CFBundleIdentifier) ;
 		}
 
@@ -979,7 +979,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 " ;
 				}
 			}
-			if 1 {
+			if ! $(CODESIGN_AUTOMATIC:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 				LuaString "
 					local newEntitlementsPlist = plist.readbuffer(jam_getvar('getTaskAllowTrueEntitlement')[1])
 					plist.merge(newEntitlementsPlist, entitlementsPlist)
@@ -1227,7 +1227,7 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 	}
 
 	local provisionFileTarget = $(PROVISION_FILE_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
-	if ! $(provisionFileTarget) {
+	if ! $(provisionFileTarget) && ! $(CODESIGN_AUTOMATIC:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
 		ios.Provision $(TARGET) : $(CFBundleIdentifier) ;
 	}
 
@@ -1511,6 +1511,7 @@ rule ios.CodeSign TARGET : SIGNING_IDENTITY {
 
 rule ios.CodeSignAutomatic TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
+	CODESIGN_AUTOMATIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = 1 ;
 
 	Contents += "Projects[ [[$(TARGET)]] ].IOS_SIGNING_AUTOMATIC[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = true$(NEWLINE)" ;
 }
@@ -2123,9 +2124,9 @@ rule ios.Provision TARGET : PROFILE_ID {
 				local plist = require 'plist'
 				local pl = plist.read(jam_getvar('_mobileProvision')[1])
 				local IsXcodeManaged = pl.IsXcodeManaged
-				if IsXcodeManaged == true then
-					return
-				end
+				--if IsXcodeManaged == true then
+					--return
+				--end
 				local ExpirationDate = pl.ExpirationDate
 				if ExpirationDate then
 					if not date then date = require 'date' end
@@ -2251,6 +2252,7 @@ rule ios.CodeSign TARGET : SIGNING_IDENTITY : CERTIFICATE_CHAIN {
 
 rule ios.CodeSignAutomatic TARGET {
 	TARGET = [ ActiveTarget $(TARGET) ] ;
+	CODESIGN_AUTOMATIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = 1 ;
 }
 
 
