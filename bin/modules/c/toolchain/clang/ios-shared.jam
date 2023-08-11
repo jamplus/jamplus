@@ -2570,16 +2570,16 @@ rule ios.CopyDirectoryContentsToBundle TARGET : DESTINATION_RELATIVE_PATH : SOUR
 			}
 		}
 	} else {
-#		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
-#		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
-#			Contents += "$(TAB)[[$(SOURCE_PATHS:T)]],$(NEWLINE)" ;
-#		Contents += "})$(NEWLINE)" ;
-#
-#		local source ;
-#		for source in $(SOURCE_PATHS) {
-#			local fullprefix = "$(prefix).SourcesInfo[ [[$(source:TR=$(SUBDIR))]] ]" ;
-#			Contents += "$(fullprefix).buildResources=true$(NEWLINE)" ;
-#			Contents += "$(fullprefix).fileType=\"file\"$(NEWLINE)" ;
-#		}
+		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
+		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
+			Contents += "$(TAB)[[$(SOURCE_PATHS:T)]],$(NEWLINE)" ;
+		Contents += "})$(NEWLINE)" ;
+
+		local source ;
+		for source in $(SOURCE_PATHS) {
+			local fullprefix = "$(prefix).SourcesInfo[ [[$(source:TR=$(SUBDIR))]] ]" ;
+			Contents += "$(fullprefix).buildResources=true$(NEWLINE)" ;
+			Contents += "$(fullprefix).fileType=\"folder\"$(NEWLINE)" ;
+		}
 	}
 }
