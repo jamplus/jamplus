@@ -848,3 +848,40 @@ actions C.macosx._CompileXIB
 
 } # TARGETINFO_LOCATE
 
+
+rule macosx.Storyboard TARGET : SOURCES {
+    TARGET = [ ActiveTarget $(TARGET) ] ;
+
+    SOURCES = $(SOURCES:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+    SEARCH on $(SOURCES) += $(SEARCH_SOURCE) ;
+
+    local LANGUAGE_SUBDIRECTORY = $(SOURCES[1]:TD) ;
+    LANGUAGE_SUBDIRECTORY = $(LANGUAGE_SUBDIRECTORY:BS) ;
+
+	if $(TARGETINFO_LOCATE) {
+		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ]" ;
+		Contents += "$(prefix).Sources = concat($(prefix).Sources, {$(NEWLINE)" ;
+			Contents += "$(TAB)[[$(SOURCES:T)]],$(NEWLINE)" ;
+		Contents += "})$(NEWLINE)" ;
+	}
+}
+
+
+rule macosx.Storyboards TARGET : LANGUAGE_DIRECTORY : STORYBOARD_FILES {
+    LANGUAGE_DIRECTORY = $(LANGUAGE_DIRECTORY:R=$(SUBDIR)) ;
+    local storyboards = [ Glob $(LANGUAGE_DIRECTORY) : *.storyboard ] ;
+    storyboards = $(storyboards:BSG=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
+    SEARCH on $(storyboards) = $(LANGUAGE_DIRECTORY) ;
+    macosx.Storyboard $(TARGET) : $(storyboards) ;
+
+	if ! $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+		if $(STORYBOARD_FILES[1]) {
+			macosx.BundleInfoString : UILaunchStoryboardName : $(STORYBOARD_FILES[1]) ;
+		}
+		if $(STORYBOARD_FILES[2]) {
+			macosx.BundleInfoString : UIMainStoryboardFile : $(STORYBOARD_FILES[2]) ;
+		}
+	}
+}
+
+
