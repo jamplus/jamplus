@@ -792,6 +792,14 @@ if $(NT)
 	}
 }
 
+actions lua together existing removeemptydirs Clean
+{
+	local targets, sources = ...
+	for _, file in ipairs(sources) do
+		os.remove(file)
+	end
+}
+
 actions quietly MkDir1
 {
 	$(MKDIR) $(<:C)
