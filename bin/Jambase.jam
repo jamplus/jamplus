@@ -767,7 +767,7 @@ rule FDirName
 # First the defaults
 #
 
-actions cleanunusedtargets CleanRoots
+actions cleanunusedtargets quietly CleanRoots
 {
 }
 
