@@ -320,6 +320,8 @@ void remove_empty_dirs()
 		popsettings( t->settings );
 
 		char* slashptr = strrchr( t->boundname, '/' );
+		if (slashptr == NULL)
+			continue;
 		char path[MAXJPATH];
 		strncpy( path, t->boundname, slashptr - t->boundname + 1 );
 		path[ slashptr - t->boundname + 1 ] = 0;
@@ -368,12 +370,12 @@ void remove_empty_dirs()
 
 					if ( dirret == 0 ) {
 						/* walk up directories removing any empty ones */
-						int MAX_RETRIES = 1;
-						int retries = 0;
-						while ( retries < MAX_RETRIES ) {
-							c->name = lastdirptr;
-							if ( hashenter( dirlisthash, (HASHDATA **)&c ) ) {
-								c->name = newstr( lastdirptr );
+						c->name = lastdirptr;
+						if ( hashenter( dirlisthash, (HASHDATA **)&c ) ) {
+							c->name = newstr( lastdirptr );
+							int MAX_RETRIES = 5;
+							int retries = 0;
+							while ( retries < MAX_RETRIES ) {
 								int ret = rmdir( lastdirptr );
 								if ( ret == -1 ) {
 									int err = errno;
@@ -392,12 +394,10 @@ void remove_empty_dirs()
 										retries = MAX_RETRIES;
 										break;
 									}
+								} else {
+									break;
 								}
 							}
-							break;
-						}
-						if ( retries == MAX_RETRIES ) {
-							break;
 						}
 					}
 
