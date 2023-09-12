@@ -127,21 +127,21 @@ function Test()
 	end
 
 	do
-		TestPattern(patternA, RunJam{ 'JAM_NO_DEP_CACHE=1' })
+		TestPattern(patternA, RunJam{ 'JAM_NO_DEPCACHE=1' })
 		TestDirectories(dirs)
 		TestFiles(noDepCacheFiles)
 	end
 
 	---------------------------------------------------------------------------
 	do
-		TestPattern(patternB, RunJam{ 'JAM_NO_DEP_CACHE=1' })
+		TestPattern(patternB, RunJam{ 'JAM_NO_DEPCACHE=1' })
 		TestDirectories(dirs)
 		TestFiles(noDepCacheFiles)
 	end
 	
 	---------------------------------------------------------------------------
 	do
-		TestPattern(patternC, RunJam{ 'JAM_NO_DEP_CACHE=1' })
+		TestPattern(patternB, RunJam{ 'JAM_NO_DEPCACHE=1' })
 		TestDirectories(dirs)
 		TestFiles(noDepCacheFiles)
 	end

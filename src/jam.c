@@ -869,7 +869,7 @@ int main( int argc, char **argv, char **arg_environ )
 		usechecksumslist = var_get("JAM_USE_CHECKSUMS");
 	}
 	if (usechecksumslist  &&  list_first(usechecksumslist)) {
-		LIST *nodepcachelist = var_get("JAM_NO_DEP_CACHE");
+		LIST *nodepcachelist = var_get("JAM_NO_DEPCACHE");
 		if (!nodepcachelist  ||  !list_first(nodepcachelist)  ||  strcmp(list_value(list_first(nodepcachelist)), "1") != 0) {
 			usechecksums = 1;
 		}
