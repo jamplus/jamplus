@@ -502,7 +502,7 @@ rule C._MultiCppCompile SOURCES {
 		Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(objects) ;
 
 		MFLAGS on $(objects) = $(flags) ;
-		UseCommandLine $(objects) : $(flags) ;
+		UseCommandLine $(objects) : $(flags:J=$(SPACE)) ;
 
 		for theRule in $(C._MultiCppCompile_PostCompile:Z=$(C.COMPILER_SUITE_SYMBOL)) {
 			$(theRule) ;
@@ -699,7 +699,7 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 
 	LINKFLAGS on $(_linkTargets) = $(linkFlags) ;
 
-	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
+	UseCommandLine $(_linkTargets) : $(linkFlags:J=$(SPACE)) $(linkLibs:J=$(SPACE)) $(needLibs:J=$(SPACE)) $(_s:J=$(SPACE)) ;
 
 	ForceContentsOnly $(_linkTargets) ;
 
@@ -830,7 +830,7 @@ rule C._LibraryFromObjects OBJECTS {
 	Needs $(_l) : $(needLibs) ;
 
 	ForceContentsOnly $(_l) ;
-	UseCommandLine $(_l) : $(libFlags) $(_s) ;
+	UseCommandLine $(_l) : $(libFlags:J=$(SPACE)) $(_s:J=$(SPACE)) ;
 
 	UseFileCache $(_l) : code ;
 	$(archiveRule) $(_l) : $(_s) : $(C.COMPILER_SUITE_SYMBOL) ;
@@ -960,7 +960,7 @@ rule C._SharedLibraryFromObjects OBJECTS : OPTIONS {
 
 	LINKFLAGS on $(_linkTargets) = $(linkFlags) ;
 
-	UseCommandLine $(_linkTargets) : $(linkFlags) $(linkLibs) $(needLibs) $(_s) ;
+	UseCommandLine $(_linkTargets) : $(linkFlags:J=$(SPACE)) $(linkLibs:J=$(SPACE)) $(needLibs:J=$(SPACE)) $(_s:J=$(SPACE)) ;
 
 	ForceContentsOnly $(_linkTargets) ;
 
