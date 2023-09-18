@@ -493,6 +493,12 @@ actions android._ZipAlign {
 }
 
 
+# aab -> Signed aab
+actions android._SignAab {
+    $(JAVA.JARSIGNER:TC) -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore $(KEYSTORE_PATH:TC) -storepass $(KEYSTORE_PASSWORD) -keypass $(KEYSTORE_KEY_PASSWORD) $(1:TC) $(KEYSTORE_KEY_ALIAS)
+}
+
+
 # Install the signed APK to the device
 actions screenoutput android._Install {
     $(ANDROID.ADB:TC) install -r $(2:TC)
@@ -1218,6 +1224,7 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
         local grist = $(C.ACTIVE_TOOLCHAIN_GRIST)|gradle ;
         local gradleTarget = $(TARGET:G=$(grist)) ;
         NotFile $(gradleTarget) ;
+        GRADLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(gradleTarget) ;
 
         # gradlew
         local gradlew ;
@@ -1380,6 +1387,23 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
             }
         }
 
+        local _keyStorePath =
+            $(ANDROID.KEYSTORE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+            $(ANDROID.KEYSTORE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+        local _keyStorePassword =
+            $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+            $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+        local _keyStoreKeyAlias =
+            $(ANDROID.KEYSTORE_KEY_ALIAS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+            $(ANDROID.KEYSTORE_KEY_ALIAS:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+        local _keyStoreKeyPassword =
+            $(ANDROID.KEYSTORE_KEY_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
+            $(ANDROID.KEYSTORE_KEY_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
+
+        if ! $(_keyStorePath) || ! $(_keyStorePassword) || ! $(_keyStoreKeyAlias) || ! $(_keyStoreKeyPassword) {
+            Exit *** error \: Must call android.Sign and specify keystore path, keystore password, key alias, and key password ;
+        }
+
         #########################################################################################
         # build.gradle
         #########################################################################################
@@ -1483,23 +1507,7 @@ include ':app'
         {
             local gradleAppOutputDirectory = $(GRADLE_OUTPUT_DIRECTORY)/app ;
 
-            local _keyStorePath =
-                $(ANDROID.KEYSTORE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-                $(ANDROID.KEYSTORE_PATH:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-            local _keyStorePassword =
-                $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-                $(ANDROID.KEYSTORE_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-            local _keyStoreKeyAlias =
-                $(ANDROID.KEYSTORE_KEY_ALIAS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-                $(ANDROID.KEYSTORE_KEY_ALIAS:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-            local _keyStoreKeyPassword =
-                $(ANDROID.KEYSTORE_KEY_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))
-                $(ANDROID.KEYSTORE_KEY_PASSWORD:Z=$(C.ACTIVE_TOOLCHAIN_*)) ;
-
-            if ! $(_keyStorePath) || ! $(_keyStorePassword) || ! $(_keyStoreKeyAlias) || ! $(_keyStoreKeyPassword) {
-                Exit *** error \: Must call android.Sign and specify keystore path, keystore password, key alias, and key password ;
-            }
-            _keyStorePath = [ MakeRelativePath $(_keyStorePath:T) : $(gradleAppOutputDirectory) ] ;
+            local _relativeKeyStorePath = [ MakeRelativePath $(_keyStorePath:T) : $(gradleAppOutputDirectory) ] ;
 
             # Resources
             local sdkVersion = $(ANDROID.SDK_TARGET_VERSION:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
@@ -1571,7 +1579,7 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('$(_keyStorePath)')
+            storeFile file('$(_relativeKeyStorePath)')
             storePassword '$(_keyStorePassword)'
             keyAlias '$(_keyStoreKeyAlias)'
             keyPassword '$(_keyStoreKeyPassword)'
@@ -1887,14 +1895,24 @@ assetPack {
             Always build-aab:$(TARGET) ;
             NotFile build-aab:$(TARGET) ;
 
-            #
+            # Sign the .aab.
+            KEYSTORE_PATH on $(_aab) = $(_keyStorePath) ;
+            KEYSTORE_PASSWORD on $(_aab) = $(_keyStorePassword) ;
+            KEYSTORE_KEY_ALIAS on $(_aab) = $(_keyStoreKeyAlias) ;
+            KEYSTORE_KEY_PASSWORD on $(_aab) = $(_keyStoreKeyPassword) ;
+
+            Depends $(_aab) : $(_keystorePath) ;
+            UseCommandLine $(_aab) : $(_keyStorePassword) $(_keyStoreKeyAlias) $(_keyStoreKeyPassword) ;
+
+            android._SignAab $(_aab) : $(_aab) : $(C.COMPILER_SUITE_SYMBOL) ;
+
+            # Set up the build-apks target.
             local _apks = $(_aab:S=.apks) ;
             MakeLocate $(_apks) : $(packageOutputPath:E=$(LOCATE_TARGET)) ;
             Depends $(_apks) : $(_aab) ;
             #MightNotUpdate $(_apks) ;
             android._bundletool_build-apks $(_apks) : $(_aab) : $(C.COMPILER_SUITE_SYMBOL) ;
 
-            # Set up the build-apks target.
             Depends build-apks:$(TARGET) : $(_apks) ;
 #            Always build-apks:$(TARGET) ;
             NotFile build-apks:$(TARGET) ;
