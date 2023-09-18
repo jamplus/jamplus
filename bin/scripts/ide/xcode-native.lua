@@ -760,6 +760,10 @@ local function XcodeHelper_WritePBXProject(self, info, allTargets)
 	table.insert(self.Contents, ("\t\t%s /* Project object */ = {\n"):format(info.ProjectUuid))
 	table.insert(self.Contents, expand([[
 			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+			};
 			buildConfigurationList = $(ProjectBuildConfigurationListUuid) /* Build configuration list for PBXProject "$(Name)" */;
 			compatibilityVersion = "Xcode 9.3";
 			hasScannedForEncodings = 0;
