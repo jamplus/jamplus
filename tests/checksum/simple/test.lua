@@ -30,17 +30,17 @@ function TestChecksum()
     local function TestNoopPattern()
         local noopPattern = [[
 *** found 10 target(s)...
-*** updating 3 target(s)...
-*** updated 3 target(s)...
 ]]
         TestPattern(noopPattern, RunJam{})
         TestDirectories(dirs)
         TestFiles(files)
     end
 
-    local function TestNoopPattern2()
+    local function TestNoopPattern3()
         local noopPattern = [[
 *** found 10 target(s)...
+*** updating 3 target(s)...
+*** updated 0 target(s)...
 ]]
         TestPattern(noopPattern, RunJam{})
         TestDirectories(dirs)
@@ -99,19 +99,19 @@ function TestChecksum()
 
     ---------------------------------------------------------------------------
     do
-        TestNoopPattern2()
+        TestNoopPattern()
     end
 
     ---------------------------------------------------------------------------
     do
-        TestNoopPattern2()
+        TestNoopPattern()
     end
 
     ---------------------------------------------------------------------------
     do
         osprocess.sleep(1.0)
         ospath.touch('template')
-        TestNoopPattern()
+        TestNoopPattern3()
     end
 
     ---------------------------------------------------------------------------
@@ -132,7 +132,7 @@ function TestChecksum()
 *** updating 3 target(s)...
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generated.h
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
-*** updated 3 target(s)...
+*** updated 2 target(s)...
 ]]
         end
 
@@ -145,7 +145,7 @@ function TestChecksum()
 
     ---------------------------------------------------------------------------
     do
-        TestNoopPattern2()
+        TestNoopPattern()
     end
 
     ---------------------------------------------------------------------------

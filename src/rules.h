@@ -175,6 +175,8 @@ struct _target {
 # define 	T_FLAG_FORCECARE 	0x8000	/* ForceCare applied */
 # define	T_FLAG_IGNORECONTENTS	    0x10000 /* ignore the checksum generated for this target */
 # define	T_FLAG_FORCECONTENTSONLY    0x20000 /* */
+# define	T_FLAG_WRONGCHECKSUM    0x40000 /* Wrong checksum */
+# define	T_FLAG_FIXSORT_VISITED	0x80000	/*  */
 
 	char		binding;	/* how target relates to real file */
 
@@ -186,6 +188,7 @@ struct _target {
 	TARGETS		*depends;	/* dependencies */
 	TARGET		*includes;	/* includes */
 
+	int dependssorted;
 	time_t		time;		/* update time */
 	time_t		leaf;		/* update time of leaf sources */
 #ifdef OPT_BUILTIN_MD5CACHE_EXT

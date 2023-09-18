@@ -60,10 +60,10 @@ function TestChecksum()
         pattern = [[
 *** found 17 target(s)...
 *** updating 8 target(s)...
-@ GenerateC <$(TOOLCHAIN_GRIST):test>generated.c
 @ GenerateH <$(TOOLCHAIN_GRIST):test>generated-a.h
 @ GenerateH <$(TOOLCHAIN_GRIST):test>generated-b.h
 @ GenerateH <$(TOOLCHAIN_GRIST):test>generated-c.h
+@ GenerateC <$(TOOLCHAIN_GRIST):test>generated.c
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.obj
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
 !NEXT!*** updated 8 target(s)...
@@ -92,10 +92,10 @@ function TestChecksum()
 *** found 17 target(s)...
 *** updating 8 target(s)...
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
-@ GenerateC <$(TOOLCHAIN_GRIST):test>generated.c
 @ GenerateH <$(TOOLCHAIN_GRIST):test>generated-a.h
 @ GenerateH <$(TOOLCHAIN_GRIST):test>generated-b.h
 @ GenerateH <$(TOOLCHAIN_GRIST):test>generated-c.h
+@ GenerateC <$(TOOLCHAIN_GRIST):test>generated.c
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>generated.o
 @ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
 *** updated 8 target(s)...

@@ -99,6 +99,8 @@
 # define max( a,b ) ((a)>(b)?(a):(b))
 # endif
 
+int hadupdating;
+
 typedef struct {
 	int	temp;
 	int	updating;
@@ -118,11 +120,13 @@ static void make0( TARGET *t, TARGET *p, int depth,
 
 static TARGETS *make0sort( TARGETS *c );
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-void make0calcmd5sum( TARGET *t, int source, int depth );
+void make0calcmd5sum( TARGET *t, int source, int depth, int force );
 #endif
 #ifdef OPT_GRAPH_DEBUG_EXT
 static void dependGraphOutput( TARGET *t, int depth );
 #endif
+
+void make1buildchecksum( const char* makestage, TARGET* t, MD5SUM buildmd5sum, int force );
 
 static const char *target_fate[] =
 {
@@ -161,6 +165,9 @@ void onintr( int disp );
 #ifdef OPT_USE_CHECKSUMS_EXT
 int usechecksums = 0;
 #endif /* OPT_USE_CHECKSUMS_EXT */
+extern int make0calcmd5sum_epoch;
+extern int make0calcmd5sum_timestamp_epoch;
+extern int make0calcmd5sum_dependssorted_stage;
 
 #ifdef OPT_MULTIPASS_EXT
 int actionpass = 0;
@@ -202,13 +209,15 @@ make_fixprogress(
 	}
 
 	if ( t->binding != T_BIND_EXISTS )
+	{
 		t->binding = T_BIND_UNBOUND;
+		t->time = 0;
+	}
 	if ( t->parents )
 		targetlist_free( t->parents );
 	t->parents = NULL;
 	t->flags &= ~T_FLAG_VISITED;
 	t->status = 0;
-	t->time = 0;
 
 	for ( actions = t->actions; actions; actions = actions->next )
 	{
@@ -601,6 +610,8 @@ make(
 #ifdef OPT_MULTIPASS_EXT
 pass:
 #endif
+	++make0calcmd5sum_dependssorted_stage;
+
 	memset( (char *)counts, 0, sizeof( *counts ) );
 
 	for( i = 0; i < n_targets; i++ )
@@ -631,7 +642,10 @@ pass:
 		if( counts->temp )
 			printf( "*** using %d temp target(s)...\n", counts->temp );
 		if( counts->updating )
+		{
 			printf( "*** updating %d target(s)...\n", counts->updating );
+			hadupdating = 1;
+		}
 		if( counts->cantfind )
 			printf( "*** can't find %d target(s)...\n", counts->cantfind );
 		if( counts->cantmake )
@@ -647,6 +661,8 @@ pass:
 #else
 	status = counts->cantfind || counts->cantmake;
 #endif
+
+	++make0calcmd5sum_dependssorted_stage;
 
 	for( i = 0; i < n_targets; i++ )
 	    status |= make1( bindtarget( targets[i] ) );
@@ -853,6 +869,19 @@ make0(
 	{
 		t->boundname = search( t->name, &t->time );
 		t->binding = t->time ? T_BIND_EXISTS : T_BIND_MISSING;
+#if 0
+		if (usechecksums)
+		{
+			if (t->binding == T_BIND_EXISTS)
+			{
+				getcachedmd5sum(t, 0);
+				if (t->contentchecksum)
+				{
+					t->time = t->contentchecksum->originalmtime;
+				}
+			}
+		}
+#endif
 	}
 
 	/* INTERNAL, NOTFILE header nodes have the time of their parents */
@@ -1216,6 +1245,43 @@ make0(
 	}
 #endif
 
+	if (usechecksums && fate == T_FATE_STABLE)
+	{
+		if (t->binding == T_BIND_EXISTS && !(t->flags & (T_FLAG_NOTFILE | T_FLAG_NOUPDATE)) /* && t->actions*/)
+		{
+			if (t->actions) {
+				//if (t->contentchecksum != NULL && t->contentchecksum->currentmtime != t->contentchecksum->originalmtime)
+				{
+					MD5SUM buildmd5sum;
+
+					/* find its final md5sum */
+					++make0calcmd5sum_epoch;
+					++make0calcmd5sum_timestamp_epoch;
+					//make0calcmd5sum(t, 1, 1);
+					make1buildchecksum("make0", t, buildmd5sum, 0);
+
+					if (checksum_retrieve(t, buildmd5sum, 0) == 0)
+					{
+						t->flags |= T_FLAG_WRONGCHECKSUM;
+						fate = T_FATE_UPDATE;
+					}
+				}
+			}
+			else {
+				/*
+				if (t->binding == T_BIND_EXISTS)
+				{
+					//getcachedmd5sum(t, 0);
+					if (t->contentchecksum && t->contentchecksum->contentmd5sum_changed)
+					{
+						fate = T_FATE_NEWER;
+					}
+				}
+				*/
+			}
+		}
+	}
+
 	if( fate >= T_FATE_BROKEN )
 	{
 		fate = T_FATE_CANTMAKE;
@@ -1500,10 +1566,17 @@ make0sortbyname( TARGETS *chain )
 
 int make0calcmd5sum_epoch = -1000000000;
 int make0calcmd5sum_timestamp_epoch = -1000000000;
+int make0calcmd5sum_dependssorted_stage = 0;
 
 static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 {
 	TARGETS *c;
+
+	if ( t->dependssorted != make0calcmd5sum_dependssorted_stage )
+	{
+		//t->depends = make0sortbyname( t->depends );
+		t->dependssorted = make0calcmd5sum_dependssorted_stage;
+	}
 
 	for( c = t->depends; c; c = c->next )
 	{
@@ -1513,12 +1586,12 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 		}
 		c->target->epoch = make0calcmd5sum_epoch;
 
-		if( ( c->target->binding == T_BIND_UNBOUND || c->target->time == 0 ) && !( c->target->flags & T_FLAG_NOTFILE )
+		if( ( c->target->binding == T_BIND_UNBOUND /*|| c->target->time == 0*/ ) && !( c->target->flags & T_FLAG_NOTFILE )
 				&& c->target->timestamp_epoch != make0calcmd5sum_timestamp_epoch )
 		{
 			c->target->timestamp_epoch = make0calcmd5sum_timestamp_epoch;
 			pushsettings( c->target->settings );
-			c->target->boundname = search_uncached( c->target->name, &c->target->time );
+			c->target->boundname = search( c->target->name, &c->target->time );
 			popsettings( c->target->settings );
 			c->target->binding = c->target->time ? T_BIND_EXISTS : T_BIND_MISSING;
 		}
@@ -1544,7 +1617,9 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 		}
 
 		if ( c->target->includes )
+		{
 			make0recurseincludesmd5sum( context, c->target->includes, depth + 1 );
+		}
 	}
 }
 
@@ -1552,12 +1627,12 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 /*
  * make0calcmd5sum() - calculate md5sum for a buildable target
  */
-void make0calcmd5sum( TARGET *t, int source, int depth )
+void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 {
 	MD5_CTX context;
 	TARGETS *c;
 
-	if ( t->buildmd5sum_calculated )
+	if ( t->buildmd5sum_calculated && !force )
 		return;
 
 	if ( ( t->flags & T_FLAG_NOUPDATE ) || ( t->flags & T_FLAG_INTERNAL ) )
@@ -1588,7 +1663,11 @@ void make0calcmd5sum( TARGET *t, int source, int depth )
 	//}
 
 	/* sort all dependents by name, so we can make reliable md5sums */
-	t->depends = make0sortbyname( t->depends );
+	if ( t->dependssorted != make0calcmd5sum_dependssorted_stage )
+	{
+		t->depends = make0sortbyname(t->depends);
+		t->dependssorted = make0calcmd5sum_dependssorted_stage;
+	}
 
 	MD5Init( &context );
 
@@ -1633,7 +1712,9 @@ void make0calcmd5sum( TARGET *t, int source, int depth )
 	}
 
 	/* add sum of your includes */
-	//if ( !t->includes )
+	//if ( t->flags & T_FLAG_INTERNAL )
+	//if (0)
+	if ( !t->includes )
 	{
 		SETTINGS *s = copysettings( t->settings );
 		pushsettings( s );
@@ -1656,7 +1737,7 @@ void make0calcmd5sum( TARGET *t, int source, int depth )
 	for( c = t->depends; c; c = c->next )
 	{
 		/* If this is a "Needs" dependency, don't care about its contents. */
-		if (c->needs  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE))
+		if (c->needs) //  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE))
 		{
 			continue;
 		}
@@ -1665,20 +1746,22 @@ void make0calcmd5sum( TARGET *t, int source, int depth )
 		{
 			continue;
 		}
-		make0calcmd5sum( c->target, 1, depth + 1 );
+		make0calcmd5sum( c->target, 1, depth + 1, force );
 
 		/* add name of the dependency and its contents */
 		if ( c->target->buildmd5sum_calculated )
 		{
-			if( DEBUG_MD5HASH )
-				printf( "\t\t%sdepends: %s %s\n", spaces( depth ), c->target->name, md5tostring( c->target->buildmd5sum ) );
 			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
 			if ( !( c->target->flags & T_FLAG_FORCECONTENTSONLY ) )
 			{
 				MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+				if( DEBUG_MD5HASH )
+					printf( "\t\t%sdepends: %s %s\n", spaces( depth ), c->target->name, md5tostring( c->target->buildmd5sum ) );
 			}
 			else if ( !( c->target->flags & T_FLAG_IGNORECONTENTS )  &&  c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
 			{
+				if( DEBUG_MD5HASH )
+					printf( "\t\t%sdepends: %s %s\n", spaces( depth ), c->target->name, md5tostring( c->target->buildmd5sum ) );
 				MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
 				if( DEBUG_MD5HASH )
 					printf( "\t\t  %s%s: md5 %s\n", spaces( depth ), c->target->name, md5tostring( c->target->contentchecksum->contentmd5sum ) );

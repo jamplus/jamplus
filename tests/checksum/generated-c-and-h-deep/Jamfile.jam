@@ -46,7 +46,7 @@ MakeLocate $(generated-c.h) : $(TOP) ;
 Clean clean : $(generated-c.h) ;
 
 local sources = $(generated-a.h) $(generated-b.h) $(generated-c.h) ;
-Includes $(generated.c) : $(sources) ;
+Needs $(generated.c) : $(sources) ;
 HDRRULE on $(sources) = C.HdrRule ;
 HDRSCAN on $(sources) = $(C.HDRPATTERN) ;
 HDRGRIST on $(sources) = $(C.ACTIVE_TOOLCHAIN_TARGET_GRIST) ;

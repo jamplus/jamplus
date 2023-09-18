@@ -121,12 +121,15 @@ local pass2Pattern
 local pass3Pattern
 local pass3Pattern_useChecksums
 local pass4Pattern
+local pass4Pattern_useChecksums
 local pass5Pattern
 local pass5Pattern_useChecksums
 local pass6Pattern
+local pass6Pattern_useChecksums
 local pass7Pattern
 local pass7Pattern_useChecksums
 local pass8Pattern
+local pass8Pattern_useChecksums
 if Platform == 'win32' then
 	pass1Pattern = [[
 *** found 42 target(s)...
@@ -156,9 +159,21 @@ if Platform == 'win32' then
 !NEXT!*** updated 4 target(s)...
 ]]
 
-pass3Pattern_useChecksums = pass3Pattern
+	pass3Pattern_useChecksums = [[
+*** found 42 target(s)...
+*** updating 4 target(s)...
+!NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.obj
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
+!NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.obj
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.dll
+!NEXT!*** updated 4 target(s)...
+]]
 
 	pass4Pattern = [[
+*** found 42 target(s)...
+]]
+
+	pass4Pattern_useChecksums = [[
 *** found 42 target(s)...
 ]]
 
@@ -171,9 +186,20 @@ pass3Pattern_useChecksums = pass3Pattern
 !NEXT!*** updated 4 target(s)...
 ]]
 
-	pass5Pattern_useChecksums = pass5Pattern
+	pass5Pattern_useChecksums = [[
+!NEXT!*** updating 4 target(s)...
+!NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):lib-c>add.obj
+!NEXT!@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.lib
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.dll
+!NEXT!*** updated 4 target(s)...
+]]
 
 	pass6Pattern = [[
+*** found 42 target(s)...
+]]
+
+	pass6Pattern_useChecksums = [[
 *** found 42 target(s)...
 ]]
 
@@ -185,9 +211,19 @@ pass3Pattern_useChecksums = pass3Pattern
 !NEXT!*** updated 2 target(s)...
 ]]
 
-	pass7Pattern_useChecksums = pass7Pattern
+	pass7Pattern_useChecksums = [[
+*** found 42 target(s)...
+*** updating 2 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.obj
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.dll
+!NEXT!*** updated 2 target(s)...
+]]
 
 	pass8Pattern = [[
+*** found 42 target(s)...
+]]
+
+	pass8Pattern_useChecksums = [[
 *** found 42 target(s)...
 ]]
 
@@ -228,8 +264,10 @@ else
 				*** found 26 target(s)...
 				*** updating 7 target(s)...
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.o
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.o
-				*** updated 7 target(s)...
+				@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so
+				*** updated 4 target(s)...
 ]]
 		else
 			pass3Pattern_useChecksums = [[
@@ -239,7 +277,7 @@ else
 				@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.o
 				@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so
-				*** updated 7 target(s)...
+				*** updated 4 target(s)...
 ]]
 		end
 	else
@@ -250,11 +288,15 @@ else
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so
 		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-b>slib-b.o
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so
-		*** updated 7 target(s)...
+		*** updated 4 target(s)...
 ]]
 	end
 
 	pass4Pattern = [[
+		*** found 26 target(s)...
+]]
+
+	pass4Pattern_useChecksums = [[
 		*** found 26 target(s)...
 ]]
 
@@ -276,7 +318,7 @@ else
 		@ $(C_ARCHIVE) <$(TOOLCHAIN_GRIST):lib-c>lib-c.a 
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-b>slib-b.so 
-		*** updated 7 target(s)...
+		*** updated 4 target(s)...
 ]]
 
 	pass6Pattern = [[
@@ -297,7 +339,7 @@ else
 		*** updating 4 target(s)...
 		@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):slib-a>slib-a.o 
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):slib-a>slib-a.so 
-		*** updated 4 target(s)...
+		*** updated 2 target(s)...
 ]]
 
 	pass8Pattern = [[
@@ -411,6 +453,7 @@ void ExportA2()
 	do
 		osprocess.sleep(1.0)
 		ospath.touch('lib-c/add.h')
+		osprocess.sleep(1.0)
 
 		if useChecksums then
 			local noopPattern
@@ -418,20 +461,25 @@ void ExportA2()
 				noopPattern = [[
 *** found 26 target(s)...
 *** updating 4 target(s)...
-*** updated 5 target(s)...
+*** updated 0 target(s)...
 ]]
 			else
 				noopPattern = [[
 *** found 28 target(s)...
 *** updating 7 target(s)...
-*** updated 7 target(s)...
+*** updated 0 target(s)...
 ]]
 			end
 
 			TestPattern(noopPattern, RunJam{})
 
+			TestPattern(pass2Pattern, RunJam{})
+			TestDirectories(dirs)
+			TestFiles(files)
+
 			osprocess.sleep(1.0)
 			WriteModifiedFileA()
+			osprocess.sleep(1.0)
 		end
 
 		TestPattern(useChecksums  and  pass3Pattern_useChecksums  or  pass3Pattern, RunJam{})
@@ -441,7 +489,8 @@ void ExportA2()
 
 	---------------------------------------------------------------------------
 	do
-		TestPattern(pass4Pattern, RunJam{})
+		osprocess.sleep(1.0)
+		TestPattern(useChecksums  and  pass4Pattern_useChecksums  or  pass4Pattern, RunJam{})
 		TestDirectories(dirs)
 		TestFiles(files)
 	end
@@ -450,6 +499,7 @@ void ExportA2()
 	do
 		osprocess.sleep(1.0)
 		ospath.touch('lib-c/add.c')
+		osprocess.sleep(1.0)
 
 		if useChecksums then
 			local noopPattern
@@ -457,13 +507,13 @@ void ExportA2()
 				noopPattern = [[
 *** found 26 target(s)...
 *** updating 4 target(s)...
-*** updated 5 target(s)...
+*** updated 0 target(s)...
 ]]
 			else
 				noopPattern = [[
 *** found 28 target(s)...
 *** updating 7 target(s)...
-*** updated 7 target(s)...
+*** updated 0 target(s)...
 ]]
 			end
 
@@ -471,6 +521,7 @@ void ExportA2()
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileB()
+			osprocess.sleep(1.0)
 		end
 
 		TestPattern(useChecksums  and  pass5Pattern_useChecksums  or  pass5Pattern, RunJam{})
@@ -480,7 +531,7 @@ void ExportA2()
 
 	---------------------------------------------------------------------------
 	do
-		TestPattern(pass6Pattern, RunJam{})
+		TestPattern(useChecksums  and  pass6Pattern_useChecksums  or  pass6Pattern, RunJam{})
 		TestDirectories(dirs)
 		TestFiles(files)
 	end
@@ -496,13 +547,13 @@ void ExportA2()
 				noopPattern = [[
 *** found 26 target(s)...
 *** updating 2 target(s)...
-*** updated 3 target(s)...
+*** updated 0 target(s)...
 ]]
 			else
 				noopPattern = [[
 *** found 28 target(s)...
 *** updating 4 target(s)...
-*** updated 4 target(s)...
+*** updated 0 target(s)...
 ]]
 			end
 
@@ -510,6 +561,7 @@ void ExportA2()
 
 			osprocess.sleep(1.0)
 			WriteModifiedFileC()
+			osprocess.sleep(1.0)
 		end
 
 		TestPattern(useChecksums  and  pass7Pattern_useChecksums  or  pass7Pattern, RunJam{})
@@ -519,7 +571,7 @@ void ExportA2()
 
 	---------------------------------------------------------------------------
 	do
-		TestPattern(pass8Pattern, RunJam{})
+		TestPattern(useChecksums  and  pass8Pattern_useChecksums  or  pass8Pattern, RunJam{})
 		TestDirectories(dirs)
 		TestFiles(files)
 	end

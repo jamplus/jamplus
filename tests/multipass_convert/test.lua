@@ -18,7 +18,9 @@ function Test()
 	TestFiles(originalFiles)
 
 	---------------------------------------------------------------------------
-	local pattern = [[
+	local pattern
+	if useChecksums then
+        pattern = [[
 *** found 7 target(s)...
 *** updating 3 target(s)...
 @ ConvertInputToJam input1.txt.jam
@@ -48,6 +50,38 @@ WriteAlternateOutput alternate_output2.dat
 @ WriteFile alternate_output2.dat
 *** updated 12 target(s)...
 ]]
+    else
+        pattern = [[
+*** found 7 target(s)...
+*** updating 3 target(s)...
+@ ConvertInputToJam input1.txt.jam
+@ ConvertAlternateInputToJam alternate_input1.txt.jam
+@ ConvertInputToJam input2.txt.jam
+*** updated 3 target(s)...
+*** executing pass 2...
+WriteOutput all - output1.dat
+WriteOutput all - output2.dat
+WriteOutput all - output3.dat
+WriteOutput all - output4.dat
+WriteOutput all - output5.dat
+WriteOutput all - output6.dat
+WriteOutput all - output7.dat
+WriteAlternateOutput alternate_output1.dat
+WriteAlternateOutput alternate_output2.dat
+*** found 13 target(s)...
+*** updating 12 target(s)...
+@ WriteFile output1.dat
+@ WriteFile output2.dat
+@ WriteFile output3.dat
+@ WriteFile output4.dat
+@ WriteFile output5.dat
+@ WriteFile output6.dat
+@ WriteFile output7.dat
+@ WriteFile alternate_output1.dat
+@ WriteFile alternate_output2.dat
+*** updated 12 target(s)...
+]]
+    end
 
 	TestPattern(pattern, RunJam())
 

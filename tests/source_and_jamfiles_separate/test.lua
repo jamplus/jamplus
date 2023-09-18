@@ -156,11 +156,6 @@ function Test()
 			*** found 17 target(s)...
 ]]
 	end
-	local noopPattern2 = [[
-		*** found 22 target(s)...
-		*** updating 5 target(s)...
-		*** updated 5 target(s)...
-]]
 
 	do
 		TestPattern(noopPattern, RunJam{ '-Cjam' })
@@ -174,6 +169,11 @@ function Test()
 		ospath.touch('src/precomp.h')
 
 		if useChecksums then
+			local noopPattern2 = [[
+		*** found 22 target(s)...
+		*** updating 5 target(s)...
+		*** updated 0 target(s)...
+]]
 			TestPattern(noopPattern2, RunJam{ '-Cjam' })
 
 			osprocess.sleep(1.0)
@@ -181,7 +181,17 @@ function Test()
 		end
 
 		if Platform == 'win32' then
-			pattern = [[
+			if useChecksums then
+				pattern = [[
+*** found 22 target(s)...
+*** updating 5 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.obj
+!NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.obj
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
+!NEXT!*** updated 3 target(s)...
+]]
+			else
+				pattern = [[
 *** found 22 target(s)...
 *** updating 5 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.obj
@@ -189,6 +199,7 @@ function Test()
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 5 target(s)...
 ]]
+			end
 		else
 			if useChecksums then
 				pattern = [[
@@ -198,7 +209,7 @@ function Test()
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.o 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/main.o 
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-				*** updated 5 target(s)...
+				*** updated 4 target(s)...
 ]]
 			else
 				pattern = [[
@@ -237,13 +248,13 @@ function Test()
 				noopPattern2 = [[
 *** found 17 target(s)...
 *** updating 5 target(s)...
-*** updated 5 target(s)...
+*** updated 0 target(s)...
 ]]
 			else
 				noopPattern2 = [[
 *** found 17 target(s)...
 *** updating 2 target(s)...
-*** updated 2 target(s)...
+*** updated 0 target(s)...
 ]]
 			end
 			osprocess.sleep(1.0)
@@ -254,7 +265,17 @@ function Test()
 		end
 
 		if Platform == 'win32' then
-			pattern = [[
+			if useChecksums then
+				pattern = [[
+*** found 22 target(s)...
+*** updating 5 target(s)...
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.obj
+!NEXT!@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/file.obj
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
+!NEXT!*** updated 3 target(s)...
+]]
+			else
+				pattern = [[
 *** found 22 target(s)...
 *** updating 5 target(s)...
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.obj
@@ -262,13 +283,14 @@ function Test()
 !NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
 !NEXT!*** updated 5 target(s)...
 ]]
+			end
 		else
 			if useChecksums then
 				pattern = [[
 				*** found 17 target(s)...
 				*** updating 2 target(s)...
 				@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>../src/createprecomp.o 
-				*** updated 2 target(s)...
+				*** updated 1 target(s)...
 ]]
 			else
 				pattern = [[

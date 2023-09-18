@@ -54,6 +54,17 @@ if Platform == 'win32' and not Compiler then
 		@ $(C_LINK) <$(TOOLCHAIN_GRIST):main>main.exe
 		!NEXT!*** updated 4 target(s)...
 ]]
+
+	pass2Pattern_useChecksums = [[
+		*** found 21 target(s)...
+		*** updating 4 target(s)...
+		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>mypch.obj
+		mypch.cpp
+		@ C.$(COMPILER).C++ <$(TOOLCHAIN_GRIST):main>main.obj
+		main.cpp
+		@ $(C_LINK) <$(TOOLCHAIN_GRIST):main>main.exe
+		!NEXT!*** updated 3 target(s)...
+]]
 elseif Compiler == 'mingw' then
 	pass1Directories = {
 		'includes/',
@@ -236,13 +247,13 @@ function TestChecksum()
 			pattern2 = [[
 *** found 22 target(s)...
 *** updating 4 target(s)...
-*** updated 4 target(s)...
+*** updated 0 target(s)...
 ]]
 		else
 			pattern2 = [[
 *** found 22 target(s)...
 *** updating 3 target(s)...
-*** updated 3 target(s)...
+*** updated 0 target(s)...
 ]]
 		end
 	end
@@ -252,7 +263,7 @@ function TestChecksum()
 
 	osprocess.sleep(1)
 	WriteModifiedFiles()
-	TestPattern(pass2Pattern, RunJam{})
+	TestPattern(useChecksums  and  pass2Pattern_useChecksums  or  pass2Pattern, RunJam{})
 	TestDirectories(pass1Directories)
 	TestFiles(pass1Files)
 

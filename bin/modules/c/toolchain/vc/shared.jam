@@ -363,12 +363,14 @@ rule C.vc._SharedLibraryFromObjects_ExportLib {
     local _actiontlib = @($(TARGET)$(suflib):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)!inner) ;
     BINDING on $(_actiontlib) = [ C._retrieveOutputName : $(suflib) ] ;
     MightNotUpdate $(_actiontlib) ;
+    ForceContentsOnly $(_actiontlib) ;
     MakeLocate $(_actiontlib) : $(outputPath) ;
     _linkTargets += $(_actiontlib) ;
 
     BINDING on $(_tlib) = [ C._retrieveOutputName : $(suflib) ] ;
     Depends $(C.ACTIVE_TOOLCHAIN_TARGET) : $(_tlib) : $(_actiontlib) $(_t) ;
     MightNotUpdate $(_tlib) ;
+    ForceContentsOnly $(_tlib) ;
     MakeLocate $(_tlib) : $(outputPath) ;
 }
 

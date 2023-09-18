@@ -209,7 +209,7 @@ void Print()
 			pattern2 = [[
 *** found 21 target(s)...
 *** updating 2 target(s)...
-*** updated 2 target(s)...
+*** updated 0 target(s)...
 ]]
 		else
 			pattern2 = [[
@@ -222,14 +222,13 @@ void Print()
 
 		osprocess.sleep(1.0)
 		WriteModifiedFiles()
+		osprocess.sleep(1.0)
 
 		local pattern3 = [[
 *** found 19 target(s)...
-*** updating 2 target(s)...
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):helloworld>main.obj
-file.c
-!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):helloworld>helloworld.exe
-!NEXT!*** updated 2 target(s)...
+*** updating 3 target(s)...
+@ GenerateCFile <$(TOOLCHAIN_GRIST):helloworld>file.c
+!NEXT!*** updated 1 target(s)...
 *** finished in 0.01 sec
 ]]
 		TestPattern(pattern3, RunJam())
@@ -283,7 +282,7 @@ file.c
 			pattern2 = [[
 *** found 11 target(s)...
 *** updating 2 target(s)...
-*** updated 2 target(s)...
+*** updated 0 target(s)...
 *** finished in 0.01 sec
 ]]
 		end
@@ -291,6 +290,7 @@ file.c
 
 		osprocess.sleep(1.0)
 		WriteModifiedFiles()
+		osprocess.sleep(1.0)
 
 		local pattern3 = [[
 *** found 11 target(s)...
@@ -300,6 +300,14 @@ file.c
 *** updated 2 target(s)...
 *** finished in 0.01 sec
 ]]
+		if useChecksums then
+			pattern3 = [[
+*** found 11 target(s)...
+*** updating 3 target(s)...
+@ GenerateCFile <$(TOOLCHAIN_GRIST):helloworld>file.c 
+*** updated 1 target(s)...
+]]
+		end
 		TestPattern(pattern3, RunJam())
 		TestFiles(pass1Files)
 		TestDirectories(pass1Dirs)

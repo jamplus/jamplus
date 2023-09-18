@@ -11,7 +11,8 @@
 struct checksumdata {
 	const char	*boundname;
 	int			age;	  /* if too old, we'll remove it from cache */
-	time_t      mtime;    /* when md5sum was cached  */
+	time_t      originalmtime;    /* when md5sum was cached  */
+	time_t		currentmtime;     /* the last file time the md5sum was checked */
 	MD5SUM      contentmd5sum;
 	char		contentmd5sum_calculated;
 	char		contentmd5sum_changed;
@@ -37,7 +38,7 @@ void filecache_disable(TARGET *t);
 int filecache_retrieve(TARGET *t, MD5SUM buildmd5sum);
 void filecache_update(TARGET* t, MD5SUM buildmd5sum);
 
-int checksum_retrieve(TARGET *t, MD5SUM buildmd5sum);
+int checksum_retrieve(TARGET *t, MD5SUM buildmd5sum, int performutime);
 void checksum_update(TARGET *t, MD5SUM buildmd5sum);
 
 int hcache_getrulemd5sum( TARGET *t );

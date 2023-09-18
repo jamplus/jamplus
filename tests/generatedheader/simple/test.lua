@@ -200,7 +200,7 @@ extern void Print(const char* str);
 			pattern2 = [[
 *** found 21 target(s)...
 *** updating 2 target(s)...
-*** updated 2 target(s)...
+*** updated 0 target(s)...
 ]]
 		else
 			pattern2 = [[
@@ -213,15 +213,26 @@ extern void Print(const char* str);
 
 		osprocess.sleep(1.0)
 		WriteModifiedFile()
+		osprocess.sleep(1.0)
 
 		local pattern3 = [[
 *** found 19 target(s)...
-*** updating 2 target(s)...
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
-!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
-!NEXT!*** updated 2 target(s)...
+*** updating 3 target(s)...
+@ WriteFile <$(TOOLCHAIN_GRIST):test>test.h
+!NEXT!*** updated 1 target(s)...
 ]]
 		TestPattern(pattern3, RunJam())
+		osprocess.sleep(1.0)
+
+		local pattern4 = [[
+*** found 19 target(s)...
+*** updating 3 target(s)...
+@ WriteFile <$(TOOLCHAIN_GRIST):test>test.h
+@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.obj
+!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
+!NEXT!*** updated 3 target(s)...
+]]
+		TestPattern(pattern4, RunJam{"OVERRIDE_TEXT=override"})
 	
 	else
 
@@ -268,43 +279,32 @@ extern void Print(const char* str);
 		pattern2 = [[
 *** found 11 target(s)...
 *** updating 2 target(s)...
-*** updated 2 target(s)...
+*** updated 0 target(s)...
 ]]
 		TestPattern(pattern2, RunJam())
 
 		osprocess.sleep(1.0)
 		WriteModifiedFile()
+		osprocess.sleep(1.0)
 
-		if Platform == 'linux' then
-			if Compiler == 'clang' then
-				local pattern3 = [[
-*** found 11 target(s)...
-*** updating 2 target(s)...
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o
-*** updated 2 target(s)...
+		local pattern3 = [[
+*** found 19 target(s)...
+*** updating 3 target(s)...
+@ WriteFile <$(TOOLCHAIN_GRIST):test>test.h
+!NEXT!*** updated 1 target(s)...
 ]]
-				TestPattern(pattern3, RunJam())
-			else
-				local pattern3 = [[
+		TestPattern(pattern3, RunJam())
+
+		osprocess.sleep(1.0)
+
+		local pattern4 = [[
 *** found 11 target(s)...
-*** updating 2 target(s)...
-@ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o
-@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
-*** updated 2 target(s)...
-]]
-				TestPattern(pattern3, RunJam())
-			end
-		else
-			local pattern3 = [[
-*** found 12 target(s)...
-*** updating 2 target(s)...
+*** updating 3 target(s)...
+@ WriteFile <$(TOOLCHAIN_GRIST):test>test.h
 @ C.$(COMPILER).CC <$(TOOLCHAIN_GRIST):test>main.o 
-@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
 *** updated 2 target(s)...
 ]]
-			TestPattern(pattern3, RunJam())
-		end
-
+		TestPattern(pattern4, RunJam{"OVERRIDE_TEXT=override"})
 	end
 
 	WriteOriginalFiles()

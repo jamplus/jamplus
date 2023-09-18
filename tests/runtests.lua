@@ -38,7 +38,7 @@ function RunJam(commandLine)
 
 	commandLine[#commandLine + 1] = 'c.toolchain=' .. PlatformDir .. '/release'
 	if useChecksums then
-		commandLine[#commandLine + 1] = 'JAM_USE_CHECKSUMS=1'
+		commandLine[#commandLine + 1] = 'JAM_CHECKSUMS=1'
 	end
 
 	commandLine.stderr_to_stdout = true

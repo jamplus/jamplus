@@ -194,8 +194,7 @@ Using cached file2.image
 	local pattern3 = [[
 *** found 5 target(s)...
 *** updating 1 target(s)...
-file1.image is already the proper cached target.
-*** updated 1 target(s)...
+*** updated 0 target(s)...
 ]]
 	TestPattern(pattern3, RunJam())
 
@@ -265,6 +264,8 @@ Using cached file1.image
 	ospath.remove('.depcache')
 
 	RunJam{ 'clean' }
+
+	ospath.remove('cache/')
 
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)

@@ -16,6 +16,7 @@ function Test()
 	io.writeall('Care.cpp', '// Care.cpp')
 	io.writeall('Care.h', '// Care.h')
 	io.writeall('NoCare.cpp', '// NoCare.cpp')
+	osprocess.sleep(1.0)
 	
 	---------------------------------------------------------------------------
 	if useChecksums then
@@ -32,6 +33,7 @@ Pass 2
 *** executing pass 3...
 Pass 3
 *** found 3 target(s)...
+*** updated 0 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
@@ -49,6 +51,7 @@ Pass 2
 *** executing pass 3...
 Pass 3
 *** found 3 target(s)...
+*** updated 0 target(s)...
 ]]
 
 		TestPattern(pattern, RunJam())
@@ -144,6 +147,7 @@ Pass 2
 *** executing pass 2...
 Pass 3
 *** found 3 target(s)...
+*** updated 0 target(s)...
 ]]
 		TestPattern(pattern3, RunJam{ '-s', 'PASS_NUM=2' })
 	else
@@ -157,6 +161,7 @@ Pass 2
 *** executing pass 2...
 Pass 3
 *** found 3 target(s)...
+*** updated 0 target(s)...
 ]]
 		TestPattern(pattern3, RunJam{ '-s', 'PASS_NUM=2' })
 	end

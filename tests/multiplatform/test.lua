@@ -183,6 +183,7 @@ RELEASE: What's up?!
 
 	---------------------------------------------------------------------------
 	ospath.remove('.jamcache')
+	ospath.remove('.build/')
 	RunJam{ 'clean' }
 	TestFiles(originalFiles)
 	TestDirectories(originalDirs)

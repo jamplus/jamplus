@@ -120,7 +120,18 @@ function TestChecksum()
         local noopPattern = [[
 *** found 12 target(s)...
 *** updating 2 target(s)...
-*** updated 2 target(s)...
+*** updated 0 target(s)...
+]]
+        TestPattern(noopPattern, RunJam{})
+        TestDirectories(dirs)
+        TestFiles(files)
+    end
+
+    local function TestNoopPattern3()
+        local noopPattern = [[
+*** found 12 target(s)...
+*** updating 3 target(s)...
+*** updated 0 target(s)...
 ]]
         TestPattern(noopPattern, RunJam{})
         TestDirectories(dirs)
@@ -131,7 +142,7 @@ function TestChecksum()
         local noopPattern = [[
 *** found 12 target(s)...
 *** updating 4 target(s)...
-*** updated 4 target(s)...
+*** updated 0 target(s)...
 ]]
         TestPattern(noopPattern, RunJam{})
         TestDirectories(dirs)
@@ -146,7 +157,7 @@ function TestChecksum()
 *** updating 4 target(s)...
 @ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
-*** updated 4 target(s)...
+*** updated 2 target(s)...
 ]]
         else
             pattern = [[
@@ -154,7 +165,7 @@ function TestChecksum()
 *** updating 4 target(s)...
 @ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
-*** updated 4 target(s)...
+*** updated 2 target(s)...
 ]]
         end
         TestPattern(pattern, RunJam{})
@@ -211,7 +222,7 @@ function TestChecksum()
 @ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
 @ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
-*** updated 4 target(s)...
+*** updated 3 target(s)...
 ]]
         end
         TestPattern(pattern, RunJam{})
@@ -268,6 +279,11 @@ function TestChecksum()
     end
 
     ---------------------------------------------------------------------------
+    do
+        TestNoopPattern()
+    end
+
+    ---------------------------------------------------------------------------
     if true then
         osprocess.sleep(1.0)
         WriteTestDotCs()
@@ -307,6 +323,11 @@ function TestChecksum()
     end
 
     ---------------------------------------------------------------------------
+    do
+        TestNoopPattern()
+    end
+
+    ---------------------------------------------------------------------------
     if true then
         osprocess.sleep(1.0)
         ospath.touch('test.cs')
@@ -321,6 +342,11 @@ function TestChecksum()
         WriteTestDotCs(nil, 10, 20)
         osprocess.sleep(1.0)
         TestPatternForTestCsAnotherValueChange()
+    end
+
+    ---------------------------------------------------------------------------
+    do
+        TestNoopPattern()
     end
 
     ---------------------------------------------------------------------------
@@ -376,23 +402,26 @@ don't know how to make <$(TOOLCHAIN_GRIST):test>test.cs
     ---------------------------------------------------------------------------
     -- Directly modify test.dll.
     if true then
-        osprocess.sleep(1.0)
+        osprocess.sleep(2.0)
         WriteTestDotDll(2)
+        osprocess.sleep(1.0)
 
         local pattern
         if Platform == 'win32' then
             pattern = [[
 *** found 12 target(s)...
-*** updating 3 target(s)...
+*** updating 4 target(s)...
+@ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
-*** updated 3 target(s)...
+*** updated 2 target(s)...
 ]]
         else
             pattern = [[
 *** found 12 target(s)...
-*** updating 3 target(s)...
+*** updating 4 target(s)...
+@ CompileCS <$(TOOLCHAIN_GRIST):test>test.dll
 @ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
-*** updated 3 target(s)...
+*** updated 2 target(s)...
 ]]
         end
 
@@ -405,6 +434,7 @@ don't know how to make <$(TOOLCHAIN_GRIST):test>test.cs
     -- Delete test.dll.
     if true then
         os.remove(testDllPath)
+        osprocess.sleep(2.0)
         TestPatternForTestDllAndGeneratedHeader()
     end
 
@@ -427,24 +457,24 @@ don't know how to make <$(TOOLCHAIN_GRIST):test>test.cs
 #define VALUE 10
 #define ANOTHER_VALUE 20
 ]])
+        osprocess.sleep(1.0)
 
         local pattern
         if Platform == 'win32' then
             pattern = [[
-*** found 12 target(s)...
-*** updating 2 target(s)...
-@ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.obj
-!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
-!NEXT!*** updated 2 target(s)...
+*** found 23 target(s)...
+*** updating 3 target(s)...
+@ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
+*** updated 1 target(s)...
 ]]
         else
             pattern = [[
 *** found 13 target(s)...
-*** updating 2 target(s)...
-@ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o
-@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
-*** updated 2 target(s)...
+*** updating 3 target(s)...
+@ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
+*** updated 1 target(s)...
 ]]
+
         end
 
         TestPattern(pattern, RunJam{})
@@ -453,33 +483,30 @@ don't know how to make <$(TOOLCHAIN_GRIST):test>test.cs
     end
 
     ---------------------------------------------------------------------------
-    -- Rewrite test.cs. Everything will build.
+    do
+        TestNoopPattern()
+    end
+
+    ---------------------------------------------------------------------------
+    -- Rewrite test.cs.
     if true then
         osprocess.sleep(1.0)
         WriteTestDotCs()
         local pattern
         if Platform == 'win32' then
             pattern = [[
-*** found 12 target(s)...
+*** found 23 target(s)...
 *** updating 4 target(s)...
-@ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
-@ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.obj
-!NEXT!@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test.exe
-!NEXT!*** updated 4 target(s)...
+!NEXT!*** updated 0 target(s)...
 ]]
         else
             pattern = [[
 *** found 13 target(s)...
 *** updating 4 target(s)...
-@ GenerateHeader <$(TOOLCHAIN_GRIST):test>generatedheader.h
-@ $(C_CC) <$(TOOLCHAIN_GRIST):test>main.o 
-@ $(C_LINK) <$(TOOLCHAIN_GRIST):test>test
-*** updated 4 target(s)...
+*** updated 0 target(s)...
 ]]
         end
-        TestPattern(pattern, RunJam{})
-        TestDirectories(dirs)
-        TestFiles(files)
+        TestNoopPattern4()
     end
 
     ---------------------------------------------------------------------------

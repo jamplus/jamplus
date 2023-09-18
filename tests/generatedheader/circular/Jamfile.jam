@@ -6,16 +6,24 @@ if $(JAM_USE_CHECKSUMS) = 1 {
 
 rule SleepThenTouch
 {
-    Clean clean : $(<) ;
+	Clean clean : $(<) ;
 }
 
 actions lua SleepThenTouch
 {
-    require 'osprocess'.sleep(5)
-	jam_print([[Writing $(<)]])
-    local file = io.open([[$(<)]], 'wb')
+	require 'osprocess'.sleep(2)
+	local target = ...
+	jam_print([[Writing ]] .. target[1])
+	local file = io.open(target[1], 'wb')
+	local outputText = jam_getvar('OUTPUT_TEXT')
+	if outputText then
+		file:write(table.concat(outputText, ' '))
+	end
 	file:close()
 }
 
-SleepThenTouch [ C.GristFiles foo : generated.h ] ;
+local generated.h = [ C.GristFiles foo : generated.h ] ;
+SleepThenTouch $(generated.h) ;
+LOCATE on $(generated.h) = . ;
+UseCommandLine  $(generated.h) : $(OUTPUT_TEXT) ;
 C.Library foo : sourceA.c sourceB.c ;
