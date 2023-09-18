@@ -43,7 +43,12 @@ function RunJam(commandLine)
 
 	commandLine.stderr_to_stdout = true
 
-	return osprocess.collectlines(commandLine)
+	--print(table.concat(commandLine, ' '))
+
+	local lines = osprocess.collectlines(commandLine)
+	--for _, line in ipairs(lines) do print(line) end
+	return lines
+
 end
 
 function TestExpression(result, failMessage)
@@ -69,6 +74,8 @@ function TestPattern(patterns, lines)
 		end
 		patterns = splitLines
 	end
+
+	--for _, line in ipairs(patterns) do print('->' .. line) end
 
 	local finishedPattern = '%*%*%* finished in [%d%.]+ sec'
 	if patterns[#patterns]  and  not patterns[#patterns]:match(finishedPattern) then
