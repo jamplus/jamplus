@@ -239,7 +239,6 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
             #C.AR on $(C.COMPILER_SUITE_SYMBOL)          = $(NDK_TOOLCHAIN_ROOT)/bin/$(NDK_COMPILER_PREFIX)ar ruc ;
             #C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/include ;
             C.C++Flags * : -stdlib=libc++ ;
-            C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/lib/gcc/$(lastDirectory)/$(NDK_COMPILER_VERSION).x ;
             switch $(C.ARCHITECTURE) {
                 case armv7-a :
                     #C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/include ;
@@ -248,8 +247,8 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
 
                 case arm64 :
                     #C.IncludeDirectories * : $(NDKROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a/include ;
-                    C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/lib64 ;
-                    C.LinkDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/arm64-v8a ;
+                    #C.LinkDirectories * : $(NDK_TOOLCHAIN_ROOT)/$(lastDirectory)/lib64 ;
+                    #C.LinkDirectories * : $(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/arm64-v8a ;
             }
             NDK_COMPILER_PREFIX = "" ;
             NDK_COMPILER_VERSION ?= llvm ;
