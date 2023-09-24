@@ -1229,9 +1229,9 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
         # gradlew
         local gradlew ;
         if $(OS) = NT {
-            gradlew = @(gradlew:G=$(grist)) ;
-        } else {
             gradlew = @(gradlew.bat:G=$(grist)) ;
+        } else {
+            gradlew = @(gradlew:G=$(grist)) ;
         }
         MakeLocate $(gradlew) : $(GRADLE_OUTPUT_DIRECTORY) ;
         Depends $(gradleTarget) : $(gradlew) ;
