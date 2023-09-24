@@ -809,7 +809,10 @@ if $(NT)
 {
 	actions quietly MkDir1
 	{
-		if not exist $(<:\\C) $(MKDIR) $(<:\\C)
+		if not exist $(<:\\C) (
+			$(MKDIR) $(<:\\C) 2>nul
+			exit /b 0
+		)
 	}
 }
 
