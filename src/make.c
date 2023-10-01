@@ -1578,7 +1578,7 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 	if ( t->dependssorted != make0calcmd5sum_dependssorted_stage )
 	{
 		//t->depends = make0sortbyname( t->depends );
-		t->dependssorted = make0calcmd5sum_dependssorted_stage;
+		//t->dependssorted = make0calcmd5sum_dependssorted_stage;
 	}
 
 	for( c = t->depends; c; c = c->next )

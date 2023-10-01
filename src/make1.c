@@ -1256,7 +1256,7 @@ void make1buildchecksum( const char* makestage, TARGET *t, MD5SUM buildmd5sum, i
 	if (t->dependssorted != make0calcmd5sum_dependssorted_stage)
 	{
 //		t->depends = make0sortbyname(t->depends);
-		t->dependssorted = make0calcmd5sum_dependssorted_stage;
+//		t->dependssorted = make0calcmd5sum_dependssorted_stage;
 	}
 
 	MD5Init( &context );
