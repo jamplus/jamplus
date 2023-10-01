@@ -63,6 +63,7 @@ Support for more than one toolchain used during the same Jam execution is provid
 \refitem rule_C_PrecompiledHeader C.PrecompiledHeader
 \refitem rule_C_RemoveFlags C.RemoveFlags
 \refitem rule_C_RuntimeType C.RuntimeType
+\refitem rule_C_SearchSource C.SearchSource
 \refitem rule_C_Toolchain C.Toolchain
 \refitem rule_LocateSource LocateSource
 \refitem rule_LocateTarget LocateTarget
@@ -1354,6 +1355,28 @@ For the given project \c TARGET, alter the build to use either a statically link
 
     # Use the dynamically linked C runtime for the helloworld target.
     C.RuntimeType helloworld : dynamic ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_C_SearchSource rule C.SearchSource TARGET : SOURCES : SEARCH_PATHS
+\addindex rule_C_SearchSource
+
+For the given project \c TARGET, apply \c SEARCH_PATHS to each of the \c SOURCES that do not already have a \c SEARCH applied.
+
+\param TARGET The target to work against.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.
+\param SOURCES The list of sources to apply \c SEARCH_PATH to.
+\param SEARCH_PATH The paths to search for. If none are specified, \c SEARCH_SOURCE is used. Any relative paths are rooted against \c SEARCH_SOURCE.
+
+\code
+    # Shorten the directory length for the output directory, as it exceeds 260 characters on Windows in certain cases.
+    #    (instead of $(NDKROOT)/sources/android/cpufeatures/cpu-features.c)
+    C.SearchSource : cpufeatures/cpu-features.c : $(NDKROOT)/sources/android ;
 \endcode
 
 
