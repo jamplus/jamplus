@@ -1612,7 +1612,7 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 		}
 
 		/* add sum of your includes */
-		if ( !c->target->includes )
+		if ( !c->target->includes && !( c->target->flags & T_FLAG_NOTFILE ) )
 		{
 			SETTINGS *s = copysettings( c->target->settings );
 			pushsettings( s );
