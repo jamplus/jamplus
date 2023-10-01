@@ -205,6 +205,7 @@ struct _target {
 #ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
 	int			epoch;
 	int			depth;
+	int			recurseincludesepoch;
 #endif
 	char		fate;		/* make0()'s diagnosis */
 

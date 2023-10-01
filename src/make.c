@@ -838,6 +838,7 @@ make0(
 	if ( t->fate == T_FATE_INIT ) {
 		t->epoch = epoch;
 		t->depth = depth;
+		t->recurseincludesepoch = INT_MIN;
 	}
 #endif
 #ifdef OPT_USE_CHECKSUMS_EXT
@@ -1568,6 +1569,8 @@ int make0calcmd5sum_epoch = -1000000000;
 int make0calcmd5sum_timestamp_epoch = -1000000000;
 int make0calcmd5sum_dependssorted_stage = 0;
 
+int make0recurseincludes_epoch = -1000000000;
+
 static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 {
 	TARGETS *c;
@@ -1580,11 +1583,13 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 
 	for( c = t->depends; c; c = c->next )
 	{
-		if ( c->target->epoch == make0calcmd5sum_epoch )
+		if ( c->target->recurseincludesepoch == make0recurseincludes_epoch)
 		{
 			continue;
 		}
-		c->target->epoch = make0calcmd5sum_epoch;
+
+		//c->target->epoch = make0calcmd5sum_epoch;
+		c->target->recurseincludesepoch = make0recurseincludes_epoch;
 
 		if( ( c->target->binding == T_BIND_UNBOUND /*|| c->target->time == 0*/ ) && !( c->target->flags & T_FLAG_NOTFILE )
 				&& c->target->timestamp_epoch != make0calcmd5sum_timestamp_epoch )
@@ -1730,6 +1735,7 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 
 		if( DEBUG_MD5HASH )
 			printf( "\t\t%s#includes:\n", spaces( depth ) );
+		++make0recurseincludes_epoch;
 		make0recurseincludesmd5sum( &context, t->includes, depth + 1 );
 	}
 
