@@ -484,10 +484,51 @@ In reality, a \c WorkspaceConfig is a hack. Just modify the generated <tt>custom
 
 
 <hr>
-\section rule_WriteFile rule WriteFile WORKSPACE_NAME : TARGETS
-\addindex rule_WriteFile
+\section actions_WriteFile actions WriteFile TARGETS
+\addindex actions_WriteFile
+
+\c WriteFile is an action that writes the setting \c CONTENTS to the specified \c TARGETS.
+
+To ensure changes in \c CONTENTS are written to the \c TARGETS, use \ref rule_UseCommandLine to signify changes.
+
+\param TARGETS The targets to write to.
+
+\code
+    CONTENTS on abc.txt = "abcdefghijklmnopqrstuvwxyz" ;
+    UseCommandLine abc.txt : $(CONTENTS:Z=abc.txt) ;
+    WriteFile abc.txt ;
+\endcode
 
 
+
+
+
+<hr>
+\section rule_WriteFileContents rule WriteFileContents TARGETS : CONTENTS
+\addindex rule_WriteFileContents
+
+Use \c WriteFileContents to write \c CONTENTS into the file(s) specified by \c TARGETS.
+
+This is a wrapper over the top of \ref actions_WriteFile.
+
+Its implementation is:
+
+\code
+rule WriteFileContents TARGETS : CONTENTS
+{
+    CONTENTS on $(TARGETS) = $(CONTENTS) ;
+....UseCommandLine $(TARGETS) : $(CONTENTS) ;
+....MakeLocate $(TARGETS) : $(TARGETS:D) : combine ;
+....WriteFile $(TARGETS) ;
+....return $(TARGETS) ;
+}
+\endcode
+
+\param TARGETS The targets to write to.
+
+\code
+    WriteFileContents abc.txt : "abcdefghi jklmnopqrstuv wxyz" ;
+\endcode
 
 
 
