@@ -1,5 +1,6 @@
 .depcache
 .gitconfig
+.jamdepcache
 jamzipbuffer.c
 *.ncb
 *.opensdf

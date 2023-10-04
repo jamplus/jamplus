@@ -1078,7 +1078,7 @@ ProcessMapArchive()
 
 jamvar["CLEAN.VERBOSE"] = 1
 --jamvar["CLEAN.NOOP"] = 1
-jamvar["CLEAN.ROOTS"] = TEMP_PATH .. "/**@-" .. TEMP_PATH .. "/.depcache@-" .. TEMP_PATH .. "/assetsfilelist.lua@-" .. TEMP_PATH .. "/map/generated/map_simple.jpg@-" .. TEMP_PATH .. "/map/generated/map/mapwipe.dat"
+jamvar["CLEAN.ROOTS"] = TEMP_PATH .. "/**@-" .. TEMP_PATH .. "/.jamdepcache@-" .. TEMP_PATH .. "/assetsfilelist.lua@-" .. TEMP_PATH .. "/map/generated/map_simple.jpg@-" .. TEMP_PATH .. "/map/generated/map/mapwipe.dat"
 
 jam_parse[[
 actions screenoutput _BuildArchive {

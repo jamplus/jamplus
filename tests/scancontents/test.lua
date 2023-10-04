@@ -12,7 +12,7 @@ function Test()
 	{
 	}
 
-	ospath.remove('.jamcache')
+	ospath.remove('.jamdepcache')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)

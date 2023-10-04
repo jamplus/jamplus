@@ -1,7 +1,7 @@
 FILECACHE.generic.PATH = cache ;
 FILECACHE.generic.GENERATE = 1 ;
 FILECACHE.generic.USE = 1 ;
-DEPCACHE.standard = .depcache ;
+DEPCACHE.standard = .jamdepcache ;
 DEPCACHE = standard ;
 
 rule ConvertImage SOURCE

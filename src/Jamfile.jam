@@ -11,7 +11,7 @@ if $(VMS) 		{ LOCATE_TARGET ?= [.binvms] ; }
 else if $(MAC) 	{ LOCATE_TARGET ?= ":bin.mac" ; }
 else 			{ LOCATE_TARGET ?= bin.$(OSFULL[1]:L)/$(CONFIG) ; }
 
-DEPCACHE.standard ?= $(LOCATE_TARGET)/.depcache ;
+DEPCACHE.standard ?= $(LOCATE_TARGET)/.jamdepcache ;
 DEPCACHE ?= standard ;
 
 # Leave generated source in current directory; it would be nice to use

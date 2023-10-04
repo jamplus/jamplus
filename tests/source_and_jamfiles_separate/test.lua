@@ -75,7 +75,7 @@ function Test()
 		files =
 		{
 			'jam/Jamfile.jam',
-			'jam/.build/.depcache',
+			'jam/.build/.jamdepcache',
 			'?jam/.build/.jamchecksums',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/createprecomp.obj',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/file.obj',
@@ -113,7 +113,7 @@ function Test()
 			'src/main.c',
 			'src/precomp.h',
 			'jam/Jamfile.jam',
-			'jam/.build/.depcache',
+			'jam/.build/.jamdepcache',
 			'?jam/.build/.jamchecksums',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/createprecomp.o',
 			'jam/$(TOOLCHAIN_PATH)/helloworld/file.o',

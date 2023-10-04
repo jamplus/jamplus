@@ -89,7 +89,7 @@ md5png: Calculating file1.png...
 
 	local pass2Files =
 	{
-		'?.depcache',
+		'?.jamdepcache',
 		'Jamfile.jam',
 		'extra.png',
 		'file1.png',
@@ -158,7 +158,7 @@ file3.image is already the proper cached target.
 	TestPattern(pattern4, RunJam())
 
 	ospath.remove('cache/')
-	ospath.remove('.depcache')
+	ospath.remove('.jamdepcache')
 	RunJam{ 'clean' }
 
 	TestDirectories(originalDirs)
@@ -192,7 +192,7 @@ function TestChecksum()
 	}
 
 	ospath.remove('cache/')
-	ospath.remove('.depcache')
+	ospath.remove('.jamdepcache')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -219,7 +219,7 @@ md5zip: Calculating file4.zip...
 	TestPattern(pattern, RunJam())
 
 	local pass1Files = {
-		'?.depcache',
+		'?.jamdepcache',
 		'Jamfile.jam',
 		'extra.png',
 		'file1.image',
@@ -262,7 +262,7 @@ md5zip: Calculating file4.zip...
 	RunJam{ 'clean' }
 
 	local pass2Files = {
-		'?.depcache',
+		'?.jamdepcache',
 		'Jamfile.jam',
 		'extra.png',
 		'file1.png',
@@ -356,7 +356,7 @@ Using cached file5.image
 	}
 
 	local pass3Files = {
-		'?.depcache',
+		'?.jamdepcache',
 		'Jamfile.jam',
 		'extra.png',
 		'file1.image',
@@ -393,7 +393,7 @@ Using cached file5.image
 	TestPattern(pattern6, RunJam())
 
 	ospath.remove('cache/')
-	ospath.remove('.depcache')
+	ospath.remove('.jamdepcache')
 	RunJam{ 'clean' }
 	ospath.copy_file('file2.png', 'file3.png')
 

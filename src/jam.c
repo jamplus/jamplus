@@ -123,6 +123,8 @@
 
 # include "filesys.h"
 
+# include "hcache.h"
+
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 # include "md5.h"
 #endif
@@ -220,6 +222,7 @@ extern char **environ;
 # endif
 # endif
 
+extern int nodepcache;
 #ifdef OPT_USE_CHECKSUMS_EXT
 extern int usechecksums;
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -864,13 +867,44 @@ int main( int argc, char **argv, char **arg_environ )
 #endif
 
 #ifdef OPT_USE_CHECKSUMS_EXT
-	LIST *usechecksumslist = var_get("JAM_CHECKSUMS");
-	if (!usechecksumslist) {
-		usechecksumslist = var_get("JAM_USE_CHECKSUMS");
+	LIST *nodepcachelist = var_get("JAM_NO_DEPCACHE");
+	if (nodepcachelist  &&  list_first(nodepcachelist)  &&  strcmp(list_value(list_first(nodepcachelist)), "1") == 0)
+	{
+		nodepcache = 1;
+		var_set( "DEPCACHE.standard", NULL, VAR_REMOVE );
 	}
-	if (usechecksumslist  &&  list_first(usechecksumslist)) {
-		LIST *nodepcachelist = var_get("JAM_NO_DEPCACHE");
-		if (!nodepcachelist  ||  !list_first(nodepcachelist)  ||  strcmp(list_value(list_first(nodepcachelist)), "1") != 0) {
+	else
+	{
+		LIST *depcache = var_get("DEPCACHE.standard");
+		if (!depcache)
+		{
+			const char* depcache_builtinfilename = hcache_get_builtinfilename();
+			var_set( "DEPCACHE.standard", list_append( L0, depcache_builtinfilename, 0 ), VAR_SET );
+#if 0
+			if (ruleexists("Clean"))
+			{
+				LOL lol;
+				LIST *result;
+				lol_init(&lol);
+				lol_add(&lol, list_append(L0, "clean", 0));
+				lol_add(&lol, list_append(L0, depcache_builtinfilename, 0));
+				result = evaluate_rule("Clean", &lol, L0);
+				lol_free(&lol);
+				list_free(result);
+			}
+#endif
+		}
+	}
+
+	if (!nodepcache)
+	{
+		LIST *usechecksumslist = var_get("JAM_CHECKSUMS");
+		if (!usechecksumslist)
+		{
+			usechecksumslist = var_get("JAM_USE_CHECKSUMS");
+		}
+		if (usechecksumslist  &&  list_first(usechecksumslist)  &&  strcmp(list_value(list_first(usechecksumslist)), "1") == 0)
+		{
 			usechecksums = 1;
 		}
 	}

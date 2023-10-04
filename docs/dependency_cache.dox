@@ -23,7 +23,7 @@ The actual name of the cache file is controlled by the <tt>DEPCACHE.cachename</t
 Setting LOCATE and SEARCH on the the <tt>DEPCACHE.cachename</tt> works as well, so you can place anywhere on disk you like or even search for it in several directories.  You may also set it in your environment to share it amongst all your projects.
 
 \code
-DEPCACHE.standard = $(ALL_LOCATE_TARGET)/.depcache ;
+DEPCACHE.standard = $(ALL_LOCATE_TARGET)/.jamdepcache ;
 \endcode
 
 The global \c DEPCACHE variable sets the active dependency cache.  \c DEPCACHE defaults to the cachename of \c standard.  It can be overridden, if desired.

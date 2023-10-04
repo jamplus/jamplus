@@ -75,7 +75,7 @@ function Test()
 		{
 			'Jamfile.jam',
 			'Jamrules.jam',
-			'.build/.depcache',
+			'.build/.jamdepcache',
 			'liba/Jamfile.jam',
 			'liba/rootfile.cpp',
 			'liba/lib/win32/release/liba.lib',

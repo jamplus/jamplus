@@ -1,4 +1,4 @@
-DEPCACHE.standard = .depcache ;
+DEPCACHE.standard = .jamdepcache ;
 DEPCACHE = standard ;
 FILECACHE.generic.PATH = cache ;
 FILECACHE.generic.GENERATE = 1 ;

@@ -369,8 +369,8 @@ end
 function TestFiles(expectedFiles)
 	TestNumberUpdate()
 
-	expectedFiles[#expectedFiles + 1] = '?.depcache'
-	expectedFiles[#expectedFiles + 1] = '?.build/.depcache'
+	expectedFiles[#expectedFiles + 1] = '?.jamdepcache'
+	expectedFiles[#expectedFiles + 1] = '?.build/.jamdepcache'
 	expectedFiles[#expectedFiles + 1] = '?.jamchecksums'
 	expectedFiles[#expectedFiles + 1] = '?.build/.jamchecksums'
 	for _, fileName in ipairs(expectedFiles) do

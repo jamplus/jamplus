@@ -41,7 +41,7 @@ project1.cpp
 
 		local pass1Files =
 		{
-			'.build/.depcache',
+			'.build/.jamdepcache',
 			'Jamfile.jam',
 			'source/Jamfile.jam',
 			'source/project1/Jamfile.jam',
@@ -107,7 +107,7 @@ project1.cpp
 
 		local pass1Files =
 		{
-			'.build/.depcache',
+			'.build/.jamdepcache',
 			'Jamfile.jam',
 			'test.lua',
 			'source/Jamfile.jam',
@@ -230,7 +230,7 @@ project1.cpp
 
 		local pass1Files =
 		{
-			'.build/.depcache',
+			'.build/.jamdepcache',
 			'Jamfile.jam',
 			'source/Jamfile.jam',
 			'source/project1/Jamfile.jam',
@@ -307,7 +307,7 @@ project1.cpp
 
 		local pass1Files =
 		{
-			'.build/.depcache',
+			'.build/.jamdepcache',
 			'Jamfile.jam',
 			'test.lua',
 			'source/Jamfile.jam',

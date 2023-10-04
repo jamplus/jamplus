@@ -162,6 +162,7 @@ void onintr( int disp );
  * make() - make a target, given its name
  */
 
+int nodepcache = 0;
 #ifdef OPT_USE_CHECKSUMS_EXT
 int usechecksums = 0;
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -735,8 +736,14 @@ pass:
 	{
 		if ( strcmp( targets[i], "clean" ) == 0 ) {
 			LIST *var = var_get( "JAM_CHECKSUMS_KEEPCACHE" );
-			if ( !var  ||  !list_first( var )  ||  strcmp( list_value( list_first( var ) ), "1") != 0 ) {
+			if ( !var  ||  !list_first( var )  ||  strcmp( list_value( list_first( var ) ), "1" ) != 0 ) {
 				unlink( checksums_filename() );
+			}
+			var = var_get( "JAM_KEEPDEPCACHE" );
+			if ( !var  ||  !list_first( var )  ||  strcmp( list_value( list_first( var ) ), "1" ) != 0 ) {
+				if ( hcache_get_builtinfilename() ) {
+					unlink( hcache_get_builtinfilename() );
+				}
 			}
 			break;
 		}

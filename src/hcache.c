@@ -123,6 +123,8 @@ HCACHEFILE *hcachefilelist = 0;
 static HCACHEFILE *lasthcachefile;
 static const char *lasthcachefile_name;
 
+static const char* hcache_builtinfilename;
+
 static int queries = 0;
 static int hits = 0;
 
@@ -133,6 +135,7 @@ static int hits = 0;
 #define CACHE_FILE_VERSION "version 1"
 #endif
 
+extern int nodepcache;
 #ifdef OPT_USE_CHECKSUMS_EXT
 extern int usechecksums;
 #endif /* OPT_USE_CHECKSUMS_EXT */
@@ -871,7 +874,7 @@ LIST *
 	c->boundname = target;
 
 	file = hcachefile_get( t );
-	//    if ( file )
+	if ( file )
 	{
 		if( hashcheck( hcachehash, (HASHDATA **) &c ) )
 		{
@@ -960,6 +963,41 @@ LIST *
 	c->hdrscan = list_copy( 0, hdrscan );
 
 	return l;
+}
+
+const char* hcache_get_builtinfilename(void)
+{
+	if ( nodepcache ) {
+		return NULL;
+	}
+
+	const char* depcachestandard = "DEPCACHE.standard";
+
+	LIST *hcachevar = var_get( depcachestandard );
+	if ( !hcachevar ) {
+		PATHNAME f[1];
+		char buf[ MAXJPATH ];
+
+		LIST* var = var_get( "ALL_LOCATE_TARGET" );
+		if ( !var ) {
+			var = var_get( "CWD" );
+		}
+
+		path_parse( ".jamdepcache", f );
+
+		f->f_grist.ptr = 0;
+		f->f_grist.len = 0;
+
+		if ( var ) {
+			f->f_root.ptr = list_value( list_first( var ) );
+			f->f_root.len = (int)( strlen( f->f_root.ptr ) );
+		}
+
+		path_build( f, buf, 1, 1 );
+		hcache_builtinfilename = newstr( buf );
+	}
+
+	return hcache_builtinfilename;
 }
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT

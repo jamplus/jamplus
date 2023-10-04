@@ -11,7 +11,7 @@ function Test()
 	}
 
 	ospath.remove('cache/')
-	ospath.remove('.depcache')
+	ospath.remove('.jamdepcache')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -30,7 +30,7 @@ function Test()
 
 	local pass1Files =
 	{
-		'?.depcache',
+		'?.jamdepcache',
 		'Jamfile.jam',
 		'file1.image',
 		'file1.tga',
@@ -58,7 +58,7 @@ function Test()
 
 	local pass2Files =
 	{
-		'?.depcache',
+		'?.jamdepcache',
 		'Jamfile.jam',
 		'file1.tga',
 		'file2.tga',
@@ -95,7 +95,7 @@ file1.image is already the proper cached target.
 	TestPattern(pattern3, RunJam())
 
 	ospath.remove('cache/')
-	ospath.remove('.depcache')
+	ospath.remove('.jamdepcache')
 
 	RunJam{ 'clean' }
 
@@ -118,7 +118,7 @@ function TestChecksum()
 	}
 
 	ospath.remove('cache/')
-	ospath.remove('.depcache')
+	ospath.remove('.jamdepcache')
 	ospath.write_file('file1.tga', '////abcd\n')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
@@ -137,7 +137,7 @@ function TestChecksum()
 	TestPattern(pattern, RunJam())
 
 	local pass1Files = {
-		'?.depcache',
+		'?.jamdepcache',
 		'Jamfile.jam',
 		'file1.image',
 		'file1.tga',
@@ -163,7 +163,7 @@ function TestChecksum()
 	RunJam{ 'clean' }
 
 	local pass2Files = {
-		'?.depcache',
+		'?.jamdepcache',
 		'Jamfile.jam',
 		'file1.tga',
 		'file2.tga',
@@ -222,7 +222,7 @@ Using cached file2.image
 	}
 
 	local pass3Files = {
-		'?.depcache',
+		'?.jamdepcache',
 		'Jamfile.jam',
 		'file1.image',
 		'file1.tga',
@@ -261,7 +261,7 @@ Using cached file1.image
 	TestDirectories(pass3Directories)
 
 	ospath.remove('cache/')
-	ospath.remove('.depcache')
+	ospath.remove('.jamdepcache')
 
 	RunJam{ 'clean' }
 

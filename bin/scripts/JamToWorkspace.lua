@@ -1047,7 +1047,7 @@ ALL_LOCATE_TARGET = "$(destinationRootPath)$$(C.PLATFORM)/_intermediates_" ;
 	local jamfileText = { expand([[
 # Generated file
 $(locateTargetText)
-DEPCACHE.standard = "$$(ALL_LOCATE_TARGET)/$$(C.PLATFORM)-$$(C.CONFIG)/.depcache" ;
+DEPCACHE.standard = "$$(ALL_LOCATE_TARGET)/$$(C.PLATFORM)-$$(C.CONFIG)/.jamdepcache" ;
 DEPCACHE = standard ;
 
 CUSTOMSETTINGS ?= "$(settingsFile)" ;

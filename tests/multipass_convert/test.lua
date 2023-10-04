@@ -12,7 +12,7 @@ function Test()
 	{
 	}
 
-	ospath.remove('.depcache')
+	ospath.remove('.jamdepcache')
 	RunJam{ 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
@@ -87,7 +87,7 @@ WriteAlternateOutput alternate_output2.dat
 
 	local pass1Files =
 	{
-		'.depcache',
+		'.jamdepcache',
 		'Jamfile.jam',
 		'alternate_input1.txt',
 		'alternate_input1.txt.jam',
@@ -150,7 +150,7 @@ WriteAlternateOutput alternate_output2.dat
 	
 	local cleanFiles =
 	{
-		'.depcache',
+		'.jamdepcache',
 		'Jamfile.jam',
 		'alternate_input1.txt',
 		'input1.txt',
@@ -158,7 +158,7 @@ WriteAlternateOutput alternate_output2.dat
 	}
 	TestFiles(cleanFiles)
 	TestDirectories(originalDirs)
-	ospath.remove('.depcache')
+	ospath.remove('.jamdepcache')
 end
 
 TestChecksum = Test
