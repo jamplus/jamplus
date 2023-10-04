@@ -1252,11 +1252,15 @@ void make1buildchecksum( const char* makestage, TARGET *t, MD5SUM buildmd5sum, i
 		printf( "------------------------------------------------\n" );
 	}
 
-	/* sort all dependents by name, so we can make reliable md5sums */
-	if (t->dependssorted != make0calcmd5sum_dependssorted_stage)
+	if ( t->dependssorted != make0calcmd5sum_dependssorted_stage )
 	{
-//		t->depends = make0sortbyname(t->depends);
-//		t->dependssorted = make0calcmd5sum_dependssorted_stage;
+		targetlist_free(t->dependssortedbyname);
+		if (t->depends)
+		{
+			t->dependssortedbyname = copytargets((TARGETS *)0, t->depends);
+			t->dependssortedbyname = make0sortbyname(t->dependssortedbyname);
+		}
+		t->dependssorted = make0calcmd5sum_dependssorted_stage;
 	}
 
 	MD5Init( &context );
@@ -1283,7 +1287,7 @@ void make1buildchecksum( const char* makestage, TARGET *t, MD5SUM buildmd5sum, i
 	}
 
 	/* for each dependencies */
-	for( c = t->depends; c; c = c->next )
+	for( c = t->dependssortedbyname; c; c = c->next )
 	{
 		/* If this is a "Needs" dependency, don't care about its contents. */
 		if (c->needs)
@@ -1297,7 +1301,7 @@ void make1buildchecksum( const char* makestage, TARGET *t, MD5SUM buildmd5sum, i
 		if ( c->target->buildmd5sum_calculated )
 		{
 			if( DEBUG_MD5HASH )
-				printf( "\t\t\tmake1buildchecksum child target: %s\n", c->target->name );
+				printf( "\t\tmake1buildchecksum child target %s\n", c->target->name );
 			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
 			if ( c->target->flags & T_FLAG_FORCECONTENTSONLY )
 			{
@@ -1305,21 +1309,21 @@ void make1buildchecksum( const char* makestage, TARGET *t, MD5SUM buildmd5sum, i
 				{
 					MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
 					if( DEBUG_MD5HASH )
-						printf( "\t\t\t\tmake1buildchecksum child target content md5sum: %s\n", md5tostring(c->target->contentchecksum->contentmd5sum) );
+						printf( "\t\t\tmake1buildchecksum child target %s content md5sum: %s\n", c->target->name, md5tostring(c->target->contentchecksum->contentmd5sum) );
 				}
 			}
 			else
 			{
 				MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
 				if( DEBUG_MD5HASH )
-					printf( "\t\t\t\tmake1buildchecksum child target buildmd5sum: %s\n", md5tostring(c->target->buildmd5sum) );
+					printf( "\t\t\tmake1buildchecksum child target %s buildmd5sum: %s\n", c->target->name, md5tostring(c->target->buildmd5sum) );
 			}
 		}
 	}
 
 	MD5Final( buildmd5sum, &context );
 	if( DEBUG_MD5HASH )
-		printf( "\t\t\t\tmake1buildchecksum child target returned buildmd5sum: %s\n", md5tostring(buildmd5sum) );
+		printf( "\t\tmake1buildchecksum returned buildmd5sum: %s\n", md5tostring(buildmd5sum) );
 }
 
 #endif

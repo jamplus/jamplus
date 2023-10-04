@@ -1555,7 +1555,7 @@ make0sortbyname( TARGETS *chain )
 
 		/* Find point s in result for c */
 
-		while( s && strcmp( s->target->name, c->target->name ) > 0 )
+		while( s && ( strcmp( s->target->name, c->target->name ) < 0 ) )
 			s = s->next;
 
 		/* Insert c in front of s (might be 0). */
@@ -1677,7 +1677,12 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 	/* sort all dependents by name, so we can make reliable md5sums */
 	if ( t->dependssorted != make0calcmd5sum_dependssorted_stage )
 	{
-		t->depends = make0sortbyname(t->depends);
+		targetlist_free(t->dependssortedbyname);
+		if (t->depends)
+		{
+			t->dependssortedbyname = copytargets((TARGETS *)0, t->depends);
+			t->dependssortedbyname = make0sortbyname(t->dependssortedbyname);
+		}
 		t->dependssorted = make0calcmd5sum_dependssorted_stage;
 	}
 
@@ -1747,7 +1752,7 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 	}
 
     /* for each of your dependencies */
-	for( c = t->depends; c; c = c->next )
+	for( c = t->dependssortedbyname; c; c = c->next )
 	{
 		/* If this is a "Needs" dependency, don't care about its contents. */
 		if (c->needs) //  ||  (t->flags & T_FLAG_MIGHTNOTUPDATE))
@@ -1783,7 +1788,7 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 	}
 	MD5Final( t->buildmd5sum, &context );
 	if( DEBUG_MD5HASH ) {
-		printf( "%sbuildmd5sum: %s (%s)\n", spaces( depth ), t->name, md5tostring(t->buildmd5sum));
+		printf( "\t\t%sbuildmd5sum: %s (%s)\n", spaces( depth ), t->name, md5tostring(t->buildmd5sum));
 	}
 
 	t->buildmd5sum_calculated = 1;

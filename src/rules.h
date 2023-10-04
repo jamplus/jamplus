@@ -192,6 +192,8 @@ struct _target {
 	time_t		time;		/* update time */
 	time_t		leaf;		/* update time of leaf sources */
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
+	TARGETS		*dependssortedbyname;
+
 	struct checksumdata *contentchecksum; /* existing md5sum - either direct (for sources) or indirect (for those that have actions) */
 	MD5SUM		buildmd5sum;	/* new indirect md5sum calculated from actions */
 	MD5SUM		rulemd5sum;	/*  */
@@ -259,6 +261,7 @@ void 	touchtarget( const char *t );
 TARGETS *targetlist( TARGETS *chain, LIST  *targets, char needs );
 TARGETS *targetentry( TARGETS *chain, TARGET *target, char needs );
 TARGETS *targetentryhead( TARGETS *chain, TARGET *target, char needs );
+TARGETS *copytargets( TARGETS *chain, TARGETS *targets );
 #else
 TARGETS *targetlist( TARGETS *chain, LIST  *targets );
 TARGETS *targetentry( TARGETS *chain, TARGET *target );

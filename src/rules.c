@@ -215,6 +215,26 @@ targetlist_free(
 #endif /* OPT_MULTIPASS_EXT */
 
 /*
+ * targetlist() - turn list of target names into a TARGET chain
+ *
+ * Inputs:
+ *	chain	existing TARGETS to append to
+ *	targets	list of target names
+ */
+
+TARGETS *
+copytargets(
+	TARGETS	*chain,
+	TARGETS	*targets )
+{
+	for ( ; targets; targets = targets->next ) {
+		chain = targetentry( chain, targets->target, targets->needs );
+	}
+
+	return chain;
+}
+
+/*
  * targetentry() - add a TARGET to a chain of TARGETS
  *
  * Inputs:
