@@ -497,9 +497,9 @@ var_expand(
 			    save_buffer_pos = buffer_pos( &buff );
 
 #ifdef NT
-				while ( ptr != endptr  &&  *ptr != ' '  &&  *ptr != '/' )
+				while ( ptr != endptr  &&  *ptr != ' '  &&  *ptr != '/'  &&  *ptr != '+' )
 					++ptr;
-				if (*ptr == ' '  ||  *ptr == '/' ) {
+				if (*ptr == ' '  ||  *ptr == '/'  ||  *ptr == '+' ) {
 					buffer_addchar( &escapebuff, '"' );
 					buffer_addstring( &escapebuff, buffer_posptr( &buff ), endptr - buffer_posptr( &buff ) );
 					buffer_addchar( &escapebuff, '"' );
