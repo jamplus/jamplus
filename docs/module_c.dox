@@ -810,13 +810,14 @@ If \c shared is specified for \c OPTIONS, the following additional options are a
 
 
 <hr>
-\section rule_C_LinkDirectories rule C.LinkDirectories TARGET : DIRECTORIES
+\section rule_C_LinkDirectories rule C.LinkDirectories TARGET : DIRECTORIES [ : OPTIONS ]
 \addindex rule_C_LinkDirectories
 
 Assign the linker search \c DIRECTORIES for the given project \c TARGET.
 
 \param TARGET The target to assign the link \c DIRECTORIES to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the defines are made available globally.
 \param DIRECTORIES The list of link directories to apply.  Absolute paths are used directly.  Relative paths are local to <tt>\$(SUBDIR)</tt>.  That is, they are relative to the subdirectory specified via \ref rule_SubDir "SubDir".
+\param OPTIONS If \c public is specified, the directories specified by \c DIRECTORIES are made available to a project using \c C.Inherits.
 
 \code
     # Add c:/some/directory to myproject for all configurations and
@@ -826,8 +827,8 @@ Assign the linker search \c DIRECTORIES for the given project \c TARGET.
     # Add the MFC link directory.
     C.LinkDirectories myproject : "$(MSVCNT)/atlmfc/lib" ;
 
-    # Relative path:
-    C.LinkDirectories myproject : ../lib ;
+    # Relative path that is also publicly inherited.
+    C.LinkDirectories myproject : ../lib : public ;
 \endcode
 
 

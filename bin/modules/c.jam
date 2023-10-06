@@ -1136,10 +1136,15 @@ rule C.LibFlags TARGET : FLAGS {
 }
 
 
-rule C.LinkDirectories TARGET : DIRECTORIES {
+rule C.LinkDirectories TARGET : DIRECTORIES : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	DIRECTORIES = $(DIRECTORIES:R=$(SUBDIR:E="")) ;
 	LINKDIRECTORIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DIRECTORIES) ;
+
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_LINKDIRECTORIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(DIRECTORIES) ;
+	}
 
 	if $(TARGETINFO_LOCATE) {
 		local prefix = "Projects[ [[$(C.ACTIVE_TARGET)]] ].LinkDirectories[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ]" ;
@@ -1188,6 +1193,7 @@ rule C.LinkPrebuiltLibraries TARGET : LIBRARIES : OPTIONS {
 		$(theRule) ;
 	}
 	SEARCH on $(gristedLibraries) += $(SUBDIR) ;
+	SEARCH on $(gristedLibraries) += $(LINKDIRECTORIES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 	SEARCH_EXTENSIONS on $(gristedLibraries) = $(SUFLINKLIBS:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	LINKLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(gristedLibraries) ;
 	if public in $(OPTIONS) {
@@ -1585,6 +1591,12 @@ rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
 		if $(publicNeedLibs) {
 			NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicNeedLibs) ;
 			PUBLIC_NEEDLIBS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicNeedLibs) ;
+		}
+
+		local publicLinkDirectories = $(PUBLIC_LINKDIRECTORIES:Z=$(inheritsTarget)) ;
+		if $(publicLinkDirectories) {
+			LINKDIRECTORIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicLinkDirectories) ;
+			PUBLIC_LINKDIRECTORIES on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(publicLinkDirectories) ;
 		}
 
 		local publicLinkFlags = $(PUBLIC_LINKFLAGS:Z=$(inheritsTarget)) ;
