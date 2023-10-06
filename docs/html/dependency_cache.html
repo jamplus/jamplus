@@ -27,7 +27,7 @@ Dependency Cache Usage</h1>
 <p>In order to turn the Dependency Cache on, two variables must be set, <code>DEPCACHE.cachename</code> and <code>DEPCACHE</code>.</p>
 <p>The actual name of the cache file is controlled by the <code>DEPCACHE.cachename</code>. If <code>DEPCACHE.cachename</code> is left unset (the default), reading and writing of a cache file is not performed. The cache is always used internally regardless of <code>DEPCACHE.cachename</code>, which helps when HDRGRIST causes the same file to be scanned multiple times.</p>
 <p>Setting LOCATE and SEARCH on the the <code>DEPCACHE.cachename</code> works as well, so you can place anywhere on disk you like or even search for it in several directories. You may also set it in your environment to share it amongst all your projects.</p>
-<div class="fragment"><div class="line">DEPCACHE.standard = $(ALL_LOCATE_TARGET)/.depcache ;</div>
+<div class="fragment"><div class="line">DEPCACHE.standard = $(ALL_LOCATE_TARGET)/.jamdepcache ;</div>
 </div><!-- fragment --><p>The global <code>DEPCACHE</code> variable sets the active dependency cache. <code>DEPCACHE</code> defaults to the cachename of <code>standard</code>. It can be overridden, if desired.</p>
 <div class="fragment"><div class="line">DEPCACHE = standard ;  # Unnecessary, as the <span class="keywordflow">default</span> is standard.</div>
 </div><!-- fragment --><p>If the dependency cache needs to be changed for a target, the <a class="el" href="builtin_rules.html#rule_UseDepCache">UseDepCache</a> rule is used to override the global value.</p>

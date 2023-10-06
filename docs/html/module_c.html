@@ -620,13 +620,14 @@ rule C.Library TARGET : SOURCES [ : OPTIONS ]</h1>
 <div class="line">C.Library mysharedlibrary : file3.c file4.cpp : shared ;</div>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_LinkDirectories"></a>
-rule C.LinkDirectories TARGET : DIRECTORIES</h1>
+rule C.LinkDirectories TARGET : DIRECTORIES [ : OPTIONS ]</h1>
 <p><a id="a126_rule_C_LinkDirectories" name="a126_rule_C_LinkDirectories"></a></p>
 <p>Assign the linker search <code>DIRECTORIES</code> for the given project <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">TARGET</td><td>The target to assign the link <code>DIRECTORIES</code> to. <code>TARGET</code> is optional if <a class="el" href="jambase_rules.html#rule_ActiveTarget">rule ActiveTarget TARGET</a> has been specified. If <code>TARGET</code> is <code>*</code>, the defines are made available globally. </td></tr>
-    <tr><td class="paramname">DIRECTORIES</td><td>The list of link directories to apply. Absolute paths are used directly. Relative paths are local to <code>$(SUBDIR)</code>. That is, they are relative to the subdirectory specified via <a class="el" href="jambase_rules.html#rule_SubDir">SubDir</a>.</td></tr>
+    <tr><td class="paramname">DIRECTORIES</td><td>The list of link directories to apply. Absolute paths are used directly. Relative paths are local to <code>$(SUBDIR)</code>. That is, they are relative to the subdirectory specified via <a class="el" href="jambase_rules.html#rule_SubDir">SubDir</a>. </td></tr>
+    <tr><td class="paramname">OPTIONS</td><td>If <code>public</code> is specified, the directories specified by <code>DIRECTORIES</code> are made available to a project using <code>C.Inherits</code>.</td></tr>
   </table>
   </dd>
 </dl>
@@ -637,8 +638,8 @@ rule C.LinkDirectories TARGET : DIRECTORIES</h1>
 <div class="line"><span class="preprocessor"># Add the MFC link directory.</span></div>
 <div class="line">C.LinkDirectories myproject : <span class="stringliteral">&quot;$(MSVCNT)/atlmfc/lib&quot;</span> ;</div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor"># Relative path:</span></div>
-<div class="line">C.LinkDirectories myproject : ../lib ;</div>
+<div class="line"><span class="preprocessor"># Relative path that is also publicly inherited.</span></div>
+<div class="line">C.LinkDirectories myproject : ../lib : public ;</div>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_LinkFlags"></a>
 rule C.LinkFlags TARGET : FLAGS</h1>
