@@ -533,7 +533,7 @@ rule FSubDirPath
 
 local __SubIncludeStackIndex = 0 ;
 
-rule SubInclude TOKENS : FILENAME
+rule SubInclude TOKENS : FILENAME : OPTIONS
 {
 	# SubInclude TOP d1 ... ;
 	#
@@ -576,7 +576,7 @@ rule SubInclude TOKENS : FILENAME
 
 	SubDir $(TOKENS) ;
 
-	local TARGET = $(FILENAME:D=) ;
+	local TARGET = $(FILENAME:B) ;
 	if ! $(TARGET)
 	{
 		local token ;
@@ -591,11 +591,17 @@ rule SubInclude TOKENS : FILENAME
 	CURRENT_JAMFILE = $(jamfile:R=$(SUBDIR)) ;
 	BUILD.$(TARGET).CURRENT_JAMFILE = $(CURRENT_JAMFILE) ;
 
-	if [ Search $(CURRENT_JAMFILE) ]
+	local nocare ;
+	if nocare in $(OPTIONS)
+	{
+		nocare = 1 ;
+		NoCare $(CURRENT_JAMFILE) ;
+	}
+	if ! $(nocare) && [ Search $(CURRENT_JAMFILE) ]
 	{
 		include $(CURRENT_JAMFILE) ;
 	}
-	else
+	else if ! $(nocare)
 	{
 		local jamfile.lua ;
 		if $(FILENAME)
@@ -630,9 +636,9 @@ rule SubInclude TOKENS : FILENAME
 	}
 }
 
-rule SubIncludeRelative RELATIVE_PATH : REQUESTED_JAMFILE
+rule SubIncludeRelative RELATIVE_PATH : REQUESTED_JAMFILE : OPTIONS
 {
-	SubInclude $(ALL_SUBDIR_TOKENS) $(RELATIVE_PATH) : $(REQUESTED_JAMFILE) ;
+	SubInclude $(ALL_SUBDIR_TOKENS) $(RELATIVE_PATH) : $(REQUESTED_JAMFILE) : OPTIONS ;
 }
 
 rule SubRules

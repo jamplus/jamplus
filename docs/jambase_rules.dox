@@ -380,7 +380,7 @@ Sets up housekeeping for the source files located in <tt>$(TOP)/d1/.../dn</tt>:
 
 
 <hr>
-\section rule_SubInclude rule SubInclude VAR d1...dn : FILETITLE
+\section rule_SubInclude rule SubInclude VAR d1...dn : FILETITLE : OPTIONS
 \addindex rule_SubInclude
 
 Reads the Jamfile in <tt>$(VAR)/d1/.../dn/</tt>.  Assumes a default Jamfile name of <tt>Jamfile.jam</tt>.  If \c FILETITLE is specified, <tt>$(FILETITLE).jam</tt> is read instead of <tt>Jamfile.jam</tt>.
@@ -390,6 +390,7 @@ A given Jamfile is only ever read in once, even if multiple \c SubInclude calls 
 \param VAR A previously specified \c TOP variable created with \ref rule_SubDir.
 \param d1...dn Additional directory components from $(VAR) making up the total path of <tt>$(VAR)/d1/.../dn/</tt>.
 \param FILETITLE (optional) If specified, a Jamfile called <tt>$(FILETITLE).jam</tt> is read instead of the default <tt>Jamfile.jam</tt>.
+\param OPTIONS (optional) If `nocare` is specified, then \c FILETITLE does not have to exist.
 
 
 
@@ -397,7 +398,7 @@ A given Jamfile is only ever read in once, even if multiple \c SubInclude calls 
 
 
 <hr>
-\section rule_SubIncludeRelative rule SubIncludeRelative RELATIVE_PATH : FILETITLE
+\section rule_SubIncludeRelative rule SubIncludeRelative RELATIVE_PATH : FILETITLE : OPTIONS
 \addindex rule_SubIncludeRelative
 
 After a \c SubDir rule has been called, \c SubIncludeRelative can be used to move within the \c SubDir structure.  Currently, it only works traversing into child directories.  It cannot be used with a <tt>..</tt> to move to a parent directory.
@@ -406,6 +407,7 @@ Further information may be found in \ref rule_SubInclude "SubInclude".
 
 \param RELATIVE_PATH The relative child directory to move into.
 \param FILETITLE (optional) If specified, a Jamfile called <tt>$(FILETITLE).jam</tt> is read instead of the default <tt>Jamfile.jam</tt>.
+\param OPTIONS (optional) If `nocare` is specified, then \c FILETITLE does not have to exist.
 
 \code
     SubDir TOP ;
