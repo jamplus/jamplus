@@ -1897,7 +1897,7 @@ rule C.GetActiveToolchain {
 }
 
 
-rule C.Build TARGETS : TOOLCHAINS {
+rule C.Build NAMES : TOOLCHAINS {
     local saveCurrentJamfile = $(CURRENT_JAMFILE) ;
 
     if $(TOOLCHAINS) {
@@ -1909,14 +1909,16 @@ rule C.Build TARGETS : TOOLCHAINS {
         for toolchain in $(TOOLCHAINS:E=$(C.ACTIVE_TOOLCHAIN_SPEC)) {
             toolchains += [ C.Toolchain $(toolchain) ] ;
 
-            local target ;
-            for target in $(TARGETS) {
+            local name ;
+            for name in $(NAMES) {
+                local target = $(BUILD.$(name).TARGET) ;
+                target ?= $(name) ;
                 if $(BUILD.$(target).SAVE_SUBDIR_TOKENS) {
                     SubDir $(BUILD.$(target).SAVE_SUBDIR_TOKENS) : $(BUILD.$(target).SAVE_SUBDIR_TARGET_DIRECTORY) ;
                     CURRENT_JAMFILE = $(BUILD.$(target).CURRENT_JAMFILE) ;
                 }
 
-                Build.$(target) ;
+                Build.$(name) $(target) ;
             }
         }
 
@@ -1927,14 +1929,16 @@ rule C.Build TARGETS : TOOLCHAINS {
         return $(toolchains) ;
     }
 
-    local target ;
-    for target in $(TARGETS) {
+    local name ;
+    for name in $(NAMES) {
+        local target = $(BUILD.$(name).TARGET) ;
+        target ?= $(name) ;
         if $(BUILD.$(target).SAVE_SUBDIR_TOKENS) {
             SubDir $(BUILD.$(target).SAVE_SUBDIR_TOKENS) : $(BUILD.$(target).SAVE_SUBDIR_TARGET_DIRECTORY) ;
             CURRENT_JAMFILE = $(BUILD.$(target).CURRENT_JAMFILE) ;
         }
 
-        Build.$(target) ;
+        Build.$(name) $(target) ;
     }
 
     CURRENT_JAMFILE = $(saveCurrentJamfile) ;
