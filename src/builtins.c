@@ -1600,7 +1600,9 @@ LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp)
 				list = var_expand(L0, line, line + strlen(line), &lol, 0);
 				leftParen = '(';
 				rightParen = ')';
-				strcpy(line, list_value(list_first(list)));
+				if (list != NULL) {
+					strcpy(line, list_value(list_first(list)));
+				}
 				cmakeDefine = strstr(line, "#cmakedefine ");
 				if (cmakeDefine) {
 					char newLine[10000];
