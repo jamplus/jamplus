@@ -551,7 +551,11 @@ rule SubInclude TOKENS : FILENAME
 	local jamfile ;
 	if $(FILENAME)
 	{
-		jamfile = $(FILENAME:S=.jam) ;
+		jamfile = $(FILENAME) ;
+		if ! $(jamfile:S)
+		{
+			jamfile = $(jamfile:S=.jam) ;
+		}
 	}
 	else
 	{
