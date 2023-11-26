@@ -1674,7 +1674,7 @@ $(buildFeaturesLines:J=$(NEWLINE))
 contents += "}
 
 repositories {
-    jcenter()
+    mavenCentral()
     google()
 " ;
             contents += $(ANDROID.GRADLE_REPOSITORIES:Z=$(C.COMPILER_SUITE_SYMBOL):E="") ;
