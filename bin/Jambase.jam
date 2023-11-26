@@ -29,6 +29,7 @@ JAMBASE_VERSION = "JamPlus 3.0 (2020.06.01)" ;
 
 if $(NT)
 {
+	CAT		?= type ;
 	MV		?= move /y ;
 	CP		?= copy ;
 	MKDIR	?= mkdir ;
@@ -45,6 +46,7 @@ else if $(UNIX)
 			JAMSHELL	?= sh -c ;
 	}
 
+	CAT			?= cat ;
 	CHMOD		?= chmod ;
 	CHGRP		?= chgrp ;
 	CHOWN		?= chown ;
@@ -55,6 +57,7 @@ else if $(UNIX)
 # General defaults; a lot like UNIX
 #
 
+CAT			?= cat ;
 CP			?= cp -f ;
 DOT			?= . ;
 DOTDOT		?= .. ;
