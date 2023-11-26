@@ -48,7 +48,7 @@ If [square] brackets are used the argument is optional.
 \refitem rule_SubIncludeRelative SubIncludeRelative
 \refitem rule_Workspace Workspace
 \refitem rule_WorkspaceConfig WorkspaceConfig
-\refitem rule_WriteFile WriteFile
+\refitem actions_WriteFile WriteFile
 \endsecreflist
 
 <hr>
@@ -519,17 +519,16 @@ Its implementation is:
 rule WriteFileContents TARGETS : CONTENTS
 {
     CONTENTS on $(TARGETS) = $(CONTENTS) ;
-....UseCommandLine $(TARGETS) : $(CONTENTS) ;
-....MakeLocate $(TARGETS) : $(TARGETS:D) : combine ;
-....WriteFile $(TARGETS) ;
-....return $(TARGETS) ;
+    UseCommandLine $(TARGETS) : $(CONTENTS) ;
+    WriteFile $(TARGETS) ;
+    return $(TARGETS) ;
 }
 \endcode
 
 \param TARGETS The targets to write to.
 
 \code
-    WriteFileContents abc.txt : "abcdefghi jklmnopqrstuv wxyz" ;
+WriteFileContents abc.txt : "abcdefghi jklmnopqrstuv wxyz" ;
 \endcode
 
 

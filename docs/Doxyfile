@@ -3,13 +3,19 @@ HTML_HEADER       =
 HTML_FOOTER       =
 QUIET             = NO
 WARNINGS          = YES
-DISABLE_INDEX     = YES
+DISABLE_INDEX     = NO
+EXAMPLE_PATH      = snippets
 EXTRACT_ALL       = NO
 EXTRACT_PRIVATE   = NO
+FULL_SIDEBAR      = NO
 GENERATE_MAN      = NO
 GENERATE_LATEX    = NO
 GENERATE_HTML     = YES
 GENERATE_HTMLHELP = NO
+GENERATE_TREEVIEW = YES
+HTML_COLORSTYLE   = LIGHT
+HTML_EXTRA_FILES  = doxygen-awesome-css/doxygen-awesome-fragment-copy-button.js
+HTML_EXTRA_STYLESHEET = doxygen-awesome-css/doxygen-awesome.css
 HTML_HEADER       = header.html
 HTML_FOOTER       = footer.html
 GENERATE_RTF      = NO
@@ -28,6 +34,9 @@ INPUT             = \
 		changelog.dox \
 		dependency_cache.dox \
 		examples.dox \
+		examples_building_lua.dox \
+		examples_simple_transform.dox \
+		examples_write_file.md \
 		file_cache.dox \
 		improvements.dox \
 		jam_language.dox \

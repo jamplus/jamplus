@@ -11,7 +11,7 @@ These variables control the binding of file target names to locations in the fil
 Rooted (absolute path) file targets are bound as is.  Unrooted file target names are also normally bound as is, and thus relative to the current directory, but the settings of \$(LOCATE) and \$(SEARCH) alter this:
 
 <ul>
-  <li> If \$(LOCATE) is set then the target is bound relative to the first directory in $(LOCATE).  Only the first element is used for binding.
+  <li> If <tt>\$(LOCATE)</tt> is set then the target is bound relative to the first directory in \$(LOCATE).  Only the first element is used for binding.
   <li> If \$(SEARCH) is set then the target is bound to the first directory in \$(SEARCH) where the target file already exists.
   <li> If the \$(SEARCH) search fails, the target is bound relative to the current directory anyhow.
 </ul>

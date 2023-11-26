@@ -1,0 +1,169 @@
+/*! \page examples_simple_transform Examples: Simple Transform
+
+\section examples_simple_transform_overview Simple Transform Overview
+
+
+
+<hr>
+\section examples_simple_transform_setup Setup
+
+Add a file called <tt>source.txt</tt> to the directory with the contents:
+
+\code
+# source.txt
+source
+\endcode
+
+
+
+
+<hr>
+\section examples_simple_transform_step_1 Transform source to destination
+
+We want to build a file <tt>destination.txt</tt> from <tt>source.txt</tt>. This involves setting a dependency between the two files using \ref rule_Depends. We will depend the default \c all target on <tt>def.txt</tt> for simpler command-line usage. Additionally, <tt>def.txt</tt> will be added to the \c clean target.
+
+\include examples_simple_transform.jam Adding dependencies
+
+\code
+# Jamfile.jam
+local source = source.txt ;
+local destination = destination.txt ;
+
+# all -> destination.txt -> source.txt
+Depends all : $(destination) : $(source) ;
+Clean clean : $(destination) ;
+\endcode
+
+Running \b jam at this point will not do anything, as we have not yet set up the action. We will call the action \c ConvertFile and cause it to create a copy of the source file and append <tt>extra destination text</tt> to the destination file.
+
+\code
+# Jamfile.jam
+local source = source.txt ;
+local destination = destination.txt ;
+
+Depends all : $(destination) : $(source) ;
+Clean clean : $(destination) ;
+
+# CAT comes from Jambase.jam and is either 'type' on Windows or 'cat' on non-Windows.
+actions ConvertFile
+{
+    $(CAT) $(2) > $(1)
+    echo extra destination text >> $(1)
+}
+
+# The first parameter to an action is the destination target(s). The second parameter to an action is the source target(s).
+ConvertFile $(destination) : $(source) ;
+\endcode
+
+Running \b jam yields:
+
+\code
+# Shell
+> jam
+*** found 3 target(s)...
+*** updating 1 target(s)...
+@ ConvertFile destination.txt
+*** updated 1 target(s)...
+\endcode
+
+On disk will be the new file <tt>destination.txt</tt>.
+
+
+
+
+
+<hr>
+\section examples_simple_transform_step_2 Build behaviors
+
+There have been no changes to <tt>source.txt</tt>, so running \b jam again shows there is nothing to be done:
+
+\code
+# Shell
+> jam
+*** found 3 target(s)...
+\endcode
+
+Modify <tt>source.txt</tt>:
+
+\code
+# source.txt
+The modified source
+\endcode
+
+As we would expect, running \b jam now with the modified <tt>source.txt</tt> causes a build to run for <tt>destination.txt</tt>.
+
+\code
+# Shell
+> jam
+*** found 3 target(s)...
+*** updating 1 target(s)...
+@ ConvertFile destination.txt
+*** updated 1 target(s)...
+\endcode
+
+If the timestamp of <tt>source.txt</tt> is ever later than <tt>destination.txt</tt>, Jam will cause the \c ConvertFile action to run.
+
+
+
+<hr>
+\section examples_simple_transform_step_3 Applying UseCommandLine
+
+In addition to a timestamp update, sometimes we want to force a build anyway.
+
+An incorrect way of doing this is to use the \ref rule_Always flag to mark the target as always needing to build.
+
+\code
+# Jamfile.jam
+local source = source.txt ;
+local destination = destination.txt ;
+
+Depends all : $(destination) : $(source) ;
+Clean clean : $(destination) ;
+Always $(destination) ;
+
+actions ConvertFile
+{
+    $(CAT) $(2) > $(1)
+    echo extra destination text >> $(1)
+}
+
+ConvertFile $(destination) : $(source) ;
+\endcode
+
+Running \b jam will build <tt>destination.txt</tt>.
+
+\code
+# Shell
+> jam
+*** found 3 target(s)...
+*** updating 1 target(s)...
+@ ConvertFile destination.txt
+*** updated 1 target(s)...
+\endcode
+
+Running \b jam again will build <tt>destination.txt</tt> again. And again. And again.
+
+The goal of using a tool like \b Jam is to get it to identify what actually needs to be done and only do that and nothing more.
+
+Instead, we can use \ref rule_UseCommandLine to add some extra text into the build calculation such that changing the text will result in a forced build regardless of timestamp change.
+
+\code
+# Jamfile.jam
+local source = source.txt ;
+local destination = destination.txt ;
+
+Depends all : $(destination) : $(source) ;
+Clean clean : $(destination) ;
+UseCommandLine $(destination) : now-on-version-2 ;
+
+actions ConvertFile
+{
+    $(CAT) $(2) > $(1)
+    echo extra destination text >> $(1)
+}
+
+ConvertFile $(destination) : $(source) ;
+\endcode
+
+
+*/
