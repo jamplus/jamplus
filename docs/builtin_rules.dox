@@ -254,6 +254,7 @@ The remaining rules are utility rules.
 
 \secreflist
 \refitem rule_ConfigureFileHelper ConfigureFileHelper
+\refitem rule_DebugSuppressMakeText DebugSuppressMakeText
 \refitem rule_DependsList DependsList
 \refitem rule_Echo Echo
 \refitem rule_Exit Exit
@@ -314,8 +315,24 @@ or if \c VAR is not defined, a line of this format will be output:
 \param OPTIONS (optional) May be \c noexpand, in which case no variable expansion is performed when copying from \c SOURCE to \c TARGET. Can also specify \c parens to use \$(VAR) as the replacement format instead of \${VAR}.
 
 \code
-    local boundName = [ Search TheTarget.lib ] ;
+    # To be filled in
 \endcode
+
+
+
+
+
+
+<hr>
+\section rule_DebugSuppressMakeText rule DebugSuppressMakeText ;
+\addindex rule_DebugSuppressMakeText
+
+\c DebugSuppressMakeText makes Jam be more quiet by turning \c DEBUG_MAKE, \c DEBUG_MAKE0, and DEBUG_EXEC off.
+
+\code
+    DebugSuppressMakeText ;
+\endcode
+
 
 
 

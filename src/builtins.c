@@ -142,6 +142,7 @@ LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_search(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_searchinternal(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_makerelativepath(PARSE *parse, LOL *args, int *jmp);
+LIST *builtin_debugsuppressmaketext(PARSE *parse, LOL *args, int *jmp);
 
 int glob( const char *s, const char *c );
 
@@ -329,6 +330,9 @@ load_builtins()
 
 	bindrule( "MakeRelativePath" )->procedure =
 		parse_make( builtin_makerelativepath, P0, P0, P0, C0, C0, 0 );
+
+	bindrule( "DebugSuppressMakeText" )->procedure =
+		parse_make( builtin_debugsuppressmaketext, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -1762,7 +1766,6 @@ LIST *builtin_searchinternal(PARSE *parse, LOL *args, int *jmp)
 	return L0;
 }
 
-
 LIST *builtin_makerelativepath(PARSE *parse, LOL *args, int *jmp)
 {
 	LIST* targetNameList;
@@ -1928,4 +1931,10 @@ LIST *builtin_makerelativepath(PARSE *parse, LOL *args, int *jmp)
 		free(cwd);
 	}
 	return resultList;
+}
+
+LIST *builtin_debugsuppressmaketext(PARSE *parse, LOL *args, int *jmp)
+{
+	DEBUG_MAKE = DEBUG_MAKEQ = DEBUG_EXEC = 0;
+	return L0;
 }
