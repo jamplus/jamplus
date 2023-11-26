@@ -2,7 +2,7 @@ rule C.Toolchain.win32.* {
     C.ToolchainSpecKeys C.PLATFORM/PLATFORM C.CONFIG/CONFIG ;
 
     if $(C.COMPILER) {
-        if $(C.COMPILER) in vs2019 vs2017 vs2015 vs2013 vs2012 vs2010 vs2008 vs2005 vs2003 vc6 {
+        if $(C.COMPILER) in vs2022 vs2019 vs2017 vs2015 vs2013 vs2012 vs2010 vs2008 vs2005 vs2003 vc6 {
             if ! [ C.Toolchain.vc.$(C.PLATFORM).Detect $(C.COMPILER) : force ] {
                 return ;
             }
