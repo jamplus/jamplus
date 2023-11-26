@@ -855,7 +855,6 @@ rule WriteFileContents TARGETS : CONTENTS
 {
 	CONTENTS on $(TARGETS) = $(CONTENTS) ;
 	UseCommandLine $(TARGETS) : $(CONTENTS) ;
-	MakeLocate $(TARGETS) : $(TARGETS:D) : combine ;
 	WriteFile $(TARGETS) ;
 	return $(TARGETS) ;
 }
