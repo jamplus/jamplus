@@ -58,7 +58,7 @@ rule C.Toolchain.vc.win32.Detect COMPILER {
                 $(MSSDK)/lib/$(MSSDK_VERSION)/um/x86
             ;
             MSVCBIN = "$(MSVCNT)/bin/HostX86/x86/" ;
-            RC = $(MSSDK)/bin/x86/rc ;
+            RC = $(MSSDK)/bin/$(MSSDK_VERSION)/x86/rc ;
             rc_nologo = /nologo ;
 
         case vs2019 :
@@ -210,7 +210,6 @@ rule C.Toolchain.vc.win32.Detect COMPILER {
             RC = $(MSVCNT)/../Common/MSDev98/Bin/rc ;
     }
 
-    MSVCBIN ?= $(MSVCNT)/bin/ ;
     MSVCBIN on $(C.COMPILER_SUITE_SYMBOL) = $(MSVCBIN) ;
     MSSDK on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK) ;
     MSSDK_BINDIR on $(C.COMPILER_SUITE_SYMBOL) = $(MSSDK_BINDIR) ;
