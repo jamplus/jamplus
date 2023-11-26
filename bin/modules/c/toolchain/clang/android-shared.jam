@@ -1218,7 +1218,7 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
     ANDROID.VERSION_CODE on $(C.ACTIVE_TOOLCHAIN_TARGET) ?= 1 ;
 
     if $(ANDROID.USE_GRADLE) = 1 {
-        local packageOutputPath = $(ANDROID.PACKAGE_OUTPUT_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):E=$(ALL_LOCATE_TARGET)/package) ;
+        local packageOutputPath = $(ANDROID.PACKAGE_OUTPUT_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):E=$(ALL_LOCATE_TARGET)/../package) ;
 
         local GRADLE_OUTPUT_DIRECTORY = @($(ALL_LOCATE_TARGET)/gradle:R=) ;
         local grist = $(C.ACTIVE_TOOLCHAIN_GRIST)|gradle ;
