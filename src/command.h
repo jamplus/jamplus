@@ -59,6 +59,7 @@ struct _cmd
 	CMD	*tail;		/* valid on in head */
 	RULE	*rule;		/* rule->actions contains shell script */
 	LIST	*shell;		/* $(SHELL) value */
+	LIST	*shellext;	/* $(SHELLEXT) value */
 	LOL	args;		/* LISTs for $(<), $(>) */
 	LIST *targetsunbound;
 	LIST *sourcesunbound;
@@ -78,6 +79,7 @@ CMD *cmd_new(
 	LIST	*targetsunbound,	/* $(<) (freed) */
 	LIST	*sourcesunbound,	/* $(<) (freed) */
 	LIST	*shell,		/* $(SHELL) (freed) */
+	LIST	*shellext,		/* $(SHELL) (freed) */
 	int	maxline );	/* max line length */
 
 void cmd_free( CMD *cmd );

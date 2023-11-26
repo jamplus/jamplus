@@ -1206,12 +1206,13 @@ builtin_shell(
     LIST *cmds = lol_get( args, 0 );
     LISTITEM* l;
     LIST *shell = var_get( "JAMSHELL" );	/* shell is per-target */
+    LIST *shellext = var_get( "JAMSHELLEXT" );	/* shellext is per-target */
 
     LIST *output = L0;
 
     exec_init();
     for( l = list_first(cmds); l; l = list_next( l ) ) {
-        execcmd( list_value(l), shell_done, &output, shell, 1 );
+        execcmd( list_value(l), shell_done, &output, shell, shellext, 1 );
 	execwait();
     }
     exec_done();

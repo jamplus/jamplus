@@ -47,6 +47,7 @@ cmd_new(
 	LIST	*targetsunbound,
 	LIST	*sourcesunbound,
 	LIST	*shell,
+	LIST	*shellext,
 	int	maxline )
 {
 	BUFFER buff;
@@ -54,6 +55,7 @@ cmd_new(
 
 	cmd->rule = rule;
 	cmd->shell = shell;
+	cmd->shellext = shellext;
 	cmd->next = 0;
 	cmd->tail = 0;
 #ifdef OPT_RESPONSE_FILES
@@ -139,6 +141,7 @@ cmd_free( CMD *cmd )
 	list_free( cmd->targetsunbound );
 	list_free( cmd->sourcesunbound );
 	lol_free( &cmd->args );
+	list_free( cmd->shellext );
 	list_free( cmd->shell );
 #ifdef OPT_RESPONSE_FILES
 	while( cmd->response_files )

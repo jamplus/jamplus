@@ -298,6 +298,7 @@ execcmd(
 #endif
 	void *closure,
 	LIST *shell,
+	LIST *shellextlist,
 #ifdef OPT_SERIAL_OUTPUT_EXT
     int serialOutput
 #endif
@@ -353,14 +354,22 @@ execcmd(
 # endif
 
 /* # ifdef USE_EXECNT *//* CWM */
-	if( !cmdtab[ slot ].tempfile )
+	//if( !cmdtab[ slot ].tempfile )
 	{
 		/* +32 is room for \jamXXXXXcmdSS.bat (at least) */
 
-		cmdtab[ slot ].tempfile = malloc( strlen( tempjamdir ) + 32 );
+		const char* shellext = ".bat";
+		if (shellextlist && list_first(shellextlist))
+		{
+			shellext = list_value(list_first(shellextlist));
+		}
 
-		sprintf( cmdtab[ slot ].tempfile, "%s%cjam%dcmd%d.bat",
-			tempjamdir, PATH_DELIM, getpid(), slot );
+		if (cmdtab[ slot ].tempfile)
+			free(cmdtab[ slot ].tempfile);
+		cmdtab[ slot ].tempfile = malloc( strlen( tempjamdir ) + 64 );
+
+		sprintf( cmdtab[ slot ].tempfile, "%s%cjam%dcmd%d%s",
+			tempjamdir, PATH_DELIM, getpid(), slot, shellext ? shellext : ".bat" );
 	}
 
 # ifdef USE_EXECNT

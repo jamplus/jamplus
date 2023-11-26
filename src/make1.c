@@ -768,7 +768,7 @@ make1c( TARGET *t )
 	    else
 	    {
 		fflush( stdout );
-		execcmd( buffer_ptr(&cmd->commandbuff), make1d, t, cmd->shell, (cmd->rule->flags & RULE_SCREENOUTPUT) == 0 );
+		execcmd( buffer_ptr(&cmd->commandbuff), make1d, t, cmd->shell, cmd->shellext, (cmd->rule->flags & RULE_SCREENOUTPUT) == 0 );
 	    }
 	}
 	else
@@ -1343,7 +1343,6 @@ make1cmds( ACTIONS *a0 )
 #endif
 {
 	CMD *cmds = 0;
-	LIST *shell = var_get( "JAMSHELL" );	/* shell is per-target */
 
 	/* Step through actions */
 	/* Actions may be shared with other targets or grouped with */
@@ -1359,6 +1358,8 @@ make1cmds( ACTIONS *a0 )
 		int	    start, chunk, length, maxline;
 		TARGETS *autosettingsreverse = 0;
 		TARGETS *autot;
+		LIST *shell;	/* shell is per-target */
+		LIST *shellext;	/* shellext is per-target */
 
 #ifdef OPT_MULTIPASS_EXT
 		if ( a0->action->pass != actionpass )
@@ -1396,6 +1397,8 @@ make1cmds( ACTIONS *a0 )
 			autosettingsreverse = targetentryhead( autosettingsreverse, autot->target, 0 );
 		}
 		pushsettings( t->settings );
+		shell = var_get( "JAMSHELL" );	/* shell is per-target */
+		shellext = var_get( "JAMSHELLEXT" );	/* shell is per-target */
 		a0->action->running = 1;
 #ifdef OPT_ACTIONS_WAIT_FIX
 		a0->action->run_tgt = t;
@@ -1801,6 +1804,7 @@ make1cmds( ACTIONS *a0 )
 				list_copy( L0, ntunbound ),
 				list_sublist( nsunbound, start, thischunk ),
 				list_copy( L0, shell ),
+				list_copy( L0, shellext ),
 				maxline );
 /* commented so jamgram.y can compile #else
 			CMD *cmd = cmd_new( rule,

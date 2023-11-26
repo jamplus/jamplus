@@ -168,6 +168,13 @@ Just as <b>jam</b> expands a % to be the text of the rule's action block, it exp
     esac
 \endcode
 
+Additionally, \c JAMSHELLEXT is a variable that can be set to the proper extension of a script accepted by the shell.
+
+\code
+JAMSHELL = pwsh.exe -noprofile -executionpolicy bypass -File ;
+JAMSHELLEXT = .ps1 ;
+\endcode
+
 <hr>
 
 
