@@ -246,6 +246,7 @@ int main( int argc, char **argv, char **arg_environ )
 	const char	*s;
 	struct option	optv[N_OPTS];
 	char*       targets[N_TARGETS];
+	char** extra_options = NULL;
 	const char	*all = "all";
 	int		anyhow = 0;
 	int		status;
@@ -273,6 +274,10 @@ int main( int argc, char **argv, char **arg_environ )
                 char processPath[4096];
                 int i;
                 const char* name = argv[argstartindex] + 2;
+
+				if (argv[argstartindex][2] == 0) {
+					break;
+				}
 
 				if (strcmp(name, "embedbuildmodules") == 0  ||  strcmp(name, "embed") == 0) {
 					++argstartindex;
@@ -467,19 +472,19 @@ int main( int argc, char **argv, char **arg_environ )
 
 #ifdef OPT_SETCWD_SETTING_EXT
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tabno:qvS", optv, targets ) ) < 0 )
+	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tabno:qvS", optv, targets, &extra_options ) ) < 0 )
 #else
-	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qvS", optv, targets ) ) < 0 )
+	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qvS", optv, targets, &extra_options ) ) < 0 )
 #endif
 #else
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-	if( ( num_targets = getoptions( argc, argv, "d:j:f:gs:t:abno:qv", optv, targets ) ) < 0 )
+	if( ( num_targets = getoptions( argc, argv, "d:j:f:gs:t:abno:qv", optv, targets, &extra_options ) ) < 0 )
 #else
-	if( ( num_targets = getoptions( argc, argv, "d:j:f:gs:t:ano:qv", optv, targets ) ) < 0 )
+	if( ( num_targets = getoptions( argc, argv, "d:j:f:gs:t:ano:qv", optv, targets, &extra_options ) ) < 0 )
 #endif
 #endif
 	{
-	    printf( "\nusage: jam [ options ] targets...\n\n" );
+	    printf( "\nusage: jam [ options ] targets -- extra_options ...\n\n" );
 
             printf( "-a      Build all targets, even if they are current.\n" );
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
@@ -831,6 +836,19 @@ int main( int argc, char **argv, char **arg_environ )
 		}
 
 		var_set( "JAM_COMMAND_LINE_TARGETS", l, VAR_SET );
+	}
+
+	if ( extra_options != NULL )
+	{
+		LIST* l = L0;
+		const char** extra_option = extra_options;
+		while ( *extra_option )
+		{
+			l = list_append( l, *extra_option, 1 );
+			++extra_option;
+		}
+
+		var_set( "JAM_EXTRA_COMMAND_LINE_OPTIONS", l, VAR_SET );
 	}
 #endif
 

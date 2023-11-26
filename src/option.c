@@ -25,10 +25,12 @@ getoptions(
     char **argv,
     const char *opts,
     option *optv,
-    char** targets )
+    char** targets,
+    char*** extra_options)
 {
 	int i, n;
 	int optc = N_OPTS;
+	int extra_options_count = 0;
 
 	memset( (char *)optv, '\0', sizeof( *optv ) * N_OPTS );
 
@@ -37,6 +39,10 @@ getoptions(
 	{
 		char *arg;
 
+		if ( argv[i][0] == '-' && argv[i][1] == '-' )
+		{
+			break;
+		}
 		if ( argv[i][0] != '-' )
 		{
 			const char *equals = strchr( argv[i],'=' );
@@ -106,6 +112,20 @@ getoptions(
 				return -1;
 			}
 		}
+	}
+
+	*extra_options = NULL;
+	++i;
+	if ( i < argc )
+	{
+		int index = 0;
+		int count = argc - i;
+		*extra_options = malloc( ( count + 1 ) * sizeof( char* ) );
+		for ( ; i < argc; i++ )
+		{
+			(*extra_options)[ index++ ] = argv[ i ];
+		}
+		(*extra_options)[ count ] = NULL;
 	}
 
 	return n;
