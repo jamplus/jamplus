@@ -180,7 +180,7 @@ struct globs globs = {
 #endif
 #ifdef OPT_IMPROVED_PROGRESS_EXT
 	0,			/* updating */
-	0,			/* start */
+	0,			/* progress */
 #endif
 	0,			/* noexec */
 	1,			/* jobs */
@@ -191,8 +191,18 @@ struct globs globs = {
 # else
 	{ 0, 1 }, 		/* display actions  */
 # endif
+#ifdef OPT_GRAPH_DEBUG_EXT
+	0,			/* debug_graph */
+	0,			/* debug_fate */
+#endif
+#ifdef OPT_DEBUG_MEM_TOTALS_EXT
+	0,			/* debug_memtotals */
+#endif
+#ifdef OPT_DEBUG_MAKE1_LOG_EXT
+	0,			/* debug_make1 */
+#endif
 	0,			/* output commands, not run them */
-	0,                      /* silence */
+	0,			/* silence */
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
 	0,          /* lua debugger */
 #endif
