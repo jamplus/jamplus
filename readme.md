@@ -5,7 +5,7 @@ JamPlus is a very fast and powerful code and data build system built on the code
 A sampling of the features in the JamPlus distribution follows:
 
 - **Multiplatform:** Binaries can be easily bootstrapped for Windows, various Unix systems, and Mac OS X.
-- **Compiler support:** Out of box compiler support for Visual C++ 201x/200x/6, GCC, Clang, and MinGW.
+- **Compiler support:** Out of box compiler support for Visual C++ 202x/201x/200x/6, GCC, Clang, and MinGW.
 - **Platform targets:** Platform modules are provided for building for Windows, Linux, macOS, iOS, and Android targets. Additionally, an Xbox 360 console platform is provided as a sample. If the machine has iOS Build Environment for Windows installed (see http://www.pmbaty.com/iosbuildenv/), then iOS builds can be made on a Windows Boot Camp partition.
 - **Workspace/Project Generator:** Output project files for the Visual Studio IDE and Xcode.
 - **Multiple Passes:** Run multiple internal passes collecting unknown dependencies, and execute them in a future pass.
@@ -48,7 +48,7 @@ d:\jamplus>bootstrap-win64-vc.bat
 
 * FILL ME IN.
 
-## Build LuaPlus
+## Build JamPlus
 
 * If you haven't already, clone JamPlus with:
 
