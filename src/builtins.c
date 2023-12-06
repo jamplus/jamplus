@@ -67,7 +67,8 @@
 
 #include "timestamp.h"
 #include "fileglob.h"
-#include "miniz.h"
+
+#include "scan.h"
 
 /*
  * compile_builtin() - define builtin rules
@@ -143,6 +144,7 @@ LIST *builtin_search(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_searchinternal(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_makerelativepath(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_debugsuppressmaketext(PARSE *parse, LOL *args, int *jmp);
+LIST *builtin_parsejam(PARSE *parse, LOL *args, int *jmp);
 
 int glob( const char *s, const char *c );
 
@@ -333,6 +335,10 @@ load_builtins()
 
 	bindrule( "DebugSuppressMakeText" )->procedure =
 		parse_make( builtin_debugsuppressmaketext, P0, P0, P0, C0, C0, 0 );
+
+	bindrule( "Parse" )->procedure =
+	bindrule( "parse" )->procedure =
+		parse_make( builtin_parsejam, P0, P0, P0, C0, C0, 0 );
 }
 
 /*
@@ -1938,3 +1944,68 @@ LIST *builtin_debugsuppressmaketext(PARSE *parse, LOL *args, int *jmp)
 	DEBUG_MAKE = DEBUG_MAKEQ = DEBUG_EXEC = 0;
 	return L0;
 }
+
+LIST *builtin_parsejam(PARSE *parse, LOL *args, int *jmp)
+{
+	LIST* parseList;
+	LIST* resultList = L0;
+	LISTITEM* item;
+
+	parseList = lol_get(args, 0);
+	if (!list_first(parseList))
+		return L0;
+
+	for (item = list_first(parseList); item; item = list_next(item)) {
+		const char* src = list_value(item);
+		const char* ptr = src;
+		const char* startPtr;
+		char** lines;
+		int numberOfLines = 1;
+		int status;
+
+		while (*ptr) {
+			if (*ptr == '\n') {
+				++numberOfLines;
+			}
+			++ptr;
+		}
+		lines = (char**)malloc(sizeof(char*) * (numberOfLines + 1));
+		numberOfLines = 0;
+		startPtr = ptr = src;
+		while (1) {
+			if (*ptr == '\n' || *ptr == 0) {
+				char* line;
+				if (*ptr == '\n')
+					++ptr;
+				line = (char*)malloc(ptr - startPtr + 1);
+				memcpy(line, startPtr, ptr - startPtr);
+				line[ptr - startPtr] = 0;
+				startPtr = ptr;
+				lines[numberOfLines++] = line;
+				if (*ptr == 0)
+					break;
+			}
+			else {
+				++ptr;
+			}
+		}
+		lines[numberOfLines] = 0;
+		parse_lines(lines[0], lines);
+
+		status = yyanyerrors();
+
+		while (numberOfLines > 0) {
+			free(lines[--numberOfLines]);
+		}
+		free(lines);
+
+		if (status) {
+			printf("jam: Error parsing Jam script near %s.\n", src);
+			exit(EXITBAD);
+		}
+	}
+
+	return 0;
+}
+
+
