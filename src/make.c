@@ -126,7 +126,7 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force );
 static void dependGraphOutput( TARGET *t, int depth );
 #endif
 
-void make1buildchecksum( const char* makestage, TARGET* t, MD5SUM buildmd5sum, int force );
+void make1buildchecksum( const char* makestage, TARGET* t, XXH128_hash_t* buildmd5sum, int force );
 
 static const char *target_fate[] =
 {
@@ -785,15 +785,16 @@ int  md5matchescommandline( TARGET *t )
 		if ( vars->symbol[0] == 'C'  &&  strcmp( vars->symbol, "COMMANDLINE" ) == 0 )
 		{
 			LISTITEM *item;
-			MD5_CTX context;
-			MD5Init( &context );
+			XXH3_state_t* state = XXH3_createState();
+			XXH3_128bits_reset(state);
 
 			for ( item = list_first(vars->value); item; item = list_next(item) ) {
 				char const* str = list_value(item);
-				MD5Update( &context, (unsigned char*)str, (unsigned int)strlen( str ) );
+				XXH3_128bits_update(state, (unsigned char*)str, (unsigned int)strlen( str ) );
 			}
 
-			MD5Final( t->rulemd5sum, &context );
+			t->rulemd5sum = XXH3_128bits_digest(state);
+			XXH3_freeState(state);
 			t->rulemd5sumclean = (char)hcache_getrulemd5sum( t );
 			return t->rulemd5sumclean;
 		}
@@ -1260,13 +1261,13 @@ make0(
 			if (t->actions) {
 				//if (t->contentchecksum != NULL && t->contentchecksum->currentmtime != t->contentchecksum->originalmtime)
 				{
-					MD5SUM buildmd5sum;
+					XXH128_hash_t buildmd5sum;
 
 					/* find its final md5sum */
 					++make0calcmd5sum_epoch;
 					++make0calcmd5sum_timestamp_epoch;
 					//make0calcmd5sum(t, 1, 1);
-					make1buildchecksum("make0", t, buildmd5sum, 0);
+					make1buildchecksum("make0", t, &buildmd5sum, 0);
 
 					if (checksum_retrieve(t, buildmd5sum, 0) == 0)
 					{
@@ -1578,7 +1579,7 @@ int make0calcmd5sum_dependssorted_stage = 0;
 
 int make0recurseincludes_epoch = -1000000000;
 
-static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
+static void make0recurseincludesmd5sum( XXH3_state_t *state, TARGET *t, int depth )
 {
 	TARGETS *c;
 
@@ -1612,7 +1613,7 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 			getcachedmd5sum( c->target, 0 );
 			if ( !( c->target->flags & T_FLAG_IGNORECONTENTS )  &&  c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
 			{
-				MD5Update( context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
+				XXH3_128bits_update( state, &c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
 				if( DEBUG_MD5HASH )
 					printf( "\t\t%s%s: md5 %s\n", spaces( depth ), c->target->name, md5tostring( c->target->contentchecksum->contentmd5sum ) );
 			}
@@ -1630,7 +1631,7 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
 
 		if ( c->target->includes )
 		{
-			make0recurseincludesmd5sum( context, c->target->includes, depth + 1 );
+			make0recurseincludesmd5sum( state, c->target->includes, depth + 1 );
 		}
 	}
 }
@@ -1641,7 +1642,7 @@ static void make0recurseincludesmd5sum( MD5_CTX *context, TARGET *t, int depth )
  */
 void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 {
-	MD5_CTX context;
+	XXH3_state_t *state;
 	TARGETS *c;
 
 	if ( t->buildmd5sum_calculated && !force )
@@ -1686,10 +1687,11 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 		t->dependssorted = make0calcmd5sum_dependssorted_stage;
 	}
 
-	MD5Init( &context );
+	state = XXH3_createState();
+	XXH3_128bits_reset(state);
 
 	/* add the path of the file to the sum - it is significant because one command can create more than one file */
-	MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
+	XXH3_128bits_update(state, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
 
 	if( DEBUG_MD5HASH )
 		printf( "\t\t%starget: %s\n", spaces( depth ), t->name );
@@ -1700,7 +1702,7 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 		/* start by adding your own content */
 		if (t->contentchecksum  &&  !ismd5empty(t->contentchecksum->contentmd5sum))
 		{
-			MD5Update( &context, t->contentchecksum->contentmd5sum, sizeof( t->contentchecksum->contentmd5sum ) );
+			XXH3_128bits_update(state, &t->contentchecksum->contentmd5sum, sizeof( t->contentchecksum->contentmd5sum ) );
 			if( DEBUG_MD5HASH )
 				printf( "\t\t%scontent: %s\n", spaces( depth ), md5tostring( t->contentchecksum->contentmd5sum ) );
 		}
@@ -1718,7 +1720,7 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 				for ( item = list_first(vars->value); item; item = list_next(item) )
 				{
 					char const* str = list_value(item);
-					MD5Update( &context, (unsigned char*)str, (unsigned int)strlen(str) );
+					XXH3_128bits_update(state, (unsigned char*)str, (unsigned int)strlen(str) );
 					if( DEBUG_MD5HASH )
 						printf( "\t\t%sCOMMANDLINE: %s\n", spaces( depth ), str );
 				}
@@ -1743,12 +1745,12 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 	if ( t->includes )
 	{
 		const char* includesStr = "#includes";
-		MD5Update( &context, (unsigned char*)includesStr, (unsigned int)strlen( includesStr ) );
+		XXH3_128bits_update(state, (unsigned char*)includesStr, (unsigned int)strlen( includesStr ) );
 
 		if( DEBUG_MD5HASH )
 			printf( "\t\t%s#includes:\n", spaces( depth ) );
 		++make0recurseincludes_epoch;
-		make0recurseincludesmd5sum( &context, t->includes, depth + 1 );
+		make0recurseincludesmd5sum( state, t->includes, depth + 1 );
 	}
 
     /* for each of your dependencies */
@@ -1769,10 +1771,10 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 		/* add name of the dependency and its contents */
 		if ( c->target->buildmd5sum_calculated )
 		{
-			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
+			XXH3_128bits_update(state, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
 			if ( !( c->target->flags & T_FLAG_FORCECONTENTSONLY ) )
 			{
-				MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+				XXH3_128bits_update(state, &c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
 				if( DEBUG_MD5HASH )
 					printf( "\t\t%sdepends: %s %s\n", spaces( depth ), c->target->name, md5tostring( c->target->buildmd5sum ) );
 			}
@@ -1780,13 +1782,14 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 			{
 				if( DEBUG_MD5HASH )
 					printf( "\t\t%sdepends: %s %s\n", spaces( depth ), c->target->name, md5tostring( c->target->buildmd5sum ) );
-				MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
+				XXH3_128bits_update(state, &c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
 				if( DEBUG_MD5HASH )
 					printf( "\t\t  %s%s: md5 %s\n", spaces( depth ), c->target->name, md5tostring( c->target->contentchecksum->contentmd5sum ) );
 			}
 		}
 	}
-	MD5Final( t->buildmd5sum, &context );
+	t->buildmd5sum = XXH3_128bits_digest(state);
+	XXH3_freeState(state);
 	if( DEBUG_MD5HASH ) {
 		printf( "\t\t%sbuildmd5sum: %s (%s)\n", spaces( depth ), t->name, md5tostring(t->buildmd5sum));
 	}

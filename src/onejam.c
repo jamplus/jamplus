@@ -129,6 +129,7 @@
 #include "variable.c"
 #include "w32_getreg.c"
 #include "w32_shortname.c"
+#include "xxhash.c"
 
 #undef LoadString
 #include "luaplus/Src/LuaPlus/lua53-luaplus/src/lua.h"

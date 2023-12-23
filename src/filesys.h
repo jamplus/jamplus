@@ -11,6 +11,7 @@
  */
 
 #include "buffer.h"
+#include "xxhash.h"
 
 #ifdef OPT_SCAN_SUBDIR_NOTIFY_EXT
 typedef void (*scanback)( void *closure, const char *file, int found, time_t t, int dir );
@@ -35,10 +36,10 @@ int file_pclose(FILE *file);
 #endif
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
-int copyfile(const char *dstin, const char *src, MD5SUM* md5sum);
+int copyfile(const char *dstin, const char *src, XXH128_hash_t* hash);
 int jfindfile(const char* wildcard, BUFFER* foundfilebuff);
-const char *md5tostring(MD5SUM sum);
-void md5file(const char *filename, MD5SUM sum);
+const char *md5tostring(XXH128_hash_t sum);
+void md5file(const char *filename, XXH128_hash_t* hash);
 #endif
 
 #ifdef OPT_SET_JAMPROCESSPATH_EXT

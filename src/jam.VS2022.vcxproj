@@ -322,6 +322,7 @@
     <ClCompile Include="variable.c" />
     <ClCompile Include="w32_getreg.c" />
     <ClCompile Include="w32_shortname.c" />
+    <ClCompile Include="xxhash.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.h" />
@@ -444,6 +445,7 @@
     <ClInclude Include="variable.h" />
     <ClInclude Include="w32_getreg.h" />
     <ClInclude Include="w32_shortname.h" />
+    <ClInclude Include="xxhash.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="luaplus\Src\Modules\lanes\src\lanes.lua" />

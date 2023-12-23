@@ -567,9 +567,9 @@ int file_pclose(FILE *file)
 /*
  * copyfile() - copy one file into another. returns 1 if successful
  */
-int copyfile(const char *dst, const char *src, MD5SUM* md5sum)
+int copyfile(const char *dst, const char *src, XXH128_hash_t* hash)
 {
-    MD5_CTX context;
+    XXH3_state_t* state = NULL;
     size_t size = 0, sizeout = 0;
     FILE *fsrc = NULL, *fdst = NULL;
     unsigned char block[1<<16];
@@ -591,8 +591,9 @@ int copyfile(const char *dst, const char *src, MD5SUM* md5sum)
 	return 0;
     }
 
-    if (md5sum) {
-	MD5Init(&context);
+    if (hash) {
+        state = XXH3_createState();
+        XXH3_128bits_reset(state);
     }
 
     while(!feof(fsrc)) {
@@ -601,8 +602,8 @@ int copyfile(const char *dst, const char *src, MD5SUM* md5sum)
 	    break;
 	}
 
-	if (md5sum) {
-	    MD5Update(&context, block, (unsigned int)size);
+	if (hash) {
+        XXH3_128bits_update(state, block, size);
 	}
 
 	sizeout = fwrite(block, 1, size, fdst);
@@ -614,8 +615,9 @@ int copyfile(const char *dst, const char *src, MD5SUM* md5sum)
 	}
     }
 
-    if (md5sum) {
-	MD5Final(*md5sum, &context);
+    if (hash) {
+        *hash = XXH3_128bits_digest(state);
+        XXH3_freeState(state);
     }
 
     fclose(fsrc);
@@ -645,11 +647,14 @@ int jfindfile(const char* wildcard, BUFFER* foundfilebuff)
 # include "newstr.h"
 
 /* Convert md5sum to a string representation. */
-const char *md5tostring(MD5SUM sum)
+const char *md5tostring(XXH128_hash_t hash)
 {
+  unsigned char sum[16];
   char buffer[1024];
   char *pbuf = buffer;
   int ch, i, val;
+
+  memcpy(sum, &hash, 16);
 
   /* add use md5 as filename */
   for( i=0; i<MD5_SUMSIZE; i++ ) {
@@ -677,30 +682,53 @@ const char *md5tostring(MD5SUM sum)
 
 
 /* Calculate md5sum of a file. */
-void md5file(const char *filename, MD5SUM sum)
+void md5file(const char *filename, XXH128_hash_t* sum)
 {
-    MD5_CTX context;
-#define BLOCK_SIZE 1024 /* file is read in blocks of custom size, just so we don't have to read the whole file at once */
+#define BLOCK_SIZE 64*1024 /* file is read in blocks of custom size, just so we don't have to read the whole file at once */
+#if 0
+	if (0) {
+    FILE *f = fopen( filename, "rb" );
+    unsigned char* block;
+    block = malloc(BLOCK_SIZE);
+    /* for each block in the file */
+    while (!feof(f)) {
+        size_t readsize = fread(block, 1, BLOCK_SIZE, f);
+    }
+    free(block);
+    fclose(f);
+		memset(sum, 1, sizeof(sum));
+		return;
+	}
+#endif
+
+    XXH3_state_t* state;
+    unsigned char* block;
     FILE *f = fopen( filename, "rb" );
 
     if( f == NULL ) {
 //	printf("Cannot calculate md5 for %s\n", filename);
-	memset(sum, 0, sizeof(MD5SUM));
-	return;
+        memset(sum, 0, sizeof(MD5SUM));
+        return;
     }
 
-    /* initialize the MD5 hash state */
-    MD5Init( &context );
+    /* initialize the hash state */
+    state = XXH3_createState();
+    XXH3_128bits_reset(state);
+
+    block = malloc(BLOCK_SIZE);
 
     /* for each block in the file */
     while (!feof(f)) {
-	unsigned char block[BLOCK_SIZE];
-	size_t readsize = fread(block, 1, BLOCK_SIZE, f);
-	/* process the block - adding its values to the hash */
-	MD5Update( &context, block, (unsigned int)readsize );
+        size_t readsize = fread(block, 1, BLOCK_SIZE, f);
+        /* process the block - adding its values to the hash */
+        XXH3_128bits_update(state, block, readsize);
     }
+
+    free(block);
+
     /* finish input processing - write the hash key to the destination buffer */
-    MD5Final( sum, &context );
+    *sum = XXH3_128bits_digest(state);
+    XXH3_freeState(state);
 
     fclose(f);
 }

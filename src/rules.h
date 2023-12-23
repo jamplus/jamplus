@@ -38,6 +38,8 @@
 
 #pragma once
 
+#include "xxhash.h"
+
 typedef struct _rule RULE;
 typedef struct _target TARGET;
 typedef struct _targets TARGETS;
@@ -195,8 +197,8 @@ struct _target {
 	TARGETS		*dependssortedbyname;
 
 	struct checksumdata *contentchecksum; /* existing md5sum - either direct (for sources) or indirect (for those that have actions) */
-	MD5SUM		buildmd5sum;	/* new indirect md5sum calculated from actions */
-	MD5SUM		rulemd5sum;	/*  */
+	XXH128_hash_t		buildmd5sum;	/* new indirect md5sum calculated from actions */
+	XXH128_hash_t		rulemd5sum;	/*  */
 	char		rulemd5sumchecked;
 	char		rulemd5sumclean;
 	char		buildmd5sum_calculated;

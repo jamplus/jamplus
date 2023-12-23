@@ -116,7 +116,7 @@ extern int make0calcmd5sum_epoch;
 extern int make0calcmd5sum_timestamp_epoch;
 extern int make0calcmd5sum_dependssorted_stage;
 void make0calcmd5sum( TARGET *t, int source, int depth, int force );
-void make1buildchecksum( const char* makestage, TARGET *t, MD5SUM buildmd5sum, int force );
+void make1buildchecksum( const char* makestage, TARGET *t, XXH128_hash_t* buildmd5sum, int force );
 #endif
 
 extern int clean_unused_files(int usealltargets);
@@ -139,8 +139,8 @@ static struct {
 
 #ifdef OPT_BUILTIN_MD5CACHE_EXT
 
-void read_md5sum( FILE *f, MD5SUM sum);
-void write_md5sum( FILE *f, MD5SUM sum);
+void read_md5sum( FILE *f, XXH128_hash_t sum);
+void write_md5sum( FILE *f, XXH128_hash_t sum);
 void write_string( FILE *f, const char *s );
 
 #endif
@@ -481,14 +481,14 @@ make1b( TARGET *t )
 			{
 				if (md5matchescommandline(t))
 				{
-					MD5SUM buildmd5sum;
+					XXH128_hash_t buildmd5sum;
 
 					t->buildmd5sum_calculated = 0;
 
 					++make0calcmd5sum_epoch;
 					++make0calcmd5sum_timestamp_epoch;
 					//make0calcmd5sum( t, 1, 1 );
-					make1buildchecksum("make1b", t, buildmd5sum, 1);
+					make1buildchecksum("make1b", t, &buildmd5sum, 1);
 
 					if (checksum_retrieve(t, buildmd5sum, 1) == 1)
 					{
@@ -1175,7 +1175,7 @@ make1d(
 	    LIST *targets = lol_get( &cmd->args, 0 );
 
 		for (target = list_first(cmd->targetsunbound); target; target = list_next(target)) {
-			MD5SUM buildmd5sum;
+			XXH128_hash_t buildmd5sum;
 			TARGET *t = bindtarget(list_value(target));
 			//if ((usechecksums  ||  (t->flags & T_FLAG_SCANCONTENTS))  &&  !(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
 			if (!(t->flags & (T_FLAG_NOUPDATE | T_FLAG_NOTFILE))) {
@@ -1204,7 +1204,7 @@ make1d(
 						freesettings( s );
 					}
 #endif
-					make1buildchecksum( "make1d", t, buildmd5sum, 1 );
+					make1buildchecksum( "make1d", t, &buildmd5sum, 1 );
 
 #ifdef OPT_USE_CHECKSUMS_EXT
 					checksum_update(t, buildmd5sum);
@@ -1241,10 +1241,10 @@ make1d(
 TARGETS *
 make0sortbyname( TARGETS *chain );
 
-void make1buildchecksum( const char* makestage, TARGET *t, MD5SUM buildmd5sum, int force )
+void make1buildchecksum( const char* makestage, TARGET *t, XXH128_hash_t* buildmd5sum, int force )
 {
 	TARGETS *c;
-	MD5_CTX context;
+	XXH3_state_t* state;
 
 	if( DEBUG_MD5HASH ) {
 		printf( "------------------------------------------------\n" );
@@ -1263,12 +1263,13 @@ void make1buildchecksum( const char* makestage, TARGET *t, MD5SUM buildmd5sum, i
 		t->dependssorted = make0calcmd5sum_dependssorted_stage;
 	}
 
-	MD5Init( &context );
+	state = XXH3_createState();
+	XXH3_128bits_reset(state);
 
 	/* add the path of the file to the sum - it is significant because one command can create more than one file */
 	if( DEBUG_MD5HASH )
 		printf( "\t\tmake1buildchecksum %s target: %s\n", makestage, t->name );
-	MD5Update( &context, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
+	XXH3_128bits_update( state, (unsigned char*)t->name, (unsigned int)strlen( t->name ) );
 
 	/* add in the COMMANDLINE */
 	if ( t->flags & T_FLAG_USECOMMANDLINE )
@@ -1279,7 +1280,7 @@ void make1buildchecksum( const char* makestage, TARGET *t, MD5SUM buildmd5sum, i
 			LISTITEM *list;
 			for ( list = list_first(vars->value); list; list = list_next(list) )
 			{
-				MD5Update( &context, (unsigned char*)list_value(list), (unsigned int)strlen( list_value(list) ) );
+				XXH3_128bits_update( state, (unsigned char*)list_value(list), (unsigned int)strlen( list_value(list) ) );
 				if( DEBUG_MD5HASH )
 					printf( "\t\tCOMMANDLINE: %s\n", list_value(list) );
 			}
@@ -1302,28 +1303,29 @@ void make1buildchecksum( const char* makestage, TARGET *t, MD5SUM buildmd5sum, i
 		{
 			if( DEBUG_MD5HASH )
 				printf( "\t\tmake1buildchecksum child target %s\n", c->target->name );
-			MD5Update( &context, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
+			XXH3_128bits_update( state, (unsigned char*)c->target->name, (unsigned int)strlen( c->target->name ) );
 			if ( c->target->flags & T_FLAG_FORCECONTENTSONLY )
 			{
 				if ( !( c->target->flags & T_FLAG_IGNORECONTENTS )  &&  c->target->contentchecksum  &&  !ismd5empty( c->target->contentchecksum->contentmd5sum ) )
 				{
-					MD5Update( &context, c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
+					XXH3_128bits_update( state, &c->target->contentchecksum->contentmd5sum, sizeof( c->target->contentchecksum->contentmd5sum ) );
 					if( DEBUG_MD5HASH )
 						printf( "\t\t\tmake1buildchecksum child target %s content md5sum: %s\n", c->target->name, md5tostring(c->target->contentchecksum->contentmd5sum) );
 				}
 			}
 			else
 			{
-				MD5Update( &context, c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
+				XXH3_128bits_update( state, &c->target->buildmd5sum, sizeof( c->target->buildmd5sum ) );
 				if( DEBUG_MD5HASH )
 					printf( "\t\t\tmake1buildchecksum child target %s buildmd5sum: %s\n", c->target->name, md5tostring(c->target->buildmd5sum) );
 			}
 		}
 	}
 
-	MD5Final( buildmd5sum, &context );
+	*buildmd5sum = XXH3_128bits_digest(state);
+	XXH3_freeState(state);
 	if( DEBUG_MD5HASH )
-		printf( "\t\tmake1buildchecksum returned buildmd5sum: %s\n", md5tostring(buildmd5sum) );
+		printf( "\t\tmake1buildchecksum returned buildmd5sum: %s\n", md5tostring(*buildmd5sum) );
 }
 
 #endif
@@ -1450,16 +1452,18 @@ make1cmds( ACTIONS *a0 )
 					/* if this target could be cacheable */
 					if ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate  ||  t->filecache_use) ) {
 						/* find its final md5sum */
-						MD5_CTX context;
-						MD5SUM buildsumorg;
+						XXH3_state_t* state;
+						XXH128_hash_t buildsumorg;
 						anycacheable = 1;
 						memcpy(&buildsumorg, &t->buildmd5sum, sizeof(t->buildmd5sum));
-						MD5Init( &context );
-						MD5Update( &context, t->buildmd5sum, sizeof( t->buildmd5sum ) );
+						state = XXH3_createState();
+						XXH3_128bits_reset(state);
+						XXH3_128bits_update(state, &t->buildmd5sum, sizeof( t->buildmd5sum ) );
 						{
 							TARGET *outt = bindtarget( t->boundname );
 							outt->flags |= T_FLAG_USEFILECACHE;
-							MD5Final( outt->buildmd5sum, &context );
+							outt->buildmd5sum = XXH3_128bits_digest(state);
+							XXH3_freeState(state);
 							memcpy(&t->buildmd5sum, &outt->buildmd5sum, sizeof(t->buildmd5sum));
 						}
 						if (DEBUG_MD5HASH) {
@@ -1549,7 +1553,7 @@ make1cmds( ACTIONS *a0 )
 						if ( filecache ) {
 							outt->settings = addsettings( outt->settings, VAR_SET, "FILECACHE", list_append( L0, list_value(list_first(filecache)), 1 ) );
 						}
-						make1buildchecksum( "make1cmds", t, outt->buildmd5sum, 1 );
+						make1buildchecksum( "make1cmds", t, &outt->buildmd5sum, 1 );
 
 						if (DEBUG_MD5HASH)
 						{
@@ -2044,7 +2048,7 @@ make1list_batched(
 
 static void
 make1list_batched(
-        MD5SUM *md5forcmd,
+        XXH128_hash_t *md5forcmd,
         LIST**plt,
         LIST**pls,
         TARGETS *targets,
@@ -2107,7 +2111,7 @@ make1list_batched(
 	if ( (t->flags & T_FLAG_USEFILECACHE) && (t->filecache_generate || t->filecache_use) ) {
 	    /* find its final md5sum */
 	    MD5_CTX context;
-	    MD5SUM buildsumorg;
+	    XXH128_hash_t buildsumorg;
 	    memcpy(&buildsumorg, &t->buildmd5sum, sizeof(t->buildmd5sum));
 	    MD5Init( &context );
 

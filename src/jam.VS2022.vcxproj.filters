@@ -450,6 +450,9 @@
     <ClCompile Include="buffer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="xxhash.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.h">
@@ -811,6 +814,9 @@
     </ClInclude>
     <ClInclude Include="luaplus\Src\Modules\ziparchive\Misc\ZipEntryFile.h">
       <Filter>Lua Files\Lua Modules\ziparchive\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="xxhash.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
