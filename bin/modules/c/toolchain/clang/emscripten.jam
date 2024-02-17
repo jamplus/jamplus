@@ -8,7 +8,7 @@ rule C.Toolchain.clang.emscripten.Detect {
             emcc = [ Glob $(PATHS) : emcc ] ;
         } else {
             local PATHS =
-                "c:/Program Files/Emscripten/emscripten/1.25.0"
+                $(EMSDK)/upstream/emscripten
                 $(PATH)
                 ;
             emcc = [ Glob $(PATHS) : emcc.bat ] ;
@@ -19,10 +19,7 @@ rule C.Toolchain.clang.emscripten.Detect {
     }
 
     local SUFEXE = .js ;
-    if $(EMSCRIPTEN_HTML) {
-        SUFEXE = .html ;
-    }
-    C.Toolchain.clang.Setup $(EMSCRIPTEN_PATH) : .bc $(SUFEXE) ;
+    C.Toolchain.clang.Setup $(EMSCRIPTEN_PATH) : .o $(SUFEXE) ;
 
     C.AR on $(C.COMPILER_SUITE_SYMBOL) = $(EMSCRIPTEN_PATH)/emar ;
     C.CC on $(C.COMPILER_SUITE_SYMBOL) = $(EMSCRIPTEN_PATH)/emcc ;
@@ -30,6 +27,11 @@ rule C.Toolchain.clang.emscripten.Detect {
     C.LINK on $(C.COMPILER_SUITE_SYMBOL) = $(EMSCRIPTEN_PATH)/emcc ;
     C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = $(EMSCRIPTEN_PATH)/emranlib ;
 
+    C.Toolchain.$(C.COMPILER_SUITE).emscripten-shared ;
+
+    C._ApplicationFromObjects_CleanIntermediates on $(C.COMPILER_SUITE_SYMBOL) = C.emscripten._ApplicationFromObjects_CleanIntermediates ;
+    C._ApplicationFromObjects_LinkFlags on $(C.COMPILER_SUITE_SYMBOL) = C.emscripten._ApplicationFromObjects_LinkFlags ;
+    C._ApplicationFromObjects_Setup on $(C.COMPILER_SUITE_SYMBOL) = C.emscripten._ApplicationFromObjects_Setup ;
+
     return $(C.COMPILER) ;
 }
-

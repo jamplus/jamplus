@@ -1,0 +1,29 @@
+rule C.Toolchain.clang.emscripten-shared {
+}
+
+rule C.emscripten._ApplicationFromObjects_CleanIntermediates {
+    # Clean the extra files.
+    local sufexe = $(_linkTargets[1]:S) ;
+    local sufs = .wasm ;
+    if $(sufexe) = .html {
+        sufs += .js ;
+    }
+    local zap = $(_tBINDING:S=$(sufs)) ;
+    MakeLocate $(zap) : $(outputPath) ;
+    Clean $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(zap) ;
+    CLEAN.KEEP_TARGETS += $(zap) ;
+
+    Depends $(zap) : $(_linkTargets) ;
+}
+
+
+rule C.emscripten._ApplicationFromObjects_LinkFlags {
+}
+
+
+rule C.emscripten._ApplicationFromObjects_Setup {
+    if html in $(OPTIONS) {
+        SUFEXE on $(C.ACTIVE_TOOLCHAIN_TARGET) = .html ;
+    }
+}
+
