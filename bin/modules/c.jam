@@ -628,7 +628,8 @@ rule C._ApplicationFromObjects OBJECTS : OPTIONS {
 
 	local _s = $(OBJECTS:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 
-	local sufexe = $(SUFEXE:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
+	local sufexe = $(SUFEXE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	sufexe ?= $(SUFEXE:Z=$(C.COMPILER_SUITE_SYMBOL)) ;
 	local _t = $(TARGET:S=$(sufexe):G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
 	local _tBINDING = [ C._retrieveOutputName : $(sufexe) ] ;
 	BINDING on $(_t) = $(_tBINDING) ;
