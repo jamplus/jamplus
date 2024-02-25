@@ -511,9 +511,12 @@ static int Lzip_write_string(lua_State *L) {
 static int Lzip_write_file(lua_State *L) {
     const char *filename = luaL_checkstring(L, 1);
     size_t size_to_reserve_at_beginning = (size_t)luaL_optinteger(L, 2, 0);
+    mz_uint flags = (mz_uint)luaL_optinteger(L, 3, 0);
+    mz_uint alignment = (mz_uint)luaL_optinteger(L, 4, 0);
     mz_zip_archive* za = (mz_zip_archive*)lua_newuserdata(L, sizeof(mz_zip_archive));
     mz_zip_zero_struct(za);
-    if (!mz_zip_writer_init_file(za, filename, size_to_reserve_at_beginning))
+    za->m_file_offset_alignment = alignment;
+    if (!mz_zip_writer_init_file_v2(za, filename, size_to_reserve_at_beginning, flags))
         return lmz_zip_pusherror(L, za, filename);
     luaL_setmetatable(L, LMZ_ZIP_WRITER);
     return 1;
@@ -610,9 +613,47 @@ LUAMOD_API int luaopen_miniz(lua_State *L) {
 #undef  ENTRY
         { NULL, NULL }
     };
+
+
+
     open_zipreader(L);
     open_zipwriter(L);
     luaL_newlib(L, libs);
+
+    lua_pushnumber(L, MZ_ZIP_FLAG_CASE_SENSITIVE);
+    lua_setfield(L, -2, "MZ_ZIP_FLAG_CASE_SENSITIVE");
+    lua_pushnumber(L, MZ_ZIP_FLAG_IGNORE_PATH);
+    lua_setfield(L, -2, "MZ_ZIP_FLAG_IGNORE_PATH");
+    lua_pushnumber(L, MZ_ZIP_FLAG_COMPRESSED_DATA);
+    lua_setfield(L, -2, "MZ_ZIP_FLAG_COMPRESSED_DATA");
+    lua_pushnumber(L, MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY);
+    lua_setfield(L, -2, "MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY");
+    lua_pushnumber(L, MZ_ZIP_FLAG_VALIDATE_LOCATE_FILE_FLAG);
+    lua_setfield(L, -2, "MZ_ZIP_FLAG_VALIDATE_LOCATE_FILE_FLAG");
+    lua_pushnumber(L, MZ_ZIP_FLAG_VALIDATE_HEADERS_ONLY);
+    lua_setfield(L, -2, "MZ_ZIP_FLAG_VALIDATE_HEADERS_ONLY");
+    lua_pushnumber(L, MZ_ZIP_FLAG_WRITE_ZIP64);
+    lua_setfield(L, -2, "MZ_ZIP_FLAG_WRITE_ZIP64");
+    lua_pushnumber(L, MZ_ZIP_FLAG_WRITE_ALLOW_READING);
+    lua_setfield(L, -2, "MZ_ZIP_FLAG_WRITE_ALLOW_READING");
+    lua_pushnumber(L, MZ_ZIP_FLAG_ASCII_FILENAME);
+    lua_setfield(L, -2, "MZ_ZIP_FLAG_ASCII_FILENAME");
+    lua_pushnumber(L, MZ_ZIP_FLAG_WRITE_HEADER_SET_SIZE);
+    lua_setfield(L, -2, "MZ_ZIP_FLAG_WRITE_HEADER_SET_SIZE");
+
+    lua_pushnumber(L, MZ_NO_COMPRESSION);
+    lua_setfield(L, -2, "MZ_NO_COMPRESSION");
+    lua_pushnumber(L, MZ_BEST_SPEED);
+    lua_setfield(L, -2, "MZ_BEST_SPEED");
+    lua_pushnumber(L, MZ_BEST_COMPRESSION);
+    lua_setfield(L, -2, "MZ_BEST_COMPRESSION");
+    lua_pushnumber(L, MZ_UBER_COMPRESSION);
+    lua_setfield(L, -2, "MZ_UBER_COMPRESSION");
+    lua_pushnumber(L, MZ_DEFAULT_LEVEL);
+    lua_setfield(L, -2, "MZ_DEFAULT_LEVEL");
+    lua_pushnumber(L, MZ_DEFAULT_COMPRESSION);
+    lua_setfield(L, -2, "MZ_DEFAULT_COMPRESSION");
+
     return 1;
 }
 
