@@ -21,6 +21,7 @@
 # include "expand.h"
 # include "tmpfile.h"
 #endif
+# include "filesys.h"
 
 # include "command.h"
 # include "buffer.h"
@@ -331,6 +332,7 @@ cmd_string(
 
 		    ((char*)ine)[0] = save;
 
+			file_mkdir(buffer_ptr( &subbuff ));
 		    file = fopen(buffer_ptr( &subbuff ), "wb");
 			if (!file)
 			{
