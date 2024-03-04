@@ -472,9 +472,9 @@ int main( int argc, char **argv, char **arg_environ )
 
 #ifdef OPT_SETCWD_SETTING_EXT
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
-	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tabno:qvS", optv, targets, &extra_options ) ) < 0 )
+	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tabno:qvSr", optv, targets, &extra_options ) ) < 0 )
 #else
-	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qvS", optv, targets, &extra_options ) ) < 0 )
+	if( ( num_targets = getoptions( argc, argv, "d:C:j:f:gs:t:Tano:qvSr", optv, targets, &extra_options ) ) < 0 )
 #endif
 #else
 #ifdef OPT_BUILTIN_LUA_SUPPORT_EXT
@@ -504,6 +504,7 @@ int main( int argc, char **argv, char **arg_environ )
             printf( "-n      Don't actually execute the updating actions.\n" );
             printf( "-ox     Write the updating actions to file x.\n" );
             printf( "-q      Quit quickly as soon as a target fails.\n" );
+            printf( "-r      Run command mode.\n" );
             printf( "-S      Silence on missing rules.\n" );
 	    printf( "-sx=y   Set variable x=y, overriding environment.\n" );
             printf( "-tx     Rebuild x, even if it is up-to-date.\n" );
@@ -822,21 +823,19 @@ int main( int argc, char **argv, char **arg_environ )
     var_set( "DEPCACHE", list_append( L0, "standard", 0 ), VAR_SET );
 
 #ifdef OPT_SET_JAMCOMMANDLINETARGETS_EXT
+	/* Go through the list of targets specified on the command line, */
+	/* and add them to a variable called JAM_COMMAND_LINE_TARGETS. */
+	LIST* l = L0;
+	int n_targets = num_targets ? num_targets : 1;
+	const char** actual_targets = num_targets ? (const char**)targets : &all;
+	int i;
+
+	for ( i = 0; i < n_targets; ++i )
 	{
-		/* Go through the list of targets specified on the command line, */
-		/* and add them to a variable called JAM_COMMAND_LINE_TARGETS. */
-		LIST* l = L0;
-		int n_targets = num_targets ? num_targets : 1;
-		const char** actual_targets = num_targets ? (const char**)targets : &all;
-		int i;
-
-		for ( i = 0; i < n_targets; ++i )
-		{
-			l = list_append( l, actual_targets[ i ], 0 );
-		}
-
-		var_set( "JAM_COMMAND_LINE_TARGETS", l, VAR_SET );
+		l = list_append( l, actual_targets[ i ], 0 );
 	}
+
+	var_set( "JAM_COMMAND_LINE_TARGETS", l, VAR_SET );
 
 	if ( extra_options != NULL )
 	{
@@ -850,7 +849,51 @@ int main( int argc, char **argv, char **arg_environ )
 
 		var_set( "JAM_EXTRA_COMMAND_LINE_OPTIONS", l, VAR_SET );
 	}
+
+	if( ( s = getoptval( optv, 'r', 0 ) ) )
+	{
+		var_set( "JAM_RUN_MODE", list_append( L0, "1", 0 ), VAR_SET );
+	}
+#if 0
+	else
+	{
+		var_set( "JAM_RUN_MODE", list_append( L0, "1", 0 ), VAR_SET );
+
+		{
+			/* Go through the list of targets specified on the command line, */
+			/* and add them to a variable called JAM_COMMAND_LINE_TARGETS. */
+			LIST* l = L0;
+			int n_targets = num_targets ? num_targets : 1;
+			const char** actual_targets = num_targets ? (const char**)targets : &all;
+			int i;
+
+			l = list_append( l, actual_targets[ 0 ], 0 );
+			var_set( "JAM_COMMAND_LINE_TARGETS", l, VAR_SET );
+
+			l = L0;
+
+			for ( i = 1; i < n_targets; ++i )
+			{
+				l = list_append( l, actual_targets[ i ], 0 );
+			}
+
+			if ( extra_options != NULL )
+			{
+				const char** extra_option = extra_options;
+				while ( *extra_option )
+				{
+					l = list_append( l, *extra_option, 1 );
+					++extra_option;
+				}
+			}
+
+			var_set( "JAM_EXTRA_COMMAND_LINE_OPTIONS", l, VAR_SET );
+		}
+
+	}
 #endif
+#endif
+
 
 	/* Parse ruleset */
 

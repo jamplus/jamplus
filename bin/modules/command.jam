@@ -1,0 +1,48 @@
+REGISTERED_COMMANDS = ;
+
+rule Command NAME : LINES : ACTION_MODIFIERS {
+	REGISTERED_COMMANDS += $(NAME) ;
+
+    Always $(NAME) ;
+    if $(LINES) {
+        ACTION_MODIFIERS ?= screenoutput ;
+        local actionLine ;
+        local index = 1 ;
+        for actionLine in $(LINES) {
+            parse "actions $(ACTION_MODIFIERS:J=$(SPACE)) $(NAME)$(index) { $(actionLine) }" ;
+            $(NAME)$(index) $(NAME) ;
+            index = [ Math $(index) + 1 ] ;
+        }
+    } else {
+        $(NAME) $(NAME) ;
+    }
+    DebugSuppressMakeText ;
+}
+
+rule CommandLua NAME : LINES {
+    Always $(NAME) ;
+    if $(LINES) {
+        local actionLine ;
+        local index = 1 ;
+        for actionLine in $(LINES) {
+            parse "actions lua $(NAME)$(index) { $(actionLine) }" ;
+            $(NAME)$(index) $(NAME) ;
+            index = [ Math $(index) + 1 ] ;
+        }
+    } else {
+        $(NAME) $(NAME) ;
+    }
+    DebugSuppressMakeText ;
+}
+
+actions lua help {
+	print('Available commands:')
+
+	local commands = jam_getvar('REGISTERED_COMMANDS')
+	table.sort(commands)
+
+	local command
+	for _, command in ipairs(commands) do
+		print('', command)
+	end
+}
