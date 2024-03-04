@@ -1115,6 +1115,85 @@ int getcachedmd5sum( TARGET *t, int forcetimecheck )
 }
 
 /*
+ */
+int getcachedmd5sumhelper( const char *boundname, MD5SUM newmd5sum, int forcetimecheck )
+{
+	time_t ftime;
+	CHECKSUMDATA checksumdata, *c = &checksumdata;
+
+	checksums_readfile();
+
+	{
+		const char *target = boundname;
+# ifdef DOWNSHIFT_PATHS
+		char path[ MAXJPATH ];
+		char *p = path;
+
+		do *p++ = (char)tolower( *target ); while( *target++ );
+
+		target = path;
+# endif
+
+		c->boundname = target;
+
+		if ( !hashcheck( checksumhash, (HASHDATA **) &c ) ) {
+			if ( hashenter( checksumhash, (HASHDATA **)&c ) ) {
+				c->boundname = newstr( c->boundname );
+				c->next = checksumdatalist;
+				checksumdatalist = c;
+				c->originalmtime = 0;
+				c->currentmtime = 0;
+				memset( &c->contentmd5sum, 0, MD5_SUMSIZE );
+				c->contentmd5sum_changed = 1;
+				c->contentmd5sum_calculated = 0;
+				c->age = 0;
+			}
+		}
+	}
+
+	timestamp( boundname, &ftime, 0 );
+	if ( forcetimecheck ) {
+		/* This file may have generated or updated in another fashion.  Grab its timestamp. */
+		c->contentmd5sum_calculated = 1;
+
+//		if ( file_time( c->boundname, &ftime ) == -1 ) {
+		if (forcetimecheck) {
+			timestamp_updatetime( c->boundname );
+			timestamp( c->boundname, &ftime, 0 );
+		}
+		if ( ftime == 0 ) {
+			/* This file is not present anymore. */
+			c->age = 0; /* The entry has been used, its young again */
+			c->originalmtime = 0;
+			c->currentmtime = 0;
+			c->contentmd5sum_changed = 1;
+			memset( &c->contentmd5sum, 0, MD5_SUMSIZE );
+			checksumsdirty = 1;
+			return 1;
+		}
+
+		/* 'c' points at the cache entry.  Its out of date. */
+
+		if ( ftime != c->currentmtime )
+		{
+			MD5SUM origmd5sum;
+			memcpy( &origmd5sum, &c->contentmd5sum, sizeof( MD5SUM ) );
+			memcpy( c->contentmd5sum, newmd5sum, sizeof( MD5SUM ));
+			c->contentmd5sum_changed = memcmp( &origmd5sum, &c->contentmd5sum, sizeof( MD5SUM ) ) != 0;
+			if (c->originalmtime == 0 || c->contentmd5sum_changed) {
+				c->originalmtime = ftime;
+			}
+			c->currentmtime = ftime;
+		}
+
+		c->age = 0;
+		checksumsdirty = 1;
+	}
+
+	return c->contentmd5sum_changed;
+}
+
+/*
  * Set cached md5sum of a file.
  */
 #if 0

@@ -27,6 +27,7 @@ const char* hcache_get_builtinfilename(void);
 int read_md5sum_string( const char* str, MD5SUM sum);
 int ismd5empty( MD5SUM md5sum );
 int getcachedmd5sum( TARGET *t, int forcetimecheck );
+int getcachedmd5sumhelper( const char *boundname, MD5SUM newmd5sum, int forcetimecheck );
 void setcachedmd5sum( TARGET *t );
 const char *checksums_filename();
 void checksums_nextpass();
