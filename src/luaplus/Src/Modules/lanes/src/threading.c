@@ -526,7 +526,7 @@ bool_t THREAD_WAIT_IMPL( THREAD_T *ref, double secs)
 
 	bool_t SIGNAL_WAIT( SIGNAL_T *ref, MUTEX_T *mu_ref, time_d abs_secs)
 	{
-		long ms;
+		unsigned long ms;
 
 		if( abs_secs < 0.0)
 			ms = INFINITE;
