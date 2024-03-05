@@ -1,0 +1,209 @@
+/*! \page examples_write_file Examples Write File
+
+\section examples_write_file_overview Writing a file
+
+The following are various methods to write a file within Jam.
+
+
+<hr>
+\section examples_write_file_1 Write a file with a custom action
+
+Copy the following to a <tt>Jamfile.jam</tt> file.
+
+\code
+actions WriteOneLineCustomFile
+{
+    echo My custom file > $(1)
+}
+
+WriteOneLineCustomFile file.txt ;
+\endcode
+
+If we were to run Jam at this point, <tt>file.txt</tt> would not be written:
+
+\code
+> jam
+*** found 1 target(s)...
+\endcode
+
+file.txt is not in the dependency chain yet, so it won't be automatically build. It can be written by running <b>jam</b> with the target name:
+
+\code
+> jam file.txt
+*** found 1 target(s)...
+*** updating 1 target(s)...
+@ WriteOneLineCustomFile file.txt
+*** updated 1 target(s)...
+\endcode
+
+Building with jam again does no additional work:
+
+\code
+> jam file.txt
+*** found 1 target(s)...
+\endcode
+
+It would be nice if we could run jam without specifying the <tt>file.txt</tt> target. We can throw it into the <tt>all</tt> dependency chain to make this happen, since <tt>all</tt> is the default target when <b>jam</b> is run without arguments.
+
+Add this to <tt>Jamfile.jam</tt>.
+
+\code
+Depends all : file1.txt ;
+\endcode
+
+Jam informs us that the target count has gone up, but nothing builds. The file is already there on disk.
+
+If <tt>file.txt</tt> is added to the <tt>clean</tt> target, then running <tt>jam clean</tt> will remove <tt>file.txt</tt>:
+
+Add the following to <tt>Jamfile.jam</tt>.
+
+\code
+Clean clean : file1.txt ;
+\endcode
+
+Then clean up the already existing <tt>file.txt</tt>:
+
+\code
+> jam clean
+*** found 2 target(s)...
+*** updating 1 target(s)...
+@ Clean clean
+*** updated 1 target(s)...
+\endcode
+
+Running jam at this point causes file.txt to be written to disk:
+
+\code
+> jam
+*** found 2 target(s)...
+*** updating 1 target(s)...
+@ WriteOneLineCustomFile file.txt
+*** updated 1 target(s)...
+\endcode
+
+Nice.
+
+
+
+
+<hr>
+\section examples_write_file_2 Write a file with changing content
+
+So, we decide to write different text to the file in the <tt>WriteOneLineCustomFile</tt> rule. The rule within Jamfile.jam is updated to this.
+
+\code
+actions WriteOneLineCustomFile
+{
+    echo My NEW custom file > $(1)
+}
+\endcode
+
+And then running Jam:
+
+\code
+> jam
+*** found 2 target(s)...
+*** finished in 0.00 sec
+\endcode
+
+Nothing happened.
+
+In Jam, changes to actions are not factored into the build. As this build is set up, only timestamps of files are considered, but there are no timestamps to be considered. We have to tell Jam the action changed in another way.
+
+The \ref rule_UseCommandLine rule can be used for this. UseCommandLine adds user-defined data to the build calculations. If that user-defined data changes from one build to another, the target will be updated regardless of timestamps. Despite its name, <tt>UseCommandLine</tt> does not change the command line of any tool used in the build.
+
+\code
+UseCommandLine file.txt : update-to-version-2 ;
+\endcode
+
+Run jam:
+
+\code
+> jam
+*** found 2 target(s)...
+*** updating 1 target(s)...
+@ WriteOneLineCustomFile file.txt
+*** updated 1 target(s)...
+*** finished in 0.01 sec
+\endcode
+
+Good. <tt>file.txt</tt> gets updated.
+
+So, any time a change is made to the text in <tt>WriteOneLineCustomFile</tt>, we can also update the <tt>UseCommandLine</tt> version to get it to build.
+
+\code
+actions WriteOneLineCustomFile
+{
+    echo My even NEWER custom file > $(1)
+}
+
+UseCommandLine file.txt : update-to-version-3 ;
+\endcode
+
+This is dodgy. We can build a better approach and make <tt>WriteOneLineCustomFile</tt> more reusable:
+
+\code
+actions WriteOneLineCustomFile
+{
+    echo $(ONE_LINE_CONTENT) > $(1)
+}
+
+Depends all : file.txt ;
+Clean clean : file.txt ;
+
+# Assign local variable 'content' with the text to write to the file.
+local content = "My newest best custom file" ;
+
+# Use 'content' in the build calculation.
+UseCommandLine file.txt : $(content) ;
+
+# Assign the setting ONE_LINE_CONTENT to the file.txt target.
+ONE_LINE_CONTENT on file.txt = $(content) ;
+WriteOneLineCustomFile file.txt ;
+\endcode
+
+
+
+
+<hr>
+\section examples_write_file_3 Writing larger text files
+
+Within <tt>WriteOneLineCustomFile</tt>, we are only writing a single line of content. Jam's list expansion features could be used to automatically expand the "echo" lines into as many as we provide, but it is ugly. A better way is to use the special expansion for writing files. In <tt>Jambase.jam</tt>, this syntax is hidden within rule \ref actions_WriteFile.
+
+\code
+actions WriteFile
+{
+    ^^($(1)|$(CONTENTS:J=))
+}
+\endcode
+
+We can use this to write multiple lines to the file:
+
+\code
+Depends all : file.txt ;
+Clean clean : file.txt ;
+
+local contents = "My newest custom file with WriteFile" ;
+local contents = "My newest custom file with WriteFileContents
+    This one has multiple lines.
+    Line #3
+" ;
+UseCommandLine file.txt : $(contents) ;
+CONTENTS on file.txt = $(contents) ;
+WriteFile file.txt ;
+\endcode
+
+In fact, Jam provides \ref rule_WriteFileContents to make this as easy to use as possible:
+
+\code
+Depends all : file.txt ;
+Clean clean : file.txt ;
+WriteFileContents file.txt : "My newest custom file with WriteFileContents
+    This one has multiple lines.
+    Line #3
+" ;
+\endcode
+
+In all cases, changing the content will result in Jam updating the generated target <tt>file.txt</tt>.
+
+*/
