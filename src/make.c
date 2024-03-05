@@ -545,6 +545,38 @@ int clean_unused_files(int usealltargets) {
 	}
 
 	int filesremoved = 0;
+	for (l = list_first(var_get("CLEAN.REMOVE_WILDCARDS")); l; l = list_next(l)) {
+		fileglob *glob = fileglob_Create(list_value(l));
+		while (fileglob_Next(glob)) {
+			USEDTARGETSDATA usedfilesdata, *c = &usedfilesdata;
+			const char *target = fileglob_FileName(glob);
+			if (verbose) {
+				printf("* Removing %s...\n", target);
+			}
+			if (!noop) {
+				unlink(target);
+				filesremoved = 1;
+			}
+		}
+		fileglob_Destroy(glob);
+	}
+
+	for (l = list_first(var_get("CLEAN.REMOVE_TARGETS")); l; l = list_next(l)) {
+		TARGET *t = bindtarget( list_value(l) );
+		if (t->boundname != NULL) {
+			time_t time;
+			if (file_time( t->boundname, &time ) != -1) {
+				if (verbose) {
+					printf("* Removing %s...\n", t->boundname);
+				}
+				if (!noop) {
+					unlink(t->boundname);
+					filesremoved = 1;
+				}
+			}
+		}
+	}
+
 	clean_roots = var_get("CLEAN.ROOTS");
 	for (l = list_first(clean_roots); l; l = list_next(l)) {
 		fileglob* glob;
