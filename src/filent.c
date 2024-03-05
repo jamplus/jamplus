@@ -570,25 +570,35 @@ int file_pclose(FILE *file)
 int copyfile(const char *dst, const char *src, XXH128_hash_t* hash)
 {
     XXH3_state_t* state = NULL;
-    size_t size = 0, sizeout = 0;
-    FILE *fsrc = NULL, *fdst = NULL;
+    size_t size = 0;
+    FILE *fsrc = NULL;
     unsigned char block[1<<16];
+    HANDLE handle;
+    FILETIME ft;
+    SYSTEMTIME st;
+    BOOL f;
 
     /* printf("copy %s->%s\n", src, dst); */
 
     file_mkdir(dst);
 
-    fsrc = fopen(src, "rb");
-    if (fsrc==NULL) {
-	printf("cannot open %s for reading - %s\n", src, strerror(errno));
-	return 0;
+    if (!CopyFile(src, dst, FALSE)) {
+        printf("cannot copy file %s to %s\n", src, dst);
+        return 0;
     }
 
-    fdst = fopen(dst, "wb");
-    if (fdst==NULL) {
-	fclose(fsrc);
-	printf("cannot open %s for writing - %s\n", dst, strerror(errno));
-	return 0;
+    // Touch the file.
+    handle = CreateFile(dst, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    GetSystemTime(&st);              // Gets the current system time
+    SystemTimeToFileTime(&st, &ft);  // Converts the current system time to file time format
+    f = SetFileTime(handle, (LPFILETIME)NULL, (LPFILETIME)NULL, &ft);
+    CloseHandle(handle);
+
+    // Hash the file.
+    fsrc = fopen(src, "rb");
+    if (fsrc==NULL) {
+		printf("cannot open %s for reading - %s\n", src, strerror(errno));
+		return 0;
     }
 
     if (hash) {
@@ -597,22 +607,14 @@ int copyfile(const char *dst, const char *src, XXH128_hash_t* hash)
     }
 
     while(!feof(fsrc)) {
-	size = fread(block, 1, sizeof(block), fsrc);
-	if (size==0) {
-	    break;
-	}
+        size = fread(block, 1, sizeof(block), fsrc);
+        if (size==0) {
+            break;
+        }
 
-	if (hash) {
-        XXH3_128bits_update(state, block, size);
-	}
-
-	sizeout = fwrite(block, 1, size, fdst);
-	if (sizeout!=size) {
-	    printf("error while copying %s to %s - %s\n", src, dst, strerror(errno));
-	    fclose(fsrc);
-	    fclose(fdst);
-	    return 0;
-	}
+        if (hash) {
+            XXH3_128bits_update(state, block, size);
+        }
     }
 
     if (hash) {
@@ -621,7 +623,6 @@ int copyfile(const char *dst, const char *src, XXH128_hash_t* hash)
     }
 
     fclose(fsrc);
-    fclose(fdst);
     return 1;
 }
 
