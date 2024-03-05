@@ -39,6 +39,7 @@ void buffer_resize(BUFFER* buff, size_t size);
 
 #define buffer_addchar(buff, c) { buffer_openspace((buff), 1); (buff)->buffer[(buff)->pos] = (c); (buff)->pos++; }
 #define buffer_addstring(buff, str, len) { size_t _len = (len); buffer_openspace((buff), _len); memcpy((buff)->buffer + (buff)->pos, str, _len); (buff)->pos += _len; }
+#define buffer_addstringx(buff, str) { size_t _len = strlen(str); buffer_openspace((buff), _len); memcpy((buff)->buffer + (buff)->pos, str, _len); (buff)->pos += _len; }
 #define buffer_putchar(buff, c) (buff)->buffer[(buff)->pos] = (c)
 #define buffer_putstring(buff, str, len) { size_t _len = (len); buffer_openspace((buff), _len); memcpy((buff)->buffer + (buff)->pos, str, _len); }
 #define buffer_setpos(buff, newpos) (buff)->pos = (newpos)

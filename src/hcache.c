@@ -655,11 +655,9 @@ const char *checksums_filename() {
 	if ( !checksumsfilename ) {
 		PATHNAME f[1];
 		char buf[ MAXJPATH ];
+		char pathbuf[ MAXJPATH ];
 
 		var = var_get( "ALL_LOCATE_TARGET" );
-		if ( !var ) {
-			var = var_get( "CWD" );
-		}
 
 		path_parse( ".jamchecksums", f );
 
@@ -669,6 +667,16 @@ const char *checksums_filename() {
 		if ( var ) {
 			f->f_root.ptr = list_value( list_first( var ) );
 			f->f_root.len = (int)( strlen( f->f_root.ptr ) );
+		} else {
+			var = var_get( "CWD" );
+			if ( var ) {
+				strcpy( pathbuf, list_value( list_first( var ) ) );
+				strcat( pathbuf, "/" );
+				strcat( pathbuf, ".build" );
+
+				f->f_root.ptr = pathbuf;
+				f->f_root.len = (int)( strlen( pathbuf ) );
+			}
 		}
 
 		path_build( f, buf, 1, 1 );
@@ -985,11 +993,9 @@ const char* hcache_get_builtinfilename(void)
 	if ( !hcachevar ) {
 		PATHNAME f[1];
 		char buf[ MAXJPATH ];
+		char pathbuf[ MAXJPATH ];
 
 		LIST* var = var_get( "ALL_LOCATE_TARGET" );
-		if ( !var ) {
-			var = var_get( "CWD" );
-		}
 
 		path_parse( ".jamdepcache", f );
 
@@ -999,6 +1005,16 @@ const char* hcache_get_builtinfilename(void)
 		if ( var ) {
 			f->f_root.ptr = list_value( list_first( var ) );
 			f->f_root.len = (int)( strlen( f->f_root.ptr ) );
+		} else {
+			var = var_get( "CWD" );
+			if ( var ) {
+				strcpy( pathbuf, list_value( list_first( var ) ) );
+				strcat( pathbuf, "/" );
+				strcat( pathbuf, ".build" );
+
+				f->f_root.ptr = pathbuf;
+				f->f_root.len = (int)( strlen( pathbuf ) );
+			}
 		}
 
 		path_build( f, buf, 1, 1 );
@@ -1258,7 +1274,43 @@ const char *filecache_getpath(TARGET *t)
 	strcpy( buffer, list_value(list_first(filecache)) );
 	strcat( buffer, ".PATH" );
 	cachevar = var_get( buffer );
-	if( list_first(cachevar) ) {
+	if ( !list_first( cachevar ) ) {
+		BUFFER pathbuf;
+		LIST* var;
+
+		buffer_init(&pathbuf);
+
+		var = var_get( "FILECACHE.PATH" );
+		if ( !list_first( var ) ) {
+			var = var_get( "ALL_LOCATE_TARGET" );
+
+			if ( var ) {
+				buffer_addstringx( &pathbuf, list_value( list_first( var ) ) );
+				buffer_addstringx( &pathbuf, "/_cache_/" );
+			} else {
+				var = var_get( "CWD" );
+				if ( var ) {
+					buffer_addstringx( &pathbuf, list_value( list_first( var ) ) );
+					buffer_addstringx( &pathbuf, "/.build/_cache_/" );
+				} else {
+					buffer_addstringx( &pathbuf, ".build/_cache_/" );
+				}
+			}
+
+		} else {
+			buffer_addstringx( &pathbuf, list_value( list_first( var ) ) );
+			buffer_addstring( &pathbuf, "/", 1 );
+		}
+
+		buffer_addstringx( &pathbuf, list_value( list_first( filecache ) ) + 10 );
+		buffer_addchar( &pathbuf, 0 );
+		var_set( buffer, list_append( L0, buffer_ptr( &pathbuf ), 0 ), VAR_SET);
+		cachevar = var_get( buffer );
+
+		buffer_free( &pathbuf );
+	}
+
+	{
 		TARGET *t = bindtarget(list_value(list_first(cachevar)));
 		//t->boundname = search( t->name, &t->time );
 		t->boundname = t->name;
@@ -1328,8 +1380,10 @@ LIST *filecache_fillvalues(TARGET *t)
 		buffer_addstring(&buff, ".USE", 4);
 		buffer_addchar(&buff, 0);
 		l = var_get( buffer_ptr( &buff ) );
-		if ( list_first(l)  &&  atoi( list_value(list_first(l)) ) != 0) {
+		if ( !list_first(l) ) {
 			t->filecache_use = 1;
+		} else {
+			t->filecache_use = atoi( list_value(list_first(l)) ) != 0;
 		}
 		buffer_free(&buff);
 
@@ -1338,8 +1392,10 @@ LIST *filecache_fillvalues(TARGET *t)
 		buffer_addstring(&buff, ".GENERATE", 9);
 		buffer_addchar(&buff, 0);
 		l = var_get( buffer_ptr( &buff ) );
-		if ( list_first(l)  &&  atoi(list_value(list_first(l))) != 0) {
+		if ( !list_first(l) ) {
 			t->filecache_generate = 1;
+		} else {
+			t->filecache_generate = atoi( list_value(list_first(l)) ) != 0;
 		}
 		buffer_free(&buff);
 	}
@@ -1669,8 +1725,7 @@ int hcache_getrulemd5sum( TARGET *t )
 # ifdef DOWNSHIFT_PATHS
 	p = path;
 
-	do *p++ = (char)tolower( *target );
-	while( *target++ );
+	do *p++ = (char)tolower( *target ); while( *target++ );
 
 	target = path;
 # endif

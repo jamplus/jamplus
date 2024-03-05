@@ -769,11 +769,13 @@ pass:
 		if ( strcmp( targets[i], "clean" ) == 0 ) {
 			LIST *var = var_get( "JAM_CHECKSUMS_KEEPCACHE" );
 			if ( !var  ||  !list_first( var )  ||  strcmp( list_value( list_first( var ) ), "1" ) != 0 ) {
+				emptydirtargets = list_append(emptydirtargets, checksums_filename(), 0);
 				unlink( checksums_filename() );
 			}
 			var = var_get( "JAM_KEEPDEPCACHE" );
 			if ( !var  ||  !list_first( var )  ||  strcmp( list_value( list_first( var ) ), "1" ) != 0 ) {
 				if ( hcache_get_builtinfilename() ) {
+					emptydirtargets = list_append(emptydirtargets, hcache_get_builtinfilename(), 0);
 					unlink( hcache_get_builtinfilename() );
 				}
 			}
