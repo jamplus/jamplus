@@ -841,7 +841,7 @@ int main( int argc, char **argv, char **arg_environ )
 	if ( extra_options != NULL )
 	{
 		LIST* l = L0;
-		const char** extra_option = extra_options;
+		const char** extra_option = (const char**)extra_options;
 		while ( *extra_option )
 		{
 			l = list_append( l, *extra_option, 1 );
