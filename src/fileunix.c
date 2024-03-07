@@ -892,22 +892,6 @@ const char *md5tostring(XXH128_hash_t hash)
 void md5file(const char *filename, XXH128_hash_t* sum)
 {
 #define BLOCK_SIZE 64*1024 /* file is read in blocks of custom size, just so we don't have to read the whole file at once */
-#if 0
-	if (0) {
-    FILE *f = fopen( filename, "rb" );
-    unsigned char* block;
-    block = malloc(BLOCK_SIZE);
-    /* for each block in the file */
-    while (!feof(f)) {
-        size_t readsize = fread(block, 1, BLOCK_SIZE, f);
-    }
-    free(block);
-    fclose(f);
-		memset(sum, 1, sizeof(sum));
-		return;
-	}
-#endif
-
     XXH3_state_t* state;
     unsigned char* block;
     FILE *f;
