@@ -36,19 +36,19 @@ function Test()
 		'file1.tga',
 		'file2.image',
 		'file2.tga',
-		'cache/c51/c518ad13579d451d4c0b2b69178a5095-ead1e43de665f2a38d9f939274cf079c.link',
-		'cache/e80/e803da4ab5571e583e755f963d4b37fd-faa1fdb2548701eb77fc77cfa18d8e47.link',
-		'cache/ead/ead1e43de665f2a38d9f939274cf079c.blob',
-		'cache/faa/faa1fdb2548701eb77fc77cfa18d8e47.blob',
+		'cache/68a/68a3ba7c0b59a09ef08a142938e06333.blob',
+		'cache/703/7030d7ab84c047dcb88c7ef237ec747f-68a3ba7c0b59a09ef08a142938e06333.link',
+		'cache/ef0/ef04c3d244dfe6f6847848cab47bc08b-f9cf672fdacd1a0612bb39eb173967cf.link',
+		'cache/f9c/f9cf672fdacd1a0612bb39eb173967cf.blob',
 	}
 
 	local newDirectories =
 	{
 		'cache/',
-		'cache/c51/',
-		'cache/e80/',
-		'cache/ead/',
-		'cache/faa/',
+		'cache/68a/',
+		'cache/703/',
+		'cache/ef0/',
+		'cache/f9c/',
 	}
 
 	TestFiles(pass1Files)
@@ -62,10 +62,10 @@ function Test()
 		'Jamfile.jam',
 		'file1.tga',
 		'file2.tga',
-		'cache/c51/c518ad13579d451d4c0b2b69178a5095-ead1e43de665f2a38d9f939274cf079c.link',
-		'cache/e80/e803da4ab5571e583e755f963d4b37fd-faa1fdb2548701eb77fc77cfa18d8e47.link',
-		'cache/ead/ead1e43de665f2a38d9f939274cf079c.blob',
-		'cache/faa/faa1fdb2548701eb77fc77cfa18d8e47.blob',
+		'cache/68a/68a3ba7c0b59a09ef08a142938e06333.blob',
+		'cache/703/7030d7ab84c047dcb88c7ef237ec747f-68a3ba7c0b59a09ef08a142938e06333.link',
+		'cache/ef0/ef04c3d244dfe6f6847848cab47bc08b-f9cf672fdacd1a0612bb39eb173967cf.link',
+		'cache/f9c/f9cf672fdacd1a0612bb39eb173967cf.blob',
 	}
 
 	TestFiles(pass2Files)
@@ -143,18 +143,18 @@ function TestChecksum()
 		'file1.tga',
 		'file2.image',
 		'file2.tga',
-		'cache/c51/c518ad13579d451d4c0b2b69178a5095-ead1e43de665f2a38d9f939274cf079c.link',
-		'cache/e80/e803da4ab5571e583e755f963d4b37fd-faa1fdb2548701eb77fc77cfa18d8e47.link',
-		'cache/ead/ead1e43de665f2a38d9f939274cf079c.blob',
-		'cache/faa/faa1fdb2548701eb77fc77cfa18d8e47.blob',
+		'cache/68a/68a3ba7c0b59a09ef08a142938e06333.blob',
+		'cache/703/7030d7ab84c047dcb88c7ef237ec747f-68a3ba7c0b59a09ef08a142938e06333.link',
+		'cache/ef0/ef04c3d244dfe6f6847848cab47bc08b-f9cf672fdacd1a0612bb39eb173967cf.link',
+		'cache/f9c/f9cf672fdacd1a0612bb39eb173967cf.blob',
 	}
 
 	local pass1Directories = {
 		'cache/',
-		'cache/c51/',
-		'cache/e80/',
-		'cache/ead/',
-		'cache/faa/',
+		'cache/68a/',
+		'cache/703/',
+		'cache/ef0/',
+		'cache/f9c/',
 	}
 
 	TestFiles(pass1Files)
@@ -167,10 +167,10 @@ function TestChecksum()
 		'Jamfile.jam',
 		'file1.tga',
 		'file2.tga',
-		'cache/c51/c518ad13579d451d4c0b2b69178a5095-ead1e43de665f2a38d9f939274cf079c.link',
-		'cache/e80/e803da4ab5571e583e755f963d4b37fd-faa1fdb2548701eb77fc77cfa18d8e47.link',
-		'cache/ead/ead1e43de665f2a38d9f939274cf079c.blob',
-		'cache/faa/faa1fdb2548701eb77fc77cfa18d8e47.blob',
+		'cache/68a/68a3ba7c0b59a09ef08a142938e06333.blob',
+		'cache/703/7030d7ab84c047dcb88c7ef237ec747f-68a3ba7c0b59a09ef08a142938e06333.link',
+		'cache/ef0/ef04c3d244dfe6f6847848cab47bc08b-f9cf672fdacd1a0612bb39eb173967cf.link',
+		'cache/f9c/f9cf672fdacd1a0612bb39eb173967cf.blob',
 	}
 
 	TestFiles(pass2Files)
@@ -213,12 +213,12 @@ Using cached file2.image
 
 	local pass3Directories = {
 		'cache/',
-		'cache/33d/',
-		'cache/ba3/',
-		'cache/c51/',
-		'cache/e80/',
-		'cache/ead/',
-		'cache/faa/',
+		'cache/68a/',
+		'cache/703/',
+		'cache/718/',
+		'cache/910/',
+		'cache/ef0/',
+		'cache/f9c/',
 	}
 
 	local pass3Files = {
@@ -228,12 +228,12 @@ Using cached file2.image
 		'file1.tga',
 		'file2.image',
 		'file2.tga',
-		'cache/33d/33d6f96e9d66b65c9d4036f777187316-ba30b5bbf846278b094d76c1c7a3aaf9.link',
-		'cache/ba3/ba30b5bbf846278b094d76c1c7a3aaf9.blob',
-		'cache/c51/c518ad13579d451d4c0b2b69178a5095-ead1e43de665f2a38d9f939274cf079c.link',
-		'cache/e80/e803da4ab5571e583e755f963d4b37fd-faa1fdb2548701eb77fc77cfa18d8e47.link',
-		'cache/ead/ead1e43de665f2a38d9f939274cf079c.blob',
-		'cache/faa/faa1fdb2548701eb77fc77cfa18d8e47.blob',
+		'cache/68a/68a3ba7c0b59a09ef08a142938e06333.blob',
+		'cache/703/7030d7ab84c047dcb88c7ef237ec747f-68a3ba7c0b59a09ef08a142938e06333.link',
+		'cache/718/718dbd8f4e4ca8964409bf8e64820397.blob',
+		'cache/910/9101634ed11e9c897e9b8630955e0b5d-718dbd8f4e4ca8964409bf8e64820397.link',
+		'cache/ef0/ef04c3d244dfe6f6847848cab47bc08b-f9cf672fdacd1a0612bb39eb173967cf.link',
+		'cache/f9c/f9cf672fdacd1a0612bb39eb173967cf.blob',
 	}
 
 	TestFiles(pass3Files)
