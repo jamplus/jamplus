@@ -910,13 +910,29 @@ void md5file(const char *filename, XXH128_hash_t* sum)
 
     XXH3_state_t* state;
     unsigned char* block;
-    FILE *f = fopen( filename, "rb" );
+    FILE *f;
+    int fileDescriptor;
+    struct stat fileInfo;
+
+    f = fopen( filename, "rb" );
 
     memset(sum, 0, sizeof(XXH128_hash_t));
 
     if( f == NULL ) {
 //	printf("Cannot calculate md5 for %s\n", filename);
         return;
+    }
+
+    fileDescriptor = fileno(f);
+    if (fstat(fileDescriptor, &fileInfo) == -1) {
+        fclose(f);
+        return;
+    }
+
+    // Check if the file is a directory
+    if (S_ISDIR(fileInfo.st_mode)) {
+       	fclose(f);
+       	return;
     }
 
     /* initialize the hash state */
