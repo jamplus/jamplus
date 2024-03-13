@@ -856,16 +856,16 @@ int jfindfile(const char* wildcard, BUFFER* foundfilebuff)
 /* Convert md5sum to a string representation. */
 const char *md5tostring(XXH128_hash_t hash)
 {
-  unsigned char sum[16];
   char buffer[1024];
   char *pbuf = buffer;
   int ch, i, val;
 
-  memcpy(sum, &hash, 16);
+  XXH128_canonical_t cano;
+  XXH128_canonicalFromHash(&cano, hash);
 
   /* add use md5 as filename */
   for( i=0; i<MD5_SUMSIZE; i++ ) {
-    val = sum[i];
+    val = cano.digest[i];
 
     ch = val>>4;
     if (ch >= 0xa) {

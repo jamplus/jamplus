@@ -1,0 +1,41 @@
+rule TestXXH3
+{
+    local r = [ xxh3_128bits $(1) ] ;
+    local e = $(2) ;
+    ECHO "xxh3_128bits of" $(1) "->" $(r) ;
+    if $(r) = $(e) {
+	ECHO "passes!" ;
+    }
+}
+
+#if BUILTIN_MD5 in $(PATCHED_JAM_VERSION)
+{
+    TestXXH3 "" : 7f498d4624c30160d8984701d306aa99 ;
+    TestXXH3 "a" : 1f4e961eb632c6e63468f15a70af6fa9 ;
+    TestXXH3 "abc" : 50392f89945faf7885613a73b65ab006 ;
+    TestXXH3 "message digest" : 24a4e3b8ecabbf0a49b6e3955d71ab34 ;
+    TestXXH3 "abcdefghijklmnopqrstuvwxyz" : e6e154012262e1eb673d84844ea47cdb ;
+    TestXXH3 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" : fb4f7ad40b56c0a386065019b680cb5b ;
+    TestXXH3 "12345678901234567890123456789012345678901234567890123456789012345678901234567890" : b8dc72c66a8dcb40e64cc3ddc322dd08 ;
+
+    # Own tests.
+
+    # Verify [ xxh3_128bits "message digest" ] different from
+    # [ xxh3_128bits "message" "digest" ]
+    TestXXH3 message digest : 96a653ca3f51fefa95c6fd7fa49f603c ;
+
+    # Verify [ xxh3_128bits "message digest" ] differnt from
+    # [ xxh3_128bits message : digest ]
+    local r = [ xxh3_128bits message : digest ] ;
+    if $(r) != 536cfb03cbc61add7021bb06ba71d59e {
+	ECHO "failure!" ;
+    }
+
+    EXIT "Done with xxh3_128bits test, exiting..." ;
+}
+#else
+#{
+#    ECHO "Skip xxh3_128bits test -- BUILTIN_MD5 not in PATCHED_JAM_VERSION." ;
+#}
+
+

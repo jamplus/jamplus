@@ -100,6 +100,8 @@ LIST *builtin_usefilecache( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_usecommandline( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_md5( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_md5file( PARSE *parse, LOL *args, int *jmp );
+LIST *builtin_xxh3_128bits( PARSE *parse, LOL *args, int *jmp );
+LIST *builtin_xxh3_128bits_file( PARSE *parse, LOL *args, int *jmp );
 #endif /* OPT_BUILTIN_MD5_EXT */
 #ifdef OPT_BUILTIN_MATH_EXT
 static LIST* builtin_math( PARSE *parse, LOL *args, int *jmp );
@@ -222,6 +224,10 @@ load_builtins()
 	parse_make( builtin_md5, P0, P0, P0, C0, C0, 0 );
     bindrule( "MD5File" )->procedure =
 	parse_make( builtin_md5file, P0, P0, P0, C0, C0, 0 );
+    bindrule( "xxh3_128bits" )->procedure =
+	parse_make( builtin_xxh3_128bits, P0, P0, P0, C0, C0, 0 );
+    bindrule( "xxh3_128bits_file" )->procedure =
+	parse_make( builtin_xxh3_128bits_file, P0, P0, P0, C0, C0, 0 );
 #endif /* OPT_BUILTIN_MD5_EXT */
 #ifdef OPT_BUILTIN_MATH_EXT
     bindrule( "Math" )->procedure =
@@ -996,6 +1002,105 @@ builtin_md5file(
 	*p = 0;
 
 	return list_append(L0, (char const*)digest_string, 0);
+}
+
+/*
+ * builtin_xxhsum() - Return the xxhsum of the supplied lists
+ */
+LIST *
+builtin_xxh3_128bits(
+	PARSE	*parse,
+	LOL	*args,
+	int	*jmp )
+{
+	static const unsigned char list_sep[] = { 0, 0 };
+	static const unsigned char item_sep[] = { 0 };
+
+	XXH3_state_t* state;
+	XXH128_hash_t sum;
+	int i;
+	LIST *l;
+
+    state = XXH3_createState();
+    XXH3_128bits_reset(state);
+
+	/* For each argument */
+	for (i = 0; i < args->count; ++i) {
+	    if (i > 0) {
+		/* separate lists with 2 NUL characters.  This
+		 * guarantees that [ XXHSUM a b ] is different from [ XXHSUM a : b ] */
+		XXH3_128bits_update(state, list_sep, sizeof(list_sep));
+	    }
+	    l = lol_get(args, i);
+	    if (list_first(l)) {
+			LISTITEM* item = list_first(l);
+		XXH3_128bits_update(state, (unsigned char*)list_value(item), (unsigned int)strlen(list_value(item)));
+		for (item = list_next(item); item; item = list_next(item)) {
+		    /* separate list items with 1 NUL character.  This
+		     * guarantees that [ MD5 a b ] is different from [
+		     * MD5 ab ] */
+			XXH3_128bits_update(state, item_sep, sizeof(item_sep));
+			XXH3_128bits_update(state, (unsigned char*)list_value(item), (unsigned int)strlen(list_value(item)));
+		}
+	    }
+	}
+
+	sum = XXH3_128bits_digest(state);
+	XXH3_freeState(state);
+
+	return list_append(L0, md5tostring(sum), 1);
+}
+
+LIST *
+builtin_xxh3_128bits_file(
+	PARSE	*parse,
+	LOL	*args,
+	int	*jmp )
+{
+	XXH3_state_t* state;
+	XXH128_hash_t sum;
+	int i;
+
+	const size_t BUFFER_SIZE = 128 * 1024;
+	unsigned char* buffer = (unsigned char*)malloc(BUFFER_SIZE);
+
+	state = XXH3_createState();
+	XXH3_128bits_reset(state);
+
+	/* For each argument */
+	for (i = 0; i < args->count; ++i) {
+	    LISTITEM* target = list_first(lol_get(args, i));
+	    if (target) {
+		do {
+			FILE* file;
+			TARGET *t = bindtarget(list_value(target));
+			pushsettings( t->settings );
+			t->boundname = search( t->name, &t->time );
+			popsettings( t->settings );
+		    file = fopen(t->boundname, "rb");
+		    if (file) {
+			size_t readSize;
+
+			do
+			{
+			    readSize = fread(buffer, 1, BUFFER_SIZE, file);
+				XXH3_128bits_update(state, buffer, (unsigned int)readSize);
+			} while (readSize != 0);
+
+			fclose(file);
+		    }
+
+			target = list_next(target);
+		} while (target);
+	    }
+	}
+
+	free(buffer);
+
+	sum = XXH3_128bits_digest(state);
+	XXH3_freeState(state);
+
+	return list_append(L0, md5tostring(sum), 1);
 }
 #endif /* OPT_BUILTIN_MD5_EXT */
 

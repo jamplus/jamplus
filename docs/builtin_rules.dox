@@ -216,7 +216,7 @@ Causes the timestamps on <i>targets</i> to be ignored. This has two effects:  fi
 
 \note In order to use \c ScanContents, the dependency cache must be enabled.
 
-Causes the file's contents to be scanned for differences on timestamp change.  There are times when a file's timestamp changes, but its contents do not.  Normally, a timestamp change will cause all dependent targets to be rebuilt.  When \c ScanContents is applied to <i>targets</i> and one of those targets has a timestamp that changes, Jam will compare the contents of the target against the last build's contents, whose md5sum is stored in the dependency cache.  If they are the same, no dependent targets are built.  If they differ, the dependent target build occurs as it would have on just a timestamp change.
+Causes the file's contents to be scanned for differences on timestamp change.  There are times when a file's timestamp changes, but its contents do not.  Normally, a timestamp change will cause all dependent targets to be rebuilt.  When \c ScanContents is applied to <i>targets</i> and one of those targets has a timestamp that changes, Jam will compare the contents of the target against the last build's contents, whose xxhsum is stored in the dependency cache.  If they are the same, no dependent targets are built.  If they differ, the dependent target build occurs as it would have on just a timestamp change.
 
 Be aware that the \c ScanContents calculation happens during the \ref operation_updating.  This results in Jam possibly reporting target counts improperly.
 
@@ -282,6 +282,8 @@ The remaining rules are utility rules.
 \refitem rule_UseMD5Callback UseMD5Callback
 \refitem rule_Wildcard Wildcard
 \refitem rule_W32_GETREG W32_GETREG
+\refitem rule_xxh3_128bits xxh3_128bits
+\refitem rule_xxh3_128bits_file xxh3_128bits_file
 \endsecreflist
 
 <hr>
@@ -1184,6 +1186,41 @@ If \c ABSOLUTE is specified, then the result(s) of the wildcard expansion will r
     # When run from s:/jamplus/src:
     Echo [ Wildcard ../*.sh : 0 ] ;
         # ../bootstrap-linux32.sh ../bootstrap-linux64.sh ../bootstrap-macosx64.sh ../bootstrap-win64-msys2.sh
+\endcode
+
+
+
+
+
+
+<hr>
+\section rule_xxh3_128bits rule xxh3_128bits LIST [ : LIST2 ... ] ;
+\addindex rule_xxh3_128bits
+
+Calculates the xxh3sum of all lists and their respective list elements.  Each list element is separated with one NUL character, so that <tt>[ xxh3_128bits a b ]</tt> is different than <tt>[ xxh3_128bits ab ]</tt>.  Each list is separated with two NUL characters so that <tt>[ xxh3_128bits a : b ]</tt> is different than <tt>[ xxh3_128bits a b ]</tt>.  Only useful within the <tt>[ ]</tt> construct, to change the resultant xxh3sum into a list.
+
+\code
+	# Prints 7f498d4624c30160d8984701d306aa99.
+    Echo [ xxh3_128bits "" ] ;
+
+	# Returns e6e154012262e1eb673d84844ea47cdb.
+    Echo [ xxh3_128bits "abcdefghijklmnopqrstuvwxyz" ] ;
+\endcode
+
+
+
+
+
+
+
+<hr>
+\section rule_xxh3_128bits_file rule xxh3_128bits_file FILENAME_LIST [ : FILENAME_LIST2 ... ] ;
+\addindex rule_xxh3_128bits_file
+
+Calculates the xxh3sum of all listed files.  Only useful within the <tt>[ ]</tt> construct, to change the resultant md5sum into a list.
+
+\code
+    Echo [ xxh3_128bits_file "myfile.txt" ] ;
 \endcode
 
 

@@ -250,9 +250,9 @@ _hcache_read_string( BUFFER* buff )
  */
 void _hcache_read_md5sum( BUFFER *buff, XXH128_hash_t* hash )
 {
-	unsigned char sum[16];
+	XXH128_canonical_t cano;
 	int ch, i, val;
-	memset(sum, 0, sizeof(*sum));
+	memset(&cano, 0, sizeof(cano));
 
 	ch = skip_spaces( buff );
 	val = 0;
@@ -267,13 +267,13 @@ void _hcache_read_md5sum( BUFFER *buff, XXH128_hash_t* hash )
 			break;
 		}
 		if ( i&1 ) {
-			sum[i/2] = (char)val;
+			cano.digest[i/2] = (char)val;
 			val = 0;
 		}
 		i++;
 		ch = buffer_getchar( buff );
 	}
-	memcpy(hash, sum, sizeof(sum));
+	*hash = XXH128_hashFromCanonical(&cano);
 }
 
 /*
@@ -281,9 +281,9 @@ void _hcache_read_md5sum( BUFFER *buff, XXH128_hash_t* hash )
  */
 int _hcache_read_md5sum_string( const char* str, XXH128_hash_t* hash)
 {
-	unsigned char sum[16];
+	XXH128_canonical_t cano;
 	int ch, i, val;
-	memset(sum, 0, sizeof(*sum));
+	memset(&cano, 0, sizeof(cano));
 
 	while (*str  &&  *str == ' ')
 		str++;
@@ -300,13 +300,13 @@ int _hcache_read_md5sum_string( const char* str, XXH128_hash_t* hash)
 			break;
 		}
 		if ( i&1 ) {
-			sum[i/2] = (char)val;
+			cano.digest[i/2] = (char)val;
 			val = 0;
 		}
 		i++;
 		ch = *str++;
 	}
-	memcpy(hash, sum, sizeof(sum));
+	*hash = XXH128_hashFromCanonical(&cano);
 	return i == MD5_SUMSIZE*2;
 }
 
@@ -352,12 +352,12 @@ write_string( FILE *f, const char *s )
  */
 void write_md5sum( FILE *f, XXH128_hash_t hash)
 {
-	unsigned char sum[16];
+	XXH128_canonical_t cano;
 	int ch, i, val;
 
-	memcpy(sum, &hash, 16);
+	XXH128_canonicalFromHash(&cano, hash);
 	for( i=0; i<MD5_SUMSIZE; i++ ) {
-		val = sum[i];
+		val = cano.digest[i];
 
 		ch = val>>4;
 		if (ch >= 0xa) {
