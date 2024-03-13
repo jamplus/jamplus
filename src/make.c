@@ -336,6 +336,7 @@ void remove_empty_dirs()
 		strncpy( path, t->boundname, slashptr - t->boundname + 1 );
 		path[ slashptr - t->boundname + 1 ] = 0;
 
+		c = &dirlistdata;
 		c->name = path;
 		if ( hashenter( dirlisthash, (HASHDATA **)&c ) ) {
 			c->name = newstr( path );
@@ -380,6 +381,7 @@ void remove_empty_dirs()
 
 					if ( dirret == 0 ) {
 						/* walk up directories removing any empty ones */
+						c = &dirlistdata;
 						c->name = lastdirptr;
 						if ( hashenter( dirlisthash, (HASHDATA **)&c ) ) {
 							c->name = newstr( lastdirptr );
