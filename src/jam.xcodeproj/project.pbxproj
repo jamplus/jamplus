@@ -94,6 +94,7 @@
 		4200ED3A29FCE286005E9759 /* pwd2key.c in Sources */ = {isa = PBXBuildFile; fileRef = 4200ECB629FCE286005E9759 /* pwd2key.c */; };
 		4200ED3B29FCE286005E9759 /* aestab.c in Sources */ = {isa = PBXBuildFile; fileRef = 4200ECB729FCE286005E9759 /* aestab.c */; };
 		4200ED3C29FCE286005E9759 /* lziparchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4200ECBB29FCE286005E9759 /* lziparchive.cpp */; };
+		420581BD2BA1EAA5002D98EA /* xxhash.c in Sources */ = {isa = PBXBuildFile; fileRef = 420581BB2BA1EAA5002D98EA /* xxhash.c */; };
 		4227A00910D20DA400D2BF65 /* fileglob.c in Sources */ = {isa = PBXBuildFile; fileRef = 4227A00710D20DA400D2BF65 /* fileglob.c */; };
 		425244180F284A44007BC650 /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 425243F10F284A44007BC650 /* buffer.c */; };
 		425244190F284A44007BC650 /* builtins.c in Sources */ = {isa = PBXBuildFile; fileRef = 425243F30F284A44007BC650 /* builtins.c */; };
@@ -345,6 +346,8 @@
 		4200ECB929FCE286005E9759 /* fileenc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fileenc.h; sourceTree = "<group>"; };
 		4200ECBA29FCE286005E9759 /* HeapAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HeapAllocator.h; sourceTree = "<group>"; };
 		4200ECBB29FCE286005E9759 /* lziparchive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lziparchive.cpp; path = luaplus/Src/Modules/ziparchive/lziparchive.cpp; sourceTree = "<group>"; };
+		420581BB2BA1EAA5002D98EA /* xxhash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xxhash.c; sourceTree = "<group>"; };
+		420581BC2BA1EAA5002D98EA /* xxhash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xxhash.h; sourceTree = "<group>"; };
 		4227A00710D20DA400D2BF65 /* fileglob.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fileglob.c; sourceTree = "<group>"; };
 		4227A00810D20DA400D2BF65 /* fileglob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fileglob.h; sourceTree = "<group>"; };
 		425243F10F284A44007BC650 /* buffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = buffer.c; sourceTree = "<group>"; };
@@ -459,6 +462,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				420581BB2BA1EAA5002D98EA /* xxhash.c */,
+				420581BC2BA1EAA5002D98EA /* xxhash.h */,
 				4200EACD29FCC5FD005E9759 /* lua */,
 				4227A00710D20DA400D2BF65 /* fileglob.c */,
 				4227A00810D20DA400D2BF65 /* fileglob.h */,
@@ -1063,6 +1068,7 @@
 				4200EB6F29FCD058005E9759 /* xmltok.c in Sources */,
 				4252446A0F284A96007BC650 /* scan.c in Sources */,
 				4200EB8429FCE02E005E9759 /* pusherror.c in Sources */,
+				420581BD2BA1EAA5002D98EA /* xxhash.c in Sources */,
 				4200ED2629FCE286005E9759 /* ZipEntryFile.cpp in Sources */,
 				4252446B0F284A96007BC650 /* search.c in Sources */,
 				4200EB7E29FCDFF1005E9759 /* lmd5.c in Sources */,
