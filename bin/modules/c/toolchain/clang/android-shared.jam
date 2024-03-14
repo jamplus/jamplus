@@ -65,7 +65,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
     ARCHITECTURE ?= $(C.ARCHITECTURE:E=armv7-a) ;
     C.ARCHITECTURE ?= $(ARCHITECTURE) ;
     SDK_VERSION ?= 30 ;
-    NDK_VERSION ?= 24 ;
+    NDK_VERSION ?= 30 ;
 
     if $(OS) in MACOSX {
         local ndkRoot = $(NDKROOT:J=" ") ;
