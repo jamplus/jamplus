@@ -222,6 +222,7 @@ rule android.SDK SDK_VERSION : NDK_VERSION : ARCHITECTURE {
     #cflags += -D__ANDROID_API__=$(NDK_VERSION) ;
     cflags += -fPIC ;
     cflags += -fvisibility=hidden ;
+    cflags += -fsigned-char ;
 
     ARCHITECTURE_CFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(cflags) ;
     ARCHITECTURE_LINKFLAGS on $(C.COMPILER_SUITE_SYMBOL) = $(linkflags) ;
@@ -1221,6 +1222,7 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
         local packageOutputPath = $(ANDROID.PACKAGE_OUTPUT_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):E=$(ALL_LOCATE_TARGET)/../package) ;
 
         local GRADLE_OUTPUT_DIRECTORY = @($(ALL_LOCATE_TARGET)/gradle:R=) ;
+        GRADLE_OUTPUT_DIRECTORY on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(GRADLE_OUTPUT_DIRECTORY) ;
         local grist = $(C.ACTIVE_TOOLCHAIN_GRIST)|gradle ;
         local gradleTarget = $(TARGET:G=$(grist)) ;
         NotFile $(gradleTarget) ;
@@ -1624,7 +1626,7 @@ android {
 
             local resourcesPaths = [ MakeRelativePath $(ANDROID.RESOURCES:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) : $(gradleAppOutputDirectory) ] ;
             contents += "        res.srcDirs += [$(NEWLINE)" ;
-            contents += "            '$(resourcesPaths)'$(NEWLINE)" ;
+            contents += "            '$(resourcesPaths)',$(NEWLINE)" ;
             contents += "        ]
     }
 " ;
