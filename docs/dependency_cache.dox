@@ -10,7 +10,7 @@ When the \ref built_in_variables_hdrscan are used, Jam scans source files for ot
 
 - If a cache entry is present in the cache file when Jam starts, and the file has not changed since the last time it was scanned, Jam will not bother to re-scan it.  This markedly decreases Jam startup times for large projects.
 
-The dependency cache also stores the md5 of the 'command line' (see \ref rule_UseCommandLine) and the md5 of the content.  In fact, neither facility will work properly if the dependency cache is not available.
+The dependency cache also stores the checksum of the 'command line' (see \ref rule_UseCommandLine) and the checksum of the content.  In fact, neither facility will work properly if the dependency cache is not available.
 
 
 

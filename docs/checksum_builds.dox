@@ -21,7 +21,7 @@ Given that checksums are optional and disabled by default, support can be enable
 
 Without further configuration, the Jam checksums support should work out-of-box. Sometimes, though, additional hints may be needed to compensate for correct but undesirable behaviors.
 
-As with the \ref file_cache facility, checksums require deep calculations through the dependency graph in order to guarantee a correct build. This is a good thing in most circumstances, but there can be some build 'anomalies' that may make it necessary for you to adjust how deep the calculations go or what is considered for the \b buildmd5sum calculation.
+As with the \ref file_cache facility, checksums require deep calculations through the dependency graph in order to guarantee a correct build. This is a good thing in most circumstances, but there can be some build 'anomalies' that may make it necessary for you to adjust how deep the calculations go or what is considered for the \b buildchecksum calculation.
 
 For example, consider a build where the destination target depends on a tool executable. If the source target file changes, the destination target rebuilds. If the tool executable changes, the destination target also rebuilds.
 
@@ -32,15 +32,15 @@ For example, consider a build where the destination target depends on a tool exe
 
 For the following discussion, assume the tool's author merely adds comments to the <tt>main.cpp</tt> file that makes up the tool executable's source code with absolute no functionality change.
 
-Using GCC on Linux, it is very likely this scenario will generate the exact same executable. However, <tt>destination.file</tt> will still rebuild. That is because the \b buildmd5sum is calculated against <tt>tool.exe</tt> (which didn't change) and <tt>main.cpp</tt> (which did change). The extra comment in <tt>main.cpp</tt> will force Jam to believe the dependencies were updated, and <tt>destination.file</tt> will build.
+Using GCC on Linux, it is very likely this scenario will generate the exact same executable. However, <tt>destination.file</tt> will still rebuild. That is because the \b buildchecksum is calculated against <tt>tool.exe</tt> (which didn't change) and <tt>main.cpp</tt> (which did change). The extra comment in <tt>main.cpp</tt> will force Jam to believe the dependencies were updated, and <tt>destination.file</tt> will build.
 
-Fortunately, there is an easy workaround to this in the form of a 'hint' rule. We merely have to apply the rule \ref rule_ForceContentsOnly to <tt>tool.exe</tt>, and the \b buildmd5sum traversal will stop there, never considering <tt>main.cpp</tt>. This is such a big deal that the rules \ref rule_C_Application and \ref rule_C_Library do it by default.
+Fortunately, there is an easy workaround to this in the form of a 'hint' rule. We merely have to apply the rule \ref rule_ForceContentsOnly to <tt>tool.exe</tt>, and the \b buildchecksum traversal will stop there, never considering <tt>main.cpp</tt>. This is such a big deal that the rules \ref rule_C_Application and \ref rule_C_Library do it by default.
 
 Unfortunately, using Microsoft's Visual C++, any simple comment change in <tt>main.cpp</tt> will result in an ever changing <tt>tool.exe</tt>. When relinking an executable with Microsoft's Visual C++, it is impossible to get a reproducible build; the executable will be different every single time. This means that some documentation-happy programmer may cause massive rebuilds of content for every single bit of commentary he/she adds.
 
 There are a few ways to work around this, but we'll only cover the one specifically used as a hint to the checksum system here.
 
-By using \ref rule_IgnoreContents on <tt>tool.exe</tt>, the \b buildmd5sum traversal will just simply not sum in the contents of <tt>tool.exe</tt>. The <tt>destination.file</tt> target's dependency on <tt>tool.exe</tt> will act only as a dependency that causes <tt>tool.exe</tt> to build. For <tt>destination.file</tt> itself, no build will occur when <tt>tool.exe</tt> changes.
+By using \ref rule_IgnoreContents on <tt>tool.exe</tt>, the \b buildchecksum traversal will just simply not sum in the contents of <tt>tool.exe</tt>. The <tt>destination.file</tt> target's dependency on <tt>tool.exe</tt> will act only as a dependency that causes <tt>tool.exe</tt> to build. For <tt>destination.file</tt> itself, no build will occur when <tt>tool.exe</tt> changes.
 
 That is bad, of course, and the advised workaround is to use \ref rule_UseCommandLine in addition to \ref rule_IgnoreContents. When <tt>tool.exe</tt> receives a change that actually matters, bump a version string supplied to \c UseCommandLine like this:
 

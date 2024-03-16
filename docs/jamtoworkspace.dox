@@ -6,7 +6,7 @@ JamPlus has a built-in workspace generator that reads a project's Jamfiles and e
 
 JamPlus generates a completely out-of-source build structure.  This means that all intermediate files, output files, IDE project files, and other miscellaneous Jam related files exist in a directory external to the source code itself.  Since the entire build tree is generated, merely removing the out-of-source build directory will destroy all evidence of the build.
 
-Out of source build trees also contain special instructions to make the build run faster.  Among other things, the dependency cache is set up.  The dependency cache is used to track 'include' dependencies, but it is also used to store MD5 command lines and MD5 contents information.
+Out of source build trees also contain special instructions to make the build run faster.  Among other things, the dependency cache is set up.  The dependency cache is used to track 'include' dependencies, but it is also used to store command line checksums and content checksum information.
 
 
 

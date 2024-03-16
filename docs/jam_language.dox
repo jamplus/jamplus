@@ -42,7 +42,7 @@ The use of \$(BINDING), \$(SEARCH), and \$(LOCATE) allows \b Jam to separate the
 
 \subsubsection operation_binding_update_determination Update Determination
 
-After binding each target, \b Jam determines whether the target needs updating, and, if so, marks the target for the updating phase. A target is normally so marked if it is missing, md5 command line flags have changed, is older than any of its sources, or any of its sources are marked for updating. This behavior can be modified by the application of special built-in rules. See \ref language_built_in_rules_modifying_binding.
+After binding each target, \b Jam determines whether the target needs updating, and, if so, marks the target for the updating phase. A target is normally so marked if it is missing, checksum command line flags have changed, is older than any of its sources, or any of its sources are marked for updating. This behavior can be modified by the application of special built-in rules. See \ref language_built_in_rules_modifying_binding.
 
 \subsubsection operation_binding_header_file_scanning Header File Scanning
 
