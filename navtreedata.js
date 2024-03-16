@@ -33,7 +33,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "bugs.html",
-"module_c.html#rule_C_OutputName"
+"module_c.html#rule_C_ObjectIncludeDirectories"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
