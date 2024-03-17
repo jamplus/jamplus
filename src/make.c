@@ -888,6 +888,7 @@ make0(
 #ifdef OPT_USE_CHECKSUMS_EXT
 	if ( t->fate == T_FATE_INIT ) {
 		t->timestamp_epoch = -1000000001;
+		t->calcchecksum_epoch = -1000000001;
 	}
 #endif /* OPT_USE_CHECKSUMS_EXT */
 #ifdef OPT_MULTIPASS_EXT
@@ -1683,6 +1684,13 @@ void make0calcmd5sum( TARGET *t, int source, int depth, int force )
 
 	if ( t->buildmd5sum_calculated && !force )
 		return;
+
+	if (t->calcchecksum_epoch == make0calcmd5sum_epoch)
+	{
+		return;
+	}
+
+	t->calcchecksum_epoch = make0calcmd5sum_epoch;
 
 	if ( ( t->flags & T_FLAG_NOUPDATE ) || ( t->flags & T_FLAG_INTERNAL ) )
 	{

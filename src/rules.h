@@ -205,6 +205,7 @@ struct _target {
 	char		filecache_use;
 	char		filecache_generate;
 	int		timestamp_epoch;
+	int			calcchecksum_epoch;
 #endif	
 #ifdef OPT_CIRCULAR_GENERATED_HEADER_FIX
 	int			epoch;
