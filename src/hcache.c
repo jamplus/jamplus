@@ -1606,21 +1606,26 @@ void filecache_update(TARGET *t, XXH128_hash_t buildmd5sum)
 		buffer_addstring(&linknamebuff, ".link", 5);
 		buffer_addchar(&linknamebuff, 0);
 
-		if (!printeddebugtext)
+		/* Is the link already there? */
+		time_t linktime;
+		if (file_time(buffer_ptr(&linknamebuff), &linktime) == -1)
 		{
-			if (DEBUG_MD5HASH)
-				printf("Caching %s link as %s\n", t->name, cachedname);
-			else
-				printf("Caching link %s\n", t->name);
-		}
+			if (!printeddebugtext)
+			{
+				if (DEBUG_MD5HASH)
+					printf("Caching %s link as %s\n", t->name, cachedname);
+				else
+					printf("Caching link %s\n", t->name);
+			}
 
-		file_mkdir(buffer_ptr(&linknamebuff));
-		file = fopen(buffer_ptr(&linknamebuff), "wb");
-		if (file)
-		{
-			write_md5sum(file, blobmd5sum);
-			write_string(file, t->name);
-			fclose(file);
+			file_mkdir(buffer_ptr(&linknamebuff));
+			file = fopen(buffer_ptr(&linknamebuff), "wb");
+			if (file)
+			{
+				write_md5sum(file, blobmd5sum);
+				write_string(file, t->name);
+				fclose(file);
+			}
 		}
 
 		buffer_free(&linknamebuff);
