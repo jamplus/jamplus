@@ -4,31 +4,33 @@ rule TestXXH3
     local e = $(2) ;
     ECHO "xxh3_128bits of" $(1) "->" $(r) ;
     if $(r) = $(e) {
-	ECHO "passes!" ;
+        ECHO "passes!" ;
     }
 }
 
 #if BUILTIN_MD5 in $(PATCHED_JAM_VERSION)
 {
-    TestXXH3 "" : 7f498d4624c30160d8984701d306aa99 ;
-    TestXXH3 "a" : 1f4e961eb632c6e63468f15a70af6fa9 ;
-    TestXXH3 "abc" : 50392f89945faf7885613a73b65ab006 ;
-    TestXXH3 "message digest" : 24a4e3b8ecabbf0a49b6e3955d71ab34 ;
-    TestXXH3 "abcdefghijklmnopqrstuvwxyz" : e6e154012262e1eb673d84844ea47cdb ;
-    TestXXH3 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" : fb4f7ad40b56c0a386065019b680cb5b ;
-    TestXXH3 "12345678901234567890123456789012345678901234567890123456789012345678901234567890" : b8dc72c66a8dcb40e64cc3ddc322dd08 ;
+    TestXXH3 "" : 99aa06d3014798d86001c324468d497f ;
+    TestXXH3 "a" : a96faf705af16834e6c632b61e964e1f ;
+    TestXXH3 "abc" : 06b05ab6733a618578af5f94892f3950 ;
+    TestXXH3 "message digest" : 34ab715d95e3b6490abfabecb8e3a424 ;
+    TestXXH3 "abcdefghijklmnopqrstuvwxyz" : db7ca44e84843d67ebe162220154e1e6 ;
+    TestXXH3 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" : 5bcb80b619500686a3c0560bd47a4ffb ;
+    TestXXH3 "12345678901234567890123456789012345678901234567890123456789012345678901234567890" : 08dd22c3ddc34ce640cb8d6ac672dcb8 ;
 
     # Own tests.
 
     # Verify [ xxh3_128bits "message digest" ] different from
     # [ xxh3_128bits "message" "digest" ]
-    TestXXH3 message digest : 96a653ca3f51fefa95c6fd7fa49f603c ;
+    TestXXH3 message digest : 3c609fa47ffdc695fafe513fca53a696 ;
 
-    # Verify [ xxh3_128bits "message digest" ] differnt from
+    # Verify [ xxh3_128bits "message digest" ] different from
     # [ xxh3_128bits message : digest ]
     local r = [ xxh3_128bits message : digest ] ;
-    if $(r) != 536cfb03cbc61add7021bb06ba71d59e {
-	ECHO "failure!" ;
+    local test = 9ed571ba06bb2170dd1ac6cb03fb6c53 ;
+    ECHO "xxh3_128bits of digest ->" $(r) ;
+    if $(r) != $(test) {
+        ECHO "failure!" ;
     }
 
     EXIT "Done with xxh3_128bits test, exiting..." ;
