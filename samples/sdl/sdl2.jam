@@ -1,541 +1,584 @@
 SDL2_ROOT = $(SUBDIR) ;
 
 rule Build.sdl2 TOOLCHAINS {
-        if $(C.PLATFORM) = android {
-            C.ActiveTarget sdl2-hidapi ;
-
-            local SRCS =
-                    src/hidapi/android/hid.cpp
-                    src/hidapi/hidapi/hidapi.h
-            ;
-            C.Defines : ANDROID ;
-            C.ForcePublic ;
-            C.OutputName : libhidapi ;
-            C.OutputPostfix ;
-            C.LinkPrebuiltLibraries : android c++abi c++_static log ;
-            C.Library : $(SRCS) : shared ;
-        }
-
-        C.ActiveTarget sdl2 ;
-
-        local SRCS =
-                include/*.h
-                src/*.c
-                src/*.h
-                src/atomic/*.c
-                src/atomic/*.h
-                src/audio/*.c
-                src/audio/*.h
-                src/cpuinfo/*.c
-                src/cpuinfo/*.h
-                src/dynapi/*.c
-                src/dynapi/*.h
-                src/events/*.c
-                src/events/*.h
-                src/file/*.c
-                src/file/*.h
-                src/joystick/hidapi/*.c
-                src/joystick/hidapi/*.h
-                src/joystick/virtual/*.c
-                src/joystick/virtual/*.h
-                src/libm/*.c
-                src/libm/*.h
-                src/locale/*.c
-                src/locale/*.h
-                src/misc/*.c
-                src/misc/*.h
-                src/render/*.c
-                src/render/*.h
-                src/render/*/*.c
-                src/render/*/*.h
-                src/sensor/*.c
-                src/sensor/*.h
-                src/sensor/dummy/*.c
-                src/sensor/dummy/*.h
-                src/stdlib/*.c
-                src/stdlib/*.h
-                src/thread/*.c
-                src/thread/*.h
-                src/timer/*.c
-                src/timer/*.h
-                src/video/*.c
-                src/video/*.h
-                src/video/yuv2rgb/*.c
-                src/video/yuv2rgb/*.h
-        ;
-
-        if $(C.PLATFORM) in win32 win64 {
-            SRCS +=
-                    src/core/windows/*.c
-                    src/core/windows/*.h
-            ;
-
-            SRCS +=
-                    src/audio/winmm/*.c
-                    src/audio/winmm/*.h
-                    src/audio/directsound/*.c
-                    src/audio/directsound/*.h
-                    src/audio/wasapi/*.c
-                    src/audio/wasapi/*.h
-                    src/audio/xaudio2/*.c
-                    src/audio/xaudio2/*.h
-            ;
-
-            SRCS +=
-                    src/video/windows/*.c
-                    src/video/windows/*.h
-            ;
-
-            SRCS +=
-                    src/thread/generic/SDL_syscond.c
-                    src/thread/generic/SDL_syscond.h
-                    src/thread/windows/*.c
-                    src/thread/windows/*.h
-            ;
-
-            SRCS +=
-                    src/power/*.c
-                    src/power/windows/SDL_syspower.c
-            ;
-
-            SRCS +=
-                    src/filesystem/windows/*.c
-                    src/filesystem/windows/*.h
-            ;
-
-            SRCS +=
-                    src/timer/windows/*.c
-                    src/timer/windows/*.h
-            ;
-
-            SRCS +=
-                    src/loadso/windows/*.c
-                    src/loadso/windows/*.h
-            ;
-
-            SRCS +=
-                    src/core/windows/*.c
-                    src/core/windows/*.h
-            ;
-
-            SRCS +=
-                    src/locale/windows/*.c
-                    src/locale/windows/*.h
-            ;
-
-            SRCS +=
-                    src/misc/windows/*.c
-                    src/misc/windows/*.h
-            ;
-
-            SDL_JOYSTICK = 1 ;
-            if $(SDL_JOYSTICK) = 1 {
-                SRCS +=
-                        src/joystick/windows/*.c
-                        src/joystick/windows/*.h
-                ;
-
-                SRCS +=
-                        src/sensor/windows/*.c
-                        src/sensor/windows/*.h
-                ;
-
-                SRCS +=
-                        src/haptic/windows/SDL_dinputhaptic.c
-                        src/haptic/windows/SDL_dinputhaptic_c.h
-                        src/haptic/windows/SDL_windowshaptic.c
-                        src/haptic/windows/SDL_xinputhaptic.c
-                ;
-
-                SRCS +=
-                        src/haptic/SDL_haptic.c
-                        src/haptic/SDL_haptic_c.h
-                        src/haptic/SDL_syshaptic.h
-                ;
-
-                SRCS +=
-                        src/hidapi/windows/*.c
-                        src/hidapi/windows/*.h
-                ;
-            }
-
-            SRCS +=
-                    src/video/dummy/*.c
-                    src/video/dummy/*.h
-            ;
-
-            C.LinkPrebuiltLibraries : advapi32 gdi32 imm32 ole32 oleaut32 opengl32 setupapi shell32 user32 uuid version winmm : public ;
-            C.LinkPrebuiltLibraries : dinput8 dxguid : public ;
-        }
-
-        else if $(C.PLATFORM) in macosx32 macosx64 {
-            SRCS +=
-                    src/file/cocoa/*.m
-                    src/file/cocoa/*.h
-            ;
-
-            SRCS +=
-                    src/audio/coreaudio/*.c
-                    src/audio/coreaudio/*.h
-                    src/audio/coreaudio/*.m
-            ;
-
-            SDL_JOYSTICK = 1 ;
-            if $(SDL_JOYSTICK) = 1 {
-                SRCS +=
-                        src/joystick/darwin/*.c
-                        src/joystick/darwin/*.m
-                        src/joystick/darwin/*.h
-                        src/joystick/iphoneos/*.h
-                        src/joystick/iphoneos/*.m
-                ;
-
-                SRCS +=
-                        src/haptic/darwin/SDL_syshaptic.c
-                        src/haptic/darwin/SDL_syshaptic_c.h
-                ;
-
-                SRCS +=
-                        #src/haptic/SDL_haptic.c
-                        src/haptic/SDL_haptic_c.h
-                        src/haptic/SDL_syshaptic.h
-                ;
-            }
-
-            SRCS +=
-                    src/hidapi/mac/*.c
-                    src/hidapi/mac/*.h
-            ;
-
-            SRCS +=
-                    src/locale/macosx/*.m
-            ;
-
-            SRCS +=
-                    src/misc/macosx/*.c
-                    src/misc/macosx/*.h
-                    src/misc/macosx/*.m
-            ;
-
-            SRCS +=
-                    src/power/*.c
-                    src/power/*.h
-                    src/power/macosx/SDL_syspower.c
-            ;
-
-            SRCS +=
-                    src/timer/unix/*.c
-                    src/timer/unix/*.h
-            ;
-
-            SRCS +=
-                    src/filesystem/cocoa/*.m
-                    src/filesystem/cocoa/*.h
-            ;
-
-            SRCS +=
-                    src/video/cocoa/*.m
-                    src/video/cocoa/*.h
-            ;
-
-            SRCS +=
-                    src/loadso/dlopen/*.c
-                    src/loadso/dlopen/*.h
-            ;
-
-            SRCS +=
-                    src/thread/pthread/*.c
-                    src/thread/pthread/*.h
-            ;
-
-            SRCS +=
-                    src/render/metal/*.m
-                    src/render/metal/*.h
-                    src/video/dummy/*.c
-                    src/video/dummy/*.h
-            ;
-
-            C.Defines : SDL_POWER_MACOSX ;
-            C.ObjectAddFlags : src/joystick/iphoneos/SDL_mfijoystick.m : -fobjc-arc ;
-            C.IncludeDirectories : src/video/khronos ;
-            C.ObjectIncludeDirectories : src/hidapi/mac/hid.c : src/hidapi/hidapi ;
-            C.macosx.LinkFrameworks : AudioToolbox AudioUnit Carbon Cocoa CoreAudio CoreFoundation CoreGraphics CoreHaptics CoreVideo ForceFeedback Foundation GameController IOKit Metal OpenGL : public ;
-        }
-
-        else if $(C.PLATFORM) in ios iossimulator {
-            SRCS +=
-                    src/file/cocoa/*.m
-                    src/file/cocoa/*.h
-            ;
-
-            SRCS +=
-                    src/audio/coreaudio/*.c
-                    src/audio/coreaudio/*.h
-                    src/audio/coreaudio/*.m
-            ;
-
-            SDL_JOYSTICK = 1 ;
-            if $(SDL_JOYSTICK) = 1 {
-                SRCS +=
-                        src/joystick/iphoneos/*.m
-                        src/joystick/iphoneos/*.h
-                        src/joystick/steam/*.c
-                        src/joystick/steam/*.h
-                ;
-
-                SRCS +=
-                        src/sensor/coremotion/*.m
-                        src/sensor/coremotion/*.h
-                ;
-
-                SRCS +=
-                        src/haptic/dummy/*.c
-                ;
-
-                SRCS +=
-                        src/hidapi/ios/*.m
-                        src/hidapi/ios/*.h
-                ;
-            }
-
-            SRCS +=
-                    src/power/*.c
-                    src/power/*.h
-                    src/power/uikit/*.m
-                    src/power/uikit/*.h
-            ;
-
-            SRCS +=
-                    src/timer/unix/*.c
-                    src/timer/unix/*.h
-            ;
-
-            SRCS +=
-                    src/filesystem/cocoa/*.m
-                    src/filesystem/cocoa/*.h
-            ;
-
-            SRCS +=
-                    src/render/metal/*.m
-                    src/render/metal/*.h
-                    #src/render/opengles/*.c
-                    #src/render/opengles/*.h
-                    #src/render/opengles2/*.c
-                    #src/render/opengles2/*.h
-                    #src/render/software/*.c
-                    #src/render/software/*.h
-            ;
-
-            SRCS +=
-                    src/video/uikit/*.m
-                    src/video/uikit/*.h
-            ;
-
-            SRCS +=
-                    src/loadso/dlopen/*.c
-                    src/loadso/dlopen/*.h
-            ;
-
-            SRCS +=
-                    src/thread/pthread/*.c
-                    src/thread/pthread/*.h
-            ;
-
-            SRCS +=
-                    src/video/dummy/*.c
-                    src/video/dummy/*.h
-            ;
-
-            SRCS +=
-                    src/misc/ios/*.m
-            ;
-
-            C.Defines : GLES_SILENCE_DEPRECATION ;
-            C.Flags : M MM : -fobjc-arc : public ;
-            C.ios.LinkFrameworks : AVFAudio AudioToolbox CoreAudio CoreGraphics CoreHaptics CoreMotion Foundation GameController Metal OpenGLES QuartzCore UIKit : public ;
-        }
-
-        else if $(C.PLATFORM) in android {
-            SRCS +=
-                    src/audio/android/*.c
-                    src/audio/android/*.h
-            ;
-
-            SRCS +=
-                    src/audio/openslES/*.c
-                    src/audio/openslES/*.h
-            ;
-
-            SDL_JOYSTICK = 1 ;
-            if $(SDL_JOYSTICK) = 1 {
-                SRCS +=
-                        src/joystick/android/*.c
-                        src/joystick/android/*.h
-                ;
-
-                SRCS +=
-                        src/haptic/android/SDL_syshaptic.c
-                        src/haptic/android/SDL_syshaptic_c.h
-                        src/hidapi/android/*.cpp
-                ;
-
-                SRCS +=
-                        #src/haptic/dummy/*.c
-                ;
-            }
-
-            SRCS +=
-                    src/power/*.c
-                    src/power/*.h
-                    src/power/android/*.c
-                    src/power/android/*.h
-            ;
-
-            SRCS +=
-                    src/timer/unix/*.c
-                    src/timer/unix/*.h
-            ;
-
-            SRCS +=
-                    src/filesystem/android/*.c
-                    src/filesystem/android/*.h
-            ;
-
-            SRCS +=
-                    #src/render/opengles/*.c
-                    #src/render/opengles/*.h
-                    #src/render/opengles2/*.c
-                    #src/render/opengles2/*.h
-                    #src/render/software/*.c
-                    #src/render/software/*.h
-            ;
-
-            SRCS +=
-                    src/video/android/*.c
-                    src/video/android/*.h
-            ;
-
-            SRCS +=
-                    src/loadso/dlopen/*.c
-                    src/loadso/dlopen/*.h
-            ;
-
-            SRCS +=
-                    src/sensor/android/*.c
-                    src/sensor/android/*.h
-            ;
-
-            SRCS +=
-                    src/thread/pthread/*.c
-                    src/thread/pthread/*.h
-            ;
-
-            SRCS +=
-                    src/core/android/*.c
-                    src/core/android/*.h
-            ;
-
-            SRCS +=
-                    src/locale/android/*.c
-                    src/locale/android/*.h
-            ;
-
-            SRCS +=
-                    src/misc/android/*.c
-                    src/misc/android/*.h
-            ;
-
-            SRCS +=
-                    $(NDKROOT)/sources/android/cpufeatures/cpu-features.*
-            ;
-        }
-
-        if $(SDL_JOYSTICK) = 1 {
-            SRCS +=
-                    src/joystick/*.c
-                    src/joystick/*.h
-            ;
-
-            SRCS +=
-                    src/haptic/*.c
-                    src/haptic/*.h
-            ;
-        }
-
-        SRCS +=
-                src/audio/disk/*.c
-                src/audio/disk/*.h
-                src/audio/dummy/*.c
-                src/audio/dummy/*.h
-        ;
-
-        SRCS +=
-                src/test/*.c
-                src/test/*.h
-        ;
-        # */
-
-        AutoSourceGroup : $(SRCS) ;
-
-        #C.Defines : USING_GENERATED_CONFIG_H ;
-        C.Defines : HAVE_LIBC GL_GLEXT_PROTOTYPES ;
-
-        if $(SDL_JOYSTICK) != 1 {
-            C.Defines : SDL_JOYSTICK_DISABLED ;
-            C.Defines : SDL_HAPTIC_DISABLED ;
-        }
-
-        C.IncludeDirectories : include : public ;
+	if $(C.PLATFORM) = android {
+		C.ActiveTarget sdl2-hidapi ;
+
+		local SRCS =
+				src/hidapi/android/hid.cpp
+				src/hidapi/hidapi/hidapi.h
+		;
+		C.Defines : ANDROID ;
+		C.ForcePublic ;
+		C.OutputName : libhidapi ;
+		C.OutputPostfix ;
+		C.LinkPrebuiltLibraries : android c++abi c++_static log ;
+		C.Library : $(SRCS) : shared ;
+	}
+
+	C.ActiveTarget sdl2 ;
+
+	local SRCS =
+			include/*.h
+			src/*.c
+			src/*.h
+			src/atomic/*.c
+			src/atomic/*.h
+			src/audio/*.c
+			src/audio/*.h
+			src/cpuinfo/*.c
+			src/cpuinfo/*.h
+			src/dynapi/*.c
+			src/dynapi/*.h
+			src/events/*.c
+			src/events/*.h
+			src/file/*.c
+			src/file/*.h
+			src/hidapi/*.c
+			src/hidapi/*.h
+			src/joystick/hidapi/*.c
+			src/joystick/hidapi/*.h
+			src/joystick/virtual/*.c
+			src/joystick/virtual/*.h
+			src/libm/*.c
+			src/libm/*.h
+			src/locale/*.c
+			src/locale/*.h
+			src/misc/*.c
+			src/misc/*.h
+			src/render/*.c
+			src/render/*.h
+			src/render/*/*.c
+			src/render/*/*.h
+			src/sensor/*.c
+			src/sensor/*.h
+			src/sensor/dummy/*.c
+			src/sensor/dummy/*.h
+			src/stdlib/*.c
+			src/stdlib/*.h
+			src/thread/*.c
+			src/thread/*.h
+			src/timer/*.c
+			src/timer/*.h
+			src/video/*.c
+			src/video/*.h
+			src/video/yuv2rgb/*.c
+			src/video/yuv2rgb/*.h
+	;
+
+	if $(C.PLATFORM) in win32 win64 {
+		SRCS +=
+				src/core/windows/*.c
+				src/core/windows/*.h
+		;
+
+		SRCS +=
+				src/audio/winmm/*.c
+				src/audio/winmm/*.h
+				src/audio/directsound/*.c
+				src/audio/directsound/*.h
+				src/audio/wasapi/*.c
+				src/audio/wasapi/*.h
+				src/audio/xaudio2/*.c
+				src/audio/xaudio2/*.h
+		;
+
+		SRCS +=
+				src/video/windows/*.c
+				src/video/windows/*.h
+		;
+
+		SRCS +=
+				src/thread/generic/SDL_syscond.c
+				src/thread/generic/SDL_syscond.h
+				src/thread/windows/*.c
+				src/thread/windows/*.h
+		;
+
+		SRCS +=
+				src/power/*.c
+				src/power/windows/SDL_syspower.c
+		;
+
+		SRCS +=
+				src/filesystem/windows/*.c
+				src/filesystem/windows/*.h
+		;
+
+		SRCS +=
+				src/timer/windows/*.c
+				src/timer/windows/*.h
+		;
+
+		SRCS +=
+				src/loadso/windows/*.c
+				src/loadso/windows/*.h
+		;
+
+		SRCS +=
+				src/core/windows/*.c
+				src/core/windows/*.h
+		;
+
+		SRCS +=
+				src/locale/windows/*.c
+				src/locale/windows/*.h
+		;
+
+		SRCS +=
+				src/misc/windows/*.c
+				src/misc/windows/*.h
+		;
+
+		SDL_JOYSTICK = 1 ;
+		if $(SDL_JOYSTICK) = 1 {
+			SRCS +=
+					src/joystick/windows/*.c
+					src/joystick/windows/*.h
+			;
+
+			SRCS +=
+					src/sensor/windows/*.c
+					src/sensor/windows/*.h
+			;
+
+			SRCS +=
+					src/haptic/windows/SDL_dinputhaptic.c
+					src/haptic/windows/SDL_dinputhaptic_c.h
+					src/haptic/windows/SDL_windowshaptic.c
+					src/haptic/windows/SDL_xinputhaptic.c
+			;
+
+			SRCS +=
+					src/haptic/SDL_haptic.c
+					src/haptic/SDL_haptic_c.h
+					src/haptic/SDL_syshaptic.h
+			;
+
+			SRCS +=
+					#src/hidapi/windows/*.c
+					#src/hidapi/windows/*.h
+			;
+		}
+
+		SRCS +=
+				src/video/dummy/*.c
+				src/video/dummy/*.h
+		;
+
+		C.Defines : SDL_THREAD_GENERIC_COND_SUFFIX=1 ;
+		C.LinkPrebuiltLibraries : advapi32 gdi32 imm32 ole32 oleaut32 opengl32 setupapi shell32 user32 uuid version winmm : public ;
+		C.LinkPrebuiltLibraries : dinput8 dxguid : public ;
+	}
+
+	else if $(C.PLATFORM) in macosx32 macosx64 {
+		SRCS +=
+				src/file/cocoa/*.m
+				src/file/cocoa/*.h
+		;
+
+		SRCS +=
+				src/audio/coreaudio/*.c
+				src/audio/coreaudio/*.h
+				src/audio/coreaudio/*.m
+		;
+
+		SDL_JOYSTICK = 1 ;
+		if $(SDL_JOYSTICK) = 1 {
+			SRCS +=
+					src/joystick/darwin/*.c
+					src/joystick/darwin/*.m
+					src/joystick/darwin/*.h
+					src/joystick/iphoneos/*.h
+					src/joystick/iphoneos/*.m
+			;
+
+			SRCS +=
+					src/haptic/darwin/SDL_syshaptic.c
+					src/haptic/darwin/SDL_syshaptic_c.h
+			;
+
+			SRCS +=
+					#src/haptic/SDL_haptic.c
+					src/haptic/SDL_haptic_c.h
+					src/haptic/SDL_syshaptic.h
+			;
+		}
+
+		SRCS +=
+				src/hidapi/mac/*.c
+				src/hidapi/mac/*.h
+		;
+
+		SRCS +=
+				src/locale/macosx/*.m
+		;
+
+		SRCS +=
+				src/misc/macosx/*.c
+				src/misc/macosx/*.h
+				src/misc/macosx/*.m
+		;
+
+		SRCS +=
+				src/power/*.c
+				src/power/*.h
+				src/power/macosx/SDL_syspower.c
+		;
+
+		SRCS +=
+				src/timer/unix/*.c
+				src/timer/unix/*.h
+		;
+
+		SRCS +=
+				src/filesystem/cocoa/*.m
+				src/filesystem/cocoa/*.h
+		;
+
+		SRCS +=
+				src/video/cocoa/*.m
+				src/video/cocoa/*.h
+		;
+
+		SRCS +=
+				src/loadso/dlopen/*.c
+				src/loadso/dlopen/*.h
+		;
+
+		SRCS +=
+				src/thread/pthread/*.c
+				src/thread/pthread/*.h
+		;
+
+		SRCS +=
+				src/render/metal/*.m
+				src/render/metal/*.h
+				src/video/dummy/*.c
+				src/video/dummy/*.h
+		;
+
+		C.Defines : SDL_POWER_MACOSX ;
+		C.ObjectAddFlags : src/joystick/iphoneos/SDL_mfijoystick.m : -fobjc-arc ;
+		C.IncludeDirectories : src/video/khronos ;
+		C.ObjectIncludeDirectories : src/hidapi/mac/hid.c : src/hidapi/hidapi ;
+		C.macosx.LinkFrameworks : AudioToolbox AudioUnit Carbon Cocoa CoreAudio CoreFoundation CoreGraphics CoreHaptics CoreVideo ForceFeedback Foundation GameController IOKit Metal OpenGL : public ;
+	}
+
+	else if $(C.PLATFORM) in ios iossimulator {
+		SRCS +=
+				src/file/cocoa/*.m
+				src/file/cocoa/*.h
+		;
+
+		SRCS +=
+				src/audio/coreaudio/*.c
+				src/audio/coreaudio/*.h
+				src/audio/coreaudio/*.m
+		;
+
+		SDL_JOYSTICK = 1 ;
+		if $(SDL_JOYSTICK) = 1 {
+			SRCS +=
+					src/joystick/iphoneos/*.m
+					src/joystick/iphoneos/*.h
+					src/joystick/steam/*.c
+					src/joystick/steam/*.h
+			;
+
+			SRCS +=
+					src/sensor/coremotion/*.m
+					src/sensor/coremotion/*.h
+			;
+
+			SRCS +=
+					src/haptic/dummy/*.c
+			;
+
+			SRCS +=
+					src/hidapi/ios/*.m
+					src/hidapi/ios/*.h
+			;
+		}
+
+		SRCS +=
+				src/power/*.c
+				src/power/*.h
+				src/power/uikit/*.m
+				src/power/uikit/*.h
+		;
+
+		SRCS +=
+				src/timer/unix/*.c
+				src/timer/unix/*.h
+		;
+
+		SRCS +=
+				src/filesystem/cocoa/*.m
+				src/filesystem/cocoa/*.h
+		;
+
+		SRCS +=
+				src/render/metal/*.m
+				src/render/metal/*.h
+				#src/render/opengles/*.c
+				#src/render/opengles/*.h
+				#src/render/opengles2/*.c
+				#src/render/opengles2/*.h
+				#src/render/software/*.c
+				#src/render/software/*.h
+		;
+
+		SRCS +=
+				src/video/uikit/*.m
+				src/video/uikit/*.h
+		;
+
+		SRCS +=
+				src/loadso/dlopen/*.c
+				src/loadso/dlopen/*.h
+		;
+
+		SRCS +=
+				src/thread/pthread/*.c
+				src/thread/pthread/*.h
+		;
+
+		SRCS +=
+				src/video/dummy/*.c
+				src/video/dummy/*.h
+		;
+
+		SRCS +=
+				src/misc/ios/*.m
+		;
+
+		C.Defines : GLES_SILENCE_DEPRECATION ;
+		C.Flags : M MM : -fobjc-arc : public ;
+		C.ios.LinkFrameworks : AudioToolbox CoreAudio CoreGraphics CoreHaptics CoreMotion Foundation GameController Metal OpenGLES QuartzCore UIKit : public ;
+	}
+
+	else if $(C.PLATFORM) in android {
+		SRCS +=
+				src/audio/android/*.c
+				src/audio/android/*.h
+				src/audio/aaudio/*.c
+				src/audio/aaudio/*.h
+		;
+
+		SRCS +=
+				src/audio/openslES/*.c
+				src/audio/openslES/*.h
+		;
+
+		SDL_JOYSTICK = 1 ;
+		if $(SDL_JOYSTICK) = 1 {
+			SRCS +=
+					src/joystick/android/*.c
+					src/joystick/android/*.h
+			;
+
+			SRCS +=
+					src/haptic/android/SDL_syshaptic.c
+					src/haptic/android/SDL_syshaptic_c.h
+					src/hidapi/android/*.cpp
+			;
+
+			SRCS +=
+					#src/haptic/dummy/*.c
+			;
+		}
+
+#            SRCS +=
+#                    src/hidapi/android/hid.cpp
+#                    src/hidapi/hidapi/hidapi.h
+#            ;
+
+		SRCS +=
+				src/power/*.c
+				src/power/*.h
+				src/power/android/*.c
+				src/power/android/*.h
+		;
+
+		SRCS +=
+				src/timer/unix/*.c
+				src/timer/unix/*.h
+		;
+
+		SRCS +=
+				src/filesystem/android/*.c
+				src/filesystem/android/*.h
+		;
+
+		SRCS +=
+				#src/render/opengles/*.c
+				#src/render/opengles/*.h
+				#src/render/opengles2/*.c
+				#src/render/opengles2/*.h
+				#src/render/software/*.c
+				#src/render/software/*.h
+		;
+
+		SRCS +=
+				src/video/android/*.c
+				src/video/android/*.h
+		;
+
+		SRCS +=
+				src/loadso/dlopen/*.c
+				src/loadso/dlopen/*.h
+		;
+
+		SRCS +=
+				src/sensor/android/*.c
+				src/sensor/android/*.h
+		;
+
+		SRCS +=
+				src/thread/pthread/*.c
+				src/thread/pthread/*.h
+		;
+
+		SRCS +=
+				src/core/android/*.c
+				src/core/android/*.h
+		;
+
+		SRCS +=
+				src/locale/android/*.c
+				src/locale/android/*.h
+		;
+
+		SRCS +=
+				src/misc/android/*.c
+				src/misc/android/*.h
+		;
+
+		SRCS +=
+				cpufeatures/cpu-features.c
+		;
+
+		# Shorten the directory length for the output directory, as it was exceeding 260 characters on Windows in certain cases.
+		C.SearchSource : cpufeatures/cpu-features.c : $(NDKROOT)/sources/android ;
+
+		SDL2_JAVA_SRCS =
+				org/libsdl/app/HIDDevice.java
+				org/libsdl/app/HIDDeviceBLESteamController.java
+				org/libsdl/app/HIDDeviceManager.java
+				org/libsdl/app/HIDDeviceUSB.java
+				org/libsdl/app/SDL.java
+				org/libsdl/app/SDLActivity.java
+				org/libsdl/app/SDLAudioManager.java
+				org/libsdl/app/SDLControllerManager.java
+				org/libsdl/app/SDLSurface.java
+		;
+	}
+
+	if $(SDL_JOYSTICK) = 1 {
+		SRCS +=
+				src/joystick/*.c
+				src/joystick/*.h
+		;
+
+		SRCS +=
+				src/haptic/*.c
+				src/haptic/*.h
+		;
+	}
+
+	SRCS +=
+			src/audio/disk/*.c
+			src/audio/disk/*.h
+			src/audio/dummy/*.c
+			src/audio/dummy/*.h
+	;
+
+	SRCS +=
+			src/test/*.c
+			src/test/*.h
+	;
+	# */
+
+	AutoSourceGroup : $(SRCS) ;
+
+	#C.Defines : USING_GENERATED_CONFIG_H ;
+	C.Defines : HAVE_LIBC GL_GLEXT_PROTOTYPES ;
+
+	if $(SDL_JOYSTICK) != 1 {
+		C.Defines : SDL_JOYSTICK_DISABLED ;
+		C.Defines : SDL_HAPTIC_DISABLED ;
+	}
+
+	C.IncludeDirectories : include : public ;
 
 #        if $(C.PLATFORM) in win32 win64 {
 #            C.LinkPrebuiltLibraries : advapi32 : public ;
 #
 #        } else if $(C.PLATFORM) in android {
-        if $(C.PLATFORM) in android {
-            C.Inherits : sdl2-hidapi ;
-            C.Defines : ANDROID ;
-            C.IncludeDirectories : $(NDKROOT)/sources/android/cpufeatures ;
-            C.OutputName : libSDL2 ;
-            C.OutputPostfix ;
-            C.LinkPrebuiltLibraries : dl GLESv1_CM GLESv2 log android c m OpenSLES stdc++ ;
-            C.Library : $(SRCS) : shared ;
+	if $(C.PLATFORM) in android {
+		#C.Inherits : sdl2-hidapi ;
+		C.Defines : ANDROID ;
+		C.IncludeDirectories : $(NDKROOT)/sources/android/cpufeatures ;
+		C.OutputName : libSDL2 ;
+		C.OutputPostfix ;
+		C.LinkPrebuiltLibraries : dl GLESv1_CM GLESv2 log android c m OpenSLES ;
+		C.Library : $(SRCS) : shared ;
 
-        } else {
-            C.Library : $(SRCS) ;
-        }
+	} else {
+		C.Library : $(SRCS) ;
+	}
 
-        #########################
-        C.ActiveTarget sdl2main ;
+	#########################
+	C.ActiveTarget sdl2main ;
 
-        SRCS = ;
+	SRCS = ;
 
-        if $(C.PLATFORM) in win32 win64 {
-            SRCS =
-                    src/main/windows/SDL_windows_main.c
-            ;
-            #C.LinkPrebuiltLibraries : shell32 winmm : public ;
+	if $(C.PLATFORM) in win32 win64 {
+		SRCS =
+				src/main/windows/SDL_windows_main.c
+		;
+		#C.LinkPrebuiltLibraries : shell32 winmm : public ;
 
-        } else if $(C.PLATFORM) in android {
-            SRCS =
-                src/main/android/*.c        # */
-            ;
-            C.Defines : ANDROID ;
-            #C.OutputName : libmain ;
-            #C.OutputPostfix ;
-            C.LinkPrebuiltLibraries : GLESv1_CM GLESv2 log c m : public ;
-            C.LinkFlags : -Wl,--undefined=Java_org_libsdl_app_SDLActivity_nativeInit : public ;
+	} else if $(C.PLATFORM) in android {
+		SRCS =
+			src/main/android/*.c        # */
+		;
+		C.Defines : ANDROID ;
+		#C.OutputName : libmain ;
+		#C.OutputPostfix ;
+		C.LinkPrebuiltLibraries : GLESv1_CM GLESv2 log c m : public ;
+		C.LinkFlags : -Wl,--undefined=Java_org_libsdl_app_SDLActivity_nativeInit : public ;
 
-        } else if $(C.PLATFORM) in ios iossimulator {
-            SRCS =
-                    src/main/uikit/SDL_uikit_main.c
-            ;
-        } else if $(C.PLATFORM) in macosx64 {
-            SRCS =
-                    src/main/dummy/SDL_dummy_main.c
-            ;
-        }
+	} else if $(C.PLATFORM) in ios iossimulator {
+		SRCS =
+				src/main/uikit/SDL_uikit_main.c
+		;
+	} else if $(C.PLATFORM) in macosx64 {
+		SRCS =
+				src/main/dummy/SDL_dummy_main.c
+		;
+	}
 
-        C.IncludeDirectories : include : public ;
-        C.Library : $(SRCS) ;
+	C.IncludeDirectories : include : public ;
+	C.Library : $(SRCS) ;
+
+	if $(USE_THIS) { #$(C.PLATFORM) = android {
+		C.ActiveTarget sdl2-hidapi ;
+
+		local SRCS =
+				src/hidapi/android/hid.cpp
+				src/hidapi/hidapi/hidapi.h
+		;
+		C.Defines : ANDROID ;
+		C.IncludeDirectories : include ;
+		C.ForcePublic ;
+		C.OutputName : libhidapi ;
+		C.OutputPostfix ;
+		C.LinkPrebuiltLibraries : android c++abi c++_static log ;
+		C.LinkLibraries : sdl2 ;
+		C.Library : $(SRCS) : shared ;
+	}
+
 }
 

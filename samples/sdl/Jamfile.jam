@@ -1,6 +1,6 @@
 SubDir TOP ;
 
-SubIncludeRelative SDL2-2.0.16 : ../sdl2 ;
+SubIncludeRelative SDL2-2.30.1 : ../sdl2 ;
 
 local SRCS =
         sdltest.c
@@ -12,7 +12,7 @@ if $(PLATFORM) in android {
     android.SDK 28 : 21 ;
 
     TOOLCHAINS =
-        #$(C.ACTIVE_TOOLCHAIN_SPEC)@C.ARCHITECTURE=armv7-a
+        $(C.ACTIVE_TOOLCHAIN_SPEC)@C.ARCHITECTURE=armv7-a
         $(C.ACTIVE_TOOLCHAIN_SPEC)@C.ARCHITECTURE=arm64
     ;
 }
@@ -65,7 +65,12 @@ if $(PLATFORM) in android {
 
     C.ActiveTarget sdltest ;
 
-    android.SDKMinimumVersion : 24 ;
+    android.SDKMinimumVersion : 26 ;
+    android.SDKTargetVersion : 34 ;
+    android.SDKCompileVersion : 34 ;
+    android.ProductVersion : 1.0.0 : 1 ;
+
+    android.PackageName : org.jamplus.sdltest ;
 
     #android.Assets : $(IMAGE_PATH) ;
     #android.UncompressedAssetExtensions : dat ;
@@ -76,11 +81,13 @@ if $(PLATFORM) in android {
     android.NativeLibraries :
             sdltest
             sdl2
-            sdl2-hidapi
+    ;
+    android.NativePrebuiltLibraries :
+            c++_shared
     ;
 
-    android.Sign : my-release-key.keystore blahblah testgles ;
-    android.Application ;
+    android.Sign : $(HOME)/.android/debug.keystore android androiddebugkey android ;
+    android.Application : $(SDL2_JAVA_SRCS) ;
     android.Package : $(toolchainsUsed) : install ;
 }
 
