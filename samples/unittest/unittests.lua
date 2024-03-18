@@ -21,7 +21,7 @@ logfile:write("Test A succeeded.\n")
 
 print("Test B")
 for line in osprocess.lines{ ADD_EXE, 4, 6 } do
-	if line ~= '100' then
+	if line ~= '10' then
 		print("Failed test Add 4 + 6 = 10")
 		logfile:write("Test B failed.\n")
 		logfile:close()
