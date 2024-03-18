@@ -37,6 +37,8 @@ if $(NT)
 	RM		?= del /f/q ;
 	RMDIR	?= rmdir /s/q ;
 	SLASH	?= / ;
+
+	HOME = $(USERPROFILE) ;
 }
 else if $(UNIX)
 {
