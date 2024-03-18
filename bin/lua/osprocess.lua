@@ -25,7 +25,7 @@ end
 
 -- ex.lines
 function M.lines(args, binary)
-	local proc, input = M.popen(args, not binary)
+	local proc, input = M.popen(args, binary)
 	if proc then
 		return function()
 			local line = input:read("*l")
@@ -41,7 +41,7 @@ end
 
 -- ex.rawlines
 function M.rawlines(args, binary)
-	local proc, input = M.popen(args, not binary)
+	local proc, input = M.popen(args, binary)
 	return function()
 		local line = input:read(100)
 		if line then return line end
