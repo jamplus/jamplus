@@ -1228,6 +1228,8 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
         NotFile $(gradleTarget) ;
         GRADLE_TARGET on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(gradleTarget) ;
 
+        CleanTree $(C.ACTIVE_TOOLCHAIN_CLEAN_TARGET) : $(GRADLE_OUTPUT_DIRECTORY) ;
+
         # gradlew
         local gradlew ;
         if $(OS) = NT {
