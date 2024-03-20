@@ -1715,6 +1715,94 @@ dependencies {
             contents += "def distFolder = \"$(relativePackageOutputPath)\"$(NEWLINE)" ;
 
             contents += "
+static String firstMatchingSubstring(String taskName, String[] keys) {
+    def lcName = taskName.toLowerCase()
+
+    for(String key: keys) {
+        if(lcName.contains(key.toLowerCase())) return key
+    }
+
+    return null
+}
+
+/**
+ *
+ * @param taskName e.g., bundleMyFlavorRelease or bundleRelease
+ * @return
+ */
+String getBuildType(String taskName) {
+    return firstMatchingSubstring(taskName, getBuildTypeNames())
+}
+
+/**
+ *
+ * @param taskName e.g., bundleMyFlavorRelease
+ * @return
+ */
+String getFlavor(String taskName) {
+    return firstMatchingSubstring(taskName, getProductFlavorNames())
+}
+
+String[] getBuildTypeNames() {
+    def types = []
+
+    android.buildTypes.all { type ->
+        types.add(type.name)
+    }
+
+    return types
+}
+
+String[] getProductFlavorNames() {
+    def flavors = []
+
+    android.productFlavors.all { flavor ->
+        flavors.add(flavor.name)
+    }
+
+    return flavors
+}
+
+// Taken from https://stackoverflow.com/questions/55058980/android-appbundle-rename-generated-outputfile-aab/69305535#69305535
+tasks.whenTaskAdded { task ->
+    def name = task.name
+
+    if (name.startsWith(\"bundle\")
+            && !name.contains(\"Classes\")
+            && !name.contains(\"Resources\")
+            && name != \"bundle\") {
+
+        def renameTaskName = \"rename${task.name.capitalize()}Aab\"
+        //def version = \"${android.defaultConfig.versionName}-${android.defaultConfig.versionCode}\"
+        def version = \"${android.defaultConfig.versionName}\" //-${android.defaultConfig.versionCode}\"
+        //def flavor = getFlavor(name)
+        def type = getBuildType(name)
+        //printf \"flavor ${flavor} type ${type}\"
+        //if(flavor == null || type == null) return
+        if(type == null) return
+
+        //def outputName = \"$(TARGET)-$flavor-$type-$version\"
+        def outputName = \"$(TARGET)-$version-$type\"
+
+        tasks.create(renameTaskName) {
+            def sourcePath = \"${rootDir}/app/build/outputs/bundle/${type}\"
+            def destinationPath = \"$(relativePackageOutputPath)\"
+            def originalFile = \"$sourcePath/app-${type}.aab\"
+            //printf \"originalFile - ${originalFile}, destinationFile - ${destinationPath}/${outputName}.aab\"
+
+            doLast {
+                if (file(\"$originalFile\").exists()) {
+                    ant.copy file: \"$originalFile\",
+                            tofile: \"$destinationPath/${outputName}.aab\"
+                }
+            }
+        }
+
+        task.finalizedBy(renameTaskName)
+    }
+}
+
+
 android {
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
