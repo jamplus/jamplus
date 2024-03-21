@@ -82,6 +82,25 @@ bindrule( const char *rulename )
 }
 
 /*
+ * actionexists() - return whether the action exists or not
+ */
+
+int actionexists( const char *actionname )
+{
+	RULE rule, *r = &rule;
+
+	if( !rulehash )
+	    rulehash = hashinit( sizeof( RULE ), "rules" );
+
+	r->name = actionname;
+
+	if( !hashcheck( rulehash, (HASHDATA **)&r ) )
+		return 0;
+
+	return r->actions != NULL;
+}
+
+/*
  * ruleexists() - return whether the rule exists or not
  */
 

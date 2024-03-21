@@ -140,6 +140,7 @@ LIST* builtin_listsort( PARSE *parse, LOL *args, int *jmp );
 
 LIST *builtin_dependslist( PARSE *parse, LOL *args, int *jmp );
 LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp);
+LIST *builtin_actionexists(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_ruleexists(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_configurefilehelper(PARSE *parse, LOL *args, int *jmp);
 LIST *builtin_search(PARSE *parse, LOL *args, int *jmp);
@@ -323,6 +324,9 @@ load_builtins()
 
 	bindrule( "QuickSettingsLookup" )->procedure =
 		parse_make( builtin_quicksettingslookup, P0, P0, P0, C0, C0, 0 );
+
+	bindrule( "ActionExists" )->procedure =
+		parse_make( builtin_actionexists, P0, P0, P0, C0, C0, 0 );
 
 	bindrule( "RuleExists" )->procedure =
 		parse_make( builtin_ruleexists, P0, P0, P0, C0, C0, 0 );
@@ -1605,6 +1609,48 @@ LIST *builtin_quicksettingslookup(PARSE *parse, LOL *args, int *jmp)
 	settings = quicksettingslookup(t, list_value(list_first(symbol)));
 	if (settings)
 		return list_copy(L0, settings->value);
+
+	return L0;
+}
+
+
+LIST *builtin_actionexists(PARSE *parse, LOL *args, int *jmp)
+{
+	LIST* symbol;
+	const char* rulename;
+
+	symbol = lol_get(args, 0);
+	if (!list_first(symbol))
+		return L0;
+
+	rulename = list_value( list_first( symbol ) );
+	if ( actionexists( rulename ) )
+		return list_append( L0, "true", 0 );
+
+	if ( !lol_get( args, 1 ) )
+		return L0;
+
+#ifdef OPT_LOAD_MISSING_RULE_EXT
+	if( ruleexists( "FindMissingRule" ) ) {
+		LOL lol;
+		LIST *args = list_append( L0, rulename, 0 );
+		LIST *result;
+
+		lol_init( &lol );
+		lol_add( &lol, args );
+		result = evaluate_rule( "FindMissingRule", &lol, L0 );
+		lol_free( &lol );
+
+		if( list_first( result ) ) {
+			list_free( result );
+			if ( actionexists( rulename ) ) {
+				return list_append( L0, "true", 0 );
+			}
+		}
+
+		list_free( result );
+	}
+#endif /* OPT_LOAD_MISSING_RULE_EXT */
 
 	return L0;
 }
