@@ -256,6 +256,7 @@ struct _target {
 } ;
 
 RULE 	*bindrule( const char *rulename );
+int actionexists( const char *rulename );
 int ruleexists( const char *rulename );
 TARGET *bindtarget( const char *targetname );
 TARGET *copytarget( const TARGET *t );
