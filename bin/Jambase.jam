@@ -990,6 +990,9 @@ if $(JAM_RUN_MODE) {
 		ARGS = $(JAM_COMMAND_LINE_TARGETS[2-] $(JAM_EXTRA_COMMAND_LINE_OPTIONS) ;
 		ARGS ?= "" ;
 		JAM_COMMAND_LINE_TARGETS = $(JAM_COMMAND_LINE_TARGETS[1]) ;
+		if $(JAM_COMMAND_LINE_TARGETS) = all {
+			JAM_COMMAND_LINE_TARGETS = help ;
+		}
 		if $(foundFile:S) = .jam {
 			include $(foundFile) ;
 		} else if $(foundFile:S) = .lua {
