@@ -1,0 +1,172 @@
+################################################################################
+# Launch any of the commands in this file with:
+#
+#     jam -r COMMAND ARGS...
+#
+# This sample is simplest to use if an alias is used:
+#
+# Powershell: function jrun { jam -r $ARGS }
+#
+# Jam will search up the directory tree for a file called jrun.jam or jrun.lua.
+# If found, it will execute the contents of that file.
+#
+# COMMAND is a regular Jam target, so anything you can do
+# with a Jam target can be done with a jrun command.
+################################################################################
+
+################################################################################
+# This is just a simple command that creates a Jam action to write out
+# "Hello, World!".
+#
+#     jrun hello
+################################################################################
+Command hello :
+    "echo Hello, world!"
+    ;
+
+################################################################################
+# This command runs dir.
+#
+# Run with:
+#
+#     jrun list
+#     jrun list *.c
+#     jam -r list *.c
+################################################################################
+if $(NT) {
+    Command list : "dir $(ARGS)" ;
+} else {
+    Command list : "ls $(ARGS)" ;
+}
+
+################################################################################
+# This is a simple command that runs git.
+#
+#     jrun git status
+################################################################################
+Command git : "git $(ARGS)" ;
+
+
+################################################################################
+# The print-it command will print print some text in Lua.
+#
+#      jrun print-it
+################################################################################
+actions lua print-it {
+    print("Printed text")
+}
+
+Command print-it ;
+
+
+################################################################################
+# The print-it-lua command will print print some text in Lua.
+#
+#      jrun print-it-lua
+################################################################################
+CommandLua print-it-lua : "print 'All the text'" ;
+
+
+################################################################################
+# The print-it-lua2 command will print print some text in Lua.
+#
+#      jrun print-it-lua2
+################################################################################
+Command print-it-lua2 : "print 'All the text'" : lua ;
+
+
+################################################################################
+# Use the built-in Lua wildcard globbing facility to dump out a file list.
+#
+#     jrun glob **.lua
+################################################################################
+CommandLua glob : "filefind = require 'filefind'; for entry in filefind.glob([[$(ARGS[1])]]) do print(entry.filename) end" ;
+CommandDescription glob :
+    "Glob files in a directory tree"
+    ""
+    "glob <pattern>"
+;
+
+
+################################################################################
+# Here is a demonstration that does the same thing as the 'glob' Command but
+# using the Jam rule facility instead of a Lua script.
+#
+#     jrun glob-jam **.lua
+################################################################################
+#rule glob-jam {
+#    local files = [ Wildcard $(ARGS[1]) ] ;
+#    Echo $(files:J=$(NEWLINE)) ;
+#}
+#
+#Command glob-jam ;
+
+
+################################################################################
+# Save the ARGS into the SAVED_ARGS settings for glob-with-saved-args.
+#
+#     jrun glob-with-saved-args **.lua
+################################################################################
+SAVED_ARGS on glob-with-saved-args = $(ARGS) ;
+actions lua glob-with-saved-args {
+    filefind = require 'filefind'
+    for entry in filefind.glob([[$(SAVED_ARGS[1])]]) do
+        print(entry.filename)
+    end
+}
+Command glob-with-saved-args ;
+
+
+################################################################################
+# Illustrate overriding the shell on a certain command. This example shows
+# PowerShell usage.
+################################################################################
+JAMSHELL on hello-powershell = pwsh.exe -noprofile -executionpolicy bypass -File ;
+JAMSHELLEXT on hello-powershell = .ps1 ;
+
+Command hello-powershell :
+    "Write-Host \"Hello in PowerShell!\""
+    ;
+
+
+################################################################################
+# This creates 3 different actions, one per set of quotes. Even though there is
+# an "exit /b 0" in there, the third echo still runs.
+################################################################################
+Command multiple-steps :
+    "@echo ar This is another recipe"
+    "exit /b 0"
+    "@echo ar This is another recipe, too"
+    ;
+
+
+################################################################################
+# This is just a simple action that writes "Hello, World!" after running the
+# Command multiple-steps first.
+#
+# That dependency is set up with the
+#     "Depends hello-with-dependency : another-recipe" line below.
+#
+#     jrun hello-with-dependency
+################################################################################
+Command hello-with-dependency :
+    "echo Hello, world!"
+    ;
+
+Depends hello-with-dependency : multiple-steps ;
+
+
+################################################################################
+# This is similar to the multiple-steps command, but there is only one list of
+# commands. Since Jam writes an action to a batch file, the "exit /b 0" will
+# cause the batch file to exit, and the "echo ar2" line will not run.
+#
+#     jrun multiple-steps-with-abort
+################################################################################
+actions multiple-steps-with-abort {
+    @echo ar2 This is another recipe
+    exit /b 0
+    @echo ar2 This is another recipe, too
+}
+
+Command multiple-steps-with-abort ;
