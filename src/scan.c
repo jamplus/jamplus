@@ -19,16 +19,16 @@
  * 11/04/02 (seiwald) - const-ing for string literals
  */
 
-# include "jam.h"
-# include "lists.h"
-# include "parse.h"
-# include "scan.h"
-# include "jamgram.h"
-# include "jambase.h"
-# include "newstr.h"
-# include "miniz.h"
-# include "variable.h"
-# include "filesys.h"
+#include "jam.h"
+#include "lists.h"
+#include "parse.h"
+#include "scan.h"
+#include "jamgram.h"
+#include "jambase.h"
+#include "newstr.h"
+#include "miniz.h"
+#include "variable.h"
+#include "filesys.h"
 
 extern mz_zip_archive *zip_attemptopen();
 extern int zip_findfile(const char *filename);
@@ -59,90 +59,85 @@ static struct include *lastIncp = 0; /* current file; head of chain */
 #endif
 static int scanmode = SCAN_NORMAL;
 static int anyerrors = 0;
-static char *symdump( YYSTYPE *s );
+static char* symdump(YYSTYPE* s);
 
 # define BIGGEST_TOKEN 10240	/* no single token can be larger */
 
-/* 
+/*
  * Set parser mode: normal, string, or keyword
  */
 
-void
-yymode( int n )
+void yymode(int n)
 {
 	scanmode = n;
 }
 
-void
-yyerror( const char *s )
+void yyerror(const char* s)
 {
-	if( incp )
-	    printf( "%s: line %d: ", incp->fname, incp->line );
+	if (incp)
+		printf("%s: line %d: ", incp->fname, incp->line);
 #ifdef OPT_IMPROVED_WARNINGS_EXT
 	else if (lastIncp)
-  	    printf( "file may be: %s: ", lastIncp->fname );
+		printf("file may be: %s: ", lastIncp->fname);
 #endif
 
-	printf( "%s at %s\n", s, symdump( &yylval ) );
+	printf("%s at %s\n", s, symdump(&yylval));
 
 	++anyerrors;
 }
 
 #ifdef OPT_IMPROVED_WARNINGS_EXT
-char *file_and_line(void)
+char* file_and_line(void)
 {
-    static char		msg[1024];
+	static char		msg[1024];
 
-    msg[0] = 0;
-    if (incp)
-	sprintf (msg, "(%s : %d)", incp->fname, incp->line);
-    else if (lastIncp)
-	sprintf (msg, "(last file: %s)", lastIncp->fname);
+	msg[0] = 0;
+	if (incp)
+		sprintf (msg, "(%s : %d)", incp->fname, incp->line);
+	else if (lastIncp)
+		sprintf (msg, "(last file: %s)", lastIncp->fname);
 
-    return msg;
+	return msg;
 }
 #endif
-int
-yyanyerrors()
+int yyanyerrors()
 {
 	return anyerrors != 0;
 }
 
-void
-yyfparse( const char *s )
+void yyfparse(const char* s)
 {
-	struct include *i = (struct include *)malloc( sizeof( *i ) );
+	struct include* i = (struct include*)malloc(sizeof(*i));
 
 	/* Push this onto the incp chain. */
 
 	i->string = "";
 	i->strings = 0;
 	i->file = 0;
-	i->fname = copystr( s );
+	i->fname = copystr(s);
 	i->line = 0;
 	i->origstrings = 0;
 	i->next = incp;
 	incp = i;
 
-	var_set( "JAM_CURRENT_SCRIPT", list_append(L0, i->fname, 0), VAR_SET );
+	var_set("JAM_CURRENT_SCRIPT", list_append(L0, i->fname, 0), VAR_SET);
 
 	/* If the filename is "+", it means use the internal jambase. */
 
-	if( !strcmp( s, "+" ) )
-	    i->strings = (char**)jambase;
+	if (!strcmp(s, "+"))
+		i->strings = (char**)jambase;
 }
 
-void
-yyfparselines( const char* s, char **lines )
+void yyfparselines( const char* s, char **lines )
 {
-	struct include *i = (struct include *)malloc( sizeof( *i ) );
+	struct include* i = (struct include*)malloc(sizeof(*i));
 
 	/* Push this onto the incp chain. */
 
 	i->string = "";
 	i->strings = lines;
 	i->file = 0;
-	i->fname = copystr( s );
+	i->fname = copystr(s);
 	i->line = 0;
 	i->origstrings = 0;
 	i->next = incp;
@@ -156,13 +151,12 @@ yyfparselines( const char* s, char **lines )
  * returning EOF at the bitter end.
  */
 
-int
-yyline()
+int yyline()
 {
-	struct include *i = incp;
+	struct include* i = incp;
 
-	if( !incp )
-	    return EOF;
+	if (!incp)
+		return EOF;
 
 	/* Once we start reading from the input stream, we reset the */
 	/* include insertion point so that the next include file becomes */
@@ -170,15 +164,15 @@ yyline()
 
 	/* If necessary, open the file */
 
-	if( !i->strings && !i->file )
+	if (!i->strings && !i->file)
 	{
-		FILE *f = stdin;
+		FILE* f = stdin;
 
-					//printf("fopencheck: %s\n", i->fname);
-		if( strcmp( i->fname, "-" ) && !( f = fopen( i->fname, "r" ) ) )
+		//printf("fopencheck: %s\n", i->fname);
+		if (strcmp(i->fname, "-") && !(f = fopen(i->fname, "r")))
 		{
-					//printf("internalzip: %s\n", i->fname);
-			mz_zip_archive *pZipArchive = zip_attemptopen();
+			//printf("internalzip: %s\n", i->fname);
+			mz_zip_archive* pZipArchive = zip_attemptopen();
 			if (pZipArchive != NULL)
 			{
 				// Search for the file.
@@ -255,24 +249,25 @@ yyline()
 				}
 				else
 				{
-					perror( i->fname );
+					perror(i->fname);
 				}
 			}
 			else
 			{
-				perror( i->fname );
+				perror(i->fname);
 			}
 		}
 		else
 		{
 			//printf("disk: %s\n", i->fname);
 			BUFFER buff;
-			if ( file_absolutepath( i->fname, &buff ) ) {
-				var_set( "JAM_CURRENT_SCRIPT", list_append(L0, buffer_ptr( &buff ), 0), VAR_SET );
-			} else {
-				var_set( "JAM_CURRENT_SCRIPT", list_append(L0, i->fname, 0), VAR_SET );
+			if (file_absolutepath(i->fname, &buff)) {
+				var_set("JAM_CURRENT_SCRIPT", list_append(L0, buffer_ptr(&buff), 0), VAR_SET);
 			}
-			buffer_free( &buff );
+			else {
+				var_set("JAM_CURRENT_SCRIPT", list_append(L0, i->fname, 0), VAR_SET);
+			}
+			buffer_free(&buff);
 
 			i->file = f;
 		}
@@ -280,49 +275,49 @@ yyline()
 
 	/* If there is more data in this line, return it. */
 
-	if( *i->string )
-	    return *i->string++;
+	if (*i->string)
+		return *i->string++;
 
 	/* If we're reading from an internal string list, go to the */
 	/* next string. */
 
-	if( i->strings )
+	if (i->strings)
 	{
-	    if( !*i->strings )
-		goto next;
+		if (!*i->strings)
+			goto next;
 
-	    i->line++;
-	    i->string = *(i->strings++);
-	    return *i->string++;
+		i->line++;
+		i->string = *(i->strings++);
+		return *i->string++;
 	}
 
 	/* If there's another line in this file, start it. */
 
-	if( i->file && fgets( i->buf, sizeof( i->buf ), i->file ) )
+	if (i->file && fgets(i->buf, sizeof(i->buf), i->file))
 	{
-	    i->line++;
-	    i->string = i->buf;
-	    return *i->string++;
+		i->line++;
+		i->string = i->buf;
+		return *i->string++;
 	}
 
-    next:
+next:
 	/* This include is done.  */
 	/* Free it up and return EOF so yyparse() returns to parse_file(). */
 #ifdef OPT_IMPROVED_WARNINGS_EXT
 	if (lastIncp)
 	{
-	    freestr( lastIncp->fname );
-	    free( (char *)lastIncp );
+		freestr(lastIncp->fname);
+		free((char*)lastIncp);
 	}
-	lastIncp = incp ;
+	lastIncp = incp;
 #endif
 
 	incp = i->next;
 
 	/* Close file, free name */
 
-	if( i->file && i->file != stdin )
-	    fclose( i->file );
+	if (i->file && i->file != stdin)
+		fclose(i->file);
 
 	if (i->origstrings != NULL)
 	{
@@ -338,8 +333,8 @@ yyline()
 #ifdef OPT_IMPROVED_WARNINGS_EXT
 	/* memory leak */
 #else
-	freestr( i->fname );
-	free( (char *)i );
+	freestr(i->fname);
+	free((char*)i);
 #endif
 
 	return EOF;
@@ -360,192 +355,191 @@ yyline()
 # define yychar() ( *incp->string ? *incp->string++ : yyline() )
 # define yyprev() ( incp->string-- )
 
-int
-yylex()
+int yylex()
 {
 	int c;
 	char buf[BIGGEST_TOKEN];
-	char *b = buf;
+	char* b = buf;
 
-	if( !incp )
-	    goto eof;
+	if (!incp)
+		goto eof;
 
 	/* Get first character (whitespace or of token) */
 
 	c = yychar();
 
-	if( scanmode == SCAN_STRING )
+	if (scanmode == SCAN_STRING)
 	{
-	    /* If scanning for a string (action's {}'s), look for the */
-	    /* closing brace.  We handle matching braces, if they match! */
+		/* If scanning for a string (action's {}'s), look for the */
+		/* closing brace.  We handle matching braces, if they match! */
 
-	    int nest = 1;
+		int nest = 1;
 
-	    while( c != EOF && b < buf + sizeof( buf ) )
-	    {
-		    if( c == '{' )
-			nest++;
+		while (c != EOF && b < buf + sizeof(buf))
+		{
+			if (c == '{')
+				nest++;
 
-		    if( c == '}' && !--nest )
-			break;
+			if (c == '}' && !--nest)
+				break;
 
-		    *b++ = c;
+			*b++ = c;
 
-		    c = yychar();
-	    }
+			c = yychar();
+		}
 
-	    /* We ate the ending brace -- regurgitate it. */
+		/* We ate the ending brace -- regurgitate it. */
 
-	    if( c != EOF )
-		yyprev();
+		if (c != EOF)
+			yyprev();
 
-	    /* Check obvious errors. */
+		/* Check obvious errors. */
 
-	    if( b == buf + sizeof( buf ) )
-	    {
-		yyerror( "action block too big" );
-		goto eof;
-	    }
+		if (b == buf + sizeof(buf))
+		{
+			yyerror("action block too big");
+			goto eof;
+		}
 
-	    if( nest )
-	    {
-		yyerror( "unmatched {} in action block" );
-		goto eof;
-	    }
+		if (nest)
+		{
+			yyerror("unmatched {} in action block");
+			goto eof;
+		}
 
-	    *b = 0;
-	    yylval.type = STRING;
-	    yylval.string = newstr( buf );
+		*b = 0;
+		yylval.type = STRING;
+		yylval.string = newstr(buf);
 
 	}
 	else
 	{
-	    char *b = buf;
-	    struct keyword *k;
-	    int inquote = 0;
-	    int notkeyword;
-		
-	    /* Eat white space */
+		char* b = buf;
+		struct keyword* k;
+		int inquote = 0;
+		int notkeyword;
 
-	    for( ;; )
-	    {
-		/* Skip past white space */
+		/* Eat white space */
 
-		while( c != EOF && isspace( c ) )
+		for (;; )
+		{
+			/* Skip past white space */
+
+			while (c != EOF && isspace(c))
+				c = yychar();
+
+			/* Not a comment?  Swallow up comment line. */
+
+			if (c != '#')
+				break;
+			while ((c = yychar()) != EOF && c != '\n')
+				;
+		}
+
+		/* c now points to the first character of a token. */
+
+		if (c == EOF)
+			goto eof;
+
+		/* While scanning the word, disqualify it for (expensive) */
+		/* keyword lookup when we can: $anything, "anything", \anything */
+
+		notkeyword = c == '$';
+
+		/* look for white space to delimit word */
+		/* "'s get stripped but preserve white space */
+		/* \ protects next character */
+
+		while (
+			c != EOF &&
+			b < buf + sizeof(buf) &&
+			(inquote || !isspace(c)))
+		{
+			if (c == '"')
+			{
+				/* begin or end " */
+				inquote = !inquote;
+				notkeyword = 1;
+			}
+			else if (c != '\\')
+			{
+				/* normal char */
+				*b++ = c;
+			}
+			else if ((c = yychar()) != EOF)
+			{
+				/* \c */
+				*b++ = c;
+				notkeyword = 1;
+			}
+			else
+			{
+				/* \EOF */
+				break;
+			}
+
 			c = yychar();
-
-		/* Not a comment?  Swallow up comment line. */
-
-		if( c != '#' )
-			break;
-		while( ( c = yychar() ) != EOF && c != '\n' )
-			;
-	    }
-
-	    /* c now points to the first character of a token. */
-
-	    if( c == EOF )
-		goto eof;
-
-	    /* While scanning the word, disqualify it for (expensive) */
-	    /* keyword lookup when we can: $anything, "anything", \anything */
-
-	    notkeyword = c == '$';
-
-	    /* look for white space to delimit word */
-	    /* "'s get stripped but preserve white space */
-	    /* \ protects next character */
-
-	    while( 
-		c != EOF &&
-		b < buf + sizeof( buf ) &&
-		( inquote || !isspace( c ) ) )
-	    {
-		if( c == '"' )
-		{
-		    /* begin or end " */
-		    inquote = !inquote;
-		    notkeyword = 1;
-		}
-		else if( c != '\\' )
-		{
-		    /* normal char */
-		    *b++ = c;
-		}
-		else if( ( c = yychar()) != EOF )
-		{
-		    /* \c */
-		    *b++ = c;
-		    notkeyword = 1;
-		}
-		else
-		{
-		    /* \EOF */
-		    break;
 		}
 
-		c = yychar();
-	    }
+		/* Check obvious errors. */
 
-	    /* Check obvious errors. */
+		if (b == buf + sizeof(buf))
+		{
+			yyerror("string too big");
+			goto eof;
+		}
 
-	    if( b == buf + sizeof( buf ) )
-	    {
-		yyerror( "string too big" );
-		goto eof;
-	    }
-
-	    if( inquote )
-	    {
-		yyerror( "unmatched \" in string" );
-		goto eof;
-	    }
+		if (inquote)
+		{
+			yyerror("unmatched \" in string");
+			goto eof;
+		}
 
 #ifdef OPT_FIND_BAD_SEMICOLON_USAGE_EXT
-	    if( !notkeyword   &&  b - 1 > buf )
-	    {
-		if ( buf[0] == ';'  ||  *(b - 1) == ';' )
+		if (!notkeyword && b - 1 > buf)
 		{
-		    yyerror( "found semicolon at the beginning or end of a token.\n\tSurround semicolons with whitespace." );
-		    goto eof;
+			if (buf[0] == ';' || *(b - 1) == ';')
+			{
+				yyerror("found semicolon at the beginning or end of a token.\n\tSurround semicolons with whitespace.");
+				goto eof;
+			}
+			if (buf[0] == ':' || *(b - 1) == ':')
+			{
+				yyerror("found colon at the beginning or end of a token.\n\tSurround colons with whitespace.");
+				goto eof;
+			}
 		}
-		if ( buf[0] == ':'  ||  *(b - 1) == ':' )
-		{
-		    yyerror( "found colon at the beginning or end of a token.\n\tSurround colons with whitespace." );
-		    goto eof;
-		}
-	    }
 #endif
 
-	    /* We looked ahead a character - back up. */
+		/* We looked ahead a character - back up. */
 
-	    if( c != EOF )
-		yyprev();
+		if (c != EOF)
+			yyprev();
 
-	    /* scan token table */
-	    /* don't scan if it's obviously not a keyword or if its */
-	    /* an alphabetic when were looking for punctuation */
+		/* scan token table */
+		/* don't scan if it's obviously not a keyword or if its */
+		/* an alphabetic when were looking for punctuation */
 
-	    *b = 0;
-	    yylval.type = ARG;
+		*b = 0;
+		yylval.type = ARG;
 
-	    if( !notkeyword && !( isalpha( *buf ) && scanmode == SCAN_PUNCT ) )
-	    {
-		for( k = keywords; k->word; k++ )
-		    if( *buf == *k->word && !strcmp( k->word, buf ) )
+		if (!notkeyword && !(isalpha(*buf) && scanmode == SCAN_PUNCT))
 		{
-		    yylval.type = k->type;
-		    yylval.string = k->word;	/* used by symdump */
-		    break;
+			for (k = keywords; k->word; k++)
+				if (*buf == *k->word && !strcmp(k->word, buf))
+				{
+					yylval.type = k->type;
+					yylval.string = k->word;	/* used by symdump */
+					break;
+				}
 		}
-	    }
 
-	    if( yylval.type == ARG )
-		yylval.string = newstr( buf );
+		if (yylval.type == ARG)
+			yylval.string = newstr(buf);
 	}
 
-	if( DEBUG_SCAN )
-		printf( "scan %s\n", symdump( &yylval ) );
+	if (DEBUG_SCAN)
+		printf("scan %s\n", symdump(&yylval));
 
 	return yylval.type;
 
@@ -554,28 +548,27 @@ eof:
 	return yylval.type;
 }
 
-static char *
-symdump( YYSTYPE *s )
+static char* symdump(YYSTYPE* s)
 {
-	static char buf[ BIGGEST_TOKEN + 20 ];
+	static char buf[BIGGEST_TOKEN + 20];
 
-	switch( s->type )
+	switch (s->type)
 	{
-	case EOF:
-		sprintf( buf, "EOF" );
-		break;
-	case 0:
-		sprintf( buf, "unknown symbol %s", s->string );
-		break;
-	case ARG:
-		sprintf( buf, "argument %s", s->string );
-		break;
-	case STRING:
-		sprintf( buf, "string \"%s\"", s->string );
-		break;
-	default:
-		sprintf( buf, "keyword %s", s->string );
-		break;
+		case EOF:
+			sprintf(buf, "EOF");
+			break;
+		case 0:
+			sprintf(buf, "unknown symbol %s", s->string);
+			break;
+		case ARG:
+			sprintf(buf, "argument %s", s->string);
+			break;
+		case STRING:
+			sprintf(buf, "string \"%s\"", s->string);
+			break;
+		default:
+			sprintf(buf, "keyword %s", s->string);
+			break;
 	}
 	return buf;
 }
