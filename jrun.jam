@@ -80,7 +80,12 @@ Command print-it-lua2 : "print 'All the text'" : lua ;
 #
 #     jrun glob **.lua
 ################################################################################
-CommandLua glob : "filefind = require 'filefind'; for entry in filefind.glob([[$(ARGS[1])]]) do print(entry.filename) end" ;
+CommandLua glob : {={
+    filefind = require 'filefind'
+    for entry in filefind.glob([[$(ARGS[1])]]) do
+        print(entry.filename)
+    end
+}=} ;
 CommandDescription glob :
     "Glob files in a directory tree"
     ""
@@ -110,10 +115,11 @@ CommandDescription glob :
 SAVED_ARGS on glob-with-saved-args = $(ARGS) ;
 actions lua glob-with-saved-args {
     filefind = require 'filefind'
-    for entry in filefind.glob([[$(SAVED_ARGS[1])]]) do
+    for entry in filefind.glob(jamvar.SAVED_ARGS[1]) do
         print(entry.filename)
     end
 }
+#JAM_UNBOUND_SETTINGS on glob-with-saved-args = SAVED_ARGS ;
 Command glob-with-saved-args ;
 
 

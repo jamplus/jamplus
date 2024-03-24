@@ -27,20 +27,24 @@ rule Command NAME : LINES : ACTION_MODIFIERS {
         local actionLine ;
         local index = 1 ;
         for actionLine in $(LINES) {
-            parse "actions $(ACTION_MODIFIERS:J=$(SPACE)) $(NAME)-----$(index) { $(actionLine) }" ;
-            $(NAME)-----$(index) $(NAME) ;
+            local actionName = $(NAME)-----$(index) ;
+            local actionString = "actions $(ACTION_MODIFIERS:E="":J=$(SPACE)) $(actionName) { " $(actionLine) " }" ;
+            parse $(actionString:J) ;
+            ARGS on $(actionName) = $(ARGS) ;
+            $(actionName) $(NAME) ;
             index = [ Math $(index) + 1 ] ;
         }
     } else {
         if ! [ ActionExists $(NAME) ] {
             parse "actions $(NAME) { }" ;
         }
+        ARGS on $(NAME) = $(ARGS) ;
         $(NAME) $(NAME) ;
     }
     DebugSuppressMakeText ;
 }
 
-rule CommandLua NAME : LINES {
+rule CommandLua NAME : LINES : ACTION_MODIFIERS {
     REGISTERED_COMMANDS += $(NAME) ;
 
     Always $(NAME) ;
@@ -48,14 +52,18 @@ rule CommandLua NAME : LINES {
         local actionLine ;
         local index = 1 ;
         for actionLine in $(LINES) {
-            parse "actions lua $(NAME)-----$(index) { $(actionLine) }" ;
-            $(NAME)-----$(index) $(NAME) ;
+            local actionName = $(NAME)-----$(index) ;
+            local actionString = "actions lua $(ACTION_MODIFIERS:E="":J=$(SPACE)) $(actionName) { " $(actionLine) " }" ;
+            parse $(actionString:J) ;
+            ARGS on $(actionName) = $(ARGS) ;
+            $(actionName) $(NAME) ;
             index = [ Math $(index) + 1 ] ;
         }
     } else {
         if ! [ ActionExists $(NAME) ] {
             parse "actions $(NAME) { }" ;
         }
+        ARGS on $(NAME) = $(ARGS) ;
         $(NAME) $(NAME) ;
     }
     DebugSuppressMakeText ;
@@ -75,4 +83,45 @@ actions lua help {
 	for _, command in ipairs(commands) do
 		print('', command)
 	end
+}
+
+{
+	JRUN.JAM		?= jrun.jam ;
+	JRUN.LUA		?= jrun.lua ;
+
+	local currentDirectory = $(CWD) ;
+	local foundFile ;
+	while 1 {
+		foundFile = [ Glob $(currentDirectory) : $(JRUN.JAM) ] ;
+		if $(foundFile) {
+			break ;
+		}
+		foundFile = [ Glob $(currentDirectory) : $(JRUN.LUA) ] ;
+		if $(foundFile) {
+			break ;
+		}
+		local parentDirectory = $(currentDirectory:P) ;
+		if $(parentDirectory) = $(currentDirectory) {
+			currentDirectory = ;
+			break ;
+		}
+		currentDirectory = $(parentDirectory) ;
+	}
+
+	if $(foundFile) {
+		ARGS = $(JAM_COMMAND_LINE_TARGETS[2-] $(JAM_EXTRA_COMMAND_LINE_OPTIONS) ;
+		ARGS ?= "" ;
+		JAM_COMMAND_LINE_TARGETS = $(JAM_COMMAND_LINE_TARGETS[1]) ;
+		if $(JAM_COMMAND_LINE_TARGETS) = all {
+			JAM_COMMAND_LINE_TARGETS = help ;
+		}
+		if $(foundFile:S) = .jam {
+			include $(foundFile) ;
+		} else if $(foundFile:S) = .lua {
+			LuaSupport ;
+			LuaFile $(foundFile) ;
+		}
+	} else {
+		Exit ** Unable to find jrun.jam or jrun.lua in the parent directory chain. ;
+	}
 }

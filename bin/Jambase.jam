@@ -964,45 +964,6 @@ rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : ACTUAL_CONFIG_NAME : COMMAND
 if $(JAM_RUN_MODE) {
 	Command help ;
 
-	JRUN.JAM		?= jrun.jam ;
-	JRUN.LUA		?= jrun.lua ;
-
-	local currentDirectory = $(CWD) ;
-	local foundFile ;
-	while 1 {
-		foundFile = [ Glob $(currentDirectory) : $(JRUN.JAM) ] ;
-		if $(foundFile) {
-			break ;
-		}
-		foundFile = [ Glob $(currentDirectory) : $(JRUN.LUA) ] ;
-		if $(foundFile) {
-			break ;
-		}
-		local parentDirectory = $(currentDirectory:P) ;
-		if $(parentDirectory) = $(currentDirectory) {
-			currentDirectory = ;
-			break ;
-		}
-		currentDirectory = $(parentDirectory) ;
-	}
-
-	if $(foundFile) {
-		ARGS = $(JAM_COMMAND_LINE_TARGETS[2-] $(JAM_EXTRA_COMMAND_LINE_OPTIONS) ;
-		ARGS ?= "" ;
-		JAM_COMMAND_LINE_TARGETS = $(JAM_COMMAND_LINE_TARGETS[1]) ;
-		if $(JAM_COMMAND_LINE_TARGETS) = all {
-			JAM_COMMAND_LINE_TARGETS = help ;
-		}
-		if $(foundFile:S) = .jam {
-			include $(foundFile) ;
-		} else if $(foundFile:S) = .lua {
-			LuaSupport ;
-			LuaFile $(foundFile) ;
-		}
-	} else {
-		Exit ** Unable to find jrun.jam or jrun.lua in the parent directory chain. ;
-	}
-
 } else if ! $(JAM_MANUAL_JAMBASE) {
 
 JAMFILE.LUA ?= Jamfile.lua ;
