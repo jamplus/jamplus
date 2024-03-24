@@ -1379,12 +1379,120 @@ int luahelper_taskadd(const char* taskscript, LOL* args)
     size_t taskscriptlen = strlen(taskscript);
     char* newTaskScript;
 	int i;
+    TARGET* t = NULL;
+    LIST* cmdlist;
+    SETTINGS* settings;
 
     ls_lua_init();
+
+    cmdlist = lol_get(args, 0);
+    if (cmdlist != NULL && list_first(cmdlist) != NULL)
+    {
+        t = bindtarget(list_value(list_first(cmdlist)));
+    }
 
     ls_lua_getglobal(L, "lanes");                             /* lanes */
     ls_lua_getfield(L, -1, "gen");                            /* lanes gen */
     ls_lua_pushstring(L, "*");                                /* lanes gen * */
+
+    ls_lua_newtable(L);                                     /* lanes gen * opts_tbl */
+    ls_lua_newtable(L);                                     /* lanes gen * opts_tbl globals */ 
+    ls_lua_newtable(L);                                     /* lanes gen * opts_tbl globals jamvar */
+
+    if (t != NULL && t->settings != NULL)
+    {
+        SETTINGS* vars;
+
+        for (vars = t->settings; vars; vars = vars->next)
+        {
+            LISTITEM* varitem;
+            int index;
+
+            if (vars->symbol[0] == 'J'  &&  vars->symbol[1] == 'A'  &&  vars->symbol[2] == 'M'  &&  vars->symbol[3] == '_'  &&
+                (strcmp(vars->symbol, "JAM_UNBOUND_SETTINGS") == 0  ||  strcmp(vars->symbol, "JAM_BOUND_SETTINGS") == 0))
+            {
+                continue;
+            }
+
+			index = 1;
+            ls_lua_newtable(L);                             /* jamvar entry_table */
+            for (varitem = list_first(vars->value); varitem; varitem = list_next(varitem), index++)
+            {
+                ls_lua_pushnumber(L, index);
+                ls_lua_pushstring(L, list_value(varitem));
+                ls_lua_settable(L, -3);
+            }
+
+            ls_lua_setfield(L, -2, vars->symbol);
+        }
+    }
+
+    settings = NULL;
+    if (t != NULL)
+    {
+        settings = quicksettingslookup(t, "JAM_UNBOUND_SETTINGS");
+    }
+    if (settings != NULL)
+    {
+        LIST* unboundsettingslist = settings->value;
+        LISTITEM* settingsitem;
+
+        for (settingsitem = list_first(unboundsettingslist); settingsitem; settingsitem = list_next(settingsitem))
+        {
+            LIST* varlist = NULL;
+            settings = quicksettingslookup(t, "JAM_UNBOUND_SETTINGS");
+            if (settings != NULL)
+            {
+                varlist = settings->value;
+            }
+
+            if (varlist != NULL) {
+                LISTITEM* varitem;
+                int index = 1;
+                ls_lua_newtable(L);                             /* jamvar entry_table */
+                for (varitem = list_first(varlist); varitem; varitem = list_next(varitem), ++index)
+                {
+                    ls_lua_pushnumber(L, index);
+                    ls_lua_pushstring(L, list_value(varitem));
+                    ls_lua_settable(L, -3);
+                }
+                ls_lua_setfield(L, -2, list_value(settingsitem));
+            }
+        }
+    }
+
+    settings = NULL;
+    if (t != NULL)
+    {
+        settings = quicksettingslookup(t, "JAM_BOUND_SETTINGS");
+    }
+    if (settings != NULL)
+    {
+        LIST* boundsettingslist = settings->value;
+        LISTITEM* settingsitem;
+
+        for (settingsitem = list_first(boundsettingslist); settingsitem; settingsitem = list_next(settingsitem))
+        {
+            LIST* varlist = var_get(list_value(settingsitem));
+            if (varlist != NULL) {
+                LISTITEM* varitem;
+                int index = 1;
+                ls_lua_newtable(L);                             /* jamvar entry_table */
+                for (varitem = list_first(varlist); varitem; varitem = list_next(varitem), ++index)
+                {
+                    TARGET *t;
+                    ls_lua_pushnumber(L, index);
+                    t = bindtarget(list_value(varitem));
+                    ls_lua_pushstring(L, t->boundname);
+                    ls_lua_settable(L, -3);
+                }
+                ls_lua_setfield(L, -2, list_value(settingsitem));
+            }
+        }
+    }
+
+    ls_lua_setfield(L, -2, "jamvar");
+    ls_lua_setfield(L, -2, "globals");
 
     newTaskScript = (char*)malloc( taskscriptlen + 1 );
     strncpy(newTaskScript, taskscript, taskscriptlen);
@@ -1401,7 +1509,7 @@ int luahelper_taskadd(const char* taskscript, LOL* args)
     }
 
     free(newTaskScript);
-    ret = ls_lua_pcall(L, 2, 1, 0);                        /* lanes lane_h */
+    ret = ls_lua_pcall(L, 3, 1, 0);                        /* lanes lane_h */
     if (ret != 0)
     {
         if (ls_lua_isstring(L, -1))
