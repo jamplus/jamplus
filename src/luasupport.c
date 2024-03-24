@@ -1478,7 +1478,7 @@ int luahelper_taskisrunning(intptr_t taskid, int* returnValue)
         else
             *returnValue = 0;
         ls_lua_pop(L, 2);
-        ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
+        ls_luaL_unref(L, LUA_REGISTRYINDEX, (int)taskid);
         return 0;
     }
     else if (strcmp(status, "error") == 0  ||  strcmp(status, "cancelled") == 0)
@@ -1506,7 +1506,7 @@ int luahelper_taskisrunning(intptr_t taskid, int* returnValue)
 
         ls_lua_pop(L, 4);                                /* */
 
-        ls_luaL_unref(L, LUA_REGISTRYINDEX, taskid);
+        ls_luaL_unref(L, LUA_REGISTRYINDEX, (int)taskid);
         return 0;
     }
 
