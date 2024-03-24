@@ -151,9 +151,20 @@ var_expand(
 	buffer_init( &buff );
 
 	/* Just try simple copy of in to out. */
-
 	while( in < end ) {
 	    char ch = *in++;
+		if (ch == 0x05) {
+			while( in < end ) {
+				ch = *in++;
+				if (ch == 0x06) {
+					break;
+				}
+				buffer_addchar( &buff, ch );
+			}
+			cancopyin = 0;
+			continue;
+		}
+
 	    buffer_addchar( &buff, ch );
 	    if( ch == '$' && *in == leftParen )
 		goto expand;

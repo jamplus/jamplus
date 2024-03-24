@@ -455,6 +455,80 @@ int yylex()
 			b < buf + sizeof(buf) &&
 			(inquote || !isspace(c)))
 		{
+			if (c == '{')
+			{
+				int prevc = c;
+				c = yychar();
+				if (c == '=')
+				{
+					int prevc2 = c;
+					c = yychar();
+					if (c == '{')
+					{
+						int nest = 1;
+
+						c = yychar();
+
+						*b++ = 0x05;
+
+						/* If scanning for a string (action's {}'s), look for the */
+						/* closing brace.  We handle matching braces, if they match! */
+
+						while (c != EOF && b < buf + sizeof(buf))
+						{
+							if (c == '{')
+								nest++;
+
+							if (c == '}' && !--nest)
+								break;
+
+							*b++ = c;
+
+							c = yychar();
+						}
+
+						c = yychar();
+						if (c != '=')
+						{
+							yyerror("expected closing }=} for raw literal string");
+							goto eof;
+						}
+
+						c = yychar();
+						if (c != '}')
+						{
+							yyerror("expected closing }=} for raw literal string");
+							goto eof;
+						}
+
+						*b++ = 0x06;
+
+						notkeyword = 1;
+
+						/* Check obvious errors. */
+
+						if (b == buf + sizeof(buf))
+						{
+							yyerror("literal string block too big");
+							goto eof;
+						}
+
+						c = yychar();
+
+						continue;
+					}
+					else
+					{
+						c = prevc2;
+						yyprev();
+					}
+				}
+				else
+				{
+					c = prevc;
+					yyprev();
+				}
+			}
 			if (c == '"')
 			{
 				/* begin or end " */

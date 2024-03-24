@@ -1,0 +1,4 @@
+ARGS = all-the-args ;
+Echo The string {={with $(ARGS)}=}.$(ARGS)--{={{And even more { string literal } stuff}}=} ;
+Echo "In quotes {={"does not expand $(ARGS)"}=} but does here \"$(ARGS)\"." ;
+
