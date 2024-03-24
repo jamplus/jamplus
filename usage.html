@@ -81,12 +81,13 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
     [ -f <em>jambase</em> ]
     [ -j <em>jobs</em> ]
     [ -o <em>actionsfile</em> ]
+    [ -r ]
     [ -s <em>var</em>=<em>value</em> ]
     [ -S ]
     [ <em>var</em>=<em>value</em> ]
     [ -t <em>target</em> ]
     [ <em>target</em> ... ]
-</pre><p>If <em>target</em> is provided on the command line, <b>jam</b> builds <em>target;</em> otherwise <b>jam</b> builds the target 'all'.</p>
+</pre><p>If <em>target</em> is provided on the command line, <b>jam</b> builds <em>target</em>; otherwise <b>jam</b> builds the target 'all'.</p>
 <p><b>Jam</b> may be invoked with the following options:</p>
 <table width="85%" align="center" border="1" cellpadding="2">
 <tr>
@@ -154,52 +155,56 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
 <p class="endtd"></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -f <em>jambase</em></code> </td><td><p class="starttd">Read <em>jambase</em> instead of using the built-in Jambase. Multiple -f flags are permitted.</p>
-<p class="endtd"></p>
+<td valign="top"><code> -f <em>[-]Jamfile[.jam]</em></code> </td><td><p class="starttd">Read the built-in Jambase and then read <em>Jamfile.jam</em>. In order to bypass the built-in Jambase, preface the filename with a <code>-<code> (minus) symbol. Multiple -f flags are permitted. If <code>.jam</code> is not listed as the filename extension, it may be appended to the filename as part of the search.</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -g </code> </td><td><p class="starttd">Build targets with the newest sources first, rather than in the order of appearance in the Jambase/Jamfiles.</p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code> -g </code> </code></code></td><td><p class="starttd"><code><code> Build targets with the newest sources first, rather than in the order of appearance in the Jambase/Jamfiles.</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -j <em>n</em></code> </td><td><p class="starttd">Run up to <em>n</em> shell commands concurrently. The default is the maximum number of available processors on the machine. On Windows, the number of processors is determined from the environment variable <code>NUMBER_OF_PROCESSORS</code>. On Mac OS X, the number of processors is obtained from the API <code>MPProcessors</code>.</p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code> -j <em>n</em></code> </code></code></td><td><p class="starttd"><code><code> Run up to <em>n</em> shell commands concurrently. The default is the maximum number of available processors on the machine. On Windows, the number of processors is determined from the environment variable <code>NUMBER_OF_PROCESSORS</code>. On Mac OS X, the number of processors is obtained from the API <code>MPProcessors</code>.</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -n</code> </td><td><p class="starttd">Don't actually execute the updating actions, but do everything else. This changes the debug level to -dax.</p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code> -n</code> </code></code></td><td><p class="starttd"><code><code> Don't actually execute the updating actions, but do everything else. This changes the debug level to -dax.</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -o <em>file</em></code> </td><td><p class="starttd">Write the updating actions to the specified file instead of running them (or outputting them, as on the Mac).</p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code> -o <em>file</em></code> </code></code></td><td><p class="starttd"><code><code> Write the updating actions to the specified file instead of running them (or outputting them, as on the Mac).</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -q </code> </td><td><p class="starttd">Quit quickly (as if an interrupt was received) as soon as any target build fails.</p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code> -r </code> </code></code></td><td><p class="starttd"><code><code> Enter run mode, a special mode that finds <b>jrun.jam</b> up the directory hierarchy and allows individual commands to be registered. See the <b>jrun.jam</b> top-level in the source tree for examples.</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -s <em>var</em>=<em>value</em></code> </td><td><p class="starttd">Set the variable <em>var</em> to <em>value</em>, overriding both internal variables and variables imported from the environment.</p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code> -q </code> </code></code></td><td><p class="starttd"><code><code> Quit quickly (as if an interrupt was received) as soon as any target build fails.</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -S</code> </td><td><p class="starttd">When specified, any rules called that have not been defined are skipped without warning. <code>jam &ndash;workspace</code> makes extensive use of it. This command line option will mask problems with your Jamfiles, so it is recommended you don't use it.</p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code> -s <em>var</em>=<em>value</em></code> </code></code></td><td><p class="starttd"><code><code> Set the variable <em>var</em> to <em>value</em>, overriding both internal variables and variables imported from the environment.</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code><em>var</em>=<em>value</em></code> </td><td><p class="starttd">Set the variable <em>var</em> to <em>value</em>, overriding both internal variables and variables imported from the environment. This is a simpler to use version of <code>-s</code></p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code> -S</code> </code></code></td><td><p class="starttd"><code><code> When specified, any rules called that have not been defined are skipped without warning. <code>jam &ndash;workspace</code> makes extensive use of it. This command line option will mask problems with your Jamfiles, so it is recommended you don't use it.</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -t <em>target</em></code> </td><td><p class="starttd">Rebuild <em>target</em> and everything that depends on it, even if it is up-to-date.</p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code><em>var</em>=<em>value</em></code> </code></code></td><td><p class="starttd"><code><code> Set the variable <em>var</em> to <em>value</em>, overriding both internal variables and variables imported from the environment. This is a simpler to use version of <code>-s</code></code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -T </code> </td><td><p class="starttd">Toggle printing of the target's bound name (full path).</p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code> -t <em>target</em></code> </code></code></td><td><p class="starttd"><code><code> Rebuild <em>target</em> and everything that depends on it, even if it is up-to-date.</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>
-<td valign="top"><code> -v</code> </td><td><p class="starttd">Print the version of <b>jam</b> and exit.</p>
-<p class="endtd"></p>
+<td valign="top"><code><code><code> -T </code> </code></code></td><td><p class="starttd"><code><code> Toggle printing of the target's bound name (full path).</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
+</td></tr>
+<tr>
+<td valign="top"><code><code><code> -v</code> </code></code></td><td><p class="starttd"><code><code> Print the version of <b>jam</b> and exit.</code></code></p>
+<p class="endtd"><code><code></code></code></p>
 </td></tr>
 </table>
 </div></div><!-- contents -->
