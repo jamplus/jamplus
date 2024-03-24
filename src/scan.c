@@ -29,6 +29,7 @@
 #include "miniz.h"
 #include "variable.h"
 #include "filesys.h"
+#include "pathsys.h"
 
 extern mz_zip_archive *zip_attemptopen();
 extern int zip_findfile(const char *filename);
@@ -169,7 +170,32 @@ int yyline()
 		FILE* f = stdin;
 
 		//printf("fopencheck: %s\n", i->fname);
-		if (strcmp(i->fname, "-") && !(f = fopen(i->fname, "r")))
+		int found = strcmp(i->fname, "-") == 0;
+		if (!found)
+		{
+			f = fopen(i->fname, "r");
+			found = f != NULL;
+		}
+		if (!found)
+		{
+			PATHNAME pathname;
+			path_parse(i->fname, &pathname);
+			if (pathname.f_suffix.ptr == NULL)
+			{
+				char buf[ MAXJPATH ];
+				pathname.f_suffix.ptr = ".jam";
+				pathname.f_suffix.len = 4;
+				path_build(&pathname, buf, 0, 1);
+
+				f = fopen(buf, "r");
+				found = f != NULL;
+				if (f != NULL)
+				{
+					i->fname = newstr(buf);
+				}
+			}
+		}
+		if (!found)
 		{
 			//printf("internalzip: %s\n", i->fname);
 			mz_zip_archive* pZipArchive = zip_attemptopen();
