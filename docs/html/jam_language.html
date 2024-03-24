@@ -116,7 +116,7 @@ Overview</h2>
 <p>Jam has a interpreted, procedural language with a few select features to effect program construction. Statements in jam are rule (procedure) definitions, rule invocations, updating action definitions, flow-of-control structures, variable assignments, and sundry language support.</p>
 <h2><a class="anchor" id="language_lexical_features"></a>
 Lexical Features</h2>
-<p><b>Jam</b> treats its input files as whitespace-separated tokens, with two exceptions: double quotes (\") can enclose whitespace to embed it into a token, and everything between the matching curly braces ({}) in the definition of a updating actions is treated as a single string. A backslash () can escape a double quote, or any single whitespace character. Both a newline and a tab must be represented physically within quotes. There is no backslash escape for them.
+<p><b>Jam</b> treats its input files as whitespace-separated tokens, with a few exceptions: double quotes (\") can enclose whitespace to embed it into a token; the special syntax starting with an open brace followed by an equals sign followed by an open brace and closed in the same manner but with closing braces is treated as a single string; and everything between the matching curly braces ({}) in the definition of a updating actions is treated as a single string. A backslash () can escape a double quote, or any single whitespace character. Both a newline and a tab must be represented physically within quotes. There is no backslash escape for them.
 
 \b Jam requires whitespace (blanks, tabs, or newlines) to surround all tokens, &lt;b&gt;including the colon (:) and semicolon (;) tokens&lt;/b&gt;.  If a colon or semicolon is found and is not surrounded by whitespace, an error is raised unless the colon or semicolon and surrounding content is in double quotes.
 
@@ -129,6 +129,18 @@ Echo Error: This won't work! ;
 
 # Parses successfully.
 Echo "Error: This works fine!" ;
+
+# Prints:
+#
+# ARGS = my-args
+ARGS = my-args ;
+Echo "ARGS = " ;
+
+# Prints:
+#
+# ARGS = $(ARGS)
+ARGS = my-args ;
+Echo {={ARGS = $(ARGS)}=} ;
 \endcode
 
 \b Jam keywords (as mentioned in this document) are reserved and generally must be quoted with double quotes (\") to be used as arbitrary tokens, such as variable or target names.
@@ -137,11 +149,11 @@ Echo "Error: This works fine!" ;
 
 @subsection language_datatype Datatype
 
-&lt;b&gt;Jam&lt;/b&gt;'s only data type is a one-dimensional list of arbitrary strings. They arise as literal (whitespace-separated) tokens in the Jambase or included files, as the result of variable expansion of those tokens, or as the return value from a rule invocation.
+&lt;b&gt;Jam&lt;/b&gt;'s only data type is a one-dimensional list of arbitrary strings. They are populated as literal (whitespace-separated) tokens in the Jambase or included files, as the result of variable expansion of those tokens, or as the return value from a rule invocation.
 
 @code 
 variableName = hello ;
-listOfStrings = hello hi bonjour hola! "how are you?" "i am fine." ;
+listOfStrings = hello hi bonjour hola! "how are you?" {={Not expanded: $(variableName)}=} "Expanded: " "i am fine." ;
 \endcode
 
 

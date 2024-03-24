@@ -1,5 +1,7 @@
 /*! \page improvements Miscellaneous Improvements
 
+This page is completely out of date.
+
 - The number of active JamPlus jobs defaults to the \c NUMBER_OF_PROCESSORS environment variable on Windows.
 - Changed ... text globally to *** to work better in the Visual Studio IDE.
 - Improved ***patience*** lines are printed out after the first 100 and every subsequent 1000 files have been header scanned.  Previously, ***patience*** was printed out for every 1000 targets.  This change both reduces the number of ...patience... lines printed, and makes them more accurately reflect the work being done.

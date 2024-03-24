@@ -96,4 +96,4 @@ Jam's author is Christopher Seiwald (seiwald@perforce.com).  *Note: Much of the 
 
 JamPlus's primary maintainer is Joshua Jensen (jjensen@workspacewhiz.com).
 
-Patches come from the Jam mailing list and Perforce Public Depot, with the primary authors being Alen Ladavac, Craig McPheeters, and Matt Armstrong. Additional patches are linked from the source code back to the Jamming mailing list.
+Patches came from the Jam mailing list and Perforce Public Depot, with the primary authors being Alen Ladavac, Craig McPheeters, and Matt Armstrong. Additional patches are linked from the source code back to the Jamming mailing list.

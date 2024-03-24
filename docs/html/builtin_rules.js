@@ -18,6 +18,7 @@ var builtin_rules =
     [ "rule ScanContents targets ;", "builtin_rules.html#rule_ScanContents", null ],
     [ "rule Temporary targets ;", "builtin_rules.html#rule_Temporary", null ],
     [ "Utility Rules", "builtin_rules.html#language_built_in_rules_utility_rules", null ],
+    [ "rule ActionExists ACTION_NAME ;", "builtin_rules.html#rule_ActionExists", null ],
     [ "rule ConfigureFileHelper TARGET : SOURCE [ : OPTIONS ] ;", "builtin_rules.html#rule_ConfigureFileHelper", null ],
     [ "rule DebugSuppressMakeText ;", "builtin_rules.html#rule_DebugSuppressMakeText", null ],
     [ "rule DependsList PARENT_TARGETS ;", "builtin_rules.html#rule_DependsList", null ],

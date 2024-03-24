@@ -89,7 +89,7 @@ Rules</h1>
 <hr  />
  <h1><a class="anchor" id="rule_C_RcDefines"></a>
 rule C.RcDefines TARGET [ : RESOURCE_NAME ] : DEFINES</h1>
-<p><a id="a162_rule_C_RcDefines" name="a162_rule_C_RcDefines"></a></p>
+<p><a id="a163_rule_C_RcDefines" name="a163_rule_C_RcDefines"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>DEFINES</code> for the resource file compilation.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -111,7 +111,7 @@ rule C.RcDefines TARGET [ : RESOURCE_NAME ] : DEFINES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_RcFlags"></a>
 rule C.RcFlags TARGET [ : RESOURCE_NAME ] : FLAGS</h1>
-<p><a id="a163_rule_C_RcFlags" name="a163_rule_C_RcFlags"></a></p>
+<p><a id="a164_rule_C_RcFlags" name="a164_rule_C_RcFlags"></a></p>
 <p>For the given project <code>TARGET</code>, assign the <code>FLAGS</code> for the resource file compilation.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -132,7 +132,7 @@ rule C.RcFlags TARGET [ : RESOURCE_NAME ] : FLAGS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_RcIncludeDirectories"></a>
 rule C.RcIncludeDirectories TARGET [ : RESOURCE_NAME ] : HDRS</h1>
-<p><a id="a164_rule_C_RcIncludeDirectories" name="a164_rule_C_RcIncludeDirectories"></a></p>
+<p><a id="a165_rule_C_RcIncludeDirectories" name="a165_rule_C_RcIncludeDirectories"></a></p>
 <p>For the given project <code>TARGET</code>, assign the include directories specified in <code>HDRS</code> to the resource file compilation.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -153,7 +153,7 @@ rule C.RcIncludeDirectories TARGET [ : RESOURCE_NAME ] : HDRS</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_C_ResourceCompiler"></a>
 rule C.ResourceCompiler PARENT : SOURCES [ : OPTIONS ]</h1>
-<p><a id="a165_rule_C_ResourceCompiler" name="a165_rule_C_ResourceCompiler"></a></p>
+<p><a id="a166_rule_C_ResourceCompiler" name="a166_rule_C_ResourceCompiler"></a></p>
 <p>Compiles a resource <code>.rc</code> file into a <code>.res</code> file.</p>
 <p>#defines made available by the <a class="el" href="#rule_C_RcDefines">rule C.RcDefines TARGET [ : RESOURCE_NAME ] : DEFINES</a> rule are applied in the following order: <code>PARENT</code> then <code>*</code>.</p>
 <p>Compilation flags made available by the <a class="el" href="#rule_C_RcFlags">rule C.RcFlags TARGET [ : RESOURCE_NAME ] : FLAGS</a> rule are applied in the following order: <code>PARENT</code> then <code>*</code>.</p>

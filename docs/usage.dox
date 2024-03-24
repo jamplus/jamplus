@@ -8,6 +8,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
     [ -f <i>jambase</i> ]
     [ -j <i>jobs</i> ]
     [ -o <i>actionsfile</i> ]
+    [ -r ]
     [ -s <i>var</i>=<i>value</i> ]
     [ -S ]
     [ <i>var</i>=<i>value</i> ]
@@ -15,7 +16,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
     [ <i>target</i> ... ]
 </pre>
 
-If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target;</I> otherwise <b>jam</b> builds the target 'all'.
+If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target</I>; otherwise <b>jam</b> builds the target 'all'.
 
 <b>Jam</b> may be invoked with the following options:
 
@@ -71,8 +72,8 @@ If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target;</
     <td> Turn off all debugging levels.  Only errors are emitted.
 
   <tr>
-	<td valign=top><code> -f <i>jambase</I></code>
-	<td>Read <i>jambase</i> instead of using the built-in Jambase.  Multiple -f flags are permitted.
+	<td valign=top><code> -f <i>[-]Jamfile[.jam]</I></code>
+	<td>Read the built-in Jambase and then read <i>Jamfile.jam</i>. In order to bypass the built-in Jambase, preface the filename with a <tt>-<tt> (minus) symbol. Multiple -f flags are permitted. If <tt>.jam</tt> is not listed as the filename extension, it may be appended to the filename as part of the search.
 
   <tr>
     <td valign=top><code> -g </code>
@@ -89,6 +90,10 @@ If <i>target</i> is provided on the command line, <b>jam</b> builds <i>target;</
   <tr>
     <td valign=top><code> -o <i>file</I></code>
 	<td> Write the updating actions to the specified file instead of running them (or outputting them, as on the Mac).
+
+  <tr>
+    <td valign=top><code> -r </code>
+	<td> Enter run mode, a special mode that finds <b>jrun.jam</b> up the directory hierarchy and allows individual commands to be registered. See the <b>jrun.jam</b> top-level in the source tree for examples.
 
   <tr>
     <td valign=top><code> -q </code>
