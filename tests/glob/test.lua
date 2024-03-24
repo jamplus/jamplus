@@ -9,7 +9,7 @@ function Test()
 	{
 	}
 
-	RunJam{ '-f', 'glob.jam', 'clean' }
+	RunJam{ '-f', '-glob.jam', 'clean' }
 	TestDirectories(originalDirs)
 	TestFiles(originalFiles)
 
@@ -27,7 +27,7 @@ don't know how to make all
 *** can't find 1 target(s)...
 ]]
 
-	TestPattern(pattern, RunJam{'-f', 'glob.jam'})
+	TestPattern(pattern, RunJam{'-f', '-glob.jam'})
 end
 
 TestChecksum = Test

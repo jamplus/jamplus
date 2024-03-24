@@ -29,7 +29,7 @@ don't know how to make all
 ]]		
 		end
 
-		TestPattern(pattern, RunJam{ '-fsubstitution.jam' })
+		TestPattern(pattern, RunJam{ '-f-substitution.jam' })
 	end
 
 	---------------------------------------------------------------------------
@@ -44,7 +44,7 @@ don't know how to make all
 *** can't find 1 target(s)...
 ]]
 
-		TestPattern(pattern, RunJam{ '-ftestgsub.jam' })
+		TestPattern(pattern, RunJam{ '-f-testgsub.jam' })
 	end
 
 	---------------------------------------------------------------------------
@@ -59,7 +59,7 @@ don't know how to make all
 *** can't find 1 target(s)...
 ]]
 
-		TestPattern(pattern, RunJam{ '-ftestwildcards.jam' })
+		TestPattern(pattern, RunJam{ '-f-testwildcards.jam' })
 	end
 end
 

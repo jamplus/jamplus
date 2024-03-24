@@ -1003,7 +1003,7 @@ if $(JAM_RUN_MODE) {
 		Exit ** Unable to find jrun.jam or jrun.lua in the parent directory chain. ;
 	}
 
-} else {
+} else if ! $(JAM_MANUAL_JAMBASE) {
 
 JAMFILE.LUA ?= Jamfile.lua ;
 if [ Search $(JAMFILE) ] {
