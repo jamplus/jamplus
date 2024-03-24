@@ -498,7 +498,7 @@ int main( int argc, char **argv, char **arg_environ )
 #ifdef OPT_GRAPH_DEBUG_EXT
 	    printf( "        (g)graph (f)fate changes.\n");
 #endif /* OPT_GRAPH_DEBUG_EXT */
-            printf( "-fx     Read x instead of Jambase.\n" );
+            printf( "-fx     Read file x. Preface the file 'x' with a minus to prevent reading the internal Jambase.\n" );
 	    printf( "-g      Build from newest sources first.\n" );
             printf( "-jx     Run up to x shell commands concurrently.\n" );
             printf( "-n      Don't actually execute the updating actions.\n" );
@@ -897,13 +897,33 @@ int main( int argc, char **argv, char **arg_environ )
 
 	/* Parse ruleset */
 
-	for( n = 0; (s = getoptval( optv, 'f', n )); n++ )
-	    parse_file( s );
+	{
+		int jambase_parsed = 0;
+		for ( n = 0; (s = getoptval( optv, 'f', n )); n++ )
+		{
+			var_set( "JAM_MANUAL_JAMBASE", list_append( L0, "1", 1 ), VAR_SET );
 
-	if( !n )
-	    parse_file( "+" );
+			if ( s[0] != '-' )
+			{
+				if ( !jambase_parsed )
+				{
+					parse_file( "+" );
+					jambase_parsed = 1;
+				}
+			}
+			else
+			{
+				s += 1;
+				jambase_parsed = 1;
+			}
+			parse_file( s );
+		}
 
-	status = yyanyerrors();
+		if ( !n )
+			parse_file( "+" );
+
+		status = yyanyerrors();
+	}
 
 	/* Manually touch -t targets */
 
