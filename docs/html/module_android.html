@@ -127,7 +127,7 @@ Rules</h1>
 <hr  />
  <h1><a class="anchor" id="rule_android_Application"></a>
 rule android.Application TARGET : SOURCES</h1>
-<p><a id="a76_rule_android_Application" name="a76_rule_android_Application"></a></p>
+<p><a id="a77_rule_android_Application" name="a77_rule_android_Application"></a></p>
 <p>Compiles <code>SOURCES</code> and links them into <code>TARGET</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -143,7 +143,7 @@ rule android.Application TARGET : SOURCES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_Assets"></a>
 rule android.Assets TARGET : DIRECTORY</h1>
-<p><a id="a77_rule_android_Assets" name="a77_rule_android_Assets"></a></p>
+<p><a id="a78_rule_android_Assets" name="a78_rule_android_Assets"></a></p>
 <p>An Android application may contain user assets. The <code>android.Assets</code> rule allows specification of the directory to be recursed and stored within the Android .apk application package.</p>
 <p>Call <code>android.Assets</code> before calling <code>android.Package</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -159,7 +159,7 @@ rule android.Assets TARGET : DIRECTORY</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_JarDirectories"></a>
 rule android.JarDirectories TARGET : DIRECTORIES</h1>
-<p><a id="a78_rule_android_JarDirectories" name="a78_rule_android_JarDirectories"></a></p>
+<p><a id="a79_rule_android_JarDirectories" name="a79_rule_android_JarDirectories"></a></p>
 <p>Specify paths to search when locating prebuilt JARs during the <code>android.Library</code> and <code>android.Package</code> rule calls.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -173,7 +173,7 @@ rule android.JarDirectories TARGET : DIRECTORIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_Library"></a>
 rule android.Library TARGET : SOURCES : OPTIONS</h1>
-<p><a id="a79_rule_android_Library" name="a79_rule_android_Library"></a></p>
+<p><a id="a80_rule_android_Library" name="a80_rule_android_Library"></a></p>
 <p><code>android.Library</code> takes a list of Java <code>SOURCES</code> and builds a Java library out of them. It takes into account the following:</p>
 <p> <blockquote>  </p><ul>
 <li>
@@ -213,7 +213,7 @@ A resources directory given by <a class="el" href="#rule_android_Resources">rule
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_LinkJars"></a>
 rule android.LinkJars TARGET : LIBRARIES</h1>
-<p><a id="a80_rule_android_LinkJars" name="a80_rule_android_LinkJars"></a></p>
+<p><a id="a81_rule_android_LinkJars" name="a81_rule_android_LinkJars"></a></p>
 <p>Makes <code>TARGET</code> depend on Jam-generated <code>.jar</code> <code>LIBRARIES</code> and uses them during linking.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -226,7 +226,7 @@ rule android.LinkJars TARGET : LIBRARIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_Manifest"></a>
 rule android.Manifest TARGET : MANIFEST</h1>
-<p><a id="a81_rule_android_Manifest" name="a81_rule_android_Manifest"></a></p>
+<p><a id="a82_rule_android_Manifest" name="a82_rule_android_Manifest"></a></p>
 <p>Assigns <code>MANIFEST</code> to be the "AndroidManifest.xml" file for this <code>TARGET</code>.</p>
 <p>This rule is unneeded if <code>MANIFEST</code> is just an <code>AndroidManifest.xml</code> file found within <code>$(SUBDIR)</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -241,7 +241,7 @@ rule android.Manifest TARGET : MANIFEST</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_NativeLibraries"></a>
 rule android.NativeLibraries TARGET : NATIVE_LIBRARIES</h1>
-<p><a id="a82_rule_android_NativeLibraries" name="a82_rule_android_NativeLibraries"></a></p>
+<p><a id="a83_rule_android_NativeLibraries" name="a83_rule_android_NativeLibraries"></a></p>
 <p>Makes <code>TARGET</code> depend on Jam-generated <code>NATIVE_LIBRARIES</code>. These are packaged during the <a class="el" href="#rule_android_Package">rule android.Package TARGET [ : TOOLCHAINS [ : OPTIONS ] ]</a> process.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -256,7 +256,7 @@ rule android.NativeLibraries TARGET : NATIVE_LIBRARIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_NativePrebuiltLibraries"></a>
 rule android.NativePrebuiltLibraries TARGET : NATIVE_PREBUILT_LIBRARIES</h1>
-<p><a id="a83_rule_android_NativePrebuiltLibraries" name="a83_rule_android_NativePrebuiltLibraries"></a></p>
+<p><a id="a84_rule_android_NativePrebuiltLibraries" name="a84_rule_android_NativePrebuiltLibraries"></a></p>
 <p>Makes <code>TARGET</code> depend on preexisting shared <code>NATIVE_PREBUILT_LIBRARIES</code>. These are packaged during the <a class="el" href="#rule_android_Package">rule android.Package TARGET [ : TOOLCHAINS [ : OPTIONS ] ]</a> process.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -271,7 +271,7 @@ rule android.NativePrebuiltLibraries TARGET : NATIVE_PREBUILT_LIBRARIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_NativePrebuiltLibraryDirectories"></a>
 rule android.NativePrebuiltLibraryDirectories TARGET : DIRECTORIES</h1>
-<p><a id="a84_rule_android_NativePrebuiltLibraryDirectories" name="a84_rule_android_NativePrebuiltLibraryDirectories"></a></p>
+<p><a id="a85_rule_android_NativePrebuiltLibraryDirectories" name="a85_rule_android_NativePrebuiltLibraryDirectories"></a></p>
 <p>For the given <code>TARGET</code>, search <code>DIRECTORIES</code> for any libraries requested via <a class="el" href="#rule_android_NativeLibraries">rule android.NativeLibraries TARGET : NATIVE_LIBRARIES</a>. This rule must be called before <a class="el" href="#rule_android_Package">rule android.Package TARGET [ : TOOLCHAINS [ : OPTIONS ] ]</a>.</p>
 <p>Native libraries are searched for the following order:</p>
 <p> <blockquote>  </p><ul>
@@ -295,7 +295,7 @@ The directories given through <code>DIRECTORIES</code> with an architecture appe
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_Package"></a>
 rule android.Package TARGET [ : TOOLCHAINS [ : OPTIONS ] ]</h1>
-<p><a id="a85_rule_android_Package" name="a85_rule_android_Package"></a></p>
+<p><a id="a86_rule_android_Package" name="a86_rule_android_Package"></a></p>
 <p>In order to output a final .apk to be installed on an Android device, the <code>android.Package</code> rule must be called. If <code>TOOLCHAINS</code> is specified, those requested toolchain components are packaged into the .apk. The passed in <code>OPTIONS</code> include additional build instructions such as automatic installation on a USB-connected Android device.</p>
 <p><code>android.Package</code> should be the last rule called in a sequence of rule calls describing the build of an Android application.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -322,7 +322,7 @@ rule android.Package TARGET [ : TOOLCHAINS [ : OPTIONS ] ]</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_PackageName"></a>
 rule android.PackageName TARGET : PACKAGE_NAME</h1>
-<p><a id="a86_rule_android_PackageName" name="a86_rule_android_PackageName"></a></p>
+<p><a id="a87_rule_android_PackageName" name="a87_rule_android_PackageName"></a></p>
 <p>Specify the package name for <code>TARGET</code>, generally in the form of <code>com.module.submodule</code>.</p>
 <p>By default, this is read from the AndroidManifest.xml, so only call this if an override is needed.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -337,7 +337,7 @@ rule android.PackageName TARGET : PACKAGE_NAME</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_PackageOutputPath"></a>
 rule android.PackageOutputPath TARGET : PACKAGE_OUTPUT_PATH</h1>
-<p><a id="a87_rule_android_PackageOutputPath" name="a87_rule_android_PackageOutputPath"></a></p>
+<p><a id="a88_rule_android_PackageOutputPath" name="a88_rule_android_PackageOutputPath"></a></p>
 <p>Assigns the location to output the final .apk to. This rule must be called prior to <code>android.Package</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -351,7 +351,7 @@ rule android.PackageOutputPath TARGET : PACKAGE_OUTPUT_PATH</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_PrebuiltAars"></a>
 rule android.PrebuiltAars TARGET : LIBRARIES</h1>
-<p><a id="a88_rule_android_PrebuiltAars" name="a88_rule_android_PrebuiltAars"></a></p>
+<p><a id="a89_rule_android_PrebuiltAars" name="a89_rule_android_PrebuiltAars"></a></p>
 <p>List out <code>.aar</code> files that <code>android.Library</code> or <code>android.Application</code> need to link against. Makes <code>TARGET</code> depend on these preexisting <code>.aar</code> files.</p>
 <p>By default, <code>.aar</code> files are searched for in <code>$(SUBDIR)/libs</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -376,7 +376,7 @@ rule android.PrebuiltAars TARGET : LIBRARIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_PrebuiltJars"></a>
 rule android.PrebuiltJars TARGET : LIBRARIES</h1>
-<p><a id="a89_rule_android_PrebuiltJars" name="a89_rule_android_PrebuiltJars"></a></p>
+<p><a id="a90_rule_android_PrebuiltJars" name="a90_rule_android_PrebuiltJars"></a></p>
 <p>List out the <code>.jar</code> files that <code>android.Library</code> or <code>android.Application</code> need to link against. Makes <code>TARGET</code> depend on these preexisting <code>.jar</code> files.</p>
 <p>The <code>LIBRARIES</code> specified are, by default, searched for in <code>$(SUBDIR)</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -399,7 +399,7 @@ rule android.PrebuiltJars TARGET : LIBRARIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_ProductVersion"></a>
 rule android.ProductVersion TARGET : VERSION_NAME : VERSION_CODE</h1>
-<p><a id="a90_rule_android_ProductVersion" name="a90_rule_android_ProductVersion"></a></p>
+<p><a id="a91_rule_android_ProductVersion" name="a91_rule_android_ProductVersion"></a></p>
 <p>Sets the <code>android.versionName</code> and <code>android.versionCode</code> properties in a <code>build.gradle</code> file.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -412,7 +412,7 @@ rule android.ProductVersion TARGET : VERSION_NAME : VERSION_CODE</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_Resources"></a>
 rule android.Resources TARGET : DIRECTORIES</h1>
-<p><a id="a91_rule_android_Resources" name="a91_rule_android_Resources"></a></p>
+<p><a id="a92_rule_android_Resources" name="a92_rule_android_Resources"></a></p>
 <p>Sets <code>DIRECTORIES</code> as the locations to search for Android resources at when <code>TARGET</code> is built.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -428,7 +428,7 @@ rule android.Resources TARGET : DIRECTORIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_SDK"></a>
 rule android.SDK SDK_VERSION : ARCHITECTURE</h1>
-<p><a id="a92_rule_android_SDK" name="a92_rule_android_SDK"></a></p>
+<p><a id="a93_rule_android_SDK" name="a93_rule_android_SDK"></a></p>
 <p>Sets the Android <code>SDK_VERSION</code> and <code>ARCHITECTURE</code> for the toolchain. Call this before any other <code>android.*</code> rules.</p>
 <p><code>android.SDK</code> attempts detection number of Android-specific tools and SDKs:</p>
 <p> <blockquote>  </p><ul>
@@ -461,7 +461,7 @@ On Windows, <code>c:/Program Files (x86)/Android/android-sdk</code> is assumed t
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_SDKCompileVersion"></a>
 rule android.SDKCompileVersion TARGET : SDK_COMPILE_VERSION</h1>
-<p><a id="a93_rule_android_SDKCompileVersion" name="a93_rule_android_SDKCompileVersion"></a></p>
+<p><a id="a94_rule_android_SDKCompileVersion" name="a94_rule_android_SDKCompileVersion"></a></p>
 <p>Sets the Android <code>SDK_COMPILE_VERSION</code> to build against. Corresponds to the <code>android.compileSdkVersion</code> property in a <code>build.gradle</code> file.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -473,7 +473,7 @@ rule android.SDKCompileVersion TARGET : SDK_COMPILE_VERSION</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_SDKMinimumVersion"></a>
 rule android.SDKMinimumVersion TARGET : SDK_MINIMUM_VERSION</h1>
-<p><a id="a94_rule_android_SDKMinimumVersion" name="a94_rule_android_SDKMinimumVersion"></a></p>
+<p><a id="a95_rule_android_SDKMinimumVersion" name="a95_rule_android_SDKMinimumVersion"></a></p>
 <p>Sets the Android <code>SDK_MINIMUM_VERSION</code> to ensure a build against. Corresponds to the <code>android.minSdkVersion</code> property in a <code>build.gradle</code> file.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -485,7 +485,7 @@ rule android.SDKMinimumVersion TARGET : SDK_MINIMUM_VERSION</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_Sign"></a>
 rule android.Sign TARGET : KEYSTORE_PATH_PASSWORD_KEY</h1>
-<p><a id="a95_rule_android_Sign" name="a95_rule_android_Sign"></a></p>
+<p><a id="a96_rule_android_Sign" name="a96_rule_android_Sign"></a></p>
 <p>Sets up the keystore information for the Android package. <code>android.Sign</code> must be called before <code>android.Package</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -498,7 +498,7 @@ rule android.Sign TARGET : KEYSTORE_PATH_PASSWORD_KEY</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_SourcePaths"></a>
 rule android.SourcePaths TARGET : DIRECTORIES</h1>
-<p><a id="a96_android_SourcePaths" name="a96_android_SourcePaths"></a></p>
+<p><a id="a97_android_SourcePaths" name="a97_android_SourcePaths"></a></p>
 <p>Specify the source path for the Java files being built by <code>TARGET</code>. <code>android.SourcePaths</code> must be called before <code>android.Application</code> or <code>android.Library</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -512,7 +512,7 @@ rule android.SourcePaths TARGET : DIRECTORIES</h1>
 </div><!-- fragment --><hr  />
  <h1><a class="anchor" id="rule_android_UncompressedAssetExtensions"></a>
 rule android.UncompressedAssetExtensions TARGET : UNCOMPRESSED_ASSET_EXTENSIONS</h1>
-<p><a id="a97_android_UncompressedAssetExtensions" name="a97_android_UncompressedAssetExtensions"></a></p>
+<p><a id="a98_android_UncompressedAssetExtensions" name="a98_android_UncompressedAssetExtensions"></a></p>
 <p>Specify extensions to leave uncompressed when building the .apk. This must be called before <code>android.Package</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

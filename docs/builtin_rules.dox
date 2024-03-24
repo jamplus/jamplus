@@ -253,6 +253,7 @@ Marks <i>targets</i> as temporary, allowing them to be removed after other targe
 The remaining rules are utility rules.
 
 \secreflist
+\refitem rule_ActionExists ActionExists
 \refitem rule_ConfigureFileHelper ConfigureFileHelper
 \refitem rule_DebugSuppressMakeText DebugSuppressMakeText
 \refitem rule_DependsList DependsList
@@ -285,6 +286,28 @@ The remaining rules are utility rules.
 \refitem rule_xxh3_128bits xxh3_128bits
 \refitem rule_xxh3_128bits_file xxh3_128bits_file
 \endsecreflist
+
+<hr>
+\section rule_ActionExists rule ActionExists ACTION_NAME ;
+\addindex rule_ActionExists
+
+Determines whether \c ACTION_NAME exists.
+
+\param ACTION_NAME The name of the action whose existence is to be determined.
+\return Returns \c true if the action exists, an empty list otherwise.
+
+\code
+    if ! [ ActionExists HiBobAction ] {
+        actions HiBobAction {
+            echo Hi Bob
+        }
+    }
+\endcode
+
+
+
+
+
 
 <hr>
 \section rule_ConfigureFileHelper rule ConfigureFileHelper TARGET : SOURCE [ : OPTIONS ] ;
