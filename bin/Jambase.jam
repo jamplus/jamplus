@@ -287,7 +287,7 @@ rule _GetSubDir_LOCATE_TARGET SUBDIR_PATH : TARGET_DIRECTORY {
 	local locate_target = [ FDirName $(ALL_LOCATE_TARGET) $(TARGET_DIRECTORY[1]) $(_top) $(SUBDIR_DOWN) $(TARGET_DIRECTORY[2]) ] ;
 }
 
-rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
+rule SubDir SUBDIR_PATH : TARGET_DIRECTORY : OPTIONS
 {
 	#
 	# SubDir TOP d1 d2 ... ;
@@ -327,6 +327,8 @@ rule SubDir SUBDIR_PATH : TARGET_DIRECTORY
 	#
 
 	if ! $(SUBDIR_PATH)  {  SUBDIR_PATH = $(ALL_SUBDIR_TOKENS) ;  }
+	SUBDIR_PATH = [ Split $(SUBDIR_PATH:J=/) : "/" ] ;
+
 	local _top = $(SUBDIR_PATH[1]) ;
 	local _tokens = $(SUBDIR_PATH[2-]) ;
 
@@ -548,6 +550,7 @@ rule SubInclude TOKENS : FILENAME : OPTIONS
 	# either doesn't have its own SubDir (naughty) or is a subtree
 	# with its own TOP.
 	TOKENS ?= $(ALL_SUBDIR_TOKENS) ;
+	TOKENS = [ Split $(TOKENS:J=/) : "/" ] ;
 	if ! $($(TOKENS[1]))
 	{
 	    Exit SubInclude $(TOKENS[1]) without prior SubDir $(TOKENS[1]) ;
