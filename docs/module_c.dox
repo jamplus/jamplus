@@ -229,11 +229,11 @@ Add \c FILES to the \c clean target for \c TARGET.
 
 <hr>
 \section rule_C_CppExceptions rule C.C++Exceptions TARGET : TYPE
-\addindex rule_C_C++Exceptions
+\addindex rule_C_CppExceptions
 
 For the given project \c TARGET, turn on/off C++ exception support within the current toolchain.
 
-\param TARGET The target to assign the \c FLAGS to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the flags are made available globally.
+\param TARGET The target to assign the exception support to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the exception flags are made available globally.
 \param TYPE \c true to turn on exceptions, \c false (default) to turn off exceptions.
 
 \code
