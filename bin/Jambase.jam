@@ -540,6 +540,28 @@ rule FSubDirPath
 
 local __SubIncludeStackIndex = 0 ;
 
+rule SubDirPush
+{
+	__SubIncludeSaveTokens_$(__SubIncludeStackIndex) = $(ALL_SUBDIR_TOKENS) ;
+	__SubIncludeSaveTargetDirectory_$(__SubIncludeStackIndex) = $(__SUBDIR_TARGET_DIRECTORY) ;
+	__SubIncludeSaveCurrentJamfile_$(__SubIncludeStackIndex) = $(CURRENT_JAMFILE) ;
+	__SubIncludeStackIndex = [ Math $(__SubIncludeStackIndex) + 1 ] ;
+}
+
+rule SubDirPop
+{
+	__SubIncludeStackIndex = [ Math $(__SubIncludeStackIndex) - 1 ] ;
+
+	if $(__SubIncludeSaveTokens_$(__SubIncludeStackIndex))
+	{
+		SubDir $(__SubIncludeSaveTokens_$(__SubIncludeStackIndex)) : $(__SubIncludeSaveTargetDirectory_$(__SubIncludeStackIndex)) ;
+		__SubIncludeSaveTokens_$(__SubIncludeStackIndex) = ;
+
+		CURRENT_JAMFILE = $(__SubIncludeSaveCurrentJamfile_$(__SubIncludeStackIndex)) ;
+		__SubIncludeSaveCurrentJamfile_$(__SubIncludeStackIndex) = ;
+	}
+}
+
 rule SubInclude TOKENS : FILENAME : OPTIONS
 {
 	# SubInclude TOP d1 ... ;
@@ -577,11 +599,7 @@ rule SubInclude TOKENS : FILENAME : OPTIONS
 	}
 	$(include_marker) = true ;
 
-	__SubIncludeSaveTokens_$(__SubIncludeStackIndex) = $(ALL_SUBDIR_TOKENS) ;
-	__SubIncludeSaveTargetDirectory_$(__SubIncludeStackIndex) = $(__SUBDIR_TARGET_DIRECTORY) ;
-	__SubIncludeSaveCurrentJamfile_$(__SubIncludeStackIndex) = $(CURRENT_JAMFILE) ;
-	__SubIncludeStackIndex = [ Math $(__SubIncludeStackIndex) + 1 ] ;
-
+	SubDirPush ;
 	SubDir $(TOKENS) ;
 
 	local TARGET = $(FILENAME:B) ;
@@ -632,16 +650,7 @@ rule SubInclude TOKENS : FILENAME : OPTIONS
 		}
 	}
 
-	__SubIncludeStackIndex = [ Math $(__SubIncludeStackIndex) - 1 ] ;
-
-	if $(__SubIncludeSaveTokens_$(__SubIncludeStackIndex))
-	{
-		SubDir $(__SubIncludeSaveTokens_$(__SubIncludeStackIndex)) : $(__SubIncludeSaveTargetDirectory_$(__SubIncludeStackIndex)) ;
-		__SubIncludeSaveTokens_$(__SubIncludeStackIndex) = ;
-
-		CURRENT_JAMFILE = $(__SubIncludeSaveCurrentJamfile_$(__SubIncludeStackIndex)) ;
-		__SubIncludeSaveCurrentJamfile_$(__SubIncludeStackIndex) = ;
-	}
+	SubDirPop ;
 }
 
 rule SubIncludeRelative RELATIVE_PATH : REQUESTED_JAMFILE : OPTIONS
