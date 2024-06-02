@@ -1250,6 +1250,15 @@ rule C.C++Exceptions TARGET : TYPE {
 	}
 }
 
+rule C.C++Standard TARGET : VERSION {
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
+	local theRule ;
+	for theRule in $(C._C++Standard:Z=$(C.COMPILER_SUITE_SYMBOL)) {
+		$(theRule) ;
+	}
+}
+
+
 
 # TARGETINFO_LOCATE
 if $(TARGETINFO_LOCATE) {

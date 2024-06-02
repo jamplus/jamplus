@@ -54,6 +54,7 @@ rule C.Toolchain.clang.Setup COMPILER_BIN_PATH : SUFFIXES {
     C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = ;
 
     C._C++Exceptions on $(C.COMPILER_SUITE_SYMBOL) = C.clang._C++Exceptions ;
+    C._C++Standard on $(C.COMPILER_SUITE_SYMBOL) = C.clang._C++Standard ;
     C._LinkPrebuiltLibraries on $(C.COMPILER_SUITE_SYMBOL) = C.clang._LinkPrebuiltLibraries ;
     C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.clang._MultiCppCompile_SetupFlags ;
     C._RuntimeTypeHelper on $(C.COMPILER_SUITE_SYMBOL) = C.clang._RuntimeTypeHelper ;

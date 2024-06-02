@@ -231,6 +231,7 @@ rule C.Toolchain.vc.win32.Detect COMPILER {
     C._ApplicationFromObjects_PostBuild on $(C.COMPILER_SUITE_SYMBOL) = ;
     C._ApplicationFromObjects_Setup on $(C.COMPILER_SUITE_SYMBOL) = C.vc._ApplicationFromObjects_Setup ;
     C._C++Exceptions on $(C.COMPILER_SUITE_SYMBOL) = C.vc._C++Exceptions ;
+    C._C++Standard on $(C.COMPILER_SUITE_SYMBOL) = C.vc._C++Standard ;
     C._LibraryFromObjects_LibFlags on $(C.COMPILER_SUITE_SYMBOL) = ;
     C._LinkPrebuiltLibraries on $(C.COMPILER_SUITE_SYMBOL) = ;
     C._MultiCppCompile_PchDeps on $(C.COMPILER_SUITE_SYMBOL) = C.vc._MultiCppCompile_PchDeps ;

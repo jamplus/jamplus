@@ -32,6 +32,11 @@ rule C.mingw._C++Exceptions {
 }
 
 
+rule C.mingw._C++Standard {
+    FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) += -std=c++$(VERSION) ;
+}
+
+
 rule C.mingw._RuntimeTypeHelper {
 	if ! $(TYPE)  ||  $(TYPE) = dynamic {
 	} else if $(TYPE) = static {

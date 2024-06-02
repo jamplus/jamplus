@@ -30,6 +30,9 @@ rule C.clang._C++Exceptions {
     }
 }
 
+rule C.clang._C++Standard {
+    FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) += -std=c++$(VERSION) ;
+}
 
 rule C.clang._RuntimeTypeHelper {
     if ! $(TYPE)  ||  $(TYPE) = dynamic {

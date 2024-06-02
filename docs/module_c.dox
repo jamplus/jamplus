@@ -19,6 +19,7 @@ Support for more than one toolchain used during the same Jam execution is provid
 \refitem rule_C_Clean C.Clean
 \refitem rule_C_ConfigureFile C.ConfigureFile
 \refitem rule_C_CppExceptions C.C++Exceptions
+\refitem rule_C_CppStandard C.C++Standard
 \refitem rule_C_CppFlags C.C++Flags
 \refitem rule_C_CompileOptions C.CompileOptions
 \refitem rule_C_DefFile C.DefFile
@@ -242,6 +243,26 @@ For the given project \c TARGET, turn on/off C++ exception support within the cu
     # Turn off exceptions in the target mycppapp for all configs.
     C.C++Exceptions mycppapp : false ;
 \endcode
+
+
+
+
+
+
+<hr>
+\section rule_C_CppStandard rule C.C++Standard TARGET : VERSION
+\addindex rule_C_CppStandard
+
+For the given project \c TARGET, set the C++ standard to \c VERSION.
+
+\param TARGET The target to set the C++ standard version to.  \c TARGET is optional if \ref rule_ActiveTarget has been specified.  If \c TARGET is <tt>*</tt>, the C++ standard version is made available globally.
+\param VERSION The C++ standard version number.
+
+\code
+    # Set the C++ version to 17.
+    C.C++Standard mycppapp : 17 ;
+\endcode
+
 
 
 

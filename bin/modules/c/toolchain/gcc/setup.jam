@@ -51,6 +51,7 @@ rule C.Toolchain.gcc.Setup COMPILER_BIN_PATH : SUFFIXES {
     C.RANLIB on $(C.COMPILER_SUITE_SYMBOL) = @(ranlib:R=$(COMPILER_BIN_PATH)) ;
 
     C._C++Exceptions on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._C++Exceptions ;
+    C._C++Standard on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._C++Standard ;
     C._LinkPrebuiltLibraries on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._LinkPrebuiltLibraries ;
     C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._MultiCppCompile_SetupFlags ;
     C._RuntimeTypeHelper on $(C.COMPILER_SUITE_SYMBOL) = C.gcc._RuntimeTypeHelper ;

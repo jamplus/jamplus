@@ -41,6 +41,7 @@ rule C.Toolchain.mingw.Setup MINGW_ROOT {
     C.RANLIB on $(C.COMPILER_SUITE_SYMBOL)  = "$(MINGW_ROOT)/bin/ranlib" ;
 
     C._C++Exceptions on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._C++Exceptions ;
+    C._C++Standard on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._C++Standard ;
     C._LinkPrebuiltLibraries on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._LinkPrebuiltLibraries ;
     C._MultiCppCompile_SetupFlags on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._MultiCppCompile_SetupFlags ;
     C._RuntimeTypeHelper on $(C.COMPILER_SUITE_SYMBOL) = C.mingw._RuntimeTypeHelper ;
