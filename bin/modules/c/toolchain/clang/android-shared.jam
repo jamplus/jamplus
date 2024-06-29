@@ -2901,7 +2901,15 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
     local _alignedApk = [ C.GristFiles $(TARGET) : $(TARGET).apk ] ;
     MakeLocate $(_alignedApk) : $(LOCATE_TARGET) ;
 
-    Contents += "Projects[ [[$(TARGET)]] ].PackagePath[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(_alignedApk:T)]]$(NEWLINE)" ;
+    local apkTarget = $(APK_TARGET:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+
+    # Set up the .apk dependencies.
+    local _apk = $(TARGET)-$(ANDROID.VERSION_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET))-$(C.CONFIG).apk ;
+    _apk = [ C.GristFiles $(TARGET) : $(_apk) ] ;
+
+    local packageOutputPath = $(ANDROID.PACKAGE_OUTPUT_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):E=$(ALL_LOCATE_TARGET)/../package) ;
+    MakeLocate $(_apk) : $(packageOutputPath:E=$(LOCATE_TARGET)) ;
+    Contents += "Projects[ [[$(TARGET)]] ].PackagePath[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(_apk:T)]]$(NEWLINE)" ;
 }
 
 
