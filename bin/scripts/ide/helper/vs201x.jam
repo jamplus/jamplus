@@ -1,13 +1,27 @@
 rule CompilerPlatformInfo
 {
-	local vsplatform = $(VSPLATFORMMAP.$(PLATFORM)) ;
-	local vsnative = $(VSNATIVEPLATFORM.$(PLATFORM)) ;
-	local text = "if not MapPlatformToVSPlatform then MapPlatformToVSPlatform = {} end
-MapPlatformToVSPlatform[ [[$(PLATFORM)]] ] = [[$(vsplatform)]]
+	local text ;
+
+	local platformString = $(PLATFORM) ;
+	if $(platformString) = android {
+		if $(C.ARCHITECTURE) {
+			platformString = $(platformString)|$(C.ARCHITECTURE) ;
+
+			text += "if not VALID_ARCHITECTURES then VALID_ARCHITECTURES = {} end
+if not VALID_ARCHITECTURES[ [[$(PLATFORM)]] ] then VALID_ARCHITECTURES[ [[$(PLATFORM)]] ] = {} end
+if not VALID_ARCHITECTURES[ [[$(PLATFORM)]] ][ [[$(C.ARCHITECTURE)]] ] then VALID_ARCHITECTURES[ [[$(PLATFORM)]] ][ [[$(C.ARCHITECTURE)]] ] = true end
+" ;
+		}
+	}
+
+	local vsplatform = $(VSPLATFORMMAP.$(platformString)) ;
+	local vsnative = $(VSNATIVEPLATFORM.$(platformString)) ;
+	text += "if not MapPlatformToVSPlatform then MapPlatformToVSPlatform = {} end
+MapPlatformToVSPlatform[ [[$(platformString)]] ] = [[$(vsplatform)]]
 " ;
 	if $(vsnative) {
 		text += "if not VSNativePlatforms then VSNativePlatforms = {} end
-VSNativePlatforms[ [[$(PLATFORM)]] ] = true
+VSNativePlatforms[ [[$(platformString)]] ] = true
 " ;
 	}
 

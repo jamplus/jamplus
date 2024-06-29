@@ -2927,6 +2927,10 @@ rule android.Library TARGET : SOURCES : OPTIONS {
 
     C._ApplicationTargetInfo ;
 
+    local _linkTargets = $(_t) ;
+    LINKTARGETS on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(_linkTargets) ;
+    C.ARCHITECTURE on $(_linkTargets) = $(C.ARCHITECTURE) ;
+
     # Source path
     local sourcePaths = $(JAVA.SOURCEPATHS:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
     sourcePaths ?= $(SUBDIR) ;
@@ -2935,7 +2939,7 @@ rule android.Library TARGET : SOURCES : OPTIONS {
     SOURCES = [ C.GristFiles : $(SOURCES) ] ;
     SEARCH on $(SOURCES) += $(sourcePaths) ;
 
-    DumpProjectInfo $(TARGET) : $(SOURCES) : app $(OPTIONS) ;
+    #DumpProjectInfo $(TARGET) : $(SOURCES) : app $(OPTIONS) ;
     Depends all : $(TARGET) ;
 }
 
@@ -2946,6 +2950,8 @@ rule android.ExcludeFromBuild TARGET : SOURCES {
 
 } # if ! $(TARGETINFO_LOCATE)
 
-VSPLATFORMMAP.android = ARM ;
-VSNATIVEPLATFORM.android = true ;
+VSPLATFORMMAP.android|arm64 = Android-arm64-v8a ;
+VSNATIVEPLATFORM.android|arm64 = true ;
+VSPLATFORMMAP.android|armv7-a = Android-armeabi-v7a ;
+VSNATIVEPLATFORM.android|armv7-a = true ;
 

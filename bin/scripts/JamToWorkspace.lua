@@ -100,6 +100,17 @@ function list_find(searchList, value)
 	end
 end
 
+function list_from_keys(map, sorted)
+	local outList = {}
+	for key in pairs(map) do
+		outList[#outList + 1] = key
+	end
+	if sorted then
+		table.sort(outList)
+	end
+	return outList
+end
+
 --- Merge one table into another. <code>u</code> is merged into <code>t</code>.
 -- @param t first table
 -- @param u second table
