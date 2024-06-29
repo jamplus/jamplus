@@ -2675,6 +2675,57 @@ rule android.AssetPack TARGET : PACK_NAME : TYPE : WILDCARDS : TARGETS_TO_COPY :
 }
 
 
+#
+rule android.ExternalAssets TARGET : SOURCE_PATH : EXTERNAL_TARGETS {
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
+
+	SOURCE_PATH = $(SOURCE_PATH:R=$(SUBDIR)) ;
+
+	if ! $(EXTERNAL_TARGETS) {
+		local files = @($(SOURCE_PATH)/**:W=$(SOURCE_PATH)/) ;
+		local externalTargetGrist = $(TARGET)!android!externalassets ;
+		EXTERNAL_TARGETS = $(files:G=$(externalTargetGrist)) ;
+		SEARCH on $(EXTERNAL_TARGETS) = $(SOURCE_PATH) ;
+	}
+
+	# Collect the list of directories to account for an
+	# Android 13 issue where adb push fails to create directories.
+	local assetDirectories ;
+	local externalTarget ;
+	for externalTarget in $(EXTERNAL_TARGETS) {
+		local fileDirectory = $(externalTarget:D) ;
+		if ! $(fileDirectory) in $(assetDirectories) {
+			assetDirectories += $(fileDirectory) ;
+		}
+	}
+
+	# Perform the steps to sync the assets to Android and account for the Android 13
+	# secure_mkdirs failure in "adb push".
+	actions screenoutput android._DeployAssets {
+		$(ANDROID.ADB) shell mkdir -p $(ANDROID_APP_DATA)/files/$(ASSET_DIRECTORIES:E="")
+		$(ANDROID.ADB) push --sync $(SOURCE_PATH) $(ANDROID_APP_DATA)/files
+		$(ANDROID.ADB) shell chmod -R u=rwx,g=rwx,o=rwx $(ANDROID_APP_DATA)/files
+		$(ANDROID.ADB) shell chmod g=rwxs $(ANDROID_APP_DATA)/files/$(ASSET_DIRECTORIES:E="")
+	}
+
+	# $(TARGET):deployassets
+	local deployAssetsTarget = $(TARGET):deployassets ;
+	Depends $(deployAssetsTarget) : $(EXTERNAL_TARGETS) ;
+	NotFile $(deployAssetsTarget) ;
+	Always $(deployAssetsTarget) ;
+
+	# Set up the action.
+	local applicationId = $(ANDROID.APPLICATION_ID:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	applicationId ?= $(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+	ANDROID_APP_DATA on $(deployAssetsTarget) = /sdcard/Android/data/$(applicationId) ;
+	ASSET_DIRECTORIES on $(deployAssetsTarget) = $(assetDirectories) ;
+	SOURCE_PATH on $(deployAssetsTarget) = $(SOURCE_PATH) ;
+	android._DeployAssets $(deployAssetsTarget) : : $(C.COMPILER_SUITE_SYMBOL) ;
+
+	ANDROID.EXTERNAL_ASSETS = $(EXTERNAL_TARGETS) ;
+}
+
+
 # Specify the native libraries used by this target. The native library targets should be
 # a target being built by the native part of the Android NDK Jam integration.
 rule android.NativeLibraries TARGET : NATIVE_LIBRARIES {
