@@ -585,7 +585,14 @@ rule SubInclude TOKENS : FILENAME : OPTIONS
 	TOKENS = [ Split $(TOKENS:J=/) : "/" ] ;
 	if ! $($(TOKENS[1]))
 	{
-	    Exit SubInclude $(TOKENS[1]) without prior SubDir $(TOKENS[1]) ;
+		if register in $(OPTIONS)
+		{
+			SubDir $(TOKENS) : : register ;
+		}
+		else
+		{
+			Exit SubInclude $(TOKENS[1]) without prior SubDir $(TOKENS[1]) ;
+		}
 	}
 
 	local jamfile ;
@@ -628,10 +635,14 @@ rule SubInclude TOKENS : FILENAME : OPTIONS
 	BUILD.$(TARGET).CURRENT_JAMFILE = $(CURRENT_JAMFILE) ;
 
 	local nocare ;
+	if register in $(OPTIONS)
+	{
+		nocare = 1 ;
+	}
 	if nocare in $(OPTIONS)
 	{
 		nocare = 1 ;
-		NoCare $(CURRENT_JAMFILE) ;
+		#NoCare $(CURRENT_JAMFILE) ;
 	}
 	if ! $(nocare) && [ Search $(CURRENT_JAMFILE) ]
 	{
