@@ -1474,12 +1474,14 @@ task clean(type: Delete) {
 " ;
 
             local versionCatalogFile = $(ANDROID.GRADLE_VERSION_CATALOG_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+            local versionCatalogName = $(ANDROID.GRADLE_VERSION_CATALOG_NAME:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
+            versionCatalogName ?= libs ;
             if $(versionCatalogFile) {
                 versionCatalogFile = [ MakeRelativePath $(versionCatalogFile:T) : $(GRADLE_OUTPUT_DIRECTORY) ] ;
                 contents += "
 dependencyResolutionManagement {
     versionCatalogs {
-        libs {
+        $(versionCatalogName) {
             from(files(\"$(versionCatalogFile)\"))
         }
     }
@@ -2795,11 +2797,12 @@ rule android.ExcludeFromBuild TARGET : SOURCES {
 
 
 #
-rule android.GradleVersionCatalogFile TARGET : VERSION_CATALOG_FILE {
+rule android.GradleVersionCatalog TARGET : VERSION_CATALOG_NAME : VERSION_CATALOG_FILE {
     C.ActiveTarget $(TARGET) ;
     local target = $(VERSION_CATALOG_FILE:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;
     SEARCH on $(target) = $(SUBDIR) ;
     ANDROID.GRADLE_VERSION_CATALOG_FILE on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(target) ;
+    ANDROID.GRADLE_VERSION_CATALOG_NAME on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(VERSION_CATALOG_NAME) ;
 }
 
 
