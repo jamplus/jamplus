@@ -1323,18 +1323,37 @@ builtin_shell(
 	int	*jmp )
 {
     LIST *cmds = lol_get( args, 0 );
+    LIST *options = lol_get( args, 1 );
     LISTITEM* l;
     LIST *shell = var_get( "JAMSHELL" );	/* shell is per-target */
     LIST *shellext = var_get( "JAMSHELLEXT" );	/* shellext is per-target */
+    int screenoutput = 0;
+    int resetcache = 0;
+
+    if (options) {
+        LISTITEM* item;
+        for (item = list_first(options); item; item = list_next(item)) {
+            const char* option = list_value(item);
+            if (strcmp(option, "screenoutput") == 0) {
+                screenoutput = 1;
+            } else if (strcmp(option, "resetcache") == 0) {
+                resetcache = 1;
+            }
+        }
+    }
 
     LIST *output = L0;
 
     exec_init();
     for( l = list_first(cmds); l; l = list_next( l ) ) {
-        execcmd( list_value(l), shell_done, &output, shell, shellext, 1 );
-	execwait();
+        execcmd( list_value(l), shell_done, &output, shell, shellext, !screenoutput );
+        execwait();
     }
     exec_done();
+
+    if (resetcache) {
+        donestamps();
+    }
 
     return output;
 }
