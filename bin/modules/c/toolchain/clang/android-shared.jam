@@ -2075,7 +2075,7 @@ assetPack {
         android._Install install:$(TARGET) : $(_apk) : $(C.COMPILER_SUITE_SYMBOL) ;
 
         # Set up an auto-install if requested.
-        if install in $(OPTIONS) {
+        if install in $(OPTIONS) && ! noinstall in $(OPTIONS) {
             Depends autoinstall:$(TARGET) : $(_apk) ;
             NotFile autoinstall:$(TARGET) ;
             android._Install autoinstall:$(TARGET) : $(_apk) : $(C.COMPILER_SUITE_SYMBOL) ;
