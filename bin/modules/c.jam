@@ -1929,6 +1929,8 @@ rule C.GetActiveToolchain {
 
 
 rule C.Build NAMES : TOOLCHAINS {
+    local saveAllSubDirTokens = $(ALL_SUBDIR_TOKENS) ;
+    local saveTargetDirectory = $(__SUBDIR_TARGET_DIRECTORY) ;
     local saveCurrentJamfile = $(CURRENT_JAMFILE) ;
 
     if $(TOOLCHAINS) {
@@ -1957,6 +1959,8 @@ rule C.Build NAMES : TOOLCHAINS {
 
         CURRENT_JAMFILE = $(saveCurrentJamfile) ;
 
+        SubDir $(saveAllSubDirTokens) : $(saveTargetDirectory) ;
+
         return $(toolchains) ;
     }
 
@@ -1972,6 +1976,7 @@ rule C.Build NAMES : TOOLCHAINS {
         Build.$(name) $(target) ;
     }
 
+    SubDir $(saveAllSubDirTokens) : $(saveTargetDirectory) ;
     CURRENT_JAMFILE = $(saveCurrentJamfile) ;
 }
 
