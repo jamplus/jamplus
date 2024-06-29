@@ -2838,26 +2838,61 @@ rule android.Package TARGET : TOOLCHAINS : OPTIONS {
         $(ANDROID.NATIVELIBS:Z=$(C.ACTIVE_TOOLCHAIN_*))
     ;
 
-    local toolchain ;
-    for toolchain in $(TOOLCHAINS) {
-        local linkTargets = [ C.GetLinkTargets $(nativeLibs) : $(toolchain) ] ;
+    local additionalSymbolsSearchPathsString = "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ]" ;
 
-        local linkTarget ;
-        for linkTarget in $(linkTargets) {
-            if $(linkTarget:S) != .so {
-                continue ;
+    if $(ANDROID.USE_GRADLE) = 1 {
+        local packageOutputPath = $(ANDROID.PACKAGE_OUTPUT_PATH:Z=$(C.ACTIVE_TOOLCHAIN_TARGET):E=$(ALL_LOCATE_TARGET)/../package) ;
+
+        local GRADLE_OUTPUT_DIRECTORY = @($(ALL_LOCATE_TARGET)/gradle:R=) ;
+
+        local jniLibsDirectory = $(GRADLE_OUTPUT_DIRECTORY)/jniLibs ;
+
+        local toolchain ;
+        for toolchain in $(TOOLCHAINS) {
+            local linkTargets = [ C.GetLinkTargets $(nativeLibs) : $(toolchain) ] ;
+
+            local linkTarget ;
+            for linkTarget in $(linkTargets) {
+                if $(linkTarget:S) != .so {
+                    continue ;
+                }
+
+                local architecture = $(C.ARCHITECTURE:Z=$(linkTarget)) ;
+                local localAdditionalSymbolsSearchPathsString = "$(additionalSymbolsSearchPathsString)[ [[$(architecture)]] ]" ;
+
+                switch $(architecture) {
+                    case arm :
+                        Contents += "$(localAdditionalSymbolsSearchPathsString) = concat($(localAdditionalSymbolsSearchPathsString), { [[$(jniLibsDirectory)/$(C.CONFIG)/armeabi]] })$(NEWLINE)" ;
+                    case armv7-a :
+                        Contents += "$(localAdditionalSymbolsSearchPathsString) = concat($(localAdditionalSymbolsSearchPathsString), { [[$(jniLibsDirectory)/$(C.CONFIG)/armeabi-v7a]] })$(NEWLINE)" ;
+                    case arm64 :
+                        Contents += "$(localAdditionalSymbolsSearchPathsString) = concat($(localAdditionalSymbolsSearchPathsString), { [[$(jniLibsDirectory)/$(C.CONFIG)/arm64-v8a]] })$(NEWLINE)" ;
+                    case x86 :
+                        Contents += "$(localAdditionalSymbolsSearchPathsString) = concat($(localAdditionalSymbolsSearchPathsString), { [[$(jniLibsDirectory)/$(C.CONFIG)/x86]] })$(NEWLINE)" ;
+                }
             }
+        }
+    } else {
+        local toolchain ;
+        for toolchain in $(TOOLCHAINS) {
+            local linkTargets = [ C.GetLinkTargets $(nativeLibs) : $(toolchain) ] ;
 
-            # Copy stripped so into output directory.
-            switch $(C.ARCHITECTURE:Z=$(linkTarget)) {
-                case arm :
-                    Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/armeabi]]$(NEWLINE)" ;
-                case armv7-a :
-                    Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/armeabi-v7a]]$(NEWLINE)" ;
-                case arm64 :
-                    Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/arm64-v8a]]$(NEWLINE)" ;
-                case x86 :
-                    Contents += "Projects[ [[$(TARGET)]] ].AdditionalSymbolSearchPaths[ [[$(C.PLATFORM)]] ][ [[$(C.CONFIG)]] ] = [[$(LOCATE_TARGET)/lib/x86]]$(NEWLINE)" ;
+            local linkTarget ;
+            for linkTarget in $(linkTargets) {
+                if $(linkTarget:S) != .so {
+                    continue ;
+                }
+
+                switch $(C.ARCHITECTURE:Z=$(linkTarget)) {
+                    case arm :
+                        Contents += "$(additionalSymbolsSearchPathsString) = concat($(additionalSymbolsSearchPathsString), { [[$(LOCATE_TARGET)/lib/armeabi]] })$(NEWLINE)" ;
+                    case armv7-a :
+                        Contents += "$(additionalSymbolsSearchPathsString) = concat($(additionalSymbolsSearchPathsString), { [[$(LOCATE_TARGET)/lib/armeabi-v7a]] })$(NEWLINE)" ;
+                    case arm64 :
+                        Contents += "$(additionalSymbolsSearchPathsString) = concat($(additionalSymbolsSearchPathsString), { [[$(LOCATE_TARGET)/lib/arm64-v8a]] })$(NEWLINE)" ;
+                    case x86 :
+                        Contents += "$(additionalSymbolsSearchPathsString) = concat($(additionalSymbolsSearchPathsString), { [[$(LOCATE_TARGET)/lib/x86]] })$(NEWLINE)" ;
+                }
             }
         }
     }
