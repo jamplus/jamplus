@@ -1549,7 +1549,17 @@ include ':app'
             local applicationId = $(ANDROID.APPLICATION_ID:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
             applicationId ?= $(ANDROID.PACKAGE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) ;
 
-            local contents = "" ;
+            if ! $(applicationId) {
+                Exit applicationId is missing. ;
+            }
+            if ! $(sdkCompileVersion) && ! $(sdkVersion) {
+                Exit sdkCompileVersion or sdkVersion is missing. ;
+            }
+            if ! $(sdkMinimumVersion) {
+                Exit sdkMinimumVersion is missing. ;
+            }
+
+            local contents = ;
             contents += "plugins {
     id 'com.android.application'
 }
