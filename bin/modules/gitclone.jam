@@ -1,0 +1,11 @@
+rule GitClone URL_AND_OPTIONS : OUTPUT_DIRECTORY_AND_FILE : EXTRA {
+	local FILE = $(OUTPUT_DIRECTORY_AND_FILE[2]:R=$(OUTPUT_DIRECTORY_AND_FILE[1])) ;
+	if ! [ Wildcard $(FILE) : 0 : : allwildcard ] {
+		Shell "git clone $(URL_AND_OPTIONS[1]) $(OUTPUT_DIRECTORY_AND_FILE[1]) $(URL_AND_OPTIONS[2-]:J=$(SPACE))" : screenoutput resetcache ;
+		if $(EXTRA) {
+			Shell $(EXTRA) : screenoutput ;
+		}
+	}
+}
+
+
