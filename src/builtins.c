@@ -1509,7 +1509,9 @@ builtin_expandfilelist(
 	char const* searchSourceStr = "";
 	LIST* absoluteList = lol_get( args, 1 );
 	LIST* searchSourceList = lol_get( args, 2 );
+	LIST* optionsList = lol_get( args, 3 );
 	int absolute = 1;
+	int allwildcard = 0;
 	if ( list_first( absoluteList ) )
 	{
 		char const* str = list_value( list_first( absoluteList ) );
@@ -1524,6 +1526,16 @@ builtin_expandfilelist(
 			searchSourceExtraLen = 1;
 	}
 
+	if ( list_first( optionsList ) )
+	{
+		LISTITEM* option;
+		for (option = list_first(optionsList); option; option = list_next(option) ) {
+			if (strcmp(list_value(option), "allwildcard") == 0) {
+				allwildcard = 1;
+			}
+		}
+	}
+
     for (file = list_first(files) ; file; file = list_next(file) ) {
 		int wildcard = 0;
 		const char* ptr = list_value(file);
@@ -1535,7 +1547,7 @@ builtin_expandfilelist(
 			++ptr;
 		}
 
-		if ( !wildcard ) {
+		if ( !wildcard && !allwildcard ) {
 			result = list_append( result, list_value(file), 1 );
 		} else {
 			PATHNAME	f;
