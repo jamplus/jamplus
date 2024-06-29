@@ -607,8 +607,12 @@ actions C.MakeLump {
 ########################################################################
 ########################################################################
 
+actions C.ApplicationRun {
+	$(EXECUTABLE:TC) $(COMMAND_LINE_OPTIONS)
+}
+
 rule C.Application TARGET : SOURCES : OPTIONS {
-	C.ActiveTarget $(TARGET) ;
+	TARGET = [ C.ActiveTarget $(TARGET) ] ;
 
 	local linkTargets ;
 	on $(C.COMPILER_SUITE_SYMBOL) {
@@ -616,6 +620,13 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 		LINKED_OBJECTS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(objects) ;
 		linkTargets = [ C._ApplicationFromObjects $(objects) : $(OPTIONS) ] ;
 		C.ARCHITECTURE on $(linkTargets) = $(C.ARCHITECTURE) ;
+
+		Depends run:$(TARGET) : $(linkTargets[1]) ;
+		Always run:$(TARGET) ;
+		NotFile run:$(TARGET) ;
+		EXECUTABLE on run:$(TARGET) = $(linkTargets[1]) ;
+		COMMAND_LINE_OPTIONS on run:$(TARGET) = $(JAM_EXTRA_COMMAND_LINE_OPTIONS) ;
+		C.ApplicationRun run:$(TARGET) : $(linkTargets[1]) ;
 	}
 	return $(linkTargets) ;
 }
