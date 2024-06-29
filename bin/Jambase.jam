@@ -1017,6 +1017,12 @@ if [ Search $(JAMFILE) ] {
 		JAM_AUTOMATIC_BUILD_CLEAN_TARGET = $(TARGET) ;
 		TARGET = $(splitTarget[2]) ;
 	}
+	if $(TARGET:S)
+	{
+		WILDCARDS ?= $(JAM_COMMAND_LINE_TARGETS[1-]) ;
+		TARGET = $(TARGET:S=) ;
+		JAM_COMMAND_LINE_TARGETS = $(TARGET) ;
+	}
 	WILDCARDS ?= $(JAM_COMMAND_LINE_TARGETS[2-]) ;
 	WILDCARDS ?= *@=*.c@=*.cpp@=*.m@=*.mm ;
 	local files = $(WILDCARDS:W) ;
