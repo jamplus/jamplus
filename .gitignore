@@ -1,5 +1,6 @@
 **/build*/
 **/.build*/
+**/.deps/
 *.sw?
 *~
 .DS_Store
