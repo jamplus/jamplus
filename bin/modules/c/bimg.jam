@@ -1,0 +1,56 @@
+rule Build.bimg {
+
+C.ActiveTarget bimg ;
+
+local SRCS =
+		src/image.cpp
+		src/image_gnf.cpp
+		include/*.h
+		3rdparty/astc-encoder/source/*.cpp
+		3rdparty/tinyexr/deps/miniz/*.c
+;
+
+C.Inherits : bx ;
+
+C.C++Standard : 17 ;
+
+C.IncludeDirectories : include : public ;
+C.IncludeDirectories : 3rdparty/astc-encoder/include ;
+
+AutoSourceGroup : $(SRCS) ;
+C.Library : $(SRCS) ;
+
+}
+
+rule Build.bimg_decode {
+
+C.ActiveTarget bimg_decode ;
+
+local SRCS =
+		src/image_decode.cpp
+		include/*.h
+;
+
+C.Inherits : bx ;
+
+C.C++Standard : 17 ;
+
+C.IncludeDirectories : include : public ;
+C.IncludeDirectories : 3rdparty 3rdparty/tinyexr/deps/miniz ;
+
+AutoSourceGroup : $(SRCS) ;
+C.Library : $(SRCS) ;
+
+}
+
+rule C.bimg.Register ROOT : OPTIONS {
+	if clone in $(OPTIONS) {
+		GitClone https://github.com/bkaradzic/bimg.git --depth 1 : $(ROOT) include/bimg/bimg.h ;
+	}
+	BIMG_ROOT = $(ROOT) ;
+	SubInclude BIMG_ROOT : bimg : register ;
+	SubInclude BIMG_ROOT : bimg_decode : register ;
+
+	BGFX_LIBS += bimg bimg_decode ;
+}
+

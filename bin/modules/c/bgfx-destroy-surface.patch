@@ -1,0 +1,27 @@
+From e859d8dc9db9a0fdc726ce70df7b2d16c6899c05 Mon Sep 17 00:00:00 2001
+From: Josh Jensen <josh@everrush.com>
+Date: Sat, 15 Jun 2024 12:16:07 -0600
+Subject: Destroy the passed in backBuffer for GLES
+
+---
+ src/glcontext_egl.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/glcontext_egl.cpp b/src/glcontext_egl.cpp
+index ac6dde9..016e20c 100644
+--- a/src/glcontext_egl.cpp
++++ b/src/glcontext_egl.cpp
+@@ -328,6 +328,10 @@ EGL_IMPORT
+ 			vc_dispmanx_update_submit_sync(dispmanUpdate);
+ #	endif // BX_PLATFORM_ANDROID
+ 
++			eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
++			eglDestroySurface(m_display, g_platformData.backBuffer);
++			g_platformData.backBuffer = NULL;
++
+ 			if (headless)
+ 			{
+ 				EGLint pbAttribs[] =
+-- 
+2.45.1.windows.1
+

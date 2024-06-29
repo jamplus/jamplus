@@ -1,0 +1,55 @@
+rule Build.bx
+{
+
+C.ActiveTarget bx ;
+
+local SRCS =
+		src/*.cpp
+		include/bx/**
+		include/compat/**
+		include/tinystl/**
+		3rdparty/ini/**
+;
+
+C.C++Standard : 17 ;
+
+C.Defines : __STDC_LIMIT_MACROS __STDC_FORMAT_MACROS __STDC_CONSTANT_MACROS : public ;
+
+if $(C.CONFIG) in debug {
+	C.Defines : BX_CONFIG_DEBUG=1 : public ;
+} else {
+	C.Defines : BX_CONFIG_DEBUG=1 : public ;
+}
+
+C.IncludeDirectories : include : public ;
+
+if $(MSVCNT) {
+	C.IncludeDirectories : include/compat/msvc : public ;
+}
+
+else if $(C.PLATFORM) in ios iossimulator {
+	C.IncludeDirectories : include/compat/ios : public ;
+}
+
+else if $(C.PLATFORM) in macosx64 {
+	C.IncludeDirectories : include/compat/osx : public ;
+}
+
+C.IncludeDirectories : 3rdparty ;
+
+C.ExcludeFromBuild : src/amalgamated.cpp ;
+
+AutoSourceGroup : $(SRCS) ;
+C.Library : $(SRCS) ;
+
+}
+
+rule C.bx.Register ROOT : OPTIONS {
+	if clone in $(OPTIONS) {
+		GitClone https://github.com/bkaradzic/bx.git --depth 1 : $(ROOT) include/bx/bx.h ;
+	}
+	BX_ROOT = $(ROOT) ;
+	SubInclude BX_ROOT : bx : register ;
+	BGFX_LIBS += bx ;
+}
+

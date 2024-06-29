@@ -1,0 +1,78 @@
+rule Build.bgfx {
+
+C.ActiveTarget bgfx ;
+
+local SRCS =
+		include/**
+		src/**
+;
+
+C.Inherits : bimg bimg_decode ;
+C.Inherits : bx : public ;
+
+C.C++Standard : 17 ;
+
+#C.Defines : BGFX_CONFIG_RENDERER_OPENGL=32 ;
+#C.Defines : BGFX_CONFIG_RENDERER_DIRECT3D11=1 ;
+if $(C.PLATFORM) = android {
+	C.Defines : BGFX_CONFIG_MULTITHREADED=0 ;
+} else {
+	C.Defines : BGFX_CONFIG_MULTITHREADED=0 ;
+}
+C.IncludeDirectories : include : public ;
+C.IncludeDirectories : 3rdparty : public ;
+C.IncludeDirectories : 3rdparty/directx-headers/include/directx ;
+C.IncludeDirectories : 3rdparty/khronos ;
+
+C.ExcludeFromBuild : src/amalgamated.cpp src/amalgamated.mm ;
+
+if $(C.PLATFORM) in ios {
+	C.ios.LinkFrameworks : UIKit : public ;
+}
+
+if $(PLATFORM) in macosx32 macosx64 ios iossimulator {
+	C.ForceFileType : src/renderer_vk.cpp : .mm ;
+	C.ObjectAddFlags : src/glcontext_nsgl.mm src/renderer_mtl.mm src/renderer_vk.cpp : -fno-objc-arc ;
+}
+
+if $(USE_IMGUI) = 1 {
+	SRCS +=
+			3rdparty/dear-imgui/**
+			examples/common/imgui/**
+			../netImgui/**
+	;
+
+	C.ExcludeFromBuild : examples/common/imgui/imgui.cpp ;
+
+	C.IncludeDirectories : ../netImgui : public ;
+	C.IncludeDirectories : 3rdparty/dear-imgui : public ;
+	C.IncludeDirectories : examples/common : public ;
+
+	C.IncludeDirectories : ../../../3rdparty-sources/sdl2/include ;
+}
+
+AutoSourceGroup : $(SRCS) ;
+C.Library : $(SRCS) ;
+
+}
+
+
+rule C.bgfx.Register ROOT : OPTIONS {
+	if all in $(OPTIONS) {
+		C.bx.Register $(ROOT)/bx : $(OPTIONS) ;
+		C.bimg.Register $(ROOT)/bimg : $(OPTIONS) ;
+		ROOT = $(ROOT)/bgfx ;
+	}
+	if clone in $(OPTIONS) {
+		local EXTRA ;
+		if patch-for-sdl in $(OPTIONS) {
+			EXTRA = "git -C $(ROOT) am -3 -k $(SDL2_CURRENT_SCRIPT:D)/bgfx-destroy-surface.patch" ;
+		}
+		GitClone https://github.com/bkaradzic/bgfx.git --depth 1 : $(ROOT) include/bgfx/bgfx.h : $(EXTRA) ;
+	}
+	BGFX_ROOT = $(ROOT) ;
+	SubInclude BGFX_ROOT : bgfx : register ;
+
+	BGFX_LIBS += bgfx ;
+}
+
