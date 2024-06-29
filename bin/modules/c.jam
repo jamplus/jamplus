@@ -1099,35 +1099,54 @@ rule C.NoPrecompiledHeader TARGET : FILES {
 
 } # ! $(TARGETINFO_LOCATE)
 
-rule C.Flags TARGET : TYPE : FLAGS {
+rule C.Flags TARGET : TYPE : FLAGS : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	$(TYPE)FLAGS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
+
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_$(TYPE)FLAGS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
+
+		if ! $(TYPE) in $(PUBLIC_TYPE_FLAGS_USED:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+			PUBLIC_TYPE_FLAGS_USED on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(TYPE) ;
+		}
+	}
 }
 
 
-rule C.CFlags TARGET : FLAGS {
-	C.ActiveTarget $(TARGET) ;
-	CCFLAGS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
+rule C.CFlags TARGET : FLAGS : OPTIONS {
+	C.Flags $(TARGET) : CC : $(FLAGS) : $(OPTIONS) ;
 }
 
 
-rule C.C++Flags TARGET : FLAGS {
-	C.ActiveTarget $(TARGET) ;
-	C++FLAGS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
+rule C.C++Flags TARGET : FLAGS : OPTIONS {
+	C.Flags $(TARGET) : C++ : $(FLAGS) : $(OPTIONS) ;
 }
 
 
-rule C.AddFlags TARGET : FLAGS {
+rule C.AddFlags TARGET : FLAGS : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
 	FLAGS_TO_REMOVE on $(C.ACTIVE_TOOLCHAIN_TARGET) -= $(FLAGS) ;
+
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
+		PUBLIC_FLAGS_TO_REMOVE on $(C.ACTIVE_TOOLCHAIN_TARGET) -= $(FLAGS) ;
+	}
 }
 
 
-rule C.RemoveFlags TARGET : FLAGS {
+rule C.RemoveFlags TARGET : FLAGS : OPTIONS {
 	C.ActiveTarget $(TARGET) ;
 	FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) -= $(FLAGS) ;
 	FLAGS_TO_REMOVE on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
+
+	if public in $(OPTIONS) {
+		__PUBLIC on $(C.ACTIVE_TOOLCHAIN_TARGET) = true ;
+		PUBLIC_FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) -= $(FLAGS) ;
+		PUBLIC_FLAGS_TO_REMOVE on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(FLAGS) ;
+	}
 }
 
 
@@ -1594,6 +1613,34 @@ rule C.Inherits TARGET : INHERITS_TARGETS : OPTIONS {
 			Echo * ;
 			Echo "*     Does $(originalInheritsTarget) exist before $(TARGET) in the Jamfile chain?" ;
 			Exit ;
+		}
+
+		local types = $(PUBLIC_TYPE_FLAGS_USED:Z=$(inheritsTarget)) ;
+		local type ;
+		for type in $(types) {
+			local flags = $(PUBLIC_$(type)FLAGS:Z=$(inheritsTarget)) ;
+			if $(flags) {
+				$(type)FLAGS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(flags) ;
+				if $(public) {
+					PUBLIC_$(type)FLAGS on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(flags) ;
+				}
+			}
+		}
+
+		local public_FLAGS_TO_ADD = $(PUBLIC_FLAGS_TO_ADD:Z=$(inheritsTarget)) ;
+		if $(public_FLAGS_TO_ADD) {
+			FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(public_FLAGS_TO_ADD) ;
+			if $(public) {
+				PUBLIC_FLAGS_TO_ADD on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(public_FLAGS_TO_ADD) ;
+			}
+		}
+
+		local public_FLAGS_TO_REMOVE = $(PUBLIC_FLAGS_TO_REMOVE:Z=$(inheritsTarget)) ;
+		if $(public_FLAGS_TO_REMOVE) {
+			FLAGS_TO_REMOVE on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(public_FLAGS_TO_REMOVE) ;
+			if $(public) {
+				PUBLIC_FLAGS_TO_REMOVE on $(C.ACTIVE_TOOLCHAIN_TARGET) += $(public_FLAGS_TO_REMOVE) ;
+			}
 		}
 
 		local publicDefines = $(PUBLIC_DEFINES:Z=$(inheritsTarget)) ;
