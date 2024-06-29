@@ -633,6 +633,10 @@ rule C.Application TARGET : SOURCES : OPTIONS {
 
 
 rule C._ApplicationFromObjects OBJECTS : OPTIONS {
+	C.ACTIVE_TARGET = ;
+	C.LAST_ACTIVE_TARGET_INFO = ;
+	C.ActiveTarget $(TARGET) ;
+
 	local TARGET = $(C.ACTIVE_TARGET) ;
 
 	local theRule ;
