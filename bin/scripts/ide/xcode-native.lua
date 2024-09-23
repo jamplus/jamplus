@@ -954,7 +954,7 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 				table.insert(self.Contents, "\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME = \"" .. subProject.ASSETCATALOG_COMPILER_APPICON_NAME[platformName][configName] .. "\";\n")
 			end
 
-			table.insert(self.Contents, "\t\t\t\tENABLE_BITCODE = NO;\n")
+			--table.insert(self.Contents, "\t\t\t\tENABLE_BITCODE = NO;\n")
 
 			local sourcesExcludedFromBuild = {}
 			local sourcesInfo = Projects[self.ProjectName].SourcesInfo
