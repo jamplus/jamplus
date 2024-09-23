@@ -999,6 +999,10 @@ local function XcodeHelper_WriteXCBuildConfigurations(self, info, projectName, w
 				table.insert(self.Contents, "\t\t\t\tMACOSX_DEPLOYMENT_TARGET = \"" .. osxSdkVersionMin .. "\";\n")
 			end
 
+			if subProject.Options  and  subProject.Options.lib then
+				table.insert(self.Contents, "\t\t\t\tSKIP_INSTALL = YES;\n")
+			end
+
 --			local jamCommandLine = '-g'
 
 --			local customWorkspaceConfig = self.Workspace  and  self.Workspace.Configs  and  self.Workspace.Configs[workspaceConfigName]
