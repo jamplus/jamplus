@@ -866,7 +866,9 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 			#CopyFile $(bundleTarget) : $(infoplist) : $(sourceInfoPlistFile) ;
 			#writeInternalInfoPlist = 0 ;
 		#} else {
-		ios.BundleInfo $(TARGET) : : : 1 ;
+		if ! $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+			ios.BundleInfo $(TARGET) : : : 1 ;
+		}
 		#}
 
 		if $(writeInternalInfoPlist) = 1 {
@@ -1196,7 +1198,9 @@ rule ios.Bundle TARGET : TOOLCHAINS {
 	CFBundleVersion on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleVersion) ;
 	CFBundleDisplayName on $(C.ACTIVE_TOOLCHAIN_TARGET) = $(CFBundleDisplayName) ;
 
-	ios.BundleInfo $(TARGET) : : : 1 ;
+	if ! $(INFO_PLIST_FILE:Z=$(C.ACTIVE_TOOLCHAIN_TARGET)) {
+		ios.BundleInfo $(TARGET) : : : 1 ;
+	}
 
 	local UIDeviceFamily ;
 	LuaString "local pl = GetInfoPlistCurrentLevel()
