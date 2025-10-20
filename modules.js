@@ -5,6 +5,7 @@ var modules =
       [ "General Modules", "modules.html#modules_general_list", null ],
       [ "C/C++ Support Modules", "modules.html#modules_c_support_list", null ],
       [ "C# Support Modules", "modules.html#modules_csharp_support_list", null ],
+      [ "Java Support Modules", "modules.html#modules_java_support_list", null ],
       [ "Platform Support Modules", "modules.html#modules_platform_support_list", null ]
     ] ],
     [ "Directory Copy Rules", "module_copydirectory.html", [
@@ -71,6 +72,32 @@ var modules =
       [ "rule CSharp.ReferenceAssemblies TARGET : ASSEMBLIES [ : THE_CONFIG ]", "module_csharp.html#rule_CSharp_ReferenceAssemblies", null ],
       [ "rule CSharp.ReferencePaths TARGET : PATHS [ : THE_CONFIG ]", "module_csharp.html#rule_CSharp_ReferencePaths", null ]
     ] ],
+    [ "Java Rules", "module_java.html", [
+      [ "List of Rules", "module_java.html#module_java_ruleslist", null ],
+      [ "Rules", "module_java.html#module_java_rules", null ],
+      [ "rule Java.Application TARGET : SOURCES", "module_java.html#rule_Java_Application", null ],
+      [ "rule Java.Assets TARGET : DIRECTORY", "module_java.html#rule_Java_Assets", null ],
+      [ "rule Java.JarDirectories TARGET : DIRECTORIES", "module_java.html#rule_Java_JarDirectories", null ],
+      [ "rule Java.Library TARGET : SOURCES : OPTIONS", "module_java.html#rule_Java_Library", null ],
+      [ "rule Java.LinkJars TARGET : LIBRARIES", "module_java.html#rule_Java_LinkJars", null ],
+      [ "rule Java.Manifest TARGET : MANIFEST", "module_java.html#rule_Java_Manifest", null ],
+      [ "rule Java.NativeLibraries TARGET : NATIVE_LIBRARIES", "module_java.html#rule_Java_NativeLibraries", null ],
+      [ "rule Java.NativePrebuiltLibraries TARGET : NATIVE_PREBUILT_LIBRARIES", "module_java.html#rule_Java_NativePrebuiltLibraries", null ],
+      [ "rule Java.NativePrebuiltLibraryDirectories TARGET : DIRECTORIES", "module_java.html#rule_Java_NativePrebuiltLibraryDirectories", null ],
+      [ "rule Java.Package TARGET [ : TOOLCHAINS [ : OPTIONS ] ]", "module_java.html#rule_Java_Package", null ],
+      [ "rule Java.PackageName TARGET : PACKAGE_NAME", "module_java.html#rule_Java_PackageName", null ],
+      [ "rule Java.PackageOutputPath TARGET : PACKAGE_OUTPUT_PATH", "module_java.html#rule_Java_PackageOutputPath", null ],
+      [ "rule Java.PrebuiltAars TARGET : LIBRARIES", "module_java.html#rule_Java_PrebuiltAars", null ],
+      [ "rule Java.PrebuiltJars TARGET : LIBRARIES", "module_java.html#rule_Java_PrebuiltJars", null ],
+      [ "rule Java.ProductVersion TARGET : VERSION_NAME : VERSION_CODE", "module_java.html#rule_Java_ProductVersion", null ],
+      [ "rule Java.Resources TARGET : DIRECTORIES", "module_java.html#rule_Java_Resources", null ],
+      [ "rule Java.SDK SDK_VERSION : ARCHITECTURE", "module_java.html#rule_Java_SDK", null ],
+      [ "rule Java.SDKCompileVersion TARGET : SDK_COMPILE_VERSION", "module_java.html#rule_Java_SDKCompileVersion", null ],
+      [ "rule Java.SDKMinimumVersion TARGET : SDK_MINIMUM_VERSION", "module_java.html#rule_Java_SDKMinimumVersion", null ],
+      [ "rule Java.Sign TARGET : KEYSTORE_PATH_PASSWORD_KEY", "module_java.html#rule_Java_Sign", null ],
+      [ "rule Java.SourcePaths TARGET : DIRECTORIES", "module_java.html#rule_Java_SourcePaths", null ],
+      [ "rule Java.UncompressedAssetExtensions TARGET : UNCOMPRESSED_ASSET_EXTENSIONS", "module_java.html#rule_Java_UncompressedAssetExtensions", null ]
+    ] ],
     [ "Android Rules", "module_android.html", [
       [ "List of Rules", "module_android.html#module_android_ruleslist", null ],
       [ "Rules", "module_android.html#module_android_rules", null ],
@@ -94,6 +121,7 @@ var modules =
       [ "rule android.SDKCompileVersion TARGET : SDK_COMPILE_VERSION", "module_android.html#rule_android_SDKCompileVersion", null ],
       [ "rule android.SDKMinimumVersion TARGET : SDK_MINIMUM_VERSION", "module_android.html#rule_android_SDKMinimumVersion", null ],
       [ "rule android.Sign TARGET : KEYSTORE_PATH_PASSWORD_KEY", "module_android.html#rule_android_Sign", null ],
+      [ "rule android.SignAab TARGET : KEYSTORE_PATH_PASSWORD_KEY", "module_android.html#rule_android_SignAab", null ],
       [ "rule android.SourcePaths TARGET : DIRECTORIES", "module_android.html#rule_android_SourcePaths", null ],
       [ "rule android.UncompressedAssetExtensions TARGET : UNCOMPRESSED_ASSET_EXTENSIONS", "module_android.html#rule_android_UncompressedAssetExtensions", null ]
     ] ],

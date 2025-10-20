@@ -84,7 +84,7 @@ Using Lua during the Parsing Phase</h1>
 <p>There are two rules for execution of Lua script available for use during the rule parsing phase of JamPlus. They are <a class="el" href="#rule_LuaString">rule LuaString LUA_SCRIPT</a> and <a class="el" href="#rule_LuaFile">rule LuaFile LUA_FILENAME</a>.</p>
 <h2><a class="anchor" id="rule_LuaString"></a>
 rule LuaString LUA_SCRIPT</h2>
-<p><a id="a68_rule_LuaString" name="a68_rule_LuaString"></a></p>
+<p><a id="a76_rule_LuaString" name="a76_rule_LuaString"></a></p>
 <p> <blockquote> </p>
 <p>Executes <code>LUA_SCRIPT</code>, returning any results back to the caller.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -97,7 +97,7 @@ rule LuaString LUA_SCRIPT</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="rule_LuaFile"></a>
 rule LuaFile LUA_FILENAME</h2>
-<p><a id="a69_rule_LuaFile" name="a69_rule_LuaFile"></a></p>
+<p><a id="a77_rule_LuaFile" name="a77_rule_LuaFile"></a></p>
 <p> <blockquote> </p>
 <p>Executes <code>LUA_FILENAME</code>, returning any results back to the caller.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -118,6 +118,92 @@ Using Lua in Actions</h1>
 <div class="line">    osprocess.sleep($(SLEEP))</div>
 <div class="line">    print($(TEXT))</div>
 <div class="line">}</div>
+</div><!-- fragment --><p>  </blockquote> </p>
+<p>Any settings attached to the target are propogated to the Lua task and are available via the <code>jamvar</code> table.</p>
+<p>Certain modifiers can be applied to determine which settings are bound and unbound. Use <code>JAM_UNBOUND_SETTINGS</code> to use a setting as is within the <code>jamvar</code> table. Use <code>JAM_BOUND_SETTINGS</code> to force a setting to resolve its path.</p>
+<p> <blockquote>  </p><div class="fragment"><div class="line">actions screenoutput lua _EmbedFile</div>
+<div class="line">{</div>
+<div class="line">    osprocess = require <span class="stringliteral">&#39;osprocess&#39;</span></div>
+<div class="line">    local targets, sources = ...</div>
+<div class="line">    local in_file = io.open(sources[1], <span class="stringliteral">&#39;rb&#39;</span>)</div>
+<div class="line">    local data = in_file:read(<span class="stringliteral">&#39;*a&#39;</span>)</div>
+<div class="line">    in_file:close()</div>
+<div class="line"> </div>
+<div class="line">    local out_file = io.open(targets[1], &#39;w&#39;)</div>
+<div class="line"> </div>
+<div class="line">    local name = jamvar.NAME</div>
+<div class="line">    local sleepAmount = jamvar.SLEEP[1]</div>
+<div class="line">    local symbol = name[1]:upper():gsub(&#39;%.&#39;, &#39;_&#39;):gsub(&#39;-&#39;, &#39;_&#39;):gsub(&#39;@&#39;, &#39;at&#39;)</div>
+<div class="line">    local cpp_str = [[<span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> %s[] =</div>
+<div class="line">]]</div>
+<div class="line">    out_file:write(cpp_str:format(symbol))</div>
+<div class="line">    out_file:write(<span class="stringliteral">&#39;{\n    &#39;</span>)</div>
+<div class="line">    local data_is_binary = false</div>
+<div class="line"> </div>
+<div class="line">    local tmp = {}</div>
+<div class="line">    local format = <span class="keywordtype">string</span>.format</div>
+<div class="line">    local sbyte = <span class="keywordtype">string</span>.byte</div>
+<div class="line">    <span class="keywordflow">if</span> data_is_binary then</div>
+<div class="line">        <span class="keywordflow">for</span> index = 1, #data <span class="keywordflow">do</span></div>
+<div class="line"> </div>
+<div class="line">        end</div>
+<div class="line">    <span class="keywordflow">else</span></div>
+<div class="line">        <span class="keywordflow">for</span> index = 1, #data <span class="keywordflow">do</span></div>
+<div class="line">            local x = sbyte(data, index, index + 1)</div>
+<div class="line">            tmp[<span class="preprocessor">#tmp + 1] = format(&#39;0x%x&#39;, x)</span></div>
+<div class="line">            tmp[#tmp + 1] = <span class="stringliteral">&#39;, &#39;</span></div>
+<div class="line">            <span class="keywordflow">if</span> index &gt; 1  and  (index - 1) % 4 == 0 then</div>
+<div class="line">                tmp[#tmp + 1] = <span class="stringliteral">&#39;\n    &#39;</span></div>
+<div class="line">            end</div>
+<div class="line">        end</div>
+<div class="line">    end</div>
+<div class="line"> </div>
+<div class="line">    osprocess.sleep(tonumber(sleepAmount))</div>
+<div class="line"> </div>
+<div class="line">    out_file:write(table.concat(tmp))</div>
+<div class="line">    out_file:write(<span class="stringliteral">&#39;\n};\n&#39;</span>)</div>
+<div class="line">    out_file:write((&#39;uint32_t %s_SIZE = sizeof(%s);\n&#39;):format(symbol, symbol))</div>
+<div class="line"> </div>
+<div class="line">    out_file:close()</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">rule EmbedFile SOURCES : SLEEP</div>
+<div class="line">{</div>
+<div class="line">    local alltargets ;</div>
+<div class="line"> </div>
+<div class="line">    SOURCES = [ C.GristFiles : $(SOURCES) ] ;</div>
+<div class="line"> </div>
+<div class="line">    local source ;</div>
+<div class="line">    <span class="keywordflow">for</span> source in $(SOURCES)</div>
+<div class="line">    {</div>
+<div class="line">        local splits = [ Split $(source) : <span class="stringliteral">&quot;=&quot;</span> ] ;</div>
+<div class="line">        local source = $(splits[1]) ;</div>
+<div class="line">        local name = $(splits[2]:E=$(source):G=) ;</div>
+<div class="line">        SEARCH on $(source) = $(SEARCH_SOURCE) ;</div>
+<div class="line">        local target.cpp = @($(source).embed.cpp:G=$(C.ACTIVE_TOOLCHAIN_TARGET_GRIST)) ;</div>
+<div class="line">        local targets = $(target.cpp) ;</div>
+<div class="line">        alltargets += $(targets) ;</div>
+<div class="line">        MakeLocate $(targets) : $(LOCATE_TARGET) ;</div>
+<div class="line"> </div>
+<div class="line">        Depends $(targets) : $(source) ;</div>
+<div class="line">        C.Clean : $(targets) ;</div>
+<div class="line">        UseCommandLine $(targets) : v1r ;</div>
+<div class="line">        NAME on $(targets) = $(name:BS) ;</div>
+<div class="line">        SLEEP on $(targets) = $(SLEEP) ;</div>
+<div class="line">        JAM_UNBOUND_SETTINGS on $(targets) = NAME SLEEP ;</div>
+<div class="line">        _EmbedFile $(target.cpp) : $(source) ;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> $(alltargets) ;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">local EMBED_SOURCES = [ EmbedFile fileglob.c jrun.jam main.cpp license : 0 ] ;</div>
+<div class="line"> </div>
+<div class="line">C.Library test : $(EMBED_SOURCES) ;</div>
+<div class="line"> </div>
+<div class="line">C.LinkLibraries main : test ;</div>
+<div class="line">C.Application main : main.cpp ;</div>
 </div><!-- fragment --><p>  </blockquote> </p>
 <hr  />
  <h1><a class="anchor" id="lua_support_line_filters"></a>
@@ -216,7 +302,7 @@ Lua to Jam API</h1>
 <p>Within a Lua script, it is possible to access Jam variables and execute Jam rules.</p>
 <h2><a class="anchor" id="lua_jam_action"></a>
 function jam_action(ACTION_NAME, ACTION_TEXT [, FLAGS])</h2>
-<p><a id="a70_lua_jam_action" name="a70_lua_jam_action"></a></p>
+<p><a id="a78_lua_jam_action" name="a78_lua_jam_action"></a></p>
 <p> <blockquote> </p>
 <p>Creates an action to be executed by Jam called <code>ACTION_NAME</code> made up of <code>ACTION_TEXT</code>. If written in the Jam language, the equivalent would be:</p>
 <p> <blockquote>  </p><div class="fragment"><div class="line">jam_action(ACTION_NAME, ACTION_TEXT)</div>
@@ -249,7 +335,7 @@ function jam_action(ACTION_NAME, ACTION_TEXT [, FLAGS])</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_evaluaterule"></a>
 function jam_evaluaterule(RULE_NAME [, PARAMETERS])</h2>
-<p><a id="a71_lua_jam_evaluaterule" name="a71_lua_jam_evaluaterule"></a></p>
+<p><a id="a79_lua_jam_evaluaterule" name="a79_lua_jam_evaluaterule"></a></p>
 <p> <blockquote> </p>
 <p>Executes rule <code>RULE_NAME</code> using any optional <code>PARAMETERS</code> specified. Returns the result as a Lua table.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -263,7 +349,7 @@ function jam_evaluaterule(RULE_NAME [, PARAMETERS])</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_expand"></a>
 function jam_expand(TEXT_TO_EXPAND)</h2>
-<p><a id="a72_lua_jam_expand" name="a72_lua_jam_expand"></a></p>
+<p><a id="a80_lua_jam_expand" name="a80_lua_jam_expand"></a></p>
 <p> <blockquote> </p>
 <p>Expands <code>TEXT_TO_EXPAND</code> according to Jam rules. <code>TEXT_TO_EXPAND</code> must use the $() or @() expansion forms described elsewhere.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -276,7 +362,7 @@ function jam_expand(TEXT_TO_EXPAND)</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_getvar"></a>
 function jam_getvar([ TARGET_NAME, ] VARIABLE_NAME)</h2>
-<p><a id="a73_lua_jam_getvar" name="a73_lua_jam_getvar"></a></p>
+<p><a id="a81_lua_jam_getvar" name="a81_lua_jam_getvar"></a></p>
 <p> <blockquote> </p>
 <p>Retrieves <code>VARIABLE_NAME</code> from the active Jam globals and returns it as a table of strings.</p>
 <p>If <code>TARGET_NAME</code> is specified, <code>VARIABLE_NAME</code> is retrieved as if an <code>on TARGET_NAME</code> had been issued in Jam.</p>
@@ -287,11 +373,11 @@ function jam_getvar([ TARGET_NAME, ] VARIABLE_NAME)</h2>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>All strings within the <code>VARIABLE_NAME</code> string are returned as a Lua array of strings.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>All strings within the <code>VARIABLE_NAME</code> string are returned as a Lua array of strings. Returns nil if <code>VARIABLE_NAME</code> does not exist.</dd></dl>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_parse"></a>
 function jam_parse(TEXT_TO_PARSE)</h2>
-<p><a id="a74_lua_jam_parse" name="a74_lua_jam_parse"></a></p>
+<p><a id="a82_lua_jam_parse" name="a82_lua_jam_parse"></a></p>
 <p> <blockquote> </p>
 <p>Parses <code>TEXT_TO_PARSE</code> as if it existed in a Jamfile.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -303,7 +389,7 @@ function jam_parse(TEXT_TO_PARSE)</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_print"></a>
 function jam_print(TEXT_TO_PRINT)</h2>
-<p><a id="a75_lua_jam_print" name="a75_lua_jam_print"></a></p>
+<p><a id="a83_lua_jam_print" name="a83_lua_jam_print"></a></p>
 <p> <blockquote> </p>
 <p>Prints <code>TEXT_TO_PRINT</code> to the standard output stream.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -315,7 +401,7 @@ function jam_print(TEXT_TO_PRINT)</h2>
 <p> </blockquote> </p>
 <h2><a class="anchor" id="lua_jam_setvar"></a>
 function jam_setvar([ TARGET_NAME, ] VARIABLE_NAME, VALUE)</h2>
-<p><a id="a76_lua_jam_setvar" name="a76_lua_jam_setvar"></a></p>
+<p><a id="a84_lua_jam_setvar" name="a84_lua_jam_setvar"></a></p>
 <p> <blockquote> </p>
 <p>Sets <code>VALUE</code> into the active Jam global <code>VARIABLE_NAME</code>. <code>VALUE</code> can be a boolean, number, string, or table. Nested tables are collapsed.</p>
 <p>If <code>TARGET_NAME</code> is specified, <code>VALUE</code> is set into <code>VARIABLE_NAME</code> as if an <code>VARIABLE_NAME on TARGET_NAME</code> had been issued in Jam.</p>

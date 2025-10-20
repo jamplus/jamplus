@@ -26,6 +26,14 @@ var NAVTREE =
 [
   [ "JamPlus manual", "index.html", [
     [ "JamPlus", "index.html", "index" ],
+    [ "Emscripten Rules", "module_emscripten.html", [
+      [ "List of Rules", "module_emscripten.html#module_emscripten_ruleslist", null ],
+      [ "Rules", "module_emscripten.html#module_emscripten_rules", null ],
+      [ "rule C.emscripten.JSLibraries TARGET : SOURCES : OPTIONS", "module_emscripten.html#rule_C_emscripten_JSLibraries", null ],
+      [ "rule C.emscripten.JSPre TARGET : SOURCES : OPTIONS", "module_emscripten.html#rule_C_emscripten_JSPre", null ],
+      [ "rule C.emscripten.JSPost TARGET : SOURCES : OPTIONS", "module_emscripten.html#rule_C_emscripten_JSPost", null ],
+      [ "rule C.emscripten.JSExterns TARGET : SOURCES : OPTIONS", "module_emscripten.html#rule_C_emscripten_JSExterns", null ]
+    ] ],
     [ "Todo List", "todo.html", null ]
   ] ]
 ];
@@ -33,7 +41,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "bugs.html",
-"module_c.html#rule_C_ObjectForceInclude"
+"module_c.html#rule_C_Inherits"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

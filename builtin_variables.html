@@ -76,11 +76,22 @@ $(function(){initNavTree('builtin_variables.html',''); initResizable(); });
 <div class="textblock"><h1><a class="anchor" id="builtin_variables_intro"></a>
 Introduction</h1>
 <p>This section discusses variables that have special meaning to <b>Jam</b>.</p>
+<h1><a class="anchor" id="built_in_variables_command_line_settings"></a>
+JAM_COMMAND_LINE_SETTINGS</h1>
+<p>All of the keys from the command line's <code>-s</code> or <code>KEY=VALUE</code> are entered into the <code>JAM_COMMAND_LINE_SETTINGS</code> list. The key can be used to look up the value by <code>$(JAM_COMMAND_LINE_SETTINGS.THE_KEY)&lt;/t&gt;.</code></p>
+<p><code></p><div class="fragment"><div class="line">local key ;</div>
+<div class="line"><span class="keywordflow">for</span> key in $(JAM_COMMAND_LINE_SETTINGS) {</div>
+<div class="line">    local value = $(JAM_COMMAND_LINE_SETTINGS.$(key)) ;</div>
+<div class="line">    Echo <span class="stringliteral">&quot;Command Line Setting: $(key)=$(value)&quot;</span> ;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p></code></p>
+<p><code></code></p>
 <h1><a class="anchor" id="built_in_variables_binding_binding_search_locate"></a>
-BINDING, SEARCH, and LOCATE Variables</h1>
-<p>These variables control the binding of file target names to locations in the file system. Generally, $(SEARCH) is used to find existing sources while $(LOCATE) is used to fix the location for built targets.</p>
-<p>Rooted (absolute path) file targets are bound as is. Unrooted file target names are also normally bound as is, and thus relative to the current directory, but the settings of $(LOCATE) and $(SEARCH) alter this:</p>
-<ul>
+<code>BINDING, SEARCH, and LOCATE Variables</code></h1>
+<p><code></code></p>
+<p><code>These variables control the binding of file target names to locations in the file system. Generally, $(SEARCH) is used to find existing sources while $(LOCATE) is used to fix the location for built targets.</code></p>
+<p><code>Rooted (absolute path) file targets are bound as is. Unrooted file target names are also normally bound as is, and thus relative to the current directory, but the settings of $(LOCATE) and $(SEARCH) alter this:</code></p>
+<p><code></p><ul>
 <li>
 If <code>$(LOCATE)</code> is set then the target is bound relative to the first directory in $(LOCATE). Only the first element is used for binding. </li>
 <li>
@@ -88,25 +99,31 @@ If $(SEARCH) is set then the target is bound to the first directory in $(SEARCH)
 <li>
 If the $(SEARCH) search fails, the target is bound relative to the current directory anyhow. </li>
 </ul>
-<p>Both $(SEARCH) and $(LOCATE) should be set target-specific and not globally. If they were set globally, <b>jam</b> would use the same paths for all file binding, which is not likely to produce sane results. When writing your own rules, especially ones not built upon those in Jambase, you may need to set $(SEARCH) or $(LOCATE) directly. Almost all of the rules defined in Jambase set $(SEARCH) and $(LOCATE) to sensible values for sources they are looking for and targets they create, respectively.</p>
+<p></code></p>
+<p><code>Both $(SEARCH) and $(LOCATE) should be set target-specific and not globally. If they were set globally, <b>jam</b> would use the same paths for all file binding, which is not likely to produce sane results. When writing your own rules, especially ones not built upon those in Jambase, you may need to set $(SEARCH) or $(LOCATE) directly. Almost all of the rules defined in Jambase set $(SEARCH) and $(LOCATE) to sensible values for sources they are looking for and targets they create, respectively.</code></p>
+<p><code></code></p>
 <h1><a class="anchor" id="built_in_variables_hdrscan"></a>
-Header Scanning Variables</h1>
-<p>The <code>HDRSCAN</code> and <code>HDRPATTERN</code> variables control the default header file scanning. HDRSCAN is an <b>egrep</b>(1) pattern, with ()'s surrounding the file name, used to find file inclusion statements in source files. Jambase uses <code>$(HDRPATTERN)</code> as the pattern for <code>HDRSCAN</code>. <code>HDRRULE</code> is the name of a rule to invoke with the results of the scan: the scanned file is the target, the found files are the sources, the bound name of the target is in the third argument. <code>HDRRULE</code> is run under the influence of the scanned file's target-specific variables. It defaults to the Jambase <code>HdrRule</code>.</p>
-<p>Both <code>HDRSCAN</code> and <code>HDRRULE</code> must be set for header file scanning to take place, and they should be set target-specific and not globally. If they were set globally, all files, including executables and libraries, would be scanned for header file include statements.</p>
-<p>The scanning for header file inclusions is not exact, but it is at least dynamic, so there is no need to run something like <b>makedepend</b>(GNU) to create a static dependency file. The scanning mechanism errs on the side of inclusion (i.e., it is more likely to return filenames that are not actually used by the compiler than to miss include files) because it can't tell if #include lines are inside #ifdefs or other conditional logic. In Jambase, HdrRule applies the <a class="el" href="builtin_rules.html#rule_NoCare">NoCare</a> rule to each header file found during scanning so that if the file isn't present yet doesn't cause the compilation to fail, <b>Jam</b> won't care.</p>
-<p>Also, scanning for regular expressions only works where the included file name is literally in the source file. It can't handle languages that allow including files using variable names (as the Jam language itself does).</p>
-<p>On Windows, header filenames are, by default, converted to lowercase. This can be prevented by setting a target's <code>HDRDOWNSHIFT</code> variable to <code>false</code>.</p>
+<code>Header Scanning Variables</code></h1>
+<p><code></code></p>
+<p><code>The <code>HDRSCAN</code> and <code>HDRPATTERN</code> variables control the default header file scanning. HDRSCAN is an <b>egrep</b>(1) pattern, with ()'s surrounding the file name, used to find file inclusion statements in source files. Jambase uses <code>$(HDRPATTERN)</code> as the pattern for <code>HDRSCAN</code>. <code>HDRRULE</code> is the name of a rule to invoke with the results of the scan: the scanned file is the target, the found files are the sources, the bound name of the target is in the third argument. <code>HDRRULE</code> is run under the influence of the scanned file's target-specific variables. It defaults to the Jambase <code>HdrRule</code>.</code></p>
+<p><code>Both <code>HDRSCAN</code> and <code>HDRRULE</code> must be set for header file scanning to take place, and they should be set target-specific and not globally. If they were set globally, all files, including executables and libraries, would be scanned for header file include statements.</code></p>
+<p><code>The scanning for header file inclusions is not exact, but it is at least dynamic, so there is no need to run something like <b>makedepend</b>(GNU) to create a static dependency file. The scanning mechanism errs on the side of inclusion (i.e., it is more likely to return filenames that are not actually used by the compiler than to miss include files) because it can't tell if #include lines are inside #ifdefs or other conditional logic. In Jambase, HdrRule applies the <a class="el" href="builtin_rules.html#rule_NoCare">NoCare</a> rule to each header file found during scanning so that if the file isn't present yet doesn't cause the compilation to fail, <b>Jam</b> won't care.</code></p>
+<p><code>Also, scanning for regular expressions only works where the included file name is literally in the source file. It can't handle languages that allow including files using variable names (as the Jam language itself does).</code></p>
+<p><code>On Windows, header filenames are, by default, converted to lowercase. This can be prevented by setting a target's <code>HDRDOWNSHIFT</code> variable to <code>false</code>.</code></p>
+<p><code></code></p>
 <h2><a class="anchor" id="built_in_variables_hdrfilter"></a>
-Filtering Unwanted Dependencies</h2>
-<p>When <code>HDRFILTER</code> is set on a target, the rule bearing the name specified in the contents of <code>HDRFILTER</code> is executed with the following signature.</p>
-<div class="fragment"><div class="line">rule DoHeaderFilter TARGET_NAME : DEPENDENCIES : TARGET_BOUNDNAME</div>
+<code>Filtering Unwanted Dependencies</code></h2>
+<p><code></code></p>
+<p><code>When <code>HDRFILTER</code> is set on a target, the rule bearing the name specified in the contents of <code>HDRFILTER</code> is executed with the following signature.</code></p>
+<p><code></p><div class="fragment"><div class="line">rule DoHeaderFilter TARGET_NAME : DEPENDENCIES : TARGET_BOUNDNAME</div>
 <div class="line">{</div>
 <div class="line"><span class="preprocessor">    # Filter any unwanted dependencies.</span></div>
 <div class="line">    DEPENDENCIES -= bob fred ;</div>
 <div class="line">    <span class="keywordflow">return</span> $(DEPENDENCIES) ;</div>
 <div class="line">}</div>
-</div><!-- fragment --><p><code>HDRFILTER</code> can also be used to translate dependency names:</p>
-<div class="fragment"><div class="line"><span class="preprocessor"># Reading our special file format, DEPENDENCIES may come in as $(environment_variable)/filename.</span></div>
+</div><!-- fragment --><p></code></p>
+<p><code><code>HDRFILTER</code> can also be used to translate dependency names:</code></p>
+<p><code></p><div class="fragment"><div class="line"><span class="preprocessor"># Reading our special file format, DEPENDENCIES may come in as $(environment_variable)/filename.</span></div>
 <div class="line"><span class="preprocessor"># Translate it.</span></div>
 <div class="line">rule DoHeaderFilter TARGET_NAME : DEPENDENCIES : TARGET_BOUNDNAME</div>
 <div class="line">{</div>
@@ -114,19 +131,27 @@ Filtering Unwanted Dependencies</h2>
 <div class="line">    DEPENDENCIES = $(DEPENDENCIES:A) ;</div>
 <div class="line">    <span class="keywordflow">return</span> $(DEPENDENCIES) ;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="built_in_variables_hdrpipe"></a>
-Shelling Processes for Dependencies</h2>
-<p>When <code>HDRPIPE</code> is set on a target, during the dependency scan for headers, the process command line specified by <code>HDRPIPE</code> is run. Any dependencies written by the process to stdout are run through the normal <code>HDRSCAN</code> regular expression mechanism.</p>
-<p>If <code>HDRPIPEFILE</code> is set on the target, the filename specified by <code>HDRPIPEFILE</code> is opened and parsed for dependencies after the <code>HDRPIPE</code> process exits.</p>
+</div><!-- fragment --><p></code></p>
+<p><code></code></p>
+<h2><a class="anchor" id="built_in_variables_hdrpipe"></a>
+<code>Shelling Processes for Dependencies</code></h2>
+<p><code></code></p>
+<p><code>When <code>HDRPIPE</code> is set on a target, during the dependency scan for headers, the process command line specified by <code>HDRPIPE</code> is run. Any dependencies written by the process to stdout are run through the normal <code>HDRSCAN</code> regular expression mechanism.</code></p>
+<p><code>If <code>HDRPIPEFILE</code> is set on the target, the filename specified by <code>HDRPIPEFILE</code> is opened and parsed for dependencies after the <code>HDRPIPE</code> process exits.</code></p>
+<p><code></code></p>
 <h1><a class="anchor" id="built_in_variables_semaphore"></a>
-Semaphores</h1>
-<p>At times, it is necessary to synchronize access in a multiprocessor build. The <code>SEMAPHORE</code> variable, when set on a target to be built, does just that. When the given <code>SEMAPHORE</code> value is in use by another target, any targets with the same <code>SEMAPHORE</code> will block until the currently building target is finished and releases the <code>SEMAPHORE</code> lock.</p>
-<p>Example: The Visual C++ compiler accesses the same .pdb and .idb files. To prevent that, a <code>SEMAPHORE</code> is used:</p>
-<div class="fragment"><div class="line">SEMAPHORE on $(objects) = $(LOCATE_TARGET)/$(_VCPDB).pdb ;</div>
-</div><!-- fragment --><h1><a class="anchor" id="built_in_variables_platform"></a>
-Platform Identifier Variables</h1>
-<p>A number of Jam built-in variables can be used to identify runtime platform:</p>
-<table width="75%" align="center">
+<code>Semaphores</code></h1>
+<p><code></code></p>
+<p><code>At times, it is necessary to synchronize access in a multiprocessor build. The <code>SEMAPHORE</code> variable, when set on a target to be built, does just that. When the given <code>SEMAPHORE</code> value is in use by another target, any targets with the same <code>SEMAPHORE</code> will block until the currently building target is finished and releases the <code>SEMAPHORE</code> lock.</code></p>
+<p><code>Example: The Visual C++ compiler accesses the same .pdb and .idb files. To prevent that, a <code>SEMAPHORE</code> is used:</code></p>
+<p><code></p><div class="fragment"><div class="line">SEMAPHORE on $(objects) = $(LOCATE_TARGET)/$(_VCPDB).pdb ;</div>
+</div><!-- fragment --><p></code></p>
+<p><code></code></p>
+<h1><a class="anchor" id="built_in_variables_platform"></a>
+<code>Platform Identifier Variables</code></h1>
+<p><code></code></p>
+<p><code>A number of Jam built-in variables can be used to identify runtime platform:</code></p>
+<p><code></p><table width="75%" align="center">
 <tr>
 <td>OS</td><td>OS identifier string </td></tr>
 <tr>
@@ -142,9 +167,12 @@ Platform Identifier Variables</h1>
 <tr>
 <td>VMS</td><td>true on VMS platform </td></tr>
 </table>
+<p></code></p>
+<p><code></code></p>
 <h1><a class="anchor" id="language_built_in_variables_version"></a>
-Jam Version Variables</h1>
-<table width="75%" align="center">
+<code>Jam Version Variables</code></h1>
+<p><code></code></p>
+<p><code></p><table width="75%" align="center">
 <tr>
 <td>JAMDATE</td><td>Time and date at <b>jam</b> start-up. </td></tr>
 <tr>
@@ -152,9 +180,12 @@ Jam Version Variables</h1>
 <tr>
 <td>JAMVERSION</td><td><b>jam</b> version, as reported by jam -v. </td></tr>
 </table>
+<p></code></p>
+<p><code></code></p>
 <h1><a class="anchor" id="language_built_in_variables_misc"></a>
-Miscellaneous Variables</h1>
-<table width="75%" align="center">
+<code>Miscellaneous Variables</code></h1>
+<p><code></code></p>
+<p><code></p><table width="75%" align="center">
 <tr>
 <td>CWD</td><td>The current working directory. </td></tr>
 <tr>
@@ -166,14 +197,17 @@ Miscellaneous Variables</h1>
 <tr>
 <td>PATHDELIM_OLDSTYLE</td><td>In JamPlus, the default path separator is a forward slash. If <code>PATHDELIM_OLDSTYLE</code> is set to 1, the default path separator is OS-specific, and the behavior mirrors the original Perforce Jam. </td></tr>
 </table>
+<p></code></p>
+<p><code></code></p>
 <h1><a class="anchor" id="built_in_variables_jamshell"></a>
-JAMSHELL Variable</h1>
-<p>When <b>jam</b> executes a rule's action block, it forks and execs a shell, passing the action block as an argument to the shell. The invocation of the shell can be controlled by $(JAMSHELL). The default on Unix is, for example:</p>
-<p><code>JAMSHELL = /bin/sh -c % ;</code></p>
-<p>The % is replaced with the text of the action block.</p>
-<p><b>Jam</b> does not directly support building in parallel across multiple hosts, since that is heavily dependent on the local environment. To build in parallel across multiple hosts, you need to write your own shell that provides access to the multiple hosts. You then reset  to reference it.</p>
-<p>Just as <b>jam</b> expands a % to be the text of the rule's action block, it expands a ! to be the multi-process slot number. The slot number varies between 1 and the number of concurrent jobs permitted by the -j flag given on the command line. Armed with this, it is possible to write a multiple host shell. For example:</p>
-<div class="fragment"><div class="line"><span class="preprocessor">#!/bin/sh</span></div>
+<code>JAMSHELL Variable</code></h1>
+<p><code></code></p>
+<p><code>When <b>jam</b> executes a rule's action block, it forks and execs a shell, passing the action block as an argument to the shell. The invocation of the shell can be controlled by $(JAMSHELL). The default on Unix is, for example:</code></p>
+<p><code><code>JAMSHELL = /bin/sh -c % ;</code></code></p>
+<p><code>The % is replaced with the text of the action block.</code></p>
+<p><code><b>Jam</b> does not directly support building in parallel across multiple hosts, since that is heavily dependent on the local environment. To build in parallel across multiple hosts, you need to write your own shell that provides access to the multiple hosts. You then reset  to reference it.</code></p>
+<p><code>Just as <b>jam</b> expands a % to be the text of the rule's action block, it expands a ! to be the multi-process slot number. The slot number varies between 1 and the number of concurrent jobs permitted by the -j flag given on the command line. Armed with this, it is possible to write a multiple host shell. For example:</code></p>
+<p><code></p><div class="fragment"><div class="line"><span class="preprocessor">#!/bin/sh</span></div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># This sample JAMSHELL uses the SunOS on(1) command to execute a</span></div>
 <div class="line"><span class="preprocessor"># command string with an identical environment on another host.</span></div>
@@ -191,15 +225,20 @@ JAMSHELL Variable</h1>
 <div class="line">3|6) on nod sh -c <span class="stringliteral">&quot;$2&quot;</span>;;</div>
 <div class="line"> )   eval <span class="stringliteral">&quot;$2&quot;</span>;;</div>
 <div class="line">esac</div>
-</div><!-- fragment --><p>Additionally, <code>JAMSHELLEXT</code> is a variable that can be set to the proper extension of a script accepted by the shell.</p>
-<div class="fragment"><div class="line">JAMSHELL = pwsh.exe -noprofile -executionpolicy bypass -File ;</div>
+</div><!-- fragment --><p></code></p>
+<p><code>Additionally, <code>JAMSHELLEXT</code> is a variable that can be set to the proper extension of a script accepted by the shell.</code></p>
+<p><code></p><div class="fragment"><div class="line">JAMSHELL = pwsh.exe -noprofile -executionpolicy bypass -File ;</div>
 <div class="line">JAMSHELLEXT = .ps1 ;</div>
-</div><!-- fragment --><hr  />
+</div><!-- fragment --><p></code></p>
+<p><code></p><hr  />
+<p></code></p>
+<p><code></code></p>
 <h1><a class="anchor" id="language_built_in_variables_clean_globs"></a>
-Clean up of extra files and directories</h1>
-<p>After a build has completed, files and directories may be left in the build's destination directories that came from a previous build and are no longer being built. JamPlus' clean up facility can be used to remove the extra files and directories at the end of the build process.</p>
-<p>Three variables are used to control the clean up:</p>
-<table width="75%" align="center">
+<code>Clean up of extra files and directories</code></h1>
+<p><code></code></p>
+<p><code>After a build has completed, files and directories may be left in the build's destination directories that came from a previous build and are no longer being built. JamPlus' clean up facility can be used to remove the extra files and directories at the end of the build process.</code></p>
+<p><code>Three variables are used to control the clean up:</code></p>
+<p><code></p><table width="75%" align="center">
 <tr>
 <td>CLEAN.VERBOSE</td><td>Prints out file removals during the clean up phase. </td></tr>
 <tr>
@@ -211,8 +250,9 @@ Clean up of extra files and directories</h1>
 <tr>
 <td>CLEAN.NOOP</td><td>Do not actually perform the removal. Useful with <code>CLEAN.VERBOSE</code> to report what would be cleaned up. </td></tr>
 </table>
-<p>To begin a clean-up, the <b>CLEAN.ROOTS</b> variable must contain one or more wildcard entries specifying the directory locations to be scanned for extra file entries during the clean-up. Wildcards must conform to the format in the <b>:W</b> modifier documentation.</p>
-<div class="fragment"><div class="line"><span class="preprocessor"># This ensures subdira/ and subdirb/ are recursively checked for</span></div>
+<p></code></p>
+<p><code>To begin a clean-up, the <b>CLEAN.ROOTS</b> variable must contain one or more wildcard entries specifying the directory locations to be scanned for extra file entries during the clean-up. Wildcards must conform to the format in the <b>:W</b> modifier documentation.</code></p>
+<p><code></p><div class="fragment"><div class="line"><span class="preprocessor"># This ensures subdira/ and subdirb/ are recursively checked for</span></div>
 <div class="line"><span class="preprocessor"># extra files that were not generated as part of this build.</span></div>
 <div class="line">CLEAN.ROOTS = subdira<span class="comment">/** subdirb/** ;</span></div>
 <div class="line"><span class="comment"></span> </div>
@@ -220,24 +260,29 @@ Clean up of extra files and directories</h1>
 <div class="line"><span class="comment"># references to junk.txt within the hierarchy.  Also check subdirb/</span></div>
 <div class="line"><span class="comment"># recursively.</span></div>
 <div class="line"><span class="comment">CLEAN.ROOTS = subdira/**@-**/</span>junk.txt subdirb<span class="comment">/** ;</span></div>
-</div><!-- fragment --><p>All targets that are in the dependency graph for this build are automatically preserved within the <code>CLEAN.ROOTS</code> directories.</p>
-<p>If additional files or targets should be preserved and are not specified within the dependency graph, the <code>CLEAN.KEEP_WILDCARDS</code> or <code>CLEAN.KEEP_TARGETS</code> variables should be used.</p>
-<p><code>CLEAN.KEEP_WILDCARDS</code> is a list of wildcard entries specifying inclusions (and even exclusions) of files to be preserved during the clean up process. As with <code>CLEAN.ROOTS</code>, it conforms to the format described in the <b>:W=</b> modifier documentation.</p>
-<div class="fragment"><div class="line"><span class="preprocessor"># In the case where Jam itself does not know about generated *.txt</span></div>
+</div><!-- fragment --><p></code></p>
+<p><code>All targets that are in the dependency graph for this build are automatically preserved within the <code>CLEAN.ROOTS</code> directories.</code></p>
+<p><code>If additional files or targets should be preserved and are not specified within the dependency graph, the <code>CLEAN.KEEP_WILDCARDS</code> or <code>CLEAN.KEEP_TARGETS</code> variables should be used.</code></p>
+<p><code><code>CLEAN.KEEP_WILDCARDS</code> is a list of wildcard entries specifying inclusions (and even exclusions) of files to be preserved during the clean up process. As with <code>CLEAN.ROOTS</code>, it conforms to the format described in the <b>:W=</b> modifier documentation.</code></p>
+<p><code></p><div class="fragment"><div class="line"><span class="preprocessor"># In the case where Jam itself does not know about generated *.txt</span></div>
 <div class="line"><span class="preprocessor"># files within the subdira/ directory structure, preserve any found</span></div>
 <div class="line"><span class="preprocessor"># *.txt file for later usage.</span></div>
 <div class="line">CLEAN.KEEP_WILDCARDS += subdira<span class="comment">/**.txt ;</span></div>
-</div><!-- fragment --><p><code>CLEAN.KEEP_TARGETS</code> is a list of Jam targets that were not processed as part of the dependency graph for this build.</p>
-<div class="fragment"><div class="line"><span class="preprocessor"># junk.txt is a target residing in subdirb, but it has no build</span></div>
+</div><!-- fragment --><p></code></p>
+<p><code><code>CLEAN.KEEP_TARGETS</code> is a list of Jam targets that were not processed as part of the dependency graph for this build.</code></p>
+<p><code></p><div class="fragment"><div class="line"><span class="preprocessor"># junk.txt is a target residing in subdirb, but it has no build</span></div>
 <div class="line"><span class="preprocessor"># instructions.  We want to preserve it during the clean up, so we add</span></div>
 <div class="line"><span class="preprocessor"># it to the CLEAN.KEEP_TARGETS list.</span></div>
 <div class="line">SEARCH on junk.txt = subdirb ;</div>
 <div class="line">CLEAN.KEEP_TARGETS += junk.txt ;</div>
-</div><!-- fragment --><p>By default, directory and file removals happen silently at the end of the build. Set the <code>CLEAN.VERBOSE</code> variable to <code>1</code> to print out the removals.</p>
-<div class="fragment"><div class="line">CLEAN.VERBOSE = 1 ;</div>
-</div><!-- fragment --><p>Set the <code>CLEAN.NOOP</code> variable to <code>1</code> to calculate what would be removed during the clean up but not actually perform the clean up.</p>
-<div class="fragment"><div class="line">CLEAN.NOOP = 1 ;</div>
-</div><!-- fragment --> </div></div><!-- contents -->
+</div><!-- fragment --><p></code></p>
+<p><code>By default, directory and file removals happen silently at the end of the build. Set the <code>CLEAN.VERBOSE</code> variable to <code>1</code> to print out the removals.</code></p>
+<p><code></p><div class="fragment"><div class="line">CLEAN.VERBOSE = 1 ;</div>
+</div><!-- fragment --><p></code></p>
+<p><code>Set the <code>CLEAN.NOOP</code> variable to <code>1</code> to calculate what would be removed during the clean up but not actually perform the clean up.</code></p>
+<p><code></p><div class="fragment"><div class="line">CLEAN.NOOP = 1 ;</div>
+</div><!-- fragment --><p> </code></p>
+</div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
 </body>

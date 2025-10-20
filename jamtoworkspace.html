@@ -90,6 +90,7 @@ jam --workspace
     [ -platform=<em>PLATFORM</em> ]
     [ -config=<em>CONFIG</em> ]
     [ -compiler=<em>COMPILER</em> ]
+    [ -buildflag=<em>KEY=VALUE</em> ]
     [ -jambaseflags=<em>KEY=VALUE</em> ]
     [ -jamfileflags=<em>KEY=VALUE</em> ]
     [ -jamexepath=<em>JAMEXEPATH</em> ]
@@ -162,33 +163,43 @@ jam --workspace
 <p class="endtd"></p>
 </td></tr>
 <tr>
-<td valign="top" width="20%"><code> -jambaseflags=<em>KEY=VALUE</em> </code> </td><td><p class="starttd">Provides additional configuration options when generating the out of source build's redirection Jambase.jam. <em>KEY</em> is the name of a variable known to Jam, such as <code>CSC_COMPILER</code>. <em>VALUE</em> is the value to set that Jam variable to.</p>
-<p class="intertd"><em>Examples:</em></p>
+<td valign="top" width="20%"><code> -buildflag=<em>KEY=VALUE</em> </code> </td><td><p class="starttd">Provides additional settings when generating the workspace. For instance, an editor-specific workspace might be specified as:</p>
 <ul>
+<li>
+<code>-buildflag=EDITOR_BUILD=true </code></li>
+</ul>
+<p class="endtd"><code> </code></p>
+</td></tr>
+<tr>
+<td valign="top" width="20%"><code><code> -jambaseflags=<em>KEY=VALUE</em> </code> </code></td><td><p class="starttd"><code> Provides additional configuration options when generating the out of source build's redirection Jambase.jam. <em>KEY</em> is the name of a variable known to Jam, such as <code>CSC_COMPILER</code>. <em>VALUE</em> is the value to set that Jam variable to.</code></p>
+<p class="intertd"><code> <em>Examples:</em></code></p>
+<p class="intertd"><code> </p><ul>
 <li>
 <code>CSC_COMPILER=mono</code> (or <code>vs2005</code> or <code>vs2008</code>) </li>
 </ul>
-<p class="endtd"></p>
+<p></code></p>
+<p class="endtd"><code> </code></p>
 </td></tr>
 <tr>
-<td valign="top" width="20%"><code> -jamfileflags=<em>KEY=VALUE</em> </code> </td><td><p class="starttd">Provides additional configuration options when generating the out of source build's redirection Jamfile.jam.</p>
-<p class="endtd"></p>
+<td valign="top" width="20%"><code><code> -jamfileflags=<em>KEY=VALUE</em> </code> </code></td><td><p class="starttd"><code> Provides additional configuration options when generating the out of source build's redirection Jamfile.jam.</code></p>
+<p class="endtd"><code> </code></p>
 </td></tr>
 <tr>
-<td valign="top" width="20%"><code> -jambase=<em>JAMBASEFULLPATH</em> </code> </td><td><p class="starttd">Overrides the default Jambase.jam that is automatically found near the executable with a user-provided version. <code>JAMBASEFULLPATH</code> must be the full path, filename included, of the alternate Jambase.jam.</p>
-<pre>
+<td valign="top" width="20%"><code><code> -jambase=<em>JAMBASEFULLPATH</em> </code> </code></td><td><p class="starttd"><code> Overrides the default Jambase.jam that is automatically found near the executable with a user-provided version. <code>JAMBASEFULLPATH</code> must be the full path, filename included, of the alternate Jambase.jam.</code></p>
+<p class="intertd"><code></p><pre>
 jam --workspace -jambase=c:/myapp/build/jam/NewJambase.jam ...
-</pre><p class="endtd"></p>
+</pre><p></code></p>
+<p class="endtd"><code> </code></p>
 </td></tr>
 <tr>
-<td valign="top" width="20%"><code> source-jamfile </code> </td><td><p class="starttd">(optional) The path to the Jamfile to start building the workspace from. If this option isn't provided or only the directory is specified, then Jam attempts to load a file named <code>Jamfile.jam</code> from the given directory. If <em>source-jamfile</em> is a directory with filename, such as <code>../Game/Pong.jam</code>, then the specified Jamfile is loaded.</p>
-<p class="endtd"></p>
+<td valign="top" width="20%"><code><code> source-jamfile </code> </code></td><td><p class="starttd"><code> (optional) The path to the Jamfile to start building the workspace from. If this option isn't provided or only the directory is specified, then Jam attempts to load a file named <code>Jamfile.jam</code> from the given directory. If <em>source-jamfile</em> is a directory with filename, such as <code>../Game/Pong.jam</code>, then the specified Jamfile is loaded.</code></p>
+<p class="endtd"><code> </code></p>
 </td></tr>
 <tr>
-<td valign="top" width="20%"><code> path-to-destination </code> </td><td>(optional) If <em>path-to-destination</em> is specified, then the build tree will be generated into <em>path-to-destination</em>. If <em>path-to-destination</em> is not specified, the build tree is generated off of the current working directory in a directory called <code>.build/</code>. </td></tr>
+<td valign="top" width="20%"><code><code> path-to-destination </code> </code></td><td><code> (optional) If <em>path-to-destination</em> is specified, then the build tree will be generated into <em>path-to-destination</em>. If <em>path-to-destination</em> is not specified, the build tree is generated off of the current working directory in a directory called <code>.build/</code>. </code></td></tr>
 </table>
-<p>Assuming a source tree of:</p>
-<ul>
+<p><code>Assuming a source tree of:</code></p>
+<p><code></p><ul>
 <li><code>helloworld/</code><ul>
 <li><code>Jamfile.jam</code></li>
 <li><code>src/</code><ul>
@@ -207,13 +218,17 @@ jam --workspace -jambase=c:/myapp/build/jam/NewJambase.jam ...
 </ul>
 </li>
 </ul>
-<p>Running JamToWorkspace from the <code>helloworld/</code> root with the following command line creates an out of source build directory in <code>helloworld/build/</code>.</p>
-<div class="fragment"><div class="line">jam --workspace -gen=vs2008 Jamfile.jam build</div>
-</div><!-- fragment --><p>From here on out, all Jam executions should be run from within the generated build/ directory.</p>
+<p></code></p>
+<p><code>Running JamToWorkspace from the <code>helloworld/</code> root with the following command line creates an out of source build directory in <code>helloworld/build/</code>.</code></p>
+<p><code></p><div class="fragment"><div class="line">jam --workspace -gen=vs2008 Jamfile.jam build</div>
+</div><!-- fragment --><p></code></p>
+<p><code>From here on out, all Jam executions should be run from within the generated build/ directory.</code></p>
+<p><code></code></p>
 <h1><a class="anchor" id="jamtoworkspace_generatedfiles"></a>
-Generated Files</h1>
-<p>TODO: This part of the documentation is out of date.</p>
-<ul>
+<code>Generated Files</code></h1>
+<p><code></code></p>
+<p><code>TODO: This part of the documentation is out of date.</code></p>
+<p><code></p><ul>
 <li><code>build/</code><ul>
 <li><code><em>workspace.ide</em>/</code><ul>
 <li><code><em>targetinfo</em>/</code> - Information files dumped by Jam and used to construct the workspace.</li>
@@ -233,6 +248,7 @@ Generated Files</h1>
 </ul>
 </li>
 </ul>
+<p></code></p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

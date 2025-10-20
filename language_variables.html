@@ -84,6 +84,8 @@ Basics</h1>
 <tr>
 <td><code><em>variable</em> += <em>elements</em> ;</code> </td><td>The += operator adds <em>elements</em> to <em>variable</em>'s list of elements  </td></tr>
 <tr>
+<td><code><em>variable</em> |= <em>elements</em> ;</code> </td><td>The |= operator adds unique <em>elements</em> to <em>variable</em>'s list of elements  </td></tr>
+<tr>
 <td><code><em>variable</em> -= <em>elements</em> ;</code> </td><td>The -= operator removes <em>elements</em> from <em>variable</em>'s list of elements  </td></tr>
 <tr>
 <td><code><em>variable</em> ?= <em>elements</em> ;</code> </td><td>The ?= operator sets <em>variable</em> only if it was previously unset  </td></tr>
@@ -91,6 +93,8 @@ Basics</h1>
 <td><code><em>variable</em> on <em>targets</em> = <em>elements</em> ;</code> </td><td>The = operator replaces any previous elements of <em>variable</em> with <em>elements</em> directly on <em>targets</em>   </td></tr>
 <tr>
 <td><code><em>variable</em> on <em>targets</em> += <em>elements</em> ;</code> </td><td>The += operator directly adds <em>elements</em> to <em>targets</em>'s <em>variable</em>'s list of elements  </td></tr>
+<tr>
+<td><code><em>variable</em> on <em>targets</em> |= <em>elements</em> ;</code> </td><td>The |= operator directly adds unique <em>elements</em> to <em>targets</em>'s <em>variable</em>'s list of elements  </td></tr>
 <tr>
 <td><code><em>variable</em> on <em>targets</em> -= <em>elements</em> ;</code> </td><td>The -= operator directly removes <em>elements</em> from <em>targets</em>'s <em>variable</em>'s list of elements  </td></tr>
 <tr>
@@ -106,6 +110,9 @@ Basics</h1>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># Add some additional elements to myvar.</span></div>
 <div class="line">myvar += ij kl ;        # myvar = ef gh ij kl</div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor"># No elements are added to myvar, because myvar already contains them.</span></div>
+<div class="line">myvar |= ij kl ;        # myvar = ef gh ij kl</div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor"># Remove some elements from myvar.</span></div>
 <div class="line">myvar -= gh kl ;        # myvar = ef ij</div>

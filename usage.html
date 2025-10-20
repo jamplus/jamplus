@@ -80,6 +80,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
     [ -d <em>debug</em> ]
     [ -f <em>jambase</em> ]
     [ -j <em>jobs</em> ]
+    [ -l Run Lua]
     [ -o <em>actionsfile</em> ]
     [ -r ]
     [ -s <em>var</em>=<em>value</em> ]
@@ -88,7 +89,9 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
     [ -t <em>target</em> ]
     [ <em>target</em> ... ]
 </pre><p>If <em>target</em> is provided on the command line, <b>jam</b> builds <em>target</em>; otherwise <b>jam</b> builds the target 'all'.</p>
-<p><b>Jam</b> may be invoked with the following options:</p>
+<p>If multiple <em>targets</em> are provided on the command line, <b>jam</b> builds each sequentially. In order to consider multiple <em>targets</em> in one pass, comma separate them.</p>
+<div class="fragment"><div class="line">jam includes,protos generate all</div>
+</div><!-- fragment --><p><b>Jam</b> may be invoked with the following options:</p>
 <table width="85%" align="center" border="1" cellpadding="2">
 <tr>
 <td valign="top" width="20%"><code> -a </code> </td><td><p class="starttd">Build all targets anyway, even if they are up-to-date.</p>
@@ -164,6 +167,10 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -T ] [ -v ]
 </td></tr>
 <tr>
 <td valign="top"><code><code><code> -j <em>n</em></code> </code></code></td><td><p class="starttd"><code><code> Run up to <em>n</em> shell commands concurrently. The default is the maximum number of available processors on the machine. On Windows, the number of processors is determined from the environment variable <code>NUMBER_OF_PROCESSORS</code>. On Mac OS X, the number of processors is obtained from the API <code>MPProcessors</code>.</code></code></p>
+<p class="endtd"><code><code> </code></code></p>
+</td></tr>
+<tr>
+<td valign="top"><code><code><code> -l <em>n</em></code> </code></code></td><td><p class="starttd"><code><code> Run the internal Lua as if it were a command-line call to the Lua executable. Anything following <code>-l</code> are passed directly to the Lua instance as if they were on the Lua executable command-line.</code></code></p>
 <p class="endtd"><code><code> </code></code></p>
 </td></tr>
 <tr>

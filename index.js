@@ -57,6 +57,7 @@ var index =
     [ "Built-in Rules", "builtin_rules.html", "builtin_rules" ],
     [ "Built-in Variables", "builtin_variables.html", [
       [ "Introduction", "builtin_variables.html#builtin_variables_intro", null ],
+      [ "JAM_COMMAND_LINE_SETTINGS", "builtin_variables.html#built_in_variables_command_line_settings", null ],
       [ "BINDING, SEARCH, and LOCATE Variables", "builtin_variables.html#built_in_variables_binding_binding_search_locate", null ],
       [ "Header Scanning Variables", "builtin_variables.html#built_in_variables_hdrscan", [
         [ "Filtering Unwanted Dependencies", "builtin_variables.html#built_in_variables_hdrfilter", null ],
@@ -92,9 +93,9 @@ var index =
       [ "rule RmTemps TARGETS : SOURCES", "jambase_rules.html#rule_RmTemps", null ],
       [ "rule SearchSource SOURCES", "jambase_rules.html#rule_SearchSource", null ],
       [ "rule SourceGroup TARGET : FOLDERNAME : SOURCES", "jambase_rules.html#rule_SourceGroup", null ],
-      [ "rule SubDir TOP d1...dn : SUBNAME", "jambase_rules.html#rule_SubDir", null ],
-      [ "rule SubInclude VAR d1...dn : FILETITLE : OPTIONS", "jambase_rules.html#rule_SubInclude", null ],
-      [ "rule SubIncludeRelative RELATIVE_PATH : FILETITLE : OPTIONS", "jambase_rules.html#rule_SubIncludeRelative", null ],
+      [ "rule SubDir VAR d1...dn : TARGET_DIRECTORY : OPTIONS", "jambase_rules.html#rule_SubDir", null ],
+      [ "rule SubInclude VAR d1...dn : FILENAME : OPTIONS", "jambase_rules.html#rule_SubInclude", null ],
+      [ "rule SubIncludeRelative RELATIVE_PATH : FILENAME : OPTIONS", "jambase_rules.html#rule_SubIncludeRelative", null ],
       [ "rule Workspace WORKSPACE_NAME : TARGETS", "jambase_rules.html#rule_Workspace", null ],
       [ "rule WorkspaceConfig WORKSPACE_NAME : CONFIG_NAME : JAM_CONFIG_NAME : COMMAND_LINE", "jambase_rules.html#rule_WorkspaceConfig", null ],
       [ "actions WriteFile TARGETS", "jambase_rules.html#actions_WriteFile", null ],
