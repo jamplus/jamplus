@@ -256,7 +256,7 @@ file_archscan(
 	struct ar_hdr ar_hdr;
 	char *string_table = 0;
 	char buf[ MAXJPATH ];
-	long offset;
+	__int64 offset;
 	int fd;
 
 	if( ( fd = open( archive, O_RDONLY | O_BINARY, 0 ) ) < 0 )
@@ -348,7 +348,7 @@ file_archscan(
 #endif
 
 	    offset += SARHDR + lar_size;
-	    lseek( fd, offset, 0 );
+	    _lseeki64( fd, offset, 0 );
 	}
 
 #ifdef OPT_FIX_NT_ARSCAN_LEAK
